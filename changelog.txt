@@ -33,7 +33,7 @@ Changelog
     https://davidfrantz.github.io/code/force/
 --- The code has been moved to GitHub. A self-registration is no longer 
     necessary. 
-    https://github.com/davidfrantz
+    https://github.com/davidfrantz/force
 --- The official FORCE paper was published in Remote Sensing. The paper 
     describes FORCE and its underlying principles.
     Frantz 2019: https://doi.org/10.3390/rs11091124
