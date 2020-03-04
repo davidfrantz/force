@@ -22,7 +22,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full directory path
     | ``DIR_LOWER = NULL``
 
-    * Higher Level datapool (parent directory of tiled output data)
+  * Higher Level datapool (parent directory of tiled output data)
 
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``

@@ -120,3 +120,50 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``FEATURE_EXCLUDE = FALSE``
 
+* Landscape Metrics
+
+  * This parameter defines the radius of the kernel used for computing the landscape metrics (in projection units, commonly in meters).
+  
+    | *Type:* Double. Valid values: ]0,BLOCK_SIZE]
+    | ``LSM_RADIUS = 50``
+  
+
+  * This parameter determines if the kernel for landscape metrics calculation is circular or squared.
+    
+    | *Type:* Character. Valid values: {CIRCULAR,SQUARED}
+    | ``LSM_KERNEL_SHAPE = CIRCULAR``
+ 
+  * This parameter defines the type of the threshold that is used to define the foreground class (greater then, less than, equal). 
+    This parameter is a character list, which defines the threshold type for each feature given.
+    The list needs to be as long as there are features (including bands).
+    
+    | *Type:* Character list. Valid values: {GT,LT,EQ}
+    | ``LSM_THRESHOLD_TYPE = EQ LT EQ EQ GT LT EQ LT GT EQ GT EQ GT GT GT LT LT EQ GT GT GT EQ GT LT LT LT``
+
+  * This parameter defines the threshold. 
+    All pixels that are greater than, lower than or equal to this threshold are defined as foreground class (in dependence of LSM_THRESHOLD_TYPE). 
+    Landscape metrics are computed for pixels covererd by the foreground class. 
+    No metrics are computed for the pixels covered by the background class. 
+    This parameter is an integer list, which defines the threshold for each feature given. 
+    The list needs to be as long as there are features (including bands).
+    
+    | *Type:* Integer list. Valid values [-32767,32767]
+    | ``LSM_THRESHOLD = 2000 2000 3500 2000 -2000 5000 7500 -3500 500 750 890 999 0 0 0 0 0 50 5500 1500 300 78 250 500 500 500``
+
+  * This parameter determines if the landscape metrics are also calculated for pixels covered by the background class.
+  
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``LSM_ALL_PIXELS = FALSE``
+  
+  * Which Landscape Metrics should be computed? There will be one LSM output file for each metric with as many bands as there are features (in the same order).
+    Currently available metrics are unique patch ID, mean patch area, fractal dimension index, weighted edge density, number of patches and effective mesh size.
+    Additionally, arithmetic mean, geometric mean, standard deviation and maximum value within the kernel are available.
+    
+    | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX}
+    | ``LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX``
+
+  * This parameter defines the basename for the output files. 
+    The basename will be appended by Module ID, product ID, and the file extension.
+
+    | *Type:* Character.
+    | ``LSM_BASE = LSM``

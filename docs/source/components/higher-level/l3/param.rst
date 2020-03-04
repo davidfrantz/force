@@ -315,7 +315,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     In case of the PAC, the target DOYs are retrived from the files given by LSP_FILE 
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
-    | ``DO_LSP = FALSE``
+    | ``LSP_DO = FALSE``
     
   * Land Surface Phenology datapool (parent directory of tiled LSP)
   
