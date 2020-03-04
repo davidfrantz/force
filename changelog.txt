@@ -171,12 +171,19 @@ Changelog
     disable PARALLEL_READS in this case (for Sentinel-2). (2) The GDAL
     JPEG drived does not do anything in parallel - use PARALLEL_READ to 
     speed up the work (also use it for Landsat).
+    TIMEOUT_ZIP sets a timeout for unpacking zip/tar.gz input images (if
+    they are still zipped). This parameter was implemented as on some 
+    platforms the Level 1 data are sitting on tape, and retrieving from 
+    tape might take longer than the system can tolerate. As a result, the
+    unzip/tar commands might hang. Timeout kills the job if it didn't 
+    finish in the given time.
     Following table indicates whether this option is used:
                    force-level2    force-l2ps
     NPROC                     X             -
     NTHREAD                   X             X
     DELAY                     X             -
     PARALLEL_READS            X             X
+    TIMEOUT_ZIP               X             -
 --- Sentinel-2 data with the old, long naming convention are completely 
     gone from ESA archives. For the file queue, and for force-l2ps, it was
     necessary to give the file path to the granule within the Sentinel-2 

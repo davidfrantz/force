@@ -1,0 +1,6 @@
+.. _development:
+
+Development and Funding
+=======================
+
+FORCE was developed by David Frantz at Trier University during the course of his Ph.D. thesis supervised by Prof. Dr. Joachim Hill, online available at <http://ubt.opus.hbz-nrw.de/volltexte/2017/1046/pdf/frantz_phd.pdf>, as well as in the projects ‘Southern African Science Service Centre for Climate Change and Adaptive Land Management Project’ supported by the Federal Ministry of Education and Research under contract number FKZ-01LG1201C, and ‘Sentinel4GRIPS’ supported by the Federal Ministry of Transport and Digital Infrastructure and National Aeronautics and Space Research Centre of the Federal Republic of Germany under contract number FKZ-50EW1605, with intellectual contributions from Prof. Dr. Joachim Hill, Dr. Achim Röder, Dr. Marion Stellmes, as well as code fragments from Dr. Sebastian Mader. New FORCE functionality is currently developed by David Frantz at Humboldt-University Berlin in the project ‘Near-Real Time Derivation of Land Surface Phenology using Sentinel Data: the FORCE-NRT approach’, supported by the Geo.X Research Network for Geosciences in Berlin and Potsdam. Many thanks to the geomatics team at HUB for many new ideas and methods that have made it into FORCE.
