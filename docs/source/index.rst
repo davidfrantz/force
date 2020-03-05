@@ -7,12 +7,14 @@ FORCE documentation
 
 **Version 3.0**
 
+`Download from Github <https://github.com/davidfrantz/force>`_.
+
 .. image:: force.png
 
 About
 -----
 
-FORCE is an all-in-one processing engine for medium-resolution EO image archives. FORCE uses the data cube concept to mass-generate Analysis Ready Data, and enables large area + time series applications. With FORCE, you can perform all essential tasks in a typical EO Analysis workflow, i.e. going from data to information.
+FORCE is an all-in-one processing engine for medium-resolution Earth Observation image archives. FORCE uses the data cube concept to mass-generate Analysis Ready Data, and enables large area + time series applications. With FORCE, you can perform all essential tasks in a typical Earth Observation Analysis workflow, i.e. going from data to information.
 
 FORCE natively supports the integrated processing and analysis of 
 
@@ -29,28 +31,29 @@ This user guide summarizes the technical aspects required to run FORCE.
 It will not give elaborated descriptions of methodology. For the methodological description, please refer to the scientific :ref:`refs`.
 
 
-Related Links
--------------
+**Related Links**
 
-Download the FORCE **source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
+**Get the source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
-Have a look at my `**Tutorials** <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
+**Learn how to use FORCE**. Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
 
-Get help, and help others in the FORCE self-help `**Google group** <https://groups.google.com/d/forum/force_eo>`_
+**Get help**, and help others in the FORCE self-help Google group <https://groups.google.com/d/forum/force_eo>`_
 
 **Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
 **Stay updated**, and follow me on `Twitter <https://twitter.com/d__frantz>`_
 
-**You are using FORCE? Spread the word**, and use the `**#FORCE_EO** <https://twitter.com/search?q=%23FORCE_EO&src=recent_search_click>`_ hashtag in your tweets!
+**You are using FORCE? Spread the word**, and use the `#FORCE_EO <https://twitter.com/search?q=%23FORCE_EO&src=recent_search_click>`_ hashtag in your tweets!
+
 
 
 
 .. toctree::
    :maxdepth: 1
+   :caption: Introduction
    :hidden:
 
-   index.rst
+   about.rst
 
    
 .. toctree::
