@@ -23,6 +23,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
   * Near-realtime (NRT) processing capability.
 
   * Generation of Analysis Ready Data (ARD): Data Cubes
+  
     * Advanced cloud and cloud shadow detection. 
     * Quality screening. 
     * Integrated atmospheric and topographic correction: one algorithm for all sensors. 
@@ -33,6 +34,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
     * Data cubing: reprojection / gridding.
 
   * Generation of highly Analysis Ready Data (hARD): Large area. Gap free. Easy to use. Ideal input for Machine Learners!
+  
     * Best Available Pixel (BAP) composites. 
     * Phenology Adaptive Composites (PAC). 
     * Spectral Temporal Metrics (STM)
@@ -43,6 +45,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
     * Landscape metrics
 
   * Generation of highly Analysis Ready Data plus (hARD+). Open in a GIS and analyze!
+  
     * Land Surface Phenology (LSP)
     * Trend analysis
     * Change, Aftereffect, Trend (CAT) analysis
@@ -52,6 +55,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
   * Detailed data mining of the Clear Sky Observation (CSO) availability.
 
   * Data Fusion. 
+  
     * Improving spatial resolution of coarse continuous fields: MODIS LSP –> medium resolution LSP. 
     * Improving spatial resolution of lower resolution ARD using higher resolution ARD: 30m Landsat –> 10m using Sentinel-2 targets
 

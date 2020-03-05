@@ -11,10 +11,14 @@ FORCE documentation
 
 .. image:: force.png
 
-About
------
 
-FORCE is an all-in-one processing engine for medium-resolution Earth Observation image archives. FORCE uses the data cube concept to mass-generate Analysis Ready Data, and enables large area + time series applications. With FORCE, you can perform all essential tasks in a typical Earth Observation Analysis workflow, i.e. going from data to information.
+.. warning:
+   This documentation is not finished yet. Parts of the description are badly formatted, incomplete, incorrect or are referring to version 2.1. Come back later for the definitive documenation.
+
+FORCE is ...
+------------
+
+... an all-in-one processing engine for medium-resolution Earth Observation image archives. FORCE uses the data cube concept to mass-generate Analysis Ready Data, and enables large area + time series applications. With FORCE, you can perform all essential tasks in a typical Earth Observation Analysis workflow, i.e. going from data to information.
 
 FORCE natively supports the integrated processing and analysis of 
 
@@ -31,13 +35,14 @@ This user guide summarizes the technical aspects required to run FORCE.
 It will not give elaborated descriptions of methodology. For the methodological description, please refer to the scientific :ref:`refs`.
 
 
-**Related Links**
+Related Links
+-------------
 
 **Get the source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
 **Learn how to use FORCE**. Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
 
-**Get help**, and help others in the FORCE self-help Google group <https://groups.google.com/d/forum/force_eo>`_
+**Get help**, and help others in the FORCE self-help `Google group <https://groups.google.com/d/forum/force_eo>`_
 
 **Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
