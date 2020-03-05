@@ -1,16 +1,18 @@
+.. _contact:
+
 Contact
 =======
 
-Dr. David Frantz
+**Dr. David Frantz**
 
-| Postal address:
+| **Postal address:**
 | Humboldt-Universität zu Berlin
 | Geography Department
 | Earth Observation Lab
 | 10099 Berlin, Germany
 
-| Homepage:
+| **Homepage:**
 | `davidfrantz.github.io <https://davidfrantz.github.io>`_
 
-| e-Mail:
+| **e-Mail:**
 | david.frantz@geo.hu-berlin.de

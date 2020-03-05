@@ -1,3 +1,5 @@
+.. _main:
+
 FORCE documentation
 ===================
 
@@ -5,12 +7,26 @@ FORCE documentation
 
 **Version 3.0**
 
+.. image:: force.png
+
 About
 -----
 
-FORCE is an all-in-one solution for the mass-processing of selected medium-resolution satellite image archives to enable large area + time series applications. Currently supported are Landsat 4/5 TM, Landsat 7 ETM+, Landsat 8 OLI and Sentinel-2 A/B MSI. The software is capable of processing Level 1 products as obtained from the space agencies to Level 2¬–4 products.
+FORCE is an all-in-one processing engine for medium-resolution EO image archives. FORCE uses the data cube concept to mass-generate Analysis Ready Data, and enables large area + time series applications. With FORCE, you can perform all essential tasks in a typical EO Analysis workflow, i.e. to go from data to information.
 
-This user guide summarizes the technical aspects required to run FORCE. It will not give elaborated descriptions of methodology. For the methodological description, refer to the scientific publications below.
+FORCE natively supports the integrated processing and analysis of 
+
+  * Landsat 4/5 TM, 
+  * Landsat 7 ETM+, 
+  * Landsat 8 OLI and 
+  * Sentinel-2 A/B MSI.
+
+Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or environmental variables.
+
+
+This user guide summarizes the technical aspects required to run FORCE. 
+
+It will not give elaborated descriptions of methodology. For the methodological description, please refer to the scientific publications (:ref:`refs`).
 
 
 .. toctree::

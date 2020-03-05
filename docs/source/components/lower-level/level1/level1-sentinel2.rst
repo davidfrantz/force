@@ -3,13 +3,7 @@
 Sentinel-2
 ==========
 
-FORCE can process Level 1C 
-
-* Sentinel-2A
-* Sentinel-2B 
-
-| data as provided by ESA through their data hub. 
-| At the time of writing, processing baseline 02.06 data was successfully digested by FORCE.
+FORCE can process Level 1C Sentinel-2A and Sentinel-2B MSI data as provided by ESA through their data hub. 
 
 The full resolution Sentinel-2 images must be acquired from the ESA archive (or from elsewhere).
 

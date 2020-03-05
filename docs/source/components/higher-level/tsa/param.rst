@@ -361,7 +361,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 * **Land surface phenology parameters**
 
   .. note::
-     The Land Surface Phenology (LSP) options are only available if FORCE was compiled with SPLITS (see installation section in the FORCE user guide).
+     The Land Surface Phenology (LSP) options are only available if FORCE was compiled with SPLITS (see :ref:`install` section).
 
   * For estimating LSP for one year, some data from the previous/next year need to be considered to find the seasonal minima, which define a season.
     The parameters are given in DOY, i.e. LSP_DOY_PREV_YEAR = 273, and LSP_DOY_NEXT_YEAR = 91 will use all observations from October (Year-1) to March (Year+1)

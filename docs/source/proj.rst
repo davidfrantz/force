@@ -1,3 +1,5 @@
+.. _proj:
+
 Projection and Tiling
 =====================
 

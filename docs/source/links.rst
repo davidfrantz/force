@@ -1,7 +1,9 @@
+.. _links:
+
 Links, Code, etc.
 =================
 
-Download the FORCE code from `Github <https://github.com/davidfrantz/force>`_. It is open source, and free!
+Download the FORCE code from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
 Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
 
