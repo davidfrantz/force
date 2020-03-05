@@ -1,7 +1,7 @@
 .. _refs:
 
-References
-==========
+Publications
+============
 
 Frantz, D. (2017). Generation of Higher Level Earth Observation Satellite Products for Regional Environmental Monitoring. Ph.D. dissertation. Faculty of Regional and Environmental Sciences, Trier University, Trier, Germany, p. 194
 http://ubt.opus.hbz-nrw.de/volltexte/2017/1046/pdf/frantz_phd.pdf
