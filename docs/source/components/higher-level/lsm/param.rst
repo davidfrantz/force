@@ -15,7 +15,7 @@ The ``++PARAM_LSM_START++`` and ``++PARAM_LSM_END++`` keywords enclose the param
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
 
-* Input/output directories
+* **Input/output directories**
 
   * Lower Level datapool (parent directory of tiled input data)
 
@@ -27,7 +27,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``
 
-* Masking
+* **Masking**
 
   * Analysis Mask datapool (parent directory of tiled analysis masks)
     If no analsys mask should be applied, give NULL.
@@ -41,7 +41,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Basename of file
     | ``BASE_MASK = NULL``
 
-* Output options
+* **Output options**
 
   * Output format, which is either uncompressed flat binary image format aka ENVI Standard or GeoTiff.
     GeoTiff images are compressed with LZW and horizontal differencing; BigTiff support is enabled; the Tiff is structured with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) specifications.
@@ -51,7 +51,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
 
-* Parallel processing
+* **Parallel processing**
 
   * This module is using a streaming mechanism to speed up processing. 
     There are three processing teams (3 Threads) that simultaneously handle Input, Processing, and Output.
@@ -64,7 +64,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``NTHREAD_COMPUTE = 22``
     | ``NTHREAD_WRITE = 4``
 
-* Processing extent and resolution
+* **Processing extent and resolution**
 
   * Analysis extent, given in tile numbers (see tile naming)
     Each existing tile falling into this square extent will be processed 
@@ -97,7 +97,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Double. Valid range: ]0,BLOCK_SIZE]
     | ``RESOLUTION = 10``
 
-* Features
+* **Features**
 
   * This parameter specifies the feature(s) used for the analysis.
     The basename of a tiled dataset needs to be given, followed by an integer list that specifies the bands that are to be used.
@@ -120,7 +120,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``FEATURE_EXCLUDE = FALSE``
 
-* Landscape Metrics
+* **Landscape Metrics**
 
   * This parameter defines the radius of the kernel used for computing the landscape metrics (in projection units, commonly in meters).
   

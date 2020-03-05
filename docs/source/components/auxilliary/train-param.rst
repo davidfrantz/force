@@ -15,7 +15,7 @@ The ``++PARAM_TRAIN_START++`` and ``++PARAM_TRAIN_END++`` keywords enclose the p
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
 
-* Input
+* **Input**
 
   * File that is holding the features for training (and probably validation).
     The file needs to be a table with features in columns, and samples in rows.
@@ -35,7 +35,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full file path
     | ``FILE_RESPONSE = NULL``
 
-* Output
+* **Output**
 
   * File for storing the Machine Learning model in xml format.
     This file will be overwritten if it exists.
@@ -49,7 +49,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full file path
     | ``FILE_LOG = NULL``
 
-* Training
+* **Training**
 
   * This parameter specifies how many samples (in %) should be used for training the model.
     The other samples are left out, and used to validate the model.
@@ -68,7 +68,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {SVR,SVC,RFR,RFC}
     | ``ML_METHOD = RFC``
 
-* Random Forest parameters
+* **Random Forest parameters**
 
   * This block only applies if method is Random Forest
 
@@ -118,7 +118,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Float. Valid range: [0.01,...
     | ``RF_DT_REG_ACCURACY = 0.01``
 
-* Support Vector Machine parameters
+* **Support Vector Machine parameters**
 
   * This block only applies if method is Support Vector Machine
 

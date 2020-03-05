@@ -15,7 +15,7 @@ The ``++PARAM_CSO_START++`` and ``++PARAM_CSO_END++`` keywords enclose the param
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
 
-* Input/output directories
+* **Input/output directories**
 
   * Lower Level datapool (parent directory of tiled input data)
 
@@ -27,7 +27,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``
 
-* Masking
+* **Masking**
 
   * Analysis Mask datapool (parent directory of tiled analysis masks)
     If no analsys mask should be applied, give NULL.
@@ -41,7 +41,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Basename of file
     | ``BASE_MASK = NULL``
 
-* Output options
+* **Output options**
 
   * Output format, which is either uncompressed flat binary image format aka ENVI Standard or GeoTiff.
     GeoTiff images are compressed with LZW and horizontal differencing; BigTiff support is enabled; the Tiff is structured with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) specifications.
@@ -51,7 +51,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
 
-* Parallel processing
+* **Parallel processing**
 
   * This module is using a streaming mechanism to speed up processing.
     There are three processing teams (3 Threads) that simultaneously handle Input, Processing, and Output.
@@ -64,7 +64,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``NTHREAD_COMPUTE = 22``
     | ``NTHREAD_WRITE = 4``
 
-* Processing extent and resolution
+* **Processing extent and resolution**
 
   * Analysis extent, given in tile numbers (see tile naming)
     Each existing tile falling into this square extent will be processed
@@ -100,49 +100,60 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 * **Sensor white list**
 
   * Sensors to be used in the analysis.
-    Multi-sensor analyses are restricted to the overlapping bands.
+    Multi-sensor analyses are restricted to the overlapping bands (see table).
+    The resulting outputs are named according to their band designation, i.e. LNDLG, SEN2L, SEN2H, R-G-B or VVVHP.
+    BAP Composites with such a band designation can be input again (e.g. SENSORS = LNDLG).
     Following sensors are available: 
 
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + SENSOR                        + BLUE + GREEN + RED + RE1 + RE2 + RE3 + BNIR + NIR + SWIR1 + SWIR2 + VV + VH +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + LND04  + Landsat 4 TM         + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + LND05  + Landsat 5 TM         + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + LND07  + Landsat 7 ETM+       + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + LND08  + Landsat 8 OLI        + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + SEN2A  + Sentinel-2A          + 1    + 2     + 3   + 4   + 5   + 6   + 7    + 8   + 9     + 10    +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + SEN2B  + Sentinel-2B          + 1    + 2     + 3   + 4   + 5   + 6   + 7    + 8   + 9     + 10    +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + sen2a  + Sentinel-2A          + 1    + 2     + 3   +     +     +     + 7    +     +       +       +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + sen2b  + Sentinel-2B          + 1    + 2     + 3   +     +     +     + 7    +     +       +       +    +    +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + S1AIA  + Sentinel-1A IW asc.  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + S1BIA  + Sentinel-1B IW asc.  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + S1AID  + Sentinel-1A IW desc. +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    + S1BID  + Sentinel-1B IW desc. +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
-    +--------+----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
-    
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + SENSOR                         + BLUE + GREEN + RED + RE1 + RE2 + RE3 + BNIR + NIR + SWIR1 + SWIR2 + VV + VH +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + LND04  + Landsat 4 TM          + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + LND05  + Landsat 5 TM          + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + LND07  + Landsat 7 ETM+        + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + LND08  + Landsat 8 OLI         + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + SEN2A  + Sentinel-2A           + 1    + 2     + 3   + 4   + 5   + 6   + 7    + 8   + 9     + 10    +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + SEN2B  + Sentinel-2B           + 1    + 2     + 3   + 4   + 5   + 6   + 7    + 8   + 9     + 10    +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + sen2a  + Sentinel-2A           + 1    + 2     + 3   +     +     +     + 7    +     +       +       +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + sen2b  + Sentinel-2B           + 1    + 2     + 3   +     +     +     + 7    +     +       +       +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + S1AIA  + Sentinel-1A IW asc.   +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + S1BIA  + Sentinel-1B IW asc.   +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + S1AID  + Sentinel-1A IW desc.  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + S1BID  + Sentinel-1B IW desc.  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + LNDLG  + Landsat legacy bands  + 1    + 2     + 3   +     +     +     +      + 4   + 5     + 6     +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + SEN2L  + Sentinel-2 land bands + 1    + 2     + 3   + 4   + 5   + 6   + 7    + 8   + 9     + 10    +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + SEN2H  + Sentinel-2 high-res   + 1    + 2     + 3   +     +     +     + 7    +     +       +       +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + R-G-B  + Visible bands         + 1    + 2     + 3   +     +     +     +      +     +       +       +    +    +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
+    + VVVHP  + VV/VH Dual Polarized  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
+    +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
  
-    | *Type:* Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID}
+    | *Type:* Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP}
     | ``SENSORS = LND08 SEN2A SEN2B``
 
-* QAI screening
+* **QAI screening**
 
   * This list controls, which QAI flags are masked out before doing the analysis.
 
     | *Type:* Character list. Valid values: {NODATA,CLOUD_OPAQUE,CLOUD_BUFFER,CLOUD_CIRRUS,CLOUD_SHADOW,SNOW,WATER,AOD_FILL,AOD_HIGH,AOD_INT,SUBZERO,SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}
     | ``SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION``
 
-* Processing timeframe
+* **Processing timeframe**
 
   * Time extent for the analysis.
     All data between these dates will be used in the analysis.
@@ -159,7 +170,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Integer list. Valid values: [1,365]
     | ``DOY_RANGE = 1 365``
 
-* CSO parameters
+* **CSO parameters**
 
   * This parameter specifies bin width for summarizing the CSOs.
     The width is given in months
