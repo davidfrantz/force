@@ -101,12 +101,25 @@ Related Links
 
 .. toctree::
    :maxdepth: 1
+   :caption: References
    :hidden:
 
    proj.rst
    faq.rst
    issues.rst
    refs.rst
+   refs-applied.rst
+   contact.rst
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Other
+   :hidden:
+
+   proj.rst
+   faq.rst
+   issues.rst
    contact.rst
 
 

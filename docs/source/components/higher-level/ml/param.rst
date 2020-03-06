@@ -157,7 +157,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     The convergence is tested for each pixel, i.e. each pixel is predicted with as many models as necessary to obtain a stable solution.
 
     | *Type:* Float. Valid range: [0,...
-    | ``ML_CONVERGENCE = SVR``
+    | ``ML_CONVERGENCE = 0``
     
   * This parameter is a scaling factor to scale the prediction to fit into a 16bit signed integer.
     This parameter should be set in dependence on the scale used for training the model.
@@ -169,7 +169,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     The basename will be appended by Module ID, product ID, and the file extension.
 
     | *Type:* Character.
-    | ``ML_BASE = TEXTURE``
+    | ``ML_BASE = PREDICTION``
     
   * Output the Machine Learning Prediction?
 
