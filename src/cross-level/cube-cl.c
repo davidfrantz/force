@@ -232,9 +232,21 @@ void update_datacube_extent(cube_t *cube, int tminx, int tmaxx, int tminy, int t
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void update_datacube_res(cube_t *cube, double res){
-  
+double tol = 5e-3;
+
+
+  if (fmod(cube->tilesize, res) > tol){
+    printf("TILE_SIZE must be a multiple of RESOLUTION.\n");
+    exit(1);
+  }
+  if (fmod(cube->chunksize, res) > tol){
+    printf("BLOCK_SIZE must be a multiple of RESOLUTION.\n");
+    exit(1);
+  }
+
   // resolution
   cube->res = res;
+  
 
   // number of pixels in tile
   cube->nx = cube->ny = (int)(cube->tilesize/cube->res);
@@ -405,13 +417,22 @@ FILE *fp = NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 cube_t *copy_datacube_def(char *d_read, char *d_write, double blockoverride){
 cube_t *cube = NULL;
+double tol = 5e-3;
+
 
   if ((cube = read_datacube_def(d_read)) == NULL){
     printf("Reading datacube definition failed. "); return NULL;}
 
   if (blockoverride > 0){
+    
+    if (fmod(cube->tilesize, blockoverride) > tol){
+      printf("TILE_SIZE must be a multiple of BLOCK_SIZE. ");
+      return NULL;
+    }
+   
     cube->cn = (int)(cube->tilesize/blockoverride);
     cube->chunksize = cube->tilesize/cube->cn;
+
   }
 
   if (strlen(d_write) > NPOW_10-1){

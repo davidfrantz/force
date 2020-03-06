@@ -37,6 +37,8 @@ Changelog
 --- The official FORCE paper was published in Remote Sensing. The paper 
     describes FORCE and its underlying principles.
     Frantz 2019: https://doi.org/10.3390/rs11091124
+--- The documentation was transformed to an online documentation:
+    https://force-eo.readthedocs.io/
 --- FORCE Tutorials are now available! Make sure to regularly check for
     new content:
     https://davidfrantz.github.io/#tutorials
@@ -46,8 +48,8 @@ Changelog
     https://groups.google.com/d/forum/force_eo
 +++ FORCE has continued to participate in the ACIX II and CMIX inter-
     comparisons (Atmosperic Correction / Cloud Masking Intercomparison
-    eXercises). The preliminary results look very good, FORCE is a 
-    reliable software framework. 
+    eXercises). The preliminary results look very good, FORCE is a very
+    reliable software framework and produces high quality products.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 +++ Deprecated programs
 --- Due to restructuring, many FORCE programs were removed, but their 
@@ -536,11 +538,11 @@ Changelog
     trols wheter a sample is taken if one of the features has a nodata 
     value. The output of this file can serve as input for force-train to
     train machine learning modules.
-
-LANDSCAPE METRICS
-
-metadata
-
+--- A new module was added: the landscape metrics module (C) Franz Schug,
+    franz.schug@geo.hu-berlin.de. This module allows for the computation
+    of landscape metrics with a moving window strategy, as well as some
+    focal statistics. The metrics can be computed on any feature provided
+    with the INPUT_FEATURE parameters, which can be given multiple times.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
 ##########################################################################

@@ -293,7 +293,7 @@ bool water;
 
   }
   
-  bap_overview(&l3, nx, ny, res);
+  bap_overview(&l3, nx, ny, nb, res, nodata);
   
 
   *nproduct = nprod;

@@ -1,3 +1,5 @@
+.. _tsa:
+
 Time Series Analysis
 ====================
 

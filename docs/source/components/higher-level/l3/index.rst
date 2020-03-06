@@ -1,3 +1,5 @@
+.. _level3:
+
 Level 3 Compositing
 ===================
 

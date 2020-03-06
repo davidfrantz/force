@@ -52,7 +52,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
 
 * **Detailed data mining of the Clear Sky Observation (CSO) availability**
 
-* Data Fusion**
+* **Data Fusion**
 
   * Improving spatial resolution of coarse continuous fields: MODIS LSP –> medium resolution LSP. 
   * Improving spatial resolution of lower resolution ARD using higher resolution ARD: 30m Landsat –> 10m using Sentinel-2 targets

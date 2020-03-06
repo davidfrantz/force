@@ -773,13 +773,16 @@ float max_score = -1;
 --- l3:     pointer to instantly useable L3 image arrays
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int bap_overview(level3_t *l3, int nx, int ny, double res){
+int bap_overview(level3_t *l3, int nx, int ny, int nb, double res, short nodata){
 int i, j, p, i_, j_, p_;
 int nx_, ny_;
 double  res_, step, scale;
 enum { R_, G_, B_ };
 enum { B, G, R };
-  
+enum { VV, VH };
+int is_radar = false;
+float ratio;
+
   
   if (l3->ovv == NULL || l3->bap == NULL) return SUCCESS;
 
@@ -790,9 +793,12 @@ enum { B, G, R };
 
   step = res_/res;
   scale = 2500;
+  
+  // if there are 2 bands, we assume radar
+  if (nb == 2) is_radar = true;
 
 
-  #pragma omp parallel private(j_,p_,i,j,p) shared(nx,nx_,ny_,step,scale,l3) default(none) 
+  #pragma omp parallel private(j_,p_,i,j,p,ratio) shared(nx,nx_,ny_,step,scale,l3,is_radar,nodata) default(none) 
   {
 
     #pragma omp for schedule(guided)
@@ -804,27 +810,58 @@ enum { B, G, R };
       i = i_*step;
       j = j_*step;
       p = i*nx+j;
+      
+      if (!is_radar){
+        
+        if (l3->bap[R][p] < 0 || l3->bap[R][p] == nodata){
+          l3->ovv[R_][p_] = 0;
+        } else if (l3->bap[R][p] > scale){
+          l3->ovv[R_][p_] = 255;
+        } else {
+          l3->ovv[R_][p_] = (small)(l3->bap[R][p]/scale*255);
+        }
+        if (l3->bap[G][p] < 0 || l3->bap[G][p] == nodata){
+          l3->ovv[G_][p_] = 0;
+        } else if (l3->bap[G][p] > scale){
+          l3->ovv[G_][p_] = 255;
+        } else {
+          l3->ovv[G_][p_] = (small)(l3->bap[G][p]/scale*255);
+        }
+        if (l3->bap[B][p] < 0 || l3->bap[B][p] == nodata){
+          l3->ovv[B_][p_] = 0;
+        } else if (l3->bap[B][p] > scale){
+          l3->ovv[B_][p_] = 255;
+        } else {
+          l3->ovv[B_][p_] = (small)(l3->bap[B][p]/scale*255);
+        }
+        
+      } else {
 
-      if (l3->bap[R][p] < 0){
-        l3->ovv[R_][p_] = 0;
-      } else if (l3->bap[R][p] > scale){
-        l3->ovv[R_][p_] = 255;
-      } else {
-        l3->ovv[R_][p_] = (small)(l3->bap[R][p]/scale*255);
-      }
-      if (l3->bap[G][p] < 0){
-        l3->ovv[G_][p_] = 0;
-      } else if (l3->bap[G][p] > scale){
-        l3->ovv[G_][p_] = 255;
-      } else {
-        l3->ovv[G_][p_] = (small)(l3->bap[G][p]/scale*255);
-      }
-      if (l3->bap[B][p] < 0){
-        l3->ovv[B_][p_] = 0;
-      } else if (l3->bap[B][p] > scale){
-        l3->ovv[B_][p_] = 255;
-      } else {
-        l3->ovv[B_][p_] = (small)(l3->bap[B][p]/scale*255);
+        if (l3->bap[VV][p] < -1600 || l3->bap[VV][p] == nodata){
+          l3->ovv[R_][p_] = 0;
+        } else if (l3->bap[VV][p] > -600){
+          l3->ovv[R_][p_] = 255;
+        } else {
+          l3->ovv[R_][p_] = (small)((l3->bap[VV][p] - -1600)/1000.0*255);
+        }
+        if (l3->bap[VH][p] < -2200 || l3->bap[VH][p] == nodata){
+          l3->ovv[G_][p_] = 0;
+        } else if (l3->bap[VH][p] > -1200){
+          l3->ovv[G_][p_] = 255;
+        } else {
+          l3->ovv[G_][p_] = (small)((l3->bap[VH][p] - -2200)/1000.0*255);
+        }
+        
+        ratio = (float)l3->bap[VV][p] / (float)l3->bap[VH][p];
+        
+        if (ratio < 0.2 || l3->bap[VV][p] == nodata|| l3->bap[VH][p] == nodata){
+          l3->ovv[B_][p_] = 0;
+        } else if (l3->bap[VH][p] > 1.0){
+          l3->ovv[B_][p_] = 255;
+        } else {
+          l3->ovv[B_][p_] = (small)((ratio - 0.2)/0.8*255);
+        }
+
       }
 
     }

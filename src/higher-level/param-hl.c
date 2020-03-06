@@ -1419,8 +1419,6 @@ double tol = 5e-3;
   phl->prd.qai = true;
 
 
-
-
   // compile temporal window
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&

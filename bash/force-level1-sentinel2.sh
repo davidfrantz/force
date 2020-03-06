@@ -338,7 +338,6 @@ while [ $START -lt $NUM ]; do
     fi
 
 
-
     # extract zip
     #SAFE=$PPATH/$(unzip -l -q $PNAMEZ | head -n 3 | tail -n 1 | sed 's/.* //')
     unzip -qq -d $PPATH $PNAMEZ 2>/dev/null
@@ -362,9 +361,9 @@ while [ $START -lt $NUM ]; do
     #find $PNAMES -type f -exec chmod 0644 {} \;
     #find $PNAMES -type d -exec chmod 0755 {} \;
 
-    TILE=$(ls -d $PNAMES/GRANULE/*)
+    #TILE=$(ls -d $PNAMES/GRANULE/*)
 
-    echo "$TILE QUEUED" >> $POOLLIST
+    echo "$PNAMES QUEUED" >> $POOLLIST
 
   done
 

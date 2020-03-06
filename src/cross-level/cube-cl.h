@@ -31,6 +31,7 @@ Datacube header
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
+#include <math.h>    // common mathematical functions
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"

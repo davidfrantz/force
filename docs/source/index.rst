@@ -12,8 +12,8 @@ FORCE documentation
 .. image:: force.png
 
 
-.. warning:
-   This documentation is not finished yet. Parts of the description are badly formatted, incomplete, incorrect or are referring to version 2.1. Come back later for the definitive documenation.
+.. warning::
+   This documentation is not finished yet. Parts of the description are badly formatted, incomplete, incorrect or are referring to version 2.1. Please, come back later for the definitive documentation.
 
 FORCE is ...
 ------------
