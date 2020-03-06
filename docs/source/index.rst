@@ -104,12 +104,8 @@ Related Links
    :caption: References
    :hidden:
 
-   proj.rst
-   faq.rst
-   issues.rst
    refs.rst
    refs-applied.rst
-   contact.rst
 
 
 .. toctree::
