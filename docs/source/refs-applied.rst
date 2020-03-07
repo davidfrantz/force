@@ -3,7 +3,7 @@
 Applied Publications
 ====================
 
-This list summarizes all scientific publications that have used FORCE. If you have used FORCE, please send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
+This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
 * **2020**

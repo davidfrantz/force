@@ -130,8 +130,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
   * This parameter determines if the kernel for landscape metrics calculation is circular or squared.
     
-    | *Type:* Character. Valid values: {CIRCULAR,SQUARED}
-    | ``LSM_KERNEL_SHAPE = CIRCULAR``
+    | *Type:* Character. Valid values: {CIRCLE,SQUARED}
+    | ``LSM_KERNEL_SHAPE = CIRCLE``
  
   * This parameter defines the type of the threshold that is used to define the foreground class (greater then, less than, equal). 
     This parameter is a character list, which defines the threshold type for each feature given.
