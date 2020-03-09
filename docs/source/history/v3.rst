@@ -44,7 +44,7 @@ Release: 09.03.2020
 
   * Due to restructuring, many FORCE programs were removed, but their functionality was integrated and synergised in fewer programs to unify usage and simplify code maintenance and reduce redundancy.
 
-  * force-level3, force-tsa, force-cso, force-improphe, force-l2imp are now available as submodules in force-higher-level
+  * force-level3, force-tsa, force-cso, force-improphe, force-l2imp are now available as submodules in force-higher-level.
 
   * force-parameter-level2, force-parameter-level3, force-parameter-tsa, force-parameter-cso, force-parameter-improphe, force-parameter-l2imp are now available as submodules in force-parameter
 
