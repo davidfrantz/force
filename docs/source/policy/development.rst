@@ -3,4 +3,15 @@
 Development and Funding
 =======================
 
-FORCE was developed by David Frantz at Trier University during the course of his Ph.D. thesis supervised by Prof. Dr. Joachim Hill, online available at <http://ubt.opus.hbz-nrw.de/volltexte/2017/1046/pdf/frantz_phd.pdf>, as well as in the projects ‘Southern African Science Service Centre for Climate Change and Adaptive Land Management Project’ supported by the Federal Ministry of Education and Research under contract number FKZ-01LG1201C, and ‘Sentinel4GRIPS’ supported by the Federal Ministry of Transport and Digital Infrastructure and National Aeronautics and Space Research Centre of the Federal Republic of Germany under contract number FKZ-50EW1605, with intellectual contributions from Prof. Dr. Joachim Hill, Dr. Achim Röder, Dr. Marion Stellmes, as well as code fragments from Dr. Sebastian Mader. New FORCE functionality is currently developed by David Frantz at Humboldt-University Berlin in the project ‘Near-Real Time Derivation of Land Surface Phenology using Sentinel Data: the FORCE-NRT approach’, supported by the Geo.X Research Network for Geosciences in Berlin and Potsdam. Many thanks to the geomatics team at HUB for many new ideas and methods that have made it into FORCE.
+FORCE is primarily developed by David Frantz (:ref:`contact`).
+The software has emerged from my PhD research at Trier University, supervised by Prof. Dr. Joachim Hill, `online available <http://ubt.opus.hbz-nrw.
+de/volltexte/2017/1046/pdf/frantz_phd.pdf>`_.
+
+Many people have contributed to FORCE in one way or the other. Most prominently, these people are all the co-authors on the :ref:`refs` that are related to FORCE. Less prominantly, but not less important, these are many of my previous and current colleagues at the `ERSG <https://www.uni-trier.de/index.php?id=2601&L=2>`_ and `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol/people>`_ labs that have shaped the development of FORCE through our collaborative work and many on- or off-topic discussion.
+
+The development has been supported by several research projects:
+
+* Southern African Science Service Centre for Climate Change and Adaptive Land Management Project (SASSCAL), funded by the Federal Ministry of Education and Research under grant number FKZ-01LG1201C
+* Sentinel4GRIPS, funded by the Federal Ministry of Transport and Digital Infrastructure under grant number FKZ-50EW1605
+* Near-Real Time Derivation of Land Surface Phenology using Sentinel Data: the FORCE-NRT approach, funded by the Geo.X Research Network for Geosciences in Berlin and Potsdam under grant number SO_087_GeoX
+* Understanding the Role of Material Stock Patterns for the Transformation to a Sustainable Society (MAT_STOCKS), funded by the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme under grant number 741950
