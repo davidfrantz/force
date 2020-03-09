@@ -156,7 +156,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``LSM_ALL_PIXELS = FALSE``
   
   * Which Landscape Metrics should be computed? There will be one LSM output file for each metric with as many bands as there are features (in the same order).
-    Currently available metrics are unique patch ID, mean patch area, fractal dimension index, weighted edge density, number of patches and effective mesh size.
+    Currently available metrics are unique patch ID, weighted mean patch area, weighted mean fractal dimension index, edge density, number of patches and effective mesh size.
     Additionally, arithmetic mean, geometric mean, standard deviation and maximum value within the kernel are available.
     
     | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX}
