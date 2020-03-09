@@ -160,9 +160,9 @@ Release: 09.03.2020
      
     * Following table indicates whether this option is used:
 
-      +================+==============+============+
-      + Parameter      + force-level2 + force-l2ps +
       +----------------+--------------+------------+
+      + Parameter      + force-level2 + force-l2ps +
+      +================+==============+============+
       + NPROC          + X            + -          +
       +----------------+--------------+------------+
       + NTHREAD        + X            + X          +
@@ -238,19 +238,21 @@ Release: 09.03.2020
   * RGB quicklooks can be generated as regular output (OUTPUT_OVV parameter).
     The quicklook is a jpeg overview with RGB image, and highlighted quality information.
 
-    +--------------------+----------+
-    +cirrus              + red      +
-    +--------------------+----------+
-    +opaque cloud        + pink     +
-    +--------------------+----------+
-    +cloud shadow        + cyan     +
-    +--------------------+----------+
-    +snow                + yellow   +
-    +--------------------+----------+
-    +saturated pixels    + orange   +
-    +--------------------+----------+
-    +subzero reflectance + greenish +
-    +--------------------+----------+
+    +---------------------+----------+
+    + cirrus              + red      +
+    +=====================+==========+
+    + cirrus              + red      +
+    +---------------------+----------+
+    + opaque cloud        + pink     +
+    +---------------------+----------+
+    + cloud shadow        + cyan     +
+    +---------------------+----------+
+    + snow                + yellow   +
+    +---------------------+----------+
+    + saturated pixels    + orange   +
+    +---------------------+----------+
+    + subzero reflectance + greenish +
+    +---------------------+----------+
 
   * The PROJECTION tag and the WKT string should be given in one line now!
     In previous version, they needed to be given in two lines due to the parsing code employed.
@@ -311,17 +313,19 @@ Release: 09.03.2020
   * A considerable performance boost has been gained by preloading data (as e.g. Youtube does).
     Due to the sequential processing of tiles or blocks and the parallelization on the pixel level, the general data access pattern was 
     
-    | (1) read all necessary data for the tile/block, (2) process the data, (3) output the results.
+    | (1) read all necessary data for the tile/block, 
+    | (2) process the data, 
+    | (3) output the results.
     |     repeat 1)-3) for each processing unit (tile/block).
 
     This resulted in ressource underutilisation as especially 1) and 3) are I/O bound with very little CPU usage, whereas 2) is CPU-heavy with no I/O load.
 
     Since v. 3.0, three teams of threads are used to break these read/process/write cycles, i.e. 
     
-    | Team (1) reads data for the next processing unit (PU+1) 
-    | Team (2) processes the data from the current processing unit (PU) 
-    | Team (3) output the results from the last processing unit (PU-1)
-    | Teams (1)-(3) do this simultaneously.
+    | (Team 1) reads data for the next processing unit (PU+1) 
+    | (Team 2) processes the data from the current processing unit (PU) 
+    | (Team 3) output the results from the last processing unit (PU-1)
+    | (Teams 1-3) do this simultaneously.
     
     Thus, if processing time is larger than reading and writing time, there is no CPU underutilisation.
 
@@ -344,17 +348,19 @@ Release: 09.03.2020
   * Input data must have one of these file extensions:
     Unexpected files, e.g. \*.ovr etc do not cause errors anymore.
     
-    +-----+----------------------------+
-    + dat + uncompressed binary (ENVI) +
-    +-----+----------------------------+
-    + bsq + uncompressed binary (ENVI) +
-    +-----+----------------------------+
-    + bil + uncompressed binary (ENVI) +
-    +-----+----------------------------+
-    + tif + GeoTiff                    +
-    +-----+----------------------------+
-    + vrt + GDAL Virtual Format        +
-    +-----+----------------------------+
+    +-----------+----------------------------+
+    + extension + format                     +
+    +===========+============================+
+    + dat       + uncompressed binary (ENVI) +
+    +-----------+----------------------------+
+    + bsq       + uncompressed binary (ENVI) +
+    +-----------+----------------------------+
+    + bil       + uncompressed binary (ENVI) +
+    +-----------+----------------------------+
+    + tif       + GeoTiff                    +
+    +-----------+----------------------------+
+    + vrt       + GDAL Virtual Format        +
+    +-----------+----------------------------+
     
 
   * Analysis masks are now specified using their directory (DIR_MASK, should contain masks, and their basename (BASE_MASK).
@@ -369,9 +375,9 @@ Release: 09.03.2020
     The images need to be signed 16bit integers with scaled backscatter in the order of -1000s, nodata value needs to be -9999.
     The data need to have two bands:
     
-    +======+==============+
-    + Band + Polarization +
     +------+--------------+
+    + Band + Polarization +
+    +======+==============+
     # 1    + VV           +
     +------+--------------+
     # 2    + VH           +
@@ -379,9 +385,9 @@ Release: 09.03.2020
     
     Four new "sensors" (like LND08 or SEN2A) have been introduced, i.e.
     
-    +========+===========================+
-    + SENSOR + Description               +
     +--------+---------------------------+
+    + SENSOR + Description               +
+    +========+===========================+
     + S1AIA  + Sentinel-1A IW Ascending  +
     +--------+---------------------------+
     + S1AID  + Sentinel-1A IW Descending +
@@ -425,9 +431,9 @@ Release: 09.03.2020
 
   * The DOYs and corresponding scoring function values in the Level 3 module are now given wih two parameters only, i.e. 
   
-    +=====================+=============================+
-    + Old                 + New                         +
     +---------------------+-----------------------------+
+    + Old                 + New                         +
+    +=====================+=============================+
     + DOY_SCORE_0 = 120   +                             +
     +---------------------+                             +
     + DOY_SCORE_1 = 180   + DOY_SCORE = 120 180 240     +
@@ -443,9 +449,9 @@ Release: 09.03.2020
 
   * The LSP files for the phenology-adaptive compositing (PAC) in the Level 3 module are now given as basenames (instead of patterns), and are given with one parameter only:
 
-    +=========================+================================================+
-    + Old                     + New                                            +
     +-------------------------+------------------------------------------------+
+    + Old                     + New                                            +
+    +=========================+================================================+
     + LSP_PATTERN_PAR_0 = POS +                                                +
     +-------------------------+                                                +
     + LSP_PATTERN_PAR_1 = EOS + LSP_FILE = LSP-POS.tif LSP-EOS.tif LSP-MOS.tif +
