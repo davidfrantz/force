@@ -33,12 +33,12 @@ GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-li
 CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 #CURL=-I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
-SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
+#SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
 
 # Linked libs
 LDGDAL=-lgdal
 LDGSL=-lgsl -lgslcblas
-LDSPLITS=-lsplits -larmadillo
+#LDSPLITS=-lsplits -larmadillo
 LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
 LDCURL=-lcurl
 
