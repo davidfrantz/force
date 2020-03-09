@@ -176,7 +176,7 @@ Release: 09.03.2020
     
   * Sentinel-2 data with the old, long naming convention are completely gone from ESA archives.
     For the file queue, and for force-l2ps, it was necessary to give the file path to the granule within the Sentinel-2 product (because there were several granules).
-    For the sake of usability, it is now possible to only give the filepath of the top directory, i.e. the *.SAFE directory.
+    For the sake of usability, it is now possible to only give the filepath of the top directory, i.e. the \*.SAFE directory.
     For force-level2, it is also possible to give the zipfile; force-l2ps needs the extracted file however.
     Note: if you give the top directory, but the image follows the outdated file structure, only the first granule will be processed.
     For the sake of backward compatibility, it is still possible to give the filepath of the granule.
