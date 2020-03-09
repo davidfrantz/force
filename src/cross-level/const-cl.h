@@ -234,7 +234,7 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 //#define FORCE_DEBUG
 //#define FORCE_DEV
 
-#define SPLITS
+//#define SPLITS
 
 //#define ACIX
 //#define ACIX2
