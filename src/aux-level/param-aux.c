@@ -1913,9 +1913,9 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter determines if the kernel for landscape metrics calculation\n");
     fprintf(fp, "# is circular or squared.\n");
-    fprintf(fp, "# # Type: Character. Valid values: {CIRCULAR,SQUARED}\n");
+    fprintf(fp, "# # Type: Character. Valid values: {CIRCLE,SQUARE}\n");
   }
-  fprintf(fp, "LSM_KERNEL_SHAPE = CIRCULAR\n");
+  fprintf(fp, "LSM_KERNEL_SHAPE = CIRCLE\n");
   
   if (verbose){
     fprintf(fp, "# This parameter defines the type of the threshold that is used to define\n");

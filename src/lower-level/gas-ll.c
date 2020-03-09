@@ -686,7 +686,9 @@ int year, month, day;
           diff_x = center_x-site_x; diff_y = center_y-site_y;
 
           dist = sqrt(diff_x*diff_x+diff_y*diff_y);
-          if (dist < min_dist){
+
+          // only use fairly near estimates (less than 1.5°)
+          if (dist < min_dist && dist < 1.5){
             min_dist = dist;
             wvp = atof(tokenptr);
             if (k == 0){

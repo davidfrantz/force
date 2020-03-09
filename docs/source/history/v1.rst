@@ -16,6 +16,7 @@ Release: 11.02.2018
   
   Fixed a bug when importing Landsat images with white-space characters in the directory name; now, this throws an error.
 
+  
 * **FORCE L2PS**
 
   Reduced memory requirements for holding TOA reflectance internally by ~0.72GB (Landsat 4-7), ~0.95GB (Landsat 8), ~2.92GB (Sentinel-2)
@@ -38,6 +39,7 @@ Release: 11.02.2018
   
   Cloud shadow matching for Sentinel-2 images is now performed on the 20m resolution, which significantly speeds up the work, especially for poorly illuminated winter images where the base height is iterated in small vertical increments.
 
+  
 * **FORCE L3PS**
 
   Added new parameter OFF_SEASON, which allows the compositing algorithm to select clear-sky observations that are not within the prime season of interest. This may be advantageous if gap-free images are needed. This parameter also affects the temporal-spectral metrics. If enabled, the statistics will be derived over the complete year, instead of the prime season of interest.
@@ -56,6 +58,7 @@ Release: 11.02.2018
   
   Negative tile numbers are now allowed.
 
+  
 * **FORCE TSA**
 
   Added product id as metadata for time series stack output.
@@ -66,12 +69,14 @@ Release: 11.02.2018
   
   Negative tile numbers are now allowed.
 
+  
 * **FORCE WVDB**
 
   Collection 5 geometa tables were removed from LAADS' FTP server, leaving force-lut-modis nonfunctional. The code was updated to make use of collection 6.
   
   Discovered a randomly occurring bug, seemingly related to a data race in localtime(): the function timer was set to tomorrow, resulting in a never-ending while loop. Measures were implemented to avoid this data race.
 
+  
 * **FORCE AUX**
 
   Added a new program force, which prints the version number and a short disclaimer.

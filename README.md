@@ -5,7 +5,7 @@
 **Version 3.0**
 
 ![FORCE Logo](/images/force.png)
-Format: ![Alt Text](url)
+
 
 ## About
 

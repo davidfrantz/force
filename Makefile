@@ -53,7 +53,7 @@ GPP=g++
 G11=g++ -std=c++11
 
 CFLAGS=-O3 -Wall -fopenmp
-#CFLAGS=-g -Wall -fopenmp
+CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
@@ -350,7 +350,7 @@ dummy: temp cross src/dummy.c
 install_:
 	cp $(DB)/* $(TB)
 	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2.sh
-	rename -f 's/\.sh//' $(TB)/*.sh
+	rename -e 's/.sh$//' $(TB)/*.sh
 	chmod 0755 $(TB)/*
 	cp $(TB)/* $(BINDIR)
 

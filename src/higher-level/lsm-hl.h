@@ -41,6 +41,7 @@ Contact: franz.schug@geo.hu-berlin.de
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/stats-cl.h"
+#include "../cross-level/cite-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
 

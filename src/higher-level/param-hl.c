@@ -512,13 +512,16 @@ par_enum_t lsm[_LSM_LENGTH_] = {
   { _LSM_WED_, "WED" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
   { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
   { _LSM_MAX_, "MAX" }};
-  
+par_enum_t kernel[_KERNEL_LENGTH_] = {
+  { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};
+
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
   register_enumvec_par(params, "LSM_THRESHOLD_TYPE", query, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
   register_intvec_par(params,  "LSM_THRESHOLD", -32767, 32767, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);
   register_enumvec_par(params, "LSM", lsm, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
+  register_enum_par(params,    "LSM_KERNEL_SHAPE", kernel, _KERNEL_LENGTH_, &phl->lsm.kernel);
 
   return;
 }

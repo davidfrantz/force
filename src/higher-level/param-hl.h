@@ -332,6 +332,7 @@ typedef struct {
   int ogeo;
   int omax;
   char *base;
+  int kernel;
 } par_lsm_t;
 
 // improphe core

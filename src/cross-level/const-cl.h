@@ -209,6 +209,9 @@ enum { _RES_MERGE_NONE_, _RES_MERGE_REGRESSION_, _RES_MERGE_IMPROPHE_, _RES_MERG
 // query type
 enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_LT_, _QUERY_LENGTH_ };
 
+// kernel type
+enum { _KERNEL_SQUARE_, _KERNEL_CIRCLE_, _KERNEL_LENGTH_ };
+
 // task type
 enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_, 
        _TASK_ALL_,   _TASK_RUNTIME_, _TASK_LENGTH_};

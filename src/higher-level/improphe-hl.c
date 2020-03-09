@@ -349,6 +349,7 @@ short **seasonal_avg_ = NULL;
             ok = true; break;}
 
         }
+        
 
         // not in any window, skip
         if (!ok) continue;
@@ -364,7 +365,7 @@ short **seasonal_avg_ = NULL;
         k[w]++; k[nwin]++;
 
       }
-      
+    
       if (k[nwin] == 0){
         
         for (wb=0; wb<nwin*nb; wb++) seasonal_avg_[wb][p] = nodata;
