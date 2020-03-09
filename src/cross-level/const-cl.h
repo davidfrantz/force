@@ -191,7 +191,7 @@ enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_,
        _TXT_GRD_, _TXT_THT_, _TXT_BHT_, _TXT_LENGTH_ };
        
 // landscape metrics
-enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_WED_, _LSM_NBR_, 
+enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_, 
        _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_LENGTH_ };
 
 // satellite mission

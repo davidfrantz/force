@@ -1950,13 +1950,14 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# Which Landscape Metrics should be computed? There will be one LSM output file\n");
     fprintf(fp, "# for each metric with as many bands as there are features (in the same order).\n");
-    fprintf(fp, "# Currently available metrics are unique patch ID, mean patch area, fractal di-\n");
-    fprintf(fp, "# mension index, weighted edge density, number of patches and effective mesh size.\n");
+    fprintf(fp, "# Currently available metrics are unique patch ID, weighted mean patch area, \n");
+    fprintf(fp, "# weighted mean fractal dimension index, edge density, number of patches and \n");
+    fprintf(fp, "# effective mesh size.\n");
     fprintf(fp, "# Additionally, arithmetic mean, geometric mean, standard deviation and maximum\n");
     fprintf(fp, "# value within the kernel are available.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX}\n");
+    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX}\n");
   }
-  fprintf(fp, "LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX\n");
+  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX\n");
 
   if (verbose){
     fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");

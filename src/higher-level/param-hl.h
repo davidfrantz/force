@@ -324,7 +324,7 @@ typedef struct {
   int ompa;
   int ouci;
   int ofdi;
-  int owed;
+  int oedd;
   int onbr;
   int oems;
   int oavg;

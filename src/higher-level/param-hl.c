@@ -509,7 +509,7 @@ par_enum_t query[_QUERY_LENGTH_] = {
   { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_LT_, "LT" }};
 par_enum_t lsm[_LSM_LENGTH_] = {
   { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
-  { _LSM_WED_, "WED" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
+  { _LSM_EDD_, "EDD" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
   { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
   { _LSM_MAX_, "MAX" }};
 par_enum_t kernel[_KERNEL_LENGTH_] = {
@@ -985,8 +985,8 @@ int i;
       lsm->ouci = true;
     } else if (lsm->metrics[i] == _LSM_FDI_){
       lsm->ofdi = true;
-    } else if (lsm->metrics[i] == _LSM_WED_){
-      lsm->owed = true;
+    } else if (lsm->metrics[i] == _LSM_EDD_){
+      lsm->oedd = true;
     } else if (lsm->metrics[i] == _LSM_NBR_){
       lsm->onbr = true;
     } else if (lsm->metrics[i] == _LSM_EMS_){

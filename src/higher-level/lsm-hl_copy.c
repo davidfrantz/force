@@ -51,19 +51,19 @@ stack_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, 
 stack_t **LSM = NULL;
 int o, nprod = 10;
 int error = 0;
-enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
+enum{ _mpa_, _uci_, _fdi_, _wed_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
 int prodlen[10] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
+char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "WED", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
 
-int prodtype[10] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
+int prodtype[10] ={ _mpa_, _uci_, _fdi_, _wed_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
 
-bool enable[10] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+bool enable[10] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.owed, phl->lsm.onbr,
                     phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
 
-bool write[10]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+bool write[10]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.owed, phl->lsm.onbr,
                     phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
 
-short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_};
+short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->wed_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_};
 
 
   alloc((void**)&LSM, nprod, sizeof(stack_t*));
@@ -171,24 +171,22 @@ int *exists = NULL;
 float **KDIST = NULL;
 int numberOfuniquePatches = 0;
 int *uniquePatches;
-float *patchperimeters;
-float *patchAreas;
-float totalClassArea = 0;
-float totaledgelength = 0;
-double sumFractalDims = 0;
+int *perimeters;
+int *patchAreas;
+int totalClassArea = 0;
+int edgeLength = 0;
+int sumFractalDims = 0;
+int sumPatchAreas = 0;
 float logSum = 0;
-float sumarea = 0;
-float sumshare = 0;
 int maxVal = 0;
 int logCounter = 0;
 int validDataPixels = 0;
+int res = cube->res;
 int kernelSize = (phl->lsm.radius * 2 + 1) * (phl->lsm.radius * 2 + 1);
 int width;
 small *newFeatures = NULL;
 double mx, vx;
-float kfraction, sqkfraction;
-float unit_area = 0;
-float unit_perim = 0;
+
 
   cite_me(_CITE_LSM_);
 
@@ -218,9 +216,6 @@ float unit_perim = 0;
   width = phl->lsm.radius*2+1;
   distance_kernel(width, &KDIST);
 
-  kfraction = 1.0/(float)kernelSize;
-  sqkfraction = sqrt(kfraction);
-
 
   // based on parameter input: range of numbers that are considered one class
   // --> derive new array with binaries from input features
@@ -231,23 +226,11 @@ float unit_perim = 0;
 
     memset(newFeatures, 0, sizeof(small)*nc);
 
-    #pragma omp parallel shared(newFeatures,lsm,phl,features,mask_,nc,f,nodata) default(none)
+    #pragma omp parallel shared(newFeatures,phl,features,mask_,nc,f) default(none)
    {
 
       #pragma omp for
       for (p=0; p<nc; p++){
-        
-        // if the metric is selected, initiate it with nodata
-        if (phl->lsm.ompa) lsm.mpa_[f][p] = nodata;
-        if (phl->lsm.ouci) lsm.uci_[f][p] = nodata;
-        if (phl->lsm.ofdi) lsm.fdi_[f][p] = nodata;
-        if (phl->lsm.oedd) lsm.edd_[f][p] = nodata;
-        if (phl->lsm.onbr) lsm.nbr_[f][p] = nodata;
-        if (phl->lsm.oems) lsm.ems_[f][p] = nodata;
-        if (phl->lsm.oavg) lsm.avg_[f][p] = nodata;
-        if (phl->lsm.ostd) lsm.std_[f][p] = nodata;
-        if (phl->lsm.ogeo) lsm.geo_[f][p] = nodata;
-        if (phl->lsm.omax) lsm.max_[f][p] = nodata;
 
         if (mask_ != NULL && !mask_[p]) continue;
         if (!features[f].msk[p] && phl->ftr.exclude) continue;
@@ -274,13 +257,13 @@ float unit_perim = 0;
     if (nobj < 1) continue;
 
 
-    #pragma omp parallel firstprivate(kernelSize,numberOfuniquePatches) private(p,u,uniquePatches,ccl,patchperimeters,patchAreas,totalClassArea,totaledgelength,sumFractalDims,mx,vx,validDataPixels,maxVal,logSum,logCounter,ii,jj,ni,nj,np,exists,t,share,kj,ki,sumarea,sumshare,unit_area,unit_perim) shared(ny,nx,nobj,f,nodata,lsm,mask_,CCL,features,phl,newFeatures,KDIST,kfraction,sqkfraction) default(none)
+    #pragma omp parallel firstprivate(kernelSize,numberOfuniquePatches) private(p,u,uniquePatches,ccl,perimeters,patchAreas,totalClassArea,edgeLength,sumFractalDims,sumPatchAreas,mx,vx,validDataPixels,maxVal,logSum,logCounter,ii,jj,ni,nj,np,exists,t,share,kj,ki) shared(ny,nx,nobj,res,f,nodata,lsm,mask_,CCL,features,phl,newFeatures,KDIST) default(none)
     {
 
       alloc((void**)&uniquePatches, kernelSize, sizeof(int));
-      alloc((void**)&patchperimeters, nobj+1, sizeof(float));
-      alloc((void**)&patchAreas,      nobj+1, sizeof(float));
-      alloc((void**)&exists,          nobj+1, sizeof(int));
+      alloc((void**)&perimeters,    nobj+1, sizeof(int));
+      alloc((void**)&patchAreas,    nobj+1, sizeof(int));
+      alloc((void**)&exists,        nobj+1, sizeof(int));
 
       #pragma omp for collapse(2) schedule(guided)
       for (i=0; i<ny; i++){
@@ -288,21 +271,34 @@ float unit_perim = 0;
 
         p = i*nx+j;
 
+        // if the metric is selected, initiate it with nodata
+        if (phl->lsm.ompa) lsm.mpa_[f][p] = nodata;
+        if (phl->lsm.ouci) lsm.uci_[f][p] = nodata;
+        if (phl->lsm.ofdi) lsm.fdi_[f][p] = nodata;
+        if (phl->lsm.owed) lsm.wed_[f][p] = nodata;
+        if (phl->lsm.onbr) lsm.nbr_[f][p] = nodata;
+        if (phl->lsm.oems) lsm.ems_[f][p] = nodata;
+        if (phl->lsm.oavg) lsm.avg_[f][p] = nodata;
+        if (phl->lsm.ostd) lsm.std_[f][p] = nodata;
+        if (phl->lsm.ogeo) lsm.geo_[f][p] = nodata;
+        if (phl->lsm.omax) lsm.max_[f][p] = nodata;
+
         if (mask_ != NULL && !mask_[p]) continue;
         if (!features[f].msk[p] && phl->ftr.exclude) continue;
         if (!newFeatures[p] && !phl->lsm.allpx) continue;
 
         // loop through a kernel of given size
         for (u=0; u<numberOfuniquePatches; u++){
-          patchperimeters[uniquePatches[u]] = 0;
+          perimeters[uniquePatches[u]] = 0;
           patchAreas[uniquePatches[u]] = 0;
           exists[uniquePatches[u]]     = 0;
           uniquePatches[u] = 0;
         }
         numberOfuniquePatches = 0;
         totalClassArea = 0;
-        totaledgelength = 0;
+        edgeLength = 0;
         sumFractalDims = 0;
+        sumPatchAreas = 0;
         logSum = 0;
         logCounter = 0;
         validDataPixels = 0;
@@ -359,42 +355,46 @@ float unit_perim = 0;
           if (ccl > 0 && !exists[ccl]){
             uniquePatches[numberOfuniquePatches] = ccl;
             numberOfuniquePatches++;
-            exists[ccl] = true;
           }
-          if (numberOfuniquePatches == 0) continue;
-      
-          // Increase patch area for that class
-          patchAreas[ccl] += kfraction;
-      
+
+
           // add total class area
-          if (newFeatures[np]) totalClassArea += kfraction;
+          if (newFeatures[np]) totalClassArea += 10;
 
+          // add to total length of edges
+          if (jj != phl->lsm.radius && nj+1 < nx &&
+              newFeatures[np] != newFeatures[ni*nx+(nj+1)]){
+              edgeLength += (res * 100);}
 
-          // At that same position in the patchperimeters array, add edge length
           if (ii != phl->lsm.radius && ni+1 < ny &&
               newFeatures[np] != newFeatures[(ni+1)*nx+nj]){
-              patchperimeters[ccl] += sqkfraction;
-              totaledgelength += sqkfraction;
-          }
+              edgeLength += (res * 100);}
+
+
+          // add edges of current pixel to the patch perimeter of that class
+
+          if (numberOfuniquePatches == 0) continue;
+
+          // Increase patch area for that class
+          patchAreas[ccl] += 10;
+
+          // At that same position in the perimeters array, add edge length
+          if (ii != phl->lsm.radius && ni+1 < ny &&
+              newFeatures[np] != newFeatures[(ni+1)*nx+nj]){
+              perimeters[ccl] += res;}
 
           if (ii != -phl->lsm.radius && ni-1 >= 0 &&
               newFeatures[np] != newFeatures[(ni-1)*nx+nj]){
-              patchperimeters[ccl] += sqkfraction;
-              totaledgelength += sqkfraction;
-          }
+              perimeters[ccl] += res;}
 
           if (jj != phl->lsm.radius && nj+1 < nx &&
               newFeatures[np] != newFeatures[ni*nx+(nj+1)]){
-              patchperimeters[ccl] += sqkfraction;
-              totaledgelength += sqkfraction;
-        }
-  
+              perimeters[ccl] += res;}
+
           if (jj != -phl->lsm.radius && nj-1 >= 0 &&
               newFeatures[np] != newFeatures[ni*nx+(nj-1)]){
-              patchperimeters[ccl] += sqkfraction;
-              totaledgelength += sqkfraction;
-          }
-        
+              perimeters[ccl] += res;}
+
         }
         }
 
@@ -406,46 +406,34 @@ float unit_perim = 0;
         if (phl->lsm.ostd) lsm.std_[f][p] = standdev(vx, validDataPixels);
 
 
-        // area weight. share of patch area in total class area
-        sumarea = sumshare = 0;
-      
-        for (t=0; t<numberOfuniquePatches; t++){
-          share = patchAreas[uniquePatches[t]] / totalClassArea;
-      
-          sumarea  += share * patchAreas[uniquePatches[t]];
-          sumshare += share;
-      
-        }
-        
-        if (phl->lsm.ompa){
-          if (sumshare > 0){
-                lsm.mpa_[f][p] = (short)(sumarea/sumshare*10000);
-          } else lsm.mpa_[f][p] = 0;
+        // TODO: change unit to px or percent of area
+        if (numberOfuniquePatches != 0){
+
+          // area weight. share of patch area in total class area
+          for (t=0; t<numberOfuniquePatches; t++){
+            share = (float)patchAreas[uniquePatches[t]] / totalClassArea;
+            if (phl->lsm.ompa) lsm.mpa_[f][p] += share * patchAreas[uniquePatches[t]] / 10;
+          }
+
+        } else{
+          if (phl->lsm.ompa) lsm.mpa_[f][p] = 0;
         }
 
-  
-        if (phl->lsm.oedd) lsm.edd_[f][p] = (short)(totaledgelength / sqrt(kernelSize) * 10000);
+        if (phl->lsm.owed) lsm.wed_[f][p] = edgeLength / (float)kernelSize;
         if (phl->lsm.onbr) lsm.nbr_[f][p] = numberOfuniquePatches;
-        if (phl->lsm.oems) lsm.ems_[f][p] = (short)(totalClassArea * totalClassArea * 10000);
+        if (phl->lsm.oems) lsm.ems_[f][p] = totalClassArea * totalClassArea / kernelSize / 1000;
 
-        sumshare = 0;
         // weighted sum of fractal dimensions
         for (t=0; t<numberOfuniquePatches; t++){
-
-          if (patchAreas[uniquePatches[t]]*kernelSize == 1) continue;
-
-            unit_area  = patchAreas[uniquePatches[t]]*kernelSize;
-            unit_perim = patchperimeters[uniquePatches[t]]*sqrt(kernelSize);
-
-            sumshare += patchAreas[uniquePatches[t]];
-            sumFractalDims += patchAreas[uniquePatches[t]] * 
-              (2.0 * log(0.25 * unit_perim)) / log(unit_area);
-
+          sumFractalDims += patchAreas[uniquePatches[t]] * (((2.0 * log(0.25 * perimeters[uniquePatches[t]]) * 1000) / (log(patchAreas[uniquePatches[t]]) * 1000)) * 10);
+          sumPatchAreas += patchAreas[uniquePatches[t]];
         }
 
         //  weighted mean fractal index
         if (numberOfuniquePatches != 0){
-          if (phl->lsm.ofdi) lsm.fdi_[f][p] = (short) (sumFractalDims / sumshare * 10000);
+          if (sumFractalDims>0){
+            if (phl->lsm.ofdi) lsm.fdi_[f][p] = (short) (sumFractalDims * 10 / totalClassArea);
+          }
         } else{
           if (phl->lsm.ofdi) lsm.fdi_[f][p] = 0;
         }
@@ -455,7 +443,7 @@ float unit_perim = 0;
       }
 
       free((void*)uniquePatches);
-      free((void*)patchperimeters);
+      free((void*)perimeters);
       free((void*)patchAreas);
       free((void*)exists);
 

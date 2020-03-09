@@ -53,7 +53,7 @@ typedef struct {
   short **mpa_;
   short **uci_;
   short **fdi_;
-  short **wed_;
+  short **edd_;
   short **nbr_;
   short **ems_;
   short **avg_;

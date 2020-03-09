@@ -25,7 +25,7 @@
 
 # Installation directory
 BINDIR=/usr/local/bin
-BINDIR=/home/frantzda/test-20200303
+BINDIR=/home/frantzda/test-20200309
 
 # Libraries
 GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
@@ -53,7 +53,7 @@ GPP=g++
 G11=g++ -std=c++11
 
 CFLAGS=-O3 -Wall -fopenmp
-CFLAGS=-g -Wall -fopenmp
+#CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
@@ -339,7 +339,8 @@ force-higher-level: temp cross higher $(DH)/_higher-level.c
 force-lut-modis: temp cross lower $(DL)/_lut-modis.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-lut-modis $(DL)/_lut-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
-  
+
+### dummy code for testing stuff  
 
 dummy: temp cross src/dummy.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
@@ -348,20 +349,25 @@ dummy: temp cross src/dummy.c
 ### MISC
 
 install_:
-	cp $(DB)/* $(TB)
-	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2.sh
-	rename -e 's/.sh$//' $(TB)/*.sh
 	chmod 0755 $(TB)/*
 	cp $(TB)/* $(BINDIR)
 
 clean:
 	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA) 
 
-bash: clean temp install_
+bash: temp
+	cp $(DB)/force-cube.sh $(TB)/force-cube
+	cp $(DB)/force-l2ps_.sh $(TB)/force-l2ps_
+	cp $(DB)/force-level1-landsat.sh $(TB)/force-level1-landsat
+	cp $(DB)/force-level1-sentinel2.sh $(TB)/force-level1-sentinel2
+	cp $(DB)/force-level2.sh $(TB)/force-level2
+	cp $(DB)/force-mosaic.sh $(TB)/force-mosaic
+	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
+	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2
 
-install: install_ clean
+install: bash install_ clean
 
 build:
 	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
 	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
-	tar -czf force_v$(V)_$(T).tar.gz src bash Makefile license.txt changelog.txt references*
+	tar -czf force_v$(V)_$(T).tar.gz src bash images docs Makefile LICENSE README.md
