@@ -21,8 +21,7 @@ There are separate methods for Landsat 4/5/7/8 and Sentinel-2A/B. The main diffe
 **Figure.** FORCE Level 1 Archiving Suite (L1AS) workflow. On successful ingestion, the image is appended to a file queue, which controls Level 2 processing. The file queue is a text file that holds the full path to the image, as well as a processing-state flag. This flag is either ``QUEUED`` or ``DONE``, which means that it is enqueued for Level 2 processing or was already processed and will be ignored next time.
 
 
-..
-toctree::
+.. toctree::
    :maxdepth: 1
    :hidden:
 
