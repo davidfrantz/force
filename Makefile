@@ -25,7 +25,6 @@
 
 # Installation directory
 BINDIR=/usr/local/bin
-BINDIR=/home/frantzda/test-20200309
 
 # Libraries
 GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
