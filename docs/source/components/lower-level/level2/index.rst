@@ -1,3 +1,5 @@
+.. _l2ps:
+
 FORCE L2PS - Level 2 Processing System
 ======================================
 

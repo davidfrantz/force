@@ -30,6 +30,7 @@ Lower Level Components
 **Content:**
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    level1/index.rst
