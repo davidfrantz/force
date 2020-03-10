@@ -7,7 +7,10 @@ FORCE is primarily developed by David Frantz (:ref:`contact`).
 The software has emerged from my PhD research at Trier University, supervised by Prof. Dr. Joachim Hill, `online available <http://ubt.opus.hbz-nrw.
 de/volltexte/2017/1046/pdf/frantz_phd.pdf>`_.
 
-Many people have contributed to FORCE in one way or the other. Most prominently, these people are all the co-authors on the :ref:`refs` that are related to FORCE. Less prominantly, but not less important, these are many of my previous and current colleagues at the `ERSG <https://www.uni-trier.de/index.php?id=2601&L=2>`_ and `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol/people>`_ labs that have shaped the development of FORCE through our collaborative work and many on- or off-topic discussion.
+Many people have contributed to FORCE in one way or the other. 
+Most prominently, these people are all the co-authors on the :ref:`refs` that are related to FORCE.
+Less prominantly, but not less important, these are many of my previous and current colleagues at the `ERSG <https://www.uni-trier.de/index.php?id=2601&L=2>`_ and `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol/people>`_ labs that have shaped the development of FORCE through our collaborative work and many on- or off-topic discussion.
+Starting with version 3.0, other people have actively developed code. Thanks to Franz Schug for providing the Landscape Metrics module.
 
 The development has been supported by several research projects:
 
