@@ -5,18 +5,18 @@ Installation
 
 FORCE is mostly written in C/C++: This, it needs to be compiled. Administrator rights are not necessarily required, unless you want to install to the system-wide search path (e.g. to make it available to muptiple users).
 
-1. Create a directory, e.g.
+1. Go to the directory, where you usually store source code, e.g.
 
   .. code-block:: bash
 
-    mkdir -p ~/src/force
-    cd ~/src/force
+    cd ~/src
 
 2. Pull from Github
 
   .. code-block:: bash
 
-    git need to check, update later
+    git clone https://github.com/davidfrantz/force.git
+    cd force
 
 3. Edit the Makefile with the text editor of your choice, e.g.
 
