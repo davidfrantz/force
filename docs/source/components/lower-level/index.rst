@@ -1,25 +1,30 @@
 .. _lower-level:
 
+
 Lower Level Components
 ======================
 
-A typical FORCE workflow consists of following main steps:
+**Table 1.** Components.
 
-1) Level 1 images are acquired from the space agencies, and are 
-
-2) converted to Level 2 ARD, which are 
-
-3) aggregated and analyzed in Higher Level processing.
-
-
-In FORCE, "Lower Level" is defined as Levels 1-2.
-
-
-.. image:: force-general-lower.jpg
-
-**Figure.** Overview of the Lower Level FORCE components.
-
-*Note, that the L2IMP module produces Level 2 data, too. However, the processing strategy follows the Higher Level, thus this module is described here (add link).*
++--------+------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Module | Program                | Level | Short description                                                                                                                                                                                                           |
++========+========================+=======+=============================================================================================================================================================================================================================+
+| L1AS   | The FORCE Level 1 Archiving Suite is intended to assist in organizing and maintaining a clean and consistent Level 1 data pool, downloading of Sentinel-2 data, and maintaining file queues                                                                  |
++        +------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        | force-level1-landsat   | 1     | Maintenance of Level-1 data pool, Landsat                                                                                                                                                                                   |
++        +------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        | force-level1-sentinel2 | 1     | Download of data and maintenance of Level-1 data pool, Sentinel-2                                                                                                                                                           |
++--------+------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| L2PS   | The FORCE Level 2 Processing System is intended to generate Analysis Ready Data (ARD), i.e. harmonized, standardized and radiometrically consistent Level 2 products. This includes cloud and cloud shadow detection, radiometric correction and data cubing | 
++        +------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        | force-level2           | 2     | Level 2 processing of image archives                                                                                                                                                                                        |
++        +------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        | force-l2ps             | 2     | Level 2 processing of single image                                                                                                                                                                                          |
++--------+------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| WVDB   | The FORCE Water Vapor Database component can be used to generate and maintain a water vapor database used for atmospheric correction of Landsat data                                                                                                         | 
++        +------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        | force-lut-modis        | /     | Generation and maintenance of water vapor database using MODIS products                                                                                                                                                     |
++--------+------------------------+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 **Content:**
