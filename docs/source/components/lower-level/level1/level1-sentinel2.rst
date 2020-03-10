@@ -1,7 +1,7 @@
 .. _level1-sentinel2:
 
-Sentinel-2
-==========
+level1-sentinel2
+================
 
 FORCE can process Level 1C Sentinel-2A and Sentinel-2B MSI data as provided by ESA through their data hub. 
 
