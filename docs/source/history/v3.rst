@@ -18,9 +18,6 @@ Release: 09.03.2020
     The paper describes FORCE and its underlying principles.
     Frantz 2019: https://doi.org/10.3390/rs11091124
 
-  * FORCE has a new project landing page:
-    https://davidfrantz.github.io/code/force/
-
   * The code has been moved to GitHub.
     A self-registration is no longer necessary.
     https://github.com/davidfrantz/force

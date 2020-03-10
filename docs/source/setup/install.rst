@@ -16,9 +16,14 @@ FORCE is mostly written in C/C++: This, it needs to be compiled. Administrator r
   .. code-block:: bash
 
     git clone https://github.com/davidfrantz/force.git
+
+3. Go to the force directory
+
+  .. code-block:: bash
+
     cd force
 
-3. Edit the Makefile with the text editor of your choice, e.g.
+4. Edit the Makefile with the text editor of your choice, e.g.
 
   .. code-block:: bash
 
@@ -34,19 +39,19 @@ FORCE is mostly written in C/C++: This, it needs to be compiled. Administrator r
 
   * The rest of the Makefile should be OK. Only edit anything if you know what you are doing.
 
-4. Compile the code
+5. Compile the code
 
   .. code-block:: bash
 
     make -j
 
-5. Install the code. If you are installing to a system directory, include ``sudo`` to install with admin rights. If you are installing to a private directory, remove the ``sudo``.
+6. Install the code. If you are installing to a system directory, include ``sudo`` to install with admin rights. If you are installing to a private directory, remove the ``sudo``.
 
   .. code-block:: bash
 
     sudo make install
 
-6. Test if it was installed correctly:
+7. Test if it was installed correctly:
 
   .. code-block:: bash
 

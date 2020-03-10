@@ -98,3 +98,20 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
     sudo apt-get install rename
 
+* **OpenCV** is used for machine learning and image processing tasks
+  We developed the code using OpenCV v. 4.1. 
+  The installation process might need some more dependencies, e.g. ``cmake``.
+  The software needs to be installed manually. 
+  See the `installation instructions <https://docs.opencv.org/4.1.0/d7/d9f/tutorial_linux_install.html>`_ or try following recipe:
+  
+  .. code-block:: bash
+  
+     mkdir -p ~/src/opencv
+     cd ~/src/opencv
+     wget https://github.com/opencv/opencv/archive/4.1.0.zip
+     unzip 4.1.0.zip
+     mkdir build
+     cd build
+     cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
+     make -j
+     sudo make install
