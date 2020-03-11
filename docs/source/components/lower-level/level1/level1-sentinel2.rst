@@ -14,6 +14,9 @@ Downloading data, unzipping, managing the data pool, and preparing/updating the 
    You will need to prepare a :ref:`queue`. 
 
    
+Usage
+^^^^^
+
 .. code-block:: bash
 
   force-level1-sentinel2
@@ -63,7 +66,8 @@ Downloading data, unzipping, managing the data pool, and preparing/updating the 
 It is possible to call ``force-level1-sentinel2`` (and subsequently ``force-level2``) from a cronjob, in which case a near-real time processing can be realized.
 
 
-**A note on the Long Term Archive**
+A note on the Long Term Archive
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 | In September 2019, ESA has activated the Long Term Archive (LTA) to roll out old (and potentially infrequently used) data products from the online storage system to offline storage. For details, see `here <https://scihub.copernicus.eu/userguide/LongTermArchive>`_. 
 | As of now, the last year of data shall stay online, and is immediately ready for download. 

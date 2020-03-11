@@ -21,6 +21,9 @@ Both tasks can be handled by ``force-level1-landsat``. Extraction of the \*.tar.
    You will need to prepare a :ref:`queue`. 
 
    
+Usage
+^^^^^
+
 .. code-block:: bash
 
   force-level1-landsat
