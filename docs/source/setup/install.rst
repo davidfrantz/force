@@ -91,5 +91,28 @@ Installation with optional software
      Additionally, uncomment the ``LDSPLITS`` line.
 
   d) Proceed with the installation of FORCE
+
+
+Installation with Docker
+------------------------
+
+* Use prebuilt image
+
+  The easiest way to use FORCE with Docker is to use a prebuilt image pulled from `Docker hub <https://hub.docker.com/>`_ with the following command:
   
-  
+  ``docker pull fegyi001/force:latest``
+
+  This downloads a fully featured FORCE v3.0 on your local machine including SPLITS.
+  You can use FORCE like this:
+
+  ``docker run fegyi001/force force``
+
+* Build image
+
+  If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from the `docker` folder:
+
+  ``docker build -t my-force .``
+
+  After that, you can use your newly built Docker image like this:
+
+  ``docker run my-force force``
