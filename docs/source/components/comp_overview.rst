@@ -20,7 +20,7 @@ A typical FORCE workflow consists of following main steps:
   3) aggregated and/or analyzed in Higher Level processing.
 
 
-.. image:: force-general-lower.jpg
+.. image:: force-general-30.jpg
 
 **Figure.** Overview of the Lower Level FORCE components.
 

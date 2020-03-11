@@ -14,7 +14,7 @@ In addition, FORCE L1AS assists in building and updating the file queues needed 
 +-----------------------+-------------------------+
 
 
-.. image:: force-l1as.jpg
+.. image:: L1AS.jpg
 
 **Figure.** FORCE Level 1 Archiving Suite (L1AS) workflow. 
 
