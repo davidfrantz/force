@@ -1,5 +1,7 @@
 # FORCE v3.0 with Docker
 
+## Use prebuilt image
+
 The easiest way to use FORCE with Docker is to use a prebuilt image pulled from [Docker hub](https://hub.docker.com/) with the following command:
 
 ```sh
@@ -56,6 +58,8 @@ FORCE consists of several components:
 
 ##########################################################################
 ```
+
+## Local build
 
 If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from this folder:
 

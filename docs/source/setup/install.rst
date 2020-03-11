@@ -107,7 +107,7 @@ Installation with Docker
 
   ``docker run fegyi001/force force``
 
-* Build image
+* Local build
 
   If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from the `docker` folder:
 
