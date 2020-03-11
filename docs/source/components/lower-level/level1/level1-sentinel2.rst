@@ -7,12 +7,13 @@ FORCE can process Level 1C Sentinel-2A and Sentinel-2B MSI data as provided by E
 
 The full resolution Sentinel-2 images must be acquired from the ESA archive (or from elsewhere).
 
-It is recommended to store the unzipped images in a consistent data pool (without duplicates). 
+Downloading data, unzipping, managing the data pool, and preparing/updating the file queue can be fully handled by ``force-level1-sentinel2``.
 
-A file queue needs to be prepared (see section VII.B). 
+.. note::
+   If you need to bypass ``force-level1-sentinel2``, it is recommended to store the images in a consistent data pool without duplicates.
+   You will need to prepare a :ref:`queue`. 
 
-Downloading data, unzipping, managing the data pool, and preparing/updating the file queue can be handled by ``force-level1-sentinel2``.
-
+   
 .. code-block:: bash
 
   force-level1-sentinel2

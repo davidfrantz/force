@@ -19,7 +19,7 @@ In addition, FORCE L1AS assists in building and updating the file queues needed 
 **Figure.** FORCE Level 1 Archiving Suite (L1AS) workflow. 
 
 The main difference is that Landsat data need to be downloaded manually, while Sentinel-2 images are automatically retrieved by FORCE. 
-On successful ingestion, the image is appended to a file queue, which controls Level 2 processing. 
+On successful ingestion, the image is appended to a :ref:`queue`, which controls Level 2 processing. 
 The file queue is a text file that holds the full path to the image, as well as a processing-state flag. 
 This flag is either ``QUEUED`` or ``DONE``, which means that it is enqueued for Level 2 processing or was already processed and will be ignored next time.
 
@@ -30,3 +30,6 @@ This flag is either ``QUEUED`` or ``DONE``, which means that it is enqueued for 
 
    level1-landsat.rst
    level1-sentinel2.rst
+   queue.rst
+
+   

@@ -1,24 +1,6 @@
 Prerequisites
 =============
 
-Level 2 file queue
-This file queue is mandatory for force-level2. It specifies the input images that are to be processed. One image per line should be given. The full file paths must be given. No white spaces should be present in the file paths. The file is specified with FILE_QUEUE in the Level 2 parameter file (see section VII.A).
-Each image is followed by ‘QUEUED’ or ‘DONE’, which indicates the queue status. Queued images will be processed, and the queue status will be changed to ‘DONE’ after Level 2 processing. If a reprocessing is required, the queue status needs to be changed to ‘QUEUED’, e.g. using
-sed -i ‘s/DONE/QUEUED/’ level1-landsat-germany.pool
-File queues can be generated – and updated with new acquisitions – using the FORCE L1AS programs (see section VI.A).
-Although not specifically required, we recommend to use a consistent and clean data pool that contains all (and nothing else) input images. Note that images downloaded from space agencies may be redundant, i.e. multiple instances of the same file with different processing IDs are possible (thus new data may be overwritten by outdated data in the Level 2 data pool). A clean data pool can be generated and maintained with FORCE L1AS.
-Example for Landsat:
-/data/africa/miombo/level1/landsat/177072/LT51770722008065JSA00.tar.gz QUEUED
-/data/africa/miombo/level1/landsat/177072/LC81770722014129LGN00.tar.gz QUEUED
-/data/africa/miombo/level1/landsat/173070/LE71730701999276SGS00.tar.gz QUEUED
-/data/africa/miombo/level1/landsat/173070/LC81730702014213LGN00.tar.gz QUEUED
-… [file truncated]
-Example for Sentinel-2:
-/data/africa/miombo/level1/sentinel/T33LYD/S2A_MSIL1C_20170706T083601_N0205_R064_T33LYD_20170706T090107.SAFE/GRANULE/L1C_T33LYD_A010643_20170706T090107 QUEUED
-/data/africa/miombo/level1/sentinel/T33LYC/S2A_MSIL1C_20170706T083601_N0205_R064_T33LYC_20170706T090107.SAFE/GRANULE/L1C_T33LYC_A010643_20170706T090107 QUEUED
-/data/africa/miombo/level1/sentinel/T33LZE/S2A_MSIL1C_20170706T083601_N0205_R064_T33LZE_20170706T090107.SAFE/GRANULE/L1C_T33LZE_A010643_20170706T090107 QUEUED
-/data/africa/miombo/level1/sentinel/T33LZF/S2A_MSIL1C_20170706T083601_N0205_R064_T33LZF_20170706T090107.SAFE/GRANULE/L1C_T33LZF_A010643_20170706T090107 QUEUED
-… [file truncated]
 
 Tile white-list
 This file is optional, and may be used to suppress the output of tiles that are not in your study area. This option was implemented to decrease the volume of the processed data. The file extension is ‘.til’. The file is specified with FILE_TILE in the various parameter files. The file must be prepared as follows: the 1st line must give the number of tiles for which output should be created. The corresponding tile IDs must be given in the following lines, one ID per line; end with an empty line. The sorting does not matter.
