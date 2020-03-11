@@ -1,5 +1,7 @@
-FORCE WVDB - Water Vapor Database
-=================================
+.. _wvdb:
+
+Water Vapor Database
+====================
 
 
 The FORCE Water Vapor Database (FORCE WVDB) component can be used to generate and maintain a water vapor database used for atmospheric correction of Landsat data (within FORCE L2PS). Instead of running this component on your own, an application-ready global water vapor database (2000–July 2018) can be downloaded from https://doi.org/10.1594/PANGAEA.893109. The water vapor database is not used when processing Sentinel-2 data because water vapor can be estimated from the images themselves. 
