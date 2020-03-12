@@ -69,7 +69,7 @@ int mask_status;
       printf("error reading mask tile X%04d_Y%04d chunk %d.\n", 
         pro->tx_next, pro->ty_next, pro->chunk_next);
     } else if (mask_status == CANCEL){
-      printf("no mask data. skip block.\n");
+      //printf("no mask data. skip block.\n");
     }
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
