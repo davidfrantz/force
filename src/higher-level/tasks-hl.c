@@ -28,6 +28,7 @@ This file contains functions for higher level tasks
 #include "tasks-hl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
+#include "cpl_conv.h"      // various convenience functions for CPL
 #include "cpl_multiproc.h" // CPL Multi-Threading
 
 /** OpenMP **/
@@ -267,6 +268,9 @@ int o;
     #pragma omp parallel shared(OUTPUT,pro,nprod,phl) default(none)
     {
 
+      CPLPushErrorHandler(CPLQuietErrorHandler);
+      CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
+
       #pragma omp for schedule(dynamic,1)
       for (o=0; o<nprod[pro->pu_prev]; o++){
         if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_stack(
@@ -274,7 +278,11 @@ int o;
         write_stack(OUTPUT[pro->pu_prev][o]);
       }
 
+      CPLPopErrorHandler();
+
     }
+    
+
 
   }
 

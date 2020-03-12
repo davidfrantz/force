@@ -28,12 +28,11 @@ Named constant definitions
 #ifndef CONSTANT_CL_H
 #define CONSTANT_CL_H
 
+#include "../cross-level/_version-cl.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// current version
-#define _VERSION_ "3.0"
 
 // abbreviated datatypes
 typedef unsigned short int ushort;
