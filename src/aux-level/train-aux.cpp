@@ -44,7 +44,8 @@ Ptr<StatModel> train_svm(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp)
     svm->setType(SVM::C_SVC);
   } else {
     printf("unknown SVM method\n");
-    return NULL;
+    Ptr<StatModel> r;
+    return r;
   }
 
   svm->setKernel(SVM::RBF);
