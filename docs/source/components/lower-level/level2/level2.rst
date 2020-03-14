@@ -18,8 +18,7 @@ A logfile is written, which is recommended to inspect after running the program.
 Usage
 ^^^^^
 
-..
-code-block:: bash
+.. code-block:: bash
 
   force-level2
 

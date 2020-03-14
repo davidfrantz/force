@@ -12,8 +12,7 @@ However, for specific purposes (e.g. testing/debugging or or if you need/want to
 Usage
 ^^^^^
 
-..
-code-block:: bash
+.. code-block:: bash
 
   force-l2ps
 
