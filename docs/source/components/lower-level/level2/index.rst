@@ -44,6 +44,7 @@ However, for specific purposes (e.g. testing/debugging, or if you want/need to i
 **Figure 2.** Data Cube of Landsat 7/8 and Sentinel-2 A/B Level 2 ARD. A two-month period of atmospherically corrected imagery acquired over South-East Berlin, Germany, is shown here.
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    level2.rst
