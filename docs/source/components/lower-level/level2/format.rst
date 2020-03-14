@@ -138,25 +138,26 @@ All other products are optional.
 
   * Landsat 4–5 Thematic Mapper (TM):
 
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + USGS Level 1 band + Wavelength name      + Wavelength range in µm + Resolution in m + FORCE Level 2 band +
-    +===================+======================+========================+=================+====================+
-    + 1                 + Blue                 + 0.45–0.52              + 30              + 1                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 2                 + Green                + 0.52–0.60              + 30              + 2                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 3                 + Red                  + 0.63–0.69              + 30              + 3                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 4                 + Near Infrared        + 0.76–0.90              + 30              + 4                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 5                 + Shortwave Infrared 1 + 1.55–1.75              + 30              + 5                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 6                 + Thermal Infrared     + 10.40–12.50            + 30 (120:sup:1)  + -:sup:`2`          +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 7                 + Shortwave Infrared 2 + 2.08–2.35              + 30              + 6                  +
-    +-------------------+----------------------+------------------------+-----------------+--------------------+
-    :sup:`1` Band is acquired at 120m resolution, but USGS products are resampled and provided at 30m.
-    :sup:`2` Thermal band is used internally for cloud / cloud shadow detection, but not output.
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + USGS Level 1 band + Wavelength name      + Wavelength range in µm + Resolution in m  + FORCE Level 2 band +
+    +===================+======================+========================+==================+====================+
+    + 1                 + Blue                 + 0.45–0.52              + 30               + 1                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 2                 + Green                + 0.52–0.60              + 30               + 2                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 3                 + Red                  + 0.63–0.69              + 30               + 3                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 4                 + Near Infrared        + 0.76–0.90              + 30               + 4                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 5                 + Shortwave Infrared 1 + 1.55–1.75              + 30               + 5                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 6                 + Thermal Infrared     + 10.40–12.50            + 30 (120 :sup:`1`)+ - :sup:`2`         +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    + 7                 + Shortwave Infrared 2 + 2.08–2.35              + 30               + 6                  +
+    +-------------------+----------------------+------------------------+------------------+--------------------+
+    
+    | :sup:`1` Band is acquired at 120m resolution, but USGS products are resampled and provided at 30m.
+    | :sup:`2` Thermal band is used internally for cloud / cloud shadow detection, but not output.
 
 
   * Landsat 7 Enhanced Thematic Mapper Plus (ETM+):
@@ -181,9 +182,8 @@ All other products are optional.
     + 8                 + Panchromatic         + 0.52–0.90              + 15              + -                  +
     +-------------------+----------------------+------------------------+-----------------+--------------------+
 
-    :sup:`1` Band is acquired at 60m resolution, but USGS products are resampled and provided at 30m.
-
-    :sup:`2` Thermal band is used internally for cloud / cloud shadow detection, but not output.
+    | :sup:`1` Band is acquired at 60m resolution, but USGS products are resampled and provided at 30m.
+    | :sup:`2` Thermal band is used internally for cloud / cloud shadow detection, but not output.
 
 
   * Landsat 8 Operational Land Imager (OLI) / Thermal Infrared Sensor (TIRS):
@@ -191,7 +191,7 @@ All other products are optional.
     +-------------------+----------------------+------------------------+------------------+--------------------+
     + USGS Level 1 band + Wavelength name      + Wavelength range in µm + Resolution in m  + FORCE Level 2 band +
     +===================+======================+========================+==================+====================+
-    + 1                 + Ultra-Blue           + 0.435–0.451            + 30               + -:sup:`2`          +
+    + 1                 + Ultra-Blue           + 0.435–0.451            + 30               + - :sup:`2`         +
     +-------------------+----------------------+------------------------+------------------+--------------------+
     + 2                 + Blue                 + 0.452–0.512            + 30               + 1                  +
     +-------------------+----------------------+------------------------+------------------+--------------------+
@@ -207,20 +207,17 @@ All other products are optional.
     +-------------------+----------------------+------------------------+------------------+--------------------+
     + 8                 + Panchromatic         + 0.503–0.676            + 15               + -                  +
     +-------------------+----------------------+------------------------+------------------+--------------------+
-    + 9                 + Cirrus               + 1.363–1.384            + 30               + -:sup:`3`          +
+    + 9                 + Cirrus               + 1.363–1.384            + 30               + - :sup:`3`         +
     +-------------------+----------------------+------------------------+------------------+--------------------+
-    + 10                + Thermal Infrared 1   + 10.60–11.19            + 30 (100:sup:`1`) + -:sup:`4`          +
+    + 10                + Thermal Infrared 1   + 10.60–11.19            + 30 (100 :sup:`1`)+ - :sup:`4`         +
     +-------------------+----------------------+------------------------+------------------+--------------------+
-    + 11                + Thermal Infrared 2   + 11.50–12.51            + 30 (100:sup:`1`) + -                  +
+    + 11                + Thermal Infrared 2   + 11.50–12.51            + 30 (100 :sup:`1`)+ -                  +
     +-------------------+----------------------+------------------------+------------------+--------------------+
 
-    :sup:`1` Bands are acquired at 100m resolution, but USGS products are resampled and provided at 30m.
-
-    :sup:`2` Ultra-Blue band is used internally for aerosol retrieval, but not output.
-
-    :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
-
-    :sup:`4` Thermal band is used internally for cloud / cloud shadow detection, but not output.
+    | :sup:`1` Bands are acquired at 100m resolution, but USGS products are resampled and provided at 30m.
+    | :sup:`2` Ultra-Blue band is used internally for aerosol retrieval, but not output.
+    | :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
+    | :sup:`4` Thermal band is used internally for cloud / cloud shadow detection, but not output.
 
 
   * Sentinel-2 A/B MultiSpectral Instrument (MSI):
@@ -228,7 +225,7 @@ All other products are optional.
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + ESA Level 1 band + Wavelength name      + Wavelength range in µm + Resolution in m + FORCE Level 2 band +
     +==================+======================+========================+=================+====================+
-    + 1                + Ultra-Blue           + 0.430–0.457            + 60              + -:sup:`1`          +
+    + 1                + Ultra-Blue           + 0.430–0.457            + 60              + - :sup:`1`         +
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + 2                + Blue                 + 0.440–0.538            + 10              + 1                  +
     +------------------+----------------------+------------------------+-----------------+--------------------+
@@ -246,20 +243,18 @@ All other products are optional.
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + 8A               + Near Infrared        + 0.848–0.881            + 20              + 8                  +
     +------------------+----------------------+------------------------+-----------------+--------------------+
-    + 9                + Water Vapor          + 0.932–0.958            + 60              + -:sup:`2`          +
+    + 9                + Water Vapor          + 0.932–0.958            + 60              + - :sup:`2`         +
     +------------------+----------------------+------------------------+-----------------+--------------------+
-    + 10               + Cirrus               + 1.337–1.412            + 60              + -:sup:`3`          +
+    + 10               + Cirrus               + 1.337–1.412            + 60              + - :sup:`3`         +
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + 11               + Shortwave Infrared 1 + 1.539–1.682            + 20              + 9                  +
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + 12               + Shortwave Infrared 2 + 2.078–2.320            + 20              + 10                 +
     +------------------+----------------------+------------------------+-----------------+--------------------+
 
-    :sup:`1` Ultra-Blue band is used internally for aerosol retrieval, but not output.
-
-    :sup:`2` Water vapor band is used internally for water vapor retrieval, but not output.
-
-    :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
+    | :sup:`1` Ultra-Blue band is used internally for aerosol retrieval, but not output.
+    | :sup:`2` Water vapor band is used internally for water vapor retrieval, but not output.
+    | :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
 
 
 * Quality Assurance Information
