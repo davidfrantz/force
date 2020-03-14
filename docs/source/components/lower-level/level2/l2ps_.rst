@@ -1,7 +1,7 @@
 .. _level2-wrapper:
 
-force-l2ps_
-===========
+force-l2ps\_
+============
 
 This program is a wrapper script that acts as a bridge between :ref:`level2-bulk` and :ref:`level2-core`.
 It is called from within :ref:`level2-bulk` for each image.
