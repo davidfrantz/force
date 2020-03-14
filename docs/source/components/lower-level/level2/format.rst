@@ -60,27 +60,45 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 + 10–15  + Product Level                                +
 +--------+----------------------------------------------+
 + 17–21  + Sensor ID                                    +
++        +----------------------------------------------+
 +        + LND04: Landsat 4 Thematic Mapper             +
++        +                                              +
 +        + LND05: Landsat 5 Thematic Mapper             +
++        +                                              +
 +        + LND07: Landsat 7 Enhanced Thematic Mapper    +
++        +                                              +
 +        + LND08: Landsat 8 Operational Land Imager     +
++        +                                              +
 +        + SEN2A: Sentinel-2A MultiSpectral Instrument  +
++        +                                              +
 +        + SEN2B: Sentinel-2B MultiSpectral Instrument  +
 +--------+----------------------------------------------+
 + 23–25  + Product Type                                 +
++        +----------------------------------------------+
 +        + BOA: Bottom-of-Atmosphere Reflectance        +
++        +                                              +
 +        + TOA: Top-of-Atmosphere Reflectance           +
++        +                                              +
 +        + QAI: Quality Assurance Information           +
++        +                                              +
 +        + AOD: Aerosol Optical Depth                   +
++        +                                              +
 +        + DST: Cloud / Cloud shadow /Snow distance     +
++        +                                              +
 +        + WVP: Water vapor                             +
++        +                                              +
 +        + VZN: View zenith                             +
++        +                                              +
 +        + HOT: Haze Optimized Transformation           +
 +--------+----------------------------------------------+
 + 27–29  + File extension                               +
++        +----------------------------------------------+
 +        + tif: image data in compressed GeoTiff format +
++        +                                              +
 +        + dat: image data in flat binary ENVI format   +
++        +                                              +
 +        + hdr: metadata for ENVI format                +
++        +                                              +
 +        + jpg: quicklooks                              +
 +--------+----------------------------------------------+
 
