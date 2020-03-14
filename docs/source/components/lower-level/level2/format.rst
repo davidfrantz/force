@@ -174,13 +174,15 @@ All other products are optional.
     +-------------------+----------------------+------------------------+-----------------+--------------------+
     + 5                 + Shortwave Infrared 1 + 1.55–1.75              + 30              + 5                  +
     +-------------------+----------------------+------------------------+-----------------+--------------------+
-    + 6                 + Thermal Infrared     + 10.40–12.50            + 30 (60:sup:`1`) + -:sup:`2`          +
+    + 6                 + Thermal Infrared     + 10.40–12.50            + 30 (60 :sup:`1`)+ - :sup:`2`         +
     +-------------------+----------------------+------------------------+-----------------+--------------------+
     + 7                 + Shortwave Infrared 2 + 2.09–2.35              + 30              + 6                  +
     +-------------------+----------------------+------------------------+-----------------+--------------------+
     + 8                 + Panchromatic         + 0.52–0.90              + 15              + -                  +
     +-------------------+----------------------+------------------------+-----------------+--------------------+
+
     :sup:`1` Band is acquired at 60m resolution, but USGS products are resampled and provided at 30m.
+
     :sup:`2` Thermal band is used internally for cloud / cloud shadow detection, but not output.
 
 
@@ -211,9 +213,13 @@ All other products are optional.
     +-------------------+----------------------+------------------------+------------------+--------------------+
     + 11                + Thermal Infrared 2   + 11.50–12.51            + 30 (100:sup:`1`) + -                  +
     +-------------------+----------------------+------------------------+------------------+--------------------+
+
     :sup:`1` Bands are acquired at 100m resolution, but USGS products are resampled and provided at 30m.
+
     :sup:`2` Ultra-Blue band is used internally for aerosol retrieval, but not output.
+
     :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
+
     :sup:`4` Thermal band is used internally for cloud / cloud shadow detection, but not output.
 
 
@@ -248,8 +254,11 @@ All other products are optional.
     +------------------+----------------------+------------------------+-----------------+--------------------+
     + 12               + Shortwave Infrared 2 + 2.078–2.320            + 20              + 10                 +
     +------------------+----------------------+------------------------+-----------------+--------------------+
+
     :sup:`1` Ultra-Blue band is used internally for aerosol retrieval, but not output.
+
     :sup:`2` Water vapor band is used internally for water vapor retrieval, but not output.
+
     :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
 
 
@@ -341,16 +350,13 @@ All other products are optional.
   + 15      + Empty                + 0         + 0       + TBD                                                                +
   +---------+----------------------+-----------+---------+--------------------------------------------------------------------+
 
-  * Nodata values are values where nothing was observed, where auxiliary data was not given (e.g. nodata in DEM), or
-where data is substantially corrupt (e.g. impulse noise, or when the surface reflectance estimate is > 2.0 or < -1.0)
+  * Nodata values are values where nothing was observed, where auxiliary data was not given (e.g. nodata in DEM), or where data is substantially corrupt (e.g. impulse noise, or when the surface reflectance estimate is > 2.0 or < -1.0)
 
   * Clouds are given in three categories, i.e. opaque clouds (confident cloud), buffered clouds (300m; less confident cloud), and cirrus clouds.
 
-  * Cloud shadows are detected on the basis of the cloud layer. If a cloud is missed, the cloud shadow is missed, too. If a false
-positive cloud is detected, false positive cloud shadows follow.
+  * Cloud shadows are detected on the basis of the cloud layer. If a cloud is missed, the cloud shadow is missed, too. If a false positive cloud is detected, false positive cloud shadows follow.
 
-  * Aerosol Optical Depth is estimated for fairly coarse grid cells. If there is no valid AOD estimation in any cell, values are
-interpolated. If there is no valid AOD estimation for the complete image, a fill value is assigned (AOD is guessed). If AOD @550nm is higher than 0.6, it is flagged as high aerosol; this is not necessarily critical, but should be used with caution (see subzero flag).
+  * Aerosol Optical Depth is estimated for fairly coarse grid cells. If there is no valid AOD estimation in any cell, values are interpolated. If there is no valid AOD estimation for the complete image, a fill value is assigned (AOD is guessed). If AOD @550nm is higher than 0.6, it is flagged as high aerosol; this is not necessarily critical, but should be used with caution (see subzero flag).
 
   * If the surface reflectance estimate in any band is < 0, the subzero flag is set. This can point to overestimation of AOD.
 
