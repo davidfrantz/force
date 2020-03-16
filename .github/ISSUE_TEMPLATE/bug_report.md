@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Is it a bug?**
-Please consider that the bug may be an error in usage, or may be related to wrong settings of your system, e.g. bad access rights. If you are sufficiently sure that it is a bug, please go ahead and file a bug report. If not, please post the question in our self-help (Google Group)[https://groups.google.com/d/forum/force_eo]
+Please consider that the bug may be an error in usage, or may be related to wrong settings of your system, e.g. bad access rights. If you are sufficiently sure that it is a bug, please go ahead and file a bug report. If not, please post the question in our self-help [Google Group](https://groups.google.com/d/forum/force_eo)
 
 **Describe the bug**
 A clear and concise description of what the bug or error is, and what software component is affected.
