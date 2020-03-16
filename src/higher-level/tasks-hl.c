@@ -28,6 +28,7 @@ This file contains functions for higher level tasks
 #include "tasks-hl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
+#include "cpl_conv.h"      // various convenience functions for CPL
 #include "cpl_multiproc.h" // CPL Multi-Threading
 
 /** OpenMP **/
@@ -69,7 +70,7 @@ int mask_status;
       printf("error reading mask tile X%04d_Y%04d chunk %d.\n", 
         pro->tx_next, pro->ty_next, pro->chunk_next);
     } else if (mask_status == CANCEL){
-      printf("no mask data. skip block.\n");
+      //printf("no mask data. skip block.\n");
     }
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
@@ -267,6 +268,9 @@ int o;
     #pragma omp parallel shared(OUTPUT,pro,nprod,phl) default(none)
     {
 
+      CPLPushErrorHandler(CPLQuietErrorHandler);
+      CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
+
       #pragma omp for schedule(dynamic,1)
       for (o=0; o<nprod[pro->pu_prev]; o++){
         if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_stack(
@@ -274,7 +278,11 @@ int o;
         write_stack(OUTPUT[pro->pu_prev][o]);
       }
 
+      CPLPopErrorHandler();
+
     }
+    
+
 
   }
 

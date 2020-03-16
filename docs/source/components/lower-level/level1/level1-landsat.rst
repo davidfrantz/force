@@ -14,11 +14,15 @@ At the time of writing, pre-collection, collection 1, and collection 2 data were
 
 Before getting started, the full resolution Landsat images must be acquired from the USGS archive, e.g. through EarthExplorer or GloVis. FORCE currently does not provide functionality to download Landsat data. 
 
-It is recommended to store the compressed images in a consistent data pool (without duplicates or different processing versions). 
-
-A file queue needs to be prepared (see section VII.B). 
-
 Both tasks can be handled by ``force-level1-landsat``. Extraction of the \*.tar.gz archives is not necessary at this point as this is done on the fly during Level 2 processing.
+
+.. note::
+   If you need to bypass ``force-level1-landsat``, it is recommended to store the compressed images in a consistent data pool without duplicates or different processing versions.
+   You will need to prepare a :ref:`queue`. 
+
+   
+Usage
+^^^^^
 
 .. code-block:: bash
 
@@ -49,9 +53,9 @@ Both tasks can be handled by ``force-level1-landsat``. Extraction of the \*.tar.
 
 * cp/mv
 
-  The Level 1 archives are moved (``mv``, recommended) or copied (``cp``) from input to target directory.
+  | The Level 1 archives are moved (``mv``, recommended) or copied (``cp``) from input to target directory.
 
 * [dry]
 
-  This argument is optional, and if ``dry`` is specified, no files are moved/copied. The program only prints what it would do.
+  | This argument is optional, and if ``dry`` is specified, no files are moved/copied. The program only prints what it would do.
 

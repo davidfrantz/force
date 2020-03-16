@@ -22,7 +22,5 @@ A typical FORCE workflow consists of following main steps:
 
 .. image:: force-general-30.jpg
 
-**Figure.** Overview of the Lower Level FORCE components.
-
-*Note, that the L2IMP module produces Level 2 data, too. However, the processing strategy follows the Higher Level, thus this module is described here (add link).*
+**Figure.** Overview of the software components.
 

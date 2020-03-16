@@ -175,4 +175,12 @@ epub_title = project
 epub_exclude_files = ['search.html']
 
 
+# -- Added by DF to wrap tables -------------------------------------------------
+
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',  # override wide tables in RTD theme
+        ],
+     }
+
 # -- Extension configuration -------------------------------------------------

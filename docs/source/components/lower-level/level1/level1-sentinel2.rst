@@ -7,11 +7,15 @@ FORCE can process Level 1C Sentinel-2A and Sentinel-2B MSI data as provided by E
 
 The full resolution Sentinel-2 images must be acquired from the ESA archive (or from elsewhere).
 
-It is recommended to store the unzipped images in a consistent data pool (without duplicates). 
+Downloading data, unzipping, managing the data pool, and preparing/updating the file queue can be fully handled by ``force-level1-sentinel2``.
 
-A file queue needs to be prepared (see section VII.B). 
+.. note::
+   If you need to bypass ``force-level1-sentinel2``, it is recommended to store the images in a consistent data pool without duplicates.
+   You will need to prepare a :ref:`queue`. 
 
-Downloading data, unzipping, managing the data pool, and preparing/updating the file queue can be handled by ``force-level1-sentinel2``.
+   
+Usage
+^^^^^
 
 .. code-block:: bash
 
@@ -62,7 +66,8 @@ Downloading data, unzipping, managing the data pool, and preparing/updating the 
 It is possible to call ``force-level1-sentinel2`` (and subsequently ``force-level2``) from a cronjob, in which case a near-real time processing can be realized.
 
 
-**A note on the Long Term Archive**
+A note on the Long Term Archive
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 | In September 2019, ESA has activated the Long Term Archive (LTA) to roll out old (and potentially infrequently used) data products from the online storage system to offline storage. For details, see `here <https://scihub.copernicus.eu/userguide/LongTermArchive>`_. 
 | As of now, the last year of data shall stay online, and is immediately ready for download. 

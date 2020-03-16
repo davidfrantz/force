@@ -1,7 +1,7 @@
 .. _l2-param:
 
-Level 2 Parameterization
-========================
+Parameter file
+==============
 
 A parameter file is mandatory for FORCE L2PS. 
 
