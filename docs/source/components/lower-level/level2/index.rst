@@ -52,5 +52,5 @@ However, for specific purposes (e.g. testing/debugging, or if you want/need to i
    l2ps.rst
    param.rst
    format.rst
-   prereq.rst
+   depend.rst
 
