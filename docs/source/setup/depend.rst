@@ -116,4 +116,4 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
      cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
      make -j
      sudo make install
-     sudo make clean
+     make clean
