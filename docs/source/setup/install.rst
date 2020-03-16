@@ -109,10 +109,12 @@ Installation with Docker
 
 * Local build
 
-  If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from the `docker` folder:
+  If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from the root folder:
 
   ``docker build -t my-force .``
 
   After that, you can use your newly built Docker image like this:
 
   ``docker run my-force force``
+
+For more details visit the Readme in the `docker` subfolder.
