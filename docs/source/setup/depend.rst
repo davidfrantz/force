@@ -110,8 +110,10 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
      cd ~/src/opencv
      wget https://github.com/opencv/opencv/archive/4.1.0.zip
      unzip 4.1.0.zip
+     cd opencv-4.1.0
      mkdir build
      cd build
      cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
      make -j
      sudo make install
+     make clean
