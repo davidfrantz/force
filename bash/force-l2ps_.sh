@@ -97,7 +97,7 @@ if [[ $IMAGE == *".tar.gz"* ]]; then
   BASE_=$(echo $BASE | sed 's/.tar.gz//')
   TODO=$TEMPDIR/$BASE_
 
-  mkdir $TODO
+  mkdir -p $TODO
   if [ ! -d $TODO ]; then
     echo "$IMAGE: creating temp directory failed" > $LOGFILE
     exit 1
