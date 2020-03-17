@@ -34,4 +34,5 @@ Some FORCE functionality is dependent on additional open-source software. In ord
 
 There are no known problems, except that you need to install SPLITS v. 1.9.
 
+* **Docker**: Docker is the de facto standard to build and share containerized apps - from desktop, to the cloud. FORCE supports Docker builds (either prebuilt image on Docker hub or custom build with Dockerfile). Docker is `available for Linux, Mac and Windows <https://docs.docker.com/install/>`_. If you are unfamiliar with Docker, see `Docker website <https://www.docker.com/why-docker>`_ for more information.
 
