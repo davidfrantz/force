@@ -69,32 +69,13 @@ Installation with optional software
 
   a) Install SPLITS, see :ref:`depend-opt`
 
-  b) In ``src/cross-level/const-cl.h``, uncomment the SPLITS preprocessor definition ``#define SPLITS``.
+  b) Enable SPLITS in FORCE
 
      .. code-block:: bash
      
        cd ~/src/force
-       sed -i -e 's%^[/]*\(#define SPLITS\)%\1%' src/cross-level/const-cl.h
-  
-  c) Edit the Makefile. 
-     ``SPLITS`` names the directories, where SPLITS header files and library are installed.     
-     This line needs to be uncommented, as well as the ``LDSPLITS`` line.
-  
-     .. code-block:: bash
+       ./splits.sh enable
 
-       sed -i -e 's%^[#]*\(SPLITS\)%\1%' Makefile
-       sed -i -e 's%^[#]*\(LDSPLITS\)%\1%' Makefile
-
-     If SPLITS was installed to a different location, you need to adjust this to your needs.
-     
-     .. code-block:: bash
-
-       vi Makefile
-     
-     Example: 
-     
-     ``SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib``
-
-  d) Proceed with the installation of FORCE
+  c) Proceed with the installation of FORCE
   
   
