@@ -295,7 +295,7 @@ par_enum_t standard[_STD_LENGTH_] = {
   register_enum_par(params,    "LSP_HEMISPHERE",    hemi, _HEMI_LENGTH_, &phl->tsa.lsp.hemi);
   register_int_par(params,     "LSP_N_SEGMENT",     1, INT_MAX, &phl->tsa.lsp.nseg);
   register_float_par(params,   "LSP_AMP_THRESHOLD", 0.01, 0.99, &phl->tsa.lsp.start);
-  register_float_par(params,   "LSP_MIN_VALUE",     0, 10000, &phl->tsa.lsp.minval);
+  register_float_par(params,   "LSP_MIN_VALUE",     -10000, 10000, &phl->tsa.lsp.minval);
   register_float_par(params,   "LSP_MIN_AMPLITUDE", 0, 10000, &phl->tsa.lsp.minamp);
   register_enumvec_par(params, "LSP",               lsp, _LSP_LENGTH_, &phl->tsa.lsp.metrics, &phl->tsa.lsp.nmetrics);
   register_enum_par(params,    "STANDARDIZE_LSP",   standard, _STD_LENGTH_, &phl->tsa.lsp.standard);

@@ -69,57 +69,13 @@ Installation with optional software
 
   a) Install SPLITS, see :ref:`depend-opt`
 
-  b) In ``src/cross-level/const-cl.h``, uncomment the SPLITS preprocessor definition ``#define SPLITS``.
+  b) Enable SPLITS in FORCE
 
      .. code-block:: bash
      
        cd ~/src/force
-       sed -i -e 's%^[/]*\(#define SPLITS\)%\1%' src/cross-level/const-cl.h
+       ./splits.sh enable
+
+  c) Proceed with the installation of FORCE
   
-  c) Edit the Makefile. 
-     ``SPLITS`` names the directories, where SPLITS header files and library are installed.     
-     This line needs to be uncommented, as well as the ``LDSPLITS`` line.
   
-     .. code-block:: bash
-
-       sed -i -e 's%^[#]*\(SPLITS\)%\1%' Makefile
-       sed -i -e 's%^[#]*\(LDSPLITS\)%\1%' Makefile
-
-     If SPLITS was installed to a different location, you need to adjust this to your needs.
-     
-     .. code-block:: bash
-
-       vi Makefile
-     
-     Example: 
-     
-     ``SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib``
-
-  d) Proceed with the installation of FORCE
-
-
-Installation with Docker
-------------------------
-
-* Use prebuilt image
-
-  The easiest way to use FORCE with Docker is to use a prebuilt image pulled from `Docker hub <https://hub.docker.com/>`_ with the following command:
-  
-  ``docker pull fegyi001/force:latest``
-
-  This downloads a fully featured FORCE v3.0 on your local machine including SPLITS.
-  You can use FORCE like this:
-
-  ``docker run fegyi001/force force``
-
-* Local build
-
-  If you wish to build a Docker image instead of using the prebuilt version you can do it with the following steps from the root folder:
-
-  ``docker build -t my-force .``
-
-  After that, you can use your newly built Docker image like this:
-
-  ``docker run my-force force``
-
-For more details visit the Readme in the `docker` subfolder.

@@ -390,7 +390,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
   * LSP won't be derived if the seasonal index values do not exceed following value.
     This is useful to remove unvegetated surfaces.
 
-    | *Type:* Integer. Valid range: [0,10000]
+    | *Type:* Integer. Valid range: [-10000,10000]
     | ``LSP_MIN_VALUE = 500``
     
   * LSP won't be derived if the seasonal amplitude is below following value
