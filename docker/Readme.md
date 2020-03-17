@@ -16,12 +16,12 @@ You can use FORCE like this:
 docker run fegyi001/force force
 ```
 
-Which outputs a default message showing that FORCE works indeed:
+Which outputs a default message showing that FORCE works indeed (the exact version may differ):
 
 ```sh
 ##########################################################################
 
-Hello user! You are currently running FORCE v. 3.0
+Hello user! You are currently running FORCE v. 3.0.1
 Framework for Operational Radiometric Correction for Environmental monitoring
 Copyright (C) 2013-2020 David Frantz, david.frantz@geo.hu-berlin.de
 With active code contributions from
