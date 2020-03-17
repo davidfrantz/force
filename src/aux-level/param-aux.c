@@ -1543,7 +1543,7 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# LSP won't be derived if the seasonal index values do not exceed following\n");
     fprintf(fp, "# value. This is useful to remove unvegetated surfaces.\n");
-    fprintf(fp, "# Type: Integer. Valid range: [0,10000]\n");
+    fprintf(fp, "# Type: Integer. Valid range: [-10000,10000]\n");
   }
   fprintf(fp, "LSP_MIN_VALUE = 500\n");
   
