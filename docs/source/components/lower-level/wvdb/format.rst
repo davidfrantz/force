@@ -7,8 +7,8 @@ The Water Vapor Database consists of two sets of tables, which both must be loca
 
 Daily tables are optional, but highly recommended.
 They contain a water vapor value for each coordinate, and there is one table for each day.
-Climatology tables are mandatory (unless DIR_WVPLUT = NULL).
-L2PS uses the climatology tables if a daily table is unavailable or if there is a fill value in the daily table.
+Climatology tables are mandatory (unless ``DIR_WVPLUT = NULL``).
+:ref:`l2ps` uses the climatology tables if a daily table is unavailable or if there is a fill value in the daily table.
 Therefore, the minimum requirement is to prepare the 12 climatology tables, one for each month.
 
 
@@ -46,7 +46,7 @@ The coordinate closest to the scene center will be selected, and the correspondi
 
 Longitude (1st column) and latitude (2nd column) need to be given as geographic coordinates in decimal degree (negative values for South/West), followed by long-term water vapor average (3rd column), long-term standard deviation of water vapor (4th column) and number of valid observations used for averaging (5th column).
 
-The generation of climatology tables is mandatory (unless DIR_WVPLUT = NULL).
+The generation of climatology tables is mandatory (unless ``DIR_WVPLUT = NULL``).
 
 Example:
 
