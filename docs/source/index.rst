@@ -87,6 +87,7 @@ Related Links
    setup/depend.rst
    setup/depend_opt.rst
    setup/install.rst
+   setup/docker.rst
    
 .. toctree::
    :maxdepth: 4

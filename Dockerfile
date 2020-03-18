@@ -52,6 +52,9 @@ RUN ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive \
 RUN mkdir -p $INSTALL_DIR/force
 WORKDIR $INSTALL_DIR/force
 COPY . . 
+# Conditionally enable SPLITS which is disabled by default
+ARG splits=false 
+RUN if [ "$splits" = "true" ] ; then ./splits.sh enable; else ./splits.sh disable; fi
 RUN make -j7 \
   && make install \
   && make clean
