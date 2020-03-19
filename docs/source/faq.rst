@@ -4,16 +4,23 @@ Frequently Asked Questions
 ==========================
 
 Something is wrong with the text files (including the parameter file), but I cannot see a mistake.
+--------------------------------------------------------------------------------------------------
+
 Make sure that the End-of-Line character is in Unix format (\n). Do not use the standard Windows text editors as they will automatically change EOL to Windows standard (\r\n).
 One of the programs crashed.
 Make sure to use full file names and avoid relative filenames containing characters like ‘.’, ‘..’, ‘~’; avoid special characters like spaces ‘ ‘. You may have found a bug…
 The tile IDs of the processed Level 2 data have negative numbers, e.g. X-100_Y0100.
 Make sure that the origin of the target grid (ORIGIN LAT / ORIGIN LON) is in the North-West of your study area.
 Potentially, you have accidentally swapped latitude and longitude. Note that a geographic location in the North-West is not necessarily North-West in the output coordinate system, too (for an example see Fig. 14). Although not recommended, higher-level FORCE functions should be able to digest negative tile numbers (note that we did not test this exhaustively).
+
 Is it possible to have a look at all the temporary layers that are created in the L2PS internals?
+-------------------------------------------------------------------------------------------------
+
 Theoretically yes, but this option should only be used by experts. You can re-compile the code in DEBUG mode, which features extensive output where images for most processing steps are saved. Note that these images are intended for software development and do not necessarily have intuitive file names; metadata or projections are also not appended. If DEBUG is activated, force-level2 does not allow you to process multiple images or to use parallel processing (your system will be unresponsive because too much data is simultaneously written to the disc, and parallel calls to force-l2ps would overwrite the debugging images). For debugging, follow the steps summarized on page 23.
-Transformation failed.Computing tile origin in dst_srs failed. Error in geometric module
-Following error appears (L2PS) in the Level 2 logfile: Transformation failed. Computing tile origin in dst_srs failed...
+
+Transformation failed.Computing tile origin in dst_srs failed. Error in geometric module Following error appears (L2PS) in the Level 2 logfile: Transformation failed. Computing tile origin in dst_srs failed...
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 This is most probably due to a bug in force-parameter-level2 (see VI.B.1), which can be solved by adding following line before the projection definition:
 PROJECTION =
 Following error appears (L2PS): 'grep: QUEUED: No such file or directory. No images in …
