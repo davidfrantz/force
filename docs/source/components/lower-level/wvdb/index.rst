@@ -17,8 +17,11 @@ Frantz, D., Stellmes, M., & Hostert, P. (2019). A Global MODIS Water Vapor Datab
 
 .. image:: wvdb.gif
 
-**Figure 2.** Global, and monthly water vapor climatology for each land-intersecting Landsat WRS-2 scene.
+**Figure** Global, and monthly water vapor climatology for each land-intersecting Landsat WRS-2 scene.
 
++------------------+--------------------+
++ :ref:`lut-modis` + :ref:`wvdb-format` +
++------------------+--------------------+
 
 .. toctree::
    :hidden:
