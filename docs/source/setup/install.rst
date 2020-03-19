@@ -84,13 +84,13 @@ Installation in DEBUG mode
 
 Follow these steps before step 3 in the installation instruction:
 
-b) Enable DEBUG in FORCE
+a) Enable DEBUG in FORCE
 
     .. code-block:: bash
     
       cd ~/src/force
       ./debug.sh enable
 
-c) Proceed with the installation of FORCE
+b) Proceed with the installation of FORCE
 
   
