@@ -28,9 +28,9 @@ You can use FORCE like this:
 
 Which outputs a default message showing that FORCE works indeed.
 
-On the `Docker hub page <https://hub.docker.com/repository/docker/fegyi001/force/tags?page=1>`_ you can see multiple tags for fegyi001/force. The tags refer to the version first (e.g. v3.0.1), then optionally indicates whether it is a SPLITS version and/or a debug version.
+On the `Docker hub page <https://hub.docker.com/repository/docker/fegyi001/force/tags?page=1>`_ you can see multiple tags for ``fegyi001/force``. The tags refer to the version first (e.g. v3.0.1), then optionally indicates whether it is a SPLITS version and/or a debug version.
 
-E.g. if you wish to use FORCE of version 3.0.1 in debug mode with SPLITS use this image: `fegyi001/force:v3.0.1_splits_debug`
+E.g. if you wish to use FORCE of version 3.0.1 in debug mode with SPLITS use this image: ``fegyi001/force:v3.0.1_splits_debug``
 
 
 Local build
