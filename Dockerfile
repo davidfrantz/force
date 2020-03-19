@@ -55,6 +55,9 @@ COPY . .
 # Conditionally enable SPLITS which is disabled by default
 ARG splits=false 
 RUN if [ "$splits" = "true" ] ; then ./splits.sh enable; else ./splits.sh disable; fi
+# Conditionally enable DEBUG mode
+ARG debug=false 
+RUN if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi
 RUN make -j7 \
   && make install \
   && make clean

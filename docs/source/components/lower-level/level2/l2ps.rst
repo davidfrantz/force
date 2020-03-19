@@ -35,10 +35,16 @@ Note that these images are intended for software development and do not necessar
 If debug output is required, the software needs to be re-compiled, which should only be done by expert users.
 If DEBUG is activated, :ref:`level2-bulk` does not allow you to process multiple images or to use parallel processing (your system will be unresponsive because too much data is simultaneously written to the disc, and parallel calls to force-l2ps would overwrite the debugging images).
 
-For debugging, follow these steps:
+For debugging, follow these steps either with:
 
 1) Modify src/higher-level/const-cl.h
 
 2) In the ‘compiler options’ section, uncomment ``FORCE_DEBUG``.
 
 3) Re-compile the software
+
+Or:
+
+1) Run ./debug.sh
+
+2) Re-compile the software
