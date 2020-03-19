@@ -136,7 +136,7 @@ Spline *spl;
            (ts->d_tsi[i].year == year+1 && ts->d_tsi[i].doy <= lsp->dnext)){
 
           if (i0 < 0) i0 = i;
-          i1 = i+1;
+          i1 = i;
 
           // copy DOY
           doy[ii] = ts->d_tsi[i].doy;
@@ -204,10 +204,6 @@ Spline *spl;
 
 
 
-      /** derive LSP **/
-//      valid = spline_analysis(ts, doy, y, yhat, w, i0, i1, ni_, 
-//                nseg, year, year_min, y_index, doymax, ymax, p, lsp);
-
       if (ymax > lsp->minval){
 
         /** time step in days, and first day **/
@@ -256,11 +252,7 @@ Spline *spl;
             ph.doy_early_min    < ph.doy_start_green && 
             ph.doy_start_green  < ph.doy_peak &&
             ph.doy_peak         < ph.doy_end_green && 
-            ph.doy_end_green    < ph.doy_late_min && 
-            ph.min_min_integral > 0 &&
-            ph.latent_integral  > 0 &&
-            ph.total_integral   > 0 &&
-            ph.green_integral   > 0) valid = true;
+            ph.doy_end_green    < ph.doy_late_min) valid = true;
 
 
         /** copy LSP if all OK **/
@@ -408,7 +400,7 @@ Spline *spl;
            (ts->d_tsi[i].year == year_max && ts->d_tsi[i].doy <= lsp->dnext)){
 
           if (i0 < 0) i0 = i;
-          i1 = i+1;
+          i1 = i;
 
           // copy DOY
           doy[ii] = ts->d_tsi[i].doy;
@@ -537,11 +529,7 @@ Spline *spl;
               ph.doy_early_min < ph.doy_start_green && 
               ph.doy_start_green < ph.doy_peak &&
               ph.doy_peak < ph.doy_end_green && 
-              ph.doy_end_green < ph.doy_late_min && 
-              ph.min_min_integral > 0 &&
-              ph.latent_integral  > 0 &&
-              ph.total_integral   > 0 &&
-              ph.green_integral   > 0) valid = true;
+              ph.doy_end_green < ph.doy_late_min) valid = true;
 
 
           /** copy LSP if all OK **/
