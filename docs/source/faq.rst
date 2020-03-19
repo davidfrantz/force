@@ -60,27 +60,61 @@ FORCE can only handle Landsat data processed by the Level 1 Product Generation S
 Following error appears (L2PS) in the logfile: tar.gz container is corrupt.
 ---------------------------------------------------------------------------
 
-There are two possible reasons: 1) the file downloaded from USGS is corrupt, incomplete, etc. In this case, delete the image, remove it from the file queue and download/process again. 2) force-level2 checks for non-zero exit code when extracting the images. On some systems, the tar/gzip programs throws a warning each time it extracts an image; this is probably related to some write permissions or mount settings. There is not much to do about this from our side. You need to fix your settings, speak with your admin. Alternatively, you can disable the exit-code check by changing, removing or commenting following lines in bash/force-level2.sh. If doing this, follow-up errors will occur if there really was a problem with the file.
+There are two possible reasons: 
 
-if [ ! $? -eq 0 ]; then
-  echo "$BASE: tar.gz container is corrupt."
-  FAIL=1
-Fi
+1) the file downloaded from USGS is corrupt, incomplete, etc. In this case, delete the image, remove it from the file queue and download/process again. 
+
+2) force-level2 checks for non-zero exit code when extracting the images. On some systems, the tar/gzip programs throws a warning each time it extracts an image; this is probably related to some write permissions or mount settings. 
+
+There is not much to do about this from our side. You need to fix your settings, speak with your admin. Alternatively, you can disable the exit-code check by changing, removing or commenting following lines in bash/force-level2.sh. If doing this, follow-up errors will occur if there really was a problem with the file.
+
+.. code-block:: bash
+  if [ ! $? -eq 0 ]; then
+    echo "$BASE: tar.gz container is corrupt."
+    FAIL=1
+  fi
+
+
 An error like this appears (L2PS) in the logfile: L1C_T21MXM_A007643_null: unknown Satellite Mission. Parsing metadata failed.
+------------------------------------------------------------------------------------------------------------------------------
 This can happen when Sentinel-2 data downloads are incomplete. Delete the image, remove it from the file queue and download/process again.
+
+
 Following error appears (L2PS) in the logfile: L2PS is already running. Exit.
+-----------------------------------------------------------------------------
 FORCE L2PS has a built-in safeguard, which was implemented to allow safe operational and scheduled processing. FORCE L1AS and FORCE L2PS can be used for NRT processing, i.e. data can be downloaded and processed with n CPUs at given intervals. As the processing can take longer than these intervals, the safeguard protects your system from launching another n processing jobs, which may exceed the N CPUs available on your machine. You can disable the safeguard by changing, removing or commenting following lines in bash/force-level2.sh:
 
-# protect against multiple calls
-if [ $(ps aux | grep 'L2PS' | wc -l) -gt 1 ]; then
-  echo "L2PS is already running. Exit." > $OD/FORCE-L2PS_$TIME.log
-  exit
-fi
+.. code-block:: bash
+  # protect against multiple calls
+  if [ $(ps aux | grep 'L2PS' | wc -l) -gt 1 ]; then
+    echo "L2PS is already running. Exit." > $OD/FORCE-L2PS_$TIME.log
+    exit
+  fi
+
+
 Following error appears (L2PS) in the logfile: Unable to lock file. Error in writing products! Tiling images failed! Error in geometric module.
-There is a write problem. 1) If L2PS was aborted in a previous run, some left-over lockfiles might exist (*.lock). In this case, FORCE cannot lock the file as it is already ‘locked’. Temporary locking the files is important as we’ll have write conflicts from parallel calls if not doing this. You need to remove the lock files. 2) The lockfile generation timed out. This may happen if there is too much I/O activity on your system, such that FORCE is not allowed to write data for quite some time. Reduce I/O from other processes/users. Try to use fewer parallel processes. Try to increase the delay. Try writing to a disc that can handle the I/O, preferably directly attached to the server.
-Following warning appears on the screen: ‘lockfile creation failed: exceeded maximum number of lock attempts’ 
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+There is a write problem. 
+
+1) If L2PS was aborted in a previous run, some left-over lockfiles might exist (*.lock). In this case, FORCE cannot lock the file as it is already ‘locked’. Temporary locking the files is important as we’ll have write conflicts from parallel calls if not doing this. You need to remove the lock files. 
+
+2) The lockfile generation timed out. This may happen if there is too much I/O activity on your system, such that FORCE is not allowed to write data for quite some time. Reduce I/O from other processes/users. Try to use fewer parallel processes. Try to increase the delay. Try writing to a disc that can handle the I/O, preferably directly attached to the server.
+
+
+Following warning appears on the screen: 'lockfile creation failed: exceeded maximum number of lock attempts' 
+-------------------------------------------------------------------------------------------------------------
+
 There is a known problem with CIFS mounted network drives. You can ignore these warnings; they are no fatal errors. But you might want to inspect the file queue after Level 2 processing, as there is a minor possibility that there were some conflicts due to parallel write attempts: a few images might not have been switched from QUEUED to DONE status. This does not imply that the image was not processed (check the logfile as well).
+
+
 There are holes in my processed Level 2 images. Why?
+----------------------------------------------------
+
 Nodata values in the DEM are masked. Impulse Noise is attempted to be detected and is masked out. The image border (including SLC-off stripes) is buffered by one pixel as these pixels are often erroneous. The masks are applied all output products.
+
+
 The programs don’t run and there are strange symbols on the screen.
+-------------------------------------------------------------------
+
 You have probably copied text from this document to your shell. This might be an encoding issue. Try to manually type the commands.
