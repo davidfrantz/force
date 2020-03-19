@@ -4,6 +4,7 @@
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
 *.c text
+*.cpp text
 *.h text
 *.sh text
 *.py text
