@@ -5,8 +5,8 @@ Docker support
 
 If you wish to use FORCE with docker you can do it in two ways: 
 
-* download a prebuilt image from Docker hub
-* create a local build with Dockerfile
+* download a **prebuilt image** from Docker hub
+* create a **local build** with Dockerfile
 
 
 Use prebuilt image
