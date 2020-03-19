@@ -3,6 +3,7 @@
 Frequently Asked Questions
 ==========================
 
+
 Something is wrong with the text files (including the parameter file), but I cannot see a mistake.
 --------------------------------------------------------------------------------------------------
 
@@ -13,27 +14,52 @@ The tile IDs of the processed Level 2 data have negative numbers, e.g. X-100_Y01
 Make sure that the origin of the target grid (ORIGIN LAT / ORIGIN LON) is in the North-West of your study area.
 Potentially, you have accidentally swapped latitude and longitude. Note that a geographic location in the North-West is not necessarily North-West in the output coordinate system, too (for an example see Fig. 14). Although not recommended, higher-level FORCE functions should be able to digest negative tile numbers (note that we did not test this exhaustively).
 
+
 Is it possible to have a look at all the temporary layers that are created in the L2PS internals?
 -------------------------------------------------------------------------------------------------
 
 Theoretically yes, but this option should only be used by experts. You can re-compile the code in DEBUG mode, which features extensive output where images for most processing steps are saved. Note that these images are intended for software development and do not necessarily have intuitive file names; metadata or projections are also not appended. If DEBUG is activated, force-level2 does not allow you to process multiple images or to use parallel processing (your system will be unresponsive because too much data is simultaneously written to the disc, and parallel calls to force-l2ps would overwrite the debugging images). For debugging, follow the steps summarized on page 23.
 
+
 Transformation failed.Computing tile origin in dst_srs failed. Error in geometric module Following error appears (L2PS) in the Level 2 logfile: Transformation failed. Computing tile origin in dst_srs failed...
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 This is most probably due to a bug in force-parameter-level2 (see VI.B.1), which can be solved by adding following line before the projection definition:
+
 PROJECTION =
+
+
 Following error appears (L2PS): 'grep: QUEUED: No such file or directory. No images in …
+-----------------------------------------------------------------------------------------
+
 Most probably, you have pasted the content of the file queue into the FILE_QUEUE parameter in the parameter file. FILE_QUEUE expects the file name (full path) of the file queue.
+
+
 Following error appears (L2PS) in the Level 2 logfile: Unacceptable tier.
+-------------------------------------------------------------------------
+
 The acceptable tier level can be specified in the parameter file. Landsat Level-1T data (tier = 1) feature the best geometric correction and geolocation. We recommend to not use Level-1G or Level-1Gt images (tier = 2), unless you know what you are doing. See section VII.A.
+
+
 Following error appears (L2PS) in the Level 2 logfile: DEM out of bounds
+------------------------------------------------------------------------
 There is a problem with the DEM. The DEM must be provided in meters a.s.l., and nodata needs to be -32767. There is a security query, which ensures that the DEM is within -500 m and +9000 m.
+
+
 Following error appears (L2PS) in the logfile: zero-filled temperature.
+-----------------------------------------------------------------------
+
 Our Landsat cloud detection is in need of temperature data. The Landsat-8 TIRS was reconfigured due to anomalous current levels, and for a certain period of time, data were distributed by USGS with zero-filled temperature data. The USGS has fixed the problem and the data are/were reprocessed in a phased processing strategy. You should regularly check on updates from USGS, re-download the failed images and process them again. This might happen again, though.
+
+
 Following error appears (L2PS) in the logfile: Unable to open MTL file. Parsing metadata failed.
+------------------------------------------------------------------------------------------------
 FORCE can only handle Landsat data processed by the Level 1 Product Generation System (LPGS) of USGS, which comes with an MTL text file (contains the metadata). Data processed with the outdated National Land Archive Production System (NLAPS) are not supported. Sorry.
+
+
 Following error appears (L2PS) in the logfile: tar.gz container is corrupt.
+---------------------------------------------------------------------------
+
 There are two possible reasons: 1) the file downloaded from USGS is corrupt, incomplete, etc. In this case, delete the image, remove it from the file queue and download/process again. 2) force-level2 checks for non-zero exit code when extracting the images. On some systems, the tar/gzip programs throws a warning each time it extracts an image; this is probably related to some write permissions or mount settings. There is not much to do about this from our side. You need to fix your settings, speak with your admin. Alternatively, you can disable the exit-code check by changing, removing or commenting following lines in bash/force-level2.sh. If doing this, follow-up errors will occur if there really was a problem with the file.
 
 if [ ! $? -eq 0 ]; then
