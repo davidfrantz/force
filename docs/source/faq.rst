@@ -69,6 +69,7 @@ There are two possible reasons:
 There is not much to do about this from our side. You need to fix your settings, speak with your admin. Alternatively, you can disable the exit-code check by changing, removing or commenting following lines in bash/force-level2.sh. If doing this, follow-up errors will occur if there really was a problem with the file.
 
 .. code-block:: bash
+
   if [ ! $? -eq 0 ]; then
     echo "$BASE: tar.gz container is corrupt."
     FAIL=1
@@ -85,6 +86,7 @@ Following error appears (L2PS) in the logfile: L2PS is already running. Exit.
 FORCE L2PS has a built-in safeguard, which was implemented to allow safe operational and scheduled processing. FORCE L1AS and FORCE L2PS can be used for NRT processing, i.e. data can be downloaded and processed with n CPUs at given intervals. As the processing can take longer than these intervals, the safeguard protects your system from launching another n processing jobs, which may exceed the N CPUs available on your machine. You can disable the safeguard by changing, removing or commenting following lines in bash/force-level2.sh:
 
 .. code-block:: bash
+
   # protect against multiple calls
   if [ $(ps aux | grep 'L2PS' | wc -l) -gt 1 ]; then
     echo "L2PS is already running. Exit." > $OD/FORCE-L2PS_$TIME.log
