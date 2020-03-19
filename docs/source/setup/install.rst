@@ -77,5 +77,20 @@ Installation with optional software
        ./splits.sh enable
 
   c) Proceed with the installation of FORCE
-  
+
+
+Installation in DEBUG mode
+--------------------------
+
+Follow these steps before step 3 in the installation instruction:
+
+a) Enable DEBUG in FORCE
+
+    .. code-block:: bash
+    
+      cd ~/src/force
+      ./debug.sh enable
+
+b) Proceed with the installation of FORCE
+
   
