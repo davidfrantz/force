@@ -42,7 +42,8 @@ extern "C" {
 #endif
 
 typedef struct {
-  float **endmember; //endmember
+  float **endmember; // endmember
+  short ***library;  // feature libraries
   std::vector<cv::Ptr<cv::ml::StatModel>> ml_model;
 } aux_t;
 

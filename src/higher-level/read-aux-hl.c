@@ -171,6 +171,15 @@ aux_t *aux;
     }
   }
 
+  if (phl->type == _HL_LIB_){
+    if (read_libraries(phl, aux) == FAILURE){
+      printf("reading library file(s) failed. ");
+      free_aux(phl, aux);
+      return NULL;
+    }
+  }
+  
+
   return aux;
 }
 
@@ -187,6 +196,10 @@ void free_aux(par_hl_t *phl, aux_t *aux){
   
     if (phl->type == _HL_TSA_ && phl->tsa.sma.v && aux->endmember != NULL){
       free_2D((void**)aux->endmember, phl->tsa.sma.nb);
+    }
+    
+    if (phl->type == _HL_LIB_&& aux->library != NULL){
+      free_3D((void***)aux->library, phl->lib.n_lib, phl->lib.n_sample);
     }
     
     free((void*)aux); aux = NULL;
