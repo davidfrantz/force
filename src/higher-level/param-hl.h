@@ -340,6 +340,7 @@ typedef struct {
   char  *d_lib;
   char **f_lib;
   int    n_lib;
+  int    n_sample;
 } par_lib_t;
 
 // improphe core
