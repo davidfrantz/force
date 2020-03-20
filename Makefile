@@ -24,19 +24,19 @@
 # Modify the following lines to match your needs
 
 # Installation directory
-BINDIR=/usr/local/bin
+BINDIR=/develop
 
 # Libraries
 GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
 GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
-#SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
+SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
 
 # Linked libs
 LDGDAL=-lgdal
 LDGSL=-lgsl -lgslcblas
-#LDSPLITS=-lsplits -larmadillo
+LDSPLITS=-lsplits -larmadillo
 LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
 LDCURL=-lcurl
 
@@ -71,7 +71,7 @@ TA=temp-aux
 ### TARGETS
 
 all: temp cross lower higher aux exe
-cross: cite_cl utils_cl alloc_cl stack_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl
+cross: cite_cl utils_cl alloc_cl stack_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl trend_hl ml_hl texture_hl lsm_hl sample_hl imp_hl cfimp_hl l2imp_hl
 aux: param_aux param_train_aux train_aux
@@ -149,6 +149,9 @@ quality_cl: temp $(DC)/quality-cl.c
 
 download_cl: temp $(DC)/download-cl.c
 	$(GCC) $(CFLAGS) $(CURL) -c $(DC)/download-cl.c -o $(TC)/download_cl.o $(LDCURL)
+
+read_cl: temp $(DC)/read-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/read-cl.c -o $(TC)/read_cl.o
 
 
 ### LOWER LEVEL COMPILE UNITS
