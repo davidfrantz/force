@@ -209,6 +209,10 @@ bool error = false;
         OUTPUT[pro->pu] = confield_improphe(ARD1[pro->pu], ARD2[pro->pu], MASK[pro->pu], 
           nt1[pro->pu], nt2[pro->pu], phl, cube, &nprod[pro->pu]);
         break;
+      case _HL_LIB_:
+        OUTPUT[pro->pu] = library_completeness(ARD1[pro->pu], MASK[pro->pu], 
+          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+        break;
       default:
         printf("unknown processing module\n");
         break;
