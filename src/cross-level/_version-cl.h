@@ -24,19 +24,18 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 Version number
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-
 #ifndef VERSION_CL_H
 #define VERSION_CL_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-#define _VERSION_ "3.0.1"
+#define _VERSION_ "3.1.0"
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-
