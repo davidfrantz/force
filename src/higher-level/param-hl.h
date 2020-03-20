@@ -335,6 +335,13 @@ typedef struct {
   int kernel;
 } par_lsm_t;
 
+// library completeness testing
+typedef struct {
+  char  *d_lib;
+  char **f_lib;
+  int    n_lib;
+} par_lib_t;
+
 // improphe core
 typedef struct {
   int *dwin;
@@ -432,6 +439,7 @@ typedef struct {
   par_smp_t smp;
   par_txt_t txt;
   par_lsm_t lsm;
+  par_lib_t lib;
 
 } par_hl_t;
 
