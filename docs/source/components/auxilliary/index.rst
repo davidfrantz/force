@@ -1,7 +1,7 @@
 .. _aux-level:
 
-Auxiliary Components
-====================
+Auxiliary
+=========
 
 **Table 1.** Components.
 

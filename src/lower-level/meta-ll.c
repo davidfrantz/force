@@ -1193,7 +1193,7 @@ int nchar;
 
   if (lid == 7 && strcmp(cal->orig_band, "6") == 0){
     strncpy(add1, "_VCID_1", 7); add1[7] = '\0';
-    strncpy(add2, "1",       1); add1[1] = '\0';
+    strncpy(add2, "1",       1); add2[1] = '\0';
   } else {
     add1[0] = '\0';
     add1[0] = '\0';

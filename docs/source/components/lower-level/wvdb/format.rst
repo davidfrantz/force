@@ -1,4 +1,4 @@
-.. wvdb-format:
+.. _wvdb-format:
 
 WVDB format
 ===========

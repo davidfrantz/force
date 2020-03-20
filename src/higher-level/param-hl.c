@@ -1453,7 +1453,7 @@ double tol = 5e-3;
 
     // phenology not possible for first and last year
     phl->tsa.lsp.ny = phl->ny-2;
-
+    
     #ifdef FORCE_DEBUG
     printf("ny: %d, nq: %d, nm: %d, nw: %d, nd: %d\n",
       phl->ny, phl->nq, phl->nm, phl->nw, phl->nd);
@@ -1566,24 +1566,47 @@ double tol = 5e-3;
      printf("FILE_ENDMEM cannot be NULL if INDEX = SMA."); return FAILURE;}
 
 
-    if (phl->tsa.lsp.ny < 1 && (phl->tsa.lsp.ospl || phl->tsa.lsp.olsp || phl->tsa.lsp.otrd || phl->tsa.lsp.ocat)){
-      printf("LSP cannot be estimated for first and last year.\n");
-      printf("Time window is too short.\n");
-      return FAILURE;
-    }
-
-    if ((phl->tsa.lsp.ospl || phl->tsa.lsp.olsp || phl->tsa.lsp.otrd || phl->tsa.lsp.ocat) && phl->tsa.tsi.method == _INT_NONE_){
-      printf("Phenology options require INTERPOLATE != NONE\n"); return FAILURE;}
-
-    #ifndef SPLITS
     if (phl->tsa.lsp.ospl || phl->tsa.lsp.olsp || phl->tsa.lsp.otrd || phl->tsa.lsp.ocat){
+      
+      #ifndef SPLITS
       printf("Phenology options require to have FORCE compiled with SPLITS\n");
       printf("Install SPLITS and re-compile (see user guide)\n");
       printf(" OR disable phenology options\n");
       return FAILURE;
-    }
-    #endif
+      #endif
     
+      if (phl->tsa.lsp.ny < 1){
+        printf("LSP cannot be estimated for first and last year.\n");
+        printf("Time window is too short.\n");
+        return FAILURE;
+      }
+
+      if (phl->tsa.tsi.method == _INT_NONE_){
+        printf("Phenology options require INTERPOLATE != NONE\n"); return FAILURE;}
+
+      if (phl->tsa.lsp.hemi == _HEMI_NORTH_ || phl->tsa.lsp.hemi == _HEMI_MIXED_){
+        if (phl->tsa.lsp.dnext < phl->tsa.tsi.step){
+          printf("If LSP_HEMISPHERE = NORTH or MIXED, LSP_DOY_NEXT_YEAR needs to be >= INT_DAY\n"); 
+          return FAILURE;
+        }
+      }
+      if (phl->tsa.lsp.hemi == _HEMI_NORTH_){
+        if (phl->tsa.lsp.dprev > 365-phl->tsa.tsi.step){
+          printf("If LSP_HEMISPHERE = NORTH, LSP_DOY_PREV_YEAR needs to be <= 365-INT_DAY\n"); 
+          return FAILURE;
+        }
+      }
+      if (phl->tsa.lsp.hemi == _HEMI_SOUTH_ || phl->tsa.lsp.hemi == _HEMI_MIXED_){
+        if (phl->tsa.lsp.dprev > 182-phl->tsa.tsi.step){
+          printf("If LSP_HEMISPHERE = NORTH or MIXED, LSP_DOY_PREV_YEAR needs to be <= 182-INT_DAY\n"); 
+          return FAILURE;
+        }
+      }
+
+    }
+ 
+
+
   }
 
 
