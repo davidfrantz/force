@@ -27,9 +27,12 @@ This file contains functions for reading aux files
 
 #include "read-aux-hl.h"
 
+#include <opencv2/ml.hpp>
+
 
 int read_endmember(par_hl_t *phl, aux_t *aux);
 int read_machine_learner(par_hl_t *phl, aux_t *aux);
+int read_libraries(par_hl_t *phl, aux_t *aux);
 
 
 /** This function reads endmembers from a text file. Put each endmember in
@@ -41,63 +44,25 @@ int read_machine_learner(par_hl_t *phl, aux_t *aux);
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int read_endmember(par_hl_t *phl, aux_t *aux){
-FILE *fp;
-char  buffer[NPOW_10] = "\0";
-char *ptr = NULL;
-const char *separator = " ";
 int b, e = 0;
 float scale = 10000.0;
 
 
-  // open file
-  if (!(fp = fopen(phl->tsa.sma.f_emb, "r"))){
-    printf("unable to open endmember file. "); return FAILURE;}
-    
-  b = 0;
-  while (fgets(buffer, NPOW_10, fp) != NULL){
+  if ((aux->endmember.tab = read_table(phl->tsa.sma.f_emb, 
+      &aux->endmember.nb, &aux->endmember.ne)) == NULL){
+    printf("unable to read endmembers. "); return FAILURE;}
 
-    ptr = strtok(buffer, separator);
-    e = 0;
-
-    while (ptr != NULL){
-      ptr = strtok(NULL, separator);
-      e++;
+  for (b=0; b<aux->endmember.nb; b++){
+  for (e=0; e<aux->endmember.ne; e++){
+    aux->endmember.tab[b][e] /= scale;
+    if (aux->endmember.tab[b][e] < 0 || aux->endmember.tab[b][e] > 1){
+      printf("\nendmember file is invalid.\n");
+      printf("valid range of endmembers: [0,10000].\n");
+      return FAILURE;
     }
-
-    b++;
-
   }
-  
-  fseek(fp, 0, SEEK_SET);
-
-  phl->tsa.sma.nb = b;
-  phl->tsa.sma.ne = e;
-  alloc_2D((void***)&aux->endmember, phl->tsa.sma.nb, phl->tsa.sma.ne, sizeof(float));
-
-  b = 0;
-  while (fgets(buffer, NPOW_10, fp) != NULL){
-
-    ptr = strtok(buffer, separator);
-    e = 0;
-
-    while (ptr != NULL){
-      aux->endmember[b][e] = atof(ptr)/scale;
-      if (aux->endmember[b][e] < 0 || aux->endmember[b][e] > 1){
-        printf("\nendmember file is invalid.\n");
-        printf("valid range: [0,10000].\n");
-        fclose(fp);
-        return FAILURE;
-      }
-      ptr = strtok(NULL, separator);
-      e++;
-    }
-
-    b++;
-
   }
-  
-  fclose(fp);
-  
+
   return SUCCESS;
 }
 
@@ -125,16 +90,100 @@ int nchar;
           phl->mcl.method == _ML_SVC_){
         cv::Ptr<cv::ml::SVM> newmodel = cv::ml::SVM::create();
         newmodel = cv::ml::SVM::load(fname);
-        aux->ml_model.push_back(newmodel);
+        aux->ml.model.push_back(newmodel);
       } else if (phl->mcl.method == _ML_RFR_ || 
                  phl->mcl.method == _ML_RFC_){
         cv::Ptr<cv::ml::RTrees> newmodel = cv::ml::RTrees::create();
         newmodel = cv::ml::RTrees::load(fname);
-        aux->ml_model.push_back(newmodel);
+        aux->ml.model.push_back(newmodel);
       }
     }
 
   }
+
+  return SUCCESS;
+}
+
+
+/** This function reads libraries from text files. Put each feature in
++++ a separate column, separated by space. Samples go to the lines. Do not
++++ use a header. For each library, the number of samples is allowed to 
++++ differ, but number of features need to be consistent.
++++ Mean and standard deviation are computed for ach table and feature;
++++ the tables may be rescaled.
+--- phl:    HL parameters
+--- aux:    auxilliary data
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int read_libraries(par_hl_t *phl, aux_t *aux){
+int i, s, f, nsample, nfeatures, nfeatures_first;
+char fname[NPOW_10];
+int nchar;
+double mx, vx, k;
+
+
+  aux->library.n = phl->lib.n_lib;
+  alloc((void**)&aux->library.tab, aux->library.n, sizeof(double**));
+  alloc((void**)&aux->library.ns,  aux->library.n, sizeof(int));
+  
+
+  for (i=0; i<phl->lib.n_lib; i++){
+    
+    nchar = snprintf(fname, NPOW_10, "%s/%s", phl->lib.d_lib, phl->lib.f_lib[i]);
+    if (nchar < 0 || nchar >= NPOW_10){
+      printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+    
+    if ((aux->library.tab[i] = read_table(fname, &nsample, &nfeatures)) == NULL){
+      printf("unable to read library. "); return FAILURE;}
+      
+    aux->library.ns[i] = nsample;
+    aux->library.nf    = nfeatures;
+    
+    if (i == 0) nfeatures_first = nfeatures;
+
+    if (aux->library.nf != nfeatures_first){
+      printf("number of features is different between libraries. "); return FAILURE;}
+
+  }
+
+  
+  alloc_2D((void***)&aux->library.mean, aux->library.n, aux->library.nf, sizeof(double));
+  alloc_2D((void***)&aux->library.sd,   aux->library.n, aux->library.nf, sizeof(double));
+  
+   
+  for (i=0; i<aux->library.n;  i++){
+  for (f=0; f<aux->library.nf; f++){
+
+    mx = vx = k = 0;
+
+    for (s=0; s<aux->library.ns[i]; s++){
+
+      k++;
+      if (k == 1){
+        mx = aux->library.tab[i][s][f];
+      } else {
+        var_recurrence(aux->library.tab[i][s][f], &mx, &vx, k);
+      }
+
+    }
+    
+    aux->library.mean[i][f] = mx;
+    aux->library.sd[i][f]   = standdev(vx, k);
+    
+    #ifdef FORCE_DEBUG
+    printf("library %d, feature %d, mean: %f, sd: %f\n", i, f, aux->library.mean[i][f], aux->library.sd[i][f]);
+    #endif
+    
+    if (phl->lib.rescale){
+      for (s=0; s<aux->library.ns[i]; s++) aux->library.tab[i][s][f] = 
+        (aux->library.tab[i][s][f]-aux->library.mean[i][f])/aux->library.sd[i][f];
+    }
+
+  }
+  }
+
+  if (phl->lib.rescale) aux->library.scaled = true;
+
 
   return SUCCESS;
 }
@@ -161,7 +210,7 @@ aux_t *aux;
       free_aux(phl, aux);
       return NULL;
     }
-  } else aux->endmember = NULL;
+  } else aux->endmember.tab = NULL;
 
   if (phl->type == _HL_ML_){
     if (read_machine_learner(phl, aux) == FAILURE){
@@ -190,16 +239,22 @@ aux_t *aux;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void free_aux(par_hl_t *phl, aux_t *aux){
-  
+int i;
   
   if (aux != NULL){
   
-    if (phl->type == _HL_TSA_ && phl->tsa.sma.v && aux->endmember != NULL){
-      free_2D((void**)aux->endmember, phl->tsa.sma.nb);
+    if (phl->type == _HL_TSA_ && phl->tsa.sma.v && aux->endmember.tab != NULL){
+      free_2D((void**)aux->endmember.tab, aux->endmember.nb);
     }
     
-    if (phl->type == _HL_LIB_&& aux->library != NULL){
-      free_3D((void***)aux->library, phl->lib.n_lib, phl->lib.n_sample);
+    if (phl->type == _HL_LIB_&& 
+        aux->library.tab  != NULL && aux->library.ns != NULL &&
+        aux->library.mean != NULL && aux->library.sd != NULL){
+      for (i=0; i<aux->library.n; i++) free_2D((void**)aux->library.tab[i], aux->library.ns[i]);
+      free((void*)aux->library.tab);
+      free((void*)aux->library.ns);
+      free_2D((void**)aux->library.mean, aux->library.n);
+      free_2D((void**)aux->library.sd,   aux->library.n);
     }
     
     free((void*)aux); aux = NULL;
