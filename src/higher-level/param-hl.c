@@ -539,6 +539,8 @@ void register_lib(params_t *params, par_hl_t *phl){
 
   register_char_par(params,    "DIR_LIBRARY",  _CHAR_TEST_EXIST_, &phl->lib.d_lib);
   register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  &phl->lib.f_lib, &phl->lib.n_lib);
+  register_bool_par(params,    "LIB_RESCALE",  &phl->lib.rescale);
+  register_char_par(params,    "LIB_BASE",     _CHAR_TEST_NONE_,  &phl->lib.base);
 
   return;
 }

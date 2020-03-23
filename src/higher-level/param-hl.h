@@ -170,7 +170,6 @@ typedef struct {
 typedef struct {
   int v;              // do SMA?
   char *f_emb; // endmember file
-  int nb, ne;          // number of bands, number of endmember
   int sto;      // sum-to-one constrained
   int pos;      // non-negative constrained
   int shn;      // shade normalization
@@ -341,6 +340,8 @@ typedef struct {
   char **f_lib;
   int    n_lib;
   int    n_sample;
+  int    rescale;
+  char  *base;
 } par_lib_t;
 
 // improphe core
