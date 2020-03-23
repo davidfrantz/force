@@ -77,6 +77,7 @@ void write_par_hl_l2i(FILE *fp, bool verbose);
 void write_par_hl_feature(FILE *fp, bool verbose);
 void write_par_hl_txt(FILE *fp, bool verbose);
 void write_par_hl_lsm(FILE *fp, bool verbose);
+void write_par_hl_lib(FILE *fp, bool verbose);
 void write_par_hl_smp(FILE *fp, bool verbose);
 void write_par_hl_ml(FILE *fp, bool verbose);
 void write_par_hl_train(FILE *fp, bool verbose);
