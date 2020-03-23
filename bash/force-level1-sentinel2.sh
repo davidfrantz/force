@@ -159,7 +159,13 @@ while [ $START -lt $NUM ]; do
   fi
 
   NUM=$(grep 'totalResults'  $LIST | sed -r 's/.*>([0-9]*)<.*/\1/')
-  echo "$CTIME - Found $NUM S2A/B files."
+  TODO=$(($NUM-$START))
+  if [ $TODO -gt 100 ]; then
+    PAGE=100
+  else
+    PAGE=$TODO
+  fi
+  echo "$CTIME - $TODO S2A/B files. Downloading $PAGE files on this page."
   START=$(($START + $NMAX))
 
   SIZES=(`grep 'size' $LIST | sed 's/<[^<>]*>//g' | sed 's/[A-Z ]//g'`)
@@ -188,7 +194,7 @@ while [ $START -lt $NUM ]; do
     continue;
   fi
   
-  echo "$CTIME - Found ${#URL[*]} S2A/B files on this page."
+  #echo "$CTIME - Found ${#URL[*]} S2A/B files on this page."
   if [ ${#URL[*]} -eq 0 ]; then
     exit
   fi
