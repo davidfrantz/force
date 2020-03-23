@@ -40,7 +40,7 @@ Reading all-purpose files
 extern "C" {
 #endif
 
-double **read_table(char *fname, size_t *nrows, size_t *ncols);
+double **read_table(char *fname, int *nrows, int *ncols);
 
 #ifdef __cplusplus
 }

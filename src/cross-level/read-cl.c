@@ -34,17 +34,17 @@ This file contains functions for reading all-purpose files
 --- ncols: number of cols (returned)
 +++ Return: table
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double **read_table(char *fname, size_t *nrows, size_t *ncols){
+double **read_table(char *fname, int *nrows, int *ncols){
 FILE *fp;
 char  buffer[NPOW_16] = "\0";
 char *ptr = NULL;
 const char *separator = " \t";
 double **tab = NULL;
-size_t ni = 0;
-size_t nj = 0;
-size_t nj_first = 0;
-size_t ni_buf = NPOW_00;
-size_t nj_buf = NPOW_00;
+int ni = 0;
+int nj = 0;
+int nj_first = 0;
+int ni_buf = NPOW_00;
+int nj_buf = NPOW_00;
 
 
   alloc_2D((void***)&tab, ni_buf, nj_buf, sizeof(double));
@@ -81,7 +81,7 @@ size_t nj_buf = NPOW_00;
 
     // table is regular?
     if (ni > 0 && nj != nj_first){
-      printf("unable to read table %s. Different number of cols found in line %lu", fname, ni); 
+      printf("unable to read table %s. Different number of cols found in line %d", fname, ni); 
       return NULL;
     }
 
