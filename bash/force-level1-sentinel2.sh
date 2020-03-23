@@ -165,7 +165,7 @@ while [ $START -lt $NUM ]; do
   else
     PAGE=$TODO
   fi
-  echo "$CTIME - $TODO S2A/B files. Downloading $PAGE files on this page."
+  echo "$CTIME - Found $TODO S2A/B files. Downloading $PAGE files on this page."
   START=$(($START + $NMAX))
 
   SIZES=(`grep 'size' $LIST | sed 's/<[^<>]*>//g' | sed 's/[A-Z ]//g'`)
