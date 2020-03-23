@@ -232,7 +232,7 @@ float unit_perim = 0;
     memset(newFeatures, 0, sizeof(small)*nc);
 
     #pragma omp parallel shared(newFeatures,lsm,phl,features,mask_,nc,f,nodata) default(none)
-   {
+    {
 
       #pragma omp for
       for (p=0; p<nc; p++){

@@ -179,7 +179,7 @@ bool error = false;
         break;
       case _HL_TSA_:
         OUTPUT[pro->pu] = time_series_analysis(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, aux->endmember, cube, &nprod[pro->pu]);
+          nt1[pro->pu], phl, &aux->endmember, cube, &nprod[pro->pu]);
         break;
       case _HL_CSO_:
         OUTPUT[pro->pu] = clear_sky_observations(ARD1[pro->pu], MASK[pro->pu], 
@@ -187,7 +187,7 @@ bool error = false;
         break;
       case _HL_ML_:
         OUTPUT[pro->pu] = machine_learning(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, aux->ml_model, cube, &nprod[pro->pu]);
+          nt1[pro->pu], phl, &aux->ml, cube, &nprod[pro->pu]);
         break;
       case _HL_SMP_:
         OUTPUT[pro->pu] = sample_points(ARD1[pro->pu], MASK[pro->pu], 
@@ -211,7 +211,7 @@ bool error = false;
         break;
       case _HL_LIB_:
         OUTPUT[pro->pu] = library_completeness(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+          nt1[pro->pu], phl, &aux->library, cube, &nprod[pro->pu]);
         break;
       default:
         printf("unknown processing module\n");

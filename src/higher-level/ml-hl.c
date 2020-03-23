@@ -28,7 +28,6 @@ This file contains functions for machine learning
 #include "ml-hl.h"
 
 /** OpenCV **/
-#include <opencv2/ml.hpp>
 using namespace cv;
 using namespace cv::ml;
 
@@ -150,7 +149,7 @@ int nchar;
 --- nproduct: number of output stacks (returned)
 +++ Return:   stacks with ML results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, std::vector<cv::Ptr<cv::ml::StatModel>> model, cube_t *cube, int *nproduct){
+stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_ml_t *mod, cube_t *cube, int *nproduct){
 ml_t ml;
 stack_t **ML;
 small *mask_ = NULL;
@@ -188,7 +187,7 @@ bool valid;
   if (phl->mcl.method == _ML_SVR_ || phl->mcl.method == _ML_RFR_) regression = true; else regression = false;
 
 
-  #pragma omp parallel private(f,s,m,k,mean,mn,mean_old,var,std,fpred,ipred,valid) shared(features,model,regression,ml,nf,nc,mask_,phl,ML,nodata) default(none)
+  #pragma omp parallel private(f,s,m,k,mean,mn,mean_old,var,std,fpred,ipred,valid) shared(features,mod,regression,ml,nf,nc,mask_,phl,ML,nodata) default(none)
   {
 
     #pragma omp for schedule(dynamic,1)
@@ -224,7 +223,7 @@ bool valid;
         mean = mean_old = var = 0;
         for (m=0; m<phl->mcl.nmodel[s]; m++, k++){
 
-          fpred[s][m] = model[k]->predict(sample);
+          fpred[s][m] = mod->model[k]->predict(sample);
           ipred[s][m] = (int)fpred[s][m];
 
           if (regression){

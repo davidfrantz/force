@@ -380,7 +380,7 @@ int nchar;
 --- nproduct:  number of output stacks (returned)
 +++ Return:    stacks with TSA results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, float **endmember, cube_t *cube, int *nproduct){
+stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct){
 tsa_t ts;
 stack_t ***TSA;
 stack_t **PTR;

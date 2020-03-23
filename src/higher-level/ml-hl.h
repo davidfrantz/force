@@ -31,12 +31,13 @@ Machine learning header
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <opencv2/ml.hpp>
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
-#include "../higher-level/read-aux-hl.h"
 
 
 #ifdef __cplusplus
@@ -44,12 +45,16 @@ extern "C" {
 #endif
 
 typedef struct {
+  std::vector<cv::Ptr<cv::ml::StatModel>> model;
+} aux_ml_t;
+
+typedef struct {
   short **mlp_;
   short **mli_;
   short **mlu_;
 } ml_t;
 
-stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, std::vector<cv::Ptr<cv::ml::StatModel>> model, cube_t *cube, int *nproduct);
+stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_ml_t *mod, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

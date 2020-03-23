@@ -42,6 +42,12 @@ extern "C" {
 #endif
 
 typedef struct {
+  double **tab; // table
+  int nb;       // number of bands
+  int ne;       // number of endmembers
+} aux_emb_t;
+
+typedef struct {
   short **tss_, **rms_, **stm_, **tsi_, **spl_;
   short **fby_, **fbq_, **fbm_, **fbw_, **fbd_;
   short **try_, **trq_, **trm_, **trw_, **trd_;
@@ -62,7 +68,7 @@ typedef struct {
 #include "../higher-level/pheno-hl.h"
 #include "../higher-level/standardize-hl.h"
 
-stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, float **endmember, cube_t *cube, int *nproduct);
+stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
 
 
 #ifdef __cplusplus
