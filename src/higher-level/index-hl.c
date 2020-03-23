@@ -300,6 +300,10 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
+  if (sma->nb != get_stack_bands(ard[0].DAT)){
+    printf("number of bands in endmember file and ARD is different.\n"; exit(1);}
+    
+
   itmax = 30*M;
 
   if (sma->sto) L++;
