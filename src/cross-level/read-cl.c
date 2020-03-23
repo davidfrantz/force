@@ -96,9 +96,10 @@ int nj_buf = NPOW_00;
   fclose(fp);
 
 
-  // re-shape buffer to actual dimensions
+  // re-shape buffer to actual dimensions, 1st rows, then cols
   if (ni != ni_buf || nj != nj_buf){
-    re_alloc_2D((void***)&tab, ni_buf, nj_buf, ni, nj, sizeof(double));
+    re_alloc_2D((void***)&tab, ni_buf, nj_buf, ni, nj_buf, sizeof(double));
+    re_alloc_2D((void***)&tab, ni,     nj_buf, ni, nj,     sizeof(double));
   }
 
 
