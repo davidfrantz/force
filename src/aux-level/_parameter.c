@@ -52,6 +52,7 @@ void usage(char *prog){
   printf("    ML:     Machine Learning\n");
   printf("    TXT:    Texture\n");
   printf("    LSM:    Landscape Metrics\n");
+  printf("    LIB:    Library Completeness\n");
   printf("  verbose (1) will generate long parameter\n");
   printf("    files with comments for each parameter. \n");
   printf("    verbose (0) will generate compact parameter\n");
@@ -121,6 +122,10 @@ bool verbose;
     level = _HIGHER_LEVEL_;
     input_level = _INP_FTR_;
     type = _HL_LSM_;
+  } else if (strcmp(ctype, "LIB") == 0){
+    level = _HIGHER_LEVEL_;
+    input_level = _INP_FTR_;
+    type = _HL_LIB_;
   } else if (strcmp(ctype, "TRAIN") == 0){
     level = _AUX_LEVEL_;
     input_level = _INP_AUX_;
@@ -210,6 +215,10 @@ bool verbose;
 
   if (type == _HL_LSM_){
     write_par_hl_lsm(fp, verbose);
+  }
+
+  if (type == _HL_LIB_){
+    write_par_hl_lib(fp, verbose);
   }
 
   if (type == _HL_SMP_){

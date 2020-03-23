@@ -21,31 +21,31 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Spectral index header
+Reading all-purpose files
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef INDEX_HL_H
-#define INDEX_HL_H
+#ifndef READ_CL_H
+#define READ_CL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
+#include <string.h>  // string handling functions
 
-#include "../cross-level/cite-cl.h"
-#include "../higher-level/read-ard-hl.h"
-#include "../higher-level/param-hl.h"
-#include "../higher-level/tsa-hl.h"
+#include "../cross-level/const-cl.h"
+#include "../cross-level/alloc-cl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, aux_emb_t *endmember);
+double **read_table(char *fname, int *nrows, int *ncols);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 

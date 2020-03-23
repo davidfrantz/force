@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2019 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,27 +21,40 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Spectral index header
+Library completeness header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef INDEX_HL_H
-#define INDEX_HL_H
+#ifndef LIBCOMPLETE_HL_H
+#define LIBCOMPLETE_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../cross-level/cite-cl.h"
-#include "../higher-level/read-ard-hl.h"
-#include "../higher-level/param-hl.h"
-#include "../higher-level/tsa-hl.h"
 
+#include "../cross-level/stack-cl.h"
+#include "../cross-level/stats-cl.h"
+#include "../higher-level/read-ard-hl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, aux_emb_t *endmember);
+typedef struct {
+  double ***tab; // table
+  int n;         // number of tables
+  int *ns;       // number of samples
+  int nf;        // number of features
+  bool scaled; // flag if table was cleaned
+  double **mean; // mean per table and feature
+  double **sd;   // sd   per table and feature
+} aux_lib_t;
+
+typedef struct {
+  short **mae_;
+} lib_t;
+
+stack_t **library_completeness(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

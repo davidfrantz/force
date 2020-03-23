@@ -37,7 +37,7 @@ enum { TCB, TCG, TCW, TCD};
 void index_band(ard_t *ard, small *mask_, tsa_t *ts, int b, int nc, int nt, short nodata);
 void index_differenced(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
-void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, float **emb);
+void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember);
 
 
 /** This function computes a spectral index time series, with band method,
@@ -265,23 +265,23 @@ float tc[3][6] = {
 /** Compute spectral mixture analysis index
 +++ This function computes SMA fractions for one date. Only one fraction
 +++ is retained.
---- ard:    ARD
---- mask_:  mask image
---- ts:     pointer to instantly useable TSA image arrays
---- nc:     number of cells
---- nt:     number of ARD products over time
---- nodata: nodata value
---- sma:    SMA parameters
---- emb:    endmember
-+++ Return: void
+--- ard:       ARD
+--- mask_:     mask image
+--- ts:        pointer to instantly useable TSA image arrays
+--- nc:        number of cells
+--- nt:        number of ARD products over time
+--- nodata:    nodata value
+--- sma:       SMA parameters
+--- endmember: endmember (if SMA was selected)
++++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, float **emb){
+void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember){
 int p, t;
 int i, j, ik, jk;
 int it, itmax;
 int m, nP, sign;
-int M = sma->ne;
-int L = sma->nb;
+int M = endmember->ne;
+int L = endmember->nb;
 double tol = FLT_MIN;
 double s_min, alpha;
 double f = 1.0;
@@ -300,6 +300,10 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
+  if (endmember->nb != get_stack_nbands(ard[0].DAT)){
+    printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
+    
+
   itmax = 30*M;
 
   if (sma->sto) L++;
@@ -310,10 +314,9 @@ gsl_vector *a   =  NULL;
 
 
   // copy endmember to GSL matrix
-  for (i=0; i<sma->nb; i++){
+  for (i=0; i<endmember->nb; i++){
   for (j=0; j<M; j++){
-    gsl_matrix_set(Z, i, j, (double)emb[i][j]);
-    //gsl_matrix_set(Z, i, j, (double)sma->endmember[i][j]);
+    gsl_matrix_set(Z, i, j, endmember->tab[i][j]);
   }
   }
   if (sma->sto){ // append a row of 1
@@ -334,7 +337,7 @@ gsl_vector *a   =  NULL;
   gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, Z, Z, 0.0, ZtZ);
 
 
-  #pragma omp parallel firstprivate(f) private(t,i,j,ik,jk,it,x,Ztx,P,R,d,s,w,a,nP,m,alpha,s_min,sign,dsum,rsum,res) shared(ard,mask_,ts,sma,nc,nt,nodata,itmax,tol,L,M,Z,ZtZ,stdout,scale) default(none)
+  #pragma omp parallel firstprivate(f) private(t,i,j,ik,jk,it,x,Ztx,P,R,d,s,w,a,nP,m,alpha,s_min,sign,dsum,rsum,res) shared(ard,mask_,ts,sma,nc,nt,nodata,itmax,tol,L,M,Z,ZtZ,stdout,scale,endmember) default(none)
   {
 
     // allocate working variables
@@ -369,7 +372,7 @@ gsl_vector *a   =  NULL;
           it = 0;
 
           // copy spectrum to GSL vector
-          for (i=0; i<sma->nb; i++) gsl_vector_set(x, i, (double)(ard[t].dat[i][p]/scale));
+          for (i=0; i<endmember->nb; i++) gsl_vector_set(x, i, (double)(ard[t].dat[i][p]/scale));
 
           // compute crossproduct of Z and x_: t(Z)x
           gsl_blas_dgemv(CblasTrans, 1.0, Z, x, 0.0, Ztx);
@@ -636,19 +639,19 @@ gsl_vector *a   =  NULL;
 
 
 /** This function computes a spectral index time series
---- ard:    ARD
---- ts:     pointer to instantly useable TSA image arrays
---- mask_:  mask image
---- nc:     number of cells
---- nt:     number of ARD products over time
---- idx:    spectral index
---- nodata: nodata value
---- tsa:    TSA parameters
---- sen:    sensor parameters
---- emb:    endmember (if SMA was selected)
-+++ Return: SUCCESS/FAILURE
+--- ard:       ARD
+--- ts:        pointer to instantly useable TSA image arrays
+--- mask_:     mask image
+--- nc:        number of cells
+--- nt:        number of ARD products over time
+--- idx:       spectral index
+--- nodata:    nodata value
+--- tsa:       TSA parameters
+--- sen:       sensor parameters
+--- endmember: endmember (if SMA was selected)
++++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, float **emb){
+int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, aux_emb_t *endmember){
 
 
   switch (tsa->index[idx]){
@@ -748,7 +751,7 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
       break;
     case _IDX_SMA_:
       cite_me(_CITE_SMA_);
-      index_unmixed(ard, mask_, ts, nc, nt, nodata, &tsa->sma, emb);
+      index_unmixed(ard, mask_, ts, nc, nt, nodata, &tsa->sma, endmember);
       break;
     case _IDX_BVV_:
       index_band(ard, mask_, ts, sen->vv, nc, nt, nodata);

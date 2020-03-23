@@ -62,7 +62,7 @@ enum { _MIN_, _MAX_ };
 // modules
 enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
        _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _AUX_TRAIN_ };
+       _HL_LIB_,    _AUX_TRAIN_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
@@ -233,7 +233,7 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 //#define FORCE_DEBUG
 //#define FORCE_DEV
 
-//#define SPLITS
+#define SPLITS
 
 //#define ACIX
 //#define ACIX2

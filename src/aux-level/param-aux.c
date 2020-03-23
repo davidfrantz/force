@@ -1971,6 +1971,53 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
++++ level library completeness pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_lib(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# Library Completeness\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+  
+  if (verbose){
+    fprintf(fp, "# Directory containing the libraries.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_LIBRARY = NULL\n");
+   
+  if (verbose){
+    fprintf(fp, "# This parameter specifies the libraries which should be tested against the \n");
+    fprintf(fp, "# features. The basename(s) must be given. One or multiple libraries can be\n");
+    fprintf(fp, "# given. The output files will have as many bands (+1 overall band) as there\n");
+    fprintf(fp, "# are libraries. The libraries should be text files with samples in rows, and\n");
+    fprintf(fp, "# features in columns (no header). The column separator is white-space. The\n");
+    fprintf(fp, "# features in the library must correspond to the given features.\n");
+    fprintf(fp, "# Type: Basename of file, character list\n");
+  }
+  fprintf(fp, "FILE_LIBRARY = biomass.txt builtup.txt land-cover.txt\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines whether the features should be rescaled before\n");
+    fprintf(fp, "# testing for library completeness.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "LIB_RESCALE = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
+    fprintf(fp, "# be appended by Module ID, product ID, and the file extension.\n");
+    fprintf(fp, "# Type: Character.\n");
+  }
+  fprintf(fp, "LIB_BASE = LSM\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
 +++ level sampling pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?

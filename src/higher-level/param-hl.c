@@ -41,6 +41,8 @@ void register_mcl(params_t *params, par_hl_t *phl);
 void register_ftr(params_t *params, par_hl_t *phl);
 void register_smp(params_t *params, par_hl_t *phl);
 void register_txt(params_t *params, par_hl_t *phl);
+void register_lsm(params_t *params, par_hl_t *phl);
+void register_lib(params_t *params, par_hl_t *phl);
 int check_bandlist(par_tsa_t *tsa, par_sen_t *sen);
 void alloc_ftr(par_ftr_t *ftr);
 void free_ftr(par_ftr_t *ftr);
@@ -522,6 +524,23 @@ par_enum_t kernel[_KERNEL_LENGTH_] = {
   register_enumvec_par(params, "LSM", lsm, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
   register_enum_par(params,    "LSM_KERNEL_SHAPE", kernel, _KERNEL_LENGTH_, &phl->lsm.kernel);
+
+  return;
+}
+
+
+/** This function registers library completeness parameters
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_lib(params_t *params, par_hl_t *phl){
+
+
+  register_char_par(params,    "DIR_LIBRARY",  _CHAR_TEST_EXIST_, &phl->lib.d_lib);
+  register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  &phl->lib.f_lib, &phl->lib.n_lib);
+  register_bool_par(params,    "LIB_RESCALE",  &phl->lib.rescale);
+  register_char_par(params,    "LIB_BASE",     _CHAR_TEST_NONE_,  &phl->lib.base);
 
   return;
 }
@@ -1312,6 +1331,10 @@ double tol = 5e-3;
     phl->type = _HL_LSM_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
+  } else if (strcmp(buffer, "++PARAM_LIB_START++") == 0){
+    phl->type = _HL_LIB_;
+    phl->input_level1 = _INP_FTR_;
+    phl->input_level2 = _INP_NONE_;
   } else {
     printf("No valid parameter file!\n"); return FAILURE;
   }
@@ -1369,6 +1392,9 @@ double tol = 5e-3;
       break;
     case _HL_LSM_:
       register_lsm(phl->params, phl);
+      break;
+    case _HL_LIB_:
+      register_lib(phl->params, phl);
       break;
     default:
       printf("Unknown module!\n"); return FAILURE;
