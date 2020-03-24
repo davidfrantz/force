@@ -2011,7 +2011,7 @@ void write_par_hl_lib(FILE *fp, bool verbose){
     fprintf(fp, "# be appended by Module ID, product ID, and the file extension.\n");
     fprintf(fp, "# Type: Character.\n");
   }
-  fprintf(fp, "LIB_BASE = LSM\n");
+  fprintf(fp, "LIB_BASE = LIB\n");
 
   return;
 }
