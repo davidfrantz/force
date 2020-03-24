@@ -110,6 +110,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``USE_L2_IMPROPHE = FALSE``
 
+
+.. _tsa-sensor:    
+
 * **Sensor white list**
 
   * Sensors to be used in the analysis.
