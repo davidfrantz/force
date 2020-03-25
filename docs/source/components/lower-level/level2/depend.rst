@@ -79,24 +79,7 @@ Master images for co-registration
 Tile white-list
 ^^^^^^^^^^^^^^^
 
-*better put in higher-level?*
-
-This file is optional, and may be used to suppress the output of tiles that are not in your study area.
+A :ref:`tilelist` is optional, and may be used to suppress the output of tiles that are not in your study area.
 This option was implemented to decrease the volume of the processed data.
-The file is specified with FILE_TILE in the various parameter files.
-The file must be prepared as follows: the 1st line must give the number of tiles for which output should be created.
-The corresponding tile IDs must be given in the following lines, one ID per line; end with an empty line.
-The sorting does not matter.
-The tool force-tabulate-grid can be used to create a shapefile of the grid, which in turn can be used to determine the desired tiles (see section VI.I.4).
-Example:
-4524
-X0044_Y0014
-X0044_Y0015
-X0045_Y0013
-X0045_Y0014
-X0045_Y0015
-X0045_Y0016
-X0045_Y0017
-X0045_Y0018
-… [file truncated]
+The file is specified in the :ref:`l2-param` with ``FILE_TILE``.
 
