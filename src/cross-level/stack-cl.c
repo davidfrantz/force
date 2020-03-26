@@ -635,7 +635,6 @@ GDALDriverH driver_cpy = NULL;
 char **options = NULL;
 float *buf = NULL;
 float now, old;
-int nb_;
 char xchunk[NPOW_08];
 char ychunk[NPOW_08];
 int xoff_write, yoff_write, nx_write, ny_write;
@@ -668,6 +667,8 @@ int i = 0;
 
   alloc_2DC((void***)&fp_meta,   n_fp_meta,   NPOW_13, sizeof(char));
   alloc_2DC((void***)&band_meta, n_band_meta, NPOW_13, sizeof(char));
+  sys_meta = system_info(&n_sys_meta);
+  
 
   strncpy(fp_meta[i], "FORCE_version",     13); fp_meta[i][13] = '\0'; i++;
   if (strlen(_VERSION_) > NPOW_13-1){
@@ -702,10 +703,40 @@ int i = 0;
   }
   
 
-  // how many bands from stack to output?
-  for (b=0, nb_=0; b<stack->nb; b++) nb_ += stack->save[b];
+  // how many bands to output?
+  for (b=0, b_=0; b<stack->nb; b++) b_ += stack->save[b];
 
+  if (SINGLEBAND){
+    nfiles = b_;
+    nbands = 1;
+  } else {
+    nfiles = 1;
+    nbands = b_;
+  }
 
+  enum { _STACK_, _FILE_};
+  alloc_3D((void****)bands, 2, nfiles, nbands);
+  // dim 1: 2 slots - stack and file
+  // dim 2: output files
+  // dim 3: band numbers
+
+  for (b=0, b_=0; b<stack->nb; b++){
+    
+    if (!stack->save[b]) continue;
+    
+    if (SINGLEBAND){
+      bands[_STACK_][b_][0] = b;
+      bands[_FILE_][b_][0]  = 1;
+    } else {
+      bands[_STACK_][0][b_] = b;
+      bands[_FILE_][0][b_]  = b_+1;
+    }
+
+    b_++;
+    
+  }
+  
+  
   //CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
   
 
@@ -773,233 +804,240 @@ int i = 0;
   lock = NULL;
 
   
+  for (f=0; f<nfiles; f++){
+    
+    if (SINGLEBAND){
+      // could/should be substituted with a short bandname
+      nchar = snprintf(bname, NPOW_10, "_B%04d", f);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
+    } else bname[0] = '\0';
   
-  nchar = snprintf(fname, NPOW_10, "%s/%s.%s", stack->dname, 
-    stack->fname, stack->extension);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+    nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", stack->dname, 
+      stack->fname, bname, stack->extension);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
-  timeout = lock_timeout(get_stack_size(stack));
+    timeout = lock_timeout(get_stack_size(stack));
 
-  if ((lock = (char*)CPLLockFile(fname, timeout)) == NULL){
-    printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, stack->nx, stack->ny);
-    return FAILURE;}
-
-
-  // mosaicking into existing file
-  // read and rewrite stack (safer when using compression)
-  if (stack->open != OPEN_CREATE && stack->open != OPEN_BLOCK && fileexist(fname)){
-
-    // read stack
-#ifdef FORCE_DEBUG
-printf("reading existing file.\n");
-#endif
-    if ((fo = GDALOpen(fname, GA_ReadOnly)) == NULL){
-      printf("Unable to open %s. ", fname); return FAILURE;}
-
-    if (GDALGetRasterCount(fo) != nb_){
-      printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
-        nb_, GDALGetRasterCount(fo)); 
-      return FAILURE;}
-    if (GDALGetRasterXSize(fo) != stack->nx){
-      printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
-        stack->nx, GDALGetRasterXSize(fo)); 
-      return FAILURE;}
-    if (GDALGetRasterYSize(fo) != stack->ny){
-      printf("Number of rows %d do not match for UPDATE/MERGE mode (file: %d). ", 
-        stack->ny, GDALGetRasterYSize(fo)); 
+    if ((lock = (char*)CPLLockFile(fname, timeout)) == NULL){
+      printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, stack->nx, stack->ny);
       return FAILURE;}
 
-    alloc((void**)&buf, stack->nc, sizeof(float));
 
-    for (b=0, b_=0; b<stack->nb; b++){
-      
-      if (!get_stack_save(stack, b)) continue;
+    // mosaicking into existing file
+    // read and rewrite stack (safer when using compression)
+    if (stack->open != OPEN_CREATE && stack->open != OPEN_BLOCK && fileexist(fname)){
 
-      band = GDALGetRasterBand(fo, b_+1);
+      // read stack
+      #ifdef FORCE_DEBUG
+      printf("reading existing file.\n");
+      #endif
 
-      if (GDALRasterIO(band, GF_Read, 0, 0, stack->nx, stack->ny, buf, 
-        stack->nx, stack->ny, GDT_Float32, 0, 0) == CE_Failure){
-        printf("Unable to read %s. ", fname); return FAILURE;} 
+      if ((fo = GDALOpen(fname, GA_ReadOnly)) == NULL){
+        printf("Unable to open %s. ", fname); return FAILURE;}
+
+      if (GDALGetRasterCount(fo) != nb_write){
+        printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
+          nb_write, GDALGetRasterCount(fo)); 
+        return FAILURE;}
+      if (GDALGetRasterXSize(fo) != stack->nx){
+        printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
+          stack->nx, GDALGetRasterXSize(fo)); 
+        return FAILURE;}
+      if (GDALGetRasterYSize(fo) != stack->ny){
+        printf("Number of rows %d do not match for UPDATE/MERGE mode (file: %d). ", 
+          stack->ny, GDALGetRasterYSize(fo)); 
+        return FAILURE;}
+
+      alloc((void**)&buf, stack->nc, sizeof(float));
+
+      for (b=0; b<nbands; b++){
+
+        b_stack = bands[_STACK_][f][b];
+        b_file  = bands[_FILE_][f][b];
+        
+        band = GDALGetRasterBand(fo, b_file);
+
+        if (GDALRasterIO(band, GF_Read, 0, 0, stack->nx, stack->ny, buf, 
+          stack->nx, stack->ny, GDT_Float32, 0, 0) == CE_Failure){
+          printf("Unable to read %s. ", fname); return FAILURE;} 
 
 
-      for (p=0; p<stack->nc; p++){
+        for (p=0; p<stack->nc; p++){
 
-        now = get_stack(stack, b, p);
-        old = buf[p];
+          now = get_stack(stack, b_stack, p);
+          old = buf[p];
 
-        // if both old and now are valid: keep now or merge now and old
-        if (now != stack->nodata[b] && old != stack->nodata[b]){
-          if (stack->open == OPEN_MERGE) set_stack(stack, b, p, (now+old)/2.0);
-        // if only old is valid, take old value
-        } else if (now == stack->nodata[b] && old != stack->nodata[b]){
-          set_stack(stack, b, p, old);
+          // if both old and now are valid: keep now or merge now and old
+          if (now != stack->nodata[b_stack] && old != stack->nodata[b_stack]){
+            if (stack->open == OPEN_MERGE) set_stack(stack, b_stack, p, (now+old)/2.0);
+          // if only old is valid, take old value
+          } else if (now == stack->nodata[b_stack] && old != stack->nodata[b_stack]){
+            set_stack(stack, b_stack, p, old);
+          }
+          // if only now is valid, nothing to do
+
         }
-        // if only now is valid, nothing to do
 
       }
 
-      b_++;
+      GDALClose(fo);
+
+      free((void*)buf);
 
     }
 
-    GDALClose(fo);
 
-    free((void*)buf);
-
-  }
-
-
-  // open for block mode or write from scratch
-  if (stack->open == OPEN_BLOCK && fileexist(fname) && stack->chunk > 0){
-    if ((fp = GDALOpen(fname, GA_Update)) == NULL){
-      printf("Unable to open %s. ", fname); return FAILURE;}
-  } else {
-    if ((fp = GDALCreate(driver, fname, stack->nx, stack->ny, nb_, file_datatype, options)) == NULL){
-      printf("Error creating file %s. ", fname); return FAILURE;}
-  }
-  
-  if (stack->open == OPEN_BLOCK){
-    if (stack->chunk < 0){
-      printf("attempting to write invalid chunk\n");
-      return FAILURE;
-    }
-    nx_write     = stack->cx;
-    ny_write     = stack->cy;
-    xoff_write   = 0;
-    yoff_write   = stack->chunk*stack->cy;
-  } else {
-    nx_write     = stack->nx;
-    ny_write     = stack->ny;
-    xoff_write   = 0;
-    yoff_write   = 0;
-  }
-
-
-  for (b=0, b_=0; b<stack->nb; b++){
-
-    if (!get_stack_save(stack, b)) continue;
-
-    i = 0;
-
-    strncpy(band_meta[i], "Domain", 6); band_meta[i][6] = '\0'; i++;
-    if (strlen(stack->domain[b]) > NPOW_13-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(band_meta[i], stack->domain[b], strlen(stack->domain[b])); 
-      band_meta[i][strlen(stack->domain[b])] = '\0'; i++;
-    }
-
-    strncpy(band_meta[i], "Wavelength", 10); band_meta[i][10] = '\0'; i++;
-    nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->wavelength[b]); i++;
-    if (nchar < 0 || nchar >= NPOW_13){ 
-      printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-    strncpy(band_meta[i], "Wavelength_unit", 15); band_meta[i][15] = '\0'; i++;
-    if (strlen(stack->unit[b]) > NPOW_13-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(band_meta[i], stack->unit[b], strlen(stack->unit[b])); 
-      band_meta[i][strlen(stack->unit[b])] = '\0'; i++;
-    }
-
-    strncpy(band_meta[i], "Scale", 5); band_meta[i][5] = '\0'; i++;
-    nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->scale[b]); i++;
-    if (nchar < 0 || nchar >= NPOW_13){ 
-      printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-    strncpy(band_meta[i], "Sensor", 6); band_meta[i][6] = '\0'; i++;
-    if (strlen(stack->sensor[b]) > NPOW_13-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(band_meta[i], stack->sensor[b], strlen(stack->sensor[b])); 
-      band_meta[i][strlen(stack->sensor[b])] = '\0'; i++;
-    }
-
-    get_stack_longdate(stack, b, ldate, NPOW_05-1);
-    strncpy(band_meta[i], "Date", 4); band_meta[i][4] = '\0'; i++;
-    if (strlen(ldate) > NPOW_13-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(band_meta[i], ldate, strlen(ldate)); 
-      band_meta[i][strlen(ldate)] = '\0'; i++;
-    }
-
-
-    band = GDALGetRasterBand(fp, b_+1);
-
-    switch (stack->datatype){
-      case _DT_SHORT_:
-        if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-          nx_write, ny_write, stack->vshort[b], 
-          nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-          printf("Unable to write %s. ", fname); return FAILURE;}
-        break;
-      case _DT_SMALL_:
-        if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-          nx_write, ny_write, stack->vsmall[b], 
-          nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-          printf("Unable to write %s. ", fname); return FAILURE;} 
-        break;
-      case _DT_FLOAT_:
-        if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-          nx_write, ny_write, stack->vfloat[b], 
-          nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-          printf("Unable to write %s. ", fname); return FAILURE;} 
-        break;
-      case _DT_INT_:
-        if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-          nx_write, ny_write, stack->vint[b], 
-          nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-          printf("Unable to write %s. ", fname); return FAILURE;} 
-        break;
-      case _DT_USHORT_:
-        if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-          nx_write, ny_write, stack->vushort[b], 
-          nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-          printf("Unable to write %s. ", fname); return FAILURE;} 
-        break;
-
-      default:
-        printf("unknown datatype for writing stack. ");
-        return FAILURE;
-    }
-
-    GDALSetDescription(band, stack->bandname[b]);
-    GDALSetRasterNoDataValue(band, stack->nodata[b]);
-    for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
-
-    b_++;
-
-  }
-
-  // write essential geo-metadata
-  #pragma omp critical
-  {
-    GDALSetGeoTransform(fp, stack->geotran);
-    GDALSetProjection(fp,   stack->proj);
-  }
-
-  // in case of ENVI, update description
-  //if (format == _FMT_ENVI_) 
-  GDALSetDescription(fp, stack->name);
-
-
-
-  sys_meta = system_info(&n_sys_meta);
-  for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
-  for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp, fp_meta[i],  fp_meta[i+1],  "FORCE");
-  
-  
-  if (stack->format == _FMT_JPEG_){
-    if ((fp_cpy = GDALCreateCopy(driver_cpy, fname, fp, FALSE, NULL, NULL, NULL)) == NULL){
+    // open for block mode or write from scratch
+    if (stack->open == OPEN_BLOCK && fileexist(fname) && stack->chunk > 0){
+      if ((fp = GDALOpen(fname, GA_Update)) == NULL){
+        printf("Unable to open %s. ", fname); return FAILURE;}
+    } else {
+      if ((fp = GDALCreate(driver, fname, stack->nx, stack->ny, nbands, file_datatype, options)) == NULL){
         printf("Error creating file %s. ", fname); return FAILURE;}
-    GDALClose(fp_cpy);
-  }
-  GDALClose(fp);
+    }
+      
+    if (stack->open == OPEN_BLOCK){
+      if (stack->chunk < 0){
+        printf("attempting to write invalid chunk\n");
+        return FAILURE;
+      }
+      nx_write     = stack->cx;
+      ny_write     = stack->cy;
+      xoff_write   = 0;
+      yoff_write   = stack->chunk*stack->cy;
+    } else {
+      nx_write     = stack->nx;
+      ny_write     = stack->ny;
+      xoff_write   = 0;
+      yoff_write   = 0;
+    }
+
+
+    for (b=0; b<nbands; b++){
+
+      b_stack = bands[_STACK_][f][b];
+      b_file  = bands[_FILE_][f][b];
+
+      i = 0;
+
+      strncpy(band_meta[i], "Domain", 6); band_meta[i][6] = '\0'; i++;
+      if (strlen(stack->domain[b_stack]) > NPOW_13-1){
+        printf("cannot copy, string too long.\n"); return FAILURE;
+      } else { 
+        strncpy(band_meta[i], stack->domain[b_stack], strlen(stack->domain[b_stack])); 
+        band_meta[i][strlen(stack->domain[b_stack])] = '\0'; i++;
+      }
+
+      strncpy(band_meta[i], "Wavelength", 10); band_meta[i][10] = '\0'; i++;
+      nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->wavelength[b_stack]); i++;
+      if (nchar < 0 || nchar >= NPOW_13){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      strncpy(band_meta[i], "Wavelength_unit", 15); band_meta[i][15] = '\0'; i++;
+      if (strlen(stack->unit[b_stack]) > NPOW_13-1){
+        printf("cannot copy, string too long.\n"); return FAILURE;
+      } else { 
+        strncpy(band_meta[i], stack->unit[b_stack], strlen(stack->unit[b_stack])); 
+        band_meta[i][strlen(stack->unit[b_stack])] = '\0'; i++;
+      }
+
+      strncpy(band_meta[i], "Scale", 5); band_meta[i][5] = '\0'; i++;
+      nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->scale[b_stack]); i++;
+      if (nchar < 0 || nchar >= NPOW_13){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      strncpy(band_meta[i], "Sensor", 6); band_meta[i][6] = '\0'; i++;
+      if (strlen(stack->sensor[b_stack]) > NPOW_13-1){
+        printf("cannot copy, string too long.\n"); return FAILURE;
+      } else { 
+        strncpy(band_meta[i], stack->sensor[b_stack], strlen(stack->sensor[b_stack])); 
+        band_meta[i][strlen(stack->sensor[b_stack])] = '\0'; i++;
+      }
+
+      get_stack_longdate(stack, b_stack, ldate, NPOW_05-1);
+      strncpy(band_meta[i], "Date", 4); band_meta[i][4] = '\0'; i++;
+      if (strlen(ldate) > NPOW_13-1){
+        printf("cannot copy, string too long.\n"); return FAILURE;
+      } else { 
+        strncpy(band_meta[i], ldate, strlen(ldate)); 
+        band_meta[i][strlen(ldate)] = '\0'; i++;
+      }
+
+
+      band = GDALGetRasterBand(fp, b_file);
+
+      switch (stack->datatype){
+        case _DT_SHORT_:
+          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
+            nx_write, ny_write, stack->vshort[b_stack], 
+            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
+            printf("Unable to write %s. ", fname); return FAILURE;}
+          break;
+        case _DT_SMALL_:
+          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
+            nx_write, ny_write, stack->vsmall[b_stack], 
+            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
+            printf("Unable to write %s. ", fname); return FAILURE;} 
+          break;
+        case _DT_FLOAT_:
+          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
+            nx_write, ny_write, stack->vfloat[b_stack], 
+            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
+            printf("Unable to write %s. ", fname); return FAILURE;} 
+          break;
+        case _DT_INT_:
+          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
+            nx_write, ny_write, stack->vint[b_stack], 
+            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
+            printf("Unable to write %s. ", fname); return FAILURE;} 
+          break;
+        case _DT_USHORT_:
+          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
+            nx_write, ny_write, stack->vushort[b_stack], 
+            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
+            printf("Unable to write %s. ", fname); return FAILURE;} 
+          break;
+
+        default:
+          printf("unknown datatype for writing stack. ");
+          return FAILURE;
+      }
+
+      GDALSetDescription(band, stack->bandname[b_stack]);
+      GDALSetRasterNoDataValue(band, stack->nodata[b_stack]);
+      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
+
+    }
+
+    // write essential geo-metadata
+    #pragma omp critical
+    {
+      GDALSetGeoTransform(fp, stack->geotran);
+      GDALSetProjection(fp,   stack->proj);
+    }
+
+    // in case of ENVI, update description
+    //if (format == _FMT_ENVI_) 
+    GDALSetDescription(fp, stack->name);
+
+
+    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
+    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp, fp_meta[i],  fp_meta[i+1],  "FORCE");
+    
+    
+    if (stack->format == _FMT_JPEG_){
+      if ((fp_cpy = GDALCreateCopy(driver_cpy, fname, fp, FALSE, NULL, NULL, NULL)) == NULL){
+          printf("Error creating file %s. ", fname); return FAILURE;}
+      GDALClose(fp_cpy);
+    }
+    GDALClose(fp);
 
   
-  CPLUnlockFile(lock);
+    CPLUnlockFile(lock);
+    
+  }
 
   if (options   != NULL){ CSLDestroy(options);         options   = NULL;}
   if (fp_meta   != NULL){ free_2DC((void**)fp_meta);   fp_meta   = NULL;}
