@@ -22,6 +22,8 @@ The user can choose to keep the original projection (UTM) or to reproject all da
   Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains what a datacube is, how it is parameterized, how you can find a POI, how to visualize the tiling grid, and how to conveniently display cubed data.
 
 
+.. _datacube-def:
+  
 Data Cube definition
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -274,6 +276,8 @@ All other products are optional.
     | :sup:`2` Water vapor band is used internally for water vapor retrieval, but not output.
     | :sup:`3` Cirrus band is used internally for cirrus cloud detection, but not output.
 
+    
+.. _qai:
 
 * Quality Assurance Information
 
