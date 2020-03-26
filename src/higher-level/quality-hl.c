@@ -178,8 +178,8 @@ bool *removed = NULL;
     for (p=0; p<nc; p++){
       
       
-      rel_noise = 10;
-      noise = 10;
+      rel_noise = INT_MAX;
+      noise = INT_MAX;
       n = nt;
       
       nout = 0;
@@ -254,8 +254,9 @@ bool *removed = NULL;
         }
         
 
+        if (n < 2) continue;
 
-        noise = sqrt(ssqr/(n-2));
+        noise = sqrt(ssqr/n);
         rel_noise = maxr/noise;
         
         //printf("max. residual is %f at time %d, relative to noise %f\n", maxr, t_maxr, rel_noise);
@@ -269,6 +270,7 @@ bool *removed = NULL;
       }
       
       
+      if (noise == INT_MAX) continue;
 
       t_left = 0;
 
