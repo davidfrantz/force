@@ -1088,7 +1088,7 @@ stack_t *BOA = TOA;
   #endif
   set_stack_filename(BOA, fname);
   set_stack_open(BOA, OPEN_MERGE);
-  set_stack_explode(BOA, pl2->explode);
+  set_stack_explode(BOA, false);
 
   if ((b_nir = find_domain(BOA, "NIR"))   < 0) return NULL;
   if ((b_sw1 = find_domain(BOA, "SWIR1")) < 0) return NULL;

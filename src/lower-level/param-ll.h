@@ -57,14 +57,13 @@ typedef struct {
   char *d_wvp;            // directory of water vapor LUT
 
   /** output parameters **/
-  int format;  // output format
-  int explode; // explode stack to single-band?
-  int odst;    // flag: output cloud/shadow distance
-  int ovzn;    // flag: output view zenith angle
-  int ohot;    // flag: output haze optimized transformation
-  int oaod;    // flag: output AOD @ 550nm
-  int owvp;    // flag: output water vapor
-  int oovv;    // flag: output product overview
+  int format; // output format
+  int odst;   // flag: output cloud/shadow distance
+  int ovzn;   // flag: output view zenith angle
+  int ohot;   // flag: output haze optimized transformation
+  int oaod;   // flag: output AOD @ 550nm
+  int owvp;   // flag: output water vapor
+  int oovv;   // flag: output product overview
 
   /** projection/tiling parameters **/
   int dotile;         // flag: tile

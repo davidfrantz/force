@@ -330,12 +330,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
-    
-  * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
-  
-    | *Type:* Logical. Valid values: {TRUE,FALSE}
-    | ``OUTPUT_EXPLODE = FALSE``
-    
+
   * Output the cloud/cloud shadow/snow distance output? Note that this is NOT the cloud mask (which is sitting in the mandatory QAI product).
     This product can be used in force-level3; no other higher-level FORCE module is using this.
     

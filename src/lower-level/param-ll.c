@@ -90,7 +90,6 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_int_par(params,     "DELAY",                 0, INT_MAX, &pl2->delay);
   register_int_par(params,     "TIMEOUT_ZIP",           0, INT_MAX, &pl2->timeout);
   register_enum_par(params,    "OUTPUT_FORMAT",         format, _FMT_LENGTH_, &pl2->format);
-  register_bool_par(params,    "OUTPUT_EXPLODE",        &pl2->explode);
   register_bool_par(params,    "OUTPUT_DST",            &pl2->odst);
   register_bool_par(params,    "OUTPUT_AOD",            &pl2->oaod);
   register_bool_par(params,    "OUTPUT_WVP",            &pl2->owvp);
