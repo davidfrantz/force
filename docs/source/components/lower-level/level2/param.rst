@@ -330,7 +330,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
-    
+
   * Output the cloud/cloud shadow/snow distance output? Note that this is NOT the cloud mask (which is sitting in the mandatory QAI product).
     This product can be used in force-level3; no other higher-level FORCE module is using this.
     

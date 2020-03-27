@@ -51,6 +51,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
 
+  * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
+  
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_EXPLODE = FALSE``
+
 * **Parallel processing**
 
   * This module is using a streaming mechanism to speed up processing.

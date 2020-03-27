@@ -55,6 +55,7 @@ typedef struct {
   int sid;               // sensor ID
   int format;            // output format
   int open;              // open mode
+  int explode;           // explode to single-bands?
   int datatype;          // datatype
   int byte;              // number of bytes
 
@@ -136,6 +137,8 @@ void     set_stack_format(stack_t *stack, int format);
 int      get_stack_format(stack_t *stack);
 void     set_stack_open(stack_t *stack, int open);
 bool     get_stack_open(stack_t *stack);
+void     set_stack_explode(stack_t *stack, int explode);
+bool     get_stack_explode(stack_t *stack);
 void     set_stack_datatype(stack_t *stack, int datatype);
 int      get_stack_datatype(stack_t *stack);
 void     set_stack_output_datatype(stack_t *stack, int datatype);

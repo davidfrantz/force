@@ -130,6 +130,7 @@ int nchar;
     set_stack_open(stack, OPEN_FALSE);
   }
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, phl->explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){

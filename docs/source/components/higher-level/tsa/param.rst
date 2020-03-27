@@ -27,6 +27,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``
 
+  * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
+  
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_EXPLODE = FALSE``
+
 * **Masking**
 
   * Analysis Mask datapool (parent directory of tiled analysis masks)

@@ -28,7 +28,7 @@ This file contains functions for Level 3 processing
 #include "level3-hl.h"
 
 
-stack_t *compile_level3_stack(stack_t *ard, int nb, bool fullres, char *prodname, par_hl_t *phl);
+stack_t *compile_level3_stack(stack_t *ard, int nb, bool explode, bool fullres, char *prodname, par_hl_t *phl);
 stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 
@@ -49,6 +49,7 @@ int o, nprod = 4;
 int error = 0;
 char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
+bool explode[4] = { false, phl->explode, phl->explode, phl->explode };
 int prodlen[4] = { 0, 6, 7, 3 };
 bool enable[4] = { phl->bap.obap, phl->bap.oinf, phl->bap.oscr, phl->bap.oovv };
 short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
@@ -61,7 +62,7 @@ short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
   for (o=0; o<nprod; o++){
     if (enable[o]){
       if ((nbands = prodlen[o]) == 0) nbands = nb;
-      if ((LEVEL3[o] = compile_level3_stack(ard[0].DAT, nbands, fullres[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(LEVEL3[o])) == NULL){
+      if ((LEVEL3[o] = compile_level3_stack(ard[0].DAT, nbands, explode[o], fullres[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(LEVEL3[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;}
     } else {
       LEVEL3[o] = NULL;
@@ -87,7 +88,7 @@ short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
 --- phl:       HL parameters
 +++ Return:    stack for L3 result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_level3_stack(stack_t *from, int nb, bool fullres, char *prodname, par_hl_t *phl){
+stack_t *compile_level3_stack(stack_t *from, int nb, bool explode, bool fullres, char *prodname, par_hl_t *phl){
 int b, m, d;
 stack_t *stack = NULL;
 date_t date;
@@ -161,6 +162,7 @@ int cx, cy, cx_, cy_, cc_;
 
   set_stack_open(stack, OPEN_BLOCK);
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){
