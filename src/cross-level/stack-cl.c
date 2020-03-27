@@ -150,6 +150,7 @@ int  b;
   set_stack_sensorid(stack, from->sid);
   set_stack_format(stack, from->format);
   set_stack_open(stack, from->open);
+  set_stack_explode(stack, from->explode);
 
   set_stack_geotran(stack, from->geotran);
   set_stack_nbands(stack, nb);
@@ -499,6 +500,7 @@ int i;
   stack->sid = -1;
   stack->format = 0;
   stack->open = OPEN_FALSE;
+  stack->explode = 0;
   stack->datatype = _DT_NONE_;
   stack->byte = 0;
 
@@ -575,8 +577,8 @@ int b;
 
 
   printf("\nstack info for %s - %s - SID %d\n", stack->name, stack->product, stack->sid);
-  printf("open: %d, format %d\n", 
-    stack->open, stack->format);
+  printf("open: %d, format %d, explode %d\n", 
+    stack->open, stack->format, stack->explode);
   printf("datatype %d with %d bytes\n", 
     stack->datatype, stack->byte);
   printf("filename: %s/%s.%s\n", stack->dname, stack->fname, stack->extension);
@@ -623,7 +625,9 @@ void print_stack_band_info(stack_t *stack, int b){
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int write_stack(stack_t *stack){
-int b, b_, p;
+int f, b, b_, p;
+int b_stack, b_file, nbands, nfiles;
+int ***bands = NULL;
 char *lock = NULL;
 double timeout;
 GDALDatasetH fp_cpy = NULL;
@@ -639,6 +643,7 @@ char xchunk[NPOW_08];
 char ychunk[NPOW_08];
 int xoff_write, yoff_write, nx_write, ny_write;
 
+char bname[NPOW_10];
 char fname[NPOW_10];
 int nchar;
 
@@ -706,7 +711,7 @@ int i = 0;
   // how many bands to output?
   for (b=0, b_=0; b<stack->nb; b++) b_ += stack->save[b];
 
-  if (SINGLEBAND){
+  if (stack->explode){
     nfiles = b_;
     nbands = 1;
   } else {
@@ -715,7 +720,7 @@ int i = 0;
   }
 
   enum { _STACK_, _FILE_};
-  alloc_3D((void****)bands, 2, nfiles, nbands);
+  alloc_3D((void****)&bands, NPOW_01, nfiles, nbands, sizeof(int));
   // dim 1: 2 slots - stack and file
   // dim 2: output files
   // dim 3: band numbers
@@ -724,7 +729,7 @@ int i = 0;
     
     if (!stack->save[b]) continue;
     
-    if (SINGLEBAND){
+    if (stack->explode){
       bands[_STACK_][b_][0] = b;
       bands[_FILE_][b_][0]  = 1;
     } else {
@@ -806,9 +811,9 @@ int i = 0;
   
   for (f=0; f<nfiles; f++){
     
-    if (SINGLEBAND){
+    if (stack->explode){
       // could/should be substituted with a short bandname
-      nchar = snprintf(bname, NPOW_10, "_B%04d", f);
+      nchar = snprintf(bname, NPOW_10, "_B%04d", f+1);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
     } else bname[0] = '\0';
@@ -837,9 +842,9 @@ int i = 0;
       if ((fo = GDALOpen(fname, GA_ReadOnly)) == NULL){
         printf("Unable to open %s. ", fname); return FAILURE;}
 
-      if (GDALGetRasterCount(fo) != nb_write){
+      if (GDALGetRasterCount(fo) != nbands){
         printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          nb_write, GDALGetRasterCount(fo)); 
+          nbands, GDALGetRasterCount(fo)); 
         return FAILURE;}
       if (GDALGetRasterXSize(fo) != stack->nx){
         printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
@@ -1039,10 +1044,11 @@ int i = 0;
     
   }
 
-  if (options   != NULL){ CSLDestroy(options);         options   = NULL;}
-  if (fp_meta   != NULL){ free_2DC((void**)fp_meta);   fp_meta   = NULL;}
-  if (band_meta != NULL){ free_2DC((void**)band_meta); band_meta = NULL;}
-  if (sys_meta  != NULL){ free_2DC((void**)sys_meta);  sys_meta  = NULL;}
+  if (options   != NULL){ CSLDestroy(options);                      options   = NULL;}
+  if (fp_meta   != NULL){ free_2DC((void**)fp_meta);                fp_meta   = NULL;}
+  if (band_meta != NULL){ free_2DC((void**)band_meta);              band_meta = NULL;}
+  if (sys_meta  != NULL){ free_2DC((void**)sys_meta);               sys_meta  = NULL;}
+  if (bands     != NULL){ free_3D((void***)bands, NPOW_01, nfiles); bands     = NULL;}
 
   //CPLPopErrorHandler();
 
@@ -2032,6 +2038,29 @@ void set_stack_open(stack_t *stack, int open){
 bool get_stack_open(stack_t *stack){
   
   return stack->open;
+}
+
+
+/** This function sets the explode-bands option of a stack
+--- stack:   stack
+--- explode: explode bands?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_stack_explode(stack_t *stack, int explode){
+
+  stack->explode = explode;
+
+  return;
+}
+
+
+/** This function gets the explode-bands option of a stack
+--- stack:  stack
++++ Return: explode bands?
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool get_stack_explode(stack_t *stack){
+  
+  return stack->explode;
 }
 
 
