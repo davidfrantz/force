@@ -422,7 +422,8 @@ typedef struct {
   int nd, nw, nm, nq, ny;
 
   // miscellaneous
-  int  format;                // output format
+  int format;                // output format
+  int explode;
   int owr;             // flag: overwrite output
   int ithread;
   int othread;

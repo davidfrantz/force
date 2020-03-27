@@ -77,7 +77,8 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
   register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
-  register_enum_par(params,    "OUTPUT_FORMAT", format, _FMT_LENGTH_, &phl->format);
+  register_enum_par(params,    "OUTPUT_FORMAT",  format, _FMT_LENGTH_, &phl->format);
+  register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
   register_int_par(params,     "NTHREAD_WRITE",   1, INT_MAX, &phl->othread);
