@@ -1088,6 +1088,7 @@ stack_t *BOA = TOA;
   #endif
   set_stack_filename(BOA, fname);
   set_stack_open(BOA, OPEN_MERGE);
+  set_stack_explode(stack, pl2->explode);
 
   if ((b_nir = find_domain(BOA, "NIR"))   < 0) return NULL;
   if ((b_sw1 = find_domain(BOA, "SWIR1")) < 0) return NULL;
@@ -1156,6 +1157,7 @@ short *qa_ = NULL;
   #endif
   set_stack_filename(QA, fname);
   set_stack_open(QA, OPEN_UPDATE);
+  set_stack_explode(stack, false);
   set_stack_nodata(QA, 0, 1);
   set_stack_scale(QA, 0, 1);
   set_stack_wavelength(QA, 0, 1);
@@ -1219,6 +1221,7 @@ short  *dst_ = NULL;
   #endif
   set_stack_filename(DST, fname);
   set_stack_open(DST, OPEN_MERGE);
+  set_stack_explode(stack, false);
   set_stack_scale(DST, 0, 1);
   set_stack_wavelength(DST, 0, 1);
   set_stack_unit(DST, 0, "unknown");
@@ -1373,6 +1376,7 @@ enum { R, G, B };
   #endif
   set_stack_filename(OVV, fname);
   set_stack_open(OVV, OPEN_UPDATE);
+  set_stack_explode(stack, false;
   for (b=0; b<3; b++){
     set_stack_scale(OVV, b, 1);
     set_stack_wavelength(OVV, b, 1);
@@ -1548,6 +1552,7 @@ GDALDataType eOutputType = GDT_Float64;
   #endif
   set_stack_filename(VZN, fname);
   set_stack_open(VZN, OPEN_MERGE);
+  set_stack_explode(stack, false);
   set_stack_scale(VZN, 0, 100);
   set_stack_wavelength(VZN, 0, 1);
   set_stack_unit(VZN, 0, "unknown");
@@ -1638,6 +1643,7 @@ short *hot_ = NULL;
   #endif
   set_stack_filename(HOT, fname);
   set_stack_open(HOT, OPEN_MERGE);
+  set_stack_explode(stack, false);
   set_stack_wavelength(HOT, 0, 1);
   set_stack_unit(HOT, 0, "unknown");
   set_stack_domain(HOT, 0, product);
@@ -1749,6 +1755,7 @@ float **xy_aod_ = NULL;
   #endif
   set_stack_filename(AOD, fname);
   set_stack_open(AOD, OPEN_MERGE);
+  set_stack_explode(stack, false);
   set_stack_scale(AOD, 0, 1000);
   set_stack_wavelength(AOD, 0, wvl);
   set_stack_unit(AOD, 0, "micrometers");
@@ -1837,6 +1844,7 @@ short *wvp_ = NULL;
   #endif
   set_stack_filename(WV, fname);
   set_stack_open(WV, OPEN_MERGE);
+  set_stack_explode(stack, false);
   set_stack_scale(WV, 0, 1000);
   set_stack_wavelength(WV, 0, 1);
   set_stack_unit(WV, 0, "unknown");
