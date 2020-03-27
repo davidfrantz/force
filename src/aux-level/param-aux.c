@@ -945,7 +945,14 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
-  
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
+    fprintf(fp, "# if the stack will be exploded into single-band files.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_EXPLODE = FALSE\n");
+
   //if (verbose){
   //  fprintf(fp, "# If an output file already exists.. Overwrite?\n");
   //  fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
