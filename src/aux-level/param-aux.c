@@ -595,6 +595,13 @@ void write_par_ll_output(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
   
   if (verbose){
+    fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
+    fprintf(fp, "# if the stack will be exploded into single-band files.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_EXPLODE = FALSE\n");
+
+  if (verbose){
     fprintf(fp, "# Output the cloud/cloud shadow/snow distance output? Note that this is NOT\n");
     fprintf(fp, "# the cloud mask (which is sitting in the mandatory QAI product). This pro-\n");
     fprintf(fp, "# duct can be used in force-level3; no other higher-level FORCE module is\n");
