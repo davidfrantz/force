@@ -14,7 +14,8 @@ The user can choose to keep the original projection (UTM) or to reproject all da
 
 .. warning::
 
-  If you are not using the datacube options, i.e. ``DO_REPROJ = FALSE`` or ``DO_TILE = FALSE``, you are running into a *dead end* for FORCE. In this case, the data cannot be further processed or analysed with any :ref:`higher-level`.
+  If you are not using the datacube options, i.e. ``DO_REPROJ = FALSE`` or ``DO_TILE = FALSE``, you are running into a *dead end* for FORCE. 
+  In this case, the data cannot be further processed or analysed with any :ref:`hlps` functionality.
 
 
 .. seealso:: 

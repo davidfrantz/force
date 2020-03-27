@@ -95,7 +95,7 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
 
 .. code-block:: bash
 
-  gdalinfo -mdd all 20160823_LEVEL2_SEN2A_BOA.tif
+  gdalinfo -mdd all 20160701_LEVEL3_LNDLG_BAP.tif
 
 
 Product type

@@ -1,7 +1,7 @@
 .. _l3-param:
 
-Level 3 Composite Parameterization
-==================================
+Parameterization
+================
 
 A parameter file is mandatory for the Level 3 Compositing submodule of FORCE HLPS.
 
