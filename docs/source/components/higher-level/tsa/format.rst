@@ -27,90 +27,122 @@ Following 42 to 46-digit naming convention is applied to all output files:
 
 Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 
-Digits 36–38	3-digit index compact name
-+                + BLU   + Blue band
-+                + GRN   + Green band
-+                + RED   + Red band
-+                + NIR   + Near Infrared band
-+                + SW1   + Shortwave Infrared band 1
-+                + SW2   + Shortwave Infrared band 2
-+                + RE1   + Red Edge band 1
-+                + RE2   + Red Edge band 2
-+                + RE3   + Red Edge band 3
-+                + BNR   + Broad Near Infrared band
-+                + NDV   + Normalized Difference Vegetation Index
-+                + EVI   + Enhanced Vegetation Index
-+                + NBR   + Normalized Burn Ratio
-+                + ARV   + Atmospherically Resistant Vegetation Index
-+                + SAV   + Soil Adjusted Vegetation Index
-+                + SRV   + Soil and Atmospherically Resistant Vegetation Index
-+                + TCB   + Tasseled Cap Brightness
-+                + TCG   + Tasseled Cap Greenness
-+                + TCW   + Tasseled Cap Wetness
-+                + TCD   + Tasseled Cap-based Disturbance Index
-+                + SMA   + Spectral Mixture Analysis abundance
-
-Digits 59–61	Product Type
-+                + TSS   + Time Series Stack
-+                + TSI   + Time Series Interpolation
-+                + RMS   + RMSE Time Series of SMA
-+                + STM   + Spectral Temporal Metrics
-+                + TRD   + Trend Analysis
-+                + CAT   + Extended CAT Analysis
-+                + FBY   + Fold-by-Year Stack
-+                + FBM   + Fold-by-Month Stack
-+                + FBW   + Fold-by-Week Stack
-+                + FBD   + Fold-by-Day Stack
-
-1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 
 **Table 1:** Naming convention
 
-+----------------+---------+------------------------------------------+
-+ Digits         + Description                                        +
-+================+=========+==========================================+
-+ 1–9            + Temporal range for the years as YYYY–YYYY          +
-+----------------+---------+------------------------------------------+
-+ 11-17          + Temporal range for the DOY as DDD–DDD              +
-+----------------+---------+------------------------------------------+
-+ 19-20          + Product Level                                      +
-+----------------+---------+------------------------------------------+
-+ 22-24          + Submodule                                          +
-+----------------+---------+------------------------------------------+
-+ 26-30          + Sensor ID                                          +
-+                +---------+------------------------------------------+
-+                + LNDLG   + Landsat legacy bands                     +
-+                +---------+------------------------------------------+
-+                + SEN2L   + Sentinel-2 land bands                    +
-+                +---------+------------------------------------------+
-+                + SEN2H   + Sentinel-2 high-res bands                +
-+                +---------+------------------------------------------+
-+                + R-G-B   + Visible bands                            +
-+                +---------+------------------------------------------+
-+                + VVVHP   + VV/VH Dual Polarized                     +
-+----------------+---------+------------------------------------------+
-+ 32–34          + Index Short Name                                   +
-+                +---------+------------------------------------------+
-+----------------+---------+------------------------------------------+
-+ 36-38          + Product Type                                       +
-+                +---------+------------------------------------------+
-+----------------+---------+------------------------------------------+
-+ 36-42          + Product Type: Phenology (replace XXX with Table 3) +
-+                +---------+------------------------------------------+
-+                + XXX-LSP + Phenometrics                             +
-+                +---------+------------------------------------------+
-+                + XXX-TRP + Trend Analysis on Phenometrics           +
-+                +---------+------------------------------------------+
-+                + XXX-CAP + Extended CAT Analysis on Phenometrics    +
-+----------------+---------+------------------------------------------+
-+ 40-42 / 44-46  + File extension                                     +
-+                +---------+------------------------------------------+
-+                + tif     + image data in compressed GeoTiff format  +
-+                +---------+------------------------------------------+
-+                + dat     + image data in flat binary ENVI format    +
-+                +---------+------------------------------------------+
-+                + hdr     + metadata for ENVI format                 +
-+----------------+---------+------------------------------------------+
++----------------+---------+---------------------------------------------------------+
++ Digits         + Description                                                       +
++================+=========+=========================================================+
++ 1–9            + Temporal range for the years as YYYY–YYYY                         +
++----------------+---------+---------------------------------------------------------+
++ 11-17          + Temporal range for the DOY as DDD–DDD                             +
++----------------+---------+---------------------------------------------------------+
++ 19-20          + Product Level                                                     +
++----------------+---------+---------------------------------------------------------+
++ 22-24          + Submodule                                                         +
++----------------+---------+---------------------------------------------------------+
++ 26-30          + Sensor ID                                                         +
++                +---------+---------------------------------------------------------+
++                + LNDLG   + Landsat legacy bands                                    +
++                +---------+---------------------------------------------------------+
++                + SEN2L   + Sentinel-2 land bands                                   +
++                +---------+---------------------------------------------------------+
++                + SEN2H   + Sentinel-2 high-res bands                               +
++                +---------+---------------------------------------------------------+
++                + R-G-B   + Visible bands                                           +
++                +---------+---------------------------------------------------------+
++                + VVVHP   + VV/VH Dual Polarized                                    +
++----------------+---------+---------------------------------------------------------+
++ 32–34          + Index Short Name                                                  +
++                +---------+---------------------------------------------------------+
++                + BLU     + Blue band                                               +
++                +---------+---------------------------------------------------------+
++                + GRN     + Green band                                              +
++                +---------+---------------------------------------------------------+
++                + RED     + Red band                                                +
++                +---------+---------------------------------------------------------+
++                + NIR     + Near Infrared band                                      +
++                +---------+---------------------------------------------------------+
++                + SW1     + Shortwave Infrared band 1                               +
++                +---------+---------------------------------------------------------+
++                + SW2     + Shortwave Infrared band 2                               +
++                +---------+---------------------------------------------------------+
++                + RE1     + Red Edge band 1                                         +
++                +---------+---------------------------------------------------------+
++                + RE2     + Red Edge band 2                                         +
++                +---------+---------------------------------------------------------+
++                + RE3     + Red Edge band 3                                         +
++                +---------+---------------------------------------------------------+
++                + BNR     + Broad Near Infrared band                                +
++                +---------+---------------------------------------------------------+
++                + NDV     + Normalized Difference Vegetation Index                  +
++                +---------+---------------------------------------------------------+
++                + EVI     + Enhanced Vegetation Index                               +
++                +---------+---------------------------------------------------------+
++                + NBR     + Normalized Burn Ratio                                   +
++                +---------+---------------------------------------------------------+
++                + ARV     + Atmospherically Resistant Vegetation Index              +
++                +---------+---------------------------------------------------------+
++                + SAV     + Soil Adjusted Vegetation Index                          +
++                +---------+---------------------------------------------------------+
++                + SRV     + Soil and Atmospherically Resistant Vegetation Index     +
++                +---------+---------------------------------------------------------+
++                + TCB     + Tasseled Cap Brightness                                 +
++                +---------+---------------------------------------------------------+
++                + TCG     + Tasseled Cap Greenness                                  +
++                +---------+---------------------------------------------------------+
++                + TCW     + Tasseled Cap Wetness                                    +
++                +---------+---------------------------------------------------------+
++                + TCD     + Tasseled Cap Disturbance Index (without rescaling)      +
++                +---------+---------------------------------------------------------+
++                + NDB     + Normalized Difference Building Index                    +
++                +---------+---------------------------------------------------------+
++                + NDW     + Normalized Difference Water Index                       +
++                +---------+---------------------------------------------------------+
++                + MNW     + modified Normalized Difference Water Index              +
++                +---------+---------------------------------------------------------+
++                + NDS     + Normalized Difference Snow Index                        +
++                +---------+---------------------------------------------------------+
++                + SMA     + Spectral Mixture Analysis abundance                     +
++                +---------+---------------------------------------------------------+
++                + BVV     + VV Polarized band                                       +
++                +---------+---------------------------------------------------------+
++                + BVH     + VH Polarized band                                       +
++----------------+---------+---------------------------------------------------------+
++ 36-38          + Product Type                                                      +
++                +---------+---------------------------------------------------------+
++                + TSS     + Time Series Stack                                       +
++                +---------+---------------------------------------------------------+
++                + TSI     + Time Series Interpolation                               +
++                +---------+---------------------------------------------------------+
++                + RMS     + RMSE Time Series of SMA                                 +
++                +---------+---------------------------------------------------------+
++                + STM     + Spectral Temporal Metrics                               +
++                +---------+---------------------------------------------------------+
++                + FBX     + Fold-by-X Time Series (replace X with Table 2)          +
++                +---------+---------------------------------------------------------+
++                + TRX     + Trend Analysis on Folds (replace X with Table 2)        +
++                +---------+---------------------------------------------------------+
++                + CAX     + Extended CAT Analysis on Folds (replace X with Table 2) +
++                +---------+---------------------------------------------------------+
++                + SPL     + Spline fitted Time Series                               +
++----------------+---------+---------------------------------------------------------+
++ 36-42          + Product Type: Phenometrics (replace XXX with Table 3)             +
++                +---------+---------------------------------------------------------+
++                + XXX-LSP + Phenometrics                                            +
++                +---------+---------------------------------------------------------+
++                + XXX-TRP + Trend Analysis on Phenometrics                          +
++                +---------+---------------------------------------------------------+
++                + XXX-CAP + Extended CAT Analysis on Phenometrics                   +
++----------------+---------+---------------------------------------------------------+
++ 40-42 / 44-46  + File extension                                                    +
++                +---------+---------------------------------------------------------+
++                + tif     + image data in compressed GeoTiff format                 +
++                +---------+---------------------------------------------------------+
++                + dat     + image data in flat binary ENVI format                   +
++                +---------+---------------------------------------------------------+
++                + hdr     + metadata for ENVI format                                +
++----------------+---------+---------------------------------------------------------+
 
 
 **Table 2:** Folding tags
