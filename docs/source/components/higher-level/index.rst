@@ -3,9 +3,6 @@
 Higher Level
 ============
 
-About
-^^^^^
-
 The FORCE Higher Level Processing System (HLPS) provides functionality for Higher Level Processing of cubed ARD and feature datasets.
 
 Some more text and description on how it works.

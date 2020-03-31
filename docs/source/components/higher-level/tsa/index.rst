@@ -17,7 +17,7 @@ The workflow of this submodule is shown in the Figure below.
 * All output is optional. 
   Each product is only generated if it is output - or needed for another product.
   All products indicated by a USB-plug can be output. 
-  All outputs labeled with a \* can be centered / standardized before output.
+  All outputs labeled with a ``*`` can be centered / standardized before output.
 
 * The analysis can be performed with observations from all available sensors, or a subset of these.
   If multiple sensors are used, only overlapping bands are considered.
@@ -54,6 +54,7 @@ The workflow of this submodule is shown in the Figure below.
 
 * The time series can be 'folded' by year, quarter, month, week or day.
   The time series can be folded with any available statistics, e.g. mean or median.
+  
   * If folded by year, the observations are grouped by year to generate an annual time series.
     This is the most frequently used folding option, and is e.g. suitable to compute long-term trends.
   * If folded by quarter, the observations are grouped by quartes (three-month periods), which gives up to 4 values per pixel.
@@ -73,7 +74,7 @@ The workflow of this submodule is shown in the Figure below.
 
 * Trend analysis and/or an change/trend analyses can be performed on any of the folded and/or LSP time series.
   Currently implemented analyses are linear trend analysis, and an extended CAT transform (with additional change and trend parameters for the three parts of the time series (see :ref:`tsa-format`).
-  CAT = **C**hange, **A**ftereffect, **T**rend.
+  CAT = Change, Aftereffect, Trend.
 
 .. warning::
 

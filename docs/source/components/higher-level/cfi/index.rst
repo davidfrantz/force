@@ -10,12 +10,12 @@ FORCE ImproPhe can only be used with Level 2 ARD.
 
 
 
-A glimpse of what you get:
-
+**A glimpse of what you get:**
  
-Fig. 8. Coarse resolution (500m) and ImproPhed (30m) LSP metrics.
+.. image:: cfi.jpg
+
+**Figure** Coarse resolution (500m) and ImproPhed (30m) LSP metrics.
 Rate of Maximum Rise (R), Integral of Green Season (G), and Value of Early Minimum (B) phenometrics for a study site in Brandenburg, Germany. Using the ImproPhe algorithm, the LSP metrics were improved to 30m spatial resolution using Landsat and (degraded) Sentinel-2 targets.
-[Data were fused using force-improphe]
 
 .. toctree::
    :maxdepth: 2
