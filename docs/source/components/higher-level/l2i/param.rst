@@ -23,6 +23,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``DIR_LOWER = NULL``
 
   * Higher Level datapool (parent directory of tiled output data)
+    It is recommended to write the products to the Lower Level datapool
 
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``

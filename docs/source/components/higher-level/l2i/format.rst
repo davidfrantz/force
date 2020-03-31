@@ -3,6 +3,15 @@
 Output Format
 =============
 
+.. note::
+
+  It is recommended to output the "improPhed" Level 2 data to the Level 2 directory, i.e. ``DIR_LOWER = DIR_HIGHER``.
+  This way, the refined dataset is appended to the original dataset as a separate product.
+  Thus, after running this submodule, two surface reflectance versions are available for each date. 
+  The new product will have higher spatial resolution (more pixels) than the other products (e.g. ``QAI``).
+  :ref:`higher-level` can digest this data structure, and the user can choose to use the original BOA or the refined product (``USE_L2_IMPROPHE``).
+
+
 Data organization
 ^^^^^^^^^^^^^^^^^
 
@@ -23,6 +32,39 @@ The spatial data cube definition is appended to each data cube, i.e. to each dir
 Naming convention
 ^^^^^^^^^^^^^^^^^
 
+Following 29-digit naming convention is applied to all output files:
+
+Example filename: 20160823_LEVEL2_SEN2A_IMP.tif
+
++--------+-------+--------------------------------------------+
++ Digits + Description                                        +
++========+=======+============================================+
++ 1–8    + Acquisition date as YYYYMMDD                       +
++--------+-------+--------------------------------------------+
++ 10–15  + Product Level                                      +
++--------+-------+--------------------------------------------+
++ 17–21  + Sensor ID                                          +
++        +-------+--------------------------------------------+
++        + LND04 + Landsat 4 Thematic Mapper                  +
++        +-------+--------------------------------------------+
++        + LND05 + Landsat 5 Thematic Mapper                  +
++        +-------+--------------------------------------------+
++        + LND07 + Landsat 7 Enhanced Thematic Mapper         +
++        +-------+--------------------------------------------+
++        + LND08 + Landsat 8 Operational Land Imager          +
++--------+-------+--------------------------------------------+
++ 23–25  + Product Type                                       +
++        +-------+--------------------------------------------+
++        + IMP   + ImproPhed Bottom-of-Atmosphere Reflectance +
++--------+-------+--------------------------------------------+
++ 27–29  + File extension                                     +
++        +-------+--------------------------------------------+
++        + tif   + image data in compressed GeoTiff format    +
++        +-------+--------------------------------------------+
++        + dat   + image data in flat binary ENVI format      +
++        +-------+--------------------------------------------+
++        + hdr   + metadata for ENVI format                   +
++--------+-------+--------------------------------------------+
 
 
 File format
@@ -62,31 +104,12 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
 Product type
 ^^^^^^^^^^^^
 
+* Reflectance
 
+  There is only one product type, i.e. the ImproPhed Bottom-of-Atmosphere Reflectance (IMP). 
+  The IMP product has the same specification as the BOA product (see :ref:`level2-format`), but spatial resolution was enhanced.
+  The scale is 10000, and nodata value is -9999.
+  IMP data contain multiple bands, which represent wavelengths, see metadata and following tables).
+  All bands are provided at the same spatial resolution (see :ref:`l2-param`).
 
-
-
-Output Format
-=============
-
-Output format
-Data organization
-The output data are organized as the Level 2 data. The output data are appended to the input Level 2 data as new product, i.e. two additional files (image + metadata) appear next to the existing data. Note that the new product will have higher spatial resolution (more pixels) than the other products (e.g. QAI). Higher-level FORCE routines can handle this. For any higher-level FORCE module, you can choose to use the improved product or the original one.
-
-Naming convention
-Following 29-digit naming convention is applied to all output files:
-
-20180823_LEVEL2_LND08_IMP.tif
-20180823_LEVEL2_LND08_IMP.hdr
-
-The naming convention is the same as for the Level 2 data (see VI.B.5). The only difference is the Product Type, which is set to IMP.
-Digits 23–25	Product Type
-		IMP		ImproPhed Bottom-of-Atmosphere Reflectance (standard output, scale: 10000, nodata: -9999)
-
-Product type
-There is only one product type, i.e. the ImproPhed Bottom-of-Atmosphere Reflectance (IMP). The IMP product has the same specification as the BOA product, but spatial resolution was enhanced.
-
-File format
-The data are provided in compressed GeoTiff or flat binary ENVI Standard format. Each dataset consists of an image dataset (.tif/.dat) and metadata (.hdr). The image data have signed 16bit datatype. Each predicted image is stored as separate file.
-The metadata (.hdr) are provided in ENVI Standard format as human-readable text using tag and value notation. Metadata include image characteristics like dimensions, data type, band interleave, coordinate reference system, map info, band names etc.
-
+  

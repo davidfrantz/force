@@ -12,7 +12,10 @@ hARD products are excellent input for many machine learning algorithms, e.g. for
 hARD+ products can be directly used to fuel your research questions without any further processing. 
 
 
-The workflow of this submodule is shown in the Figure below. 
+.. image:: tsa-workflow.jpg
+
+**Figure** Processing workflow of the Time Series Analysis submodule.
+
 
 * All output is optional. 
   Each product is only generated if it is output - or needed for another product.
@@ -84,11 +87,6 @@ The workflow of this submodule is shown in the Figure below.
    Each of these products are multi-band images.
    Some of these products, e.g. interpolated time series, can have 1000s of bands.
    **Use with care!**
-
-  
-.. image:: tsa-workflow.jpg
-
-**Figure** Processing workflow of the Time Series Analysis submodule.
 
 
 **A glimpse of what you get:**

@@ -6,7 +6,10 @@ Clear Sky Observations
 FORCE Clear Sky Observations (FORCE CSO) assists in data availability mining. 
 
 
-The workflow of this submodule is shown in the Figure below. 
+.. image:: cso-workflow.jpg
+
+**Figure** Processing workflow of the Clear Sky Observations submodule.
+
 
 The most important setting are the temporal properties. 
 A temporal range needs to be specified in terms of years, e.g. 2017–2018. 
@@ -20,11 +23,6 @@ A combined look at different statistics, or at a more uncommon metric, may provi
 As an example, the data availability for the first and second half of 2018 (as depicted below) is equal in terms of the number of observations, and the average time between observations. 
 However, there are large differences in the maximum time between observations as the data are clumped in the first half. This may have important implications, e.g. for the detectability of harvesting events.
 Happy data mining!
-
- 
-.. image:: cso-workflow.jpg
-
-**Figure** Processing workflow of the Clear Sky Observations submodule.
 
 
 **A glimpse of what you get:**
@@ -40,7 +38,6 @@ The CSO statistics were computed for the 2015 Landsat 7–8 acquisitions over Tu
    :maxdepth: 2
 
    param.rst
-   process.rst
    format.rst
 
    
