@@ -812,8 +812,7 @@ int i = 0;
   for (f=0; f<nfiles; f++){
     
     if (stack->explode){
-      // could/should be substituted with a short bandname
-      nchar = snprintf(bname, NPOW_10, "_B%04d", f+1);
+      nchar = snprintf(bname, NPOW_10, "_%s", stack->domain[bands[_STACK_][f][0]]);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
     } else bname[0] = '\0';
