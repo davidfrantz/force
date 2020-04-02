@@ -162,3 +162,16 @@ const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
 const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_] = {
   { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};
 
+const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_] = {
+  { _SCR_TOTAL_, "TOTAL" },    { _SCR_DOY_,  "DOY" },  { _SCR_YEAR_,   "YEAR" }, 
+  { _SCR_DST_,   "DISTANCE" }, { _SCR_HAZE_, "HAZE" }, { _SCR_CORREL_, "CORREL" }, 
+  { _SCR_VZEN_,  "VZEN" }};
+       
+const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_] = {
+  { _INF_QAI_,  "QAI" },  { _INF_NUM_,  "NUM" },  { _INF_DOY_, "DOY" }, 
+  { _INF_YEAR_, "YEAR" }, { _INF_DIFF_, "dDOY" }, { _INF_SEN_, "SENSOR" }};
+
+const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
+  { _RGB_R_,  "RED" }, { _RGB_G_,  "GREEN" }, { _RGB_B_,  "BLUE" }};
+  
+  

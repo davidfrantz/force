@@ -87,7 +87,7 @@ enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_JPEG_, _FMT_LENGTH_ };
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };
 
 // RGB
-enum { _RGB_R_, _RGB_G_, _RGB_B_ };
+enum { _RGB_R_, _RGB_G_, _RGB_B_, _RGB_LENGTH_ };
 
 // bit positions for QAI
 enum { _QAI_BIT_OFF_ =  0, _QAI_BIT_CLD_ =  1, _QAI_BIT_SHD_ =  3, 
@@ -134,7 +134,15 @@ enum { _AOD_WAT_, _AOD_SHD_, _AOD_VEG_ };
 enum { _ARD_REF_, _ARD_AUX_, _ARD_MSK_, _ARD_FTR_ };
        
 // scoring method
-enum { _SCR_GAUSS_, _SCR_SIG_DES_, _SCR_SIG_ASC_, _SCR_LENGTH_ };
+enum { _SCR_TYPE_GAUSS_, _SCR_TYPE_SIG_DES_, _SCR_TYPE_SIG_ASC_, _SCR_TYPE_LENGTH_ };
+
+// compositing scores
+enum { _SCR_TOTAL_,  _SCR_DOY_,  _SCR_YEAR_, _SCR_DST_, _SCR_HAZE_, 
+       _SCR_CORREL_, _SCR_VZEN_, _SCR_LENGTH_ };
+       
+// compositing information
+enum { _INF_QAI_,  _INF_NUM_, _INF_DOY_, _INF_YEAR_, 
+       _INF_DIFF_, _INF_SEN_, _INF_LENGTH_ };
 
 // interpolation method
 enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_LENGTH_ };
@@ -263,6 +271,9 @@ extern const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
 
 #ifdef __cplusplus
 }
