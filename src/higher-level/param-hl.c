@@ -1410,11 +1410,11 @@ double tol = 5e-3;
     // choose type of scoring function
     if (phl->bap.Ds[1] > phl->bap.Ds[0] &&
         phl->bap.Ds[1] > phl->bap.Ds[2]){
-      phl->bap.score_type = _SCR_GAUSS_; // gaussian
+      phl->bap.score_type = _SCR_TYPE_GAUSS_; // gaussian
     } else if (phl->bap.Ds[0] > phl->bap.Ds[2]){
-      phl->bap.score_type = _SCR_SIG_DES_; // descending sigmoid
+      phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
-      phl->bap.score_type = _SCR_SIG_ASC_; // ascending sigmoid
+      phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
     }
 
     // choose products
