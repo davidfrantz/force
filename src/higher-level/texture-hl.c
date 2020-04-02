@@ -48,8 +48,10 @@ stack_t *compile_txt_stack(stack_t *ard, int nb, bool write, char *prodname, par
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_txt(ard_t *features, txt_t *txt, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **TXT = NULL;
-int o, nprod = 7;
+int b, o, nprod = 7;
 int error = 0;
+int nchar;
+char domain[NPOW_04];
 enum { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 int prodlen[7] = { phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
 char prodname[7][NPOW_02] = { "ERO", "DIL", "OPN", "CLS", "GRD", "THT", "BHT" };
@@ -71,6 +73,19 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
     if (enable[o]){
       if ((TXT[o] = compile_txt_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(TXT[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[o]; b++){
+          if (strlen(phl->ftr.bname[o]) > NPOW_04-1){
+            nchar = snprintf(domain, NPOW_04, "FEATURE-%04d", b+1);
+            if (nchar < 0 || nchar >= NPOW_04){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
+          } else { 
+            strncpy(domain, phl->ftr.bname[o], strlen(phl->ftr.bname[o])); 
+            domain[strlen(phl->ftr.bname[o])] = '\0';
+          }
+          set_stack_domain(TXT[o],   b, domain);
+          set_stack_bandname(TXT[o], b, domain);
+        }
       }
     } else {
       TXT[o]  = NULL;
