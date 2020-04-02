@@ -38,8 +38,6 @@ void register_train(params_t *params, par_train_t *train);
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_train(params_t *params, par_train_t *train){
-par_enum_t method[_ML_LENGTH_] = {
-  { _ML_SVR_, "SVR" }, { _ML_SVC_, "SVC" }, { _ML_RFR_, "RFR" }, { _ML_RFC_, "RFC" }};
 
 
   register_char_par(params,     "FILE_FEATURES",         _CHAR_TEST_EXIST_, &train->f_feature);
@@ -48,7 +46,7 @@ par_enum_t method[_ML_LENGTH_] = {
   register_char_par(params,     "FILE_LOG",              _CHAR_TEST_NONE_,  &train->f_log);
   register_float_par(params,    "PERCENT_TRAIN",         0.001, 100, &train->per_train);
   register_bool_par(params,     "RANDOM_SPLIT",          &train->random_split);
-  register_enum_par(params,     "ML_METHOD",             method, _ML_LENGTH_, &train->method);
+  register_enum_par(params,     "ML_METHOD",             _TAGGED_ENUM_ML_, _ML_LENGTH_, &train->method);
   register_int_par(params,      "RF_NTREE",              0, INT_MAX, &train->rf.ntree);
   register_float_par(params,    "RF_OOB_ACCURACY",       0, INT_MAX, &train->rf.oob_accuracy);
   register_int_par(params,      "RF_NFEATURE",           0, INT_MAX, &train->rf.feature_subset);
