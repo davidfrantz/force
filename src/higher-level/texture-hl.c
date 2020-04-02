@@ -51,6 +51,7 @@ stack_t **TXT = NULL;
 int b, o, nprod = 7;
 int error = 0;
 int nchar;
+char bname[NPOW_10];
 char domain[NPOW_04];
 enum { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 int prodlen[7] = { phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
@@ -75,13 +76,14 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          if (strlen(phl->ftr.bname[o]) > NPOW_04-1){
+          basename_without_ext(phl->ftr.bname[o], bname, NPOW_10);
+          if (strlen(bname) > NPOW_04-1){
             nchar = snprintf(domain, NPOW_04, "FEATURE-%04d", b+1);
             if (nchar < 0 || nchar >= NPOW_04){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           } else { 
-            strncpy(domain, phl->ftr.bname[o], strlen(phl->ftr.bname[o])); 
-            domain[strlen(phl->ftr.bname[o])] = '\0';
+            strncpy(domain, bname, strlen(bname)); 
+            domain[strlen(bname)] = '\0';
           }
           set_stack_domain(TXT[o],   b, domain);
           set_stack_bandname(TXT[o], b, domain);
