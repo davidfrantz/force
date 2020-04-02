@@ -353,7 +353,7 @@ void register_int_par(params_t *params, const char *name, int min, int max, int 
 --- ptr:     pointer to instantly useable parameter variable
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_enum_par(params_t *params, const char *name, tagged_enum_t *enums, int n_enums, int *ptr){
+void register_enum_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int *ptr){
 
 
   reallocate_params(params);
@@ -625,7 +625,7 @@ void register_intvec_par(params_t *params, const char *name, int min, int max, i
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_enumvec_par(params_t *params, const char *name, tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length){
+void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length){
 
 
   reallocate_params(params);
