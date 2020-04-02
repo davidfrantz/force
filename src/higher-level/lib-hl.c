@@ -47,6 +47,7 @@ stack_t **LIB = NULL;
 int b, o, nprod = 1;
 int error = 0;
 int nchar;
+char bname[NPOW_10];
 char domain[NPOW_04];
 enum{ _mae_ };
 int prodlen[1] ={ library->n + 1 };
@@ -70,11 +71,17 @@ short ***ptr[1] ={ &lib->mae_ };
       } else {
         for (b=0; b<prodlen[o]; b++){
           if (b < library->n){
-            nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
-            if (nchar < 0 || nchar >= NPOW_04){ 
-              printf("Buffer Overflow in assembling domain\n"); error++;}
+            basename_without_ext(phl->lib.f_lib[o], bname, NPOW_10);
+            if (strlen(bname) > NPOW_04-1){
+              nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
+              if (nchar < 0 || nchar >= NPOW_04){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
+            } else { 
+              strncpy(domain, bname, strlen(bname)); 
+              domain[strlen(bname)] = '\0';
+            }
           } else {
-            strncpy(domain, "LIBRARY-TOTAL", 13); domain[13] = '\0';
+            strncpy(domain, "LIBRARY-SUMMARY", 15); domain[15] = '\0';
           }
           set_stack_domain(LIB[o],   b, domain);
           set_stack_bandname(LIB[o], b, domain);
