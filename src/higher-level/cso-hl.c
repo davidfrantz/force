@@ -50,6 +50,7 @@ stack_t **CSO = NULL;
 int w, q;
 int year, month;
 date_t date;
+char fdate[NPOW_04];
 int o, nprod = phl->cso.sta.nmetrics;
 int error = 0;
 
@@ -97,10 +98,13 @@ short ***ptr[NPOW_08];
         if (month > 12){ year++; month -= 12;}
         set_date(&date, year, month, 1);
         copy_date(&date, &cs->d_cso[w]);
+        compact_date(date.year, date.month, date.day, fdate, NPOW_04);
 //printf("W: "); print_date(&date);
         if (w < nw){
           set_stack_wavelength(CSO[o], w, w+1);
           set_stack_date(CSO[o], w, date);
+          set_stack_domain(CSO[o], w, fdate);
+          set_stack_bandname(CSO[o], w, fdate);
         }
         month += phl->cso.step;
       }
