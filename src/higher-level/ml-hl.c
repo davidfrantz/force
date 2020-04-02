@@ -48,8 +48,10 @@ stack_t *compile_ml_stack(stack_t *ard, int nb, bool write, char *prodname, par_
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_ml(ard_t *features, ml_t *ml, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **ML = NULL;
-int o, nprod = 3;
+int b, o, nprod = 3;
 int error = 0;
+int nchar;
+char domain[NPOW_04];
 enum { _mlp_, _mli_, _mlu_ };
 int prodlen[3] = { phl->mcl.nmodelset, phl->mcl.nmodelset, phl->mcl.nmodelset };
 char prodname[3][NPOW_02] = { "MLP", "MLI", "MLU" };
@@ -65,6 +67,14 @@ short ***ptr[3] = { &ml->mlp_, &ml->mli_, &ml->mlu_ };
     if (enable[o]){
       if ((ML[o] = compile_ml_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(ML[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[o]; b++){
+          nchar = snprintf(domain, NPOW_04, "MODELSET-%02d", b+1);
+          if (nchar < 0 || nchar >= NPOW_04){ 
+            printf("Buffer Overflow in assembling domain\n"); error++;}
+          set_stack_domain(ML[o],   b, domain);
+          set_stack_bandname(ML[o], b, domain);
+        }
       }
     } else {
       ML[o]  = NULL;
