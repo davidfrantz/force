@@ -51,6 +51,7 @@ stack_t **ML = NULL;
 int b, o, nprod = 3;
 int error = 0;
 int nchar;
+char bname[NPOW_10];
 char domain[NPOW_04];
 enum { _mlp_, _mli_, _mlu_ };
 int prodlen[3] = { phl->mcl.nmodelset, phl->mcl.nmodelset, phl->mcl.nmodelset };
@@ -69,9 +70,15 @@ short ***ptr[3] = { &ml->mlp_, &ml->mli_, &ml->mlu_ };
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          nchar = snprintf(domain, NPOW_04, "MODELSET-%02d", b+1);
-          if (nchar < 0 || nchar >= NPOW_04){ 
-            printf("Buffer Overflow in assembling domain\n"); error++;}
+          basename_without_ext(phl->mcl.f_model[o][0], bname, NPOW_10);
+          if (strlen(bname) > NPOW_04-1){
+            nchar = snprintf(domain, NPOW_04, "MODELSET-%02d", b+1);
+            if (nchar < 0 || nchar >= NPOW_04){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
+          } else { 
+            strncpy(domain, bname, strlen(bname)); 
+            domain[strlen(bname)] = '\0';
+          }
           set_stack_domain(ML[o],   b, domain);
           set_stack_bandname(ML[o], b, domain);
         }
