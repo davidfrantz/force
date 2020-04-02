@@ -90,7 +90,6 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
           set_stack_bandname(LSM[o], b, domain);
         }
       }
-
     } else{
       LSM[o]  = NULL;
       *ptr[o] = NULL;
