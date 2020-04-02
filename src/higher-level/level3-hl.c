@@ -44,13 +44,15 @@ stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **LEVEL3 = NULL;
-int nb, nbands;
+int b, nb, nbands;
 int o, nprod = 4;
 int error = 0;
+enum { _ref_, _inf_, _scr_, _ovv_ };
 char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
 bool explode[4] = { false, phl->explode, phl->explode, phl->explode };
-int prodlen[4] = { 0, 6, 7, 3 };
+int prodlen[4] = { 0, _INF_LENGTH_, _SCR_LENGTH_, _RGB_LENGTH_ };
+int prodtype[4] = { _ref_, _inf_, _scr_, _ovv_ };
 bool enable[4] = { phl->bap.obap, phl->bap.oinf, phl->bap.oscr, phl->bap.oovv };
 short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
 
@@ -63,7 +65,30 @@ short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
     if (enable[o]){
       if ((nbands = prodlen[o]) == 0) nbands = nb;
       if ((LEVEL3[o] = compile_level3_stack(ard[0].DAT, nbands, explode[o], fullres[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(LEVEL3[o])) == NULL){
-        printf("Error compiling %s product. ", prodname[o]); error++;}
+        printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[prodtype[o]]; b++){
+          switch (prodtype[o]){
+            case _ref_:
+              break;
+            case _inf_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_INF_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_INF_[b].tag);
+              break;
+            case _scr_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_SCR_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_SCR_[b].tag);
+              break;
+            case _ovv_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_RGB_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_RGB_[b].tag);
+              break;
+            default:
+              printf("unknown level3 type.\n"); error++;
+              break;
+          }
+        }
+      }
     } else {
       LEVEL3[o] = NULL;
       *ptr[o]   = NULL;
@@ -100,9 +125,9 @@ int nx, ny, nx_, ny_;
 int cx, cy, cx_, cy_, cc_; 
 
 
-  if (phl->bap.score_type == _SCR_SIG_DES_) doy2md(phl->bap.Dt[0], &m, &d);
-  if (phl->bap.score_type == _SCR_GAUSS_)   doy2md(phl->bap.Dt[1], &m, &d);
-  if (phl->bap.score_type == _SCR_SIG_ASC_) doy2md(phl->bap.Dt[2], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_SIG_DES_) doy2md(phl->bap.Dt[0], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_GAUSS_)   doy2md(phl->bap.Dt[1], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_SIG_ASC_) doy2md(phl->bap.Dt[2], &m, &d);
   
   date.year = phl->bap.Yt;
   date.month = m;
