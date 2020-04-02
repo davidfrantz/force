@@ -216,8 +216,23 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 
 // tagged enums
+extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];
-
+extern const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_STD_[_STD_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_ML_[_ML_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_TXT_[_TXT_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_QUERY_[_QUERY_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_];
 
 #ifdef __cplusplus
 }
