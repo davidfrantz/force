@@ -31,8 +31,6 @@ This file contains functions for library completeness testing
 stack_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
 stack_t *compile_lib_stack(stack_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
-int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
-
 
 /** This function compiles the stacks, in which LIB results are stored.
 +++ It also sets metadata and sets pointers to instantly useable image
@@ -46,8 +44,10 @@ int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct){
 stack_t **LIB = NULL;
-int o, nprod = 1;
+int b, o, nprod = 1;
 int error = 0;
+int nchar;
+char domain[NPOW_04];
 enum{ _mae_ };
 int prodlen[1] ={ library->n + 1 };
 char prodname[1][NPOW_02] ={ "MAE" };
@@ -67,6 +67,14 @@ short ***ptr[1] ={ &lib->mae_ };
     if (enable[o]){
       if ((LIB[o] = compile_lib_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(LIB[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[o]; b++){
+          nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
+          if (nchar < 0 || nchar >= NPOW_04){ 
+            printf("Buffer Overflow in assembling domain\n"); error++;}
+          set_stack_domain(LIB[o],   b, domain);
+          set_stack_bandname(LIB[o], b, domain);
+        }
       }
     } else{
       LIB[o]  = NULL;
