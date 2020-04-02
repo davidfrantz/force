@@ -49,7 +49,7 @@ stack_t **compile_tsa(ard_t *ard, tsa_t *ts, par_hl_t *phl, cube_t *cube, int nt
 stack_t **TSA = NULL;
 int t, k;
 date_t date;
-char fdate[NPOW_04];
+char fdate[NPOW_10];
 int nchar;
 int o, nprod = 98;
 int error = 0;
@@ -209,7 +209,7 @@ short ***ptr[98] = {
             case _full_:
               date = get_stack_date(ard[t].DAT, 0);
               copy_date(&date, &ts->d_tss[t]);
-              compact_date(date.year, date.month, date.day, fdate, NPOW_04);
+              compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
               set_stack_domain(TSA[o], t, fdate);
@@ -226,7 +226,7 @@ short ***ptr[98] = {
                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
               }
               copy_date(&date, &ts->d_tsi[t]);
-              compact_date(date.year, date.month, date.day, fdate, NPOW_04);
+              compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
               set_stack_domain(TSA[o], t, fdate);
@@ -235,8 +235,8 @@ short ***ptr[98] = {
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
               copy_date(&date, &ts->d_fby[t]);
-              nchar = snprintf(fdate, NPOW_04, "YEAR-%04d", date.year);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
@@ -247,8 +247,8 @@ short ***ptr[98] = {
               while (k < 5 && !phl->date_quarters[k]) k++;
               set_date_quarter(&date, k);
               copy_date(&date, &ts->d_fbq[t]);
-              nchar = snprintf(fdate, NPOW_04, "QUARTER-%01d", date.quarter);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "quarter");
@@ -260,8 +260,8 @@ short ***ptr[98] = {
               while (k < 13 && !phl->date_months[k]) k++;
               set_date_month(&date, k);
               copy_date(&date, &ts->d_fbm[t]);
-              nchar = snprintf(fdate, NPOW_04, "MONTH-%02d", date.month);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "month");
@@ -273,8 +273,8 @@ short ***ptr[98] = {
               while (k < 53 && !phl->date_weeks[k]) k++;
               set_date_week(&date, k);
               copy_date(&date, &ts->d_fbw[t]);
-              nchar = snprintf(fdate, NPOW_04, "WEEK-%02d", date.week);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "week");
@@ -286,8 +286,8 @@ short ***ptr[98] = {
               while (k < 366 && !phl->date_doys[k]) k++;
               set_date_doy(&date, k);
               copy_date(&date, &ts->d_fbd[t]);
-              nchar = snprintf(fdate, NPOW_04, "DOY-%03d", date.doy);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "day of year");
@@ -298,8 +298,8 @@ short ***ptr[98] = {
             case _lsp_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t+1);
               copy_date(&date, &ts->d_lsp[t]);
-              nchar = snprintf(fdate, NPOW_04, "YEAR-%04d", date.year);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");

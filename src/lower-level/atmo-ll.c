@@ -949,21 +949,21 @@ int p, nc;
 int b, b_red, b_nir, b_sw1;
 #ifndef ACIX
 int b_, nb_, bands[10], ndomain = 10;
-char domains[10][NPOW_04] = { "BLUE", "GREEN", "RED", 
+char domains[10][NPOW_10] = { "BLUE", "GREEN", "RED", 
                            "REDEDGE1", "REDEDGE2",
                            "REDEDGE3", "BROADNIR",
                            "NIR", "SWIR1", "SWIR2" };
 #else
 int b_, nb_, bands[12], ndomain = 12;
-char domains[12][NPOW_04] = { "ULTRABLUE", "BLUE", "GREEN", "RED", 
+char domains[12][NPOW_10] = { "ULTRABLUE", "BLUE", "GREEN", "RED", 
                            "REDEDGE1", "REDEDGE2",
                            "REDEDGE3", "BROADNIR",
                            "NIR", "VAPOR", "SWIR1", "SWIR2" };
 #endif
 char fname[NPOW_10];
 char product[NPOW_02];
-char domain[NPOW_04];
-char bandname[NPOW_08];
+char domain[NPOW_10];
+char bandname[NPOW_10];
 char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
@@ -1029,8 +1029,8 @@ stack_t *BOA = TOA;
     printf("error in surface reflectance.\n"); return NULL;}
 
     set_stack_wavelength(BOA, b_, get_stack_wavelength(BOA, b));
-    get_stack_domain(BOA,   b, domain,   NPOW_04); set_stack_domain(BOA,   b_, domain);
-    get_stack_bandname(BOA, b, bandname, NPOW_08); set_stack_bandname(BOA, b_, bandname);
+    get_stack_domain(BOA,   b, domain,   NPOW_10); set_stack_domain(BOA,   b_, domain);
+    get_stack_bandname(BOA, b, bandname, NPOW_10); set_stack_bandname(BOA, b_, bandname);
 
     if (Tg_ != NULL) free((void*)Tg_);  
     Tg_ = NULL;

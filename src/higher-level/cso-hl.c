@@ -50,7 +50,7 @@ stack_t **CSO = NULL;
 int w, q;
 int year, month;
 date_t date;
-char fdate[NPOW_04];
+char fdate[NPOW_10];
 int o, nprod = phl->cso.sta.nmetrics;
 int error = 0;
 
@@ -98,7 +98,7 @@ short ***ptr[NPOW_08];
         if (month > 12){ year++; month -= 12;}
         set_date(&date, year, month, 1);
         copy_date(&date, &cs->d_cso[w]);
-        compact_date(date.year, date.month, date.day, fdate, NPOW_04);
+        compact_date(date.year, date.month, date.day, fdate, NPOW_10);
 //printf("W: "); print_date(&date);
         if (w < nw){
           set_stack_wavelength(CSO[o], w, w+1);

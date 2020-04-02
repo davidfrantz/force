@@ -48,8 +48,7 @@ stack_t **CFI = NULL;
 int b, o, nprod = ncf;
 int error = 0;
 date_t date;
-char fdate[NPOW_04];
-char domain[NPOW_04];
+char fdate[NPOW_10];
 int nchar;
 int prodlen;
 char bname[NPOW_10];
@@ -78,11 +77,11 @@ short ****ptr = NULL;
       
       for (b=0; b<prodlen; b++){
         set_date_year(&date, phl->cfi.years[o]);
-        nchar = snprintf(fdate, NPOW_04, "YEAR-%04d", date.year);
-        if (nchar < 0 || nchar >= NPOW_04){ 
+        nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+        if (nchar < 0 || nchar >= NPOW_10){ 
           printf("Buffer Overflow in assembling domain\n"); error++;}
-        set_stack_domain(CFI[o],   b, domain);
-        set_stack_bandname(CFI[o], b, domain);
+        set_stack_domain(CFI[o],   b, fdate);
+        set_stack_bandname(CFI[o], b, fdate);
       }
     }
 

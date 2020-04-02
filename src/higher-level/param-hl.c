@@ -996,7 +996,7 @@ const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 }}; // VV/VH polarized
-char domains[_WVL_LENGTH_][NPOW_04] = {
+char domains[_WVL_LENGTH_][NPOW_10] = {
   "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
   "REDEDGE3", "BROADNIR", "NIR", "SWIR1", "SWIR2",
   "VV", "VH" };
@@ -1049,11 +1049,11 @@ int *band_ptr[_WVL_LENGTH_] = {
   // build sensor struct
   alloc_2D((void***)&sen->sensor, sen->n,  NPOW_10, sizeof(char));
   alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
-  alloc_2D((void***)&sen->domain, sen->nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
 
   for (b=0, bb=0; b<nb; b++){
     if (!vb[b]) continue;
-    if (strlen(domains[b]) > NPOW_04-1){
+    if (strlen(domains[b]) > NPOW_10-1){
       printf("cannot copy, string too long.\n"); exit(1);
     } else { strncpy(sen->domain[bb], domains[b], strlen(domains[b])); sen->domain[bb][strlen(domains[b])] = '\0';}
     for (s=0, ss=0; s<ns; s++){

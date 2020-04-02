@@ -75,7 +75,7 @@ int b_, nb_ = 10; // band ID and number of bands for which we have parameters
 float iso[10] = { 0.0774, 0.1306, 0.1690, 0.2085, 0.2316, 0.2599, 0.3093, 0.3093, 0.3430, 0.2658 };
 float vol[10] = { 0.0372, 0.0580, 0.0574, 0.0845, 0.1003, 0.1197, 0.1535, 0.1535, 0.1154, 0.0639 };
 float geo[10] = { 0.0079, 0.0178, 0.0227, 0.0256, 0.0273, 0.0294, 0.0330, 0.0330, 0.0453, 0.0387 };
-char domain[10][NPOW_04] = { "BLUE", "GREEN", "RED", 
+char domain[10][NPOW_10] = { "BLUE", "GREEN", "RED", 
                            "REDEDGE1", "REDEDGE2",
                            "REDEDGE3", "BROADNIR",
                            "NIR", "SWIR1", "SWIR2" };

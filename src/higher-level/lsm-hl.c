@@ -53,7 +53,7 @@ int b, o, nprod = 10;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
-char domain[NPOW_04];
+char domain[NPOW_10];
 enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
 int prodlen[10] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
 char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
@@ -78,9 +78,9 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
       } else {
         for (b=0; b<prodlen[o]; b++){
           basename_without_ext(phl->ftr.bname[o], bname, NPOW_10);
-          if (strlen(bname) > NPOW_04-1){
-            nchar = snprintf(domain, NPOW_04, "FEATURE-%04d", b+1);
-            if (nchar < 0 || nchar >= NPOW_04){ 
+          if (strlen(bname) > NPOW_10-1){
+            nchar = snprintf(domain, NPOW_10, "FEATURE-%04d", b+1);
+            if (nchar < 0 || nchar >= NPOW_10){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           } else { 
             strncpy(domain, bname, strlen(bname)); 

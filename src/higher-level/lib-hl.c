@@ -48,7 +48,7 @@ int b, o, nprod = 1;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
-char domain[NPOW_04];
+char domain[NPOW_10];
 enum{ _mae_ };
 int prodlen[1] ={ library->n + 1 };
 char prodname[1][NPOW_02] ={ "MAE" };
@@ -72,9 +72,9 @@ short ***ptr[1] ={ &lib->mae_ };
         for (b=0; b<prodlen[o]; b++){
           if (b < library->n){
             basename_without_ext(phl->lib.f_lib[o], bname, NPOW_10);
-            if (strlen(bname) > NPOW_04-1){
-              nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
-              if (nchar < 0 || nchar >= NPOW_04){ 
+            if (strlen(bname) > NPOW_10-1){
+              nchar = snprintf(domain, NPOW_10, "LIBRARY-%02d", b+1);
+              if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
             } else { 
               strncpy(domain, bname, strlen(bname)); 

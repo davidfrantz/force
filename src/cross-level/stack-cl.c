@@ -64,8 +64,8 @@ stack_t *stack = NULL;
   alloc((void**)&stack->scale,      nb, sizeof(float));
   alloc((void**)&stack->wavelength, nb, sizeof(float));
   alloc_2D((void***)&stack->unit, nb, NPOW_04, sizeof(char));
-  alloc_2D((void***)&stack->domain, nb, NPOW_04, sizeof(char));
-  alloc_2D((void***)&stack->bandname,   nb, NPOW_08, sizeof(char));
+  alloc_2D((void***)&stack->domain, nb, NPOW_10, sizeof(char));
+  alloc_2D((void***)&stack->bandname,   nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&stack->sensor,     nb, NPOW_04, sizeof(char));
   alloc((void**)&stack->date, nb, sizeof(date_t));
   
@@ -108,8 +108,8 @@ int datatype = get_stack_datatype(stack);
   re_alloc((void**)&stack->scale,        nb0, nb, sizeof(float));
   re_alloc((void**)&stack->wavelength,   nb0, nb, sizeof(float));
   re_alloc_2D((void***)&stack->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
-  re_alloc_2D((void***)&stack->domain,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
-  re_alloc_2D((void***)&stack->bandname, nb0, NPOW_08, nb, NPOW_08, sizeof(char));
+  re_alloc_2D((void***)&stack->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
+  re_alloc_2D((void***)&stack->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&stack->sensor,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
   re_alloc((void**)&stack->date,         nb0, nb, sizeof(date_t));
 
@@ -1748,10 +1748,10 @@ void convert_stack_ji2jip(stack_t *from, stack_t *to, int i_from, int j_from, in
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int find_domain(stack_t *stack, const char *domain){
 int b, n = get_stack_nbands(stack);
-char domain_[NPOW_04];
+char domain_[NPOW_10];
 
   for (b=0; b<n; b++){
-    get_stack_domain(stack, b, domain_, NPOW_04);
+    get_stack_domain(stack, b, domain_, NPOW_10);
     if (strcmp(domain_, domain) == 0) return b;
   }
   
@@ -2922,7 +2922,7 @@ void get_stack_unit(stack_t *stack, int b, char unit[], size_t size){
 void set_stack_domain(stack_t *stack, int b, const char *domain){
 
 
-  if (strlen(domain) > NPOW_04-1){
+  if (strlen(domain) > NPOW_10-1){
     printf("cannot copy, string too long.\n"); exit(1);
   } else { 
     strncpy(stack->domain[b], domain, strlen(domain)); 
@@ -2963,7 +2963,7 @@ void get_stack_domain(stack_t *stack, int b, char domain[], size_t size){
 void set_stack_bandname(stack_t *stack, int b, const char *bandname){
 
 
-  if (strlen(bandname) > NPOW_08-1){
+  if (strlen(bandname) > NPOW_10-1){
     printf("cannot copy, string too long.\n"); exit(1);
   } else { 
     strncpy(stack->bandname[b], bandname, strlen(bandname)); 

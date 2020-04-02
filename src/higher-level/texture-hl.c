@@ -52,7 +52,7 @@ int b, o, nprod = 7;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
-char domain[NPOW_04];
+char domain[NPOW_10];
 enum { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 int prodlen[7] = { phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
 char prodname[7][NPOW_02] = { "ERO", "DIL", "OPN", "CLS", "GRD", "THT", "BHT" };
@@ -77,9 +77,9 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
       } else {
         for (b=0; b<prodlen[o]; b++){
           basename_without_ext(phl->ftr.bname[o], bname, NPOW_10);
-          if (strlen(bname) > NPOW_04-1){
-            nchar = snprintf(domain, NPOW_04, "FEATURE-%04d", b+1);
-            if (nchar < 0 || nchar >= NPOW_04){ 
+          if (strlen(bname) > NPOW_10-1){
+            nchar = snprintf(domain, NPOW_10, "FEATURE-%04d", b+1);
+            if (nchar < 0 || nchar >= NPOW_10){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           } else { 
             strncpy(domain, bname, strlen(bname)); 
