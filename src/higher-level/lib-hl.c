@@ -69,9 +69,13 @@ short ***ptr[1] ={ &lib->mae_ };
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
-          if (nchar < 0 || nchar >= NPOW_04){ 
-            printf("Buffer Overflow in assembling domain\n"); error++;}
+          if (b < library->n){
+            nchar = snprintf(domain, NPOW_04, "LIBRARY-%02d", b+1);
+            if (nchar < 0 || nchar >= NPOW_04){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
+          } else {
+            strncpy(domain, "LIBRARY-TOTAL", 13); domain[13] = '\0';
+          }
           set_stack_domain(LIB[o],   b, domain);
           set_stack_bandname(LIB[o], b, domain);
         }
