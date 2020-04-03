@@ -50,7 +50,7 @@ int error = 0;
 enum { _ref_, _inf_, _scr_, _ovv_ };
 char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
-bool explode[4] = { false, phl->explode, phl->explode, phl->explode };
+bool explode[4] = { false, phl->explode, phl->explode, false };
 int prodlen[4] = { 0, _INF_LENGTH_, _SCR_LENGTH_, _RGB_LENGTH_ };
 int prodtype[4] = { _ref_, _inf_, _scr_, _ovv_ };
 bool enable[4] = { phl->bap.obap, phl->bap.oinf, phl->bap.oscr, phl->bap.oovv };
