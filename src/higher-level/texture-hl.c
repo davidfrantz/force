@@ -76,14 +76,15 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          basename_without_ext(phl->ftr.bname[o], bname, NPOW_10);
+          basename_without_ext(phl->ftr.bname[b], bname, NPOW_10);
           if (strlen(bname) > NPOW_10-1){
             nchar = snprintf(domain, NPOW_10, "FEATURE-%04d", b+1);
             if (nchar < 0 || nchar >= NPOW_10){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           } else { 
-            strncpy(domain, bname, strlen(bname)); 
-            domain[strlen(bname)] = '\0';
+            nchar = snprintf(domain, NPOW_10, "%s_B%04d", bname, phl->ftr.band[b]);
+            if (nchar < 0 || nchar >= NPOW_10){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
           }
           set_stack_domain(TXT[o],   b, domain);
           set_stack_bandname(TXT[o], b, domain);
