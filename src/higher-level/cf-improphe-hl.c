@@ -168,6 +168,7 @@ int ny_cf, b_cf, y;
 short ard_nodata, cf_nodata;
 float **KDIST = NULL; // kernel distance
 int width, nk, mink; // number of kernel pixels, and minimum number of pixels for good prediction
+bool is_empty;
 
 
   cite_me(_CITE_IMPROPHE_);
@@ -230,10 +231,26 @@ int width, nk, mink; // number of kernel pixels, and minimum number of pixels fo
     b_cf = phl->cfi.years[y]-phl->cfi.y0;
 
     // compute average per seasonal window
-    if ((seasonal_avg_ = average_season(ard, mask_, nb_ard, nc, nt, ard_nodata, phl->imp.nwin, phl->imp.dwin, phl->cfi.years[y])) == NULL){
+    if ((seasonal_avg_ = average_season(ard, mask_, nb_ard, nc, nt, ard_nodata, phl->imp.nwin, phl->imp.dwin, phl->cfi.years[y], &is_empty)) == NULL){
       printf("error in computing window averages.\n");
       *nproduct = 0;
       return NULL;}
+
+    // if there is no valid target data, copy over and skip
+    if (is_empty){
+
+      for (f=0; f<ncf; f++){
+        #pragma omp parallel shared(cfi,cf,nc,y,f,b_cf) default(none)
+        {
+          #pragma omp for
+          for (p=0; p<nc; p++) cfi.imp_[f][y][p] = cf[f].dat[b_cf][p];
+        }
+      }
+
+      *nproduct = nprod;
+      return CFI;
+
+    }
 
     // reduce HR dimensionality using principal component analysis
     if ((ard_ = pca(seasonal_avg_, mask_, phl->imp.nwin*nb_ard, nc, ard_nodata, 0.975, &npc)) == NULL){

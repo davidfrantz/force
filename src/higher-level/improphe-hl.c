@@ -275,21 +275,23 @@ double normweight;
 +++ proPhe code. If one seasonal window has no valid data, the overall 
 +++ mean is used instead. The averages are copied into the 3x3 mosaic ima-
 +++ ges used in ImproPhe.
---- ard:    ARD
---- mask_:  mask image
---- nb:     number of bands
---- nc:     number of pixels
---- nt:     number of ARD products over time
---- nodata: nodata value
---- nwin:   number of seasonal windows
---- dwin:   doy boundaries of seasonal windows
---- ywin:   year that seasonal window refers to (-1 for multi-annual)
-+++ Return: seasonal average
+--- ard:      ARD
+--- mask_:    mask image
+--- nb:       number of bands
+--- nc:       number of pixels
+--- nt:       number of ARD products over time
+--- nodata:   nodata value
+--- nwin:     number of seasonal windows
+--- dwin:     doy boundaries of seasonal windows
+--- ywin:     year that seasonal window refers to (-1 for multi-annual)
+--- is_empty: is there any valid data?
++++ Return:   seasonal average
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short **average_season(ard_t *ard, small *mask_, int nb, int nc, int nt, short nodata, int nwin, int *dwin, int ywin){
+short **average_season(ard_t *ard, small *mask_, int nb, int nc, int nt, short nodata, int nwin, int *dwin, int ywin, bool *is_empty){
 double **avg = NULL;
 int *k = NULL;
 int t, p, b, w, wb, doy, year;
+int n_valid = 0;
 bool ok;
 short **seasonal_avg_ = NULL;
 
@@ -297,7 +299,7 @@ short **seasonal_avg_ = NULL;
   alloc_2D((void***)&seasonal_avg_, nwin*nb, nc, sizeof(short));
 
 
-  #pragma omp parallel private(avg,k,t,p,w,b,wb,ok,doy,year) shared(seasonal_avg_,ard,mask_,nodata,nb,nc,nt,nwin,dwin,ywin) default(none)
+  #pragma omp parallel private(avg,k,t,p,w,b,wb,ok,doy,year) shared(seasonal_avg_,ard,mask_,nodata,nb,nc,nt,nwin,dwin,ywin) reduction(+: n_valid) default(none)
   {
 
     // allocate memory
@@ -365,7 +367,7 @@ short **seasonal_avg_ = NULL;
         k[w]++; k[nwin]++;
 
       }
-    
+
       if (k[nwin] == 0){
         
         for (wb=0; wb<nwin*nb; wb++) seasonal_avg_[wb][p] = nodata;
@@ -388,6 +390,8 @@ short **seasonal_avg_ = NULL;
 
         }
 
+        n_valid++;
+
       }
 
     }
@@ -399,6 +403,7 @@ short **seasonal_avg_ = NULL;
 
   }
 
+  if (n_valid > 0) *is_empty = false; else *is_empty = true;
 
   return seasonal_avg_;
 }
