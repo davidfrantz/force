@@ -71,7 +71,7 @@ short ***ptr[1] ={ &lib->mae_ };
       } else {
         for (b=0; b<prodlen[o]; b++){
           if (b < library->n){
-            basename_without_ext(phl->lib.f_lib[o], bname, NPOW_10);
+            basename_without_ext(phl->lib.f_lib[b], bname, NPOW_10);
             if (strlen(bname) > NPOW_10-1){
               nchar = snprintf(domain, NPOW_10, "LIBRARY-%02d", b+1);
               if (nchar < 0 || nchar >= NPOW_10){ 

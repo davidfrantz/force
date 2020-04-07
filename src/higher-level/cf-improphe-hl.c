@@ -76,7 +76,7 @@ short ****ptr = NULL;
       set_date(&date, 2000, 1, 1);
       
       for (b=0; b<prodlen; b++){
-        set_date_year(&date, phl->cfi.years[o]);
+        set_date_year(&date, phl->cfi.years[b]);
         nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
         if (nchar < 0 || nchar >= NPOW_10){ 
           printf("Buffer Overflow in assembling domain\n"); error++;}

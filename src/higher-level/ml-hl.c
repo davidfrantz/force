@@ -70,7 +70,7 @@ short ***ptr[3] = { &ml->mlp_, &ml->mli_, &ml->mlu_ };
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          basename_without_ext(phl->mcl.f_model[o][0], bname, NPOW_10);
+          basename_without_ext(phl->mcl.f_model[b][0], bname, NPOW_10);
           if (strlen(bname) > NPOW_10-1){
             nchar = snprintf(domain, NPOW_10, "MODELSET-%02d", b+1);
             if (nchar < 0 || nchar >= NPOW_10){ 
