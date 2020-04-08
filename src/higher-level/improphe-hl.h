@@ -42,7 +42,7 @@ extern "C" {
 
 int improphe(float **hr_, float *hr_tex_, float **mr_, float **mr_tex_, short **pred_, float **KDIST, float nodata_hr, short nodata_mr, int i, int j, int p, int nx, int ny, int h, int nb_hr, int nb_mr, int nk, int mink);
 double rescale_weight(double weight, double minweight, double maxweight);
-short **average_season(ard_t *ard, small *mask_, int nb, int nc, int nt, short nodata, int nwin, int *dwin, int ywin);
+short **average_season(ard_t *ard, small *mask_, int nb, int nc, int nt, short nodata, int nwin, int *dwin, int ywin, bool *is_empty);
 int standardize_float(float *data, float nodata, int nc);
 float *focal_sd(float **DAT, float nodata, int h, int nx, int ny, int nb, int bstart);
 
