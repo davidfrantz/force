@@ -19,7 +19,7 @@ This includes cloud and cloud shadow detection, potentially co-registration, rad
 
 Each image (box in Figure 1) is processed independently using multiprocessing and optionally multithreading. 
 The pipeline is memory resident to minimize input/output (I/O), i.e. input data are read once, and only the final, gridded data products are written to disc.
-The data generated with this module are the main input for the :ref:`higher-level`.
+The data generated with this module are the main input for the :ref:`hlps` component.
 
 
 .. image:: L2PS.jpg
