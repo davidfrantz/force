@@ -1259,7 +1259,7 @@ void free_param_higher(par_hl_t *phl){
 int parse_param_higher(par_hl_t *phl){
 FILE *fpar;
 char  buffer[NPOW_10] = "\0";
-int d, w, m, q, tmp;
+int d, w, m, q, y, tmp;
 double tol = 5e-3;
   
 
@@ -1609,6 +1609,13 @@ double tol = 5e-3;
 
   }
 
+  if (phl->type == _HL_CFI_){
+    for (y=0; y<phl->cfi.nyears; y++){
+      if (phl->cfi.years[y] < phl->date_range[_MIN_].year || 
+          phl->cfi.years[y] > phl->date_range[_MAX_].year){
+        printf("The prediction year %d (COARSE_PREDICT_YEARS) is outside of DATE_RANGE. This won't work.\n", phl->cfi.years[y]); return FAILURE;}
+    }
+  }
 
   return SUCCESS;
 }
