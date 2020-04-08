@@ -128,10 +128,10 @@ int f, y;
 float param[7];
 
 
-  if (bap->score_type == _SCR_SIG_DES_ || bap->score_type == _SCR_SIG_ASC_){
+  if (bap->score_type == _SCR_TYPE_SIG_DES_ || bap->score_type == _SCR_TYPE_SIG_ASC_){
     for (f=0; f<3; f++) param[f+3] = bap->Ds[f];
-    if (bap->score_type == _SCR_SIG_DES_) param[6] = bap->Ds[0];
-    if (bap->score_type == _SCR_SIG_ASC_) param[6] = bap->Ds[2];
+    if (bap->score_type == _SCR_TYPE_SIG_DES_) param[6] = bap->Ds[0];
+    if (bap->score_type == _SCR_TYPE_SIG_ASC_) param[6] = bap->Ds[2];
   }
 
   for (y=0; y<bap->Yn; y++){
@@ -141,10 +141,10 @@ float param[7];
     param[1] = 0;
     param[2] = target[y].ce[2] - target[y].ce[1];
 
-    if (bap->score_type == _SCR_GAUSS_){
+    if (bap->score_type == _SCR_TYPE_GAUSS_){
       target[y].a = fabs((param[0])/sqrt(-2*log(bap->Ds[0]/bap->Ds[1])));
       target[y].b = fabs((param[2])/sqrt(-2*log(bap->Ds[2]/bap->Ds[1])));
-    } else if (bap->score_type == _SCR_SIG_DES_ || bap->score_type == _SCR_SIG_ASC_){
+    } else if (bap->score_type == _SCR_TYPE_SIG_DES_ || bap->score_type == _SCR_TYPE_SIG_ASC_){
       optimize_logistic_target(param, &target[y].a, &target[y].b);
     }
 
@@ -534,7 +534,7 @@ float vz;
     +++ Annual   suitability: Year score
     +** *****************************************************************/
 
-    if (bap->score_type == _SCR_GAUSS_){
+    if (bap->score_type == _SCR_TYPE_GAUSS_){
 
       // use left tail of Gaussian if acquisition before target
       if (ce < target[y].ce[1]){
@@ -565,7 +565,7 @@ float vz;
       // difference between acquisition and target
       tdist[t] = ce_dist;
 
-    } else if (bap->score_type == _SCR_SIG_DES_){
+    } else if (bap->score_type == _SCR_TYPE_SIG_DES_){
 
       // use 0 weight if acquisition before target
       if (ce < target[y].ce[0]){
@@ -589,7 +589,7 @@ float vz;
       // difference between acquisition and target
       tdist[t] = ce - target[y].ce[0];
 
-    } else if (bap->score_type == _SCR_SIG_ASC_){
+    } else if (bap->score_type == _SCR_TYPE_SIG_ASC_){
 
       // use 0 weight if acquisition after target
       if (ce > target[y].ce[2]){
@@ -721,25 +721,25 @@ float max_score = -1;
 
     // compositing scores
     if (l3->scr != NULL){
-      l3->scr[0][p] = (short) (score[max_t].t * 10000);
+      l3->scr[_SCR_TOTAL_][p]    = (short) (score[max_t].t * 10000);
       if (!water){
-        l3->scr[1][p] = (short) (score[max_t].d    * 10000);
-        l3->scr[2][p] = (short) (score[max_t].y   * 10000);
-        l3->scr[3][p] = (short) (score[max_t].c  * 10000);
-        l3->scr[4][p] = (short) (score[max_t].h   * 10000);
-        l3->scr[5][p] = (short) (score[max_t].r * 10000);
-        l3->scr[6][p] = (short) (score[max_t].v   * 10000);
+        l3->scr[_SCR_DOY_][p]    = (short) (score[max_t].d * 10000);
+        l3->scr[_SCR_YEAR_][p]   = (short) (score[max_t].y * 10000);
+        l3->scr[_SCR_DST_][p]    = (short) (score[max_t].c * 10000);
+        l3->scr[_SCR_HAZE_][p]   = (short) (score[max_t].h * 10000);
+        l3->scr[_SCR_CORREL_][p] = (short) (score[max_t].r * 10000);
+        l3->scr[_SCR_VZEN_][p]   = (short) (score[max_t].v * 10000);
       }
     }
 
     // compositing information
     if (l3->inf != NULL){
-      l3->inf[0][p] = ard[max_t].qai[p];
-      l3->inf[1][p] = n;
-      l3->inf[2][p] = get_stack_doy(ard[max_t].DAT, 0);
-      l3->inf[3][p] = get_stack_year(ard[max_t].DAT, 0);
-      l3->inf[4][p] = tdist[max_t];
-      l3->inf[5][p] = get_stack_sensorid(ard[max_t].DAT)+1;
+      l3->inf[_INF_QAI_][p]  = ard[max_t].qai[p];
+      l3->inf[_INF_NUM_][p]  = n;
+      l3->inf[_INF_DOY_][p]  = get_stack_doy(ard[max_t].DAT, 0);
+      l3->inf[_INF_YEAR_][p] = get_stack_year(ard[max_t].DAT, 0);
+      l3->inf[_INF_DIFF_][p] = tdist[max_t];
+      l3->inf[_INF_SEN_][p]  = get_stack_sensorid(ard[max_t].DAT)+1;
     }
 
     // best available pixel composite
@@ -750,12 +750,12 @@ float max_score = -1;
   } else {
 
     if (l3->scr != NULL){
-      for (b=0; b<7; b++) l3->scr[b][p] = nodata;
+      for (b=0; b<_SCR_LENGTH_; b++) l3->scr[b][p] = nodata;
     }
     if (l3->inf != NULL){
-      l3->inf[0][p] = 1;
-      l3->inf[1][p] = 0;
-      for (b=2; b<6; b++) l3->inf[b][p] = nodata;
+      l3->inf[_INF_QAI_][p] = 1;
+      l3->inf[_INF_NUM_][p] = 0;
+      for (b=2; b<_INF_LENGTH_; b++) l3->inf[b][p] = nodata;
     }
     if (l3->bap != NULL){
       for (b=0; b<nb; b++) l3->bap[b][p] = nodata;
@@ -777,7 +777,6 @@ int bap_overview(level3_t *l3, int nx, int ny, int nb, double res, short nodata)
 int i, j, p, i_, j_, p_;
 int nx_, ny_;
 double  res_, step, scale;
-enum { R_, G_, B_ };
 enum { B, G, R };
 enum { VV, VH };
 int is_radar = false;
@@ -814,52 +813,52 @@ float ratio;
       if (!is_radar){
         
         if (l3->bap[R][p] < 0 || l3->bap[R][p] == nodata){
-          l3->ovv[R_][p_] = 0;
+          l3->ovv[_RGB_R_][p_] = 0;
         } else if (l3->bap[R][p] > scale){
-          l3->ovv[R_][p_] = 255;
+          l3->ovv[_RGB_R_][p_] = 255;
         } else {
-          l3->ovv[R_][p_] = (small)(l3->bap[R][p]/scale*255);
+          l3->ovv[_RGB_R_][p_] = (small)(l3->bap[R][p]/scale*255);
         }
         if (l3->bap[G][p] < 0 || l3->bap[G][p] == nodata){
-          l3->ovv[G_][p_] = 0;
+          l3->ovv[_RGB_G_][p_] = 0;
         } else if (l3->bap[G][p] > scale){
-          l3->ovv[G_][p_] = 255;
+          l3->ovv[_RGB_G_][p_] = 255;
         } else {
-          l3->ovv[G_][p_] = (small)(l3->bap[G][p]/scale*255);
+          l3->ovv[_RGB_G_][p_] = (small)(l3->bap[G][p]/scale*255);
         }
         if (l3->bap[B][p] < 0 || l3->bap[B][p] == nodata){
-          l3->ovv[B_][p_] = 0;
+          l3->ovv[_RGB_B_][p_] = 0;
         } else if (l3->bap[B][p] > scale){
-          l3->ovv[B_][p_] = 255;
+          l3->ovv[_RGB_B_][p_] = 255;
         } else {
-          l3->ovv[B_][p_] = (small)(l3->bap[B][p]/scale*255);
+          l3->ovv[_RGB_B_][p_] = (small)(l3->bap[B][p]/scale*255);
         }
         
       } else {
 
         if (l3->bap[VV][p] < -1600 || l3->bap[VV][p] == nodata){
-          l3->ovv[R_][p_] = 0;
+          l3->ovv[_RGB_R_][p_] = 0;
         } else if (l3->bap[VV][p] > -600){
-          l3->ovv[R_][p_] = 255;
+          l3->ovv[_RGB_R_][p_] = 255;
         } else {
-          l3->ovv[R_][p_] = (small)((l3->bap[VV][p] - -1600)/1000.0*255);
+          l3->ovv[_RGB_R_][p_] = (small)((l3->bap[VV][p] - -1600)/1000.0*255);
         }
         if (l3->bap[VH][p] < -2200 || l3->bap[VH][p] == nodata){
-          l3->ovv[G_][p_] = 0;
+          l3->ovv[_RGB_G_][p_] = 0;
         } else if (l3->bap[VH][p] > -1200){
-          l3->ovv[G_][p_] = 255;
+          l3->ovv[_RGB_G_][p_] = 255;
         } else {
-          l3->ovv[G_][p_] = (small)((l3->bap[VH][p] - -2200)/1000.0*255);
+          l3->ovv[_RGB_G_][p_] = (small)((l3->bap[VH][p] - -2200)/1000.0*255);
         }
         
         ratio = (float)l3->bap[VV][p] / (float)l3->bap[VH][p];
         
         if (ratio < 0.2 || l3->bap[VV][p] == nodata|| l3->bap[VH][p] == nodata){
-          l3->ovv[B_][p_] = 0;
+          l3->ovv[_RGB_B_][p_] = 0;
         } else if (l3->bap[VH][p] > 1.0){
-          l3->ovv[B_][p_] = 255;
+          l3->ovv[_RGB_B_][p_] = 255;
         } else {
-          l3->ovv[B_][p_] = (small)((ratio - 0.2)/0.8*255);
+          l3->ovv[_RGB_B_][p_] = (small)((ratio - 0.2)/0.8*255);
         }
 
       }

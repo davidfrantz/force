@@ -45,8 +45,11 @@ stack_t *compile_cfi_stack(stack_t *ard, int nb, bool write, char *bname, char *
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_cfi(ard_t *cf, cfi_t *cfi, int ncf, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **CFI = NULL;
-int o, nprod = ncf;
+int b, o, nprod = ncf;
 int error = 0;
+date_t date;
+char fdate[NPOW_10];
+int nchar;
 int prodlen;
 char bname[NPOW_10];
 short ****ptr = NULL;
@@ -67,6 +70,19 @@ short ****ptr = NULL;
 
     if ((CFI[o] = compile_cfi_stack(cf[o].DAT, prodlen, true, bname, "IMP", phl)) == NULL || (*ptr[o] = get_bands_short(CFI[o])) == NULL){
       printf("Error compiling %s product. ", bname); error++;
+    } else {
+      
+      init_date(&date);
+      set_date(&date, 2000, 1, 1);
+      
+      for (b=0; b<prodlen; b++){
+        set_date_year(&date, phl->cfi.years[b]);
+        nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+        if (nchar < 0 || nchar >= NPOW_10){ 
+          printf("Buffer Overflow in assembling domain\n"); error++;}
+        set_stack_domain(CFI[o],   b, fdate);
+        set_stack_bandname(CFI[o], b, fdate);
+      }
     }
 
   }

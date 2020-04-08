@@ -121,11 +121,6 @@ bool alloc_q_array = false;
           }
         }
 
-        //if (stm->sta.q10 > -1) ts->stm_[stm->sta.q10][p] = (short)quantile(q_array, n, 0.10);
-        //if (stm->sta.q25 > -1) ts->stm_[stm->sta.q25][p] = (short)quantile(q_array, n, 0.25);
-        //if (stm->sta.q50 > -1) ts->stm_[stm->sta.q50][p] = (short)quantile(q_array, n, 0.50);
-        //if (stm->sta.q75 > -1) ts->stm_[stm->sta.q75][p] = (short)quantile(q_array, n, 0.75);
-        //if (stm->sta.q90 > -1) ts->stm_[stm->sta.q90][p] = (short)quantile(q_array, n, 0.90);
         if (stm->sta.iqr > -1){
           if (q25_ == SHRT_MIN) q25_ = (short)quantile(q_array, n, 0.25);
           if (q75_ == SHRT_MIN) q75_ = (short)quantile(q_array, n, 0.75);

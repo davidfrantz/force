@@ -39,13 +39,6 @@ void parse_proj(par_ll_t *pl2);
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_lower(params_t *params, par_ll_t *pl2){
-par_enum_t resample[_RESAMPLE_LENGTH_] = {
-  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" }};
-par_enum_t resmerge[_RES_MERGE_LENGTH_] = {
-  { _RES_MERGE_NONE_,     "NONE" },     { _RES_MERGE_REGRESSION_, "REGRESSION" }, 
-  { _RES_MERGE_IMPROPHE_, "IMPROPHE" }, { _RES_MERGE_STARFM_,     "STARFM" }};
-par_enum_t format[_FMT_LENGTH_] = {
-  { _FMT_ENVI_, "ENVI" }, { _FMT_GTIFF_, "GTiff" }};
 
 
   register_char_par(params,    "DIR_LEVEL2",            _CHAR_TEST_EXIST_, &pl2->d_level2);
@@ -66,8 +59,8 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_double_par(params,  "ORIGIN_LAT",            -90, 90, &pl2->orig_lat);
   register_double_par(params,  "ORIGIN_LON",            -180, 180, &pl2->orig_lon);
   register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, &pl2->proj_, &pl2->nproj_);
-  register_enum_par(params,    "RESAMPLING",            resample, _RESAMPLE_LENGTH_, &pl2->resample);
-  register_enum_par(params,    "RES_MERGE",             resmerge, _RES_MERGE_LENGTH_, &pl2->resmerge);
+  register_enum_par(params,    "RESAMPLING",            _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->resample);
+  register_enum_par(params,    "RES_MERGE",             _TAGGED_ENUM_RES_MERGE_, _RES_MERGE_LENGTH_, &pl2->resmerge);
   register_int_par(params,     "TIER",                  1, 3, &pl2->tier);
   register_bool_par(params,    "DO_TOPO",               &pl2->dotopo);
   register_bool_par(params,    "DO_ATMO",               &pl2->doatmo);
@@ -89,7 +82,7 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_bool_par(params,    "PARALLEL_READS",        &pl2->ithread);
   register_int_par(params,     "DELAY",                 0, INT_MAX, &pl2->delay);
   register_int_par(params,     "TIMEOUT_ZIP",           0, INT_MAX, &pl2->timeout);
-  register_enum_par(params,    "OUTPUT_FORMAT",         format, _FMT_LENGTH_, &pl2->format);
+  register_enum_par(params,    "OUTPUT_FORMAT",         _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &pl2->format);
   register_bool_par(params,    "OUTPUT_DST",            &pl2->odst);
   register_bool_par(params,    "OUTPUT_AOD",            &pl2->oaod);
   register_bool_par(params,    "OUTPUT_WVP",            &pl2->owvp);

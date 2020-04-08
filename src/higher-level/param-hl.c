@@ -64,8 +64,6 @@ int parse_sensor(par_sen_t *sen);
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_higher(params_t *params, par_hl_t *phl){
-par_enum_t format[_FMT_LENGTH_] = {
-  { _FMT_ENVI_, "ENVI" }, { _FMT_GTIFF_, "GTiff" }};
 
 
   register_char_par(params,    "DIR_LOWER",  _CHAR_TEST_EXIST_,         &phl->d_lower);
@@ -77,7 +75,7 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
   register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
-  register_enum_par(params,    "OUTPUT_FORMAT",  format, _FMT_LENGTH_, &phl->format);
+  register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
@@ -94,29 +92,10 @@ par_enum_t format[_FMT_LENGTH_] = {
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_ard1(params_t *params, par_hl_t *phl){
-par_enum_t sensor[_SEN_LENGTH_] = {
-  { _SEN_LND04_, "LND04" }, { _SEN_LND05_, "LND05" },
-  { _SEN_LND07_, "LND07" }, { _SEN_LND08_, "LND08" },
-  { _SEN_SEN2A_, "SEN2A" }, { _SEN_SEN2B_, "SEN2B" },
-  { _SEN_sen2a_, "sen2a" }, { _SEN_sen2b_, "sen2b" },
-  { _SEN_LNDLG_, "LNDLG" }, { _SEN_SEN2L_, "SEN2L" },
-  { _SEN_SEN2H_, "SEN2H" }, { _SEN_RGB_,   "R-G-B" },
-  { _SEN_S1AIA_, "S1AIA" }, { _SEN_S1AID_, "S1AID" },
-  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" }};
-par_enum_t qai[_QAI_LENGTH_] = {
-  { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },
-  { _QAI_CLD_UNC_,  "CLOUD_BUFFER" }, { _QAI_CLD_CIR_,  "CLOUD_CIRRUS" },
-  { _QAI_SHD_,      "CLOUD_SHADOW" }, { _QAI_SNW_,      "SNOW"         },
-  { _QAI_WTR_,      "WATER"        }, { _QAI_AOD_FILL_, "AOD_FILL"     },
-  { _QAI_AOD_HIGH_, "AOD_HIGH"     }, { _QAI_AOD_INT_,  "AOD_INT"      },
-  { _QAI_SUB_,      "SUBZERO"      }, { _QAI_SAT_,      "SATURATION"   },
-  { _QAI_SUN_,      "SUN_LOW"      }, { _QAI_ILL_SHD_,  "ILLUMIN_NONE" },
-  { _QAI_ILL_POOR_, "ILLUMIN_POOR" }, { _QAI_ILL_LOW_,  "ILLUMIN_LOW"  },
-  { _QAI_SLP_,      "SLOPED"       }, { _QAI_WVP_,      "WVP_NONE"     }};
 
   
-  register_enumvec_par(params, "SENSORS", sensor, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
-  register_enumvec_par(params, "SCREEN_QAI", qai, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
+  register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
+  register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
   register_intvec_par(params,  "DOY_RANGE", 1, 365, &phl->doy_range, &phl->ndoy);
 
@@ -191,65 +170,11 @@ void register_bap(params_t *params, par_hl_t *phl){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_tsa(params_t *params, par_hl_t *phl){
-par_enum_t index[_IDX_LENGTH_] = {
-  { _IDX_BLU_, "BLUE"   }, { _IDX_GRN_, "GREEN"     }, { _IDX_RED_, "RED"      },
-  { _IDX_NIR_, "NIR"    }, { _IDX_SW1_, "SWIR1"     }, { _IDX_SW2_, "SWIR2"    },
-  { _IDX_RE1_, "RE1"    }, { _IDX_RE2_, "RE2"       }, { _IDX_RE3_, "RE3"      },
-  { _IDX_BNR_, "BNIR"   }, { _IDX_NDV_, "NDVI"      }, { _IDX_EVI_, "EVI"      },
-  { _IDX_NBR_, "NBR"    }, { _IDX_ARV_, "ARVI"      }, { _IDX_SAV_, "SAVI"     },
-  { _IDX_SRV_, "SARVI"  }, { _IDX_TCB_, "TC-BRIGHT" }, { _IDX_TCG_, "TC-GREEN" },
-  { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"     },
-  { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"     },
-  { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       }};
-par_enum_t interpol[_INT_LENGTH_] = {
-  { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },
-  { _INT_MOVING_, "MOVING" }, { _INT_RBF_,    "RBF"    }};
-par_enum_t stats[_STA_LENGTH_] = {
-  { _STA_MIN_, "MIN" }, { _STA_MAX_, "MAX" }, { _STA_RNG_, "RNG" }, { _STA_IQR_, "IQR" },
-  { _STA_AVG_, "AVG" }, { _STA_STD_, "STD" }, { _STA_SKW_, "SKW" }, { _STA_KRT_, "KRT" },
-  { _STA_Q01_, "Q01" }, { _STA_Q02_, "Q02" }, { _STA_Q03_, "Q03" }, { _STA_Q04_, "Q04" },
-  { _STA_Q05_, "Q05" }, { _STA_Q06_, "Q06" }, { _STA_Q07_, "Q07" }, { _STA_Q08_, "Q08" },
-  { _STA_Q09_, "Q09" }, { _STA_Q10_, "Q10" }, { _STA_Q11_, "Q11" }, { _STA_Q12_, "Q12" },
-  { _STA_Q13_, "Q13" }, { _STA_Q14_, "Q14" }, { _STA_Q15_, "Q15" }, { _STA_Q16_, "Q16" },
-  { _STA_Q17_, "Q17" }, { _STA_Q18_, "Q18" }, { _STA_Q19_, "Q19" }, { _STA_Q20_, "Q20" },
-  { _STA_Q21_, "Q21" }, { _STA_Q22_, "Q22" }, { _STA_Q23_, "Q23" }, { _STA_Q24_, "Q24" },
-  { _STA_Q25_, "Q25" }, { _STA_Q26_, "Q26" }, { _STA_Q27_, "Q27" }, { _STA_Q28_, "Q28" },
-  { _STA_Q29_, "Q29" }, { _STA_Q30_, "Q30" }, { _STA_Q31_, "Q31" }, { _STA_Q32_, "Q32" },
-  { _STA_Q33_, "Q33" }, { _STA_Q34_, "Q34" }, { _STA_Q35_, "Q35" }, { _STA_Q36_, "Q36" },
-  { _STA_Q37_, "Q37" }, { _STA_Q38_, "Q38" }, { _STA_Q39_, "Q39" }, { _STA_Q40_, "Q40" },
-  { _STA_Q41_, "Q41" }, { _STA_Q42_, "Q42" }, { _STA_Q43_, "Q43" }, { _STA_Q44_, "Q44" },
-  { _STA_Q45_, "Q45" }, { _STA_Q46_, "Q46" }, { _STA_Q47_, "Q47" }, { _STA_Q48_, "Q48" },
-  { _STA_Q49_, "Q49" }, { _STA_Q50_, "Q50" }, { _STA_Q51_, "Q51" }, { _STA_Q52_, "Q52" },
-  { _STA_Q53_, "Q53" }, { _STA_Q54_, "Q54" }, { _STA_Q55_, "Q55" }, { _STA_Q56_, "Q56" },
-  { _STA_Q57_, "Q57" }, { _STA_Q58_, "Q58" }, { _STA_Q59_, "Q59" }, { _STA_Q60_, "Q60" },
-  { _STA_Q61_, "Q61" }, { _STA_Q62_, "Q62" }, { _STA_Q63_, "Q63" }, { _STA_Q64_, "Q64" },
-  { _STA_Q65_, "Q65" }, { _STA_Q66_, "Q66" }, { _STA_Q67_, "Q67" }, { _STA_Q68_, "Q68" },
-  { _STA_Q69_, "Q69" }, { _STA_Q70_, "Q70" }, { _STA_Q71_, "Q71" }, { _STA_Q72_, "Q72" },
-  { _STA_Q73_, "Q73" }, { _STA_Q74_, "Q74" }, { _STA_Q75_, "Q75" }, { _STA_Q76_, "Q76" },
-  { _STA_Q77_, "Q77" }, { _STA_Q78_, "Q78" }, { _STA_Q79_, "Q79" }, { _STA_Q80_, "Q80" },
-  { _STA_Q81_, "Q81" }, { _STA_Q82_, "Q82" }, { _STA_Q83_, "Q83" }, { _STA_Q84_, "Q84" },
-  { _STA_Q85_, "Q85" }, { _STA_Q86_, "Q86" }, { _STA_Q87_, "Q87" }, { _STA_Q88_, "Q88" },
-  { _STA_Q89_, "Q89" }, { _STA_Q90_, "Q90" }, { _STA_Q91_, "Q91" }, { _STA_Q92_, "Q92" },
-  { _STA_Q93_, "Q93" }, { _STA_Q94_, "Q94" }, { _STA_Q95_, "Q95" }, { _STA_Q96_, "Q96" },
-  { _STA_Q97_, "Q97" }, { _STA_Q98_, "Q98" }, { _STA_Q99_, "Q99" }, { _STA_NUM_, "NUM" }};
-par_enum_t hemi[_HEMI_LENGTH_] = {
-  { _HEMI_NORTH_, "NORTH" }, { _HEMI_SOUTH_, "SOUTH" }, { _HEMI_MIXED_, "MIXED" }};
-par_enum_t lsp[_LSP_LENGTH_] = {
-  {_LSP_DEM_, "DEM" }, {_LSP_DSS_, "DSS" }, {_LSP_DRI_, "DRI" }, {_LSP_DPS_, "DPS" },
-  {_LSP_DFI_, "DFI" }, {_LSP_DES_, "DES" }, {_LSP_DLM_, "DLM" }, {_LSP_LTS_, "LTS" },
-  {_LSP_LGS_, "LGS" }, {_LSP_VEM_, "VEM" }, {_LSP_VSS_, "VSS" }, {_LSP_VRI_, "VRI" },
-  {_LSP_VPS_, "VPS" }, {_LSP_VFI_, "VFI" }, {_LSP_VES_, "VES" }, {_LSP_VLM_, "VLM" },
-  {_LSP_VBL_, "VBL" }, {_LSP_VSA_, "VSA" }, {_LSP_IST_, "IST" }, {_LSP_IBL_, "IBL" },
-  {_LSP_IBT_, "IBT" }, {_LSP_IGS_, "IGS" }, {_LSP_RAR_, "RAR" }, {_LSP_RAF_, "RAF" },
-  {_LSP_RMR_, "RMR" }, {_LSP_RMF_, "RMF" }};
-par_enum_t tail[_TAIL_LENGTH_] = {
-  { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
-par_enum_t standard[_STD_LENGTH_] = {
-  { _STD_NONE_, "NONE" }, {_STD_NORMAL_, "NORMALIZE"}, {_STD_CENTER_, "CENTER" }};
+
 
   // TS parameters
-  register_enumvec_par(params, "INDEX",      index, _IDX_LENGTH_, &phl->tsa.index, &phl->tsa.n);
-  register_enum_par(params,    "STANDARDIZE_TSS", standard, _STD_LENGTH_, &phl->tsa.standard);
+  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, &phl->tsa.index, &phl->tsa.n);
+  register_enum_par(params,    "STANDARDIZE_TSS", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.standard);
   register_bool_par(params,    "OUTPUT_TSS", &phl->tsa.otss);
 
   // SMA parameters
@@ -261,21 +186,21 @@ par_enum_t standard[_STD_LENGTH_] = {
   register_bool_par(params, "OUTPUT_RMS",     &phl->tsa.sma.orms);
 
   // interpolation parameters
-  register_enum_par(params,   "INTERPOLATE", interpol, _INT_LENGTH_, &phl->tsa.tsi.method);
+  register_enum_par(params,   "INTERPOLATE", _TAGGED_ENUM_INT_, _INT_LENGTH_, &phl->tsa.tsi.method);
   register_int_par(params,    "MOVING_MAX",  1, 365, &phl->tsa.tsi.mov_max);
   register_intvec_par(params, "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
   register_float_par(params,  "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
   register_int_par(params,    "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
-  register_enum_par(params,   "STANDARDIZE_TSI", standard, _STD_LENGTH_, &phl->tsa.tsi.standard);
+  register_enum_par(params,   "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,   "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
 
   // STM parameters
-  register_enumvec_par(params, "STM",        stats, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
+  register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
   register_bool_par(params,    "OUTPUT_STM", &phl->tsa.stm.ostm);
 
   // folding parameters
-  register_enum_par(params, "FOLD_TYPE",  stats, _STA_LENGTH_, &phl->tsa.fld.type);
-  register_enum_par(params, "STANDARDIZE_FOLD", standard, _STD_LENGTH_, &phl->tsa.fld.standard);
+  register_enum_par(params, "FOLD_TYPE", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.fld.type);
+  register_enum_par(params, "STANDARDIZE_FOLD", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.fld.standard);
   register_bool_par(params, "OUTPUT_FBY", &phl->tsa.fld.ofby);
   register_bool_par(params, "OUTPUT_FBQ", &phl->tsa.fld.ofbq);
   register_bool_par(params, "OUTPUT_FBM", &phl->tsa.fld.ofbm);
@@ -295,20 +220,20 @@ par_enum_t standard[_STD_LENGTH_] = {
   // phenology parameters
   register_int_par(params,     "LSP_DOY_PREV_YEAR", 1, 365, &phl->tsa.lsp.dprev);
   register_int_par(params,     "LSP_DOY_NEXT_YEAR", 1, 365, &phl->tsa.lsp.dnext);
-  register_enum_par(params,    "LSP_HEMISPHERE",    hemi, _HEMI_LENGTH_, &phl->tsa.lsp.hemi);
+  register_enum_par(params,    "LSP_HEMISPHERE", _TAGGED_ENUM_HEMI_, _HEMI_LENGTH_, &phl->tsa.lsp.hemi);
   register_int_par(params,     "LSP_N_SEGMENT",     1, INT_MAX, &phl->tsa.lsp.nseg);
   register_float_par(params,   "LSP_AMP_THRESHOLD", 0.01, 0.99, &phl->tsa.lsp.start);
   register_float_par(params,   "LSP_MIN_VALUE",     -10000, 10000, &phl->tsa.lsp.minval);
   register_float_par(params,   "LSP_MIN_AMPLITUDE", 0, 10000, &phl->tsa.lsp.minamp);
-  register_enumvec_par(params, "LSP",               lsp, _LSP_LENGTH_, &phl->tsa.lsp.metrics, &phl->tsa.lsp.nmetrics);
-  register_enum_par(params,    "STANDARDIZE_LSP",   standard, _STD_LENGTH_, &phl->tsa.lsp.standard);
+  register_enumvec_par(params, "LSP", _TAGGED_ENUM_LSP_, _LSP_LENGTH_, &phl->tsa.lsp.metrics, &phl->tsa.lsp.nmetrics);
+  register_enum_par(params,    "STANDARDIZE_LSP", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.lsp.standard);
   register_bool_par(params,    "OUTPUT_SPL",        &phl->tsa.lsp.ospl);
   register_bool_par(params,    "OUTPUT_LSP",        &phl->tsa.lsp.olsp);
   register_bool_par(params,    "OUTPUT_TRP",        &phl->tsa.lsp.otrd);
   register_bool_par(params,    "OUTPUT_CAP",        &phl->tsa.lsp.ocat);
 
   // trend parameters
-  register_enum_par(params,  "TREND_TAIL", tail, _TAIL_LENGTH_, &phl->tsa.trd.tail);
+  register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
 
 
@@ -322,38 +247,10 @@ par_enum_t standard[_STD_LENGTH_] = {
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_cso(params_t *params, par_hl_t *phl){
-par_enum_t stats[_STA_LENGTH_] = {
-  { _STA_MIN_, "MIN" }, { _STA_MAX_, "MAX" }, { _STA_RNG_, "RNG" }, { _STA_IQR_, "IQR" },
-  { _STA_AVG_, "AVG" }, { _STA_STD_, "STD" }, { _STA_SKW_, "SKW" }, { _STA_KRT_, "KRT" },
-  { _STA_Q01_, "Q01" }, { _STA_Q02_, "Q02" }, { _STA_Q03_, "Q03" }, { _STA_Q04_, "Q04" },
-  { _STA_Q05_, "Q05" }, { _STA_Q06_, "Q06" }, { _STA_Q07_, "Q07" }, { _STA_Q08_, "Q08" },
-  { _STA_Q09_, "Q09" }, { _STA_Q10_, "Q10" }, { _STA_Q11_, "Q11" }, { _STA_Q12_, "Q12" },
-  { _STA_Q13_, "Q13" }, { _STA_Q14_, "Q14" }, { _STA_Q15_, "Q15" }, { _STA_Q16_, "Q16" },
-  { _STA_Q17_, "Q17" }, { _STA_Q18_, "Q18" }, { _STA_Q19_, "Q19" }, { _STA_Q20_, "Q20" },
-  { _STA_Q21_, "Q21" }, { _STA_Q22_, "Q22" }, { _STA_Q23_, "Q23" }, { _STA_Q24_, "Q24" },
-  { _STA_Q25_, "Q25" }, { _STA_Q26_, "Q26" }, { _STA_Q27_, "Q27" }, { _STA_Q28_, "Q28" },
-  { _STA_Q29_, "Q29" }, { _STA_Q30_, "Q30" }, { _STA_Q31_, "Q31" }, { _STA_Q32_, "Q32" },
-  { _STA_Q33_, "Q33" }, { _STA_Q34_, "Q34" }, { _STA_Q35_, "Q35" }, { _STA_Q36_, "Q36" },
-  { _STA_Q37_, "Q37" }, { _STA_Q38_, "Q38" }, { _STA_Q39_, "Q39" }, { _STA_Q40_, "Q40" },
-  { _STA_Q41_, "Q41" }, { _STA_Q42_, "Q42" }, { _STA_Q43_, "Q43" }, { _STA_Q44_, "Q44" },
-  { _STA_Q45_, "Q45" }, { _STA_Q46_, "Q46" }, { _STA_Q47_, "Q47" }, { _STA_Q48_, "Q48" },
-  { _STA_Q49_, "Q49" }, { _STA_Q50_, "Q50" }, { _STA_Q51_, "Q51" }, { _STA_Q52_, "Q52" },
-  { _STA_Q53_, "Q53" }, { _STA_Q54_, "Q54" }, { _STA_Q55_, "Q55" }, { _STA_Q56_, "Q56" },
-  { _STA_Q57_, "Q57" }, { _STA_Q58_, "Q58" }, { _STA_Q59_, "Q59" }, { _STA_Q60_, "Q60" },
-  { _STA_Q61_, "Q61" }, { _STA_Q62_, "Q62" }, { _STA_Q63_, "Q63" }, { _STA_Q64_, "Q64" },
-  { _STA_Q65_, "Q65" }, { _STA_Q66_, "Q66" }, { _STA_Q67_, "Q67" }, { _STA_Q68_, "Q68" },
-  { _STA_Q69_, "Q69" }, { _STA_Q70_, "Q70" }, { _STA_Q71_, "Q71" }, { _STA_Q72_, "Q72" },
-  { _STA_Q73_, "Q73" }, { _STA_Q74_, "Q74" }, { _STA_Q75_, "Q75" }, { _STA_Q76_, "Q76" },
-  { _STA_Q77_, "Q77" }, { _STA_Q78_, "Q78" }, { _STA_Q79_, "Q79" }, { _STA_Q80_, "Q80" },
-  { _STA_Q81_, "Q81" }, { _STA_Q82_, "Q82" }, { _STA_Q83_, "Q83" }, { _STA_Q84_, "Q84" },
-  { _STA_Q85_, "Q85" }, { _STA_Q86_, "Q86" }, { _STA_Q87_, "Q87" }, { _STA_Q88_, "Q88" },
-  { _STA_Q89_, "Q89" }, { _STA_Q90_, "Q90" }, { _STA_Q91_, "Q91" }, { _STA_Q92_, "Q92" },
-  { _STA_Q93_, "Q93" }, { _STA_Q94_, "Q94" }, { _STA_Q95_, "Q95" }, { _STA_Q96_, "Q96" },
-  { _STA_Q97_, "Q97" }, { _STA_Q98_, "Q98" }, { _STA_Q99_, "Q99" }, { _STA_NUM_, "NUM" }};
 
-  
+
   register_int_par(params,     "MONTH_STEP", 1, 12, &phl->cso.step);
-  register_enumvec_par(params, "CSO",        stats, _STA_LENGTH_, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
+  register_enumvec_par(params, "CSO", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
 
   return;
 }
@@ -400,19 +297,10 @@ void register_cfi(params_t *params, par_hl_t *phl){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_l2i(params_t *params, par_hl_t *phl){
-par_enum_t sensor[_SEN_LENGTH_] = {
-  { _SEN_LND04_, "LND04" }, { _SEN_LND05_, "LND05" },
-  { _SEN_LND07_, "LND07" }, { _SEN_LND08_, "LND08" },
-  { _SEN_SEN2A_, "SEN2A" }, { _SEN_SEN2B_, "SEN2B" },
-  { _SEN_sen2a_, "sen2a" }, { _SEN_sen2b_, "sen2b" },
-  { _SEN_LNDLG_, "LNDLG" }, { _SEN_SEN2L_, "SEN2L" },
-  { _SEN_SEN2H_, "SEN2H" }, { _SEN_RGB_,   "R-G-B" },
-  { _SEN_S1AIA_, "S1AIA" }, { _SEN_S1AID_, "S1AID" },
-  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" }};
 
   
   register_imp(params, phl);
-  register_enumvec_par(params, "SENSORS_LOWRES", sensor, _SEN_LENGTH_, &phl->sen2.senid, &phl->sen2.n);
+  register_enumvec_par(params, "SENSORS_LOWRES", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen2.senid, &phl->sen2.n);
 
   return;
 }
@@ -425,12 +313,10 @@ par_enum_t sensor[_SEN_LENGTH_] = {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_mcl(params_t *params, par_hl_t *phl){
 int i;
-par_enum_t method[_ML_LENGTH_] = {
-  { _ML_SVR_, "SVR" }, { _ML_SVC_, "SVC" }, { _ML_RFR_, "RFR" }, { _ML_RFC_, "RFC" }};
 
 
   register_char_par(params,  "DIR_MODEL", _CHAR_TEST_EXIST_, &phl->mcl.d_model);
-  register_enum_par(params,  "ML_METHOD", method, _ML_LENGTH_, &phl->mcl.method);
+  register_enum_par(params,  "ML_METHOD", _TAGGED_ENUM_ML_, _ML_LENGTH_, &phl->mcl.method);
   register_float_par(params, "ML_CONVERGENCE", 0, INT_MAX, &phl->mcl.converge);
   register_float_par(params, "ML_SCALE", 0, 1e6, &phl->mcl.scale);
   register_char_par(params,  "ML_BASE",  _CHAR_TEST_NONE_, &phl->mcl.base);
@@ -488,14 +374,11 @@ void register_smp(params_t *params, par_hl_t *phl){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_txt(params_t *params, par_hl_t *phl){
-par_enum_t text[_TXT_LENGTH_] = {
-  { _TXT_ERO_, "ERO" }, { _TXT_DIL_, "DIL" }, { _TXT_OPN_, "OPN" }, { _TXT_CLS_, "CLS" }, 
-  { _TXT_GRD_, "GRD" }, { _TXT_THT_, "THT" }, { _TXT_BHT_, "BHT" }};
 
 
   register_double_par(params,  "TXT_RADIUS",    0, 1e6,  &phl->txt.radius);
   register_int_par(params,     "TXT_ITERATION", 1, 1000, &phl->txt.iter);
-  register_enumvec_par(params, "TXT", text, _TXT_LENGTH_, &phl->txt.metrics, &phl->txt.nmetrics);
+  register_enumvec_par(params, "TXT", _TAGGED_ENUM_TXT_, _TXT_LENGTH_, &phl->txt.metrics, &phl->txt.nmetrics);
   register_char_par(params,    "TXT_BASE",  _CHAR_TEST_NONE_, &phl->txt.base);
 
   return;
@@ -508,23 +391,15 @@ par_enum_t text[_TXT_LENGTH_] = {
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_lsm(params_t *params, par_hl_t *phl){
-par_enum_t query[_QUERY_LENGTH_] = {
-  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_LT_, "LT" }};
-par_enum_t lsm[_LSM_LENGTH_] = {
-  { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
-  { _LSM_EDD_, "EDD" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
-  { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
-  { _LSM_MAX_, "MAX" }};
-par_enum_t kernel[_KERNEL_LENGTH_] = {
-  { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};
+
 
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
-  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", query, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
+  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
   register_intvec_par(params,  "LSM_THRESHOLD", -32767, 32767, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);
-  register_enumvec_par(params, "LSM", lsm, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
+  register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
-  register_enum_par(params,    "LSM_KERNEL_SHAPE", kernel, _KERNEL_LENGTH_, &phl->lsm.kernel);
+  register_enum_par(params,    "LSM_KERNEL_SHAPE", _TAGGED_ENUM_KERNEL_, _KERNEL_LENGTH_, &phl->lsm.kernel);
 
   return;
 }
@@ -1121,7 +996,7 @@ const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
   { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 }}; // VV/VH polarized
-char domains[_WVL_LENGTH_][NPOW_04] = {
+char domains[_WVL_LENGTH_][NPOW_10] = {
   "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
   "REDEDGE3", "BROADNIR", "NIR", "SWIR1", "SWIR2",
   "VV", "VH" };
@@ -1174,11 +1049,11 @@ int *band_ptr[_WVL_LENGTH_] = {
   // build sensor struct
   alloc_2D((void***)&sen->sensor, sen->n,  NPOW_10, sizeof(char));
   alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
-  alloc_2D((void***)&sen->domain, sen->nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
 
   for (b=0, bb=0; b<nb; b++){
     if (!vb[b]) continue;
-    if (strlen(domains[b]) > NPOW_04-1){
+    if (strlen(domains[b]) > NPOW_10-1){
       printf("cannot copy, string too long.\n"); exit(1);
     } else { strncpy(sen->domain[bb], domains[b], strlen(domains[b])); sen->domain[bb][strlen(domains[b])] = '\0';}
     for (s=0, ss=0; s<ns; s++){
@@ -1535,11 +1410,11 @@ double tol = 5e-3;
     // choose type of scoring function
     if (phl->bap.Ds[1] > phl->bap.Ds[0] &&
         phl->bap.Ds[1] > phl->bap.Ds[2]){
-      phl->bap.score_type = _SCR_GAUSS_; // gaussian
+      phl->bap.score_type = _SCR_TYPE_GAUSS_; // gaussian
     } else if (phl->bap.Ds[0] > phl->bap.Ds[2]){
-      phl->bap.score_type = _SCR_SIG_DES_; // descending sigmoid
+      phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
-      phl->bap.score_type = _SCR_SIG_ASC_; // ascending sigmoid
+      phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
     }
 
     // choose products

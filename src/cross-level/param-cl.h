@@ -44,11 +44,6 @@ Parsing parameter header
 extern "C" {
 #endif
 
-typedef struct{
-  int en;
-  char tag[NPOW_04];
-} par_enum_t;
-
 typedef struct {
   char   name[NPOW_10];
   bool   set;
@@ -60,7 +55,7 @@ typedef struct {
   date_t *date_,   **date_vec_;
   char   **char_,  ***char_vec_;
   int n_enums;
-  par_enum_t *enums;
+  tagged_enum_t *enums;
   int    int_range[2];
   float  float_range[2];
   double double_range[2];
@@ -77,7 +72,7 @@ typedef struct {
 
 int length_par(const char *buf);
 date_t parse_date(char *str);
-int parse_enum(char *str, par_enum_t *enums, int n_enums);
+int parse_enum(char *str, tagged_enum_t *enums, int n_enums);
 params_t *allocate_params();
 void reallocate_params(params_t *params);
 void free_params(params_t *params);
@@ -85,14 +80,14 @@ void allocate_par(par_t *par);
 void free_par(par_t *par);
 int prescreen_par(FILE *fpar, const char *tag, int *num);
 void register_int_par(params_t *params, const char *name, int min, int max, int *ptr);
-void register_enum_par(params_t *params, const char *name, par_enum_t *enums, int n_enums, int *ptr);
+void register_enum_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int *ptr);
 void register_float_par(params_t *params, const char *name, float min, float max, float *ptr);
 void register_double_par(params_t *params, const char *name, double min, double max, double *ptr);
 void register_bool_par(params_t *params, const char *name, int *ptr);
 void register_date_par(params_t *params, const char *name, const char *min, const char *max, date_t *ptr);
 void register_char_par(params_t *params, const char *name, int char_test, char **ptr);
 void register_intvec_par(params_t *params, const char *name, int min, int max, int **ptr, int *ptr_length);
-void register_enumvec_par(params_t *params, const char *name, par_enum_t *enums, int n_enums, int **ptr, int *ptr_length);
+void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length);
 void register_floatvec_par(params_t *params, const char *name, float min, float max, float **ptr, int *ptr_length);
 void register_doublevec_par(params_t *params, const char *name, double min, double max, double **ptr, int *ptr_length);
 void register_boolvec_par(params_t *params, const char *name, int **ptr, int *ptr_length);

@@ -122,7 +122,7 @@ date_t date;
 --- n_enums: number of enums in enum definition
 +++ Return:  enum
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_enum(char *str, par_enum_t *enums, int n_enums){
+int parse_enum(char *str, tagged_enum_t *enums, int n_enums){
 int e;
 
 
@@ -353,7 +353,7 @@ void register_int_par(params_t *params, const char *name, int min, int max, int 
 --- ptr:     pointer to instantly useable parameter variable
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_enum_par(params_t *params, const char *name, par_enum_t *enums, int n_enums, int *ptr){
+void register_enum_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int *ptr){
 
 
   reallocate_params(params);
@@ -368,8 +368,8 @@ void register_enum_par(params_t *params, const char *name, par_enum_t *enums, in
   params->par[params->n].set = false;
   
   params->par[params->n].n_enums = n_enums;
-  alloc((void**)&params->par[params->n].enums, n_enums, sizeof(par_enum_t));
-  memmove(params->par[params->n].enums, enums, sizeof(par_enum_t)*n_enums);
+  alloc((void**)&params->par[params->n].enums, n_enums, sizeof(tagged_enum_t));
+  memmove(params->par[params->n].enums, enums, sizeof(tagged_enum_t)*n_enums);
 
   params->par[params->n].type = _PAR_ENUM_;
   params->par[params->n].length = NULL;
@@ -475,7 +475,7 @@ void register_bool_par(params_t *params, const char *name, int *ptr){
   params->par[params->n].set = false;
   
   params->par[params->n].n_enums = 2;
-  alloc((void**)&params->par[params->n].enums, 2, sizeof(par_enum_t));
+  alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
   
   strncpy(params->par[params->n].enums[0].tag, "FALSE", 5); 
   params->par[params->n].enums[0].tag[5] = '\0';
@@ -625,7 +625,7 @@ void register_intvec_par(params_t *params, const char *name, int min, int max, i
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_enumvec_par(params_t *params, const char *name, par_enum_t *enums, int n_enums, int **ptr, int *ptr_length){
+void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -640,8 +640,8 @@ void register_enumvec_par(params_t *params, const char *name, par_enum_t *enums,
   params->par[params->n].set = false;
   
   params->par[params->n].n_enums = n_enums;
-  alloc((void**)&params->par[params->n].enums, n_enums, sizeof(par_enum_t));
-  memmove(params->par[params->n].enums, enums, sizeof(par_enum_t)*n_enums);
+  alloc((void**)&params->par[params->n].enums, n_enums, sizeof(tagged_enum_t));
+  memmove(params->par[params->n].enums, enums, sizeof(tagged_enum_t)*n_enums);
   
   params->par[params->n].type = _PAR_ENUM_;
 
@@ -756,7 +756,7 @@ void register_boolvec_par(params_t *params, const char *name, int **ptr, int *pt
   params->par[params->n].set = false;
   
   params->par[params->n].n_enums = 2;
-  alloc((void**)&params->par[params->n].enums, 2, sizeof(par_enum_t));
+  alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
   
   strncpy(params->par[params->n].enums[0].tag, "FALSE",  5); 
   params->par[params->n].enums[0].tag[5] = '\0';
