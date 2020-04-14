@@ -370,6 +370,7 @@ bash: temp
 	cp $(DB)/force-level2.sh $(TB)/force-level2
 	cp $(DB)/force-mosaic.sh $(TB)/force-mosaic
 	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
+	cp $(DB)/force-procmask.sh $(TB)/force-procmask
 	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2
 
 install: bash install_ clean
