@@ -538,9 +538,14 @@ int n = 0;
     printf("Error getting processing mask."); 
     free_stack(MASK);
     *success = FAILURE; return NULL;}
-    
+
+  // count and make sure that mask_ is binary
   for (p=0; p<nc; p++){
-    if (mask_[p]) n++;
+    if (mask_[p] == 1){
+      n++;
+    } else {
+      mask_[p] = 0;
+    }
   }
 
   if (n == 0){
