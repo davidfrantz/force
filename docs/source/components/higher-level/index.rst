@@ -15,6 +15,17 @@ Prepare Figure for this?
 
 force-higher-level for all submodules.
 
+.. image:: hl-1.jpg
+   :width: 19%
+.. image:: hl-2.jpg
+   :width: 19%
+.. image:: hl-3.jpg
+   :width: 19%
+.. image:: hl-4.jpg
+   :width: 19%
+.. image:: hl-5.jpg
+   :width: 19%
+
 
 **Table 1** Higher Level module.
 
