@@ -256,7 +256,7 @@ bool verbose;
   
   printf("An empty parameter file skeleton was written to\n  %s\n", fname);
   printf("Note that all parameters need to be given, even though some may not be used\n");
-  printf("with you specific parameterization.\n");
+  printf("with your specific parameterization.\n");
   printf("You should rename the file, e.g. my-first-%s.prm.\n", ctype);
   printf("Parameterize according to your needs and run with\n");
 
