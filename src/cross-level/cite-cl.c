@@ -288,6 +288,16 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Analysis Program for Categorical and Continuous Maps. Computer software "
     "program produced by the authors at the University of Massachusetts, Amherst. "
     "Available at: http://www.umass.edu/landeco/research/fragstats/fragstats.html",
+    false },
+  { "NDTI",
+    "Van Deventer, A.P., Ward, A.D., Gowda, P.H., Lyon, J.G. (1997). Using "
+    "Thematic Mapper data to identify contrasting soil plains and tillage "
+    "practices. Photogrammetric engineering and remote sensing, 63, 87-93",
+    false },
+  { "NDMI",
+    "Gao, B. (1996). NDWI — A normalized difference water index for remote "
+    "sensing of vegetation liquid water from space. Remote Sensing of Environment, "
+    "58, 3, 257-266",
     false }
 };
 

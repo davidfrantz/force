@@ -561,6 +561,14 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_VH_] = true;
         strncpy(tsa->index_name[idx] , "BVH", 3); tsa->index_name[idx][3] = '\0';
         break;
+      case _IDX_NDT_:
+        v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
+        strncpy(tsa->index_name[idx] , "NDT", 3); tsa->index_name[idx][3] = '\0';
+        break;
+      case _IDX_NDM_:
+        v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
+        strncpy(tsa->index_name[idx] , "NDM", 3); tsa->index_name[idx][3] = '\0';
+        break;
       default:
         printf("unknown INDEX\n");
         break;
