@@ -759,6 +759,14 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_BVH_:
       index_band(ard, mask_, ts, sen->vh, nc, nt, nodata);
       break;
+    case _IDX_NDT_:
+      cite_me(_CITE_NDTI_);
+      index_differenced(ard, mask_, ts, sen->swir1, sen->swir2, nc, nt, nodata);
+      break;
+    case _IDX_NDM_:
+      cite_me(_CITE_NDMI_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->swir1, nc, nt, nodata);
+      break;
     default:
       printf("unknown INDEX\n");
       break;      

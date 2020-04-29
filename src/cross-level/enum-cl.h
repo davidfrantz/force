@@ -152,8 +152,8 @@ enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_,
        _IDX_RE1_, _IDX_RE2_, _IDX_RE3_, _IDX_BNR_, _IDX_NDV_, _IDX_EVI_, 
        _IDX_NBR_, _IDX_ARV_, _IDX_SAV_, _IDX_SRV_, _IDX_TCB_, _IDX_TCG_, 
        _IDX_TCW_, _IDX_TCD_, _IDX_NDB_, _IDX_NDW_, _IDX_MNW_, _IDX_NDS_,
-       _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_LENGTH_};
-       
+       _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_LENGTH_};
+
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
 

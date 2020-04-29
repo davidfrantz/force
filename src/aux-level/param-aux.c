@@ -1244,8 +1244,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# a linear spectral mixture analysis and is dependent on the parameters\n");
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
-    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDSI,SMA}\n");
+    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
+    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 

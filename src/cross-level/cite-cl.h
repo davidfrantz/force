@@ -54,7 +54,7 @@ enum { _CITE_FORCE_,       _CITE_L2PS_,       _CITE_ATMVAL_,
        _CITE_DISTURBANCE_, _CITE_NDBI_,       _CITE_NDWI_,
        _CITE_MNDWI_,       _CITE_NDSI_,       _CITE_SMA_,
        _CITE_EQUI7_,       _CITE_RESMERGE_,   _CITE_LSM_,
-       _CITE_LENGTH_ };
+       _CITE_NDTI_,        _CITE_NDMI_,       _CITE_LENGTH_ };
 
 typedef struct {
   char description[NPOW_10];
