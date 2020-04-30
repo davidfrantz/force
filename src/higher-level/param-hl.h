@@ -284,6 +284,8 @@ typedef struct {
   int omlp; 
   int omli; 
   int omlu; 
+  int orfp; 
+  int orfm; 
   char *base;
 } par_mcl_t;
 

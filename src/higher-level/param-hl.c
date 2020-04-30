@@ -323,6 +323,8 @@ int i;
   register_bool_par(params,  "OUTPUT_MLP", &phl->mcl.omlp);
   register_bool_par(params,  "OUTPUT_MLI", &phl->mcl.omli);
   register_bool_par(params,  "OUTPUT_MLU", &phl->mcl.omlu);
+  register_bool_par(params,  "OUTPUT_RFP", &phl->mcl.orfp);
+  register_bool_par(params,  "OUTPUT_RFM", &phl->mcl.orfm);
 
   for (i=0; i<phl->mcl.nmodelset; i++) register_charvec_par(params,  "FILE_MODEL",
     _CHAR_TEST_BASE_, &phl->mcl.f_model[i], &phl->mcl.nmodel[i]);
@@ -1526,6 +1528,18 @@ double tol = 5e-3;
         printf("The prediction year %d (COARSE_PREDICT_YEARS) is outside of DATE_RANGE. This won't work.\n", phl->cfi.years[y]); return FAILURE;}
     }
   }
+
+  if (phl->type == _HL_ML_){
+    if (phl->mlc.orfp && phl->mcl.method != _ML_RFC_){
+      phl->mlc.orfp = false;
+      printf("Random Forest Class Probabilities cannot be computed. Ignored and continue.\n");
+    }
+    if (phl->mlc.orfm && phl->mcl.method != _ML_RFC_){
+      phl->mlc.orfm = false;
+      printf("Random Forest Classifcation Margin cannot be computed. Ignored and continue.\n");
+    }
+  }
+
 
   return SUCCESS;
 }
