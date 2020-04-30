@@ -1,3 +1,5 @@
+from os import makedirs
+from os.path import join, exists
 from typing import Dict, Union, NamedTuple, Iterator, List
 
 import numpy as np
@@ -10,21 +12,22 @@ class Mixture(NamedTuple):
     profile: List[float]
 
 
-def synthMix(
-        features: np.ndarray, responses: np.array, target: int, mixingLikelihood: Dict[int, float],
+def synthMixCore(
+        features: np.ndarray, response: np.array, target: int, mixingLikelihood: Dict[int, float],
         classLikelihood: Union[Dict[int, float], str], includeWithinClassMixtures=False, targetRange=(0., 1.)
 ) -> Iterator[Mixture]:
     # prepare parameters and check consistency
     assert isinstance(features, np.ndarray) and features.ndim == 2
-    assert isinstance(responses, np.ndarray) and responses.ndim == 1
-    assert len(features) == len(responses)
-    classIds, counts = np.unique(responses, return_counts=True)
+    assert isinstance(response, np.ndarray) and response.ndim == 1
+    assert len(features) == len(response)
+    classIds, counts = np.unique(response, return_counts=True)
     if classLikelihood is None:
         classLikelihood = 'proportional'
-    if classLikelihood == 'proportional':
-        classLikelihood = {classId: float(count) / len(responses) for classId, count in zip(classIds, counts)}
-    elif classLikelihood == 'equalized':
-        classLikelihood = {classId: 1. / len(classIds) for classId in classIds}
+    if isinstance(classLikelihood, str):
+        if classLikelihood.lower() == 'proportional':
+            classLikelihood = {classId: float(count) / len(response) for classId, count in zip(classIds, counts)}
+        elif classLikelihood.lower() == 'equalized':
+            classLikelihood = {classId: 1. / len(classIds) for classId in classIds}
     assert isinstance(mixingLikelihood, dict)
     assert isinstance(classLikelihood, dict)
     for classId in classIds:
@@ -33,7 +36,7 @@ def synthMix(
     # cache feature locations by class
     indicesByClassId = dict()
     for classId in classIds:
-        indicesByClassId[classId] = np.where(responses == classId)[0]
+        indicesByClassId[classId] = np.where(response == classId)[0]
 
     # remove within class mixtures if requested
     if includeWithinClassMixtures:
@@ -74,3 +77,64 @@ def synthMix(
         mixedProfile = list(np.sum(features[drawnIndices] * np.reshape(drawnFractions, (-1, 1)), axis=0))
 
         yield Mixture(classIds=drawnClassIds, indices=drawnIndices, fractions=drawnFractions, profile=mixedProfile)
+
+
+def parsePrm(filenamePrm: str) -> Dict[str, str]:
+    with open(filenamePrm) as file:
+        lines = file.readlines()
+
+    parameters = dict()
+    for line in lines:
+        if line.startswith('#'):
+            continue
+        tmp = line.split('=')
+        if len(tmp) != 2:
+            continue
+        key = tmp[0].strip()
+        value = tmp[1].strip()
+        parameters[key] = value
+    return parameters
+
+
+def synthMixCli(filenamePrm: str):
+    parameters = parsePrm(filenamePrm=filenamePrm)
+    print(parameters)
+    features = np.genfromtxt(fname=parameters['FILE_FEATURES'])
+    response = np.genfromtxt(fname=parameters['FILE_RESPONSE'])
+    targets = [int(v) for v in parameters['TARGET_CLASS'].split(' ')]
+    n = int(parameters['SYNTHETIC_MIXTURES'])
+    mixingLikelihood = {
+        int(complexity): float(likelihood) for complexity, likelihood in zip(
+            parameters['MIXING_COMPLEXITY'].split(' '),
+            parameters['MIXING_LIKELIHOOD'].split(' ')
+        )
+    }
+    if parameters['CLASS_LIKELIHOOD'].lower() in ['proportional', 'equalized']:
+        classLikelihood = parameters['CLASS_LIKELIHOOD'].lower()
+    else:
+        classLikelihood = {
+            int(complexity): float(likelihood) for complexity, likelihood in zip(
+                parameters['TARGET_CLASS'].split(' '),
+                parameters['CLASS_LIKELIHOOD'].split(' ')
+            )
+        }
+    includeWithinClassMixtures = parameters['WITHIN_CLASS_MIXING'] == 'TRUE'
+    iterations = int(parameters['ITERATIONS'])
+    if not exists(parameters['DIR_MIXES']):
+        makedirs(parameters['DIR_MIXES'])
+
+    for iteration in range(1, iterations + 1):
+        for target in targets:
+            filenameFeatures = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_FEATURES_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+            filenameResponse = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_RESPONSE_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+            mixtureStream = synthMixCore(
+                features=features, response=response, target=target, mixingLikelihood=mixingLikelihood,
+                classLikelihood=classLikelihood, includeWithinClassMixtures=includeWithinClassMixtures
+            )
+            with open(filenameFeatures, 'w') as fileFeatures, open(filenameResponse, 'w') as fileResponse:
+                for i, mixture in enumerate(mixtureStream, 1):
+                    print(' '.join(map(str, mixture.profile)), file=fileFeatures)
+                    print(mixture.fractions[0], file=fileResponse)
+
+                    if i == n:
+                        break

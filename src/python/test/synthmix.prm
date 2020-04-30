@@ -1,0 +1,37 @@
+++PARAM_SYNTHMIX_START++
+
+# Text file with features for all classes
+FILE_FEATURES = jpn_features.txt
+
+# Text file with class IDs
+FILE_RESPONSE = jpn_response.txt
+
+SYNTHETIC_MIXTURES = 1000
+INCLUDE_ORIGINAL = TRUE
+
+# to be consisten with previous FORCE modules, this needs to be split in two variables
+# a test should be made to verify that complexity doesn't exceed number of classes in response
+MIXING_COMPLEXITY = 1 2 3 4
+MIXING_LIKELIHOOD = 0.2 0.4 0.2 0.2
+
+WITHIN_CLASS_MIXING = TRUE
+
+# can be one of the following
+# for the last case, a test should be made that each class has a likelihood and that the number is consistent with the number of classes
+CLASS_LIKELIHOOD = EQUALIZED
+
+# number of ensembles per class
+ITERATIONS = 3
+
+# target classes
+TARGET_CLASS = 1 2 3 4 5
+
+
+# output directory
+DIR_MIXES = data
+
+# basename of output
+# output could be named like this: SYNTHMIX_FEATURES_CLASS-%03d_ENSEMBLE-%03d.txt
+BASE_MIXES = SYNTHMIX
+
+++PARAM_SYNTHMIX_END++

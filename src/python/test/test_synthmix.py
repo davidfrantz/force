@@ -2,12 +2,12 @@ from unittest import TestCase
 
 import numpy as np
 
-from synthmix import synthMix
+from synthmix import synthMixCore, synthMixCli
 
 
 class TestSynthMix(TestCase):
 
-    def test(self):
+    def test_core(self):
         features = np.array([
             [1, 2, 3, 4],
             [10, 20, 30, 40],
@@ -16,8 +16,8 @@ class TestSynthMix(TestCase):
         ])
         responses = np.array([1, 2, 3, 1])
 
-        mixtureStream = synthMix(
-            features=features, responses=responses, target=1, mixingLikelihood={1: 0.2, 2: 0.4, 3: 0.4},
+        mixtureStream = synthMixCore(
+            features=features, response=responses, target=1, mixingLikelihood={1: 0.2, 2: 0.4, 3: 0.4},
             classLikelihood={1: 0.4, 2: 0.3, 3: 0.3}, includeWithinClassMixtures=True
         )
 
@@ -26,3 +26,6 @@ class TestSynthMix(TestCase):
 
             if i == 3:
                 break
+
+    def test_cli(self):
+        synthMixCli(filenamePrm='synthmix.prm')
