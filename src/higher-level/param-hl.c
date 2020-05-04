@@ -649,6 +649,7 @@ void alloc_mcl(par_mcl_t *mcl){
 
   alloc((void**)&mcl->f_model, mcl->nmodelset, sizeof(char**));
   alloc((void**)&mcl->nmodel,  mcl->nmodelset, sizeof(int));
+  alloc((void**)&mcl->nclass,  mcl->nmodelset, sizeof(int));
 
   return;
 }
@@ -662,6 +663,7 @@ void free_mcl(par_mcl_t *mcl){
 
   free((void*)mcl->f_model); mcl->f_model = NULL;
   free((void*)mcl->nmodel);  mcl->nmodel  = NULL;
+  free((void*)mcl->nclass);  mcl->nclass  = NULL;
 
   return;
 }
@@ -1530,12 +1532,12 @@ double tol = 5e-3;
   }
 
   if (phl->type == _HL_ML_){
-    if (phl->mlc.orfp && phl->mcl.method != _ML_RFC_){
-      phl->mlc.orfp = false;
+    if (phl->mcl.orfp && phl->mcl.method != _ML_RFC_){
+      phl->mcl.orfp = false;
       printf("Random Forest Class Probabilities cannot be computed. Ignored and continue.\n");
     }
-    if (phl->mlc.orfm && phl->mcl.method != _ML_RFC_){
-      phl->mlc.orfm = false;
+    if (phl->mcl.orfm && phl->mcl.method != _ML_RFC_){
+      phl->mcl.orfm = false;
       printf("Random Forest Classifcation Margin cannot be computed. Ignored and continue.\n");
     }
   }

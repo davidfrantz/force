@@ -278,6 +278,8 @@ typedef struct {
   char ***f_model;
   int nmodelset;
   int *nmodel;
+  int *nclass;
+  int nclass_all_sets;
   float converge;
   float scale;
   int method;

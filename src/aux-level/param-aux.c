@@ -2161,12 +2161,31 @@ void write_par_hl_ml(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_MLI = FALSE\n");
   
   if (verbose){
-    fprintf(fp, "# Output the uncertainty of the blended prediction? THis is the standard\n");
+    fprintf(fp, "# Output the uncertainty of the blended prediction? This is the standard\n");
     fprintf(fp, "# deviation of all predictions that are blended into the final prediction.\n");
     fprintf(fp, "# Only makes sense when multiple models are given in a modelset.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_MLU = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the Random Forest Class Probabilities? This option is only available\n");
+    fprintf(fp, "# when ML_METHOD = RFC. If multiple models are given per modelset, the mean \n");
+    fprintf(fp, "# class probability is computed. The output file will have as many bands as \n");
+    fprintf(fp, "# classes. If multiple modelsets are given, the modelsets are appended after \n");
+    fprintf(fp, "# each other.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RFP = FALSE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Output the Random Forest Classification Margin? This option is only available\n");
+    fprintf(fp, "# when ML_METHOD = RFC. If multiple models are given per modelset, the margin is \n");
+    fprintf(fp, "# based on the mean class probability. If multiple modelsets are given, a margin \n");
+    fprintf(fp, "# is computed for each modelset.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RFM = FALSE\n");
   
   
   return;

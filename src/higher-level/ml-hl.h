@@ -45,13 +45,17 @@ extern "C" {
 #endif
 
 typedef struct {
-  std::vector<cv::Ptr<cv::ml::StatModel>> model;
+  //std::vector<cv::Ptr<cv::ml::StatModel>> model;
+  std::vector<cv::Ptr<cv::ml::RTrees>> rf_model;
+  std::vector<cv::Ptr<cv::ml::SVM>> sv_model;
 } aux_ml_t;
 
 typedef struct {
   short **mlp_;
   short **mli_;
   short **mlu_;
+  short **rfp_;
+  short **rfm_;
 } ml_t;
 
 stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_ml_t *mod, cube_t *cube, int *nproduct);

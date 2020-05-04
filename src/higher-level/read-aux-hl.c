@@ -78,7 +78,12 @@ char fname[NPOW_10];
 int nchar;
 
 
+  phl->mcl.nclass_all_sets = 0;
+
+
   for (s=0; s<phl->mcl.nmodelset; s++){
+    
+    phl->mcl.nclass[s] = 0;
 
     for (m=0; m<phl->mcl.nmodel[s]; m++){
 
@@ -88,16 +93,38 @@ int nchar;
 
       if (phl->mcl.method == _ML_SVR_ || 
           phl->mcl.method == _ML_SVC_){
+            
         cv::Ptr<cv::ml::SVM> newmodel = cv::ml::SVM::create();
         newmodel = cv::ml::SVM::load(fname);
-        aux->ml.model.push_back(newmodel);
+        aux->ml.sv_model.push_back(newmodel);
+        
       } else if (phl->mcl.method == _ML_RFR_ || 
                  phl->mcl.method == _ML_RFC_){
+
         cv::Ptr<cv::ml::RTrees> newmodel = cv::ml::RTrees::create();
         newmodel = cv::ml::RTrees::load(fname);
-        aux->ml.model.push_back(newmodel);
+        aux->ml.rf_model.push_back(newmodel);
+
+        if (phl->mcl.method == _ML_RFC_){
+
+          // number of classes need to be known to compute RF probability
+          // ... I hate this piece of code, but didn't find another way to 
+          //     catch number of classes in the classifier...
+          cv::Mat sample(1, phl->ftr.nfeature, CV_32F);
+          cv::Mat vote;
+          newmodel->getVotes(sample, vote, 0);
+
+          phl->mcl.nclass[s] = vote.cols;
+          
+          sample.release();
+          vote.release();
+
+        }
+
       }
     }
+
+    phl->mcl.nclass_all_sets += phl->mcl.nclass[s];
 
   }
 
