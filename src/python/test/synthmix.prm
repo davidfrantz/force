@@ -6,7 +6,7 @@ FILE_FEATURES = jpn_features.txt
 # Text file with class IDs
 FILE_RESPONSE = jpn_response.txt
 
-SYNTHETIC_MIXTURES = 1000
+SYNTHETIC_MIXTURES = 10
 INCLUDE_ORIGINAL = TRUE
 
 # to be consisten with previous FORCE modules, this needs to be split in two variables

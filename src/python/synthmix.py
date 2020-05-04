@@ -127,14 +127,19 @@ def synthMixCli(filenamePrm: str):
         for target in targets:
             filenameFeatures = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_FEATURES_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
             filenameResponse = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_RESPONSE_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+
             mixtureStream = synthMixCore(
                 features=features, response=response, target=target, mixingLikelihood=mixingLikelihood,
                 classLikelihood=classLikelihood, includeWithinClassMixtures=includeWithinClassMixtures
             )
             with open(filenameFeatures, 'w') as fileFeatures, open(filenameResponse, 'w') as fileResponse:
                 for i, mixture in enumerate(mixtureStream, 1):
-                    print(' '.join(map(str, mixture.profile)), file=fileFeatures)
-                    print(mixture.fractions[0], file=fileResponse)
+                    print(' '.join([str(round(v, 2)) for v in mixture.profile]), file=fileFeatures)
+                    print(round(mixture.fractions[0], 4), file=fileResponse)
 
                     if i == n:
                         break
+                for profile, classId in zip(features, response):
+                    if classId == target:
+                        print(' '.join([str(round(v, 2)) for v in profile]), file=fileFeatures)
+                        print('1.', file=fileResponse)
