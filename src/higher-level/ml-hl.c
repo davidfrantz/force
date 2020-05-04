@@ -48,18 +48,18 @@ stack_t *compile_ml_stack(stack_t *ard, int nb, bool write, char *prodname, par_
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_ml(ard_t *features, ml_t *ml, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **ML = NULL;
-int b, o, nprod = 3;
+int s, c, sc, o, nprod = 5;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
 char domain[NPOW_10];
-enum { _mlp_, _mli_, _mlu_ };
-int prodlen[3] = { phl->mcl.nmodelset, phl->mcl.nmodelset, phl->mcl.nmodelset };
-char prodname[3][NPOW_02] = { "MLP", "MLI", "MLU" };
-int prodtype[3] = { _mlp_, _mli_, _mlu_ };
-bool enable[3] = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu };
-bool write[3]  = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu };
-short ***ptr[3] = { &ml->mlp_, &ml->mli_, &ml->mlu_ };
+enum { _set_, _setclass_ };
+int prodlen[2] = { phl->mcl.nmodelset, phl->mcl.nclass_all_sets };
+char prodname[5][NPOW_02] = { "MLP", "MLI", "MLU", "RFP", "RFM" };
+int prodtype[5] = { _set_, _set_, _set_, _setclass_, _set_ };
+bool enable[5] = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
+bool write[5]  = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
+short ***ptr[5] = { &ml->mlp_, &ml->mli_, &ml->mlu_, &ml->rfp_, &ml->rfm_ };
 
 
   alloc((void**)&ML, nprod, sizeof(stack_t*));
@@ -69,18 +69,48 @@ short ***ptr[3] = { &ml->mlp_, &ml->mli_, &ml->mlu_ };
       if ((ML[o] = compile_ml_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(ML[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
-        for (b=0; b<prodlen[o]; b++){
-          basename_without_ext(phl->mcl.f_model[b][0], bname, NPOW_10);
-          if (strlen(bname) > NPOW_10-1){
-            nchar = snprintf(domain, NPOW_10, "MODELSET-%02d", b+1);
-            if (nchar < 0 || nchar >= NPOW_10){ 
-              printf("Buffer Overflow in assembling domain\n"); error++;}
-          } else { 
-            strncpy(domain, bname, strlen(bname)); 
-            domain[strlen(bname)] = '\0';
-          }
-          set_stack_domain(ML[o],   b, domain);
-          set_stack_bandname(ML[o], b, domain);
+        
+        switch (prodtype[o]){
+          case _set_:
+            for (s=0; s<phl->mcl.nmodelset; s++){
+              basename_without_ext(phl->mcl.f_model[s][0], bname, NPOW_10);
+              if (strlen(bname) > NPOW_10-1){
+                nchar = snprintf(domain, NPOW_10, "MODELSET-%02d", s+1);
+                if (nchar < 0 || nchar >= NPOW_10){ 
+                  printf("Buffer Overflow in assembling domain\n"); error++;}
+              } else { 
+                strncpy(domain, bname, strlen(bname)); 
+                domain[strlen(bname)] = '\0';
+              }
+              set_stack_domain(ML[o],   s, domain);
+              set_stack_bandname(ML[o], s, domain);
+            }
+            break;
+          case _setclass_:
+
+            for (s=0, sc=0; s<phl->mcl.nmodelset; s++){
+              basename_without_ext(phl->mcl.f_model[s][0], bname, NPOW_10);
+              for (c=0; c<phl->mcl.nclass[s]; c++, sc++){
+                if (strlen(bname) > NPOW_10-1){
+                  nchar = snprintf(domain, NPOW_10, "MODELSET-%02d_CLASS-%03d", s+1, c+1);
+                  if (nchar < 0 || nchar >= NPOW_10){ 
+                    printf("Buffer Overflow in assembling domain\n"); error++;}
+                } else { 
+                  strncpy(domain, bname, strlen(bname)); 
+                  domain[strlen(bname)] = '\0';
+                }
+                set_stack_domain(ML[o],   sc, domain);
+                set_stack_bandname(ML[o], sc, domain);
+              }
+            }
+
+
+
+
+            break;
+          default:
+            printf("unknown ml type.\n"); error++;
+            break;
         }
       }
     } else {
@@ -172,11 +202,14 @@ ml_t ml;
 stack_t **ML;
 small *mask_ = NULL;
 bool regression;
+bool rf, rfprob;
 float fpred[NPOW_03][NPOW_06];
 int   ipred[NPOW_03][NPOW_06];
 int nprod = 0;
-int f, s, m, k, p, nc;
+int f, s, m, k, c, sc, p, nc;
 double mean, mean_old, var, std, mn;
+double *mean_prob;
+int max_prob, max2_prob, win_class, ntree;
 short nodata;
 bool valid;
 
@@ -203,20 +236,29 @@ bool valid;
 
   
   if (phl->mcl.method == _ML_SVR_ || phl->mcl.method == _ML_RFR_) regression = true; else regression = false;
+  if (phl->mcl.method == _ML_RFR_ || phl->mcl.method == _ML_RFC_) rf = true; else rf = false;
+  if (phl->mcl.orfp || phl->mcl.orfm) rfprob = true; else rfprob = false;
 
 
-  #pragma omp parallel private(f,s,m,k,mean,mn,mean_old,var,std,fpred,ipred,valid) shared(features,mod,regression,ml,nf,nc,mask_,phl,ML,nodata) default(none)
+
+  #pragma omp parallel private(f,s,m,k,c,sc,mean,mn,mean_old,var,std,fpred,ipred,mean_prob,max_prob,max2_prob,win_class,ntree,valid) shared(features,mod,regression,rf,rfprob,ml,nf,nc,mask_,phl,ML,nodata) default(none)
   {
+
+    if (rfprob) alloc((void**)&mean_prob, phl->mcl.nclass_all_sets, sizeof(double));
 
     #pragma omp for schedule(dynamic,1)
     for (p=0; p<nc; p++){
 
       // skip pixels that are masked
       if (mask_ != NULL && !mask_[p]){
-        for (s=0; s<phl->mcl.nmodelset; s++){
+        for (s=0, sc=0; s<phl->mcl.nmodelset; s++){
           if (ml.mlp_ != NULL) ml.mlp_[s][p] = nodata;
           if (ml.mli_ != NULL) ml.mli_[s][p] = nodata;
           if (ml.mlu_ != NULL) ml.mlu_[s][p] = nodata;
+          if (ml.rfm_ != NULL) ml.rfm_[s][p] = nodata;
+          for (c=0; c<phl->mcl.nclass[s]; c++, sc++){
+            if (ml.rfp_ != NULL) ml.rfp_[sc][p] = nodata;
+          }
         }
         continue;
       }
@@ -228,21 +270,56 @@ bool valid;
       }
 
       if (!valid){
-        for (s=0; s<phl->mcl.nmodelset; s++){
+        for (s=0, sc=0; s<phl->mcl.nmodelset; s++){
           if (ml.mlp_ != NULL) ml.mlp_[s][p] = nodata;
           if (ml.mli_ != NULL) ml.mli_[s][p] = nodata;
           if (ml.mlu_ != NULL) ml.mlu_[s][p] = nodata;
+          if (ml.rfm_ != NULL) ml.rfm_[s][p] = nodata;
+          for (c=0; c<phl->mcl.nclass[s]; c++, sc++){
+            if (ml.rfp_ != NULL) ml.rfp_[sc][p] = nodata;
+          }
         }
         continue;
       }
 
-      for (s=0, k=0; s<phl->mcl.nmodelset; s++){
+      for (s=0, k=0, sc=0; s<phl->mcl.nmodelset; s++){
         
         mean = mean_old = var = 0;
+        ntree = 0;
+        memset(mean_prob, 0, phl->mcl.nclass_all_sets*sizeof(double));
+
         for (m=0; m<phl->mcl.nmodel[s]; m++, k++){
 
-          fpred[s][m] = mod->model[k]->predict(sample);
-          ipred[s][m] = (int)fpred[s][m];
+          if (rfprob){
+
+            Mat vote;
+            mod->rf_model[k]->getVotes(sample, vote, 0);
+
+            win_class = 0;
+            max_prob  = 0;
+
+            for (c=0; c<phl->mcl.nclass[s]; c++){
+              mean_prob[c] += vote.at<int>(1,c);
+              ntree += vote.at<int>(1,c);
+              if (vote.at<int>(1,c) > max_prob){
+                win_class = vote.at<int>(0,c);
+                max_prob  = vote.at<int>(1,c);
+              }
+            }
+
+
+            ipred[s][m] = win_class;
+
+          } else {
+
+            if (rf){
+              fpred[s][m] = mod->rf_model[k]->predict(sample);
+            } else {
+              fpred[s][m] = mod->sv_model[k]->predict(sample);
+            }
+            ipred[s][m] = (int)fpred[s][m];
+
+          }
 
           if (regression){
 
@@ -254,7 +331,7 @@ bool valid;
 
             if (m > 1 && fabs(mean-mean_old) < phl->mcl.converge){ k += phl->mcl.nmodel[s]-m; m++; break;}
             mean_old = mean;
-            
+
           }
 
         }
@@ -270,12 +347,36 @@ bool valid;
         } else {
           if (ml.mlp_ != NULL) ml.mlp_[s][p] = (short)mode(ipred[s], phl->mcl.nmodel[s]);
         }
+
         if (ml.mli_ != NULL) ml.mli_[s][p] = m;
-        
+
+        if (rfprob){
+
+          for (c=0; c<phl->mcl.nclass[s]; c++) mean_prob[c] /= (ntree*0.0001);
+
+          if (ml.rfp_ != NULL){
+            for (c=0; c<phl->mcl.nclass[s]; c++) ml.rfp_[sc++][p] = (short)mean_prob[c];
+          }
+          
+          if (ml.rfm_ != NULL){
+            max_prob = max2_prob  = 0;
+            for (c=0; c<phl->mcl.nclass[s]; c++){
+              if (mean_prob[c] > max_prob) max_prob = mean_prob[c];
+            }
+            for (c=0; c<phl->mcl.nclass[s]; c++){
+              if (mean_prob[c] > max2_prob && mean_prob[c] < max_prob) max2_prob = mean_prob[c];
+            }
+            ml.rfm_[s][p] = max_prob-max2_prob;
+          }
+
+        }
+
       }
 
 
     }
+    
+    if (rfprob) free((void*)mean_prob);
 
   }
   

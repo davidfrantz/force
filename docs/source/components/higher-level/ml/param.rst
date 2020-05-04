@@ -185,10 +185,26 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_MLI = FALSE``
-     
-  * Output the uncertainty of the blended prediction? THis is the standard deviation of all predictions that are blended into the final prediction.
+
+  * Output the uncertainty of the blended prediction? This is the standard deviation of all predictions that are blended into the final prediction.
     Only makes sense when multiple models are given in a modelset.
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_MLU = FALSE``
 
+  * Output the Random Forest Class Probabilities? 
+    This option is only available when ``ML_METHOD = RFC``. 
+    If multiple models are given per modelset, the mean class probability is computed. 
+    The output file will have as many bands as classes. 
+    If multiple modelsets are given, the modelsets are appended after each other.
+    
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_RFP = FALSE``
+
+  * Output the Random Forest Classification Margin? 
+    This option is only available when ``ML_METHOD = RFC``. 
+    If multiple models are given per modelset, the margin is based on the mean class probability. 
+    If multiple modelsets are given, a margin is computed for each modelset.
+    
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_RFM = FALSE``
