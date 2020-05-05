@@ -142,4 +142,4 @@ def synthMixCli(filenamePrm: str):
                 for profile, classId in zip(features, response):
                     if classId == target:
                         print(' '.join([str(round(v, 2)) for v in profile]), file=fileFeatures)
-                        print('1.', file=fileResponse)
+                        print('1.0', file=fileResponse)
