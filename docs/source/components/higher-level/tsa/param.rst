@@ -287,7 +287,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + SMA       + Spectral Mixture Analysis                  + | BOA = F * endmember + E                                                                + Smith et al. 1990        +
     +           +                                            + | Fraction F is retrieved using least-squares optimization                               +                          +
-    +           +                                            + | from a couple of endmembers and BOA reflectance, E is model error                      +                          +
+    +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                      +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     
