@@ -249,22 +249,22 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + NDVI      + Normalized Difference Vegetation Index     + (NIR - RED) / (NIR + RED)                                                                + Tucker 1979              +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + EVI       + Enhanced Vegetation Index                  + G * ((NIR - R) / (NIR + C1 * RED – C2 * BLUE + L))                                       + Huete et al. 2002        +
-    +           +                                            + with G = 2.5, L = 1, C1 = 6, C2 = 7.5                                                    +                          +
+    + EVI       + Enhanced Vegetation Index                  + | G * ((NIR - R) / (NIR + C1 * RED – C2 * BLUE + L))                                     + Huete et al. 2002        +
+    +           +                                            + | with G = 2.5, L = 1, C1 = 6, C2 = 7.5                                                  +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + NBR       + Normalized Burn Ratio                      + (NIR - SWIR2) / (NIR  SWIR2)                                                             + Key & Benson 2005        +
+    + NBR       + Normalized Burn Ratio                      + (NIR - SWIR2) / (NIR + SWIR2)                                                            + Key & Benson 2005        +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + NDTI      + Normalized Difference Tillage Index        + (SWIR1 - SWIR2) / (SWIR1  SWIR2)                                                         + Van Deventer et al. 1997 +
+    + NDTI      + Normalized Difference Tillage Index        + (SWIR1 - SWIR2) / (SWIR1 + SWIR2)                                                        + Van Deventer et al. 1997 +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + ARVI      + Atmospherically Resistant Vegetation Index + (NIR - RB) / (NIR + RB)                                                                  + Kaufman & Tanré 1992     +
-    +           +                                            + with RB = RED - (BLUE - RED)                                                             +                          +
+    + ARVI      + Atmospherically Resistant Vegetation Index + | (NIR - RB) / (NIR + RB)                                                                + Kaufman & Tanré 1992     +
+    +           +                                            + | with RB = RED - (BLUE - RED)                                                           +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + SAVI      + Soil Adjusted Vegetation Index             + (NIR - RED) / (NIR + RED + L) * (1 + L)                                                  + Huete 1988               +
-    +           +                                            + with L = 0.5                                                                             +                          +
+    + SAVI      + Soil Adjusted Vegetation Index             + | (NIR - RED) / (NIR + RED + L) * (1 + L)                                                + Huete 1988               +
+    +           +                                            + | with L = 0.5                                                                           +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + SARVI     + Soil adj. and Atm.  Resistant Veg. Index   + (NIR - RB) / (NIR + RB + L) * (1 + L)                                                    + Kaufman & Tanré 1992     +
-    +           +                                            + with RB = RED - (BLUE - RED)                                                             +                          +
-    +           +                                            + with L = 0.5                                                                             +                          +
+    + SARVI     + Soil adj. and Atm.  Resistant Veg. Index   + | (NIR - RB) / (NIR + RB + L) * (1 + L)                                                  + Kaufman & Tanré 1992     +
+    +           +                                            + | with RB = RED - (BLUE - RED)                                                           +                          +
+    +           +                                            + | with L = 0.5                                                                           +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + TC-BRIGHT + Tasseled Cap Brightness                    +  0.2043 * BLUE  0.4158 * GREEN  0.5524 * RED 0.5741 * NIR  0.3124 * SWIR1  0.2303 *SWIR2 + Crist 1985               +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
@@ -272,10 +272,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + TC-WET    + Tasseled Cap Wetness                       +  0.0315 * BLUE  0.2021 * GREEN  0.3102 * RED 0.1594 * NIR -0.6806 * SWIR1 -0.6109 *SWIR2 + Crist 1985               +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + TC-DI     +                                            + TC-BRIGHT - (TC-GREEN + TC-WET)                                                          + Healey et al. 1995       +
-    +           +                                            + no rescaling applied (as opposed to Healey et al. 1995)                                  +                          +
+    + TC-DI     +                                            + | TC-BRIGHT - (TC-GREEN + TC-WET)                                                        + Healey et al. 1995       +
+    +           +                                            + | no rescaling applied (as opposed to Healey et al. 1995)                                +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + NDBI      + Normalized Difference Built-Up Index       + (SWIR1 - NIR) / (SWIR1 + NIR)                                                             + Zha et al. 2003         +
+    + NDBI      + Normalized Difference Built-Up Index       + (SWIR1 - NIR) / (SWIR1 + NIR)                                                            + Zha et al. 2003          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + NDWI      + Normalized Difference Water Index          + (GREEN - NIR) / (GREEN + NIR)                                                            + McFeeters 1996           +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
@@ -285,9 +285,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + NDSI      + Normalized Difference Snow Index           + (GREEN - SWIR1) / (GREEN + SWIR1)                                                        + Hall et al. 1995         +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + SMA       + Spectral Mixture Analysis                  + BOA = F * endmember + E                                                                  + Smith et al. 1990        +
-    +           +                                            + Fraction F is retrieved using least-squares optimization                                 +                          +
-    +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                        +                          +
+    + SMA       + Spectral Mixture Analysis                  + | BOA = F * endmember + E                                                                + Smith et al. 1990        +
+    +           +                                            + | Fraction F is retrieved using least-squares optimization                               +                          +
+    +           +                                            +   from a couple of endmembers and BOA reflectance, E is model error                      +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     
