@@ -235,9 +235,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "inventory system 2004 (2005).",
     false },
   { "SAVI, SARVI, ARVI", 
-    "Huete, A., Justice, C., & Liu, H. (1994). Development of vegetation "
-    "and soil indices for MODIS-EOS. Remote Sensing of Environment, "
-    "49, 224-234",
+    "Huete, A. (1988). Soil-Adjusted Vegetation Index (SAVI). Remote Sensing "
+    "of Environment, 25, 295-309\n"
+    "Kaufman, Y., Tanré, D. (1992). Atmospherically Resistant Vegetation Index "
+    "(ARVI) for EOS-MODIS. IEEE Transactions On Geoscience And Remote Sensing, "
+    "30 (2), 261-270",
     false },
   { "Tasseled Cap", 
     "Crist, E.P. (1985). A TM Tasseled Cap equivalent transformation for "
