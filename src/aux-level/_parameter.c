@@ -235,11 +235,11 @@ bool verbose;
   }
   
   if (type == _AUX_TRAIN_){
-    write_par_hl_train(fp, verbose);
+    write_par_aux_train(fp, verbose);
   }
 
   if (type == _AUX_SYNTHMIX_){
-    write_par_hl_synthmix(fp, verbose);
+    write_par_aux_synthmix(fp, verbose);
   }
   
   if (level == _LOWER_LEVEL_){
