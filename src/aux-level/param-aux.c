@@ -2173,13 +2173,13 @@ void write_par_hl_ml(FILE *fp, bool verbose){
 }
 
 
-/** This function writes parameters into a parameter skeleton file: higher
+/** This function writes parameters into a parameter skeleton file: aux
 +++ level machine learning training pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_par_hl_train(FILE *fp, bool verbose){
+void write_par_aux_train(FILE *fp, bool verbose){
   
   
   fprintf(fp, "\n# INPUT\n");
@@ -2357,6 +2357,135 @@ void write_par_hl_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float list. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_GAMMA_GRID = 0.000010 10000 10\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: aux
++++ level synthetic mixing pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_aux_synthmix(FILE *fp, bool verbose){
+  
+  
+  fprintf(fp, "\n# INPUT\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+  
+  if (verbose){
+    fprintf(fp, "# File that is holding the features, which should be mixed.\n");
+    fprintf(fp, "# The file needs to be a table with features in columns, and samples in rows.\n");
+    fprintf(fp, "# Column delimiter is whitespace. The same number of features must be given\n");
+    fprintf(fp, "# for each sample. Do not include a header. The samples need to match the\n");
+    fprintf(fp, "# response file.\n");  
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_FEATURES = NULL\n");
+  
+  if (verbose){
+    fprintf(fp, "# File that is holding the class labels. The file needs to be a table with\n");
+    fprintf(fp, "# one column, and samples in rows. Do not include a header. The samples need \n");
+    fprintf(fp, "# to match the feature file.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_RESPONSE = NULL\n");
+
+
+  fprintf(fp, "\n# SYNTHETIC MIXING\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# How many mixtures should be generated?\n");
+    fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
+  }
+  fprintf(fp, "SYNTHETIC_MIXTURES = 1000\n");
+
+  if (verbose){
+    fprintf(fp, "# Additional to the generated mixtures: include the original features as \n");
+    fprintf(fp, "# 0%% or 100%% \"mixtures\", too?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "INCLUDE_ORIGINAL = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Mixing complexity, i.e. how many endmembers should be mixed together?\n");
+    fprintf(fp, "# Multiple complexities can be given as list. E.g. to allow mixtures of \n");
+    fprintf(fp, "# one, two, three, and four endmembers, use MIXING_COMPLEXITY = 1 2 3 4.\n");
+    fprintf(fp, "# The complexity cannot exceed the number of classes given in the response\n");
+    fprintf(fp, "# file (FILE_RESPONSE).\n");
+    fprintf(fp, "# Type: Integer list. Valid values: [1,n-classes]\n");
+  }
+  fprintf(fp, "MIXING_COMPLEXITY = 1 2 3 4\n");
+
+  if (verbose){
+    fprintf(fp, "# Likelihood of mixing complexity, i.e. what is the statistical likelihood\n");
+    fprintf(fp, "# to generate a mixture of a given mixing complexity? Multiple likelihoods \n");
+    fprintf(fp, "# can be given as list, and the number and order need to match the mixing\n");
+    fprintf(fp, "# complexities given with MIXING_COMPLEXITY. The sum of all likelihoods \n");
+    fprintf(fp, "# should be 1.\n");
+    fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "MIXING_COMPLEXITY = 0.2 0.4 0.2 0.2\n");
+
+  if (verbose){
+    fprintf(fp, "# Allow mixing endmembers of the same class? If FALSE, a two endmember mix-\n");
+    fprintf(fp, "# ture will always mix endmembers from different classes. If TRUE, a two \n");
+    fprintf(fp, "# endmember mixture might mix endmembers from the same class, too.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "WITHIN_CLASS_MIXING = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# Class likelihood, i.e. what is the statitical likelihood of drawing an\n");
+    fprintf(fp, "# endmember from a specific class. This parameter can be set to PROPORTIONAL\n");
+    fprintf(fp, "# or EQUALIZED. If PROPORTIONAL, the likelihood is based on the number of \n");
+    fprintf(fp, "# samples given for each class. If EQUALIZED, the same likelihhod is given \n");
+    fprintf(fp, "# to all classes. Alternatively, custom likelihhods can be defined. In this \n");
+    fprintf(fp, "# case, a likelihood needs to be given for each class given in the response \n");
+    fprintf(fp, "# file (FILE_RESPONSE), and the sum needs to be 1.\n");
+    fprintf(fp, "# Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR\n");
+    fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "CLASS_LIKELIHOODS = PROPORTIONAL\n");
+
+if (verbose){
+    fprintf(fp, "# Number of iterations. This parameter allows to repeat the mixing multiple \n");
+    fprintf(fp, "# times. If set to 10, 10 different sets of random mixtures will be generated.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [1,...\n");
+  }
+  fprintf(fp, "ITERATIONS = 10\n");
+
+if (verbose){
+    fprintf(fp, "# What is the target class for generating the mixtures? Example: class 1, \n");
+    fprintf(fp, "# class 2, and class 3 are vegetation, soil, and water. A 70-30%% mixture of \n");
+    fprintf(fp, "# a beach and ocean endmember would result in 70%%, 0%% and 30%% fractions for \n");
+    fprintf(fp, "# target classes 1, 2, and 3, respectively. Multiple classes can be given, \n");
+    fprintf(fp, "# i.e. output tables will be generated for each target class.\n");
+    
+    fprintf(fp, "# Type: Integer list. Valid values: [1,n-class\n");
+  }
+  fprintf(fp, "TARGET_CLASS = 1 2 3 4\n");
+
+
+  fprintf(fp, "\n# OUTPUT\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# Directory for storing the generated mixtures. Output files will be \n");
+    fprintf(fp, "# overwritten if they exist.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_MIXES = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
+    fprintf(fp, "# be appended by class ID, and iteration, e.g. \n");
+    fprintf(fp, "# SYNTHMIX_FEATURES_CLASS-001_ITERATION-001.txt.\n");
+    fprintf(fp, "# Type: Character.\n");
+  }
+  fprintf(fp, "BASE_MIXES = SYNTHMIX\n");
 
   return;
 }

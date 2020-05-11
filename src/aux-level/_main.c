@@ -100,12 +100,14 @@ char user[NPOW_10];
          "time series analysis, ...)\n"
          "+ force-train            Training (and validation) of Machine "
          "Learning models\n"
+         "+ force-synthmix         Synthetic Mixing of training data\n"
          "+ force-qai-inflate      Inflate QAI bit layers\n"
          "+ force-tile-finder      Find the tile, pixel, and chunk of a "
          "given coordinate\n"
          "+ force-tabulate-grid    Extract the processing grid as shapefile\n"
          "+ force-cube             Ingestion of auxiliary data into data"
          "cube format\n"
+         "+ force-procmask         Processing masks from raster images\n"
          "+ force-pyramid          Generation of image pyramids\n"
          "+ force-mosaic           Mosaicking of image chips\n");
 
