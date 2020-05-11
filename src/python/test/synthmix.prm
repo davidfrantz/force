@@ -1,10 +1,10 @@
 ++PARAM_SYNTHMIX_START++
 
 # Text file with features for all classes
-FILE_FEATURES = jpn_features.txt
+FILE_FEATURES = C:\source\force\src\python\test\jpn_features.txt
 
 # Text file with class IDs
-FILE_RESPONSE = jpn_response.txt
+FILE_RESPONSE = C:\source\force\src\python\test\jpn_response.txt
 
 SYNTHETIC_MIXTURES = 10
 INCLUDE_ORIGINAL = TRUE
