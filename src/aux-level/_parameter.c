@@ -41,18 +41,19 @@ void usage(char *prog){
   printf("usage: %s dir type verbose\n", prog); 
   printf("\n");
   printf("  type can be one of the following:\n");
-  printf("    LEVEL2: Level 2 Processing System\n");
-  printf("    LEVEL3: Level 3 Processing System\n");
-  printf("    TSA:    Time Series Analysis\n");
-  printf("    CSO:    Clear-Sky Observations\n");
-  printf("    L2IMP:  Level 2 ImproPhe\n");
-  printf("    CFIMP:  Continuous Field ImproPhe\n");
-  printf("    SMP:    Sampling\n");
-  printf("    TRAIN:  Train Machine Learner\n");
-  printf("    ML:     Machine Learning\n");
-  printf("    TXT:    Texture\n");
-  printf("    LSM:    Landscape Metrics\n");
-  printf("    LIB:    Library Completeness\n");
+  printf("    LEVEL2:   Level 2 Processing System\n");
+  printf("    LEVEL3:   Level 3 Processing System\n");
+  printf("    TSA:      Time Series Analysis\n");
+  printf("    CSO:      Clear-Sky Observations\n");
+  printf("    L2IMP:    Level 2 ImproPhe\n");
+  printf("    CFIMP:    Continuous Field ImproPhe\n");
+  printf("    SMP:      Sampling\n");
+  printf("    TRAIN:    Train Machine Learner\n");
+  printf("    SYNTHMIX: Synthetic Mixing\n");
+  printf("    ML:       Machine Learning\n");
+  printf("    TXT:      Texture\n");
+  printf("    LSM:      Landscape Metrics\n");
+  printf("    LIB:      Library Completeness\n");
   printf("  verbose (1) will generate long parameter\n");
   printf("    files with comments for each parameter. \n");
   printf("    verbose (0) will generate compact parameter\n");
@@ -130,6 +131,10 @@ bool verbose;
     level = _AUX_LEVEL_;
     input_level = _INP_AUX_;
     type = _AUX_TRAIN_;
+  } else if (strcmp(ctype, "SYNTHMIX") == 0){
+    level = _AUX_LEVEL_;
+    input_level = _INP_AUX_;
+    type = _AUX_SYNTHMIX_;
   } else {
     printf("No valid type!\n"); return FAILURE;
   }
@@ -232,6 +237,10 @@ bool verbose;
   if (type == _AUX_TRAIN_){
     write_par_hl_train(fp, verbose);
   }
+
+  if (type == _AUX_SYNTHMIX_){
+    write_par_hl_synthmix(fp, verbose);
+  }
   
   if (level == _LOWER_LEVEL_){
     write_par_ll_dirs(fp, verbose);
@@ -267,7 +276,11 @@ bool verbose;
   } else if (level == _HIGHER_LEVEL_){
     printf("force-higher-level %s/my-first-%s.prm\n", dname, ctype);
   } else if (level == _AUX_LEVEL_){
-    printf("force-train %s/my-first-%s.prm\n", dname, ctype);
+    if (type == _AUX_TRAIN_){
+      printf("force-train %s/my-first-%s.prm\n", dname, ctype);
+    } else if (type == _AUX_SYNTHMIX_){
+      printf("force-synthmix %s/my-first-%s.prm\n", dname, ctype);
+    }
   }
 
 
