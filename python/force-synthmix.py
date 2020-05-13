@@ -1,21 +1,23 @@
+import argparse
+
 from os import makedirs
 from os.path import join, exists
-from typing import Dict, Union, NamedTuple, Iterator, List
 
 import numpy as np
 
 
-class Mixture(NamedTuple):
-    classIds: List[int]
-    indices: List[int]
-    fractions: List[float]
-    profile: List[float]
+class Mixture(object):
+    def __init__(self, classIds, indices, fractions, profile):
+        self.classIds = classIds
+        self.indices = indices
+        self.fractions = fractions
+        self.profile = profile
 
 
 def synthMixCore(
-        features: np.ndarray, response: np.array, target: int, mixingLikelihood: Dict[int, float],
-        classLikelihood: Union[Dict[int, float], str], includeWithinClassMixtures=False, targetRange=(0., 1.)
-) -> Iterator[Mixture]:
+        features, response, target, mixingLikelihood, classLikelihood, includeWithinClassMixtures=False,
+        targetRange=(0., 1.)
+):
     # prepare parameters and check consistency
     assert isinstance(features, np.ndarray) and features.ndim == 2
     assert isinstance(response, np.ndarray) and response.ndim == 1
@@ -79,7 +81,7 @@ def synthMixCore(
         yield Mixture(classIds=drawnClassIds, indices=drawnIndices, fractions=drawnFractions, profile=mixedProfile)
 
 
-def parsePrm(filenamePrm: str) -> Dict[str, str]:
+def parsePrm(filenamePrm):
     with open(filenamePrm) as file:
         lines = file.readlines()
 
@@ -96,9 +98,8 @@ def parsePrm(filenamePrm: str) -> Dict[str, str]:
     return parameters
 
 
-def synthMixCli(filenamePrm: str):
+def synthMixCli(filenamePrm):
     parameters = parsePrm(filenamePrm=filenamePrm)
-    print(parameters)
     features = np.genfromtxt(fname=parameters['FILE_FEATURES'])
     response = np.genfromtxt(fname=parameters['FILE_RESPONSE'])
     targets = [int(v) for v in parameters['TARGET_CLASS'].split(' ')]
@@ -125,8 +126,10 @@ def synthMixCli(filenamePrm: str):
 
     for iteration in range(1, iterations + 1):
         for target in targets:
-            filenameFeatures = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_FEATURES_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
-            filenameResponse = join(parameters['DIR_MIXES'], f'{parameters["BASE_MIXES"]}_RESPONSE_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+            filenameFeatures = join(parameters['DIR_MIXES'],
+                f'{parameters["BASE_MIXES"]}_FEATURES_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+            filenameResponse = join(parameters['DIR_MIXES'],
+                f'{parameters["BASE_MIXES"]}_RESPONSE_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
 
             mixtureStream = synthMixCore(
                 features=features, response=response, target=target, mixingLikelihood=mixingLikelihood,
@@ -143,3 +146,10 @@ def synthMixCli(filenamePrm: str):
                     if classId == target:
                         print(' '.join([str(round(v, 2)) for v in profile]), file=fileFeatures)
                         print('1.0', file=fileResponse)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('parameterFile', type=str, help='parameter file')
+    args = parser.parse_args()
+    synthMixCli(filenamePrm=args.parameterFile)
