@@ -127,9 +127,12 @@ def synthMixCli(filenamePrm):
     for iteration in range(1, iterations + 1):
         for target in targets:
             filenameFeatures = join(parameters['DIR_MIXES'],
-                f'{parameters["BASE_MIXES"]}_FEATURES_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+                '{}_FEATURES_CLASS-{}_ITERATION-{}.txt'.format(parameters["BASE_MIXES"], str(target).zfill(3),
+                    str(iteration).zfill(3)))
+
             filenameResponse = join(parameters['DIR_MIXES'],
-                f'{parameters["BASE_MIXES"]}_RESPONSE_CLASS-{str(target).zfill(3)}_ITERATION-{str(iteration).zfill(3)}.txt')
+                '{}_RESPONSE_CLASS-{}_ITERATION-{}.txt'.format(parameters["BASE_MIXES"], str(target).zfill(3),
+                    str(iteration).zfill(3)))
 
             mixtureStream = synthMixCore(
                 features=features, response=response, target=target, mixingLikelihood=mixingLikelihood,
@@ -137,15 +140,14 @@ def synthMixCli(filenamePrm):
             )
             with open(filenameFeatures, 'w') as fileFeatures, open(filenameResponse, 'w') as fileResponse:
                 for i, mixture in enumerate(mixtureStream, 1):
-                    print(' '.join([str(round(v, 2)) for v in mixture.profile]), file=fileFeatures)
-                    print(round(mixture.fractions[0], 4), file=fileResponse)
-
+                    fileFeatures.write(' '.join([str(round(v, 2)) for v in mixture.profile]) + '\n')
+                    fileResponse.write(str(round(mixture.fractions[0], 4)) + '\n')
                     if i == n:
                         break
                 for profile, classId in zip(features, response):
                     if classId == target:
-                        print(' '.join([str(round(v, 2)) for v in profile]), file=fileFeatures)
-                        print('1.0', file=fileResponse)
+                        fileFeatures.write(' '.join([str(round(v, 2)) for v in profile]) + '\n')
+                        fileResponse.write('1.0\n')
 
 
 if __name__ == '__main__':
