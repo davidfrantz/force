@@ -8,12 +8,13 @@ The FORCE Level 2 Processing System (FORCE L2PS) is intended to generate harmoni
 
 About / Workflow
 
-A glimpse of what you get:
-
  
-Fig. 2. Data Cube of Landsat 7/8 and Sentinel-2 A/B ARD.
-A two-month period of atmospherically corrected imagery acquired over South-East Berlin, Germany, is shown here.
-[Images were corrected using force-level2, true-color quicklooks were generated using force-quicklook-level2]
+**A glimpse of what you get:**
+ 
+.. image:: buiding-height.jpg
+
+**Figure**  Building Height prediction for Germany using Support Vector Regression.
+The model was trained with 3D building models and multi-temporal Sentinel-1+2 A/B time series.
 
 .. toctree::
    :maxdepth: 2
