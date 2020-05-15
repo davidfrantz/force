@@ -47,7 +47,12 @@ This figure shows a Google Earth screenshot with ARD grid overlay. The grid cell
    :maxdepth: 2
 
    main.rst
+   parameter.rst
    qai-inflate.rst
    tile-finder.rst
    tabulate-grid.rst
+   mosaic.rst
+   pyramid.rst
+   cube.rst
+   train.rst
 
