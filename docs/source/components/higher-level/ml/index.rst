@@ -18,7 +18,8 @@ In this case, different fractional cover types are the response variables.
 
 The same set of features need to be input, which was used to train the model (:ref:`aux-train`). 
 The submodule permits to predict multiple response variables at once, i.e. with the same run. 
-The only constraint is, that each prediction was trained with the same input features, and that the same Machine Learner was used (e.g. Support Vector Regression).
+The only constraint is, that each prediction was trained with the same input features, and that the same Machine Learner is used for each model.
+Available learners are Support Vector Regression, Support Vector Classification, Random Forest Regression, and Random Forest Classification.
 
 A modelset need to be given for each response variable. 
 Within each modelset, one or multiple models may be input. 

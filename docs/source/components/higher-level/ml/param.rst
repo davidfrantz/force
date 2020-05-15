@@ -181,7 +181,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_MLI = FALSE``
      
-  * Output the uncertainty of the blended prediction? THis is the standard deviation of all predictions that are blended into the final prediction.
+  * Output the uncertainty of the blended prediction? This is the standard deviation of all predictions that are blended into the final prediction.
     Only makes sense when multiple models are given in a modelset.
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
