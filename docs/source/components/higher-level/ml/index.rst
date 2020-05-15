@@ -41,9 +41,6 @@ The model was trained with 3D building models and multi-temporal Sentinel-1+2 A/
 .. toctree::
    :maxdepth: 2
 
-   prereq.rst
    param.rst
-   process.rst
    format.rst
 
-   
