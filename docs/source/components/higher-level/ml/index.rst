@@ -14,6 +14,7 @@ Machine learning models are trained using :ref:`aux-train`.
 .. image:: ml-workflow.jpg
 
 **Figure** Processing workflow of the Machine Learning submodule.
+In this case, different fractional cover types are the response variables.
 
 How does it work? Add some description. Modelsets, models, aggregation etc. 
 
