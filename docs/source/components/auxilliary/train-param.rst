@@ -3,7 +3,7 @@
 Parameterization
 ================
 
-A parameter file is mandatory for the Time Series Analysis submodule of FORCE HLPS.
+A parameter file is mandatory for the Machine Learning Trainer.
 
 The file extension is ‘.prm’.
 All parameters must be given, even if they are not used.
