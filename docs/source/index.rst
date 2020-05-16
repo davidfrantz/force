@@ -13,8 +13,8 @@ FORCE documentation
 
 .. note::
    The ``latest`` version of this documentation refers to the ``develop`` software branch, which includes bleeding-edge features that are not part of ``master`` yet.
-   Please switch to the ``stable`` version of this documentation, which will only describe features that are present in ``master``.
-   However, new additions to this documentation will only be included in the ``latest`` version.
+   The ``stable`` version of this documentation only describes features that are present in ``master``.
+   New additions to this documentation will only be included in the ``latest`` version.
    The ``stable`` version will be synced with ``latest`` whenever a new ``master`` version of FORCE is released.
 
 .. warning::
