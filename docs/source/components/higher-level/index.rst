@@ -105,17 +105,17 @@ The individual sub-figures can be enlarged by clicking on them.
 .. |hl-compute4-image| image:: hl-4.jpg
 .. |hl-compute5-image| image:: hl-5.jpg
 
-+----------------------+-----------------------+
-+ `|hl-compute1-text|` + `|hl-compute1-image|` +
-+----------------------+-----------------------+
-+ `|hl-compute2-text|` + `|hl-compute2-image|` +
-+----------------------+-----------------------+
-+ `|hl-compute3-text|` + `|hl-compute3-image|` +
-+----------------------+-----------------------+
-+ `|hl-compute4-text|` + `|hl-compute4-image|` +
-+----------------------+-----------------------+
-+ `|hl-compute5-text|` + `|hl-compute5-image|` +
-+----------------------+-----------------------+
++--------------------+---------------------+
++ |hl-compute1-text| + |hl-compute1-image| +
++--------------------+---------------------+
++ |hl-compute2-text| + |hl-compute2-image| +
++--------------------+---------------------+
++ |hl-compute3-text| + |hl-compute3-image| +
++--------------------+---------------------+
++ |hl-compute4-text| + |hl-compute4-image| +
++--------------------+---------------------+
++ |hl-compute5-text| + |hl-compute5-image| +
++--------------------+---------------------+
 
 
 **Table 1** Higher Level module.
