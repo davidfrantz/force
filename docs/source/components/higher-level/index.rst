@@ -71,11 +71,17 @@ The individual sub-figures can be enlarged by clicking on them.
 .. |hl-compute3-text| replace:: The image chips in each tile have an internal block structure for partial image access. These blocks are strips that are as wide as the ``TILE_SIZE`` and as high as the ``BLOCK_SIZE``. The blocks are the main processing units (PU), and are processed sequentially, i.e. one after another.
 .. |hl-compute4-text| replace:: FORCE uses a streaming strategy, where three teams take care of reading, computing and writing data. The teams work simultaneously, e.g. input data for PU 19 is read, pre-loaded data for PU 18 is processed, and processed results for PU 17 are written - at the same time. If processing takes longer than I/O, this streaming strategy avoids idle CPUs waiting for delivery of input data. Optionally, :ref:`processing-masks` can be used, which restrict processing and analysis to certain pixels of interest. Processing units, which do not contain any active pixels, are skipped (in this case, the national territory of Belgium).
 .. |hl-compute5-text| replace:: Each team can use several threads to further parallelize the work. In the input team, multiple threads read multiple input images simultaneously, e.g. different dates of ARD. In the computing team, the pixels are distributed to different threads (please note that the actual load distribution may differ from the idealized figure due to load balancing etc.). In the output team, multiple threads write multiple output products simultaneously, e.g. different Spectral Temporal Metrics.
+
 .. |hl-compute1-image| image:: hl-1.jpg
+   :width: 50%
 .. |hl-compute2-image| image:: hl-2.jpg
+   :width: 50%
 .. |hl-compute3-image| image:: hl-3.jpg
+   :width: 50%
 .. |hl-compute4-image| image:: hl-4.jpg
+   :width: 50%
 .. |hl-compute5-image| image:: hl-5.jpg
+   :width: 50%
 
 +----+--------------------+---------------------+
 + 1. + |hl-compute1-text| + |hl-compute1-image| +
