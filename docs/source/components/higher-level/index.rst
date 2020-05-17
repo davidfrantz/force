@@ -5,8 +5,11 @@ Higher Level
 
 The FORCE Higher Level Processing System (HLPS) provides functionality for Higher Level Processing.
 
-HLPS consists of one executable only, i.e. :ref:`_higher`.
-However, multiple submodules exist (see table below), which either process cubed ARD or feature datasets. 
+HLPS consists of one executable only, i.e. :ref:`higher`.
+Multiple submodules are available (see table below), which either process ARD or feature datasets, both in datacube format. 
+
+.. seealso:: Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how we define a datacube.
+
 
 - ARD are Level 2 Analysis Ready Data. 
   Alternatively, Level 3 Best Available Pixel composites can be input, too.
@@ -60,13 +63,66 @@ The individual sub-figures can be enlarged by clicking on them.
 .. image:: hl-5.jpg
    :width: 19%
 
+.. |hl-compute1-text| replace::
+
+  1. The cubed data are stored in a grid system.
+     Each tile has a unique tile ID, which consists of an X-ID, and a Y-ID.
+     The numbers increase from left ro right, and from top to bottom.
+     In a first step, a rectangular extent needs to be specified using the tile X- and Y-IDs.
+     In this example, we have selected the extent covering Belgium, i.e. 9 tiles.
+     
+.. |hl-compute2-text| replace::
+
+  2. If you do not want to process all tiles, you can use a :ref:`tilelist`.
+     The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+     This is optional.
+   
+.. |hl-compute3-text| replace::
+
+  3. The image chips in each tile have an internal block structure for partial image access.
+     These blocks are strips that are as wide as the ``TILE_SIZE`` and as high as the ``BLOCK_SIZE``.
+     The blocks are the main processing units (PU), and are processed sequentially, i.e. one after another.
+   
+.. |hl-compute4-text| replace::
+
+  4. FORCE uses a streaming strategy, where three teams take care of reading, computing and writing data.
+     The teams work simultaneously, e.g. input data for PU 19 is read, pre-loaded data for PU 18 is processed, and processed results for PU 17 are written - at the same time.
+     If processing takes longer than I/O, this streaming strategy avoids idle CPUs waiting for delivery of input data.
+     Optionally, :ref:`processing-masks` can be used, which restrict processing and analysis to certain pixels of interest.
+     Processing units, which do not contain any active pixels, are skipped (in this case, the national territory of Belgium).
+   
+.. |hl-compute5-text| replace::
+
+  5. Each team can use several threads to further parallelize the work.
+     In the input team, multiple threads read multiple input images simultaneously, e.g. different dates of ARD.
+     In the computing team, the pixels are distributed to different threads (please note that the actual load distribution may differ from the idealized figure due to load balancing etc.).
+     In the output team, multiple threads write multiple output products simultaneously, e.g. different Spectral Temporal Metrics.
+
+
+.. |hl-compute1-image| image:: hl-1.jpg
+.. |hl-compute2-image| image:: hl-2.jpg
+.. |hl-compute3-image| image:: hl-3.jpg
+.. |hl-compute4-image| image:: hl-4.jpg
+.. |hl-compute5-image| image:: hl-5.jpg
+
++----------------------+-----------------------+
++ `|hl-compute1-text|` + `|hl-compute1-image|` +
++----------------------+-----------------------+
++ `|hl-compute2-text|` + `|hl-compute2-image|` +
++----------------------+-----------------------+
++ `|hl-compute3-text|` + `|hl-compute3-image|` +
++----------------------+-----------------------+
++ `|hl-compute4-text|` + `|hl-compute4-image|` +
++----------------------+-----------------------+
++ `|hl-compute5-text|` + `|hl-compute5-image|` +
++----------------------+-----------------------+
+
 
 **Table 1** Higher Level module.
 
 +--------+-------------------------+-------+-----------------------------------------------------------------------------------------------------+
 + Module + Program                 + Level + Short description                                                                                   +
 +========+=========================+=======+=====================================================================================================+
-+--------+-------------------------+-------+-----------------------------------------------------------------------------------------------------+
 + HLPS   + The FORCE Higher Level Processing System (HLPS) provides functionality for Higher Level Processing of cubed ARD and feature datasets. +
 +        +-------------------------+-------+-----------------------------------------------------------------------------------------------------+
 +        + :ref:`higher-level`     + 3-4   + Higher Level processing                                                                             +
@@ -86,9 +142,9 @@ The individual sub-figures can be enlarged by clicking on them.
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
 + :ref:`ml`     + 4     + feature + Model predictions based on any cubed features                                                                                               +
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
-+ :ref:`txt`    + 4     + feature + Morphological transformations based on any cubed features                                                                                   +
++ :ref:`txt`    + 3-4   + feature + Morphological transformations based on any cubed features                                                                                   +
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
-+ :ref:`lsm`    + 4     + feature + Quantification of spatial patterns based on any cubed features                                                                              +
++ :ref:`lsm`    + 3-4   + feature + Quantification of spatial patterns based on any cubed features                                                                              +
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
 + :ref:`smp`    + /     + feature + Point-based extraction of features for training/validation purposes                                                                         +
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
