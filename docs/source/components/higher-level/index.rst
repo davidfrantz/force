@@ -63,6 +63,13 @@ The individual sub-figures can be enlarged by clicking on them.
 .. image:: hl-5.jpg
    :width: 19%
 
+.. |hl-compute0-text| replace:: Test
+
+.. |hl-compute7-text| replace:: Test
+
+   ksks
+
+
 .. |hl-compute1-text| replace::
 
   1. The cubed data are stored in a grid system.
@@ -106,9 +113,9 @@ The individual sub-figures can be enlarged by clicking on them.
 .. |hl-compute5-image| image:: hl-5.jpg
 
 +--------------------+---------------------+
-+ |hl-compute1-text| + |hl-compute1-image| +
++ |hl-compute0-text| + |hl-compute1-image| +
 +--------------------+---------------------+
-+ |hl-compute2-text| + |hl-compute2-image| +
++ |hl-compute7-text| + |hl-compute2-image| +
 +--------------------+---------------------+
 + |hl-compute3-text| + |hl-compute3-image| +
 +--------------------+---------------------+
