@@ -5,7 +5,7 @@ Higher Level
 
 The FORCE Higher Level Processing System (HLPS) provides functionality for Higher Level Processing.
 
-HLPS consists of one executable only, i.e. :ref:`higher`. 
+HLPS consists of one executable only, i.e. :ref:`higher-level`. 
 Multiple submodules are available (see table below), which either process ARD or feature datasets, both in datacube format. 
 
 
@@ -45,7 +45,7 @@ Multiple submodules are available (see table below), which either process ARD or
 +---------------+-------+---------+---------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-** Input type **
+**Input type**
 
 .. seealso:: Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how we define a datacube.
 
@@ -61,9 +61,9 @@ Multiple submodules are available (see table below), which either process ARD or
    The most important constraint is: HLPS only knows 16bit signed input, thus if you import external data, you need to scale accordingly.
 
 
-**Computing Model**
+**Compute Model**
 
-The conceptual figures below explain the general concept of the processing strategy, computing model, and nested parallelism. 
+The conceptual figures below explain the general concept of the processing strategy, compute model, and nested parallelism. 
 The individual sub-figures can be enlarged by clicking on them.
 
 .. |hl-compute1-text| replace:: The cubed data are stored in a grid system. Each tile has a unique tile ID, which consists of an X-ID, and a Y-ID. The numbers increase from left ro right, and from top to bottom. In a first step, a rectangular extent needs to be specified using the tile X- and Y-IDs. In this example, we have selected the extent covering Belgium, i.e. 9 tiles.
@@ -78,9 +78,9 @@ The individual sub-figures can be enlarged by clicking on them.
 .. |hl-compute5-image| image:: hl-5.jpg
 
 +----+--------------------+---------------------+
-+ 1. + |hl-compute0-text| + |hl-compute1-image| +
++ 1. + |hl-compute1-text| + |hl-compute1-image| +
 +----+--------------------+---------------------+
-+ 2. + |hl-compute7-text| + |hl-compute2-image| +
++ 2. + |hl-compute2-text| + |hl-compute2-image| +
 +----+--------------------+---------------------+
 + 3. + |hl-compute3-text| + |hl-compute3-image| +
 +----+--------------------+---------------------+
