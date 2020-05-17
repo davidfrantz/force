@@ -73,20 +73,15 @@ The individual sub-figures can be enlarged by clicking on them.
 .. |hl-compute5-text| replace:: Each team can use several threads to further parallelize the work. In the input team, multiple threads read multiple input images simultaneously, e.g. different dates of ARD. In the computing team, the pixels are distributed to different threads (please note that the actual load distribution may differ from the idealized figure due to load balancing etc.). In the output team, multiple threads write multiple output products simultaneously, e.g. different Spectral Temporal Metrics.
 
 .. |hl-compute1-image| image:: hl-1.jpg
-   :width: 50%
-   :align: center
+   :width: 70%
 .. |hl-compute2-image| image:: hl-2.jpg
-   :width: 50%
-   :align: center
+   :width: 70%
 .. |hl-compute3-image| image:: hl-3.jpg
-   :width: 50%
-   :align: center
+   :width: 70%
 .. |hl-compute4-image| image:: hl-4.jpg
-   :width: 50%
-   :align: center
+   :width: 70%
 .. |hl-compute5-image| image:: hl-5.jpg
-   :width: 50%
-   :align: center
+   :width: 70%
 
 +----+--------------------+---------------------+
 + 1. + |hl-compute1-text| + |hl-compute1-image| +
