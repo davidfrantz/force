@@ -74,14 +74,19 @@ The individual sub-figures can be enlarged by clicking on them.
 
 .. |hl-compute1-image| image:: hl-1.jpg
    :width: 50%
+   :align: center
 .. |hl-compute2-image| image:: hl-2.jpg
    :width: 50%
+   :align: center
 .. |hl-compute3-image| image:: hl-3.jpg
    :width: 50%
+   :align: center
 .. |hl-compute4-image| image:: hl-4.jpg
    :width: 50%
+   :align: center
 .. |hl-compute5-image| image:: hl-5.jpg
    :width: 50%
+   :align: center
 
 +----+--------------------+---------------------+
 + 1. + |hl-compute1-text| + |hl-compute1-image| +
