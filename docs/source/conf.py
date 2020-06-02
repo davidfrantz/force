@@ -186,6 +186,6 @@ html_context = {
 # -- Added by DF to show logo ---------------------------------------------------
 
 html_logo = 'img/force-logo.png'
-html_favicon = 'img/force-icon.png'
+html_favicon = 'img/force-icon.svg'
 
 # -- Extension configuration -------------------------------------------------
