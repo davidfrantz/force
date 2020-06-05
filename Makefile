@@ -57,6 +57,7 @@ CFLAGS=-O3 -Wall -fopenmp
 ### DIRECTORIES
 
 DB=bash
+DP=python
 DC=src/cross-level
 DL=src/lower-level
 DH=src/higher-level
@@ -76,7 +77,7 @@ lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll r
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl
 aux: param_aux param_train_aux train_aux
 exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis
-.PHONY: temp all install install_ bash clean build
+.PHONY: temp all install install_ bash python clean build
 
 
 ### TEMP
@@ -373,9 +374,12 @@ bash: temp
 	cp $(DB)/force-procmask.sh $(TB)/force-procmask
 	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2
 
-install: bash install_ clean
+python: temp
+	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
+
+install: bash python install_ clean
 
 build:
 	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
 	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
-	tar -czf force_v$(V)_$(T).tar.gz src bash images docs Makefile LICENSE README.md
+	tar -czf force_v$(V)_$(T).tar.gz src bash python images docs Makefile LICENSE README.md
