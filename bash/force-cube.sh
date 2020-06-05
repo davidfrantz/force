@@ -155,6 +155,15 @@ function cubethis(){
 
     gdal_rasterize -burn 1 -a_nodata 255 -ot 'Byte' -of 'GTiff' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $INP $OUTFILE
 
+    MAX=$(gdalinfo -stats $OUTFILE | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    rm $OUTFILE".aux.xml"
+    #echo "max: " $MAX
+
+    if [ $MAX -lt 1 ]; then
+      rm $OUTFILE
+      exit
+    fi
+
   else
   
     if [ -r $OUTFILE ]; then
