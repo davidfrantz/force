@@ -112,8 +112,21 @@ def synthMixCore(
 
 
 def parsePrm(filenamePrm):
+    if not exists(filenamePrm):
+        print('Unable to open parameter file!')
+        print('Reading parameter file failed!')
+        exit(1)
+
     with open(filenamePrm) as file:
         lines = file.readlines()
+
+    if lines[0] != '++PARAM_SYNTHMIX_START++\n':
+        print('Not a synthmix parameter file!')
+        exit(1)
+
+    if lines[-1] != '++PARAM_SYNTHMIX_END++':
+        print('Not a synthmix parameter file!')
+        exit(1)
 
     parameters = dict()
     for line in lines:
@@ -125,34 +138,99 @@ def parsePrm(filenamePrm):
         key = tmp[0].strip()
         value = tmp[1].strip()
         parameters[key] = value
+
+    keys = [
+        'FILE_FEATURES', 'FILE_RESPONSE', 'CLASSES', 'SYNTHETIC_MIXTURES', 'INCLUDE_ORIGINAL', 'MIXING_COMPLEXITY',
+        'MIXING_LIKELIHOOD', 'WITHIN_CLASS_MIXING', 'CLASS_LIKELIHOOD', 'ITERATIONS', 'TARGET_CLASS', 'DIR_MIXES',
+        'BASE_MIXES'
+    ]
+
+    missingKey = False
+    for key in keys:
+        if not key in parameters:
+            print('parameter', key, 'was not set.')
+            missingKey = True
+    if missingKey:
+        print('Reading parameter file failed!')
+        exit(1)
+
     return parameters
 
 
 def synthMixCli(filenamePrm):
     parameters = parsePrm(filenamePrm=filenamePrm)
+
+    if not exists(parameters['FILE_FEATURES']):
+        print('parameter FILE_FEATURES does not exist in the filesystem.')
+        print('Reading parameter file failed!')
+        exit(1)
+
+    if not exists(parameters['FILE_RESPONSE']):
+        print('parameter FILE_RESPONSE does not exist in the filesystem.')
+        print('Reading parameter file failed!')
+        exit(1)
+
+    if not exists(parameters['DIR_MIXES']):
+        print('parameter DIR_MIXES does not exist in the filesystem.')
+        print('Reading parameter file failed!')
+        exit(1)
+
     features = np.genfromtxt(fname=parameters['FILE_FEATURES'])
     response = np.genfromtxt(fname=parameters['FILE_RESPONSE'])
+
+    classes = [int(v) for v in parameters['CLASSES'].split(' ')]
+
+    if not set(classes).issubset(set(response)):
+        print('parameter CLASSES must be a subset of classes in parameter FILE_RESPONSE file.')
+        print('Reading parameter file failed!')
+        exit(1)
+
     targets = [int(v) for v in parameters['TARGET_CLASS'].split(' ')]
+    if not set(targets).issubset(set(classes)):
+        print('parameter TARGET_CLASS must be a subset of parameter CLASSES.')
+        print('Reading parameter file failed!')
+        exit(1)
+
+
     n = int(parameters['SYNTHETIC_MIXTURES'])
+
+    if n < 1:
+        print('parameter SYNTHETIC_MIXTURES must be greather 0.')
+        print('Reading parameter file failed!')
+        exit(1)
+
+
     mixingLikelihood = {
         int(complexity): float(likelihood) for complexity, likelihood in zip(
             parameters['MIXING_COMPLEXITY'].split(' '),
             parameters['MIXING_LIKELIHOOD'].split(' ')
         )
     }
+
+    if sum(mixingLikelihood.values()) != 1:
+        print('parameter MIXING_LIKELIHOOD must sum to one')
+        print('Reading parameter file failed!')
+        exit(1)
+
     if parameters['CLASS_LIKELIHOOD'].lower() in ['proportional', 'equalized']:
         classLikelihood = parameters['CLASS_LIKELIHOOD'].lower()
     else:
-        classLikelihood = {
-            int(complexity): float(likelihood) for complexity, likelihood in zip(
-                parameters['TARGET_CLASS'].split(' '),
-                parameters['CLASS_LIKELIHOOD'].split(' ')
-            )
-        }
+        parsedClassLikelihood = [float(v) for v in parameters['CLASS_LIKELIHOOD'].split(' ')]
+
+        if len(parsedClassLikelihood) != len(classes):
+            print('length of parameter CLASS_LIKELIHOOD and CLASSES must match')
+            print('Reading parameter file failed!')
+            exit(1)
+
+        if sum(parsedClassLikelihood) != 1:
+            print('parameter CLASS_LIKELIHOOD must sum to one')
+            print('Reading parameter file failed!')
+            exit(1)
+
+        classLikelihood = {int(c): float(likelihood) for c, likelihood in zip(classes, parsedClassLikelihood)}
+
     includeWithinClassMixtures = parameters['WITHIN_CLASS_MIXING'] == 'TRUE'
     iterations = int(parameters['ITERATIONS'])
-    if not exists(parameters['DIR_MIXES']):
-        makedirs(parameters['DIR_MIXES'])
 
     for iteration in range(1, iterations + 1):
         for target in targets:
@@ -175,13 +253,22 @@ def synthMixCli(filenamePrm):
                     if i == n:
                         break
                 for profile, classId in zip(features, response):
+                    fileFeatures.write(' '.join([str(round(v, 2)) for v in profile]) + '\n')
                     if classId == target:
-                        fileFeatures.write(' '.join([str(round(v, 2)) for v in profile]) + '\n')
                         fileResponse.write('1.0\n')
+                    else:
+                        fileResponse.write('0.0\n')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('parameterFile', type=str, help='parameter file')
     args = parser.parse_args()
+
+    # args.parameterFile2
+    # try:
+    #    args.parameterFile2
+    # except:
+    #    pass
+
     synthMixCli(filenamePrm=args.parameterFile)
