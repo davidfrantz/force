@@ -262,13 +262,13 @@ short nodata;
       }
 
       src.release();
-      ero_dst.release();      
-      dil_dst.release();      
-      opn_dst.release();      
-      cls_dst.release();      
-      grd_dst.release();      
-      tht_dst.release();      
-      bht_dst.release();      
+      ero_dst.release();
+      dil_dst.release();
+      opn_dst.release();
+      cls_dst.release();
+      grd_dst.release();
+      tht_dst.release();
+      bht_dst.release();
 
     }
 
