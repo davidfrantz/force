@@ -101,6 +101,8 @@ char user[NPOW_10];
          "+ force-train            Training (and validation) of Machine "
          "Learning models\n"
          "+ force-qai-inflate      Inflate QAI bit layers\n"
+         "+ force-tile-extent      Compute suggested processing extent and "
+         "tile white-list based on a vector layer\n"
          "+ force-tile-finder      Find the tile, pixel, and chunk of a "
          "given coordinate\n"
          "+ force-tabulate-grid    Extract the processing grid as shapefile\n"
