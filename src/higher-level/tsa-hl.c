@@ -50,6 +50,8 @@ stack_t **TSA = NULL;
 int t, k;
 date_t date;
 char fdate[NPOW_10];
+char sensor[NPOW_04];
+char domain[NPOW_10];
 int nchar;
 int o, nprod = 98;
 int error = 0;
@@ -208,15 +210,21 @@ short ***ptr[98] = {
           switch (prodtype[o]){
             case _full_:
               date = get_stack_date(ard[t].DAT, 0);
+              get_stack_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+              set_stack_sensor(TSA[o], t, sensor);
               copy_date(&date, &ts->d_tss[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
-              set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
+              set_stack_domain(TSA[o], t, domain);
+              set_stack_bandname(TSA[o], t, domain);
               break;
             case _stats_:
-              set_stack_domain(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              set_stack_sensor(TSA[o], t, "BLEND");
+              set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
@@ -225,6 +233,7 @@ short ***ptr[98] = {
               } else {
                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
               }
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_tsi[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
@@ -234,6 +243,7 @@ short ***ptr[98] = {
               break;
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fby[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -246,6 +256,7 @@ short ***ptr[98] = {
             case  _quarter_:
               while (k < 5 && !phl->date_quarters[k]) k++;
               set_date_quarter(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbq[t]);
               nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -259,6 +270,7 @@ short ***ptr[98] = {
             case _month_: 
               while (k < 13 && !phl->date_months[k]) k++;
               set_date_month(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbm[t]);
               nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -272,6 +284,7 @@ short ***ptr[98] = {
             case _week_: 
               while (k < 53 && !phl->date_weeks[k]) k++;
               set_date_week(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbw[t]);
               nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -285,6 +298,7 @@ short ***ptr[98] = {
             case _day_: 
               while (k < 366 && !phl->date_doys[k]) k++;
               set_date_doy(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbd[t]);
               nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -297,6 +311,7 @@ short ***ptr[98] = {
               break;
             case _lsp_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t+1);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_lsp[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
@@ -307,10 +322,12 @@ short ***ptr[98] = {
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
+              set_stack_sensor(TSA[o], t, "BLEND");
               set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
+              set_stack_sensor(TSA[o], t, "BLEND");
               set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               break;
