@@ -29,8 +29,6 @@
 
 
 import argparse
-
-from os import makedirs
 from os.path import join, exists
 
 import numpy as np
@@ -140,7 +138,7 @@ def parsePrm(filenamePrm):
         parameters[key] = value
 
     keys = [
-        'FILE_FEATURES', 'FILE_RESPONSE', 'CLASSES', 'SYNTHETIC_MIXTURES', 'INCLUDE_ORIGINAL', 'MIXING_COMPLEXITY',
+        'FILE_FEATURES', 'FILE_RESPONSE', 'USE_CLASSES', 'SYNTHETIC_MIXTURES', 'INCLUDE_ORIGINAL', 'MIXING_COMPLEXITY',
         'MIXING_LIKELIHOOD', 'WITHIN_CLASS_MIXING', 'CLASS_LIKELIHOOD', 'ITERATIONS', 'TARGET_CLASS', 'DIR_MIXES',
         'BASE_MIXES'
     ]
@@ -178,7 +176,10 @@ def synthMixCli(filenamePrm):
     features = np.genfromtxt(fname=parameters['FILE_FEATURES'])
     response = np.genfromtxt(fname=parameters['FILE_RESPONSE'])
 
-    classes = [int(v) for v in parameters['CLASSES'].split(' ')]
+    if parameters['USE_CLASSES'].upper() == 'ALL':
+        classes = list(sorted(set(response)))
+    else:
+        classes = [int(v) for v in parameters['USE_CLASSES'].split(' ')]
 
     if not set(classes).issubset(set(response)):
         print('parameter CLASSES must be a subset of classes in parameter FILE_RESPONSE file.')
@@ -215,6 +216,10 @@ def synthMixCli(filenamePrm):
     if parameters['CLASS_LIKELIHOOD'].lower() in ['proportional', 'equalized']:
         classLikelihood = parameters['CLASS_LIKELIHOOD'].lower()
     else:
+        if parameters['USE_CLASSES'].upper() == 'ALL':
+            print('if parameter USE_CLASSES = ALL, CLASS_LIKELIHOOD must be set to EQUALIZED or PROPORTIONAL')
+            print('Reading parameter file failed!')
+            exit(1)
         parsedClassLikelihood = [float(v) for v in parameters['CLASS_LIKELIHOOD'].split(' ')]
 
         if len(parsedClassLikelihood) != len(classes):

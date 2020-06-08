@@ -5,7 +5,8 @@ FILE_FEATURES = C:\source\force\python\testdata\jpn_features.txt
 
 # Text file with class IDs
 FILE_RESPONSE = C:\source\force\python\testdata\jpn_response.txt
-CLASSES = 1 2 3 4 5
+USE_CLASSES = 1 2 3 4 5
+USE_CLASSES = ALL
 
 SYNTHETIC_MIXTURES = 10
 INCLUDE_ORIGINAL = TRUE
@@ -19,9 +20,9 @@ WITHIN_CLASS_MIXING = TRUE
 
 # can be one of the following
 # for the last case, a test should be made that each class has a likelihood and that the number is consistent with the number of classes
-#CLASS_LIKELIHOOD = EQUALIZED
+CLASS_LIKELIHOOD = EQUALIZED
 #CLASS_LIKELIHOOD = PROPORTIONAL
-CLASS_LIKELIHOOD = 0.2 0.2 0.2 0.2 0.2
+#CLASS_LIKELIHOOD = 0.2 0.2 0.2 0.2 0.2
 
 # number of ensembles per class
 ITERATIONS = 3
