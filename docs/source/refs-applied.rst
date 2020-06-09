@@ -13,6 +13,12 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | J. Rosentreter, R. Hagensieker, and B. Waske (2020): Towards large-scale mapping of local climate zones using multitemporal Sentinel 2 data and convolutional neural networks. Remote Sensing of Environment 237, 111472.
   | https://doi.org/10.1016/j.rse.2019.111472
 
+  | F. Schug, D. Frantz, A. Okujeni, S. van der Linden, and P. Hostert (2020): Mapping urban-rural gradients of settlements and vegetation at national scale using Sentinel-2 spectral-temporal metrics and regression-based unmixing with synthetic training data. Remote Sensing of Environment 246, 111810.
+  | https://doi.org/10.1016/j.rse.2020.111810
+
+  | T. Wellmann, F. Schug, D. Haase, D. Pflugmacher, and S. van der Linden (2020): Green growth? On the relation between population density, land use and vegetation cover fractions in a city using a 30-years Landsat time series. Landscape and Urban Planning 202, 103857.
+  | https://doi.org/10.1016/j.landurbplan.2020.103857
+
 
 * **2019**
 
