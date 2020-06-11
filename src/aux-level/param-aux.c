@@ -2427,7 +2427,7 @@ void write_par_aux_synthmix(FILE *fp, bool verbose){
     fprintf(fp, "# should be 1.\n");
     fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
   }
-  fprintf(fp, "MIXING_COMPLEXITY = 0.2 0.4 0.2 0.2\n");
+  fprintf(fp, "MIXING_LIKELIHOOD = 0.2 0.4 0.2 0.2\n");
 
   if (verbose){
     fprintf(fp, "# Allow mixing endmembers of the same class? If FALSE, a two endmember mix-\n");
@@ -2448,7 +2448,7 @@ void write_par_aux_synthmix(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR\n");
     fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
   }
-  fprintf(fp, "CLASS_LIKELIHOODS = PROPORTIONAL\n");
+  fprintf(fp, "CLASS_LIKELIHOOD = PROPORTIONAL\n");
 
 if (verbose){
     fprintf(fp, "# Number of iterations. This parameter allows to repeat the mixing multiple \n");
@@ -2468,6 +2468,13 @@ if (verbose){
   }
   fprintf(fp, "TARGET_CLASS = 1 2 3 4\n");
 
+  if (verbose){
+    fprintf(fp, "# What classes should be considered for mixing? Default: use all classes.\n");
+    fprintf(fp, "# You can however select individual classes. If custom likelihoods are defined\n");
+    fprintf(fp, "# in CLASS_LIKELIHOOD, the explicit definition of classes is mandatory here \n");
+    fprintf(fp, "# (in the same order as in CLASS_LIKELIHOOD).\n");
+  }
+  fprintf(fp, "USE_CLASSES = ALL\n");
 
   fprintf(fp, "\n# OUTPUT\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
