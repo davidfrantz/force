@@ -6,10 +6,10 @@ FILE_FEATURES = C:\source\force\python\testdata\jpn_features.txt
 # Text file with class IDs
 FILE_RESPONSE = C:\source\force\python\testdata\jpn_response.txt
 USE_CLASSES = 1 2 3 4 5
-USE_CLASSES = ALL
+#USE_CLASSES = ALL
 
 SYNTHETIC_MIXTURES = 10
-INCLUDE_ORIGINAL = TRUE
+INCLUDE_ORIGINAL = FALSE
 
 # to be consisten with previous FORCE modules, this needs to be split in two variables
 # a test should be made to verify that complexity doesn't exceed number of classes in response
@@ -22,7 +22,8 @@ WITHIN_CLASS_MIXING = TRUE
 # for the last case, a test should be made that each class has a likelihood and that the number is consistent with the number of classes
 CLASS_LIKELIHOOD = EQUALIZED
 #CLASS_LIKELIHOOD = PROPORTIONAL
-#CLASS_LIKELIHOOD = 0.2 0.2 0.2 0.2 0.2
+CLASS_LIKELIHOOD = 0.2 0.2 0.2 0.2 0.2
+CLASS_LIKELIHOOD = 0.1 0.9 0 0 0
 
 # number of ensembles per class
 ITERATIONS = 3
