@@ -8,10 +8,19 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2020**
 
+  | B. Jakimow, S. van der Linden, F. Thiel, D. Frantz, and Patrick Hostert (2020): Visualizing and labeling dense multi-sensor earth observation time series: The EO Time Series Viewer. Environmental Modelling & Software 125, 104631.
+  | https://doi.org/10.1016/j.envsoft.2020.104631
+
   | S. König, J. Schultz, O. Dubovyk, and F. Thonfeld (2020): Assessment of Drought Effects on Forests using Non-Parametric Methods and Satellite Imagery. 40. Wissenschaftlich-Technische Jahrestagung der DGPF in Stuttgart – Publikationen der DGPF, Band 29.
+
+  | K. Kowalski, C. Senf, P. Hostert, and D. Pflugmacher (2020): Characterizing spring phenology of temperate broadleaf forests using Landsat and Sentinel-2 time series. International Journal of Applied Earth Observation and Geoinformation 92, 102172.
+  | https://doi.org/10.1016/j.jag.2020.102172
 
   | J. Rosentreter, R. Hagensieker, and B. Waske (2020): Towards large-scale mapping of local climate zones using multitemporal Sentinel 2 data and convolutional neural networks. Remote Sensing of Environment 237, 111472.
   | https://doi.org/10.1016/j.rse.2019.111472
+  
+  | D. Scheffler, D. Frantz, and K. Segl (2020): Spectral harmonization and red edge prediction of Landsat-8 to Sentinel-2 using land cover optimized multivariate regressors. Remote Sensing of Environment 241, 111723.
+  | https://doi.org/10.1016/j.rse.2020.111723
 
   | F. Schug, D. Frantz, A. Okujeni, S. van der Linden, and P. Hostert (2020): Mapping urban-rural gradients of settlements and vegetation at national scale using Sentinel-2 spectral-temporal metrics and regression-based unmixing with synthetic training data. Remote Sensing of Environment 246, 111810.
   | https://doi.org/10.1016/j.rse.2020.111810
