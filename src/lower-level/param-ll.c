@@ -103,9 +103,7 @@ void parse_proj(par_ll_t *pl2){
 int i;
 
 
-  if (strlen(pl2->proj_[0]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(pl2->proj, pl2->proj_[0], strlen(pl2->proj_[0])); pl2->proj[strlen(pl2->proj_[0])] = '\0';}
+  copy_string(pl2->proj, NPOW_10, pl2->proj_[0]);
   
   for (i=1; i<pl2->nproj_; i++){
     strncat(pl2->proj, " ",           NPOW_10-strlen(pl2->proj)-1);
@@ -172,12 +170,7 @@ char  bname[NPOW_10] = "\0";
       if (findfile(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
          printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
-      if (strlen(bname) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;;
-      } else { 
-        strncpy(pl2->d_level1, bname, strlen(bname));
-        pl2->d_level1[strlen(bname)] = '\0';
-      }
+      copy_string(pl2->d_level1, NPOW_10, bname);
 
     }
 

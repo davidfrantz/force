@@ -32,6 +32,7 @@ Level 2 Processing paramater header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
 
 

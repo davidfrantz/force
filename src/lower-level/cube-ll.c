@@ -298,26 +298,19 @@ double tol = 5e-3;
   multicube->cover[0] = true;
   cube = multicube->cube[0];
 
-  if (strlen(pl2->d_level2) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return NULL;
-  } else { strncpy(cube->dname, pl2->d_level2, strlen(pl2->d_level2)); cube->dname[strlen(pl2->d_level2)] = '\0';}
-  
+  copy_string(cube->dname, NPOW_10, pl2->d_level2);
 
 
   if (pl2->doreproj){
 
     cube->res = pl2->res;
-    if (strlen(pl2->proj) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return NULL;
-    } else { strncpy(cube->proj, pl2->proj, strlen(pl2->proj)); cube->proj[strlen(pl2->proj)] = '\0';}
+    copy_string(cube->proj, NPOW_10, pl2->proj);
     
   } else {
 
     cube->res = get_stack_res(stack);
     get_stack_proj(stack, utm_proj, NPOW_10);
-    if (strlen(utm_proj) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return NULL;
-    } else { strncpy(cube->proj, utm_proj, strlen(utm_proj)); cube->proj[strlen(utm_proj)] = '\0';}
+    copy_string(cube->proj, NPOW_10, utm_proj);
     
   }
 

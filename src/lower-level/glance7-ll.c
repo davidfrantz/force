@@ -137,9 +137,8 @@ int nchar;
       printf("Buffer Overflow in assembling dirname\n"); return NULL;}
 
     cube->res = pl2->res;
-    if (strlen(proj7[c]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return NULL;
-    } else { strncpy(cube->proj, proj7[c], strlen(proj7[c])); cube->proj[strlen(proj7[c])] = '\0';}
+
+    copy_string(cube->proj, NPOW_10, proj7[c]);
 
     cube->tilesize  = 150000;
     cube->chunksize =   1500;
