@@ -31,6 +31,7 @@ This program is the general entry point to FORCE
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 
 
@@ -41,8 +42,7 @@ char user[NPOW_10];
 
   if (argc >= 2) check_arg(argv[1]);
 
-  if (getlogin_r(user, NPOW_10) != 0){
-    strncpy(user, "user", 4); user[4] = '\0';}
+  if (getlogin_r(user, NPOW_10) != 0) copy_string(user, NPOW_10, "user");
 
   printf("\n##########################################################################\n");
 
