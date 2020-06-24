@@ -48,7 +48,7 @@ typedef struct {
   int tminx, tmaxx;   // extent min/max tile
   int tminy, tmaxy;   // extent min/max tile
   int tnx, tny, tnc;  // number of tiles (square extent)
-  int *tx, *ty, tn;   // white-listed tiles
+  int *tx, *ty, tn;   // allow-listed tiles
   double tilesize;     // tile size in desination unit
   double chunksize;    // vertical chunk size
   double res;          // spatial resolution

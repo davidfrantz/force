@@ -177,7 +177,7 @@ void print_datacube(cube_t *cube){
   printf("Number of tiles (x): %d\n", cube->tnx);
   printf("Number of tiles (y): %d\n", cube->tny);
   printf("Number of tiles: %d\n", cube->tnc);
-  printf("Number of white-listed tiles: %d\n", cube->tn);
+  printf("Number of allow-listed tiles: %d\n", cube->tn);
 
   return;
 }

@@ -86,11 +86,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``DO_TILE = TRUE``
     
-  * This is the tile white list.
+  * This is the tile allow-list.
     It is an optional file that holds all tiles that should be output.
     Tiles, which are not specified in this file are not written to disc.
     This paremeter is ignored if DO_TILE = FALSE.
-    If no tile white list should be used, give FILE_TILE = NULL, in which case all tiles are output.
+    If no tile allow-list should be used, give FILE_TILE = NULL, in which case all tiles are output.
     
     | *Type:* full file path
     | ``FILE_TILE = NULL``

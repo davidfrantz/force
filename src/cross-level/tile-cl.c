@@ -28,10 +28,10 @@ This file contains functions that handle tiling operations
 #include "tile-cl.h"
 
 
-/** Read tile white-list
-+++ This function reads the tile white-list. If none is given, it is gra-
+/** Read tile allow-list
++++ This function reads the tile allow-list. If none is given, it is gra-
 +++ cefully ignored. The X/Y IDs and the number of entries is returned.
---- f_tile: path of tile white list
+--- f_tile: path of tile allow-list
 --- X:      X tile coordinate IDs (returned)
 --- Y:      Y tile coordinate IDs (returned)
 --- k:      number of tiles       (returned)
@@ -91,47 +91,47 @@ char cx[5], cy[5];
 }
 
 
-/** Test if tile is white-listed
-+++ This function tests whether a given tile is white-listed or not.
---- white_x: white-listed X tile coordinate IDs
---- white_y: white-listed Y tile coordinate IDs
---- white_k: number of white-listed tiles
+/** Test if tile is allow-listed
++++ This function tests whether a given tile is allow-listed or not.
+--- allow_x: allow-listed X tile coordinate IDs
+--- allow_y: allow-listed Y tile coordinate IDs
+--- allow_k: number of allow-listed tiles
 --- x:       x tile coordinate ID
 --- y:       y tile coordinate ID
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tile_whitelisted(int *white_x, int *white_y, int white_k, int x, int y){
+int tile_allowlisted(int *allow_x, int *allow_y, int allow_k, int x, int y){
 int k;
-bool white = false;
+bool allow = false;
 
-  if (white_k > 0){
-    for (k=0; k<white_k; k++){
-      if (x == white_x[k] && y == white_y[k]) white = true;
+  if (allow_k > 0){
+    for (k=0; k<allow_k; k++){
+      if (x == allow_x[k] && y == allow_y[k]) allow = true;
     }
   } else {
-    white = true;
+    allow = true;
   }
   
-  if (white) return SUCCESS; else return FAILURE;
+  if (allow) return SUCCESS; else return FAILURE;
 }
 
 
 /** Compile list of active tiles
 +++ This function compiles a list of active tiles, i.e. tiles for which
-+++ processing should be done. The tile white-list is read, and intersec-
++++ processing should be done. The tile allow-list is read, and intersec-
 +++ ted with the processing extent. The X/Y IDs and the number of tiles
 +++ are returned.
---- f_tile: path of tile white list
+--- f_tile: path of tile allow-list
 --- cube:   datacube struct
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tile_active(char *f_tile, cube_t *cube){
 int tx, ty;
-int *white_x = NULL, *white_y = NULL, white_k;
+int *allow_x = NULL, *allow_y = NULL, allow_k;
 
 
-  // read tile white-list
-  if (tile_readlist(f_tile, &white_x, &white_y, &white_k) != SUCCESS){
+  // read tile allow-list
+  if (tile_readlist(f_tile, &allow_x, &allow_y, &allow_k) != SUCCESS){
     printf("Reading tile file failed! "); return FAILURE;}
 
   // allocate active tile list
@@ -143,8 +143,8 @@ int *white_x = NULL, *white_y = NULL, white_k;
   for (ty=cube->tminy; ty<=cube->tmaxy; ty++){
   for (tx=cube->tminx; tx<=cube->tmaxx; tx++){
 
-    // if tile is not whitelisted (if specified), skip
-    if (tile_whitelisted(white_x, white_y, white_k, tx, ty) == FAILURE) continue;
+    // if tile is not allowlisted (if specified), skip
+    if (tile_allowlisted(allow_x, allow_y, allow_k, tx, ty) == FAILURE) continue;
 
     cube->tx[cube->tn] = tx;
     cube->ty[cube->tn] = ty;
@@ -153,8 +153,8 @@ int *white_x = NULL, *white_y = NULL, white_k;
   }
   }
 
-  free((void*)white_x);
-  free((void*)white_y);
+  free((void*)allow_x);
+  free((void*)allow_y);
 
   // is there any tile to do?
   if (cube->tn == 0){

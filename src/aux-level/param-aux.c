@@ -150,10 +150,10 @@ void write_par_ll_cube(FILE *fp, bool verbose){
   fprintf(fp, "DO_TILE = TRUE\n");
   
   if (verbose){
-    fprintf(fp, "# This is the tile white list. It is an optional file that holds all tiles\n");
+    fprintf(fp, "# This is the tile allow-list. It is an optional file that holds all tiles\n");
     fprintf(fp, "# that should be output. Tiles, which are not specified in this file are\n");
     fprintf(fp, "# not written to disc. This paremeter is ignored if DO_TILE = FALSE.\n");
-    fprintf(fp, "# If no tile white list should be used, give FILE_TILE = NULL, in which\n");
+    fprintf(fp, "# If no tile allow-list should be used, give FILE_TILE = NULL, in which\n");
     fprintf(fp, "# case all tiles are output.\n");
     fprintf(fp, "# Type: full file path\n");
   }
@@ -723,9 +723,9 @@ void write_par_hl_extent(FILE *fp, bool verbose){
   fprintf(fp, "Y_TILE_RANGE = 0 0\n");
 
   if (verbose){
-    fprintf(fp, "# White list of tiles. Can be used to further limit the analysis extent to\n");
-    fprintf(fp, "# non-square extents. The white list is intersected with the analysis extent,\n");
-    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the white-list will\n");
+    fprintf(fp, "# Allow-list of tiles. Can be used to further limit the analysis extent to\n");
+    fprintf(fp, "# non-square extents. The allow-list is intersected with the analysis extent,\n");
+    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the allow-list will\n");
     fprintf(fp, "# be processed.\n");
     fprintf(fp, "# Optional. If NULL, the complete analysis extent is processed\n");
     fprintf(fp, "# Type: full file path\n");
@@ -808,7 +808,7 @@ void write_par_hl_improphed(FILE *fp, bool verbose){
 void write_par_hl_sensor(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# SENSOR WHITE LIST\n");
+  fprintf(fp, "\n# SENSOR ALLOW-LIST\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   
   if (verbose){
