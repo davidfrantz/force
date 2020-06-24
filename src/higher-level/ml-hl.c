@@ -79,8 +79,7 @@ short ***ptr[5] = { &ml->mlp_, &ml->mli_, &ml->mlu_, &ml->rfp_, &ml->rfm_ };
                 if (nchar < 0 || nchar >= NPOW_10){ 
                   printf("Buffer Overflow in assembling domain\n"); error++;}
               } else { 
-                strncpy(domain, bname, strlen(bname)); 
-                domain[strlen(bname)] = '\0';
+                copy_string(domain, NPOW_10, bname);
               }
               set_stack_domain(ML[o],   s, domain);
               set_stack_bandname(ML[o], s, domain);
@@ -96,8 +95,7 @@ short ***ptr[5] = { &ml->mlp_, &ml->mli_, &ml->mlu_, &ml->rfp_, &ml->rfm_ };
                   if (nchar < 0 || nchar >= NPOW_10){ 
                     printf("Buffer Overflow in assembling domain\n"); error++;}
                 } else { 
-                  strncpy(domain, bname, strlen(bname)); 
-                  domain[strlen(bname)] = '\0';
+                  copy_string(domain, NPOW_10, bname);
                 }
                 set_stack_domain(ML[o],   sc, domain);
                 set_stack_bandname(ML[o], sc, domain);

@@ -77,11 +77,10 @@ short ***ptr[1] ={ &lib->mae_ };
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
             } else { 
-              strncpy(domain, bname, strlen(bname)); 
-              domain[strlen(bname)] = '\0';
+              copy_string(domain, NPOW_10, bname);
             }
           } else {
-            strncpy(domain, "LIBRARY-SUMMARY", 15); domain[15] = '\0';
+            copy_string(domain, NPOW_10, "LIBRARY-SUMMARY");
           }
           set_stack_domain(LIB[o],   b, domain);
           set_stack_bandname(LIB[o], b, domain);

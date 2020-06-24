@@ -34,6 +34,7 @@ Higher Level Processing paramater header
 #include <float.h>   // macro constants of the floating-point library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
 
 
