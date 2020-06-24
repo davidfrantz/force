@@ -32,6 +32,7 @@ Image header
 #include <string.h>  // string handling functions
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/date-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/warp-cl.h"

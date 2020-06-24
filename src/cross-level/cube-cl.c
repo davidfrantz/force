@@ -325,10 +325,7 @@ FILE *fp = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   
-  if (strlen(d_read) > NPOW_10-1){
-    printf("cannot copy, string too long.\n");  return NULL;
-  } else { strncpy(cube->dname, d_read, strlen(d_read)); cube->dname[strlen(d_read)] = '\0';}
-  
+  copy_string(cube->dname, NPOW_10, d_read);
 
   if ((fp = fopen(fname, "r")) == NULL){
     printf("Unable to open %s. ", fname); 
@@ -340,9 +337,7 @@ FILE *fp = NULL;
     free_datacube(cube); return NULL;
   } else {
     buffer[strcspn(buffer, "\r\n#")] = 0;
-    if (strlen(buffer) > NPOW_10-1){
-      printf("cannot copy, string too long.\n");  return NULL;
-    } else { strncpy(cube->proj, buffer, strlen(buffer)); cube->proj[strlen(buffer)] = '\0';}
+    copy_string(cube->proj, NPOW_10, buffer);
   }
 
   if (fgets(buffer, NPOW_10, fp) == NULL){
@@ -435,9 +430,7 @@ double tol = 5e-3;
 
   }
 
-  if (strlen(d_write) > NPOW_10-1){
-    printf("cannot copy, string too long.\n");  return NULL;
-  } else { strncpy(cube->dname, d_write, strlen(d_write)); cube->dname[strlen(d_write)] = '\0';}
+  copy_string(cube->dname, NPOW_10, d_write);
 
   if (write_datacube_def(cube) == FAILURE){
     printf("Writing datacube definition failed. "); 

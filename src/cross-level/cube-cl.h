@@ -34,6 +34,7 @@ Datacube header
 #include <math.h>    // common mathematical functions
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/dir-cl.h"
 #include "../cross-level/lock-cl.h"
