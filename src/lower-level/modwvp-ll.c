@@ -855,22 +855,22 @@ float ctr = 0;
   for (c=0; c<nc; c++){
     if (!aqua){
       WVP[c] = modavg[c];
-      if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+      if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
     } else {
       if (modavg[c] < 9999 && mydavg[c] < 9999){
         if (modctr[c] >= mydctr[c]){
           WVP[c] = modavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+          if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
         } else {
           WVP[c] = mydavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[3] = '\0';}
+          if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[c][3] = '\0';}
         }
       } else if (modavg[c] < 9999 && mydavg[c] >= 9999){
         WVP[c] = modavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+        if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
       } else if (modavg[c] >= 9999 && mydavg[c] < 9999){
         WVP[c] = mydavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[3] = '\0';}
+        if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[c][3] = '\0';}
       }
     }
     if (WVP[c] < 9999) ctr++;
@@ -1006,7 +1006,7 @@ double *modavg, *mydavg, *modctr, *mydctr;
   // initialize precipitable water with fill
   for (c=0; c<nc; c++){
     WVP[c] = 9999;
-    strncpy(SEN[c], "TBD", 3); SEN[3] = '\0';
+    strncpy(SEN[c], "TBD", 3); SEN[c][3] = '\0';
   }
 
   // if TERRA geometa doesn't exist: download
