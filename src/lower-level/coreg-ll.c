@@ -87,7 +87,7 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 
 /** This function is the private entry point to the LSReg coregistration.
 --- slave:   slave image (to be registered)
---- master:  master image (registration target)
+--- master:  master image
 --- QAI:     Quality Assurance Information
 --- res:     resolution
 --- nx:      number of columns
@@ -430,7 +430,7 @@ int nx_new, ny_new;
 
 /** This function builds a nodata mask and selects the base image from
 +++ slave or master
---- master_:  master image (registration target)
+--- master_:  master image
 --- slave_:   slave image (to be registered)
 --- nx:       number of columns
 --- ny:       number of rows
@@ -1005,7 +1005,7 @@ enum_tranformation_type transform;
   slave_i = tie->slave.i;
   master_j = tie->master.j;
   master_i = tie->master.i;
-  
+
   base_i   = slave_i;
   base_j   = slave_j;
   target_i = master_i;
