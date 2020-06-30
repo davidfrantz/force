@@ -136,6 +136,7 @@ stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, a
 small *mask_ = NULL;
 int f, r, s, i, j, p;
 int cx, cy, chunk, tx, ty;
+int nr;
 double res;
 coord_t smp_map, smp_map_ul;
 int smp_tx, smp_ty, smp_chunk;
@@ -175,10 +176,11 @@ double minx, maxx, miny, maxy;
   }
 
 
+  nr = smp->nr-2;
 
-  alloc((void**)&copied,           smp->ns,           sizeof(bool));
-  alloc_2D((void***)&smp_features, smp->ns, nf,       sizeof(double));
-  alloc_2D((void***)&smp_response, smp->ns, smp->nr,  sizeof(double));
+  alloc((void**)&copied,           smp->ns,     sizeof(bool));
+  alloc_2D((void***)&smp_features, smp->ns, nf, sizeof(double));
+  alloc_2D((void***)&smp_response, smp->ns, nr, sizeof(double));
 
 
   if (phl->smp.projected){
@@ -218,7 +220,7 @@ double minx, maxx, miny, maxy;
   }
 
 
-  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,r,valid) shared(tx,ty,chunk,res,cx,cy,nf,minx,maxx,miny,maxy,copied,smp_features,smp_response,smp,features,mask_,cube,phl) reduction(+: error, found, added) default(none)
+  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,r,valid) shared(tx,ty,chunk,res,cx,cy,nf,nr,minx,maxx,miny,maxy,copied,smp_features,smp_response,smp,features,mask_,cube,phl) reduction(+: error, found, added) default(none)
   {
 
     #pragma omp for
@@ -276,7 +278,7 @@ double minx, maxx, miny, maxy;
         smp_features[s][f] = features[f].dat[0][p];
         if (!features[f].msk[p] && phl->ftr.exclude) valid = false;
       }
-     for (r=0; r<smp->nr; r++) smp_response[s][r] = smp->tab[s][_Z_+r];
+     for (r=0; r<nr; r++) smp_response[s][r] = smp->tab[s][_Z_+r];
 
 
       // we are done with this sample
@@ -298,9 +300,9 @@ double minx, maxx, miny, maxy;
 
 
   if (added > 0){
-    append_table(phl->smp.f_sample,   copied, smp_features, smp->ns, nf,      0);
-    append_table(phl->smp.f_response, copied, smp_response, smp->ns, smp->nr, 6);
-    append_table(phl->smp.f_coords,   copied, smp->tab,     smp->ns, 2,       6);
+    append_table(phl->smp.f_sample,   copied, smp_features, smp->ns, nf, 0);
+    append_table(phl->smp.f_response, copied, smp_response, smp->ns, nr, 6);
+    append_table(phl->smp.f_coords,   copied, smp->tab,     smp->ns, 2,  6);
   }
 
 
