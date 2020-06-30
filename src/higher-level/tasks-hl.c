@@ -191,7 +191,7 @@ bool error = false;
         break;
       case _HL_SMP_:
         OUTPUT[pro->pu] = sample_points(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+          nt1[pro->pu], phl, &aux->sample, cube, &nprod[pro->pu]);
         break;
       case _HL_TXT_:
         OUTPUT[pro->pu] = texture(ARD1[pro->pu], MASK[pro->pu], 
