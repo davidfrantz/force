@@ -49,6 +49,7 @@ def synthMixCore(
     # prepare parameters and check consistency
     assert isinstance(features, np.ndarray) and features.ndim == 2
     assert isinstance(response, np.ndarray) and response.ndim == 1
+    assert isinstance(classes, list)
     assert len(features) == len(response)
     _classIds, counts = np.unique(response, return_counts=True)
     classIds = classes
@@ -74,13 +75,15 @@ def synthMixCore(
         replace = True
     else:
         classLikelihood = {k: v / (1 - classLikelihood[target]) for k, v in classLikelihood.items() if k != target}
-        classIds = classIds[classIds != target]
+        classIds = [v for v in classIds if v != target]
         replace = False
 
     # prepare random sampling
     complexitiesV = list(mixingLikelihood.keys())
     complexitiesP = list(mixingLikelihood.values())
+    complexitiesP = [v / sum(complexitiesP) for v in complexitiesP]
     classP = [classLikelihood[classId] for classId in classIds]
+    classP = [v / sum(classP) for v in classP]
 
     # generate endless stream of mixtures (caller needs to break out!)
     while True:
@@ -228,7 +231,7 @@ def synthMixCli(filenamePrm):
 
     mixingLikelihood = {k: v for k, v in zip(parsedMixingComplexity, parsedMixingLikelihood)}
 
-    if sum(mixingLikelihood.values()) != 1:
+    if abs(sum(mixingLikelihood.values()) - 1) > 0.01:
         print('parameter MIXING_LIKELIHOOD must sum to one')
         print('Reading parameter file failed!')
         exit(1)
