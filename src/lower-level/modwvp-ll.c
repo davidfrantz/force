@@ -50,9 +50,9 @@ FILE *fk = NULL;
 
   if (getlogin_r(user, NPOW_10) != 0){
 
-    printf("warning: couldn't retrieve user..\n");
-    printf("you are probably runnign in docker.\n");
-    printf("looking for LAADS App Key in /app.\n");
+    printf("Warning: couldn't retrieve user.\n");
+    printf("You are probably running in Docker.\n");
+    printf("Looking for LAADS App Key in /app.\n");
 
     nchar = snprintf(fkey, NPOW_10, "/app/.laads");
     if (nchar < 0 || nchar >= NPOW_10){ 
