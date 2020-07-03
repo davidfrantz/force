@@ -49,11 +49,22 @@ FILE *fk = NULL;
 
 
   if (getlogin_r(user, NPOW_10) != 0){
-    printf("couldn't retrieve user..\n"); exit(1);}
 
-  nchar = snprintf(fkey, NPOW_10, "/home/%s/.laads", user);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    printf("warning: couldn't retrieve user..\n");
+    printf("you are probably runnign in docker.\n");
+    printf("looking for LAADS App Key in /app.\n");
+
+    nchar = snprintf(fkey, NPOW_10, "/app/.laads");
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+
+  } else {
+
+    nchar = snprintf(fkey, NPOW_10, "/home/%s/.laads", user);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+
+  }
 
   if (!fileexist(fkey)){
     printf("LAADS authentification does not exist: %s\n", fkey); exit(1);}
