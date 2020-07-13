@@ -35,7 +35,7 @@ This file contains functions for handling MODIS Atmospheric Water Vapor
 void int2bit(int integer, bool *bin, int start, int size);
 
 
-/** Retrieve LAADS App Key from $HOME/.laads
+/** Retrieve LAADS App Key from $HOME/.laads or $FORCE_CREDENTIALS/.laads
 --- auth:   authentification header including key
 --- size:   buffer size of auth
 +++ Return: void
@@ -46,25 +46,30 @@ char fkey[NPOW_10];
 char  key[NPOW_10];
 int nchar;
 FILE *fk = NULL;
+char *CRED = NULL;
 
 
-  if (getlogin_r(user, NPOW_10) != 0){
+  if ((CRED = getenv("FORCE_CREDENTIALS")) == NULL){
 
-    printf("Warning: couldn't retrieve user.\n");
-    printf("You are probably running in Docker.\n");
-    printf("Looking for LAADS App Key in /app.\n");
-
-    nchar = snprintf(fkey, NPOW_10, "/app/.laads");
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    if (getlogin_r(user, NPOW_10) != 0){
+      printf("Warning: couldn't retrieve user.\n");
+      printf("You are probably running FORCE in Docker?\n");
+      printf("Try to set the environment variable FORCE_CREDENTIALS,"
+             "where the LAADS app key (.laads) is stored.\n");
+    } else {
+      nchar = snprintf(fkey, NPOW_10, "/home/%s/.laads", user);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    }
 
   } else {
 
-    nchar = snprintf(fkey, NPOW_10, "/home/%s/.laads", user);
+    nchar = snprintf(fkey, NPOW_10, "%s/.laads", CRED);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
 
   }
+
 
   if (!fileexist(fkey)){
     printf("LAADS authentification does not exist: %s\n", fkey); exit(1);}
