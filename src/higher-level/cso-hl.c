@@ -95,13 +95,13 @@ short ***ptr[NPOW_08];
       month = phl->date_range[_MIN_].month;
 
       for (w=0; w<=nw; w++){
-        set_stack_nodata(CSO[o], w, nodata);
         if (month > 12){ year++; month -= 12;}
         set_date(&date, year, month, 1);
         copy_date(&date, &cs->d_cso[w]);
         compact_date(date.year, date.month, date.day, fdate, NPOW_10);
 //printf("W: "); print_date(&date);
         if (w < nw){
+          set_stack_nodata(CSO[o], w, nodata);
           set_stack_wavelength(CSO[o], w, w+1);
           set_stack_date(CSO[o], w, date);
           set_stack_domain(CSO[o], w, fdate);
