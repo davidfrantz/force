@@ -349,7 +349,7 @@ force-lut-modis: temp cross lower $(DL)/_lut-modis.c
 
 ### dummy code for testing stuff  
 
-dummy: temp cross src/dummy.c
+dummy: temp cross aux src/dummy.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
 
   

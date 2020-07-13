@@ -363,6 +363,18 @@ bool buf1[12] = { 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1 };
 bool buf2[12] = { 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1 };
 bool buf3[12] = { 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 };
 
+char *CRED = NULL;
+
+
+  if ((CRED = getenv("FORCE_CREDENTIALS")) == NULL){
+    printf("Environment variable not set.\n");
+  } else {
+    printf("Environment variable: %s\n", CRED);
+  }
+
+  exit(1);
+
+
 crc1 = crc8_slow(buf1, 12);
 crc2 = crc8_slow(buf2, 12);
 crc3 = crc8_slow(buf3, 12);
@@ -372,7 +384,6 @@ printf("%#02x\n", crc2);
 printf("%#02x\n", crc3);
 
 
-exit(1);
 
   if (argc != 4){ 
     printf("usage: %s\n", argv[0]);
