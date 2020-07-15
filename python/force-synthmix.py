@@ -250,7 +250,7 @@ def synthMixCli(filenamePrm):
             print('Reading parameter file failed!')
             exit(1)
 
-        if sum(parsedClassLikelihood) != 1:
+        if abs(sum(parsedClassLikelihood) - 1) > 0.01:
             print('parameter CLASS_LIKELIHOOD must sum to one')
             print('Reading parameter file failed!')
             exit(1)

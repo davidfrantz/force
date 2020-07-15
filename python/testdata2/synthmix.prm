@@ -56,7 +56,7 @@ WITHIN_CLASS_MIXING = TRUE
 # Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR
 # Type: Float list. Valid values: [0,1]
 
-CLASS_LIKELIHOOD = 0.2 0.1 0.5 0.1 0.1
+CLASS_LIKELIHOOD = 0.2 0.1 0.5 0.1 0.099
 # CLASS_LIKELIHOOD = PROPORTIONAL
 
 # Number of iterations. This parameter allows to repeat the mixing multiple 
