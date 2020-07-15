@@ -439,18 +439,18 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# This parameter only applies for Sentinel-2 data. This parameter defines\n");
-    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR target images.\n");
+    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR base images.\n");
     fprintf(fp, "# If given, a co-registration is attempted. If it fails (no tie points),\n");
     fprintf(fp, "# the image won't be processed.\n");
     fprintf(fp, "# Type: full directory path\n");
   }
-  fprintf(fp, "DIR_MASTER = NULL\n");
+  fprintf(fp, "DIR_COREG_BASE = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter defines the nodata values of the master images.\n");
+    fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
   }
-  fprintf(fp, "MASTER_NODATA = -32767\n");
+  fprintf(fp, "COREG_BASE_NODATA = -32767\n");
 
   return;
 }

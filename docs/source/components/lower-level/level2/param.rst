@@ -249,17 +249,17 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 * **Co-Registration options**
     
   * This parameter only applies for Sentinel-2 data.
-    This parameter defines the path to a directory that contains monthly Landsat NIR target images.
+    This parameter defines the path to a directory that contains monthly Landsat NIR base images.
     If given, a co-registration is attempted.
     If it fails (no tie points), the image won't be processed.
     
     | *Type:* full directory path
-    | ``DIR_MASTER = NULL``
+    | ``DIR_COREG_BASE = NULL``
     
-  * This parameter defines the nodata values of the master images.
+  * This parameter defines the nodata values of the coregistration base images.
     
     | *Type:* Integer. Valid values: [-32767,32767]
-    | ``MASTER_NODATA = -32767``
+    | ``COREG_BASE_NODATA = -32767``
     
 * **Miscellaneous options**
     

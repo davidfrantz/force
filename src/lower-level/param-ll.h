@@ -50,7 +50,7 @@ typedef struct {
   char *d_temp;           // temporary directory
   char *d_out;            // exact output directory
   char *fdem;             // Digital Elevation Model
-  char *d_master;         // Master image for coregistration
+  char *d_coreg;         // Master image for coregistration
   char *f_tile;           // tile allow-list
   char *f_queue;          // file queue
   char *d_aod;            // directory of AOD LUT
@@ -99,7 +99,7 @@ typedef struct {
   int doenv;   // flag: environment reflectance
 
   int dem_nodata;    // DEM nodata
-  int master_nodata; // Master nodata
+  int coreg_nodata;  // Master nodata
   
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile
   float wvp;              // water vapor dummy value
