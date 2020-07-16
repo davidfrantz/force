@@ -78,7 +78,7 @@ fi
 
 POOL=$1
 POOLLIST=$2
-BOUND=$(echo $3 | sed 's_/_%20_g')
+BOUND=$(echo $3 | sed 's_/_%20_g' | sed 's/ //g')
 S0=$4
 S1=$5
 C0=$6
