@@ -365,6 +365,8 @@ bool buf3[12] = { 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 };
 
 char *CRED = NULL;
 
+  printf("%d - %d\n", SHRT_MIN, SHRT_MAX);
+
 
   if ((CRED = getenv("FORCE_CREDENTIALS")) == NULL){
     printf("Environment variable not set.\n");
