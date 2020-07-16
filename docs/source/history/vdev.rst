@@ -39,6 +39,7 @@ Master release: TBA
 * **FORCE HIGHER LEVEL**
 
   * added new sub-module to force-higher-level:
+  
     library-completeness LIB. 
     This submodule takes a feature table (e.g. spectral library used for training a machine learning classifier), and tests each feature vector against the image features.
     The output is a minimum MAE map, which indicates if your library is complete - or if there are e.g. landcovers that you do not have any samples for (likely your classification/regression will be worse there).
@@ -47,37 +48,44 @@ Master release: TBA
     Thanks to Franz Schug for prototyping this method.
 
   * in force-higher-level, most sub-modules: 
+  
     Added a new parameter ``OUTPUT_EXPLODE``.
     If FALSE, multi-band images are written (as before).
     If TRUE, the output is exploded into single-band images.
     Note that this can result in an extremely large number of files.
 
   * in force-higher-level, various sub-modules: 
+  
     Explicitly added the nodata value for output products, which formerly caused strange behaviour when there only was nodata within the processing mask of one block.
     Thanks to Stefan Ernst for reporting this issue.
 
   * in force-higher-level, sampling sub-module: 
+  
     The limitation of only having one response variable was lifted.
     Accordingly, the input table can have more than 3 columns, i.e. 1) X-, 2) Y-coordinates, and 3+) response variables.
     The output response file will hold all response variables.
     Some improvements were made w.r.t. performance, i.e. the input table is only read once, and a "we-already-have-sampled-this-coordinate" is used to skip finished samples.
 
   * in force-higher-level, CSO sub-module: 
+  
     Fixed a critical memory error related to the CSO nodata value.
 
   * in force-higher-level, machine learning sub-module, random forest classification:
+  
     Random Forest class probabilities can now be output. 
     The Random Forest classification margin can now be output.
     Two new parameters were added: ``OUTPUT_RFP`` & ``OUTPUT_RFM``.
     Thanks to Benjamin Jakimow for suggesting this improvement.
     
   * in force-higher-level, TSA sub-module: 
+  
     Added additional spectral indices: Normalized Difference Tillage Index, and Normalized Difference Moisture Index
     Thanks to Benjamin Jakimow for suggesting this improvement.
 
 * **FORCE AUX**
 
   * new program force-synthmix:
+  
     Andreas Rabe has provided a SynthMix program!
     SynthMix can be used to generate training data for machine learning regression to map sub-pixel fractions of land cover, tree cover etc.
     SynthMix is a very elegant method to create a proper training dataset, makes it much easier to generate training data for fractional cover, and needs very few input data (as opposed to traditional methods).
@@ -86,18 +94,22 @@ Master release: TBA
     force-parameter has a new option to generate a SynthMix parameter file.
 
   * new program force-procmask:
+  
     This program can generate processing masks from cubed, continuous input images, e.g. to generate a mask with all pixels that have NDVI > 0.8
   
   * new program force-tile-extent:
+  
     This program takes a polygon vector file (e.g. shapefile of a country), and suggests a processing extent for higher-level processing (``X_TILE_RANGE`` & ``Y_TILE_RANGE``)
     It further gives a recommendation whether you should use a tile allow-list.
     This list is also generated.
 
   * in force-train:
+  
     Due to the change in the sampling module, force-train now explicitly uses the 1st column in the response file.
     In a future version, this might be adapted to flexibly choose a column.
 
   * in force-cube:
+  
     If a resulting image is completely nodata, it will automatically be removed.
     
     
