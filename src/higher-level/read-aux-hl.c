@@ -33,6 +33,7 @@ This file contains functions for reading aux files
 int read_endmember(par_hl_t *phl, aux_t *aux);
 int read_machine_learner(par_hl_t *phl, aux_t *aux);
 int read_libraries(par_hl_t *phl, aux_t *aux);
+int read_samples(par_hl_t *phl, aux_t *aux);
 
 
 /** This function reads endmembers from a text file. Put each endmember in
@@ -216,6 +217,36 @@ double mx, vx, k;
 }
 
 
+/** This function reads sample locations from text files. Samples go to 
++++ the lines. Do not use a header. Put X-coords in 1st column and Y-
++++ coords in 2nd column. Coordinates must be in geographic decimal 
++++ degree notation (South and West coordinates are negative). There needs
++++ to be at least one additional column with a response variable (class 
++++ ID or some quantitative value). Multiple variables are supported-
+--- phl:    HL parameters
+--- aux:    auxilliary data
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int read_samples(par_hl_t *phl, aux_t *aux){
+int ns, nr;
+
+
+  if ((aux->sample.tab = read_table(phl->smp.f_coord, &ns, &nr)) == NULL){
+    printf("unable to read samples. "); return FAILURE;}
+
+  if (nr < 3){
+    printf("Less than 3 columns. "); return FAILURE;}
+
+  alloc((void**)&aux->sample.visited, ns, sizeof(bool));
+
+  aux->sample.ns = ns;
+  aux->sample.nr = nr;
+  aux->sample.nleft = ns;
+
+  return SUCCESS;
+}
+
+
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -254,6 +285,14 @@ aux_t *aux;
       return NULL;
     }
   }
+
+  if (phl->type == _HL_SMP_){
+    if (read_samples(phl, aux) == FAILURE){
+      printf("reading sample file failed. ");
+      free_aux(phl, aux);
+      return NULL;
+    }
+  }
   
 
   return aux;
@@ -284,6 +323,11 @@ int i;
       free_2D((void**)aux->library.sd,   aux->library.n);
     }
     
+    if (phl->type == _HL_SMP_){
+      free_2D((void**)aux->sample.tab, aux->sample.ns);
+      free((void*)aux->sample.visited);
+    }
+
     free((void*)aux); aux = NULL;
 
   }
