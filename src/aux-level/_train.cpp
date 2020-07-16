@@ -93,8 +93,10 @@ time_t TIME;
   s = 0;
   while (fgets(buffer, NPOW_14, fp) != NULL){
 
-    c_response[s] = atoi(buffer);
-    r_response[s] = atof(buffer);
+    if ((ptr = strtok(buffer, separator)) == NULL) continue;
+
+    c_response[s] = atoi(ptr);
+    r_response[s] = atof(ptr);
     s++;
 
     // if extremely large size, attempt to increase buffer size
