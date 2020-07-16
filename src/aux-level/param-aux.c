@@ -150,10 +150,10 @@ void write_par_ll_cube(FILE *fp, bool verbose){
   fprintf(fp, "DO_TILE = TRUE\n");
   
   if (verbose){
-    fprintf(fp, "# This is the tile white list. It is an optional file that holds all tiles\n");
+    fprintf(fp, "# This is the tile allow-list. It is an optional file that holds all tiles\n");
     fprintf(fp, "# that should be output. Tiles, which are not specified in this file are\n");
     fprintf(fp, "# not written to disc. This paremeter is ignored if DO_TILE = FALSE.\n");
-    fprintf(fp, "# If no tile white list should be used, give FILE_TILE = NULL, in which\n");
+    fprintf(fp, "# If no tile allow-list should be used, give FILE_TILE = NULL, in which\n");
     fprintf(fp, "# case all tiles are output.\n");
     fprintf(fp, "# Type: full file path\n");
   }
@@ -439,18 +439,18 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# This parameter only applies for Sentinel-2 data. This parameter defines\n");
-    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR target images.\n");
+    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR base images.\n");
     fprintf(fp, "# If given, a co-registration is attempted. If it fails (no tie points),\n");
     fprintf(fp, "# the image won't be processed.\n");
     fprintf(fp, "# Type: full directory path\n");
   }
-  fprintf(fp, "DIR_MASTER = NULL\n");
+  fprintf(fp, "DIR_COREG_BASE = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter defines the nodata values of the master images.\n");
+    fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
   }
-  fprintf(fp, "MASTER_NODATA = -32767\n");
+  fprintf(fp, "COREG_BASE_NODATA = -32767\n");
 
   return;
 }
@@ -723,9 +723,9 @@ void write_par_hl_extent(FILE *fp, bool verbose){
   fprintf(fp, "Y_TILE_RANGE = 0 0\n");
 
   if (verbose){
-    fprintf(fp, "# White list of tiles. Can be used to further limit the analysis extent to\n");
-    fprintf(fp, "# non-square extents. The white list is intersected with the analysis extent,\n");
-    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the white-list will\n");
+    fprintf(fp, "# Allow-list of tiles. Can be used to further limit the analysis extent to\n");
+    fprintf(fp, "# non-square extents. The allow-list is intersected with the analysis extent,\n");
+    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the allow-list will\n");
     fprintf(fp, "# be processed.\n");
     fprintf(fp, "# Optional. If NULL, the complete analysis extent is processed\n");
     fprintf(fp, "# Type: full file path\n");
@@ -808,7 +808,7 @@ void write_par_hl_improphed(FILE *fp, bool verbose){
 void write_par_hl_sensor(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# SENSOR WHITE LIST\n");
+  fprintf(fp, "\n# SENSOR ALLOW-LIST\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   
   if (verbose){

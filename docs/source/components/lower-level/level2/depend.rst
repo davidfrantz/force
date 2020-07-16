@@ -76,7 +76,7 @@ Master images for co-registration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Tile white-list
+Tile allow-list
 ^^^^^^^^^^^^^^^
 
 A :ref:`tilelist` is optional, and may be used to suppress the output of tiles that are not in your study area.

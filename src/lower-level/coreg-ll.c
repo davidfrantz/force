@@ -58,8 +58,8 @@ typedef struct{
 } poi_t;
 
 typedef struct{
-  poi_t slave;
-  poi_t master;
+  poi_t target;
+  poi_t base;
 } tie_t;
 
 typedef struct{
@@ -68,13 +68,13 @@ typedef struct{
   double rmse;
 } match_t;
 
-int coreg(short **slave, short *master, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
+int coreg(short **target, short *base, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
 int cumulative_scale(int toplayer, int *scales);
 void free_pyramids(short ***pyramids_, int nlayer);
 void build_pyramids(short *image, stack_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr);
 void build_pyramidlayer(int nx, int ny, short nodata, int scale, int *nx_new_, int *ny_new_, short *image_, short **pyramid);
 poi_t points_of_interest(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodata, int iLayer, int iMinPOINum);
-bool mask_and_base(short *master_, short *slave_, int nx, int ny, small *mask, bool *pbImage1);
+bool mask_and_base(short *target, short *base, int nx, int ny, small *mask, bool *pbImage1);
 tie_t initial_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, int iLayer, int h, int max_h, double corr_threshold, poi_t *poi);
 match_t depth_first_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, int toplayer, int *scales, int h_, int max_h_, double SAM, tie_t *init);
 enum_tranformation_type choose_transform(int ntie); 
@@ -86,8 +86,8 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 
 
 /** This function is the private entry point to the LSReg coregistration.
---- slave:   slave image (to be registered)
---- master:  master image (registration target)
+--- target:  target image (to be registered)
+--- base:    base image
 --- QAI:     Quality Assurance Information
 --- res:     resolution
 --- nx:      number of columns
@@ -97,7 +97,7 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 --- nodata:  nodata value
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coreg(short **slave, short *master, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
+int coreg(short **target, short *base, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
 int h, max_h, b;
 int i, j, p;
 double SAM, SAM_original;
@@ -124,7 +124,7 @@ int nland = 0;
   qai_nodata = (short)get_stack_nodata(QAI, 0);
   
   // number of valid land pixels
-  #pragma omp parallel private(j,p) shared(ny,nx,QAI,slave,master,band,band_value_thr) reduction(+: nland) default(none)
+  #pragma omp parallel private(j,p) shared(ny,nx,QAI,target,base,band,band_value_thr) reduction(+: nland) default(none)
   {
 
     #pragma omp for
@@ -132,7 +132,7 @@ int nland = 0;
     for (j=0; j<nx; j++){
       p = i*nx+j;
       if (get_off(QAI, p) || get_shadow(QAI, p) || get_cloud(QAI, p) > 0) continue;
-      if (slave[band][p] > band_value_thr && master[p] > band_value_thr) nland++;
+      if (target[band][p] > band_value_thr && base[p] > band_value_thr) nland++;
     }
     }
 
@@ -167,9 +167,9 @@ int nland = 0;
   
 
   alloc((void**)&pyramids_, 2, sizeof(short**));
-  build_pyramids(slave[band], QAI, nx, ny, nodata, nlayer, scales, &pyramids_[0], &nx_pyr, &ny_pyr);
+  build_pyramids(target[band], QAI, nx, ny, nodata, nlayer, scales, &pyramids_[0], &nx_pyr, &ny_pyr);
   free((void*)nx_pyr); free((void*)ny_pyr);
-  build_pyramids(master,      QAI, nx, ny, nodata, nlayer, scales, &pyramids_[1], &nx_pyr, &ny_pyr);
+  build_pyramids(base,         QAI, nx, ny, nodata, nlayer, scales, &pyramids_[1], &nx_pyr, &ny_pyr);
 
 
   while (success == false){
@@ -185,10 +185,10 @@ int nland = 0;
     // depth-first matching
     df = depth_first_matching(pyramids_, nx_pyr, ny_pyr, toplayer, scales, h, max_h, SAM, &init);    // depth-first matching on initial matched points; results stored at [pLSReg->pdCoefs, pLSReg->n_tie, pLSReg->dRMSE]
 
-    if (init.slave.n >0){
-      free((void*)init.slave.j);  free((void*)init.slave.i);  init.slave.n  = 0;}
-    if (init.master.n >0){
-      free((void*)init.master.j); free((void*)init.master.i); init.master.n = 0;}
+    if (init.target.n >0){
+      free((void*)init.target.j); free((void*)init.target.i); init.target.n = 0;}
+    if (init.base.n   >0){
+      free((void*)init.base.j);   free((void*)init.base.i);   init.base.n   = 0;}
 
     #ifdef FORCE_DEBUG
     printf("Depth-First matching:\n");
@@ -246,7 +246,7 @@ int nland = 0;
 
   if (success){
     printf(" - good, ");
-    for (b=0; b<nb; b++) slave[b] = register_band(transform, &dm, slave[b], nx, ny, nodata);
+    for (b=0; b<nb; b++) target[b] = register_band(transform, &dm, target[b], nx, ny, nodata);
     qai_[0] = register_quality(transform, &dm, qai_[0], nx, ny, qai_nodata);
   } else {
     //printf(" - fail, ");
@@ -429,16 +429,16 @@ int nx_new, ny_new;
 
 
 /** This function builds a nodata mask and selects the base image from
-+++ slave or master
---- master_:  master image (registration target)
---- slave_:   slave image (to be registered)
++++ target or base
+--- target:  target image
+--- base:   base image
 --- nx:       number of columns
 --- ny:       number of rows
 --- mask:     nodata mask
---- pbImage1: flag whether base is slave
+--- pbImage1: flag whether base is target
 +++ Return:   logical value indicating if there is any valid value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool mask_and_base(short *master_, short *slave_, int nx, int ny, small *mask, bool *pbImage1){
+bool mask_and_base(short *target, short *base, int nx, int ny, small *mask, bool *pbImage1){
 int p;
 float fStd1, fStd2;
 int n = 0;
@@ -447,7 +447,7 @@ int n = 0;
   *pbImage1 = true;
 
   for (p=0; p<ny*nx; p++){
-    if (master_[p] > 0 && slave_[p] > 0){
+    if (target[p] > 0 && base[p] > 0){
       n++;
       mask[p] = true;
     }
@@ -455,8 +455,8 @@ int n = 0;
 
   if (n == 0) return false;
 
-  fStd1 = GetStd(master_, ny*nx, mask);
-  fStd2 = GetStd(slave_,  ny*nx, mask);
+  fStd1 = GetStd(target, ny*nx, mask);
+  fStd2 = GetStd(base,   ny*nx, mask);
 
   *pbImage1 = (fStd1 <= fStd2) ? true : false;
 
@@ -479,12 +479,13 @@ int wFilter7, wFilter2;
 int h = 7, npoi;
 float  *dFilter7 = NULL, *dFilter2 = NULL;
 float  dMin, dMax, dMean;
-short *slave = NULL, *master = NULL;
+short *target = NULL;
+short *base   = NULL;
 short *image = NULL;
 float *img0 = NULL, *img1 = NULL, *img2 = NULL, *img3 = NULL;
 float img_max;
 int iIterNum;
-bool base_is_slave;
+bool base_is_target;
 int nx, ny, nc;
 small *mask = NULL;
 poi_t poi;
@@ -496,8 +497,8 @@ poi_t poi;
   
   //  printf("\npoi detection\n");
 
-  slave  = pyramids_[0][layer];
-  master = pyramids_[1][layer];
+  target = pyramids_[0][layer];
+  base   = pyramids_[1][layer];
 
   nx = nx_pyr[layer];
   ny = ny_pyr[layer];
@@ -507,13 +508,13 @@ poi_t poi;
   alloc((void**)&mask, nc, sizeof(small));
 
   // get overlappping area mask and the image for POI detection (the one with smaller std)
-  if (mask_and_base(slave, master, nx, ny, mask, &base_is_slave) == false){
+  if (mask_and_base(target, base, nx, ny, mask, &base_is_target) == false){
     free(mask);
     poi.n = 0;
     return poi;
   }
 
-  image = (base_is_slave) ? slave : master;
+  image = (base_is_target) ? target : base;
   ApplyMask(image, nc, mask, nodata);
 
   alloc((void**)&img0, nc, sizeof(float));
@@ -656,8 +657,10 @@ int n;
 int dx, dy;
 int x, y, x2, y2, x1 = 0, y1 = 0;
 int nx, ny;
-short *master = NULL, *slave = NULL;
-short *master_sub = NULL, *slave_sub = NULL;
+short *target     = NULL;
+short *base       = NULL;
+short *target_sub = NULL;
+short *base_sub   = NULL;
 double diff_threshold;
 int ntie;
 tie_t init;
@@ -670,13 +673,13 @@ tie_t init;
   //  printf("\nImage matching\n");
   
   if (poi->n == 0){
-    init.slave.n  = 0;
-    init.master.n = 0;
+    init.target.n = 0;
+    init.base.n   = 0;
     return init;
   }
 
-  slave  = pyramids_[0][layer];
-  master = pyramids_[1][layer];
+  target = pyramids_[0][layer];
+  base   = pyramids_[1][layer];
 
   nx = nx_pyr[layer];
   ny = ny_pyr[layer];
@@ -693,13 +696,13 @@ tie_t init;
   ww = w*w;
 
 
-  alloc((void**)&master_sub, ww, sizeof(short));
-  alloc((void**)&slave_sub,  ww, sizeof(short));
+  alloc((void**)&target_sub, ww, sizeof(short));
+  alloc((void**)&base_sub,   ww, sizeof(short));
   
-  alloc((void**)&init.slave.j,  poi->n, sizeof(double));
-  alloc((void**)&init.slave.i,  poi->n, sizeof(double));
-  alloc((void**)&init.master.j, poi->n, sizeof(double));
-  alloc((void**)&init.master.i, poi->n, sizeof(double));
+  alloc((void**)&init.target.j, poi->n, sizeof(double));
+  alloc((void**)&init.target.i, poi->n, sizeof(double));
+  alloc((void**)&init.base.j,   poi->n, sizeof(double));
+  alloc((void**)&init.base.i,   poi->n, sizeof(double));
 
 
   ntie = 0;
@@ -709,14 +712,14 @@ tie_t init;
     y2 = (int)poi->i[n];
 
     // initial cross-correlation matching
-    if (!imsub(slave, nx, ny, x2, y2, h, slave_sub))      continue;
+    if (!imsub(target, nx, ny, x2, y2, h, target_sub))      continue;
 
     // get cross-correlation matched position (x1, y1)
     maxcor = 0;
     for (y=y2-dy; y<=y2+dy; y++){
     for (x=x2-dx; x<=x2+dx; x++){
-      if (imsub(master, nx, ny, x, y, h, master_sub)){
-        cor = corr2(slave_sub, master_sub, ww);
+      if (imsub(base, nx, ny, x, y, h, base_sub)){
+        cor = corr2(target_sub, base_sub, ww);
         if (cor > maxcor){
           x1 = x;
           y1 = y;
@@ -739,7 +742,7 @@ tie_t init;
       // get LSM matched position (x1n, y1n)
       x1n = (float)(x1);
       y1n = (float)(y1);
-      LSMatching_SAM(slave, nx, ny, master, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
+      LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
 
       // increment matching window size
       ws = ws + 4;
@@ -754,23 +757,23 @@ tie_t init;
 
     // output matched points
     //fprintf(fout, "%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.3f\n", x2, y2, x1n, y1n, x1n - x2, y1n - y2, corr);
-    init.slave.j[ntie]    = x2;
-    init.slave.i[ntie]    = y2;
-    init.master.j[ntie]    = x1n;
-    init.master.i[ntie]    = y1n;
+    init.target.j[ntie] = x2;
+    init.target.i[ntie] = y2;
+    init.base.j[ntie]   = x1n;
+    init.base.i[ntie]   = y1n;
     ntie++;
   }
 
-  init.slave.n  = ntie;
-  init.master.n = ntie;
+  init.target.n = ntie;
+  init.base.n   = ntie;
 
   #ifdef FORCE_DEBUG
   printf(" %d points initially matched on top layer.\n", ntie);
   #endif
 
 
-  free(master_sub);
-  free(slave_sub);
+  free(base_sub);
+  free(target_sub);
   
   #ifdef FORCE_CLOCK
   proctime_print("initial matching", TIME);
@@ -812,7 +815,8 @@ double diff_threshold;
 int layer;
 int nlayer = toplayer+1;
 int value_threshold = 1000; // do not do matching if band value is smaller than this threshold; used to filter out water
-short *master = NULL, *slave = NULL;
+short *target = NULL;
+short *base   = NULL;
 tie_t tie;
 match_t df;
 
@@ -821,28 +825,28 @@ match_t df;
   time_t TIME; time(&TIME);
   #endif
   
-  if (toplayer <= 0 || init->master.n == 0){
+  if (toplayer <= 0 || init->base.n == 0){
     df.ntie = 0;
     return df;
   }
 
 
-  ntie = ninit = init->master.n;
+  ntie = ninit = init->base.n;
 
   alloc_2D((void***)&i_new, nlayer, ninit, sizeof(double));
   alloc_2D((void***)&j_new, nlayer, ninit, sizeof(double));
   alloc((void**)&invalid, ninit, sizeof(bool));
 
-  alloc((void**)&tie.slave.j, ninit, sizeof(double));
-  alloc((void**)&tie.slave.i, ninit, sizeof(double));
-  alloc((void**)&tie.master.j, ninit, sizeof(double));
-  alloc((void**)&tie.master.i, ninit, sizeof(double));
+  alloc((void**)&tie.target.j, ninit, sizeof(double));
+  alloc((void**)&tie.target.i, ninit, sizeof(double));
+  alloc((void**)&tie.base.j,   ninit, sizeof(double));
+  alloc((void**)&tie.base.i,   ninit, sizeof(double));
 
 
   // save results on top layer
   for (n = 0; n < ninit; n++){
-    i_new[toplayer][n] = init->master.i[n];
-    j_new[toplayer][n] = init->master.j[n];
+    i_new[toplayer][n] = init->base.i[n];
+    j_new[toplayer][n] = init->base.j[n];
   }
 
 
@@ -852,8 +856,8 @@ match_t df;
 
   for (layer = toplayer-1; layer >= 0; layer--){
 
-    slave  = pyramids_[0][layer];
-    master = pyramids_[1][layer];
+    target = pyramids_[0][layer];
+    base   = pyramids_[1][layer];
 
     nx = nx_pyr[layer];
     ny = ny_pyr[layer];
@@ -877,14 +881,14 @@ match_t df;
       
       if (invalid[n]) continue;  // point n have been detected as mismatch
 
-      x2 = (int)init->slave.j[n] * cumscale;
-      y2 = (int)init->slave.i[n] * cumscale;
+      x2 = (int)init->target.j[n] * cumscale;
+      y2 = (int)init->target.i[n] * cumscale;
 
-      x1 = (float)init->master.j[n] * layerscale; 
-      y1 = (float)init->master.i[n] * layerscale;
+      x1 = (float)init->base.j[n] * layerscale; 
+      y1 = (float)init->base.i[n] * layerscale;
 
       // skip possible water pixels; added 1/27/2017
-      if (slave[y2*nx + x2] <= value_threshold || master[(int)(y1 + 1e-10)*nx + (int)(x1 + 1e-10)] <= value_threshold){
+      if (target[y2*nx + x2] <= value_threshold || base[(int)(y1 + 1e-10)*nx + (int)(x1 + 1e-10)] <= value_threshold){
         invalid[n] = true;
         ntie -= 1;
         continue;
@@ -902,7 +906,7 @@ match_t df;
         // get LSM matched position (x1n, y1n)
         x1n = x1;
         y1n = y1;
-        LSMatching_SAM(slave, nx, ny, master, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
+        LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
 
         // increment matching window size
         ws = ws + 4 * (int)(sqrt((double)(cumscale)) + 0.5);
@@ -922,8 +926,8 @@ match_t df;
       }
 
       // update pdPreCols1 and pdPreRows1, i.e. LSM matched positions
-      init->master.j[n] = x1n;
-      init->master.i[n] = y1n;
+      init->base.j[n] = x1n;
+      init->base.i[n] = y1n;
     }
 
   }
@@ -940,10 +944,10 @@ match_t df;
   for (n=0; n<ninit; n++){
     if (invalid[n] == true) continue;
 
-    tie.slave.j[ntie]  = init->slave.j[n] * cumscale;
-    tie.slave.i[ntie]  = init->slave.i[n] * cumscale;
-    tie.master.j[ntie] = j_new[layer][n];
-    tie.master.i[ntie] = i_new[layer][n];
+    tie.target.j[ntie] = init->target.j[n] * cumscale;
+    tie.target.i[ntie] = init->target.i[n] * cumscale;
+    tie.base.j[ntie]   = j_new[layer][n];
+    tie.base.i[ntie]   = i_new[layer][n];
     
     //printf("%d %.0f %.0f %.0f %.0f\n", ntie,tie.img2.j[ntie],tie.img2.i[ntie],tie.img1.j[ntie],tie.img1.i[ntie]);
     
@@ -951,8 +955,8 @@ match_t df;
 
   }
 
-  tie.slave.n  = ntie;
-  tie.master.n = ntie;
+  tie.target.n = ntie;
+  tie.base.n   = ntie;
 
   
   #ifdef FORCE_DEBUG
@@ -963,8 +967,8 @@ match_t df;
   df.ntie = transform_from_df(enum_AUTO, &tie, df.coefs, &df.rmse);
  
 
-  free((void*)tie.slave.j);  free((void*)tie.slave.i);  tie.slave.n  = 0;
-  free((void*)tie.master.j); free((void*)tie.master.i); tie.master.n = 0;
+  free((void*)tie.target.j); free((void*)tie.target.i); tie.target.n  = 0;
+  free((void*)tie.base.j);   free((void*)tie.base.i);   tie.base.n = 0;
   free_2D((void**)i_new, nlayer);
   free_2D((void**)j_new, nlayer);
   free(invalid);
@@ -986,10 +990,10 @@ match_t df;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int transform_from_df(enum_tranformation_type transform_, tie_t *tie, double *coefs, double *rmse){
 int ntie, n, nout;
-double *slave_i  = NULL, *slave_j  = NULL;
-double *master_i = NULL, *master_j = NULL;
-double *base_i   = NULL, *base_j   = NULL;
-double *target_i = NULL, *target_j = NULL;
+double *target_i  = NULL, *target_j  = NULL;
+double *base_i    = NULL, *base_j    = NULL;
+double *target_i_ = NULL, *target_j_ = NULL;
+double *base_i_   = NULL, *base_j_   = NULL;
 double *residuals = NULL;
 double mean_residual, fitting_rmse;
 enum_tranformation_type transform;
@@ -997,19 +1001,19 @@ enum_tranformation_type transform;
   
   memset(coefs, 0, 12 * sizeof(double));
 
-  if ((ntie = tie->master.n) < 2) return 0;
+  if ((ntie = tie->base.n) < 2) return 0;
 
   alloc((void**)&residuals, ntie, sizeof(double));
 
-  slave_j = tie->slave.j;
-  slave_i = tie->slave.i;
-  master_j = tie->master.j;
-  master_i = tie->master.i;
-  
-  base_i   = slave_i;
-  base_j   = slave_j;
-  target_i = master_i;
-  target_j = master_j;
+  target_j = tie->target.j;
+  target_i = tie->target.i;
+  base_j   = tie->base.j;
+  base_i   = tie->base.i;
+
+  target_i_ = target_i;
+  target_j_ = target_j;
+  base_i_   = base_i;
+  base_j_   = base_j;
 
   if (transform_ == enum_AUTO){
     transform = choose_transform(ntie);
@@ -1022,19 +1026,19 @@ enum_tranformation_type transform;
   switch (transform)  {
   case enum_TRANSLATION:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_AFFINE:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_POLYNOMIAL:
     FitPolynomialTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   default:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   }
 
@@ -1044,15 +1048,15 @@ enum_tranformation_type transform;
   for (n=0; n<ntie; n++){
     if (residuals[n] == -1) break;
     if (residuals[n] > 2 * fitting_rmse){
-      memmove(master_j  + n, master_j  + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
-      memmove(master_i  + n, master_i  + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
-      memmove(slave_j   + n, slave_j   + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
-      memmove(slave_i   + n, slave_i   + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
+      memmove(base_j    + n, base_j    + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
+      memmove(base_i    + n, base_i    + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
+      memmove(target_j  + n, target_j  + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
+      memmove(target_i  + n, target_i  + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
       memmove(residuals + n, residuals + n + 1, (size_t)(ntie - n - 1 - nout)*sizeof(double));
-      master_j[ntie  - nout - 1] = -1;
-      master_i[ntie  - nout - 1] = -1;
-      slave_j[ntie   - nout - 1] = -1;
-      slave_i[ntie   - nout - 1] = -1;
+      base_j[ntie    - nout - 1] = -1;
+      base_i[ntie    - nout - 1] = -1;
+      target_j[ntie  - nout - 1] = -1;
+      target_i[ntie  - nout - 1] = -1;
       residuals[ntie - nout - 1] = -1;
       nout++;
       n--;
@@ -1076,19 +1080,19 @@ enum_tranformation_type transform;
   switch (transform)  {
   case enum_TRANSLATION:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_AFFINE:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_POLYNOMIAL:
     FitPolynomialTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   default:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      target_j_, target_i_, base_j_, base_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   }
 
@@ -1115,10 +1119,10 @@ enum_tranformation_type transform;
 int transform_from_dm(enum_tranformation_type transform, float *parallaxmap_x, float *parallaxmap_y, float *corrmap, int nx_new, int ny_new, int step, double *coefs, double *rmse){
 int i, j;
 int ntie, n, nout;
-double *slave_i  = NULL, *slave_j  = NULL;
-double *master_i = NULL, *master_j = NULL;
-double *base_i   = NULL, *base_j   = NULL;
-double *target_i = NULL, *target_j = NULL;
+double *target_i  = NULL, *target_j  = NULL;
+double *base_i = NULL, *base_j = NULL;
+double *target_i_ = NULL, *target_j_ = NULL;
+double *base_i_   = NULL, *base_j_   = NULL;
 double *residuals = NULL;
 double mean_residual, fitting_rmse;
 
@@ -1134,10 +1138,10 @@ double mean_residual, fitting_rmse;
 
   if (ntie < MIN_TIES_NUM) return ntie;
 
-  alloc((void*)&slave_j,    ntie, sizeof(double));
-  alloc((void*)&slave_i,    ntie, sizeof(double));
-  alloc((void*)&master_j,   ntie, sizeof(double));
-  alloc((void*)&master_i,   ntie, sizeof(double));
+  alloc((void*)&target_j,   ntie, sizeof(double));
+  alloc((void*)&target_i,   ntie, sizeof(double));
+  alloc((void*)&base_j,     ntie, sizeof(double));
+  alloc((void*)&base_i,     ntie, sizeof(double));
   alloc((void**)&residuals, ntie, sizeof(double));
 
 
@@ -1147,10 +1151,10 @@ double mean_residual, fitting_rmse;
   for (j=0; j<nx_new; j++){
     n = i*nx_new + j;
     if (corrmap[n] > 0.1f){
-      slave_i[ntie]  = i*step;
-      slave_j[ntie]  = j*step;
-      master_i[ntie] = slave_i[ntie] + parallaxmap_y[n];
-      master_j[ntie] = slave_j[ntie] + parallaxmap_x[n];
+      target_i[ntie] = i*step;
+      target_j[ntie] = j*step;
+      base_i[ntie]   = target_i[ntie] + parallaxmap_y[n];
+      base_j[ntie]   = target_j[ntie] + parallaxmap_x[n];
       ntie++;
     }
   }
@@ -1159,28 +1163,28 @@ double mean_residual, fitting_rmse;
   if (ntie < MIN_TIES_NUM) return ntie;
 
 
-  base_i   = master_i;
-  base_j   = master_j;
-  target_i = slave_i;
-  target_j = slave_j;
+  base_i_   = base_i;
+  base_j_   = base_j;
+  target_i_ = target_i;
+  target_j_ = target_j;
 
   // fit transformation
   switch (transform){
   case enum_TRANSLATION:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_AFFINE:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_POLYNOMIAL:
     FitPolynomialTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   default:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   }
 
@@ -1189,15 +1193,15 @@ double mean_residual, fitting_rmse;
   for (n = 0; n < ntie; n++){
     if (residuals[n] == -1) break;
     if (residuals[n] > 2 * fitting_rmse){
-      memmove(master_j  + n, master_j  + n + 1, (ntie - n - 1 - nout)*sizeof(double));
-      memmove(master_i  + n, master_i  + n + 1, (ntie - n - 1 - nout)*sizeof(double));
-      memmove(slave_j   + n, slave_j   + n + 1, (ntie - n - 1 - nout)*sizeof(double));
-      memmove(slave_i   + n, slave_i   + n + 1, (ntie - n - 1 - nout)*sizeof(double));
+      memmove(base_j    + n, base_j    + n + 1, (ntie - n - 1 - nout)*sizeof(double));
+      memmove(base_i    + n, base_i    + n + 1, (ntie - n - 1 - nout)*sizeof(double));
+      memmove(target_j  + n, target_j  + n + 1, (ntie - n - 1 - nout)*sizeof(double));
+      memmove(target_i  + n, target_i  + n + 1, (ntie - n - 1 - nout)*sizeof(double));
       memmove(residuals + n, residuals + n + 1, (ntie - n - 1 - nout)*sizeof(double));
-      master_j[ntie  - nout - 1] = -1;
-      master_i[ntie  - nout - 1] = -1;
-      slave_j[ntie   - nout - 1] = -1;
-      slave_i[ntie   - nout - 1] = -1;
+      base_j[ntie    - nout - 1] = -1;
+      base_i[ntie    - nout - 1] = -1;
+      target_j[ntie  - nout - 1] = -1;
+      target_i[ntie  - nout - 1] = -1;
       residuals[ntie - nout - 1] = -1;
       nout += 1;
       n -= 1;
@@ -1215,26 +1219,26 @@ double mean_residual, fitting_rmse;
   switch (transform){
   case enum_TRANSLATION:
     FitTranslationTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_AFFINE:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   case enum_POLYNOMIAL:
     FitPolynomialTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   default:
     FitAffineTransform(
-      base_j, base_i, target_j, target_i, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
+      base_j_, base_i_, target_j_, target_i_, ntie, coefs, residuals, &mean_residual, &fitting_rmse);
     break;
   }
 
-  free(slave_i);
-  free(slave_j);
-  free(master_i);
-  free(master_j);
+  free(target_i);
+  free(target_j);
+  free(base_i);
+  free(base_j);
   free(residuals);
 
   *rmse = fitting_rmse;
@@ -1261,19 +1265,18 @@ enum_tranformation_type choose_transform(int ntie){
 /** Re-register a band (apply transformation to image)
 --- transform: transformation type
 --- dm:        dense matching tie points
---- image:     image to be registered
+--- target:    image to be registered
 --- nx:        columns of image
 --- ny:        rows of image
 --- nodata:    nodata value
 +++ Return:    registered image
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *register_band(enum_tranformation_type transform, match_t *dm, short *image, int nx, int ny, short nodata){
+short *register_band(enum_tranformation_type transform, match_t *dm, short *target, int nx, int ny, short nodata){
 int i, j, p_;
 short *warped = NULL;
 double di_, dj_;
 int i_, j_;
-float target;
-float weight, weightsum;
+float avg, weight, weightsum;
 float dx, dy;
 
 
@@ -1285,7 +1288,7 @@ float dx, dy;
   // allocate memory for new registered (warped) image
   alloc((void**)&warped, ny*nx, sizeof(short));
 
-  #pragma omp parallel private(j,j_,i_,dj_,di_,dx,dy,p_,weightsum,target,weight) shared(nx,ny,transform,dm,image,warped,nodata) default(none)
+  #pragma omp parallel private(j,j_,i_,dj_,di_,dx,dy,p_,weightsum,avg,weight) shared(nx,ny,transform,dm,target,warped,nodata) default(none)
   {
 
     #pragma omp for
@@ -1296,7 +1299,7 @@ float dx, dy;
 
       // for bilinear resampling
       weightsum = 0;
-      target = 0;
+      avg = 0;
 
       // top left point
       j_ = (int)dj_;
@@ -1306,9 +1309,9 @@ float dx, dy;
       dy = (float)(di_ - i_);
       if (j_ >= 0 && j_ < nx && i_ >= 0 && i_ < ny){
         p_ = i_*nx + j_;
-        if (image[p_] != nodata){
+        if (target[p_] != nodata){
           weight = (1 - dx)*(1 - dy);
-          target += image[p_] * weight;
+          avg += target[p_] * weight;
           weightsum += weight;
         }
       }
@@ -1317,9 +1320,9 @@ float dx, dy;
       j_ += 1;
       if (j_ >= 0 && j_ < nx && i_ >= 0 && i_ < ny){
         p_ = i_*nx + j_;
-        if (image[p_] != nodata){
+        if (target[p_] != nodata){
           weight = dx*(1 - dy);
-          target += image[p_] * weight;
+          avg += target[p_] * weight;
           weightsum += weight;
         }
       }
@@ -1328,9 +1331,9 @@ float dx, dy;
       i_ += 1;
       if (j_ >= 0 && j_ < nx && i_ >= 0 && i_ < ny){
         p_ = i_*nx + j_;
-        if (image[p_] != nodata){
+        if (target[p_] != nodata){
           weight = dx*dy;
-          target += image[p_] * weight;
+          avg += target[p_] * weight;
           weightsum += weight;
         }
       }
@@ -1339,16 +1342,16 @@ float dx, dy;
       j_ -= 1;
       if (j_ >= 0 && j_ < nx && i_ >= 0 && i_ < ny){
         p_ = i_*nx + j_;
-        if (image[p_] != nodata){
+        if (target[p_] != nodata){
           weight = (1 - dx)*dy;
-          target += image[p_] * weight;
+          avg += target[p_] * weight;
           weightsum += weight;
         }
       }
 
       if (weightsum > 0){
-        target /= weightsum;
-        warped[i*nx + j] = (short)(target + 0.5f);
+        avg /= weightsum;
+        warped[i*nx + j] = (short)(avg + 0.5f);
       } else {
         warped[i*nx + j] = nodata;
       }
@@ -1358,7 +1361,7 @@ float dx, dy;
     
   }
 
-  free((void*)image);
+  free((void*)target);
 
   #ifdef FORCE_CLOCK
   proctime_print("registering band", TIME);
@@ -1463,7 +1466,8 @@ int nx_new, ny_new;
 int iMatchedNum = 0, iPointNum = 0;
 int autotransform;
 int nx, ny;
-short *master = NULL, *slave = NULL;
+short *target = NULL;
+short *base   = NULL;
 match_t dm;
 
 
@@ -1488,8 +1492,8 @@ match_t dm;
   
   autotransform = choose_transform(df->ntie);  // added 8/31/2016
 
-  slave  = pyramids_[0][layer];
-  master = pyramids_[1][layer];
+  target = pyramids_[0][layer];
+  base   = pyramids_[1][layer];
 
   nx = nx_pyr[layer];
   ny = ny_pyr[layer];
@@ -1515,7 +1519,7 @@ match_t dm;
   alloc((void**)&corrmap, ny_new*nx_new, sizeof(float));
 
 
-  #pragma omp parallel private(j_new,i,j,x1_predict,y1_predict,x1,y1,corr,x2n,y2n,xdif,ydif,ws,x1n,y1n,x1d,y1d) shared(nx,ny,nx_new,ny_new,step,max_h,h,w,slave,master,nodata,band_value_thr,diff_threshold,mean_diff_thr,corr_threshold,autotransform,df,parallaxmap_x,parallaxmap_y,corrmap) reduction(+: iMatchedNum,iPointNum) default(none)
+  #pragma omp parallel private(j_new,i,j,x1_predict,y1_predict,x1,y1,corr,x2n,y2n,xdif,ydif,ws,x1n,y1n,x1d,y1d) shared(nx,ny,nx_new,ny_new,step,max_h,h,w,target,base,nodata,band_value_thr,diff_threshold,mean_diff_thr,corr_threshold,autotransform,df,parallaxmap_x,parallaxmap_y,corrmap) reduction(+: iMatchedNum,iPointNum) default(none)
   {
 
     #pragma omp for
@@ -1527,10 +1531,10 @@ match_t dm;
       j = j_new*step;
 
       // skip possible water pixels
-      if (slave[i*nx + j] <= band_value_thr || master[i*nx + j] <= band_value_thr) continue;
+      if (target[i*nx + j] <= band_value_thr || base[i*nx + j] <= band_value_thr) continue;
 
       // skip if matching window contain fill values
-      if (FindTargetValueInWindow(slave, nx, ny, j, i, h, nodata)) continue;
+      if (FindTargetValueInWindow(target, nx, ny, j, i, h, nodata)) continue;
 
       iPointNum++; // base for matching ratio calculation (water pixels and fill value pixels excluded)
 
@@ -1550,7 +1554,7 @@ match_t dm;
       do {
         x1n = x1;
         y1n = y1;
-        LSMatching_SAM(slave, nx, ny, master, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, mean_diff_thr);
+        LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, mean_diff_thr);
         x1d = x1n;
         y1d = y1n;
         ws = ws + 4;
@@ -1603,7 +1607,7 @@ match_t dm;
 --- pl2:     L2 parameters
 --- meta:    metadata
 --- TOA:     Top of Atmosphere reflectance
---- QAI:    Quality Assurance Information
+--- QAI:     Quality Assurance Information
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int coregister(int mission, par_ll_t *pl2, stack_t *TOA, stack_t *QAI){
@@ -1612,9 +1616,9 @@ float res;
 char fname[NPOW_10], cyear[NPOW_03];
 int nchar;
 short nodata;
-short **slave = NULL;
-short *master = NULL;
-stack_t *MASTER = NULL;
+short  **target = NULL;
+short   *base   = NULL;
+stack_t *BASE   = NULL;
 int success = FAILURE;
 
 
@@ -1623,7 +1627,7 @@ int success = FAILURE;
   #endif
 
 
-  if (mission != SENTINEL2 || strcmp(pl2->d_master, "NULL") == 0) return SUCCESS;
+  if (mission != SENTINEL2 || strcmp(pl2->d_coreg, "NULL") == 0) return SUCCESS;
 
   
   #ifdef FORCE_DEBUG
@@ -1638,14 +1642,14 @@ int success = FAILURE;
   nb  = get_stack_nbands(TOA);
   res = get_stack_res(TOA);
 
-  // import slave
-  if ((slave = get_bands_short(TOA)) == NULL) return FAILURE;
+  // import target
+  if ((target = get_bands_short(TOA)) == NULL) return FAILURE;
   if ((band = find_domain(TOA, "BROADNIR")) < 0) return FAILURE;
   nodata = get_stack_nodata(TOA, band);
   year  =  get_stack_year(TOA, band);
   month =  get_stack_month(TOA, band);
 
-  // get master
+  // get base
   dy = 0;
   while (success == FAILURE && dy < 50){
     
@@ -1653,28 +1657,28 @@ int success = FAILURE;
     if (nchar < 0 || nchar >= NPOW_03){
       printf("Buffer Overflow in assembling pattern\n"); return FAILURE;}
 
-    success = findfile(pl2->d_master, cyear, NULL, fname, NPOW_10);
+    success = findfile(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
     dy++;
   }
   
   //printf("%s %d %d\n", cyear, year, month-1);
 
   if (!fileexist(fname)){
-    printf("could not retrieve master image. First 5 digits = 'YYYY-'. "); return FAILURE;}
+    printf("could not retrieve base image. First 5 digits = 'YYYY-'. "); return FAILURE;}
 
   #ifdef FORCE_DEBUG
   printf("reference image: %s\n", fname);
   #endif
 
 
-  MASTER = copy_stack(TOA, 1, _DT_SHORT_);
-  if ((warp_from_disc_to_known_stack(2, pl2->nthread, fname, MASTER, month-1, 0, pl2->master_nodata)) != SUCCESS){
-    printf("Warping master failed! "); return FAILURE;}
-  if ((master = get_band_short(MASTER, 0)) == NULL) return FAILURE;
+  BASE = copy_stack(TOA, 1, _DT_SHORT_);
+  if ((warp_from_disc_to_known_stack(2, pl2->nthread, fname, BASE, month-1, 0, pl2->coreg_nodata)) != SUCCESS){
+    printf("Warping base failed! "); return FAILURE;}
+  if ((base = get_band_short(BASE, 0)) == NULL) return FAILURE;
   
   
-  err = coreg(slave, master, QAI, res, nx, ny, nb, band, nodata);
-  free_stack(MASTER);
+  err = coreg(target, base, QAI, res, nx, ny, nb, band, nodata);
+  free_stack(BASE);
   if (err == FAILURE){
     printf("error in coregistering image.\n"); return FAILURE;
   } else if (err == CANCEL){
@@ -1686,14 +1690,14 @@ int success = FAILURE;
 
   // go through QAI, and reset boundary if neccessary
  
-  #pragma omp parallel shared(nc, slave, QAI, nodata, band) default(none) 
+  #pragma omp parallel shared(nc, target, QAI, nodata, band) default(none) 
   {
 
     #pragma omp for schedule(static)
     for (p=0; p<nc; p++){
 
-      if (slave[band][p] == nodata && !get_off(QAI, p)) set_off(QAI, p, true);
-      if (slave[band][p] != nodata &&  get_off(QAI, p)) set_off(QAI, p, false);
+      if (target[band][p] == nodata && !get_off(QAI, p)) set_off(QAI, p, true);
+      if (target[band][p] != nodata &&  get_off(QAI, p)) set_off(QAI, p, false);
 
     }
   }
