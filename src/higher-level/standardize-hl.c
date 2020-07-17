@@ -85,8 +85,8 @@ int t, p;
         if (ts_[t][p] == nodata) continue;
 
         tmp = (ts_[t][p] - avg) / std;
-        if (tmp > INT_MAX) tmp = INT_MAX;
-        if (tmp < INT_MIN) tmp = INT_MIN;
+        if (tmp > SHRT_MAX) tmp = SHRT_MAX;
+        if (tmp < SHRT_MIN) tmp = SHRT_MIN;
         ts_[t][p] = (short)tmp;;
 
       }

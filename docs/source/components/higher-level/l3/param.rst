@@ -369,6 +369,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * This parameter defines the nodata value for the LSP.
   
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``LSP_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``LSP_NODATA = -9999``
 

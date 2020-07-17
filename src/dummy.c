@@ -365,6 +365,8 @@ bool buf3[12] = { 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 };
 
 char *CRED = NULL;
 
+  printf("%d - %d\n", INT_MIN, INT_MAX);
+  printf("%u\n", UINT_MAX);
   printf("%d - %d\n", SHRT_MIN, SHRT_MAX);
 
 

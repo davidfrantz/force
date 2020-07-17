@@ -67,7 +67,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * Nodata value of the DEM.
     
-    | *Type:* Integer. Valid range: [-32767,32767]
+    | *Type:* Integer. Valid range: [-32768,32767]
     | ``DEM_NODATA = -32767``
     
 * **Data Cubes**
@@ -258,8 +258,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * This parameter defines the nodata values of the coregistration base images.
     
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``COREG_BASE_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``COREG_BASE_NODATA = -9999``
     
 * **Miscellaneous options**
     

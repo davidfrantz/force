@@ -253,6 +253,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * This parameter defines the nodata value for the continuous fields.
 
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``COARSE_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``COARSE_NODATA = -9999``
 

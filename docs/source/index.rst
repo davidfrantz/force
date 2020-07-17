@@ -120,7 +120,6 @@ Related Links
    :hidden:
 
    proj.rst
-   faq.rst
    issues.rst
    contact.rst
 

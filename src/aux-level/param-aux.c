@@ -111,7 +111,7 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# Nodata value of the DEM.\n");
-    fprintf(fp, "# Type: Integer. Valid range: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid range: [-32768,32767]\n");
   }
   fprintf(fp, "DEM_NODATA = -32767\n");
 
@@ -448,9 +448,9 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COREG_BASE_NODATA = -32767\n");
+  fprintf(fp, "COREG_BASE_NODATA = -9999\n");
 
   return;
 }
@@ -1216,9 +1216,9 @@ void write_par_hl_pac(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata value for the LSP.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "LSP_NODATA = -32767\n");
+  fprintf(fp, "LSP_NODATA = -9999\n");
   
   return;
 }
@@ -1773,9 +1773,9 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COARSE_NODATA = -32767\n");
+  fprintf(fp, "COARSE_NODATA = -9999\n");
   
   return;
 }
@@ -1836,9 +1836,9 @@ void write_par_hl_feature(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# Nodata value of the features.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "FEATURE_NODATA = -32767\n");
+  fprintf(fp, "FEATURE_NODATA = -9999\n");
   
   if (verbose){
     fprintf(fp, "# Should nodata values be excluded if any feature is nodata (TRUE). Or just\n");
@@ -1942,7 +1942,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# background class. This parameter is an integer list, which defines the threshold\n");
     fprintf(fp, "# for each feature given. The list needs to be as long as there are features (in-\n");
     fprintf(fp, "# cluding bands).\n");
-    fprintf(fp, "# Type: Integer list. Valid values [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer list. Valid values [-32768,32767]\n");
   }
   fprintf(fp, "LSM_THRESHOLD = 2000 2000 3500 2000 -2000 5000 7500 -3500 500 750 890 999 0 0 0 0 0 "
               "50 5500 1500 300 78 250 500 500 500\n");

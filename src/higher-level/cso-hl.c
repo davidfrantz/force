@@ -46,7 +46,7 @@ stack_t *compile_cso_stack(stack_t *ard, int nb, bool write, char *prodname, par
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct){
 stack_t **CSO = NULL;
-short nodata = -32767;
+short nodata = SHRT_MIN;
 int w, q;
 int year, month;
 date_t date;
@@ -207,7 +207,7 @@ int *t0 = NULL, *t1 = NULL;
 int month, year;
 int nc;
 int nw;
-short nodata = -32767;
+short nodata = SHRT_MIN;
 short minimum, maximum;
 short q25_, q75_;
 double mean, var;

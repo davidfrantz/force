@@ -73,7 +73,7 @@ double mae, rmse;
 
       x = mx = my = vx = vy = cv = k  = 0;
       ssqe = sae = sxsq = 0;
-      maxe = INT_MIN;
+      maxe = SHRT_MIN;
 
       // compute stats
       for (f=0; f<nf; f++){
@@ -235,7 +235,7 @@ double mae, rmse;
 
   
       f_change = 0;
-      change = INT_MIN;
+      change = SHRT_MIN;
 
       // find largest change
       for (f=1; f<nf; f++){
@@ -254,7 +254,7 @@ double mae, rmse;
 
       }
 
-      if (change == INT_MIN){
+      if (change == SHRT_MIN){
         for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
         continue;
       }
@@ -344,7 +344,7 @@ double mae, rmse;
 
 
         // compute residual metrics
-        ssqe = sae = sxsq = 0; maxe = INT_MIN;
+        ssqe = sae = sxsq = 0; maxe = SHRT_MIN;
         
         for (f=f_min[part]; f<f_max[part]; f++){
 

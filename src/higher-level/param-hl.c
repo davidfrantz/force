@@ -154,7 +154,7 @@ void register_bap(params_t *params, par_hl_t *phl){
 
   register_char_par(params,    "DIR_LSP", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
   register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, &phl->con.fname, &phl->con.n);
-  register_int_par(params,     "LSP_NODATA", INT_MIN, INT_MAX, &phl->con.nodata);
+  register_int_par(params,     "LSP_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_bool_par(params,    "LSP_DO", &phl->bap.pac.lsp);
   register_int_par(params,     "LSP_1ST_YEAR", 1900, 2100, &phl->bap.pac.y0);
   register_int_par(params,     "LSP_START", 1, 2100*365, &phl->bap.pac.start);
@@ -283,7 +283,7 @@ void register_cfi(params_t *params, par_hl_t *phl){
   register_imp(params, phl);
   register_char_par(params,    "DIR_COARSE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
   register_charvec_par(params, "BASE_COARSE", _CHAR_TEST_BASE_, &phl->con.fname, &phl->con.n);
-  register_int_par(params,     "COARSE_NODATA", INT_MIN, INT_MAX, &phl->con.nodata);
+  register_int_par(params,     "COARSE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_int_par(params,     "COARSE_1ST_YEAR",      1900, 2100, &phl->cfi.y0);
   register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, &phl->cfi.years, &phl->cfi.nyears);
 
@@ -345,7 +345,7 @@ int i;
   for (i=0; i<phl->ftr.ntags; i++) register_charvec_par(params,  "INPUT_FEATURE",
     _CHAR_TEST_NONE_, &phl->ftr.cfeature[i], &phl->ftr.ifeature[i]);
 
-  register_int_par(params, "FEATURE_NODATA", -32767, 32767, &phl->ftr.nodata);
+  register_int_par(params,  "FEATURE_NODATA", SHRT_MIN, SHRT_MAX, &phl->ftr.nodata);
   register_bool_par(params, "FEATURE_EXCLUDE", &phl->ftr.exclude);
 
   return;
@@ -397,7 +397,7 @@ void register_lsm(params_t *params, par_hl_t *phl){
 
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
   register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
-  register_intvec_par(params,  "LSM_THRESHOLD", -32767, 32767, &phl->lsm.threshold, &phl->lsm.nthreshold);
+  register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);
   register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);

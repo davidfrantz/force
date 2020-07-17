@@ -116,8 +116,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * Nodata value of the features.
 
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``FEATURE_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``FEATURE_NODATA = -9999``
     
   * Should nodata values be excluded if any feature is nodata (TRUE).
   * Or just proceed (FALSE)?
