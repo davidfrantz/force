@@ -145,13 +145,26 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``FILE_MODEL = biomass-1.xml biomass-2.xml biomass-3.xml``
     | ``FILE_MODEL = canopy-cover.xml``
     | ``FILE_MODEL = tree-height.xml``
-    
+
   * Machine learning method.
     Currently implemented are Random Forest and Support Vector Machines, both in regression and classification flavors.
     The method must match the models as given with FILE_MODEL.
 
     | *Type:* Character. Valid values: {SVR,SVC,RFR,RFC}
     | ``ML_METHOD = SVR``
+
+  * Class weights.
+    This parameter only applies for the classification flavor.
+    This parameter lets you define à priori class weights, which can be useful if the training data are inbalanced.
+    This parameter can be set to a number of different values. 
+    EQUALIZED gives the same weight to all classes (default).
+    PROPORTIONAL gives a weight proportional to the class frequency.
+    ANTIPROPORTIONAL gives a weight, which is inversely proportional to the class frequency.
+    Alternatively, you can use custom weights, i.e. a vector of weights for each class in your response file.
+    The weights must sum to one, and must be given in ascending order.
+
+    | *Type:* Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or ]0,1[
+    | ``FEATURE_WEIGHTS = EQUALIZED``
 
   * This parameter only applies if multiple models are given for a modelset, and machine learning method is of regression flavor.
     The models are blended into the final prediction, and processing time scales linearly with the number of models given.

@@ -104,9 +104,9 @@ Master release: TBA
     This list is also generated.
 
   * in force-train:
-  
-    Due to the change in the sampling module, force-train now explicitly uses the 1st column in the response file.
-    In a future version, this might be adapted to flexibly choose a column.
+
+    The response file can now have multiple columns, i.e. different variables.
+    A new tag ``RESPONSE_VARIABLE`` is used to select the variable, which should be used for training the model.
 
   * in force-cube:
   
