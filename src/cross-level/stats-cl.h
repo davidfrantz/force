@@ -34,6 +34,7 @@ Statistics header
 #include <math.h>    // common mathematical functions
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/alloc-cl.h"
 
 
 #ifdef __cplusplus
@@ -68,6 +69,8 @@ float tscore_T_z(float t, int df);
 float tscore_T_p(float t, int df);
 float quantile(float *x, int n, float p);
 int mode(int *x, int n);
+int n_uniq(int *x, int n);
+int **histogram(int *x, int n, int *n_uniq);
 
 #ifdef __cplusplus
 }

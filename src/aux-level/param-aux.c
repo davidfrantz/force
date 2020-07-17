@@ -2269,6 +2269,21 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {SVR,SVC,RFR,RFC}\n");
   }
   fprintf(fp, "ML_METHOD = RFC\n");
+  
+  if (verbose){
+    fprintf(fp, "# Class weights. This parameter only applies for the classification flavor. \n");
+    fprintf(fp, "# This parameter lets you define à priori class weights, which can be useful\n");
+    fprintf(fp, "# if the training data are inbalanced. This parameter can be set to a number\n");
+    fprintf(fp, "# of different values. EQUALIZED gives the same weight to all classes (default).\n");
+    fprintf(fp, "# PROPORTIONAL gives a weight proportional to the class frequency.\n");
+    fprintf(fp, "# ANTIPROPORTIONAL gives a weight, which is inversely proportional to the class\n");
+    fprintf(fp, "# frequency. Alternatively, you can use custom weights, i.e. a vector of weights\n");
+    fprintf(fp, "# for each class in your response file. The weights must sum to one, and must be\n");
+    fprintf(fp, "# given in ascending order.\n");
+    fprintf(fp, "# Type: Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or ]0,1[\n");
+  }
+  fprintf(fp, "FEATURE_WEIGHTS = EQUALIZED\n");
+
 
   fprintf(fp, "\n# RANDOM FOREST PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");

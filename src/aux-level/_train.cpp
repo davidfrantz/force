@@ -162,6 +162,10 @@ time_t TIME;
   fprintf(flog, "Validating model with %d samples\n", n_sample_val);
 
 
+  // get class priors
+  class_priors(c_response, n_sample, train);
+
+
   Mat trainingDataMat(n_sample_train, n_feature, CV_32F, features_train[0]);
   Mat r_labelsMat(n_sample_train, 1, CV_32F, r_response_train);
   Mat c_labelsMat(n_sample_train, 1, CV_32S, c_response_train);
