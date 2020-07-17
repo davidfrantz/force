@@ -71,8 +71,8 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_float_par(params,   "WATER_VAPOR",           0, 15, &pl2->wvp);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
-  register_int_par(params,     "DEM_NODATA",            INT_MIN, INT_MAX, &pl2->dem_nodata);
-  register_int_par(params,     "COREG_BASE_NODATA",     INT_MIN, INT_MAX, &pl2->coreg_nodata);
+  register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
+  register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
   register_float_par(params,   "MAX_CLOUD_COVER_TILE",  1, 100, &pl2->maxtc);
   register_float_par(params,   "CLOUD_THRESHOLD",       0, 1, &pl2->cldprob);

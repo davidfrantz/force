@@ -742,7 +742,7 @@ tie_t init;
       // get LSM matched position (x1n, y1n)
       x1n = (float)(x1);
       y1n = (float)(y1);
-      LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
+      LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, SHRT_MAX);
 
       // increment matching window size
       ws = ws + 4;
@@ -906,7 +906,7 @@ match_t df;
         // get LSM matched position (x1n, y1n)
         x1n = x1;
         y1n = y1;
-        LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, 32767);
+        LSMatching_SAM(target, nx, ny, base, nx, ny, ws, ws, x2n, y2n, &x1n, &y1n, &corr, SHRT_MAX);
 
         // increment matching window size
         ws = ws + 4 * (int)(sqrt((double)(cumscale)) + 0.5);
