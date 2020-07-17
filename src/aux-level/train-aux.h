@@ -37,6 +37,7 @@ using namespace cv;
 using namespace cv::ml;
 
 #include "../cross-level/stats-cl.h"
+#include "../cross-level/read-cl.h"
 #include "../aux-level/param-train-aux.h"
 
 

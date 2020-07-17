@@ -2242,6 +2242,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
+    fprintf(fp, "# Response variable for training the model. This number refers to the column\n");
+    fprintf(fp, "# of the response file, in which the desired variable is stored (FILE_RESPONSE).\n");
+    fprintf(fp, "# Type: Integer. Valid range: [1,NUMBER_OF_VARIABLES]\n");
+  }
+  fprintf(fp, "RESPONSE_VARIABLE = 1\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter specifies how many samples (in %%) should be used for\n");
     fprintf(fp, "# training the model. The other samples are left out, and used to vali-\n");
     fprintf(fp, "# date the model.\n");

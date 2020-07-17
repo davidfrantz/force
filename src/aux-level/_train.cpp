@@ -34,11 +34,13 @@ This program trains (and validates) machine learning models
 
 int main ( int argc, char *argv[] ){
 par_train_t *train = NULL;
-int f = 0, s, k, j, n_feature, n_sample;
+int f = 0, s, k, j, n_feature, n_sample, n_sample2;
 int n_sample_train, n_sample_val;
-float **features  = NULL;
-float  *r_response  = NULL;
-int    *c_response  = NULL;
+int n_response_vars;
+double **t_features  = NULL;
+double **t_response  = NULL;
+float   *r_response  = NULL;
+int     *c_response  = NULL;
 float **features_train  = NULL;
 float  *r_response_train  = NULL;
 int    *c_response_train  = NULL;
@@ -46,13 +48,7 @@ float **features_val  = NULL;
 float  *r_response_val  = NULL;
 int    *c_response_val  = NULL;
 bool    *is_train  = NULL;
-FILE   *fp = NULL;
 FILE   *flog = NULL;
-char buffer[NPOW_14] = "\0";
-char *ptr = NULL;
-const char *separator = " ";
-size_t sampsize = NPOW_10;
-size_t featsize = NPOW_05;
 
 Ptr<StatModel> model;
 Ptr<TrainData> TrainData;
@@ -83,77 +79,45 @@ time_t TIME;
     return FAILURE;}
 
 
-  alloc((void**)&c_response, sampsize, sizeof(int));
-  alloc((void**)&r_response, sampsize, sizeof(float));
+
 
   // read response variable
-  if ((fp = fopen(train->f_response, "r")) == NULL){
-    printf("Unable to open response-file. "); exit(1);}
+  if ((t_response = read_table(train->f_response, 
+      &n_sample, &n_response_vars)) == NULL){
+    printf("unable to read response file. "); return FAILURE;}
 
-  s = 0;
-  while (fgets(buffer, NPOW_14, fp) != NULL){
+  if (n_sample < 1){
+    printf("no sample in response file. "); return FAILURE;}
+    
+  if (n_response_vars < train->response_var){
+    printf("requested response variable is "
+           "larger than columns in response file. ");
+    return FAILURE;}
 
-    if ((ptr = strtok(buffer, separator)) == NULL) continue;
+  alloc((void**)&c_response, n_sample, sizeof(int));
+  alloc((void**)&r_response, n_sample, sizeof(float));
 
-    c_response[s] = atoi(ptr);
-    r_response[s] = atof(ptr);
-    s++;
+  for (s=0; s<n_sample; s++){
 
-    // if extremely large size, attempt to increase buffer size
-    if (s >= (int)sampsize){
-      //printf("reallocate.. %lu %lu\n", s, sampsize);
-      re_alloc((void**)&c_response, sampsize, sampsize*2, sizeof(int));
-      re_alloc((void**)&r_response, sampsize, sampsize*2, sizeof(float));
-      sampsize *= 2;
-    }
+    c_response[s] = (int)t_response[s][train->response_var-1];
+    r_response[s] = (float)t_response[s][train->response_var-1];
 
   }
 
-  fclose(fp);
-
-  n_sample = s;
   n_sample_train = n_sample*train->per_train/100;
   n_sample_val   = n_sample-n_sample_train;
 
 
-  alloc_2DC((void***)&features, n_sample, featsize, sizeof(float));
-
   // read features
-  if ((fp = fopen(train->f_feature, "r")) == NULL){
-    printf("Unable to open feature-file. "); exit(1);}
+  if ((t_features = read_table(train->f_feature, 
+    &n_sample2, &n_feature)) == NULL){
+  printf("unable to read feature file. "); return FAILURE;}
 
-  s = 0;
-  while (fgets(buffer, NPOW_14, fp) != NULL){
 
-    ptr = strtok(buffer, separator);
-    f = 0;
+  if (n_sample2 != n_sample){
+    printf("number of samples in feature (%d) and response (%d) files are different..\n",
+      n_sample2, n_sample); return FAILURE;}
 
-    while (ptr != NULL){
-      features[s][f] = atof(ptr)/10000.0;
-      ptr = strtok(NULL, separator);
-      f++;
-
-      // if many features, attempt to increase buffer size
-      if (f >= (int)featsize){
-        //printf("reallocate.. %lu %lu\n", s, sampsize);
-        re_alloc_2DC((void***)&features, n_sample, featsize, n_sample, featsize*2, sizeof(float));
-        featsize *= 2;
-      }
-
-    }
-
-    s++;
-
-  }
-
-  fclose(fp);
-
-  if (s != n_sample){
-    printf("number of samples %d and responses %d are different..\n",
-      n_sample, s); exit(FAILURE);
-  }
-
-  n_feature = f;
 
 
   alloc_2DC((void***)&features_train, n_sample_train, n_feature, sizeof(float));
@@ -179,12 +143,12 @@ time_t TIME;
   for (s=0, k=0, j=0; s<n_sample; s++){
     fprintf(flog, "sample: %d, train: %d\n", s, is_train[s]);
     if (is_train[s]){
-      for (f=0; f<n_feature; f++) features_train[k][f] = features[s][f];
+      for (f=0; f<n_feature; f++) features_train[k][f] = t_features[s][f]/10000.0;
       r_response_train[k] = r_response[s];
       c_response_train[k] = c_response[s];
       k++;
     } else {
-      for (f=0; f<n_feature; f++) features_val[j][f] = features[s][f];
+      for (f=0; f<n_feature; f++) features_val[j][f] = t_features[s][f]/10000.0;
       r_response_val[j] = r_response[s];
       c_response_val[j] = c_response[s];
       j++;
@@ -243,7 +207,8 @@ time_t TIME;
   fprintf(flog, "____________________________________________________________________\n");
 
 
-  free_2DC((void**)features);
+  free_2D((void**)t_features, n_sample);
+  free_2D((void**)t_response, n_sample);
   free((void*)c_response);
   free((void*)r_response);
   free_2DC((void**)features_train);

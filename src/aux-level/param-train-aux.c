@@ -44,6 +44,7 @@ void register_train(params_t *params, par_train_t *train){
   register_char_par(params,     "FILE_RESPONSE",         _CHAR_TEST_EXIST_, &train->f_response);
   register_char_par(params,     "FILE_MODEL",            _CHAR_TEST_NONE_,  &train->f_model);
   register_char_par(params,     "FILE_LOG",              _CHAR_TEST_NONE_,  &train->f_log);
+  register_int_par(params,      "RESPONSE_VARIABLE",     1, INT_MAX, &train->response_var);
   register_float_par(params,    "PERCENT_TRAIN",         0.001, 100, &train->per_train);
   register_bool_par(params,     "RANDOM_SPLIT",          &train->random_split);
   register_enum_par(params,     "ML_METHOD",             _TAGGED_ENUM_ML_, _ML_LENGTH_, &train->method);

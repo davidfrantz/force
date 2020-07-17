@@ -51,6 +51,12 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Training**
 
+  * Response variable for training the model. 
+    This number refers to the column of the response file, in which the desired variable is stored (FILE_RESPONSE).
+
+    | *Type:* Integer. Valid range: [1,NUMBER_OF_VARIABLES]
+    | ``RESPONSE_VARIABLE = 1``
+
   * This parameter specifies how many samples (in %) should be used for training the model.
     The other samples are left out, and used to validate the model.
 
