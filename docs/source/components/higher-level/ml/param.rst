@@ -153,19 +153,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {SVR,SVC,RFR,RFC}
     | ``ML_METHOD = SVR``
 
-  * Class weights.
-    This parameter only applies for the classification flavor.
-    This parameter lets you define à priori class weights, which can be useful if the training data are inbalanced.
-    This parameter can be set to a number of different values. 
-    EQUALIZED gives the same weight to all classes (default).
-    PROPORTIONAL gives a weight proportional to the class frequency.
-    ANTIPROPORTIONAL gives a weight, which is inversely proportional to the class frequency.
-    Alternatively, you can use custom weights, i.e. a vector of weights for each class in your response file.
-    The weights must sum to one, and must be given in ascending order.
-
-    | *Type:* Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or ]0,1[
-    | ``FEATURE_WEIGHTS = EQUALIZED``
-
   * This parameter only applies if multiple models are given for a modelset, and machine learning method is of regression flavor.
     The models are blended into the final prediction, and processing time scales linearly with the number of models given.
     However, the blended prediction will likely converge with increasing numbers of models, thus it may not be necessary to compute all models.
