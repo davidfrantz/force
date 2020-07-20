@@ -107,6 +107,12 @@ Master release: TBA
 
     The response file can now have multiple columns, i.e. different variables.
     A new tag ``RESPONSE_VARIABLE`` is used to select the variable, which should be used for training the model.
+    See :ref:`train-param`.
+
+  * in force-train:
+
+    introduced new parameter ``FEATURE_WEIGHTS``, which allows to use à priori class weights for Random Forest and Support Vector Machine classification.
+    See :ref:`train-param`.
 
   * in force-cube:
   
