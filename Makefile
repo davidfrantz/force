@@ -373,6 +373,7 @@ bash: temp
 	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
 	cp $(DB)/force-procmask.sh $(TB)/force-procmask
 	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
+	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
 	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2
 
 python: temp

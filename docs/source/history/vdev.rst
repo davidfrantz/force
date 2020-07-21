@@ -103,6 +103,11 @@ Master release: TBA
     It further gives a recommendation whether you should use a tile allow-list.
     This list is also generated.
 
+  * new program force-magic-parameters:
+
+    This program lets you define multiple replacement vectors in any FORCE parameterfile.
+    When executing this program, the vectors are combined with each other, and multiple new parameterfiles are generated.
+
   * in force-train:
 
     The response file can now have multiple columns, i.e. different variables.
