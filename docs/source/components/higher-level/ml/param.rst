@@ -51,6 +51,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff}
     | ``OUTPUT_FORMAT = GTiff``
 
+  * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
+  
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_EXPLODE = FALSE``
+
 * **Parallel processing**
 
   * This module is using a streaming mechanism to speed up processing.
@@ -74,9 +79,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``X_TILE_RANGE = 0 0``
     | ``Y_TILE_RANGE = 0 0``
 
-  * White list of tiles.
+  * Allow-list of tiles.
     Can be used to further limit the analysis extent to non-square extents.
-    The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+    The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
     Optional. If NULL, the complete analysis extent is processed
 
     | *Type:* full file path
@@ -111,8 +116,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * Nodata value of the features.
 
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``FEATURE_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``FEATURE_NODATA = -9999``
     
   * Should nodata values be excluded if any feature is nodata (TRUE).
     Or just proceed (FALSE)?
@@ -140,7 +145,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``FILE_MODEL = biomass-1.xml biomass-2.xml biomass-3.xml``
     | ``FILE_MODEL = canopy-cover.xml``
     | ``FILE_MODEL = tree-height.xml``
-    
+
   * Machine learning method.
     Currently implemented are Random Forest and Support Vector Machines, both in regression and classification flavors.
     The method must match the models as given with FILE_MODEL.
@@ -180,10 +185,26 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_MLI = FALSE``
-     
+
   * Output the uncertainty of the blended prediction? This is the standard deviation of all predictions that are blended into the final prediction.
     Only makes sense when multiple models are given in a modelset.
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_MLU = FALSE``
 
+  * Output the Random Forest Class Probabilities? 
+    This option is only available when ``ML_METHOD = RFC``. 
+    If multiple models are given per modelset, the mean class probability is computed. 
+    The output file will have as many bands as classes. 
+    If multiple modelsets are given, the modelsets are appended after each other.
+    
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_RFP = FALSE``
+
+  * Output the Random Forest Classification Margin? 
+    This option is only available when ``ML_METHOD = RFC``. 
+    If multiple models are given per modelset, the margin is based on the mean class probability. 
+    If multiple modelsets are given, a margin is computed for each modelset.
+    
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_RFM = FALSE``

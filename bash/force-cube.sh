@@ -1,5 +1,27 @@
 #!/bin/bash
 
+##########################################################################
+# 
+# This file is part of FORCE - Framework for Operational Radiometric 
+# Correction for Environmental monitoring.
+# 
+# Copyright (C) 2013-2020 David Frantz
+# 
+# FORCE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# FORCE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
+# 
+##########################################################################
+
 
 issmaller(){
   awk -v n1="$1" -v n2="$2" 'BEGIN {print n1<n2}'
@@ -15,7 +37,7 @@ EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: force-cube input-file datacube-dir resample resolution"
+  echo "Usage: `basename $0` input-file datacube-dir resample resolution"
   echo ""
   echo "       input-file:   the file you want to cube"
   echo "       datacube-dir: the directory you want to store the cubes;"
@@ -132,6 +154,15 @@ function cubethis(){
   if [ "$RESAMPLE" == "rasterize" ]; then
 
     gdal_rasterize -burn 1 -a_nodata 255 -ot 'Byte' -of 'GTiff' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $INP $OUTFILE
+
+    MAX=$(gdalinfo -stats $OUTFILE | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    rm $OUTFILE".aux.xml"
+    #echo "max: " $MAX
+
+    if [ $MAX -lt 1 ]; then
+      rm $OUTFILE
+      exit
+    fi
 
   else
   

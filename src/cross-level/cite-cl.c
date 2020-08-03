@@ -235,9 +235,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "inventory system 2004 (2005).",
     false },
   { "SAVI, SARVI, ARVI", 
-    "Huete, A., Justice, C., & Liu, H. (1994). Development of vegetation "
-    "and soil indices for MODIS-EOS. Remote Sensing of Environment, "
-    "49, 224-234",
+    "Huete, A. (1988). Soil-Adjusted Vegetation Index (SAVI). Remote Sensing "
+    "of Environment, 25, 295-309\n"
+    "Kaufman, Y., Tanré, D. (1992). Atmospherically Resistant Vegetation Index "
+    "(ARVI) for EOS-MODIS. IEEE Transactions On Geoscience And Remote Sensing, "
+    "30 (2), 261-270",
     false },
   { "Tasseled Cap", 
     "Crist, E.P. (1985). A TM Tasseled Cap equivalent transformation for "
@@ -288,6 +290,16 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Analysis Program for Categorical and Continuous Maps. Computer software "
     "program produced by the authors at the University of Massachusetts, Amherst. "
     "Available at: http://www.umass.edu/landeco/research/fragstats/fragstats.html",
+    false },
+  { "NDTI",
+    "Van Deventer, A.P., Ward, A.D., Gowda, P.H., Lyon, J.G. (1997). Using "
+    "Thematic Mapper data to identify contrasting soil plains and tillage "
+    "practices. Photogrammetric engineering and remote sensing, 63, 87-93",
+    false },
+  { "NDMI",
+    "Gao, B. (1996). NDWI — A normalized difference water index for remote "
+    "sensing of vegetation liquid water from space. Remote Sensing of Environment, "
+    "58, 3, 257-266",
     false }
 };
 

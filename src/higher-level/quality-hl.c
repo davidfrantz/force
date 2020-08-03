@@ -190,6 +190,7 @@ bool *removed = NULL;
       while (rel_noise > qai_rule->above_noise && n > 2){
 
         t_left  = 0;
+        t_right = 0;
         t_first = 0;
         t_last  = 0;
         n = 0;
@@ -216,10 +217,14 @@ bool *removed = NULL;
             } else if (t == t_mid){
               continue;
             } else if (t > t_mid){
-              t_right = t;
-              if (!valid_right) t_last = t;
-              valid_right = true;
-              break;
+              if (!valid_right){
+                t_right = t;
+                t_last  = t;
+                valid_right = true;
+              } else {
+                t_last  = t;
+                break;
+              }
             }
 
           }

@@ -83,7 +83,7 @@ hARD+ products can be directly used to fuel your research questions without any 
 
    Multiple indices can be selected at once, and the processing will generate all available output data for each index.
    While this is very handy, please keep in mind that depending on parameterization you can potentially generate an absurd amount of results and quickly fill up disc space.
-   Fully parameterized, FORCE TSA can output 5100 products!!! For each tile!
+   Fully parameterized, FORCE TSA can output 5508 products!!! For each tile!
    Each of these products are multi-band images.
    Some of these products, e.g. interpolated time series, can have 1000s of bands.
    **Use with care!**

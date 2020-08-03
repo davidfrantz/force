@@ -170,7 +170,6 @@ typedef struct {
 typedef struct {
   int v;              // do SMA?
   char *f_emb; // endmember file
-  int nb, ne;          // number of bands, number of endmember
   int sto;      // sum-to-one constrained
   int pos;      // non-negative constrained
   int shn;      // shade normalization
@@ -279,12 +278,16 @@ typedef struct {
   char ***f_model;
   int nmodelset;
   int *nmodel;
+  int *nclass;
+  int nclass_all_sets;
   float converge;
   float scale;
   int method;
   int omlp; 
   int omli; 
   int omlu; 
+  int orfp; 
+  int orfm; 
   char *base;
 } par_mcl_t;
 
@@ -335,6 +338,16 @@ typedef struct {
   int kernel;
 } par_lsm_t;
 
+// library completeness testing
+typedef struct {
+  char  *d_lib;
+  char **f_lib;
+  int    n_lib;
+  int    n_sample;
+  int    rescale;
+  char  *base;
+} par_lib_t;
+
 // improphe core
 typedef struct {
   int *dwin;
@@ -374,7 +387,7 @@ typedef struct {
   char *d_higher; // Higher Level directory
   char *d_mask;   // mask directory
   char *b_mask;   // mask basename
-  char *f_tile;   // tile white-list
+  char *f_tile;   // tile allow-list
 
   // spatial variables
   int *tx;
@@ -413,7 +426,8 @@ typedef struct {
   int nd, nw, nm, nq, ny;
 
   // miscellaneous
-  int  format;                // output format
+  int format;                // output format
+  int explode;
   int owr;             // flag: overwrite output
   int ithread;
   int othread;
@@ -432,6 +446,7 @@ typedef struct {
   par_smp_t smp;
   par_txt_t txt;
   par_lsm_t lsm;
+  par_lib_t lib;
 
 } par_hl_t;
 

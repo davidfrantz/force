@@ -3,6 +3,130 @@
 Version 3
 =========
 
+FORCE v. 3.3.0
+--------------
+
+Release: 24.06.2020
+
+* **FORCE WVDB**
+
+  * Fixed a critical bug in force-lut-modis.
+  
+    An incorrect array index was used causing a memory error.
+    Thanks to Hailu Hu for the bugfix.
+
+* **FORCE AUX**
+
+  * In force-train: 
+  
+    added a small fix that enables compilation with OpenCV-3.4.1 under CentOS-8 as suggested by github user kemnitzs.
+
+
+FORCE v. 3.2.1
+--------------
+
+Release: 14.04.2020
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level: 
+  
+    fixed a small issue when the processing mask included nodata values.
+
+
+FORCE v. 3.2.0
+--------------
+
+Release: 08.04.2020
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, Continuous Field ImproPhe sub-module: 
+  
+    included a safety check when attempting to predict a year outside of the DATE_RANGE. Before, this caused a memory error.
+
+  * in force-higher-level, both ImproPhe sub-modules: 
+  
+    fixed a critical bug when no valid high-res pixel was found in a processing block.
+
+
+FORCE v. 3.1.1
+--------------
+
+Release: 26.03.2020
+
+* **General changes**
+
+  * Added a small bash script to increase the version number.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level: 
+  
+    fixed a small issue that prevented outlier detection if we have a very low data availability.
+
+
+FORCE v. 3.1.0
+--------------
+
+Release: 19.03.2020
+
+* **General changes**
+
+  * Added a small bash script to compile with/without SPLITS.
+
+  * Added a small bash script to compile in debug/production mode.
+
+  * Updated the Makefile with the standard CURL path for both Ubuntu 16.04 LTS and 18.04 LTS.
+
+* **Docker support**
+
+  * Gergely Padányi-Gulyás has contributed a Docker image!
+    See :ref:`docker` for details.
+
+* **FORCE L2PS**
+
+  * Fixed a bug when reading Landsat 7 metadata.
+    Thanks to Gergely Padányi-Gulyás for reporting this.
+    
+  * Fixed a cosmetic issue, where a mkdir warning was displayed for existing directories.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, TSA sub-module, phenometrics:
+  
+    Added safety checks for ``LSP_DOY_PREV_YEAR`` and ``LSP_DOY_NEXT_YEAR`` in relation to the interpolation step ``INT_DAY`` and the hemisphere switch ``LSP_HEMISPHERE ``.
+    Before, a critical memory error was possible.
+    
+  * in force-higher-level, TSA sub-module, phenometrics:
+  
+    Fixed an incorrect index that could cause a memory error.
+  
+  * in force-higher-level, TSA sub-module, phenometrics:
+  
+    Allowed negative integrals, e.g. when ``INDEX`` is Tasseled Cap Wetness or radar backscatter.
+
+  * in force-higher-level, TSA sub-module, phenometrics:
+  
+    Allowed negative ``LSP_MIN_VALUE``. e.g. when ``INDEX`` is Tasseled Cap Wetness or radar backscatter.
+
+
+FORCE v. 3.0.1
+--------------
+
+Release: 12.03.2020
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level:
+  
+    fixed GDAL PAM warning messages.
+    
+  * in force-higher-level:
+  
+    fixed nodata warning messages when no processing mask is available in block.
+
+
 FORCE v. 3.0
 ------------
 

@@ -111,7 +111,7 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# Nodata value of the DEM.\n");
-    fprintf(fp, "# Type: Integer. Valid range: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid range: [-32768,32767]\n");
   }
   fprintf(fp, "DEM_NODATA = -32767\n");
 
@@ -150,10 +150,10 @@ void write_par_ll_cube(FILE *fp, bool verbose){
   fprintf(fp, "DO_TILE = TRUE\n");
   
   if (verbose){
-    fprintf(fp, "# This is the tile white list. It is an optional file that holds all tiles\n");
+    fprintf(fp, "# This is the tile allow-list. It is an optional file that holds all tiles\n");
     fprintf(fp, "# that should be output. Tiles, which are not specified in this file are\n");
     fprintf(fp, "# not written to disc. This paremeter is ignored if DO_TILE = FALSE.\n");
-    fprintf(fp, "# If no tile white list should be used, give FILE_TILE = NULL, in which\n");
+    fprintf(fp, "# If no tile allow-list should be used, give FILE_TILE = NULL, in which\n");
     fprintf(fp, "# case all tiles are output.\n");
     fprintf(fp, "# Type: full file path\n");
   }
@@ -439,18 +439,18 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# This parameter only applies for Sentinel-2 data. This parameter defines\n");
-    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR target images.\n");
+    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR base images.\n");
     fprintf(fp, "# If given, a co-registration is attempted. If it fails (no tie points),\n");
     fprintf(fp, "# the image won't be processed.\n");
     fprintf(fp, "# Type: full directory path\n");
   }
-  fprintf(fp, "DIR_MASTER = NULL\n");
+  fprintf(fp, "DIR_COREG_BASE = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter defines the nodata values of the master images.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "MASTER_NODATA = -32767\n");
+  fprintf(fp, "COREG_BASE_NODATA = -9999\n");
 
   return;
 }
@@ -593,7 +593,7 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the cloud/cloud shadow/snow distance output? Note that this is NOT\n");
     fprintf(fp, "# the cloud mask (which is sitting in the mandatory QAI product). This pro-\n");
@@ -723,9 +723,9 @@ void write_par_hl_extent(FILE *fp, bool verbose){
   fprintf(fp, "Y_TILE_RANGE = 0 0\n");
 
   if (verbose){
-    fprintf(fp, "# White list of tiles. Can be used to further limit the analysis extent to\n");
-    fprintf(fp, "# non-square extents. The white list is intersected with the analysis extent,\n");
-    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the white-list will\n");
+    fprintf(fp, "# Allow-list of tiles. Can be used to further limit the analysis extent to\n");
+    fprintf(fp, "# non-square extents. The allow-list is intersected with the analysis extent,\n");
+    fprintf(fp, "# i.e. only tiles included in both the analysis extent AND the allow-list will\n");
     fprintf(fp, "# be processed.\n");
     fprintf(fp, "# Optional. If NULL, the complete analysis extent is processed\n");
     fprintf(fp, "# Type: full file path\n");
@@ -808,7 +808,7 @@ void write_par_hl_improphed(FILE *fp, bool verbose){
 void write_par_hl_sensor(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# SENSOR WHITE LIST\n");
+  fprintf(fp, "\n# SENSOR ALLOW-LIST\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   
   if (verbose){
@@ -945,7 +945,14 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
-  
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
+    fprintf(fp, "# if the stack will be exploded into single-band files.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_EXPLODE = FALSE\n");
+
   //if (verbose){
   //  fprintf(fp, "# If an output file already exists.. Overwrite?\n");
   //  fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
@@ -1209,9 +1216,9 @@ void write_par_hl_pac(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata value for the LSP.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "LSP_NODATA = -32767\n");
+  fprintf(fp, "LSP_NODATA = -9999\n");
   
   return;
 }
@@ -1237,8 +1244,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# a linear spectral mixture analysis and is dependent on the parameters\n");
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
-    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDSI,SMA}\n");
+    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
+    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 
@@ -1766,9 +1773,9 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COARSE_NODATA = -32767\n");
+  fprintf(fp, "COARSE_NODATA = -9999\n");
   
   return;
 }
@@ -1829,9 +1836,9 @@ void write_par_hl_feature(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# Nodata value of the features.\n");
-    fprintf(fp, "# Type: Integer. Valid values: [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "FEATURE_NODATA = -32767\n");
+  fprintf(fp, "FEATURE_NODATA = -9999\n");
   
   if (verbose){
     fprintf(fp, "# Should nodata values be excluded if any feature is nodata (TRUE). Or just\n");
@@ -1935,7 +1942,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# background class. This parameter is an integer list, which defines the threshold\n");
     fprintf(fp, "# for each feature given. The list needs to be as long as there are features (in-\n");
     fprintf(fp, "# cluding bands).\n");
-    fprintf(fp, "# Type: Integer list. Valid values [-32767,32767]\n");
+    fprintf(fp, "# Type: Integer list. Valid values [-32768,32767]\n");
   }
   fprintf(fp, "LSM_THRESHOLD = 2000 2000 3500 2000 -2000 5000 7500 -3500 500 750 890 999 0 0 0 0 0 "
               "50 5500 1500 300 78 250 500 500 500\n");
@@ -1965,6 +1972,53 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character.\n");
   }
   fprintf(fp, "LSM_BASE = LSM\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level library completeness pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_lib(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# Library Completeness\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+  
+  if (verbose){
+    fprintf(fp, "# Directory containing the libraries.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_LIBRARY = NULL\n");
+   
+  if (verbose){
+    fprintf(fp, "# This parameter specifies the libraries which should be tested against the \n");
+    fprintf(fp, "# features. The basename(s) must be given. One or multiple libraries can be\n");
+    fprintf(fp, "# given. The output files will have as many bands (+1 overall band) as there\n");
+    fprintf(fp, "# are libraries. The libraries should be text files with samples in rows, and\n");
+    fprintf(fp, "# features in columns (no header). The column separator is white-space. The\n");
+    fprintf(fp, "# features in the library must correspond to the given features.\n");
+    fprintf(fp, "# Type: Basename of file, character list\n");
+  }
+  fprintf(fp, "FILE_LIBRARY = biomass.txt builtup.txt land-cover.txt\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines whether the features should be rescaled before\n");
+    fprintf(fp, "# testing for library completeness.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "LIB_RESCALE = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
+    fprintf(fp, "# be appended by Module ID, product ID, and the file extension.\n");
+    fprintf(fp, "# Type: Character.\n");
+  }
+  fprintf(fp, "LIB_BASE = LIB\n");
 
   return;
 }
@@ -2107,25 +2161,44 @@ void write_par_hl_ml(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_MLI = FALSE\n");
   
   if (verbose){
-    fprintf(fp, "# Output the uncertainty of the blended prediction? THis is the standard\n");
+    fprintf(fp, "# Output the uncertainty of the blended prediction? This is the standard\n");
     fprintf(fp, "# deviation of all predictions that are blended into the final prediction.\n");
     fprintf(fp, "# Only makes sense when multiple models are given in a modelset.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_MLU = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the Random Forest Class Probabilities? This option is only available\n");
+    fprintf(fp, "# when ML_METHOD = RFC. If multiple models are given per modelset, the mean \n");
+    fprintf(fp, "# class probability is computed. The output file will have as many bands as \n");
+    fprintf(fp, "# classes. If multiple modelsets are given, the modelsets are appended after \n");
+    fprintf(fp, "# each other.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RFP = FALSE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Output the Random Forest Classification Margin? This option is only available\n");
+    fprintf(fp, "# when ML_METHOD = RFC. If multiple models are given per modelset, the margin is \n");
+    fprintf(fp, "# based on the mean class probability. If multiple modelsets are given, a margin \n");
+    fprintf(fp, "# is computed for each modelset.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RFM = FALSE\n");
   
   
   return;
 }
 
 
-/** This function writes parameters into a parameter skeleton file: higher
+/** This function writes parameters into a parameter skeleton file: aux
 +++ level machine learning training pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_par_hl_train(FILE *fp, bool verbose){
+void write_par_aux_train(FILE *fp, bool verbose){
   
   
   fprintf(fp, "\n# INPUT\n");
@@ -2169,6 +2242,13 @@ void write_par_hl_train(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
+    fprintf(fp, "# Response variable for training the model. This number refers to the column\n");
+    fprintf(fp, "# of the response file, in which the desired variable is stored (FILE_RESPONSE).\n");
+    fprintf(fp, "# Type: Integer. Valid range: [1,NUMBER_OF_VARIABLES]\n");
+  }
+  fprintf(fp, "RESPONSE_VARIABLE = 1\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter specifies how many samples (in %%) should be used for\n");
     fprintf(fp, "# training the model. The other samples are left out, and used to vali-\n");
     fprintf(fp, "# date the model.\n");
@@ -2189,6 +2269,21 @@ void write_par_hl_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {SVR,SVC,RFR,RFC}\n");
   }
   fprintf(fp, "ML_METHOD = RFC\n");
+  
+  if (verbose){
+    fprintf(fp, "# Class weights. This parameter only applies for the classification flavor. \n");
+    fprintf(fp, "# This parameter lets you define à priori class weights, which can be useful\n");
+    fprintf(fp, "# if the training data are inbalanced. This parameter can be set to a number\n");
+    fprintf(fp, "# of different values. EQUALIZED gives the same weight to all classes (default).\n");
+    fprintf(fp, "# PROPORTIONAL gives a weight proportional to the class frequency.\n");
+    fprintf(fp, "# ANTIPROPORTIONAL gives a weight, which is inversely proportional to the class\n");
+    fprintf(fp, "# frequency. Alternatively, you can use custom weights, i.e. a vector of weights\n");
+    fprintf(fp, "# for each class in your response file. The weights must sum to one, and must be\n");
+    fprintf(fp, "# given in ascending order.\n");
+    fprintf(fp, "# Type: Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or ]0,1[\n");
+  }
+  fprintf(fp, "FEATURE_WEIGHTS = EQUALIZED\n");
+
 
   fprintf(fp, "\n# RANDOM FOREST PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
@@ -2303,6 +2398,142 @@ void write_par_hl_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float list. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_GAMMA_GRID = 0.000010 10000 10\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: aux
++++ level synthetic mixing pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_aux_synthmix(FILE *fp, bool verbose){
+  
+  
+  fprintf(fp, "\n# INPUT\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+  
+  if (verbose){
+    fprintf(fp, "# File that is holding the features, which should be mixed.\n");
+    fprintf(fp, "# The file needs to be a table with features in columns, and samples in rows.\n");
+    fprintf(fp, "# Column delimiter is whitespace. The same number of features must be given\n");
+    fprintf(fp, "# for each sample. Do not include a header. The samples need to match the\n");
+    fprintf(fp, "# response file.\n");  
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_FEATURES = NULL\n");
+  
+  if (verbose){
+    fprintf(fp, "# File that is holding the class labels. The file needs to be a table with\n");
+    fprintf(fp, "# one column, and samples in rows. Do not include a header. The samples need \n");
+    fprintf(fp, "# to match the feature file.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_RESPONSE = NULL\n");
+
+
+  fprintf(fp, "\n# SYNTHETIC MIXING\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# How many mixtures should be generated?\n");
+    fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
+  }
+  fprintf(fp, "SYNTHETIC_MIXTURES = 1000\n");
+
+  if (verbose){
+    fprintf(fp, "# Additional to the generated mixtures: include the original features as \n");
+    fprintf(fp, "# 0%% or 100%% \"mixtures\", too?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "INCLUDE_ORIGINAL = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Mixing complexity, i.e. how many endmembers should be mixed together?\n");
+    fprintf(fp, "# Multiple complexities can be given as list. E.g. to allow mixtures of \n");
+    fprintf(fp, "# one, two, three, and four endmembers, use MIXING_COMPLEXITY = 1 2 3 4.\n");
+    fprintf(fp, "# The complexity cannot exceed the number of classes given in the response\n");
+    fprintf(fp, "# file (FILE_RESPONSE).\n");
+    fprintf(fp, "# Type: Integer list. Valid values: [1,n-classes]\n");
+  }
+  fprintf(fp, "MIXING_COMPLEXITY = 1 2 3 4\n");
+
+  if (verbose){
+    fprintf(fp, "# Likelihood of mixing complexity, i.e. what is the statistical likelihood\n");
+    fprintf(fp, "# to generate a mixture of a given mixing complexity? Multiple likelihoods \n");
+    fprintf(fp, "# can be given as list, and the number and order need to match the mixing\n");
+    fprintf(fp, "# complexities given with MIXING_COMPLEXITY. The sum of all likelihoods \n");
+    fprintf(fp, "# should be 1.\n");
+    fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "MIXING_LIKELIHOOD = 0.2 0.4 0.2 0.2\n");
+
+  if (verbose){
+    fprintf(fp, "# Allow mixing endmembers of the same class? If FALSE, a two endmember mix-\n");
+    fprintf(fp, "# ture will always mix endmembers from different classes. If TRUE, a two \n");
+    fprintf(fp, "# endmember mixture might mix endmembers from the same class, too.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "WITHIN_CLASS_MIXING = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# Class likelihood, i.e. what is the statitical likelihood of drawing an\n");
+    fprintf(fp, "# endmember from a specific class. This parameter can be set to PROPORTIONAL\n");
+    fprintf(fp, "# or EQUALIZED. If PROPORTIONAL, the likelihood is based on the number of \n");
+    fprintf(fp, "# samples given for each class. If EQUALIZED, the same likelihhod is given \n");
+    fprintf(fp, "# to all classes. Alternatively, custom likelihhods can be defined. In this \n");
+    fprintf(fp, "# case, a likelihood needs to be given for each class given in the response \n");
+    fprintf(fp, "# file (FILE_RESPONSE), and the sum needs to be 1.\n");
+    fprintf(fp, "# Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR\n");
+    fprintf(fp, "# Type: Float list. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "CLASS_LIKELIHOOD = PROPORTIONAL\n");
+
+if (verbose){
+    fprintf(fp, "# Number of iterations. This parameter allows to repeat the mixing multiple \n");
+    fprintf(fp, "# times. If set to 10, 10 different sets of random mixtures will be generated.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [1,...\n");
+  }
+  fprintf(fp, "ITERATIONS = 10\n");
+
+if (verbose){
+    fprintf(fp, "# What is the target class for generating the mixtures? Example: class 1, \n");
+    fprintf(fp, "# class 2, and class 3 are vegetation, soil, and water. A 70-30%% mixture of \n");
+    fprintf(fp, "# a beach and ocean endmember would result in 70%%, 0%% and 30%% fractions for \n");
+    fprintf(fp, "# target classes 1, 2, and 3, respectively. Multiple classes can be given, \n");
+    fprintf(fp, "# i.e. output tables will be generated for each target class.\n");
+    
+    fprintf(fp, "# Type: Integer list. Valid values: [1,n-class\n");
+  }
+  fprintf(fp, "TARGET_CLASS = 1 2 3 4\n");
+
+  if (verbose){
+    fprintf(fp, "# What classes should be considered for mixing? Default: use all classes.\n");
+    fprintf(fp, "# You can however select individual classes. If custom likelihoods are defined\n");
+    fprintf(fp, "# in CLASS_LIKELIHOOD, the explicit definition of classes is mandatory here \n");
+    fprintf(fp, "# (in the same order as in CLASS_LIKELIHOOD).\n");
+  }
+  fprintf(fp, "USE_CLASSES = ALL\n");
+
+  fprintf(fp, "\n# OUTPUT\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# Directory for storing the generated mixtures. Output files will be \n");
+    fprintf(fp, "# overwritten if they exist.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_MIXES = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
+    fprintf(fp, "# be appended by class ID, and iteration, e.g. \n");
+    fprintf(fp, "# SYNTHMIX_FEATURES_CLASS-001_ITERATION-001.txt.\n");
+    fprintf(fp, "# Type: Character.\n");
+  }
+  fprintf(fp, "BASE_MIXES = SYNTHMIX\n");
 
   return;
 }

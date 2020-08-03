@@ -79,6 +79,11 @@ typedef struct {
   int method;
   float per_train;
   int random_split;
+  int response_var;
+  char **class_weights;
+  int nclass_weights;
+  float *priors;
+  int npriors;
   char log[NPOW_14];
 } par_train_t;
 

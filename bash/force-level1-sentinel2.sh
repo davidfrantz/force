@@ -56,7 +56,9 @@ if [ $# -ne $EXPECTED_ARGS ] && [ $# -ne $MAXIMUM_ARGS ]; then
   echo "  dry will trigger a dry run that will only return the number of images"
   echo "  and their total data volume"
   echo ""
-  echo "  Your ESA credentials must be placed in $HOME/.scihub"
+  echo "  Your ESA credentials must be placed in \$HOME/.scihub"
+  echo "  (OR in \$FORCE_CREDENTIALS/.scihub if the FORCE_CREDENTIALS environment"
+  echo "   variable is defined)."
   echo "    First line: User name" 
   echo "    Second line: Password, special characters might be problematic"
   echo ""
@@ -76,7 +78,7 @@ fi
 
 POOL=$1
 POOLLIST=$2
-BOUND=$(echo $3 | sed 's_/_%20_g')
+BOUND=$(echo $3 | sed 's_/_%20_g' | sed 's/ //g')
 S0=$4
 S1=$5
 C0=$6
@@ -88,14 +90,21 @@ if [ ! -w $POOL ]; then
 fi
 
 
-if [ ! -r $HOME/.scihub ]; then
-  echo "Your ESA credentials must be placed in $HOME/.scihub"
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  CREDDIR=$HOME/.scihub
+else
+  CREDDIR=$FORCE_CREDENTIALS/.scihub
+fi
+
+
+if [ ! -r $CREDDIR ]; then
+  echo "Your ESA credentials were not found in $CREDDIR"
   echo "    First line: User name" 
   echo "    Second line: Password, special characters might be problematic"
   exit
 fi
 
-H=$(head -n 2 $HOME/.scihub)
+H=$(head -n 2 $CREDDIR)
 USER=$(echo $H | cut -d ' ' -f 1)
 PW=$(echo $H | cut -d ' ' -f 2)
 CRED="--user=$USER --password=$PW"
@@ -159,7 +168,13 @@ while [ $START -lt $NUM ]; do
   fi
 
   NUM=$(grep 'totalResults'  $LIST | sed -r 's/.*>([0-9]*)<.*/\1/')
-  echo "$CTIME - Found $NUM S2A/B files."
+  TODO=$(($NUM-$START))
+  if [ $TODO -gt 100 ]; then
+    PAGE=100
+  else
+    PAGE=$TODO
+  fi
+  echo "$CTIME - Found $TODO S2A/B files. Downloading $PAGE files on this page."
   START=$(($START + $NMAX))
 
   SIZES=(`grep 'size' $LIST | sed 's/<[^<>]*>//g' | sed 's/[A-Z ]//g'`)
@@ -188,7 +203,7 @@ while [ $START -lt $NUM ]; do
     continue;
   fi
   
-  echo "$CTIME - Found ${#URL[*]} S2A/B files on this page."
+  #echo "$CTIME - Found ${#URL[*]} S2A/B files on this page."
   if [ ${#URL[*]} -eq 0 ]; then
     exit
   fi

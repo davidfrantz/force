@@ -949,21 +949,21 @@ int p, nc;
 int b, b_red, b_nir, b_sw1;
 #ifndef ACIX
 int b_, nb_, bands[10], ndomain = 10;
-char domains[10][NPOW_04] = { "BLUE", "GREEN", "RED", 
+char domains[10][NPOW_10] = { "BLUE", "GREEN", "RED", 
                            "REDEDGE1", "REDEDGE2",
                            "REDEDGE3", "BROADNIR",
                            "NIR", "SWIR1", "SWIR2" };
 #else
 int b_, nb_, bands[12], ndomain = 12;
-char domains[12][NPOW_04] = { "ULTRABLUE", "BLUE", "GREEN", "RED", 
+char domains[12][NPOW_10] = { "ULTRABLUE", "BLUE", "GREEN", "RED", 
                            "REDEDGE1", "REDEDGE2",
                            "REDEDGE3", "BROADNIR",
                            "NIR", "VAPOR", "SWIR1", "SWIR2" };
 #endif
 char fname[NPOW_10];
 char product[NPOW_02];
-char domain[NPOW_04];
-char bandname[NPOW_08];
+char domain[NPOW_10];
+char bandname[NPOW_10];
 char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
@@ -1029,8 +1029,8 @@ stack_t *BOA = TOA;
     printf("error in surface reflectance.\n"); return NULL;}
 
     set_stack_wavelength(BOA, b_, get_stack_wavelength(BOA, b));
-    get_stack_domain(BOA,   b, domain,   NPOW_04); set_stack_domain(BOA,   b_, domain);
-    get_stack_bandname(BOA, b, bandname, NPOW_08); set_stack_bandname(BOA, b_, bandname);
+    get_stack_domain(BOA,   b, domain,   NPOW_10); set_stack_domain(BOA,   b_, domain);
+    get_stack_bandname(BOA, b, bandname, NPOW_10); set_stack_bandname(BOA, b_, bandname);
 
     if (Tg_ != NULL) free((void*)Tg_);  
     Tg_ = NULL;
@@ -1088,6 +1088,7 @@ stack_t *BOA = TOA;
   #endif
   set_stack_filename(BOA, fname);
   set_stack_open(BOA, OPEN_MERGE);
+  set_stack_explode(BOA, false);
 
   if ((b_nir = find_domain(BOA, "NIR"))   < 0) return NULL;
   if ((b_sw1 = find_domain(BOA, "SWIR1")) < 0) return NULL;
@@ -1156,6 +1157,7 @@ short *qa_ = NULL;
   #endif
   set_stack_filename(QA, fname);
   set_stack_open(QA, OPEN_UPDATE);
+  set_stack_explode(QA, false);
   set_stack_nodata(QA, 0, 1);
   set_stack_scale(QA, 0, 1);
   set_stack_wavelength(QA, 0, 1);
@@ -1219,6 +1221,7 @@ short  *dst_ = NULL;
   #endif
   set_stack_filename(DST, fname);
   set_stack_open(DST, OPEN_MERGE);
+  set_stack_explode(DST, false);
   set_stack_scale(DST, 0, 1);
   set_stack_wavelength(DST, 0, 1);
   set_stack_unit(DST, 0, "unknown");
@@ -1373,6 +1376,8 @@ enum { R, G, B };
   #endif
   set_stack_filename(OVV, fname);
   set_stack_open(OVV, OPEN_UPDATE);
+  set_stack_explode(OVV, false);
+  
   for (b=0; b<3; b++){
     set_stack_scale(OVV, b, 1);
     set_stack_wavelength(OVV, b, 1);
@@ -1548,6 +1553,7 @@ GDALDataType eOutputType = GDT_Float64;
   #endif
   set_stack_filename(VZN, fname);
   set_stack_open(VZN, OPEN_MERGE);
+  set_stack_explode(VZN, false);
   set_stack_scale(VZN, 0, 100);
   set_stack_wavelength(VZN, 0, 1);
   set_stack_unit(VZN, 0, "unknown");
@@ -1638,6 +1644,7 @@ short *hot_ = NULL;
   #endif
   set_stack_filename(HOT, fname);
   set_stack_open(HOT, OPEN_MERGE);
+  set_stack_explode(HOT, false);
   set_stack_wavelength(HOT, 0, 1);
   set_stack_unit(HOT, 0, "unknown");
   set_stack_domain(HOT, 0, product);
@@ -1749,6 +1756,7 @@ float **xy_aod_ = NULL;
   #endif
   set_stack_filename(AOD, fname);
   set_stack_open(AOD, OPEN_MERGE);
+  set_stack_explode(AOD, false);
   set_stack_scale(AOD, 0, 1000);
   set_stack_wavelength(AOD, 0, wvl);
   set_stack_unit(AOD, 0, "micrometers");
@@ -1837,6 +1845,7 @@ short *wvp_ = NULL;
   #endif
   set_stack_filename(WV, fname);
   set_stack_open(WV, OPEN_MERGE);
+  set_stack_explode(WV, false);
   set_stack_scale(WV, 0, 1000);
   set_stack_wavelength(WV, 0, 1);
   set_stack_unit(WV, 0, "unknown");

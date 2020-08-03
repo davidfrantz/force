@@ -49,8 +49,11 @@ int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **LSM = NULL;
-int o, nprod = 10;
+int b, o, nprod = 10;
 int error = 0;
+int nchar;
+char bname[NPOW_10];
+char domain[NPOW_10];
 enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
 int prodlen[10] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
 char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
@@ -72,6 +75,21 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
     if (enable[o]){
       if ((LSM[o] = compile_lsm_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(LSM[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[o]; b++){
+          basename_without_ext(phl->ftr.bname[b], bname, NPOW_10);
+          if (strlen(bname) > NPOW_10-1){
+            nchar = snprintf(domain, NPOW_10, "FEATURE-%04d", b+1);
+            if (nchar < 0 || nchar >= NPOW_10){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
+          } else {
+            nchar = snprintf(domain, NPOW_10, "%s_B%04d", bname, phl->ftr.band[b]);
+            if (nchar < 0 || nchar >= NPOW_10){ 
+              printf("Buffer Overflow in assembling domain\n"); error++;}
+          }
+          set_stack_domain(LSM[o],   b, domain);
+          set_stack_bandname(LSM[o], b, domain);
+        }
       }
     } else{
       LSM[o]  = NULL;
@@ -130,6 +148,7 @@ int nchar;
     set_stack_open(stack, OPEN_FALSE);
   }
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, phl->explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){
@@ -232,7 +251,7 @@ float unit_perim = 0;
     memset(newFeatures, 0, sizeof(small)*nc);
 
     #pragma omp parallel shared(newFeatures,lsm,phl,features,mask_,nc,f,nodata) default(none)
-   {
+    {
 
       #pragma omp for
       for (p=0; p<nc; p++){

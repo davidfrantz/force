@@ -49,10 +49,12 @@ This figure shows a Google Earth screenshot with ARD grid overlay. The grid cell
    main.rst
    parameter.rst
    qai-inflate.rst
+   extent.rst
    tile-finder.rst
    tabulate-grid.rst
    mosaic.rst
    pyramid.rst
    cube.rst
    train.rst
+   magic-parameters.rst
 

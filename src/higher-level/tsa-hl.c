@@ -47,15 +47,18 @@ stack_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int n
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_tsa(ard_t *ard, tsa_t *ts, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct){
 stack_t **TSA = NULL;
-int ntrd = 9, ncat = 29;
 int t, k;
 date_t date;
+char fdate[NPOW_10];
+char sensor[NPOW_04];
+char domain[NPOW_10];
+int nchar;
 int o, nprod = 98;
 int error = 0;
 enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _trd_, _cat_ };
 int prodlen[11] = { nt, phl->tsa.stm.sta.nmetrics, ni, 
                     phl->ny, phl->nq, phl->nm, phl->nw, phl->nd,
-                    phl->tsa.lsp.ny, ntrd, ncat };
+                    phl->tsa.lsp.ny, _TRD_LENGTH_, _CAT_LENGTH_ };
 char prodname[98][NPOW_03] = { 
   "TSS", "RMS", "STM", "TSI", "SPL",
   "FBY", "FBQ", "FBM", "FBW", "FBD",
@@ -76,7 +79,7 @@ char prodname[98][NPOW_03] = {
   "IST-CAP", "IBL-CAP", "IBT-CAP", "IGS-CAP", "RAR-CAP", "RAF-CAP", 
   "RMR-CAP", "RMF-CAP", 
   "CAY", "CAQ", "CAM", "CAW", "CAD" };
-                             
+
 int prodtype[98] = { 
   _full_, _full_, _stats_, _inter_, _inter_,
   _year_, _quarter_, _month_, _week_, _day_, 
@@ -207,11 +210,22 @@ short ***ptr[98] = {
           switch (prodtype[o]){
             case _full_:
               date = get_stack_date(ard[t].DAT, 0);
+              get_stack_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+              set_stack_sensor(TSA[o], t, sensor);
               copy_date(&date, &ts->d_tss[t]);
+              compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
+              nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
+              set_stack_domain(TSA[o], t, domain);
+              set_stack_bandname(TSA[o], t, domain);
               break;
             case _stats_:
+              set_stack_sensor(TSA[o], t, "BLEND");
+              set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
               if (phl->tsa.tsi.method == _INT_NONE_){
@@ -219,59 +233,104 @@ short ***ptr[98] = {
               } else {
                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
               }
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_tsi[t]);
+              compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               break;
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fby[t]);
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               break;
             case  _quarter_:
               while (k < 5 && !phl->date_quarters[k]) k++;
               set_date_quarter(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbq[t]);
+              nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "quarter");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _month_: 
               while (k < 13 && !phl->date_months[k]) k++;
               set_date_month(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbm[t]);
+              nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "month");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _week_: 
               while (k < 53 && !phl->date_weeks[k]) k++;
               set_date_week(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbw[t]);
+              nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "week");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _day_: 
               while (k < 366 && !phl->date_doys[k]) k++;
               set_date_doy(&date, k);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbd[t]);
+              nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "day of year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _lsp_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t+1);
+              set_stack_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_lsp[t]);
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
               break;
-            case _trd_: 
+            case _trd_:
+              set_stack_sensor(TSA[o], t, "BLEND");
+              set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
+              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
+              set_stack_sensor(TSA[o], t, "BLEND");
+              set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               break;
-
             default:
               printf("unknown tsa type.\n"); error++;
               break;
@@ -354,6 +413,7 @@ int nchar;
     set_stack_open(stack, OPEN_FALSE);
   }
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, phl->explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){
@@ -380,7 +440,7 @@ int nchar;
 --- nproduct:  number of output stacks (returned)
 +++ Return:    stacks with TSA results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, float **endmember, cube_t *cube, int *nproduct){
+stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct){
 tsa_t ts;
 stack_t ***TSA;
 stack_t **PTR;

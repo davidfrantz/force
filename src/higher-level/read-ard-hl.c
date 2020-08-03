@@ -374,7 +374,7 @@ int nchar;
       if (date.ce > phl->date_range[_MAX_].ce) vs = false;
       if (!phl->date_doys[date.doy])  vs = false;
 
-      // white-list image
+      // allow-list image
       if (vs){
         if (strlen(d.LIST[t]->d_name) > NPOW_10-1){
           printf("cannot copy, string too long.\n"); return FAILURE;

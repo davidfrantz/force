@@ -6,6 +6,12 @@ Publications
 This list summarizes all scientific publications that describe FORCE, functionality, validation etc. 
 
 
+* **2020**
+
+  | P. Rufin, D. Frantz, L. Yan, and P. Hostert (2020): Operational Coregistration of the Sentinel-2A/B Image Archive Using Multitemporal Landsat Spectral Averages. IEEE Geoscience and Remote Sensing Letters (early access).
+  | https://doi.org/10.1109/LGRS.2020.2982245
+
+
 * **2019**
 
   | Frantz, D. (2019): FORCE – Landsat + Sentinel-2 Analysis Ready Data and beyond: Remote Sensing 11, 1124.

@@ -824,7 +824,7 @@ short *mask_   = NULL;
 short *marker_ = NULL;
 float *clear_  = NULL;
 ushort *dist_;
-char domains[2][NPOW_04] = { "NIR", "SWIR1" };
+char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
 
   #ifdef FORCE_CLOCK

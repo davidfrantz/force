@@ -46,10 +46,11 @@ stack_t *compile_cso_stack(stack_t *ard, int nb, bool write, char *prodname, par
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct){
 stack_t **CSO = NULL;
-
+short nodata = SHRT_MIN;
 int w, q;
 int year, month;
 date_t date;
+char fdate[NPOW_10];
 int o, nprod = phl->cso.sta.nmetrics;
 int error = 0;
 
@@ -97,10 +98,14 @@ short ***ptr[NPOW_08];
         if (month > 12){ year++; month -= 12;}
         set_date(&date, year, month, 1);
         copy_date(&date, &cs->d_cso[w]);
+        compact_date(date.year, date.month, date.day, fdate, NPOW_10);
 //printf("W: "); print_date(&date);
         if (w < nw){
+          set_stack_nodata(CSO[o], w, nodata);
           set_stack_wavelength(CSO[o], w, w+1);
           set_stack_date(CSO[o], w, date);
+          set_stack_domain(CSO[o], w, fdate);
+          set_stack_bandname(CSO[o], w, fdate);
         }
         month += phl->cso.step;
       }
@@ -166,6 +171,7 @@ int nchar;
     set_stack_open(stack, OPEN_FALSE);
   }
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, phl->explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){
@@ -201,7 +207,7 @@ int *t0 = NULL, *t1 = NULL;
 int month, year;
 int nc;
 int nw;
-short nodata = -32767;
+short nodata = SHRT_MIN;
 short minimum, maximum;
 short q25_, q75_;
 double mean, var;
@@ -216,7 +222,6 @@ bool alloc_q_array = false;
 
   // import stacks
   nc = get_stack_chunkncells(ard[0].QAI);
-  //nodata = get_stack_nodata(ard[0].DAT, 0);
 
   // import mask (if available)
   if (mask != NULL){

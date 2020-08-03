@@ -28,7 +28,7 @@ This file contains functions for Level 3 processing
 #include "level3-hl.h"
 
 
-stack_t *compile_level3_stack(stack_t *ard, int nb, bool fullres, char *prodname, par_hl_t *phl);
+stack_t *compile_level3_stack(stack_t *ard, int nb, bool explode, bool fullres, char *prodname, par_hl_t *phl);
 stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 
@@ -44,12 +44,15 @@ stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_level3(ard_t *ard, level3_t *l3, par_hl_t *phl, cube_t *cube, int *nproduct){
 stack_t **LEVEL3 = NULL;
-int nb, nbands;
+int b, nb, nbands;
 int o, nprod = 4;
 int error = 0;
+enum { _ref_, _inf_, _scr_, _ovv_ };
 char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
-int prodlen[4] = { 0, 6, 7, 3 };
+bool explode[4] = { false, phl->explode, phl->explode, false };
+int prodlen[4] = { 0, _INF_LENGTH_, _SCR_LENGTH_, _RGB_LENGTH_ };
+int prodtype[4] = { _ref_, _inf_, _scr_, _ovv_ };
 bool enable[4] = { phl->bap.obap, phl->bap.oinf, phl->bap.oscr, phl->bap.oovv };
 short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
 
@@ -61,8 +64,31 @@ short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
   for (o=0; o<nprod; o++){
     if (enable[o]){
       if ((nbands = prodlen[o]) == 0) nbands = nb;
-      if ((LEVEL3[o] = compile_level3_stack(ard[0].DAT, nbands, fullres[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(LEVEL3[o])) == NULL){
-        printf("Error compiling %s product. ", prodname[o]); error++;}
+      if ((LEVEL3[o] = compile_level3_stack(ard[0].DAT, nbands, explode[o], fullres[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(LEVEL3[o])) == NULL){
+        printf("Error compiling %s product. ", prodname[o]); error++;
+      } else {
+        for (b=0; b<prodlen[prodtype[o]]; b++){
+          switch (prodtype[o]){
+            case _ref_:
+              break;
+            case _inf_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_INF_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_INF_[b].tag);
+              break;
+            case _scr_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_SCR_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_SCR_[b].tag);
+              break;
+            case _ovv_:
+              set_stack_domain(LEVEL3[o], b, _TAGGED_ENUM_RGB_[b].tag);
+              set_stack_bandname(LEVEL3[o], b, _TAGGED_ENUM_RGB_[b].tag);
+              break;
+            default:
+              printf("unknown level3 type.\n"); error++;
+              break;
+          }
+        }
+      }
     } else {
       LEVEL3[o] = NULL;
       *ptr[o]   = NULL;
@@ -87,7 +113,7 @@ short ***ptr[4] = { &l3->bap, &l3->inf, &l3->scr, &l3->ovv };
 --- phl:       HL parameters
 +++ Return:    stack for L3 result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_level3_stack(stack_t *from, int nb, bool fullres, char *prodname, par_hl_t *phl){
+stack_t *compile_level3_stack(stack_t *from, int nb, bool explode, bool fullres, char *prodname, par_hl_t *phl){
 int b, m, d;
 stack_t *stack = NULL;
 date_t date;
@@ -99,9 +125,9 @@ int nx, ny, nx_, ny_;
 int cx, cy, cx_, cy_, cc_; 
 
 
-  if (phl->bap.score_type == _SCR_SIG_DES_) doy2md(phl->bap.Dt[0], &m, &d);
-  if (phl->bap.score_type == _SCR_GAUSS_)   doy2md(phl->bap.Dt[1], &m, &d);
-  if (phl->bap.score_type == _SCR_SIG_ASC_) doy2md(phl->bap.Dt[2], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_SIG_DES_) doy2md(phl->bap.Dt[0], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_GAUSS_)   doy2md(phl->bap.Dt[1], &m, &d);
+  if (phl->bap.score_type == _SCR_TYPE_SIG_ASC_) doy2md(phl->bap.Dt[2], &m, &d);
   
   date.year = phl->bap.Yt;
   date.month = m;
@@ -161,6 +187,7 @@ int cx, cy, cx_, cy_, cc_;
 
   set_stack_open(stack, OPEN_BLOCK);
   set_stack_format(stack, phl->format);
+  set_stack_explode(stack, explode);
   set_stack_par(stack, phl->params->log);
 
   for (b=0; b<nb; b++){
@@ -195,7 +222,7 @@ int nprod = 0;
 int p, nx, ny, nc, nb;
 double res;
 short nodata;
-short lsp_nodata = -32767;
+short lsp_nodata = SHRT_MIN;
 target_t *target = NULL;
 int *tdist = NULL;
 par_scr_t *score = NULL;

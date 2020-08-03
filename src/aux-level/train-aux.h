@@ -37,6 +37,7 @@ using namespace cv;
 using namespace cv::ml;
 
 #include "../cross-level/stats-cl.h"
+#include "../cross-level/read-cl.h"
 #include "../aux-level/param-train-aux.h"
 
 
@@ -46,6 +47,7 @@ extern "C" {
 
 Ptr<StatModel> train_svm(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp);
 Ptr<StatModel> train_rf(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp);
+void class_priors(int *c_response, int n_sample, par_train_t *train);
 void predict_regression(float **features, float *response, Ptr<StatModel> model, int n_sample, int n_feature, FILE *fp);
 void predict_classification(float **features, int *response, Ptr<StatModel> model, int n_sample, int n_feature, FILE *fp);
 

@@ -34,6 +34,7 @@ This file contains functions for training machine learning models
 +++ Return:    model
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 Ptr<StatModel> train_svm(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp){
+int i;
 
 
   Ptr<SVM> svm = SVM::create();
@@ -66,7 +67,12 @@ Ptr<StatModel> train_svm(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp)
   } else {
     svm->setP(FLT_EPSILON);
   }
-  
+
+  if (train->priors != NULL && train->method == _ML_SVC_){
+    Mat priors(train->npriors, 1, CV_32F, train->priors);
+    svm->setClassWeights(priors);
+  }
+
   ParamGrid Cgrid = SVM::getDefaultGrid(SVM::C);
   ParamGrid Gammagrid = SVM::getDefaultGrid(SVM::GAMMA);
 
@@ -93,6 +99,14 @@ Ptr<StatModel> train_svm(Ptr<TrainData> TrainData, par_train_t *train, FILE *fp)
   fprintf(fp, "P: %f\n", svm->getP());
   fprintf(fp, "C: %f\n", svm->getC());
   fprintf(fp, "Gamma: %f\n", svm->getGamma());
+  if (train->priors != NULL && train->method == _ML_SVC_){
+    Mat priors = svm->getClassWeights();
+    fprintf(fp, "class weights: %f", priors.at<float>(0, 0));
+    for (i=1; i<priors.rows; i++) fprintf(fp, " %f", priors.at<float>(i, 0));
+    fprintf(fp, "\n");
+  } else {
+    fprintf(fp, "class weights: NA\n");
+  }
   fprintf(fp, "____________________________________________________________________\n");
 
   svm->save(train->f_model);
@@ -160,6 +174,11 @@ int n_feature;
     rf->setRegressionAccuracy(0.01);
   }
 
+  if (train->priors != NULL && train->method == _ML_RFC_){
+    Mat priors(train->npriors, 1, CV_32F, train->priors);
+    rf->setPriors(priors);
+  }
+
 
   fprintf(fp, "\nRandom Forest parameters\n");
   fprintf(fp, "--------------------------------------------------------------------\n");
@@ -176,6 +195,14 @@ int n_feature;
   fprintf(fp, "max depth of tree: %d\n", rf->getMaxDepth());
   fprintf(fp, "min # of samples for split: %d\n", rf->getMinSampleCount());
   fprintf(fp, "regression accuracy: %f\n", rf->getRegressionAccuracy());
+  if (train->priors != NULL && train->method == _ML_RFC_){
+    Mat priors = rf->getPriors();
+    fprintf(fp, "class weights: %f", priors.at<float>(0, 0));
+    for (i=1; i<priors.rows; i++) fprintf(fp, " %f", priors.at<float>(i, 0));
+    fprintf(fp, "\n");
+  } else {
+    fprintf(fp, "class weights: NA\n");
+  }
   fprintf(fp, "____________________________________________________________________\n");
 
   rf->train(TrainData, 0);
@@ -199,6 +226,56 @@ int n_feature;
   rf->save(train->f_model);
 
   return rf;
+}
+
+
+void class_priors(int *c_response, int n_sample, par_train_t *train){
+int i;
+int **hist = NULL;
+float sum = 0.0;
+
+
+  // init
+  train->priors = NULL;
+  train->npriors = 0;
+
+  // no priors needed when regression
+  if (train->method == _ML_RFR_ ||
+      train->method == _ML_SVR_) return;
+
+  // no priors needed when EQUALIZED class weights
+  if (train->nclass_weights == 1 && 
+      strcmp(train->class_weights[0], "EQUALIZED") == 0) return;
+
+  // PROPORTIONAL priors
+  if (train->nclass_weights == 1 && 
+     (strcmp(train->class_weights[0], "PROPORTIONAL") == 0 ||
+      strcmp(train->class_weights[0], "ANTIPROPORTIONAL") == 0)){
+    hist = histogram(c_response, n_sample, &train->npriors);
+    alloc((void**)&train->priors, train->npriors, sizeof(float));
+    if (strcmp(train->class_weights[0], "PROPORTIONAL") == 0){
+      for (i=0; i<train->npriors; i++) train->priors[i] = hist[1][i]/(float)n_sample;
+    } else if (strcmp(train->class_weights[0], "ANTIPROPORTIONAL") == 0){
+      for (i=0; i<train->npriors; i++) train->priors[i] = n_sample/(float)hist[1][i];
+      for (i=0; i<train->npriors; i++) sum += train->priors[i];
+      for (i=0; i<train->npriors; i++) train->priors[i] /= sum;
+    }
+    free_2D((void**)hist, 2);
+  }
+
+  // CUSTOM priors
+  if (train->nclass_weights > 1){
+    if ((train->npriors = n_uniq(c_response, n_sample)) != train->nclass_weights){
+      printf("number of FEATURE_WEIGHTS do not match number of classes in response file.\n");
+      exit(FAILURE);
+    } else {
+      alloc((void**)&train->priors, train->npriors, sizeof(float));
+      for (i=0; i<train->npriors; i++) train->priors[i] = atof(train->class_weights[i]);
+    }
+  }
+
+
+  return;
 }
 
 

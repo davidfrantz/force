@@ -39,13 +39,6 @@ void parse_proj(par_ll_t *pl2);
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_lower(params_t *params, par_ll_t *pl2){
-par_enum_t resample[_RESAMPLE_LENGTH_] = {
-  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" }};
-par_enum_t resmerge[_RES_MERGE_LENGTH_] = {
-  { _RES_MERGE_NONE_,     "NONE" },     { _RES_MERGE_REGRESSION_, "REGRESSION" }, 
-  { _RES_MERGE_IMPROPHE_, "IMPROPHE" }, { _RES_MERGE_STARFM_,     "STARFM" }};
-par_enum_t format[_FMT_LENGTH_] = {
-  { _FMT_ENVI_, "ENVI" }, { _FMT_GTIFF_, "GTiff" }};
 
 
   register_char_par(params,    "DIR_LEVEL2",            _CHAR_TEST_EXIST_, &pl2->d_level2);
@@ -56,7 +49,7 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_char_par(params,    "DIR_AOD",               _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_aod);
   register_char_par(params,    "FILE_TILE",             _CHAR_TEST_NULL_OR_EXIST_, &pl2->f_tile);
   register_char_par(params,    "FILE_DEM",              _CHAR_TEST_NULL_OR_EXIST_, &pl2->fdem);
-  register_char_par(params,    "DIR_MASTER",            _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_master);
+  register_char_par(params,    "DIR_COREG_BASE",        _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_coreg);
   register_double_par(params,  "TILE_SIZE",             0, INT_MAX, &pl2->tilesize);
   register_double_par(params,  "BLOCK_SIZE",            0, INT_MAX, &pl2->chunksize);
   register_double_par(params,  "RESOLUTION_LANDSAT",    0, INT_MAX, &pl2->res_landsat);
@@ -66,8 +59,8 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_double_par(params,  "ORIGIN_LAT",            -90, 90, &pl2->orig_lat);
   register_double_par(params,  "ORIGIN_LON",            -180, 180, &pl2->orig_lon);
   register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, &pl2->proj_, &pl2->nproj_);
-  register_enum_par(params,    "RESAMPLING",            resample, _RESAMPLE_LENGTH_, &pl2->resample);
-  register_enum_par(params,    "RES_MERGE",             resmerge, _RES_MERGE_LENGTH_, &pl2->resmerge);
+  register_enum_par(params,    "RESAMPLING",            _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->resample);
+  register_enum_par(params,    "RES_MERGE",             _TAGGED_ENUM_RES_MERGE_, _RES_MERGE_LENGTH_, &pl2->resmerge);
   register_int_par(params,     "TIER",                  1, 3, &pl2->tier);
   register_bool_par(params,    "DO_TOPO",               &pl2->dotopo);
   register_bool_par(params,    "DO_ATMO",               &pl2->doatmo);
@@ -78,8 +71,8 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_float_par(params,   "WATER_VAPOR",           0, 15, &pl2->wvp);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
-  register_int_par(params,     "DEM_NODATA",            INT_MIN, INT_MAX, &pl2->dem_nodata);
-  register_int_par(params,     "MASTER_NODATA",         INT_MIN, INT_MAX, &pl2->master_nodata);
+  register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
+  register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
   register_float_par(params,   "MAX_CLOUD_COVER_TILE",  1, 100, &pl2->maxtc);
   register_float_par(params,   "CLOUD_THRESHOLD",       0, 1, &pl2->cldprob);
@@ -89,7 +82,7 @@ par_enum_t format[_FMT_LENGTH_] = {
   register_bool_par(params,    "PARALLEL_READS",        &pl2->ithread);
   register_int_par(params,     "DELAY",                 0, INT_MAX, &pl2->delay);
   register_int_par(params,     "TIMEOUT_ZIP",           0, INT_MAX, &pl2->timeout);
-  register_enum_par(params,    "OUTPUT_FORMAT",         format, _FMT_LENGTH_, &pl2->format);
+  register_enum_par(params,    "OUTPUT_FORMAT",         _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &pl2->format);
   register_bool_par(params,    "OUTPUT_DST",            &pl2->odst);
   register_bool_par(params,    "OUTPUT_AOD",            &pl2->oaod);
   register_bool_par(params,    "OUTPUT_WVP",            &pl2->owvp);
@@ -236,8 +229,8 @@ char  bname[NPOW_10] = "\0";
 
   if (pl2->dem_nodata == 0){
     printf("DEM_NODATA is 0. Check if this is correct. 0 is a bad choice of DEM nodata. ");}
-  if (pl2->master_nodata == 0){
-    printf("MASTER_NODATA is 0. Check if this is correct. 0 is a bad choice of reflectance nodata. ");}
+  if (pl2->coreg_nodata == 0){
+    printf("COREG_BASE_NODATA is 0. Check if this is correct. 0 is a bad choice of reflectance nodata. ");}
 
 
   if (!pl2->doaod){

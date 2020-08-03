@@ -36,7 +36,6 @@ NOW=$PWD
 
 INP=$(readlink -f $1)
 OUT=$INP/mosaic
-LIST=$OUT/list.txt
 
 
 # input dir exists?
@@ -56,14 +55,14 @@ fi
 
 cd $OUT
 
+function mosaic_this(){
 
-FILES=$(find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq | xargs)
-
-# for each possible output product
-for prd in $FILES; do 
+  num=$1
+  prd=$2
+  LIST="force-mosaic_list_$2.txt"
 
   echo "mosaicking" $prd
-  
+
   ONAME=${prd/.dat/.vrt}
   ONAME=${ONAME/.tif/.vrt}
 
@@ -87,10 +86,10 @@ for prd in $FILES; do
   # build vrt
   if [ $N -gt 0 ]; then
     echo $N "chips found".
-    gdalbuildvrt -q -srcnodata $NODATA -vrtnodata $NODATA -input_file_list $LIST $OUT"/"$ONAME
-    sed -i.tmp 's/relativeToVRT="0"/relativeToVRT="1"/g' $OUT"/"$ONAME
-    chmod --reference $OUT"/"$ONAME".tmp" $OUT"/"$ONAME
-    rm $OUT"/"$ONAME".tmp"
+    gdalbuildvrt -q -srcnodata $NODATA -vrtnodata $NODATA -input_file_list $LIST $ONAME
+    sed -i.tmp 's/relativeToVRT="0"/relativeToVRT="1"/g' $ONAME
+    chmod --reference $ONAME".tmp" $ONAME
+    rm $ONAME".tmp"
   else
     echo "no chip found."
   fi
@@ -102,7 +101,22 @@ for prd in $FILES; do
     exit
   fi
 
-done
+}
+
+export -f mosaic_this
+
+
+PRODUCTS="force-mosaic_products.txt"
+
+find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
+NPROD=$(wc -l $PRODUCTS)
+
+echo "mosaicking $NPROD products:"
+parallel -a $PRODUCTS echo        {#} {}
+parallel -a $PRODUCTS mosaic_this {#} {}
+
+rm $PRODUCTS
 
 cd $PWD
 
+exit 0

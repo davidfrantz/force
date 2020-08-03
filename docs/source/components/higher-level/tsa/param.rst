@@ -27,6 +27,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* full directory path
     | ``DIR_HIGHER = NULL``
 
+  * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
+  
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_EXPLODE = FALSE``
+
 * **Masking**
 
   * Analysis Mask datapool (parent directory of tiled analysis masks)
@@ -74,9 +79,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``X_TILE_RANGE = 0 0``
     | ``Y_TILE_RANGE = 0 0``
 
-  * White list of tiles.
+  * Allow-list of tiles.
     Can be used to further limit the analysis extent to non-square extents.
-    The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+    The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
     Optional. If NULL, the complete analysis extent is processed
 
     | *Type:* full file path
@@ -113,13 +118,16 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 .. _tsa-sensor:    
 
-* **Sensor white list**
+* **Sensor allow-list**
 
   * Sensors to be used in the analysis.
     Multi-sensor analyses are restricted to the overlapping bands (see table).
     The resulting outputs are named according to their band designation, i.e. LNDLG, SEN2L, SEN2H, R-G-B or VVVHP.
     BAP Composites with such a band designation can be input again (e.g. SENSORS = LNDLG).
     Following sensors are available: 
+
+
+    .. _table-tsa-sensor-bands:
 
     +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
     + SENSOR                         + BLUE + GREEN + RED + RE1 + RE2 + RE3 + BNIR + NIR + SWIR1 + SWIR2 + VV + VH +
@@ -207,8 +215,81 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDSI,SMA}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}
     | ``INDEX = NDVI EVI NBR``
+
+
+
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + Index     + Name                                       + Formula                                                                                  + Reference                +
+    +===========+============================================+==========================================================================================+==========================+
+    + BLUE      + see :ref:`Sensor Bands <table-tsa-sensor-bands>`                                                                                                                 +
+    +-----------+                                                                                                                                                                  +
+    + GREEN     +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + RED       +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + RE1       +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + RE2       +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + RE3       +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + BNIR      +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + NIR       +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + SWIR1     +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + SWIR2     +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + VV        +                                                                                                                                                                  +
+    +-----------+                                                                                                                                                                  +
+    + VH        +                                                                                                                                                                  +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVI      + Normalized Difference Vegetation Index     + (NIR - RED) / (NIR + RED)                                                                + Tucker 1979              +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + EVI       + Enhanced Vegetation Index                  + G * ((NIR - RED) / (NIR + C1 * RED – C2 * BLUE + L))                                     + Huete et al. 2002        +
+    +           +                                            + with G = 2.5, L = 1, C1 = 6, C2 = 7.5                                                    +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NBR       + Normalized Burn Ratio                      + (NIR - SWIR2) / (NIR + SWIR2)                                                            + Key & Benson 2005        +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDTI      + Normalized Difference Tillage Index        + (SWIR1 - SWIR2) / (SWIR1 + SWIR2)                                                        + Van Deventer et al. 1997 +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + ARVI      + Atmospherically Resistant Vegetation Index + (NIR - RB) / (NIR + RB)                                                                  + Kaufman & Tanré 1992     +
+    +           +                                            + with RB = RED - (BLUE - RED)                                                             +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + SAVI      + Soil Adjusted Vegetation Index             + (NIR - RED) / (NIR + RED + L) * (1 + L)                                                  + Huete 1988               +
+    +           +                                            + with L = 0.5                                                                             +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + SARVI     + Soil adj. and Atm.  Resistant Veg. Index   + (NIR - RB) / (NIR + RB + L) * (1 + L)                                                    + Kaufman & Tanré 1992     +
+    +           +                                            + with RB = RED - (BLUE - RED)                                                             +                          +
+    +           +                                            + with L = 0.5                                                                             +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + TC-BRIGHT + Tasseled Cap Brightness                    +  0.2043*BLUE + 0.4158*GREEN + 0.5524*RED + 0.5741*NIR + 0.3124*SWIR1 + 0.2303*SWIR2      + Crist 1985               +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + TC-GREEN  + Tasseled Cap Greeness                      + -0.1603*BLUE - 0.2819*GREEN - 0.4934*RED + 0.7940*NIR - 0.0002*SWIR1 - 0.1446*SWIR2      + Crist 1985               +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + TC-WET    + Tasseled Cap Wetness                       +  0.0315*BLUE + 0.2021*GREEN + 0.3102*RED + 0.1594*NIR - 0.6806*SWIR1 - 0.6109*SWIR2      + Crist 1985               +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + TC-DI     + Tasseled Cap Disturbance Index             + TC-BRIGHT - (TC-GREEN + TC-WET)                                                          + Healey et al. 1995       +
+    +           +                                            + no rescaling applied (as opposed to Healey et al. 1995)                                  +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDBI      + Normalized Difference Built-Up Index       + (SWIR1 - NIR) / (SWIR1 + NIR)                                                            + Zha et al. 2003          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDWI      + Normalized Difference Water Index          + (GREEN - NIR) / (GREEN + NIR)                                                            + McFeeters 1996           +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + MNDWI     + Modified Normalized Difference Water Index + (GREEN - SWIR1) / (GREEN + SWIR1)                                                        + Xu, H. 2006              +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDMI      + Normalized Difference Moisture Index       + (NIR - SWIR1) / (NIR + SWIR1)                                                            + Gao 1996                 +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDSI      + Normalized Difference Snow Index           + (GREEN - SWIR1) / (GREEN + SWIR1)                                                        + Hall et al. 1995         +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + SMA       + Spectral Mixture Analysis                  + BOA = F * endmember + E                                                                  + Smith et al. 1990        +
+    +           +                                            + Fraction F is retrieved using least-squares optimization                                 +                          +
+    +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                        +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+
     
   * Standardize the TSS time series with pixel mean and/or standard deviation?
 
