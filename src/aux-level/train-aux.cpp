@@ -45,7 +45,7 @@ int i;
     svm->setType(SVM::C_SVC);
   } else {
     printf("unknown SVM method\n");
-    return NULL;
+    exit(FAILURE);
   }
 
   svm->setKernel(SVM::RBF);
