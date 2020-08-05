@@ -493,6 +493,8 @@ short nodata;
     
     tsa_fold(&ts, mask_, nc, ni, nodata, phl);
     
+    tsa_polar(&ts, mask_, nc, ni, nodata, phl);
+    
     tsa_pheno(&ts, mask_, nc, ni, nodata, phl);
 
     tsa_trend(&ts, mask_, nc, nodata, phl);
