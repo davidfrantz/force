@@ -52,12 +52,15 @@ typedef struct {
   short **fby_, **fbq_, **fbm_, **fbw_, **fbd_;
   short **try_, **trq_, **trm_, **trw_, **trd_;
   short **cay_, **caq_, **cam_, **caw_, **cad_;
-  short **lsp_[26];
-  short **trp_[26];
-  short **cap_[26];
+  short **lsp_[_LSP_LENGTH_];
+  short **trp_[_LSP_LENGTH_];
+  short **cap_[_LSP_LENGTH_];
+  short **pol_[_POL_LENGTH_];
+  short **tro_[_POL_LENGTH_];
+  short **cao_[_POL_LENGTH_];
   date_t *d_tss, *d_tsi;
   date_t *d_fby, *d_fbq, *d_fbm, *d_fbw, *d_fbd;
-  date_t *d_lsp;
+  date_t *d_lsp, *d_pol;
 } tsa_t;
 
 #include "../higher-level/index-hl.h"
@@ -66,6 +69,7 @@ typedef struct {
 #include "../higher-level/fold-hl.h"
 #include "../higher-level/trend-hl.h"
 #include "../higher-level/pheno-hl.h"
+#include "../higher-level/polar-hl.h"
 #include "../higher-level/standardize-hl.h"
 
 stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);

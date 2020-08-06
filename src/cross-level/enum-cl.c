@@ -116,6 +116,13 @@ const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_] = {
   {_LSP_IBT_, "IBT" }, {_LSP_IGS_, "IGS" }, {_LSP_RAR_, "RAR" }, {_LSP_RAF_, "RAF" },
   {_LSP_RMR_, "RMR" }, {_LSP_RMF_, "RMF" }};
 
+const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_] = {
+  { _POL_DSS_, "DSS" }, { _POL_DMS_, "DMS" }, { _POL_DES_, "DES" }, { _POL_DEV_, "DEV" }, 
+  { _POL_DAV_, "DAV" }, { _POL_DLV_, "DLV" }, { _POL_LGS_, "LGS" }, { _POL_LBV_, "LBV" }, 
+  { _POL_VSS_, "VSS" }, { _POL_VMS_, "VMS" }, { _POL_VES_, "VES" }, { _POL_VEV_, "VEV" }, 
+  { _POL_VAV_, "VAV" }, { _POL_VLV_, "VLV" }, { _POL_VGA_, "VGA" }, { _POL_VGV_, "VGV" }, 
+  { _POL_DPY_, "DPY" }};
+
 const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
 

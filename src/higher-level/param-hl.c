@@ -51,6 +51,7 @@ void free_mcl(par_mcl_t *mcl);
 int parse_ftr(par_ftr_t *ftr);
 int parse_sta(par_sta_t *sta);
 int parse_lsp(par_lsp_t *lsp);
+int parse_pol(par_pol_t *pol);
 int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
 int parse_quality(par_qai_t *qai);
@@ -231,6 +232,17 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "OUTPUT_LSP",        &phl->tsa.lsp.olsp);
   register_bool_par(params,    "OUTPUT_TRP",        &phl->tsa.lsp.otrd);
   register_bool_par(params,    "OUTPUT_CAP",        &phl->tsa.lsp.ocat);
+
+  // polar parameters
+  register_float_par(params,   "POL_START_THRESHOLD", 0.01, 0.99, &phl->tsa.pol.start);
+  register_float_par(params,   "POL_MID_THRESHOLD", 0.01, 0.99, &phl->tsa.pol.mid);
+  register_float_par(params,   "POL_END_THRESHOLD", 0.01, 0.99, &phl->tsa.pol.end);
+  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
+  register_enum_par(params,    "STANDARDIZE_POL", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.pol.standard);
+  register_bool_par(params,    "OUTPUT_PCT",        &phl->tsa.pol.opct);
+  register_bool_par(params,    "OUTPUT_POL",        &phl->tsa.pol.opol);
+  register_bool_par(params,    "OUTPUT_TRO",        &phl->tsa.pol.otrd);
+  register_bool_par(params,    "OUTPUT_CAO",        &phl->tsa.pol.ocat);
 
   // trend parameters
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
@@ -843,6 +855,60 @@ int i;
 }
 
 
+/** This function reparses polarmetrics parameters (special para-
++++ meter that cannot be parsed with the general parser).
+--- lsp:    phenometrics parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int parse_pol(par_pol_t *pol){
+int i;
+
+
+  for (i=0; i<pol->nmetrics; i++){
+    if (pol->metrics[i] == _POL_DSS_){
+      pol->odss = true;
+    } else if (pol->metrics[i] == _POL_DMS_){
+      pol->odms = true;
+    } else if (pol->metrics[i] == _POL_DES_){
+      pol->odes = true;
+    } else if (pol->metrics[i] == _POL_DEV_){
+      pol->odev = true;
+    } else if (pol->metrics[i] == _POL_DAV_){
+      pol->odav = true;
+    } else if (pol->metrics[i] == _POL_DLV_){
+      pol->odlv = true;
+    } else if (pol->metrics[i] == _POL_LGS_){
+      pol->olgs = true;
+    } else if (pol->metrics[i] == _POL_LBV_){
+      pol->olbv = true;
+    } else if (pol->metrics[i] == _POL_VSS_){
+      pol->ovss = true;
+    } else if (pol->metrics[i] == _POL_VMS_){
+      pol->ovms = true;
+    } else if (pol->metrics[i] == _POL_VES_){
+      pol->oves = true;
+    } else if (pol->metrics[i] == _POL_VEV_){
+      pol->ovev = true;
+    } else if (pol->metrics[i] == _POL_VAV_){
+      pol->ovav = true;
+    } else if (pol->metrics[i] == _POL_VLV_){
+      pol->ovlv = true;
+    } else if (pol->metrics[i] == _POL_VGA_){
+      pol->ovga = true;
+    } else if (pol->metrics[i] == _POL_VGV_){
+      pol->ovgv = true;
+    } else if (pol->metrics[i] == _POL_DPY_){
+      pol->odpy = true;
+     } else {
+      printf("warning: unknown pol.\n");
+    }
+  }
+
+
+  return SUCCESS;
+}
+
+
 /** This function reparses texture parameters (special para-
 +++ meter that cannot be parsed with the general parser).
 --- txt:    texture parameters
@@ -1322,6 +1388,8 @@ double tol = 5e-3;
   if (phl->type == _HL_CSO_) parse_sta(&phl->cso.sta);
   
   if (phl->type == _HL_TSA_) parse_lsp(&phl->tsa.lsp);
+
+  if (phl->type == _HL_TSA_) parse_pol(&phl->tsa.pol);
   
   if (phl->type == _HL_TXT_) parse_txt(&phl->txt);
   
@@ -1367,6 +1435,10 @@ double tol = 5e-3;
 
     // phenology not possible for first and last year
     phl->tsa.lsp.ny = phl->ny-2;
+    
+    // polarmetrics not possible for one year
+    phl->tsa.pol.ny = phl->ny;
+    phl->tsa.pol.ns = phl->ny-1;
     
     #ifdef FORCE_DEBUG
     printf("ny: %d, nq: %d, nm: %d, nw: %d, nd: %d\n",
@@ -1516,6 +1588,20 @@ double tol = 5e-3;
           return FAILURE;
         }
       }
+
+    }
+ 
+ 
+    if (phl->tsa.pol.opct || phl->tsa.pol.opol || phl->tsa.pol.otrd || phl->tsa.pol.ocat){
+          
+      if (phl->tsa.pol.ns < 1){
+        printf("POL cannot be estimated for one year.\n");
+        printf("Time window is too short.\n");
+        return FAILURE;
+      }
+
+      if (phl->tsa.tsi.method == _INT_NONE_){
+        printf("Polarmetrics require INTERPOLATE != NONE\n"); return FAILURE;}
 
     }
  

@@ -300,6 +300,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Gao, B. (1996). NDWI — A normalized difference water index for remote "
     "sensing of vegetation liquid water from space. Remote Sensing of Environment, "
     "58, 3, 257-266",
+    false },
+  { "Polar metrics",
+    "Brooks, B., Lee, D., Pomara, L., Hargrove, W. (2020). Monitoring Broadscale "
+    "Vegetational Diversity and Change across North American Landscapes Using Land "
+    "Surface Phenology. Forests 11(6), 606",
     false }
 };
 

@@ -200,6 +200,24 @@ typedef struct {
   int standard;
 } par_lsp_t;
 
+// polar metrics
+typedef struct {
+  int ny;
+  int ns;
+  float start;
+  float mid;
+  float end;
+  int opct;       // flag: output polar coordinate transformed TS
+  int opol;       // flag: output polar metrics
+  int *metrics, nmetrics;
+  int odss, odms, odes, odev, odav, odlv;
+  int olgs, olbv, ovss, ovms, oves, ovev;
+  int ovav, ovlv, ovga, ovgv, odpy;
+  int otrd;       // flag: output POL trends
+  int ocat;       // flag: output POL cats
+  int standard;
+} par_pol_t;
+
 // trend
 typedef struct {
   int tail;           // tail type
@@ -249,6 +267,7 @@ typedef struct {
   par_tsi_t tsi;
   par_sma_t sma;
   par_lsp_t lsp;
+  par_pol_t pol;
   par_trd_t trd;
 } par_tsa_t;
 

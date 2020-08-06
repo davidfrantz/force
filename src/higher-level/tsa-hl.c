@@ -53,13 +53,13 @@ char fdate[NPOW_10];
 char sensor[NPOW_04];
 char domain[NPOW_10];
 int nchar;
-int o, nprod = 98;
+int o, nprod = 149;
 int error = 0;
-enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _trd_, _cat_ };
-int prodlen[11] = { nt, phl->tsa.stm.sta.nmetrics, ni, 
+enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_ };
+int prodlen[12] = { nt, phl->tsa.stm.sta.nmetrics, ni, 
                     phl->ny, phl->nq, phl->nm, phl->nw, phl->nd,
-                    phl->tsa.lsp.ny, _TRD_LENGTH_, _CAT_LENGTH_ };
-char prodname[98][NPOW_03] = { 
+                    phl->tsa.lsp.ny, phl->tsa.pol.ny, _TRD_LENGTH_, _CAT_LENGTH_ };
+char prodname[149][NPOW_03] = { 
   "TSS", "RMS", "STM", "TSI", "SPL",
   "FBY", "FBQ", "FBM", "FBW", "FBD",
   "DEM-LSP", "DSS-LSP", "DRI-LSP", "DPS-LSP", "DFI-LSP", "DES-LSP", 
@@ -67,20 +67,29 @@ char prodname[98][NPOW_03] = {
   "VPS-LSP", "VFI-LSP", "VES-LSP", "VLM-LSP", "VBL-LSP", "VSA-LSP", 
   "IST-LSP", "IBL-LSP", "IBT-LSP", "IGS-LSP", "RAR-LSP", "RAF-LSP", 
   "RMR-LSP", "RMF-LSP",
+  "DSS-POL", "DMS-POL", "DES-POL", "DEV-POL", "DAV-POL", "DLV-POL",
+  "LGS-POL", "LBV-POL", "VSS-POL", "VMS-POL", "VES-POL", "VEV-POL",
+  "VAV-POL", "VLV-POL", "VGA-POL", "VGV-POL", "DPY-POL",
   "DEM-TRP", "DSS-TRP", "DRI-TRP", "DPS-TRP", "DFI-TRP", "DES-TRP", 
   "DLM-TRP", "LTS-TRP", "LGS-TRP", "VEM-TRP", "VSS-TRP", "VRI-TRP", 
   "VPS-TRP", "VFI-TRP", "VES-TRP", "VLM-TRP", "VBL-TRP", "VSA-TRP", 
   "IST-TRP", "IBL-TRP", "IBT-TRP", "IGS-TRP", "RAR-TRP", "RAF-TRP", 
   "RMR-TRP", "RMF-TRP", 
+  "DSS-TRO", "DMS-TRO", "DES-TRO", "DEV-TRO", "DAV-TRO", "DLV-TRO",
+  "LGS-TRO", "LBV-TRO", "VSS-TRO", "VMS-TRO", "VES-TRO", "VEV-TRO",
+  "VAV-TRO", "VLV-TRO", "VGA-TRO", "VGV-TRO", "DPY-TRO",
   "TRY", "TRQ", "TRM", "TRW", "TRD",
   "DEM-CAP", "DSS-CAP", "DRI-CAP", "DPS-CAP", "DFI-CAP", "DES-CAP", 
   "DLM-CAP", "LTS-CAP", "LGS-CAP", "VEM-CAP", "VSS-CAP", "VRI-CAP", 
   "VPS-CAP", "VFI-CAP", "VES-CAP", "VLM-CAP", "VBL-CAP", "VSA-CAP", 
   "IST-CAP", "IBL-CAP", "IBT-CAP", "IGS-CAP", "RAR-CAP", "RAF-CAP", 
   "RMR-CAP", "RMF-CAP", 
+  "DSS-CAO", "DMS-CAO", "DES-CAO", "DEV-CAO", "DAV-CAO", "DLV-CAO",
+  "LGS-CAO", "LBV-CAO", "VSS-CAO", "VMS-CAO", "VES-CAO", "VEV-CAO",
+  "VAV-CAO", "VLV-CAO", "VGA-CAO", "VGV-CAO", "DPY-CAO",
   "CAY", "CAQ", "CAM", "CAW", "CAD" };
 
-int prodtype[98] = { 
+int prodtype[149] = { 
   _full_, _full_, _stats_, _inter_, _inter_,
   _year_, _quarter_, _month_, _week_, _day_, 
   _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
@@ -88,20 +97,29 @@ int prodtype[98] = {
   _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
   _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
   _lsp_, _lsp_, 
+  _pol_, _pol_, _pol_, _pol_, _pol_, _pol_, 
+  _pol_, _pol_, _pol_, _pol_, _pol_, _pol_, 
+  _pol_, _pol_, _pol_, _pol_, _pol_, 
   _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
   _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
   _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
   _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
   _trd_, _trd_, 
+  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
+  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
+  _trd_, _trd_, _trd_, _trd_, _trd_, 
   _trd_, _trd_, _trd_, _trd_, _trd_,
   _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
   _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
   _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
   _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
   _cat_, _cat_, 
+  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
+  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
+  _cat_, _cat_, _cat_, _cat_, _cat_,  
   _cat_, _cat_, _cat_, _cat_, _cat_ };
 
-int enable[98] = { 
+int enable[149] = { 
   true, phl->tsa.sma.orms, phl->tsa.stm.ostm, true, phl->tsa.lsp.ospl,
   phl->tsa.fld.ofby+phl->tsa.fld.otry+phl->tsa.fld.ocay, phl->tsa.fld.ofbq+phl->tsa.fld.otrq+phl->tsa.fld.ocaq,
   phl->tsa.fld.ofbm+phl->tsa.fld.otrm+phl->tsa.fld.ocam, phl->tsa.fld.ofbw+phl->tsa.fld.otrw+phl->tsa.fld.ocaw,
@@ -119,20 +137,35 @@ int enable[98] = {
   phl->tsa.lsp.oibt*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.oigs*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
   phl->tsa.lsp.orar*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.oraf*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
   phl->tsa.lsp.ormr*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ormf*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
+  phl->tsa.pol.odss*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.odms*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.odes*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.odev*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.odav*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.odlv*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat),
+  phl->tsa.pol.olgs*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.olbv*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.ovss*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.ovms*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.oves*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.ovev*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat),
+  phl->tsa.pol.ovav*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.ovlv*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.ovga*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), phl->tsa.pol.ovgv*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat), 
+  phl->tsa.pol.odpy*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat),
   phl->tsa.lsp.otrd*phl->tsa.lsp.odem, phl->tsa.lsp.otrd*phl->tsa.lsp.odss, phl->tsa.lsp.otrd*phl->tsa.lsp.odri, phl->tsa.lsp.otrd*phl->tsa.lsp.odps, phl->tsa.lsp.otrd*phl->tsa.lsp.odfi, phl->tsa.lsp.otrd*phl->tsa.lsp.odes, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.odlm, phl->tsa.lsp.otrd*phl->tsa.lsp.olts, phl->tsa.lsp.otrd*phl->tsa.lsp.olgs, phl->tsa.lsp.otrd*phl->tsa.lsp.ovem, phl->tsa.lsp.otrd*phl->tsa.lsp.ovss, phl->tsa.lsp.otrd*phl->tsa.lsp.ovri, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.ovps, phl->tsa.lsp.otrd*phl->tsa.lsp.ovfi, phl->tsa.lsp.otrd*phl->tsa.lsp.oves, phl->tsa.lsp.otrd*phl->tsa.lsp.ovlm, phl->tsa.lsp.otrd*phl->tsa.lsp.ovbl, phl->tsa.lsp.otrd*phl->tsa.lsp.ovsa, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.oist, phl->tsa.lsp.otrd*phl->tsa.lsp.oibl, phl->tsa.lsp.otrd*phl->tsa.lsp.oibt, phl->tsa.lsp.otrd*phl->tsa.lsp.oigs, phl->tsa.lsp.otrd*phl->tsa.lsp.orar, phl->tsa.lsp.otrd*phl->tsa.lsp.oraf, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.ormr, phl->tsa.lsp.otrd*phl->tsa.lsp.ormf,
+  phl->tsa.pol.otrd*phl->tsa.pol.odss, phl->tsa.pol.otrd*phl->tsa.pol.odms, phl->tsa.pol.otrd*phl->tsa.pol.odes, phl->tsa.pol.otrd*phl->tsa.pol.odev, phl->tsa.pol.otrd*phl->tsa.pol.odav, phl->tsa.pol.otrd*phl->tsa.pol.odlv, 
+  phl->tsa.pol.otrd*phl->tsa.pol.olgs, phl->tsa.pol.otrd*phl->tsa.pol.olbv, phl->tsa.pol.otrd*phl->tsa.pol.ovss, phl->tsa.pol.otrd*phl->tsa.pol.ovms, phl->tsa.pol.otrd*phl->tsa.pol.oves, phl->tsa.pol.otrd*phl->tsa.pol.ovev, 
+  phl->tsa.pol.otrd*phl->tsa.pol.ovav, phl->tsa.pol.otrd*phl->tsa.pol.ovlv, phl->tsa.pol.otrd*phl->tsa.pol.ovga, phl->tsa.pol.otrd*phl->tsa.pol.ovgv, phl->tsa.pol.otrd*phl->tsa.pol.odpy,
   phl->tsa.fld.otry, phl->tsa.fld.otrq, phl->tsa.fld.otrm, phl->tsa.fld.otrw, phl->tsa.fld.otrd, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.odem, phl->tsa.lsp.ocat*phl->tsa.lsp.odss, phl->tsa.lsp.ocat*phl->tsa.lsp.odri, phl->tsa.lsp.ocat*phl->tsa.lsp.odps, phl->tsa.lsp.ocat*phl->tsa.lsp.odfi, phl->tsa.lsp.ocat*phl->tsa.lsp.odes, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.odlm, phl->tsa.lsp.ocat*phl->tsa.lsp.olts, phl->tsa.lsp.ocat*phl->tsa.lsp.olgs, phl->tsa.lsp.ocat*phl->tsa.lsp.ovem, phl->tsa.lsp.ocat*phl->tsa.lsp.ovss, phl->tsa.lsp.ocat*phl->tsa.lsp.ovri, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.ovps, phl->tsa.lsp.ocat*phl->tsa.lsp.ovfi, phl->tsa.lsp.ocat*phl->tsa.lsp.oves, phl->tsa.lsp.ocat*phl->tsa.lsp.ovlm, phl->tsa.lsp.ocat*phl->tsa.lsp.ovbl, phl->tsa.lsp.ocat*phl->tsa.lsp.ovsa, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.oist, phl->tsa.lsp.ocat*phl->tsa.lsp.oibl, phl->tsa.lsp.ocat*phl->tsa.lsp.oibt, phl->tsa.lsp.ocat*phl->tsa.lsp.oigs, phl->tsa.lsp.ocat*phl->tsa.lsp.orar, phl->tsa.lsp.ocat*phl->tsa.lsp.oraf, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.ormr, phl->tsa.lsp.ocat*phl->tsa.lsp.ormf,
+  phl->tsa.pol.ocat*phl->tsa.pol.odss, phl->tsa.pol.ocat*phl->tsa.pol.odms, phl->tsa.pol.ocat*phl->tsa.pol.odes, phl->tsa.pol.ocat*phl->tsa.pol.odev, phl->tsa.pol.ocat*phl->tsa.pol.odav, phl->tsa.pol.ocat*phl->tsa.pol.odlv, 
+  phl->tsa.pol.ocat*phl->tsa.pol.olgs, phl->tsa.pol.ocat*phl->tsa.pol.olbv, phl->tsa.pol.ocat*phl->tsa.pol.ovss, phl->tsa.pol.ocat*phl->tsa.pol.ovms, phl->tsa.pol.ocat*phl->tsa.pol.oves, phl->tsa.pol.ocat*phl->tsa.pol.ovev, 
+  phl->tsa.pol.ocat*phl->tsa.pol.ovav, phl->tsa.pol.ocat*phl->tsa.pol.ovlv, phl->tsa.pol.ocat*phl->tsa.pol.ovga, phl->tsa.pol.ocat*phl->tsa.pol.ovgv, phl->tsa.pol.ocat*phl->tsa.pol.odpy,
   phl->tsa.fld.ocay, phl->tsa.fld.ocaq, phl->tsa.fld.ocam, phl->tsa.fld.ocaw, phl->tsa.fld.ocad };
 
-int write[98]  = { 
+int write[149]  = { 
   phl->tsa.otss, phl->tsa.sma.orms, phl->tsa.stm.ostm, phl->tsa.tsi.otsi, phl->tsa.lsp.ospl,
   phl->tsa.fld.ofby, phl->tsa.fld.ofbq, phl->tsa.fld.ofbm, phl->tsa.fld.ofbw, phl->tsa.fld.ofbd, 
   phl->tsa.lsp.olsp*phl->tsa.lsp.odem, phl->tsa.lsp.olsp*phl->tsa.lsp.odss, phl->tsa.lsp.olsp*phl->tsa.lsp.odri, phl->tsa.lsp.olsp*phl->tsa.lsp.odps, phl->tsa.lsp.olsp*phl->tsa.lsp.odfi, phl->tsa.lsp.olsp*phl->tsa.lsp.odes, 
@@ -140,20 +173,29 @@ int write[98]  = {
   phl->tsa.lsp.olsp*phl->tsa.lsp.ovps, phl->tsa.lsp.olsp*phl->tsa.lsp.ovfi, phl->tsa.lsp.olsp*phl->tsa.lsp.oves, phl->tsa.lsp.olsp*phl->tsa.lsp.ovlm, phl->tsa.lsp.olsp*phl->tsa.lsp.ovbl, phl->tsa.lsp.olsp*phl->tsa.lsp.ovsa, 
   phl->tsa.lsp.olsp*phl->tsa.lsp.oist, phl->tsa.lsp.olsp*phl->tsa.lsp.oibl, phl->tsa.lsp.olsp*phl->tsa.lsp.oibt, phl->tsa.lsp.olsp*phl->tsa.lsp.oigs, phl->tsa.lsp.olsp*phl->tsa.lsp.orar, phl->tsa.lsp.olsp*phl->tsa.lsp.oraf, 
   phl->tsa.lsp.olsp*phl->tsa.lsp.ormr, phl->tsa.lsp.olsp*phl->tsa.lsp.ormf,
+  phl->tsa.pol.opol*phl->tsa.pol.odss, phl->tsa.pol.opol*phl->tsa.pol.odms, phl->tsa.pol.opol*phl->tsa.pol.odes, phl->tsa.pol.opol*phl->tsa.pol.odev, phl->tsa.pol.opol*phl->tsa.pol.odav, phl->tsa.pol.opol*phl->tsa.pol.odlv, 
+  phl->tsa.pol.opol*phl->tsa.pol.olgs, phl->tsa.pol.opol*phl->tsa.pol.olbv, phl->tsa.pol.opol*phl->tsa.pol.ovss, phl->tsa.pol.opol*phl->tsa.pol.ovms, phl->tsa.pol.opol*phl->tsa.pol.oves, phl->tsa.pol.opol*phl->tsa.pol.ovev, 
+  phl->tsa.pol.opol*phl->tsa.pol.ovav, phl->tsa.pol.opol*phl->tsa.pol.ovlv, phl->tsa.pol.opol*phl->tsa.pol.ovga, phl->tsa.pol.opol*phl->tsa.pol.ovgv, phl->tsa.pol.opol*phl->tsa.pol.odpy,
   phl->tsa.lsp.otrd*phl->tsa.lsp.odem, phl->tsa.lsp.otrd*phl->tsa.lsp.odss, phl->tsa.lsp.otrd*phl->tsa.lsp.odri, phl->tsa.lsp.otrd*phl->tsa.lsp.odps, phl->tsa.lsp.otrd*phl->tsa.lsp.odfi, phl->tsa.lsp.otrd*phl->tsa.lsp.odes, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.odlm, phl->tsa.lsp.otrd*phl->tsa.lsp.olts, phl->tsa.lsp.otrd*phl->tsa.lsp.olgs, phl->tsa.lsp.otrd*phl->tsa.lsp.ovem, phl->tsa.lsp.otrd*phl->tsa.lsp.ovss, phl->tsa.lsp.otrd*phl->tsa.lsp.ovri, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.ovps, phl->tsa.lsp.otrd*phl->tsa.lsp.ovfi, phl->tsa.lsp.otrd*phl->tsa.lsp.oves, phl->tsa.lsp.otrd*phl->tsa.lsp.ovlm, phl->tsa.lsp.otrd*phl->tsa.lsp.ovbl, phl->tsa.lsp.otrd*phl->tsa.lsp.ovsa, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.oist, phl->tsa.lsp.otrd*phl->tsa.lsp.oibl, phl->tsa.lsp.otrd*phl->tsa.lsp.oibt, phl->tsa.lsp.otrd*phl->tsa.lsp.oigs, phl->tsa.lsp.otrd*phl->tsa.lsp.orar, phl->tsa.lsp.otrd*phl->tsa.lsp.oraf, 
   phl->tsa.lsp.otrd*phl->tsa.lsp.ormr, phl->tsa.lsp.otrd*phl->tsa.lsp.ormf,
+  phl->tsa.pol.otrd*phl->tsa.pol.odss, phl->tsa.pol.otrd*phl->tsa.pol.odms, phl->tsa.pol.otrd*phl->tsa.pol.odes, phl->tsa.pol.otrd*phl->tsa.pol.odev, phl->tsa.pol.otrd*phl->tsa.pol.odav, phl->tsa.pol.otrd*phl->tsa.pol.odlv, 
+  phl->tsa.pol.otrd*phl->tsa.pol.olgs, phl->tsa.pol.otrd*phl->tsa.pol.olbv, phl->tsa.pol.otrd*phl->tsa.pol.ovss, phl->tsa.pol.otrd*phl->tsa.pol.ovms, phl->tsa.pol.otrd*phl->tsa.pol.oves, phl->tsa.pol.otrd*phl->tsa.pol.ovev, 
+  phl->tsa.pol.otrd*phl->tsa.pol.ovav, phl->tsa.pol.otrd*phl->tsa.pol.ovlv, phl->tsa.pol.otrd*phl->tsa.pol.ovga, phl->tsa.pol.otrd*phl->tsa.pol.ovgv, phl->tsa.pol.otrd*phl->tsa.pol.odpy,
   phl->tsa.fld.otry, phl->tsa.fld.otrq, phl->tsa.fld.otrm, phl->tsa.fld.otrw, phl->tsa.fld.otrd, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.odem, phl->tsa.lsp.ocat*phl->tsa.lsp.odss, phl->tsa.lsp.ocat*phl->tsa.lsp.odri, phl->tsa.lsp.ocat*phl->tsa.lsp.odps, phl->tsa.lsp.ocat*phl->tsa.lsp.odfi, phl->tsa.lsp.ocat*phl->tsa.lsp.odes, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.odlm, phl->tsa.lsp.ocat*phl->tsa.lsp.olts, phl->tsa.lsp.ocat*phl->tsa.lsp.olgs, phl->tsa.lsp.ocat*phl->tsa.lsp.ovem, phl->tsa.lsp.ocat*phl->tsa.lsp.ovss, phl->tsa.lsp.ocat*phl->tsa.lsp.ovri, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.ovps, phl->tsa.lsp.ocat*phl->tsa.lsp.ovfi, phl->tsa.lsp.ocat*phl->tsa.lsp.oves, phl->tsa.lsp.ocat*phl->tsa.lsp.ovlm, phl->tsa.lsp.ocat*phl->tsa.lsp.ovbl, phl->tsa.lsp.ocat*phl->tsa.lsp.ovsa, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.oist, phl->tsa.lsp.ocat*phl->tsa.lsp.oibl, phl->tsa.lsp.ocat*phl->tsa.lsp.oibt, phl->tsa.lsp.ocat*phl->tsa.lsp.oigs, phl->tsa.lsp.ocat*phl->tsa.lsp.orar, phl->tsa.lsp.ocat*phl->tsa.lsp.oraf, 
   phl->tsa.lsp.ocat*phl->tsa.lsp.ormr, phl->tsa.lsp.ocat*phl->tsa.lsp.ormf,
+  phl->tsa.pol.ocat*phl->tsa.pol.odss, phl->tsa.pol.ocat*phl->tsa.pol.odms, phl->tsa.pol.ocat*phl->tsa.pol.odes, phl->tsa.pol.ocat*phl->tsa.pol.odev, phl->tsa.pol.ocat*phl->tsa.pol.odav, phl->tsa.pol.ocat*phl->tsa.pol.odlv, 
+  phl->tsa.pol.ocat*phl->tsa.pol.olgs, phl->tsa.pol.ocat*phl->tsa.pol.olbv, phl->tsa.pol.ocat*phl->tsa.pol.ovss, phl->tsa.pol.ocat*phl->tsa.pol.ovms, phl->tsa.pol.ocat*phl->tsa.pol.oves, phl->tsa.pol.ocat*phl->tsa.pol.ovev, 
+  phl->tsa.pol.ocat*phl->tsa.pol.ovav, phl->tsa.pol.ocat*phl->tsa.pol.ovlv, phl->tsa.pol.ocat*phl->tsa.pol.ovga, phl->tsa.pol.ocat*phl->tsa.pol.ovgv, phl->tsa.pol.ocat*phl->tsa.pol.odpy,
   phl->tsa.fld.ocay, phl->tsa.fld.ocaq, phl->tsa.fld.ocam, phl->tsa.fld.ocaw, phl->tsa.fld.ocad };
 
-short ***ptr[98] = { 
+short ***ptr[149] = { 
   &ts->tss_, &ts->rms_, &ts->stm_, &ts->tsi_, &ts->spl_,
   &ts->fby_, &ts->fbq_, &ts->fbm_, &ts->fbw_, &ts->fbd_, 
   &ts->lsp_[0],  &ts->lsp_[1],  &ts->lsp_[2],  &ts->lsp_[3],  &ts->lsp_[4],  &ts->lsp_[5], 
@@ -161,17 +203,26 @@ short ***ptr[98] = {
   &ts->lsp_[12], &ts->lsp_[13], &ts->lsp_[14], &ts->lsp_[15], &ts->lsp_[16], &ts->lsp_[17], 
   &ts->lsp_[18], &ts->lsp_[19], &ts->lsp_[20], &ts->lsp_[21], &ts->lsp_[22], &ts->lsp_[23], 
   &ts->lsp_[24], &ts->lsp_[25], 
+  &ts->pol_[0],  &ts->pol_[1],  &ts->pol_[2],  &ts->pol_[3],  &ts->pol_[4],  &ts->pol_[5], 
+  &ts->pol_[6],  &ts->pol_[7],  &ts->pol_[8],  &ts->pol_[9],  &ts->pol_[10], &ts->pol_[11], 
+  &ts->pol_[12], &ts->pol_[13], &ts->pol_[14], &ts->pol_[15], &ts->pol_[16],
   &ts->trp_[0],  &ts->trp_[1],  &ts->trp_[2],  &ts->trp_[3],  &ts->trp_[4],  &ts->trp_[5], 
   &ts->trp_[6],  &ts->trp_[7],  &ts->trp_[8],  &ts->trp_[9],  &ts->trp_[10], &ts->trp_[11], 
   &ts->trp_[12], &ts->trp_[13], &ts->trp_[14], &ts->trp_[15], &ts->trp_[16], &ts->trp_[17], 
   &ts->trp_[18], &ts->trp_[19], &ts->trp_[20], &ts->trp_[21], &ts->trp_[22], &ts->trp_[23], 
   &ts->trp_[24], &ts->trp_[25],
+  &ts->tro_[0],  &ts->tro_[1],  &ts->tro_[2],  &ts->tro_[3],  &ts->tro_[4],  &ts->tro_[5], 
+  &ts->tro_[6],  &ts->tro_[7],  &ts->tro_[8],  &ts->tro_[9],  &ts->tro_[10], &ts->tro_[11], 
+  &ts->tro_[12], &ts->tro_[13], &ts->tro_[14], &ts->tro_[15], &ts->tro_[16],
   &ts->try_, &ts->trq_, &ts->trm_, &ts->trw_, &ts->trd_, 
   &ts->cap_[0],  &ts->cap_[1],  &ts->cap_[2],  &ts->cap_[3],  &ts->cap_[4],  &ts->cap_[5], 
   &ts->cap_[6],  &ts->cap_[7],  &ts->cap_[8],  &ts->cap_[9],  &ts->cap_[10], &ts->cap_[11], 
   &ts->cap_[12], &ts->cap_[13], &ts->cap_[14], &ts->cap_[15], &ts->cap_[16], &ts->cap_[17], 
   &ts->cap_[18], &ts->cap_[19], &ts->cap_[20], &ts->cap_[21], &ts->cap_[22], &ts->cap_[23], 
-  &ts->cap_[24], &ts->cap_[25], 
+  &ts->cap_[24], &ts->cap_[25],
+  &ts->cao_[0],  &ts->cao_[1],  &ts->cao_[2],  &ts->cao_[3],  &ts->cao_[4],  &ts->cao_[5], 
+  &ts->cao_[6],  &ts->cao_[7],  &ts->cao_[8],  &ts->cao_[9],  &ts->cao_[10], &ts->cao_[11], 
+  &ts->cao_[12], &ts->cao_[13], &ts->cao_[14], &ts->cao_[15], &ts->cao_[16],
   &ts->cay_, &ts->caq_, &ts->cam_, &ts->caw_, &ts->cad_ };
 
 
@@ -190,6 +241,7 @@ short ***ptr[98] = {
   if (phl->nw         > 0) alloc((void**)&ts->d_fbw, phl->nw, sizeof(date_t));         else ts->d_fbw = NULL;
   if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
   if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
+  if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
   //printf("scale, date, ts, bandnames, and sensor ID must be set in compile_tsa!!!\n");
 
@@ -197,7 +249,7 @@ short ***ptr[98] = {
   for (o=0; o<nprod; o++){
     
     if (enable[o]){
-      
+      printf("compiling %s product. ", prodname[o]);
       if ((TSA[o] = compile_tsa_stack(ard[0].DAT, prodlen[prodtype[o]], idx, write[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(TSA[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
@@ -321,6 +373,18 @@ short ***ptr[98] = {
               set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
+            case _pol_: 
+              set_date_year(&date, phl->date_range[_MIN_].year+t);
+              set_stack_sensor(TSA[o], t, "BLEND");
+              copy_date(&date, &ts->d_pol[t]);
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
+              set_stack_wavelength(TSA[o], t, date.year);
+              set_stack_unit(TSA[o], t, "year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
+              break;
             case _trd_:
               set_stack_sensor(TSA[o], t, "BLEND");
               set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
@@ -361,6 +425,7 @@ short ***ptr[98] = {
     if (ts->d_fbw != NULL){ free((void*)ts->d_fbw); ts->d_fbw = NULL;}
     if (ts->d_fbd != NULL){ free((void*)ts->d_fbd); ts->d_fbd = NULL;}
     if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
+    if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
     return NULL;
   }
 
@@ -500,10 +565,10 @@ short nodata;
     tsa_trend(&ts, mask_, nc, nodata, phl);
    
     tsa_cat(&ts, mask_, nc, nodata, phl);
-    
+
     tsa_standardize(&ts, mask_, nc, nt, ni, nodata, phl);
 
-      
+
     // clean temporal information
     if (ts.d_tss != NULL){ free((void*)ts.d_tss); ts.d_tss = NULL;}
     if (ts.d_tsi != NULL){ free((void*)ts.d_tsi); ts.d_tsi = NULL;}
@@ -513,6 +578,7 @@ short nodata;
     if (ts.d_fbw != NULL){ free((void*)ts.d_fbw); ts.d_fbw = NULL;}
     if (ts.d_fbd != NULL){ free((void*)ts.d_fbd); ts.d_fbd = NULL;}
     if (ts.d_lsp != NULL){ free((void*)ts.d_lsp); ts.d_lsp = NULL;}
+    if (ts.d_pol != NULL){ free((void*)ts.d_pol); ts.d_pol = NULL;}
 
   }
   

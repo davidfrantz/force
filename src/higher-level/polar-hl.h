@@ -25,8 +25,8 @@ Polarmetrics header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef PHENO_HL_H
-#define PHENO_HL_H
+#ifndef POLAR_HL_H
+#define POLAR_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
