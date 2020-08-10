@@ -1416,6 +1416,10 @@ double tol = 5e-3;
     phl->bap.w.t = phl->bap.w.d + phl->bap.w.y + phl->bap.w.c  + phl->bap.w.h +
              phl->bap.w.r + phl->bap.w.v;
 
+    if (phl->bap.w.t == 0){
+      printf("ALL scoring weights are zero. This is not allowed. "
+             "At least, the seasonal score should be > 0.\n"); return FAILURE;}
+
     // number of years
     phl->bap.Yn = (phl->bap.Yr*2)+1;
 
