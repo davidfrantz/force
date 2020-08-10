@@ -28,10 +28,10 @@ This file contains functions for polarmetrics
 #include "polar-hl.h"
 
 
-enum { _RAD_, _VAL_, _CUM_, _YEAR_, _DOY_, _SEASON_, _PCX_, _PCY_, _COORD_LEN_ };
+enum { _RAD_, _VAL_, _CUM_, _YEAR_, _DOY_, _CE_, _SEASON_, _PCX_, _PCY_, _COORD_LEN_ };
 
 void polar_coords(float r, float v, float yr, float polar_array[_COORD_LEN_]);
-void polar_vector(float x, float y, float yr, float polar_array[_COORD_LEN_]);
+void polar_vector(float x, float y, float yr, float doy_theta, float polar_array[_COORD_LEN_]);
 void identify_seasons(float **polar, int ni, int istep, float theta);
 void accumulate_seasons(float **polar, int ni);
 
@@ -41,12 +41,16 @@ int polar_ts(tsa_t *ts, small *mask_, int nc, int ni, short nodata, int year_min
 
 
 void polar_coords(float r, float v, float yr, float polar_array[_COORD_LEN_]){
+float doy;
 
+
+  doy = r*365.0/(2.0*M_PI);
 
   polar_array[_RAD_]  = r;
   polar_array[_VAL_]  = v;
   polar_array[_YEAR_] = yr;
-  polar_array[_DOY_]  = r*365.0/(2.0*M_PI);
+  polar_array[_DOY_]  = doy;
+  polar_array[_CE_]   = doy2ce(doy, yr);
   polar_array[_PCX_]  = v*cos(r);
   polar_array[_PCY_]  = v*sin(r);
 
@@ -54,18 +58,27 @@ void polar_coords(float r, float v, float yr, float polar_array[_COORD_LEN_]){
 }
 
 
-void polar_vector(float x, float y, float yr, float polar_array[_COORD_LEN_]){
-float r, v;
+void polar_vector(float x, float y, float yr, float doy_theta, float polar_array[_COORD_LEN_]){
+float r, v, doy;
 
 
   r = atan2(y, x);
   if (r <= 0) r += 2*M_PI;
   v = sqrt(x*x + y*y);
+  
+  doy = r*365.0/(2.0*M_PI);
 
   polar_array[_RAD_]  = r;
   polar_array[_VAL_]  = v;
   polar_array[_YEAR_] = yr;
-  polar_array[_DOY_]  = r*365.0/(2.0*M_PI);
+  polar_array[_DOY_]  = doy;
+
+  if (doy > doy_theta){
+    polar_array[_CE_] = doy2ce(doy, yr);
+  } else {
+    polar_array[_CE_] = doy2ce(doy, yr+1);
+  }
+
   polar_array[_PCX_]  = x;
   polar_array[_PCY_]  = y;
 
@@ -152,9 +165,10 @@ float ce_left, ce_right, ce;
 float v_left, v_right;
 
 enum { _START_, _MID_, _END_, _EVENT_LEN_ };
-enum { _LONGTERM_, _EARLY_, _GROW_, _LATE_, _WINDOW_LEN_};
+enum { _LONGTERM_, _THISYEAR_, _EARLY_, _GROW_, _LATE_, _WINDOW_LEN_};
 
-float theta, doy_theta;
+float theta, doy_theta, ce_theta;
+float theta_now, doy_theta_now, ce_theta_now;
 
 float timing[_EVENT_LEN_][_COORD_LEN_];
 float vector[_WINDOW_LEN_][_COORD_LEN_];
@@ -201,7 +215,7 @@ float **polar = NULL;
       memset(mean_window[_LONGTERM_], 0, 2*sizeof(float));
 
 
-      /** copy ce/v to working variables 
+      /** copy doy/v to working variables 
       +++ and interpolate linearly to make sure **/
       for (i=0; i<ni; i++){
 
@@ -247,12 +261,13 @@ float **polar = NULL;
 
         r = ts->d_tsi[i].doy/365.0*2.0*M_PI;
 
-if (p == 0) printf("doy: %d\n", ts->d_tsi[i].doy);
-if (p == 0) printf("r:   %f\n", r);
-if (p == 0) printf("v:   %f\n", v);
-        polar_coords(r, v, ts->d_tsi[i].year, polar[i]);
-if (p == 0) printf("x:   %f\n", polar[i][_PCX_]);
-if (p == 0) printf("y:   %f\n", polar[i][_PCY_]);
+if (p == 367642) printf("doy: %d\n", ts->d_tsi[i].doy);
+if (p == 367642) printf("r:   %f\n", r);
+if (p == 367642) printf("v:   %f\n", v);
+if (v < 0) v = 0;
+        polar_coords(r, v, ts->d_tsi[i].year-year_min, polar[i]);
+if (p == 367642) printf("x:   %f\n", polar[i][_PCX_]);
+if (p == 367642) printf("y:   %f\n", polar[i][_PCY_]);
 
         mean_window[_LONGTERM_][_X_] += polar[i][_PCX_];
         mean_window[_LONGTERM_][_Y_] += polar[i][_PCY_];
@@ -261,15 +276,15 @@ if (p == 0) printf("y:   %f\n", polar[i][_PCY_]);
 
       if (!valid) continue;
 
-if (p == 0) printf("valid pixel.\n");
+if (p == 367642) printf("valid pixel.\n");
 
       // mean of polar coordinates
       mean_window[_LONGTERM_][_X_] /= ni;
       mean_window[_LONGTERM_][_Y_] /= ni;
-if (p == 0) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_]);
+if (p == 367642) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_]);
 
       // multi-annual average vector
-      polar_vector(mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_], 0, vector[_LONGTERM_]);
+      polar_vector(mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_], 0, 0, vector[_LONGTERM_]);
 
       // diametric opposite of average vector = start of phenological year
       if (vector[_LONGTERM_][_RAD_] < M_PI){
@@ -279,8 +294,8 @@ if (p == 0) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], mean_w
       }
       doy_theta = (theta*365.0/(2.0*M_PI));
       
-if (p == 0) printf("avg:   %f %f %f\n", vector[_LONGTERM_][_RAD_], vector[_LONGTERM_][_DOY_], vector[_LONGTERM_][_VAL_]);
-if (p == 0) printf("theta: %f %f\n", theta, doy_theta);
+if (p == 367642) printf("avg:   %f %f %f\n", vector[_LONGTERM_][_RAD_], vector[_LONGTERM_][_DOY_], vector[_LONGTERM_][_VAL_]);
+if (p == 367642) printf("theta: %f %f\n", theta, doy_theta);
 
 
       identify_seasons(polar, ni, tsi->step, theta);
@@ -295,9 +310,12 @@ if (p == 0) printf("theta: %f %f\n", theta, doy_theta);
         memset(n_window,    0, sizeof(float)*_WINDOW_LEN_);
         memset(recurrence,  0, sizeof(double)*2);
 
+        if (doy_theta < 182) y = s; else y = s+1;
+        ce_theta = doy2ce(doy_theta, s);
+
 
         for (i=i0; i<ni; i++){
-if (p == 0) printf("season: %f, rad: %f, val: %f, x: %f, y: %f, cum: %f\n", 
+if (p == 367642) printf("season: %f, rad: %f, val: %f, x: %f, y: %f, cum: %f\n", 
 polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][_PCY_], polar[i][_CUM_]);
           
           if (polar[i][_SEASON_] < s) continue;
@@ -338,7 +356,32 @@ polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][
             mean_window[_LATE_][_Y_] += polar[i][_PCY_];
             n_window[_LATE_]++;
           }
+
+          mean_window[_THISYEAR_][_X_] += polar[i][_PCX_];
+          mean_window[_THISYEAR_][_Y_] += polar[i][_PCY_];
+          n_window[_THISYEAR_]++;
+
         }
+        
+        
+
+        mean_window[_THISYEAR_][_X_]  /= n_window[_THISYEAR_];
+        mean_window[_THISYEAR_][_Y_]  /= n_window[_THISYEAR_];
+        polar_vector(mean_window[_THISYEAR_][_X_],  mean_window[_THISYEAR_][_Y_], s, doy_theta, vector[_THISYEAR_]);
+
+        if (vector[_THISYEAR_][_RAD_] < M_PI){
+          theta_now = vector[_THISYEAR_][_RAD_] + M_PI;
+        } else {
+          theta_now = vector[_THISYEAR_][_RAD_] - M_PI;
+        }
+        doy_theta_now = (theta_now*365.0/(2.0*M_PI));
+        
+        if (doy_theta_now > doy_theta){
+          ce_theta_now = doy2ce(doy_theta_now, s);
+        } else {
+          ce_theta_now = doy2ce(doy_theta_now, s+1);
+        }
+
 
 
         mean_window[_GROW_][_X_]  /= n_window[_GROW_];
@@ -348,9 +391,9 @@ polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][
         mean_window[_LATE_][_X_]  /= n_window[_LATE_];
         mean_window[_LATE_][_Y_]  /= n_window[_LATE_];
 
-        polar_vector(mean_window[_GROW_][_X_],  mean_window[_GROW_][_Y_],  0, vector[_GROW_]);
-        polar_vector(mean_window[_EARLY_][_X_], mean_window[_EARLY_][_Y_], 0, vector[_EARLY_]);
-        polar_vector(mean_window[_LATE_][_X_],  mean_window[_LATE_][_Y_],  0, vector[_LATE_]);
+        polar_vector(mean_window[_GROW_][_X_],  mean_window[_GROW_][_Y_],  s, doy_theta, vector[_GROW_]);
+        polar_vector(mean_window[_EARLY_][_X_], mean_window[_EARLY_][_Y_], s, doy_theta, vector[_EARLY_]);
+        polar_vector(mean_window[_LATE_][_X_],  mean_window[_LATE_][_Y_],  s, doy_theta, vector[_LATE_]);
 
 
 
@@ -359,24 +402,25 @@ polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][
         // if () valid = true;
         //valid = true;
 
-        if (doy_theta < 182) y = s; else y = s+1;
 
-if (p == 0) printf("season: %d, year %d\n", s, y);
-if (p == 0) printf("mean, sd, and n: %f, %f, %d\n", recurrence[0], standdev(recurrence[1], n_window[_GROW_]), n_window[_GROW_]);
+
+if (p == 367642) printf("season: %d, year %d\n", s, y);
+if (p == 367642) printf("mean, sd, and n: %f, %f, %d\n", recurrence[0], standdev(recurrence[1], n_window[_GROW_]), n_window[_GROW_]);
+
 
 
         /** copy POL if all OK **/
         //if (valid){
           //if (pol->odem) ts->pol_[_POL_DEM_][y][p] = (short)0;
-          if (pol->odss) ts->pol_[_POL_DSS_][y][p] = (short)timing[_START_][_DOY_];
-          if (pol->odms) ts->pol_[_POL_DMS_][y][p] = (short)timing[_MID_][_DOY_];
-          if (pol->odes) ts->pol_[_POL_DES_][y][p] = (short)timing[_END_][_DOY_];
-          if (pol->odev) ts->pol_[_POL_DEV_][y][p] = (short)vector[_EARLY_][_DOY_];
-          if (pol->odav) ts->pol_[_POL_DAV_][y][p] = (short)vector[_GROW_][_DOY_];
-          if (pol->odlv) ts->pol_[_POL_DLV_][y][p] = (short)vector[_LATE_][_DOY_];
+          if (pol->odss) ts->pol_[_POL_DSS_][y][p] = (short)timing[_START_][_CE_];
+          if (pol->odms) ts->pol_[_POL_DMS_][y][p] = (short)timing[_MID_][_CE_];
+          if (pol->odes) ts->pol_[_POL_DES_][y][p] = (short)timing[_END_][_CE_];
+          if (pol->odev) ts->pol_[_POL_DEV_][y][p] = (short)vector[_EARLY_][_CE_];
+          if (pol->odav) ts->pol_[_POL_DAV_][y][p] = (short)vector[_GROW_][_CE_];
+          if (pol->odlv) ts->pol_[_POL_DLV_][y][p] = (short)vector[_LATE_][_CE_];
           //if (pol->odlm) ts->pol_[_POL_DLM_][y][p] = (short)0;
-          if (pol->olgs) ts->pol_[_POL_LGS_][y][p] = (short)(timing[_END_][_DOY_] - timing[_START_][_DOY_]);
-          if (pol->olbv) ts->pol_[_POL_LBV_][y][p] = (short)(vector[_LATE_][_DOY_] - vector[_EARLY_][_DOY_]);
+          if (pol->olgs) ts->pol_[_POL_LGS_][y][p] = (short)(timing[_END_][_CE_] - timing[_START_][_CE_]);
+          if (pol->olbv) ts->pol_[_POL_LBV_][y][p] = (short)(vector[_LATE_][_CE_] - vector[_EARLY_][_CE_]);
           //if (pol->ovem) ts->pol_[_POL_VEM_][y][p] = (short)0;
           if (pol->ovss) ts->pol_[_POL_VSS_][y][p] = (short)timing[_START_][_VAL_];
           if (pol->ovms) ts->pol_[_POL_VMS_][y][p] = (short)timing[_MID_][_VAL_];
@@ -388,7 +432,8 @@ if (p == 0) printf("mean, sd, and n: %f, %f, %d\n", recurrence[0], standdev(recu
           //if (pol->ovbl) ts->pol_[_POL_VBL_][y][p] = (short)0;
           if (pol->ovga) ts->pol_[_POL_VGA_][y][p] = (short)recurrence[0];
           if (pol->ovgv) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
-          if (pol->odpy) ts->pol_[_POL_DPY_][y][p] = (short)doy_theta;
+          //if (pol->odpy) ts->pol_[_POL_DPY_][y][p] = (short)(ce_theta_now - ce_theta);
+          if (pol->odpy) ts->pol_[_POL_DPY_][y][p] = (short)(ce_theta);
           //if (pol->oist) ts->pol_[_POL_IST_][y][p] = (short)0;
           //if (pol->oibl) ts->pol_[_POL_IBL_][y][p] = (short)0;
           //if (pol->oibt) ts->pol_[_POL_IBT_][y][p] = (short)0;
