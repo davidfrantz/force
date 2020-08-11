@@ -32,7 +32,7 @@ enum { _RAD_, _VAL_, _CUM_, _YEAR_, _DOY_, _CE_, _SEASON_, _PCX_, _PCY_, _COORD_
 
 void polar_coords(float r, float v, float yr, float polar_array[_COORD_LEN_]);
 void polar_vector(float x, float y, float yr, float doy_theta, float polar_array[_COORD_LEN_]);
-void identify_seasons(float **polar, int ni, int istep, float theta);
+void identify_seasons(float **polar, int ni, int istep, float doy_theta);
 void accumulate_seasons(float **polar, int ni);
 
 int polar_ts(tsa_t *ts, small *mask_, int nc, int ni, short nodata, int year_min, int year_max, par_tsi_t *tsi, par_pol_t *pol);
@@ -86,15 +86,18 @@ float r, v, doy;
 }
 
 
-void identify_seasons(float **polar, int ni, int istep, float theta){
-int i, s = -1;
+void identify_seasons(float **polar, int ni, int istep, float doy_theta){
+int i, s = -1, y = 0;
 float rstep = istep/365.0*2.0*M_PI;
+float ce_theta;
 
 
   for (i=0; i<ni; i++){
 
-    if (polar[i][_RAD_] >= theta && 
-        polar[i][_RAD_]-theta <= rstep) s++;
+    ce_theta = doy2ce(doy_theta, y);
+
+    if (polar[i][_CE_] >= ce_theta && 
+        polar[i][_CE_]-ce_theta <= istep){ s++; y++;}
 
     polar[i][_SEASON_] = s;
 
@@ -261,13 +264,13 @@ float **polar = NULL;
 
         r = ts->d_tsi[i].doy/365.0*2.0*M_PI;
 
-if (p == 367642) printf("doy: %d\n", ts->d_tsi[i].doy);
-if (p == 367642) printf("r:   %f\n", r);
-if (p == 367642) printf("v:   %f\n", v);
+if (p == 375639) printf("doy: %d\n", ts->d_tsi[i].doy);
+if (p == 375639) printf("r:   %f\n", r);
+if (p == 375639) printf("v:   %f\n", v);
 if (v < 0) v = 0;
         polar_coords(r, v, ts->d_tsi[i].year-year_min, polar[i]);
-if (p == 367642) printf("x:   %f\n", polar[i][_PCX_]);
-if (p == 367642) printf("y:   %f\n", polar[i][_PCY_]);
+if (p == 375639) printf("x:   %f\n", polar[i][_PCX_]);
+if (p == 375639) printf("y:   %f\n", polar[i][_PCY_]);
 
         mean_window[_LONGTERM_][_X_] += polar[i][_PCX_];
         mean_window[_LONGTERM_][_Y_] += polar[i][_PCY_];
@@ -276,12 +279,12 @@ if (p == 367642) printf("y:   %f\n", polar[i][_PCY_]);
 
       if (!valid) continue;
 
-if (p == 367642) printf("valid pixel.\n");
+if (p == 375639) printf("valid pixel.\n");
 
       // mean of polar coordinates
       mean_window[_LONGTERM_][_X_] /= ni;
       mean_window[_LONGTERM_][_Y_] /= ni;
-if (p == 367642) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_]);
+if (p == 375639) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_]);
 
       // multi-annual average vector
       polar_vector(mean_window[_LONGTERM_][_X_], mean_window[_LONGTERM_][_Y_], 0, 0, vector[_LONGTERM_]);
@@ -294,11 +297,11 @@ if (p == 367642) printf("mean pol x/y: %f %f\n", mean_window[_LONGTERM_][_X_], m
       }
       doy_theta = (theta*365.0/(2.0*M_PI));
       
-if (p == 367642) printf("avg:   %f %f %f\n", vector[_LONGTERM_][_RAD_], vector[_LONGTERM_][_DOY_], vector[_LONGTERM_][_VAL_]);
-if (p == 367642) printf("theta: %f %f\n", theta, doy_theta);
+if (p == 375639) printf("avg:   %f %f %f\n", vector[_LONGTERM_][_RAD_], vector[_LONGTERM_][_DOY_], vector[_LONGTERM_][_VAL_]);
+if (p == 375639) printf("theta: %f %f\n", theta, doy_theta);
 
 
-      identify_seasons(polar, ni, tsi->step, theta);
+      identify_seasons(polar, ni, tsi->step, doy_theta);
 
       accumulate_seasons(polar, ni);
 
@@ -315,8 +318,8 @@ if (p == 367642) printf("theta: %f %f\n", theta, doy_theta);
 
 
         for (i=i0; i<ni; i++){
-if (p == 367642) printf("season: %f, rad: %f, val: %f, x: %f, y: %f, cum: %f\n", 
-polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][_PCY_], polar[i][_CUM_]);
+if (p == 375639) printf("season: %2.0f, rad: %.2f, val: %7.2f, year: %2.0f, ce: %6.0f, doy: %3.0f, x: %7.2f, y: %7.2f, cum: %7.2f\n", 
+polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_YEAR_], polar[i][_CE_], polar[i][_DOY_], polar[i][_PCX_], polar[i][_PCY_], polar[i][_CUM_]);
           
           if (polar[i][_SEASON_] < s) continue;
           if (polar[i][_SEASON_] > s){ i0 = i; break; }
@@ -404,8 +407,8 @@ polar[i][_SEASON_], polar[i][_RAD_], polar[i][_VAL_], polar[i][_PCX_], polar[i][
 
 
 
-if (p == 367642) printf("season: %d, year %d\n", s, y);
-if (p == 367642) printf("mean, sd, and n: %f, %f, %d\n", recurrence[0], standdev(recurrence[1], n_window[_GROW_]), n_window[_GROW_]);
+if (p == 375639) printf("season: %d, year %d\n", s, y);
+if (p == 375639) printf("mean, sd, and n: %f, %f, %d\n", recurrence[0], standdev(recurrence[1], n_window[_GROW_]), n_window[_GROW_]);
 
 
 
