@@ -384,7 +384,7 @@ stack_compile_info_t *info = NULL;
           _POL_LENGTH_ + // trend on polarmetrics
           _POL_LENGTH_;  // cat on polarmetrics
 
-  printf("%d potential products.\n", nprod);
+  //printf("%d potential products.\n", nprod);
 
   alloc((void**)&info, nprod, sizeof(stack_compile_info_t));
 
