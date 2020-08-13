@@ -423,9 +423,12 @@ stack_compile_info_t *info = NULL;
   
   for (o=0; o<nprod; o++){
 
-    printf("%03d: compiling %s product? ", o, info[o].prodname);
+    //printf("%03d: compiling %s product? ", o, info[o].prodname);
+    
     if (info[o].enable){
-      printf("Yes\n");
+      
+      //printf("Yes\n");
+      
       if ((TSA[o] = compile_tsa_stack(ard[0].DAT, info[o].prodlen, idx, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
         printf("Error compiling %s product. ", info[o].prodname); error++;
       } else {
@@ -583,41 +586,42 @@ stack_compile_info_t *info = NULL;
       }
 
     } else {
-      printf("No\n");
+      //printf("No\n");
       TSA[o]  = NULL;
       *info[o].ptr = NULL;
     }
-    printf(" ptr: %p\n", *info[o].ptr);
+    
+    //printf(" ptr: %p\n", *info[o].ptr);
+    
   }
 
 
-printf("%02d: ts ptr tss: %p\n", 0, ts->tss_);
-printf("%02d: ts ptr rms: %p\n", 0, ts->rms_);
-printf("%02d: ts ptr tsi: %p\n", 0, ts->tsi_);
-printf("%02d: ts ptr stm: %p\n", 0, ts->stm_);
-printf("%02d: ts ptr spl: %p\n", 0, ts->spl_);
-printf("%02d: ts ptr fby: %p\n", 0, ts->fby_);
-printf("%02d: ts ptr fbq: %p\n", 0, ts->fbq_);
-printf("%02d: ts ptr fbm: %p\n", 0, ts->fbm_);
-printf("%02d: ts ptr fbw: %p\n", 0, ts->fbw_);
-printf("%02d: ts ptr fbd: %p\n", 0, ts->fbd_);
-printf("%02d: ts ptr try: %p\n", 0, ts->try_);
-printf("%02d: ts ptr trq: %p\n", 0, ts->trq_);
-printf("%02d: ts ptr trm: %p\n", 0, ts->trm_);
-printf("%02d: ts ptr trw: %p\n", 0, ts->trw_);
-printf("%02d: ts ptr trd: %p\n", 0, ts->trd_);
-printf("%02d: ts ptr cay: %p\n", 0, ts->cay_);
-printf("%02d: ts ptr caq: %p\n", 0, ts->caq_);
-printf("%02d: ts ptr cam: %p\n", 0, ts->cam_);
-printf("%02d: ts ptr caw: %p\n", 0, ts->caw_);
-printf("%02d: ts ptr cad: %p\n", 0, ts->cad_);
-
-for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr lsp: %p\n", o, ts->lsp_[o]);
-for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr trp: %p\n", o, ts->trp_[o]);
-for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr cap: %p\n", o, ts->cap_[o]);
-for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr pol: %p\n", o, ts->pol_[o]);
-for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr tro: %p\n", o, ts->tro_[o]);
-for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr cao: %p\n", o, ts->cao_[o]);
+  //printf("%02d: ts ptr tss: %p\n", 0, ts->tss_);
+  //printf("%02d: ts ptr rms: %p\n", 0, ts->rms_);
+  //printf("%02d: ts ptr tsi: %p\n", 0, ts->tsi_);
+  //printf("%02d: ts ptr stm: %p\n", 0, ts->stm_);
+  //printf("%02d: ts ptr spl: %p\n", 0, ts->spl_);
+  //printf("%02d: ts ptr fby: %p\n", 0, ts->fby_);
+  //printf("%02d: ts ptr fbq: %p\n", 0, ts->fbq_);
+  //printf("%02d: ts ptr fbm: %p\n", 0, ts->fbm_);
+  //printf("%02d: ts ptr fbw: %p\n", 0, ts->fbw_);
+  //printf("%02d: ts ptr fbd: %p\n", 0, ts->fbd_);
+  //printf("%02d: ts ptr try: %p\n", 0, ts->try_);
+  //printf("%02d: ts ptr trq: %p\n", 0, ts->trq_);
+  //printf("%02d: ts ptr trm: %p\n", 0, ts->trm_);
+  //printf("%02d: ts ptr trw: %p\n", 0, ts->trw_);
+  //printf("%02d: ts ptr trd: %p\n", 0, ts->trd_);
+  //printf("%02d: ts ptr cay: %p\n", 0, ts->cay_);
+  //printf("%02d: ts ptr caq: %p\n", 0, ts->caq_);
+  //printf("%02d: ts ptr cam: %p\n", 0, ts->cam_);
+  //printf("%02d: ts ptr caw: %p\n", 0, ts->caw_);
+  //printf("%02d: ts ptr cad: %p\n", 0, ts->cad_);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr lsp: %p\n", o, ts->lsp_[o]);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr trp: %p\n", o, ts->trp_[o]);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr cap: %p\n", o, ts->cap_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr pol: %p\n", o, ts->pol_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr tro: %p\n", o, ts->tro_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr cao: %p\n", o, ts->cao_[o]);
 
 
   if (error > 0){
