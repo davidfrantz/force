@@ -316,7 +316,6 @@ float sum;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int polar_ts(tsa_t *ts, small *mask_, int nc, int ni, short nodata, int year_min, int year_max, par_tsi_t *tsi, par_pol_t *pol){
 int l;
-int year;
 int p;
 int i, i_, i0;
 int s, y;
@@ -348,20 +347,20 @@ polar_t *theta0 = NULL;
 
 
 
-  //#pragma omp parallel private(l,i,i0,ni_,ce_left,ce_right,v_left,v_right,year,valid,ce,v,doy) firstprivate(southern) shared(mask_,ts,nc,ni,year_min,year_max,nodata,pol,nseg) default(none)
+  #pragma omp parallel private(l,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,recurrence,polar,theta0) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
   {
 
     // allocate
     alloc((void**)&polar, ni, sizeof(polar_t));
 
 
-    //#pragma omp for
+    #pragma omp for
     for (p=0; p<nc; p++){
 
       /** nodata if deriving POL failed **/
       for (l=0; l<_POL_LENGTH_; l++){
         if (ts->pol_[l] != NULL){
-          for (year=0; year<pol->ny; year++) ts->pol_[l][year][p] = nodata;
+          for (y=0; y<pol->ny; y++) ts->pol_[l][y][p] = nodata;
         }
       }
       
