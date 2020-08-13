@@ -133,15 +133,6 @@ METACAT=$METADIR"/metadata_S2.csv"
 
 # ============================================================
 # Check user input
-for s in $(echo $SENSIN | sed 's/,/ /g')
-do 
-  case "$s" in
-    LT05|LE07|LC08) continue ;;
-    *) printf "%s\n" "" "$s is not a valid sensor type." "Valid Sensors: LT05, LE07, LC08" ""
-	   exit ;;
-  esac
-done
-
 if ! date -d $DATEMIN &> /dev/null; then
   printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
   exit 1
