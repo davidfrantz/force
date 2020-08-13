@@ -55,6 +55,7 @@ typedef struct {
   short **lsp_[_LSP_LENGTH_];
   short **trp_[_LSP_LENGTH_];
   short **cap_[_LSP_LENGTH_];
+  short **pcx_, **pcy_;
   short **pol_[_POL_LENGTH_];
   short **tro_[_POL_LENGTH_];
   short **cao_[_POL_LENGTH_];

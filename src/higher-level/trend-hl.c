@@ -425,7 +425,7 @@ double mae, rmse;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_trend(tsa_t *ts, small *mask_, int nc, short nodata, par_hl_t *phl){
-int l, nlsp = 26;
+int l;
 bool in_ce = false;
 
 
@@ -437,9 +437,16 @@ bool in_ce = false;
 
   
   if (phl->tsa.lsp.otrd){
-    for (l=0; l<nlsp; l++){
+    for (l=0; l<_LSP_LENGTH_; l++){
       if (l < 7) in_ce = true; else in_ce = false;
       trend(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->trp_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
+    }
+  }
+  
+  if (phl->tsa.pol.otrd){
+    for (l=0; l<_POL_LENGTH_; l++){
+      if (l < 9) in_ce = true; else in_ce = false;
+      trend(ts->pol_[l], ts->d_pol, mask_, nc, phl->tsa.pol.ny, ts->tro_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
     }
   }
 
@@ -456,7 +463,7 @@ bool in_ce = false;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_cat(tsa_t *ts, small *mask_, int nc, short nodata, par_hl_t *phl){
-int l, nlsp = 26;
+int l;
 bool in_ce = false;
 
 
@@ -471,9 +478,16 @@ bool in_ce = false;
 
   
   if (phl->tsa.lsp.ocat){
-    for (l=0; l<nlsp; l++){
+    for (l=0; l<_LSP_LENGTH_; l++){
       if (l < 7) in_ce = true; else in_ce = false;
       cat(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->cap_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
+    }
+  }
+  
+  if (phl->tsa.pol.ocat){
+    for (l=0; l<_POL_LENGTH_; l++){
+      if (l < 9) in_ce = true; else in_ce = false;
+      cat(ts->pol_[l], ts->d_pol, mask_, nc, phl->tsa.pol.ny, ts->cao_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
     }
   }
 

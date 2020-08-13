@@ -108,20 +108,25 @@ const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_] = {
   { _HEMI_NORTH_, "NORTH" }, { _HEMI_SOUTH_, "SOUTH" }, { _HEMI_MIXED_, "MIXED" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_] = {
-  {_LSP_DEM_, "DEM" }, {_LSP_DSS_, "DSS" }, {_LSP_DRI_, "DRI" }, {_LSP_DPS_, "DPS" },
-  {_LSP_DFI_, "DFI" }, {_LSP_DES_, "DES" }, {_LSP_DLM_, "DLM" }, {_LSP_LTS_, "LTS" },
-  {_LSP_LGS_, "LGS" }, {_LSP_VEM_, "VEM" }, {_LSP_VSS_, "VSS" }, {_LSP_VRI_, "VRI" },
-  {_LSP_VPS_, "VPS" }, {_LSP_VFI_, "VFI" }, {_LSP_VES_, "VES" }, {_LSP_VLM_, "VLM" },
-  {_LSP_VBL_, "VBL" }, {_LSP_VSA_, "VSA" }, {_LSP_IST_, "IST" }, {_LSP_IBL_, "IBL" },
-  {_LSP_IBT_, "IBT" }, {_LSP_IGS_, "IGS" }, {_LSP_RAR_, "RAR" }, {_LSP_RAF_, "RAF" },
-  {_LSP_RMR_, "RMR" }, {_LSP_RMF_, "RMF" }};
+  { _LSP_DEM_, "DEM" }, { _LSP_DSS_, "DSS" }, { _LSP_DRI_, "DRI" }, { _LSP_DPS_, "DPS" },
+  { _LSP_DFI_, "DFI" }, { _LSP_DES_, "DES" }, { _LSP_DLM_, "DLM" }, { _LSP_LTS_, "LTS" },
+  { _LSP_LGS_, "LGS" }, { _LSP_VEM_, "VEM" }, { _LSP_VSS_, "VSS" }, { _LSP_VRI_, "VRI" },
+  { _LSP_VPS_, "VPS" }, { _LSP_VFI_, "VFI" }, { _LSP_VES_, "VES" }, { _LSP_VLM_, "VLM" },
+  { _LSP_VBL_, "VBL" }, { _LSP_VSA_, "VSA" }, { _LSP_IST_, "IST" }, { _LSP_IBL_, "IBL" },
+  { _LSP_IBT_, "IBT" }, { _LSP_IGS_, "IGS" }, { _LSP_RAR_, "RAR" }, { _LSP_RAF_, "RAF" },
+  { _LSP_RMR_, "RMR" }, { _LSP_RMF_, "RMF" }};
 
 const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_] = {
-  { _POL_DSS_, "DSS" }, { _POL_DMS_, "DMS" }, { _POL_DES_, "DES" }, { _POL_DEV_, "DEV" }, 
-  { _POL_DAV_, "DAV" }, { _POL_DLV_, "DLV" }, { _POL_LGS_, "LGS" }, { _POL_LBV_, "LBV" }, 
-  { _POL_VSS_, "VSS" }, { _POL_VMS_, "VMS" }, { _POL_VES_, "VES" }, { _POL_VEV_, "VEV" }, 
-  { _POL_VAV_, "VAV" }, { _POL_VLV_, "VLV" }, { _POL_VGA_, "VGA" }, { _POL_VGV_, "VGV" }, 
-  { _POL_DPY_, "DPY" }};
+  { _POL_DEM_, "DEM" }, { _POL_DLM_, "DLM" }, { _POL_DPS_, "DPS" }, 
+  { _POL_DSS_, "DSS" }, { _POL_DMS_, "DMS" }, { _POL_DES_, "DES" }, 
+  { _POL_DEV_, "DEV" }, { _POL_DAV_, "DAV" }, { _POL_DLV_, "DLV" }, 
+  { _POL_LTS_, "LTS" }, { _POL_LGS_, "LGS" }, { _POL_LGV_, "LGV" }, 
+  { _POL_VEM_, "VEM" }, { _POL_VLM_, "VLM" }, { _POL_VPS_, "VPS" }, 
+  { _POL_VSS_, "VSS" }, { _POL_VMS_, "VMS" }, { _POL_VES_, "VES" }, 
+  { _POL_VEV_, "VEV" }, { _POL_VAV_, "VAV" }, { _POL_VLV_, "VLV" }, 
+  { _POL_VBL_, "VBL" }, { _POL_VSA_, "VSA" }, { _POL_VPA_, "VPA" }, 
+  { _POL_VGA_, "VGA" }, { _POL_VGV_, "VGV" }, { _POL_DPY_, "DPY" }, 
+  { _POL_DPV_, "DPV" }};
 
 const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};

@@ -191,16 +191,18 @@ enum { _LSP_DEM_, _LSP_DSS_, _LSP_DRI_, _LSP_DPS_, _LSP_DFI_, _LSP_DES_,
        _LSP_RMR_, _LSP_RMF_, _LSP_LENGTH_ };
 
 // polar metrics
-enum { _POL_DSS_, _POL_DMS_, _POL_DES_, _POL_DEV_, _POL_DAV_, _POL_DLV_, 
-       _POL_LGS_, _POL_LBV_, _POL_VSS_, _POL_VMS_, _POL_VES_, _POL_VEV_, 
-       _POL_VAV_, _POL_VLV_, _POL_VGA_, _POL_VGV_, _POL_DPY_, _POL_LENGTH_ };
+enum { _POL_DEM_, _POL_DLM_, _POL_DPS_, _POL_DSS_, _POL_DMS_, _POL_DES_, 
+       _POL_DEV_, _POL_DAV_, _POL_DLV_, _POL_LTS_, _POL_LGS_, _POL_LGV_, 
+       _POL_VEM_, _POL_VLM_, _POL_VPS_, _POL_VSS_, _POL_VMS_, _POL_VES_, 
+       _POL_VEV_, _POL_VAV_, _POL_VLV_, _POL_VBL_, _POL_VSA_, _POL_VPA_, 
+       _POL_VGA_, _POL_VGV_, _POL_DPY_, _POL_DPV_, _POL_LENGTH_ };
 
 // folding
 enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGTH_ };
 
 // time series parts
 enum { _PART_TOTAL_, _PART_BEFORE_, _PART_AFTER_, _PART_LENGTH_ };
- 
+
 // trend
 enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_, 
        _TRD_RSQ_,  _TRD_SIG_,    _TRD_RMSE_,  
