@@ -1,3 +1,30 @@
+##########################################################################
+# 
+# This file is part of FORCE - Framework for Operational Radiometric 
+# Correction for Environmental monitoring.
+# 
+# Copyright (C) 2013-2020 David Frantz
+# 
+# FORCE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# FORCE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
+# 
+##########################################################################
+
+# Copyright (C) 2020 Stefan Ernst
+# Contact: stefan.ernst@hu-berlin.de
+
+# This script downloads Landsat and Sentinel-2 Level 1 data from GCS
+
 trap "echo Exited!; exit;" SIGINT SIGTERM # make sure that CTRL-C breaks out of download loop
 set -e # make sure script exits if any process exits unsuccessfully
 
@@ -142,7 +169,7 @@ case $SENSIN in
     print "%s\n" "Error: Sentinel-2 sensor names for Landsat query received" 
     show_help
     fi ;;
-  LT05|LT05,LE07|LT05,LE07,LC08|LE07|LE07,LC08|LC08) 
+  LT05|LT05,LE07|LT05,LC08|LT05,LE07,LC08|LE07|LE07,LC08|LC08) 
     if [ $PLATFORM = "s2" ]; then
     printf "%s\n" "" "Error: Landsat sensor names for Sentinel-2 query received" 
     show_help
@@ -178,11 +205,6 @@ fi
 
 # ============================================================
 # Get tiles / footprints of interest
-if [ "$AOITYPE" -eq 2 ]; then
-  if ! [  $(basename "$AOI" | cut -d"." -f 2-) == "shp" ]; then
-    printf "%s\n" "" "WARNING: AOI does not seem to be a shapefile. Other filetypes supported by GDAL should work, but are untested."
-  fi
-fi
 if [ "$AOITYPE" -eq 1 ] || [ "$AOITYPE" -eq 2 ]; then
   if ! [ -x "$(command -v ogr2ogr)" ]; then
     printf "%s\n" "Could not find ogr2ogr, is gdal installed?" "Define the AOI polygon using coordinates (option 3) if gdal is not available." >&2
@@ -192,14 +214,21 @@ fi
 
 
 if [ "$AOITYPE" -eq 1 ]; then
-
+  printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
   WKT=$(echo $AOI | sed 's/,/%20/g; s/\//,/g')
   WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
   TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "Name" WFS:"$WFSURL") 
-  TILES="_"$(echo $TILERAW | sed 's/Name, /T/; s/ /_|_T/g')"_"
+  case $PLATFORM in
+    s2) TILES="_"$(echo $TILERAW | sed 's/Name, /T/; s/ /_|_T/g')"_" ;;
+    ls) TILES="_"$(echo $TILERAW | sed 's/PR, //; s/ /_|_/g')"_" ;;
+  esac
+
   
 elif [ "$AOITYPE" -eq 2 ]; then
-
+  
+  if ! [  $(basename "$AOI" | cut -d"." -f 2-) == "shp" ]; then
+    printf "%s\n" "" "WARNING: AOI does not seem to be a shapefile. Other filetypes supported by GDAL should work, but are untested."
+  fi
   printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
   AOINE=$(echo $(basename "$AOI") | rev | cut -d"." -f 2- | rev)
   BBOX=$(ogrinfo -so $AOI $AOINE | grep "Extent: " | sed 's/Extent: //; s/(//g; s/)//g; s/, /,/g; s/ - /,/')
@@ -212,10 +241,13 @@ elif [ "$AOITYPE" -eq 2 ]; then
   TILES="_"$(echo $TILERAW | sed 's/Name, /T/; s/ /_|_T/g')"_"
   rm merged.gpkg
     
-elif [ "$AOITYPE" -eq 3 ]; then
+elif [ "$AOITYPE" -eq 3 ]; then  
   
   TILERAW=$AOI
-  TILES="_T"$(echo $AOI | sed 's/,/_|_T/g')"_"
+  case $PLATFORM in
+    "s2") TILES="_T"$(echo $TILERAW | sed 's/,/_|_T/g')"_" ;;
+    "ls") TILES="_"$(echo $TILERAW | sed 's/,/_|_/g')"_" ;;
+  esac
 
 else
   echo "  Error: Please specify aoitype as 1 for coordinates of a polygon, "
@@ -231,12 +263,15 @@ printf "%s\n" "" "Querying the metadata catalogue for" "Tile(s): "$(echo $TILERA
 
 if [ $PLATFORM = "s2" ]; then
   LINKS=$(grep -E $TILES $METACAT | grep -E $(echo $SENSIN | sed s'/,/|/g') | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start=$DATEMIN -v stop=$DATEMAX -v clow=$CCMIN -v chigh=$CCMAX -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh')
-elif [ $PLATFORM = "landsat" ]; then
+elif [ $PLATFORM = "ls" ]; then
   LINKS=$(grep -E $TILES $METACAT | grep -E $(echo "$SENSIN" | sed 's/,/_|/g')"_" | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start=$DATEMIN -v stop=$DATEMAX -v clow=$CCMIN -v chigh=$CCMAX -F "," '$5 >= start && $5 <= stop && $6 == 01 && $7 == "T1" && $12 >= clow && $12 <= chigh')
 fi
 
 printf "%s" "$LINKS" > filtered_metadata.txt
-SIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}')
+case $PLATFORM in 
+  "s2") SIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
+  "ls") SIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$17/1048576} END {printf "%f", s}') ;;
+esac
 NSCENES=$(sed -n '$=' filtered_metadata.txt)
 rm filtered_metadata.txt
 
