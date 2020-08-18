@@ -1024,7 +1024,7 @@ int i = 0;
 
     // in case of ENVI, update description
     //if (format == _FMT_ENVI_) 
-    GDALSetDescription(fp, stack->name);
+    //GDALSetDescription(fp, stack->name);
 
 
     for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
