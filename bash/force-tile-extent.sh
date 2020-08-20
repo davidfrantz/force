@@ -26,12 +26,12 @@ EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: `basename $0` input-vector datacube-dir white-list"
+  echo "Usage: `basename $0` input-vector datacube-dir allow-list"
   echo ""
   echo "       input-file:   a polygon vector file"
   echo "       datacube-dir: the directory of a datacube;"
   echo "                     datacube-definition.prj needs to exist in there"
-  echo "       white-list:   a tile white-list to restrict the processing extent."
+  echo "       allow-list:   a tile allow-list to restrict the processing extent."
   echo "                     This file will be written"
   echo ""
   exit
@@ -63,7 +63,7 @@ cp $DIR/datacube-definition.prj $TMP/datacube-definition.prj
 
 # generate masks, use force-cube version relative to this program
 BINDIR=$(dirname $0)
-$BINDIR"/"force-cube.sh $INP $TMP rasterize 10  &> /dev/null
+$BINDIR"/"force-cube $INP $TMP rasterize 10  &> /dev/null
 
 
 WD=$PWD
@@ -111,13 +111,13 @@ NSQ=$((NSQX*NSQY))
 if [ "$NTILES" -lt "$NSQ" ]; then
 
   echo "Processing extent is not square."
-  echo "Suggest to use the tile white-list:"
+  echo "Suggest to use the tile allow-list:"
   echo "FILE_TILE =" $LIST
 
 else
 
   echo "Processing extent is square."
-  echo "Using the tile white-list is not necessary, but can be used with:"
+  echo "Using the tile allow-list is not necessary, but can be used with:"
   echo "FILE_TILE =" $LIST
 
 fi
@@ -126,7 +126,7 @@ echo ""
 
 cd $WD
 
-# write white-list
+# write allow-list
 echo $NTILES > $LIST
 printf "%s\n" "${TILES[@]}" >> $LIST
 

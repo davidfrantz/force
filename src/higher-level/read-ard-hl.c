@@ -366,7 +366,7 @@ int nchar;
       if (date.ce > phl->date_range[_MAX_].ce) vs = false;
       if (!phl->date_doys[date.doy])  vs = false;
 
-      // white-list image
+      // allow-list image
       if (vs) copy_string(d.list[d.n++], NPOW_10, d.LIST[t]->d_name);
 
     }

@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 int tile_readlist(char *f_tile, int **X, int **Y, int *k);
-int tile_whitelisted(int *white_x, int *white_y, int white_k, int x, int y);
+int tile_allowlisted(int *allow_x, int *allow_y, int allow_k, int x, int y);
 int tile_active(char *f_tile, cube_t *cube);
 
 #ifdef __cplusplus

@@ -46,7 +46,7 @@ stack_t *compile_cso_stack(stack_t *ard, int nb, bool write, char *prodname, par
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 stack_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct){
 stack_t **CSO = NULL;
-short nodata = -32767;
+short nodata = SHRT_MIN;
 int w, q;
 int year, month;
 date_t date;
@@ -95,13 +95,13 @@ short ***ptr[NPOW_08];
       month = phl->date_range[_MIN_].month;
 
       for (w=0; w<=nw; w++){
-        set_stack_nodata(CSO[o], w, nodata);
         if (month > 12){ year++; month -= 12;}
         set_date(&date, year, month, 1);
         copy_date(&date, &cs->d_cso[w]);
         compact_date(date.year, date.month, date.day, fdate, NPOW_10);
 //printf("W: "); print_date(&date);
         if (w < nw){
+          set_stack_nodata(CSO[o], w, nodata);
           set_stack_wavelength(CSO[o], w, w+1);
           set_stack_date(CSO[o], w, date);
           set_stack_domain(CSO[o], w, fdate);
@@ -207,7 +207,7 @@ int *t0 = NULL, *t1 = NULL;
 int month, year;
 int nc;
 int nw;
-short nodata = -32767;
+short nodata = SHRT_MIN;
 short minimum, maximum;
 short q25_, q75_;
 double mean, var;

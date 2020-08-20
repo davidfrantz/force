@@ -49,7 +49,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_char_par(params,    "DIR_AOD",               _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_aod);
   register_char_par(params,    "FILE_TILE",             _CHAR_TEST_NULL_OR_EXIST_, &pl2->f_tile);
   register_char_par(params,    "FILE_DEM",              _CHAR_TEST_NULL_OR_EXIST_, &pl2->fdem);
-  register_char_par(params,    "DIR_MASTER",            _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_master);
+  register_char_par(params,    "DIR_COREG_BASE",        _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_coreg);
   register_double_par(params,  "TILE_SIZE",             0, INT_MAX, &pl2->tilesize);
   register_double_par(params,  "BLOCK_SIZE",            0, INT_MAX, &pl2->chunksize);
   register_double_par(params,  "RESOLUTION_LANDSAT",    0, INT_MAX, &pl2->res_landsat);
@@ -71,8 +71,8 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_float_par(params,   "WATER_VAPOR",           0, 15, &pl2->wvp);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
-  register_int_par(params,     "DEM_NODATA",            INT_MIN, INT_MAX, &pl2->dem_nodata);
-  register_int_par(params,     "MASTER_NODATA",         INT_MIN, INT_MAX, &pl2->master_nodata);
+  register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
+  register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
   register_float_par(params,   "MAX_CLOUD_COVER_TILE",  1, 100, &pl2->maxtc);
   register_float_par(params,   "CLOUD_THRESHOLD",       0, 1, &pl2->cldprob);
@@ -222,8 +222,8 @@ char  bname[NPOW_10] = "\0";
 
   if (pl2->dem_nodata == 0){
     printf("DEM_NODATA is 0. Check if this is correct. 0 is a bad choice of DEM nodata. ");}
-  if (pl2->master_nodata == 0){
-    printf("MASTER_NODATA is 0. Check if this is correct. 0 is a bad choice of reflectance nodata. ");}
+  if (pl2->coreg_nodata == 0){
+    printf("COREG_BASE_NODATA is 0. Check if this is correct. 0 is a bad choice of reflectance nodata. ");}
 
 
   if (!pl2->doaod){

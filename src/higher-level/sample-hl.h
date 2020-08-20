@@ -39,7 +39,15 @@ Sampling header
 extern "C" {
 #endif
 
-stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
+typedef struct {
+  double **tab;  // table
+  bool *visited; // sample already visited?
+  int ns;        // number of samples
+  int nleft;     // number of samples still to do
+  int nr;        // number of response variables
+} aux_smp_t;
+
+stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

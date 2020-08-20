@@ -972,7 +972,7 @@ float **xyz_tsd = NULL;
         }
 
         if (num > 0) cf = mx/num*10000; else cf = cor_[p]*10000;
-        if (cf > UINT_MAX) cf = UINT_MAX;
+        if (cf > USHRT_MAX) cf = USHRT_MAX;
         if (num > 0) cf_[p] = (ushort)cf;
 
     }

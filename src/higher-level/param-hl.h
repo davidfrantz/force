@@ -388,7 +388,7 @@ typedef struct {
   char *d_higher; // Higher Level directory
   char *d_mask;   // mask directory
   char *b_mask;   // mask basename
-  char *f_tile;   // tile white-list
+  char *f_tile;   // tile allow-list
 
   // spatial variables
   int *tx;

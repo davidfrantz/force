@@ -45,7 +45,7 @@ double **parse_coord_list(char *fname, size_t *ncoord);
 --- ncoord: number of coordinate pairs (returned)
 +++ Return: array with coordinates
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double **parse_coord_list(char *fname, size_t *ncoord){
+/**double **parse_coord_list(char *fname, size_t *ncoord){
 FILE *fp;
 char  buffer[NPOW_10] = "\0";
 char *tag = NULL;
@@ -85,7 +85,38 @@ size_t bufsize = NPOW_10;
 
   *ncoord = k;
   return coords;
+}**/
+
+
+void append_table(char *fname, bool *allow, double **tab, int nrow, int ncol, int decimals);
+
+void append_table(char *fname, bool *allow, double **tab, int nrow, int ncol, int decimals){
+int row, col;
+FILE *fp = NULL;
+
+
+  if (!(fp = fopen(fname, "a"))){
+    printf("unable to open %s. ", fname); exit(FAILURE);}
+
+  for (row=0; row<=nrow; row++){
+
+    if (allow[row]){
+
+      fprintf(fp, "%.*f", decimals, tab[row][0]);
+      for (col=1; col<ncol; col++) fprintf(fp, " %.*f", decimals, tab[row][col]);
+      fprintf(fp, "\n");
+    }
+
+  }
+
+  fclose(fp);
+
+  return;
 }
+
+
+
+
 
 
 /** public functions
@@ -101,33 +132,38 @@ size_t bufsize = NPOW_10;
 --- nproduct:  number of output stacks (returned)
 +++ Return:    empty stacks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct){
+stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct){
 small *mask_ = NULL;
-int f, s, i, j, p;
-size_t ns;
+int f, r, s, i, j, p;
 int cx, cy, chunk, tx, ty;
+int nr;
 double res;
-double **smp = NULL;
 coord_t smp_map, smp_map_ul;
 int smp_tx, smp_ty, smp_chunk;
 int smp_tj, smp_ti;
-int error = 0, added = 0;
-bool *found = NULL, valid;
-short **sample = NULL;
-float *response = NULL;
-FILE *fp = NULL;
+int error = 0, found = 0, added = 0;
+bool *copied = NULL, valid;
+double **smp_features = NULL;
+double **smp_response = NULL;
 coord_t geo_ul, geo_ur, geo_lr, geo_ll;
 coord_t geo_upper, geo_lower, geo_left, geo_right;
 double minx, maxx, miny, maxy; 
 
 
+  // if no sample is left, skip all
+  if (smp->nleft == 0){
+    *nproduct = 0;
+    return NULL;
+  }
+
+
   // import stacks
-  cx = get_stack_chunkncols(features[0].DAT);
-  cy = get_stack_chunknrows(features[0].DAT);
-  res = get_stack_res(features[0].DAT);
+  cx    = get_stack_chunkncols(features[0].DAT);
+  cy    = get_stack_chunknrows(features[0].DAT);
+  res   = get_stack_res(features[0].DAT);
   chunk = get_stack_chunk(features[0].DAT);
-  tx = get_stack_tilex(features[0].DAT);
-  ty = get_stack_tiley(features[0].DAT);
+  tx    = get_stack_tilex(features[0].DAT);
+  ty    = get_stack_tiley(features[0].DAT);
 
 //  nodata = get_stack_nodata(features[0].DAT, 0);
 
@@ -140,15 +176,13 @@ double minx, maxx, miny, maxy;
   }
 
 
-  // read samples
-  smp = parse_coord_list(phl->smp.f_coord, &ns);
+  nr = smp->nr-2;
+
+  alloc((void**)&copied,           smp->ns,     sizeof(bool));
+  alloc_2D((void***)&smp_features, smp->ns, nf, sizeof(double));
+  alloc_2D((void***)&smp_response, smp->ns, nr, sizeof(double));
 
 
-  alloc((void**)&found, ns, sizeof(bool));
-  alloc_2D((void***)&sample, nf, ns, sizeof(short));
-  alloc((void**)&response, ns, sizeof(float));
-
-  
   if (phl->smp.projected){
 
     // corner coordinates of chunk
@@ -186,26 +220,28 @@ double minx, maxx, miny, maxy;
   }
 
 
-  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,valid) shared(tx,ty,chunk,res,cx,cy,nf,ns,minx,maxx,miny,maxy,found,sample,response,smp,features,mask_,cube,phl) reduction(+: error, added) default(none)
+  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,r,valid) shared(tx,ty,chunk,res,cx,cy,nf,nr,minx,maxx,miny,maxy,copied,smp_features,smp_response,smp,features,mask_,cube,phl) reduction(+: error, found, added) default(none)
   {
 
     #pragma omp for
-    for (s=0; s<(int)ns; s++){
+    for (s=0; s<smp->ns; s++){
 
-      if (smp[0][s] < minx) continue;
-      if (smp[0][s] > maxx) continue;
-      if (smp[1][s] < miny) continue;
-      if (smp[1][s] > maxy) continue;
+      if (smp->visited[s]) continue;
+
+      if (smp->tab[s][_X_] < minx) continue;
+      if (smp->tab[s][_X_] > maxx) continue;
+      if (smp->tab[s][_Y_] < miny) continue;
+      if (smp->tab[s][_Y_] > maxy) continue;
       
       if (phl->smp.projected){
 
-        smp_map.x = smp[0][s];
-        smp_map.y = smp[1][s];
+        smp_map.x = smp->tab[s][_X_];
+        smp_map.y = smp->tab[s][_Y_];
 
       } else {
 
         // get target coordinates in target css coordinates
-        if ((warp_geo_to_any(smp[0][s], smp[1][s], &smp_map.x, &smp_map.y, cube->proj)) == FAILURE){
+        if ((warp_geo_to_any(smp->tab[s][_X_], smp->tab[s][_Y_], &smp_map.x, &smp_map.y, cube->proj)) == FAILURE){
           printf("Computing target coordinates in dst_srs failed!\n"); 
           error++;
           continue;
@@ -239,15 +275,19 @@ double minx, maxx, miny, maxy;
 
       // extract
       for (f=0, valid=true; f<nf; f++){
-        sample[f][s] = features[f].dat[0][p];
+        smp_features[s][f] = features[f].dat[0][p];
         if (!features[f].msk[p] && phl->ftr.exclude) valid = false;
       }
-      response[s] = smp[_Z_][s];
-      
-      if (!valid) continue;
+     for (r=0; r<nr; r++) smp_response[s][r] = smp->tab[s][_Z_+r];
+
 
       // we are done with this sample
-      found[s] = true;
+      smp->visited[s] = true;
+      found++;
+
+      if (!valid) continue;
+
+      copied[s] = true;
       added++;
 
     }
@@ -256,48 +296,14 @@ double minx, maxx, miny, maxy;
 
   if (error > 0) printf("there were %d errors in coordinate conversion..\n", error);
 
+  smp->nleft -= found;
 
-  if (!(fp = fopen(phl->smp.f_sample, "a"))){
-    printf("unable to open sample file. "); return NULL;}
 
-  for (s=0; s<(int)ns; s++){
-
-    // if sample was taken, skip
-    if (found[s]){
-      fprintf(fp, "%d", sample[0][s]);
-      for (f=1; f<nf; f++) fprintf(fp, " %d", sample[f][s]);
-      fprintf(fp, "\n");
-    }
-
+  if (added > 0){
+    append_table(phl->smp.f_sample,   copied, smp_features, smp->ns, nf, 0);
+    append_table(phl->smp.f_response, copied, smp_response, smp->ns, nr, 6);
+    append_table(phl->smp.f_coords,   copied, smp->tab,     smp->ns, 2,  6);
   }
-
-  fclose(fp);
-  
-  
-  if (!(fp = fopen(phl->smp.f_response, "a"))){
-    printf("unable to open response file. "); return NULL;}
-
-  for (s=0; s<(int)ns; s++){
-
-    // if sample was taken, skip
-    if (found[s]) fprintf(fp, "%f\n", response[s]);
-
-  }
-
-  fclose(fp);
-
-
-  if (!(fp = fopen(phl->smp.f_coords, "a"))){
-    printf("unable to open coordinates file. "); return NULL;}
-
-  for (s=0; s<(int)ns; s++){
-
-    // if sample was taken, skip
-    if (found[s]) fprintf(fp, "%f %f\n", smp[_X_][s], smp[_Y_][s]);
-
-  }
-
-  fclose(fp);
 
 
   #ifdef FORCE_DEBUG
@@ -305,10 +311,10 @@ double minx, maxx, miny, maxy;
     added, tx, ty, chunk);
   #endif
 
-  free_2D((void**)smp, 3);
-  free((void*)found);
-  free((void*)response);
-  free_2D((void**)sample, nf);
+
+  free((void*)copied);
+  free_2D((void**)smp_response, smp->ns);
+  free_2D((void**)smp_features, smp->ns);
 
   *nproduct = 0;
   return NULL;

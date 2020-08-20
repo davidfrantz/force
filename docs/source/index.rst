@@ -5,7 +5,7 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.2.1**
+**Version 3.4.0**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
@@ -120,7 +120,6 @@ Related Links
    :hidden:
 
    proj.rst
-   faq.rst
    issues.rst
    contact.rst
 

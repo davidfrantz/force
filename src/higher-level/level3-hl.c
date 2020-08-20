@@ -222,7 +222,7 @@ int nprod = 0;
 int p, nx, ny, nc, nb;
 double res;
 short nodata;
-short lsp_nodata = -32767;
+short lsp_nodata = SHRT_MIN;
 target_t *target = NULL;
 int *tdist = NULL;
 par_scr_t *score = NULL;

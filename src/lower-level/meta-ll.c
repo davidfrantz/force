@@ -75,7 +75,7 @@ int init_metadata(meta_t *meta){
 printf("check that all meta is initialized, stack as well?\n");
 #endif
 
-  meta->fill = -32767;
+  meta->fill = SHRT_MIN;
 
   meta->dtype      = meta->fill;
   meta->sat        = meta->fill;
@@ -132,7 +132,7 @@ int init_calibration(cal_t *cal){
   copy_string(cal->fname,     NPOW_10, "NULL");
   copy_string(cal->orig_band, NPOW_03, "NULL");
 
-  cal->fill     = -32767;
+  cal->fill     = SHRT_MIN;
 
   cal->rsr_band = cal->fill;
   cal->lmax     = cal->fill;

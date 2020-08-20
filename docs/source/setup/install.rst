@@ -58,6 +58,19 @@ FORCE is mostly written in C/C++: Thus, it needs to be compiled. Administrator r
     force
 
   If the program cannot be found, you will likely need to add this directory to your search path ``$PATH`` (see `here <https://opensource.com/article/17/6/set-path-linux>`_). This might happen if you have used a custom installation directory.
+  
+  
+Installation of the development version
+---------------------------------------
+
+To install FORCE with all "bleeding-edge features", consider to use the develop version.
+
+* After point (3), change to the develop branch, then proceed with (4).
+
+  .. code-block:: bash
+
+    git checkout -b develop
+    git pull origin develop
 
 
 Installation with optional software

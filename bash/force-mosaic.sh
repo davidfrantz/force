@@ -33,10 +33,11 @@ if [ $# -ne $EXPECTED_ARGS ]; then
 fi
 
 NOW=$PWD
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 INP=$(readlink -f $1)
 OUT=$INP/mosaic
-LIST=$OUT/list.txt
+
 
 
 # input dir exists?
@@ -56,14 +57,17 @@ fi
 
 cd $OUT
 
+function mosaic_this(){
 
-FILES=$(find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq | xargs)
+  num=$1
+  prd=$2
+  bin=$3
+  LIST="force-mosaic_list_$2.txt"
 
-# for each possible output product
-for prd in $FILES; do 
+  echo $bin
 
   echo "mosaicking" $prd
-  
+
   ONAME=${prd/.dat/.vrt}
   ONAME=${ONAME/.tif/.vrt}
 
@@ -86,11 +90,20 @@ for prd in $FILES; do
 
   # build vrt
   if [ $N -gt 0 ]; then
+
     echo $N "chips found".
-    gdalbuildvrt -q -srcnodata $NODATA -vrtnodata $NODATA -input_file_list $LIST $OUT"/"$ONAME
-    sed -i.tmp 's/relativeToVRT="0"/relativeToVRT="1"/g' $OUT"/"$ONAME
-    chmod --reference $OUT"/"$ONAME".tmp" $OUT"/"$ONAME
-    rm $OUT"/"$ONAME".tmp"
+
+    #build VRT
+    gdalbuildvrt -q -srcnodata $NODATA -vrtnodata $NODATA -input_file_list $LIST $ONAME
+
+    # set vrt to relative paths
+    sed -i.tmp 's/relativeToVRT="0"/relativeToVRT="1"/g' $ONAME
+    chmod --reference $ONAME".tmp" $ONAME
+    rm $ONAME".tmp"
+
+    # copy metadata
+    $bin"/"force-mdcp $FIRST $ONAME
+
   else
     echo "no chip found."
   fi
@@ -102,7 +115,22 @@ for prd in $FILES; do
     exit
   fi
 
-done
+}
+
+export -f mosaic_this
+
+
+PRODUCTS="force-mosaic_products.txt"
+
+find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
+NPROD=$(wc -l $PRODUCTS | cut -d " " -f 1)
+
+echo "mosaicking $NPROD products:"
+parallel -a $PRODUCTS echo        {#} {}
+parallel -a $PRODUCTS mosaic_this {#} {} $BINDIR
+
+rm $PRODUCTS
 
 cd $PWD
 
+exit 0

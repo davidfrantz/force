@@ -79,9 +79,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``X_TILE_RANGE = 0 0``
     | ``Y_TILE_RANGE = 0 0``
 
-  * White list of tiles.
+  * Allow-list of tiles.
     Can be used to further limit the analysis extent to non-square extents.
-    The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+    The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
     Optional. If NULL, the complete analysis extent is processed
 
     | *Type:* full file path
@@ -116,8 +116,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * Nodata value of the features.
 
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``FEATURE_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``FEATURE_NODATA = -9999``
     
   * Should nodata values be excluded if any feature is nodata (TRUE).
     Or just proceed (FALSE)?
@@ -152,7 +152,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     This parameter is an integer list, which defines the threshold for each feature given. 
     The list needs to be as long as there are features (including bands).
     
-    | *Type:* Integer list. Valid values [-32767,32767]
+    | *Type:* Integer list. Valid values [-32768,32767]
     | ``LSM_THRESHOLD = 2000 2000 3500 2000 -2000 5000 7500 -3500 500 750 890 999 0 0 0 0 0 50 5500 1500 300 78 250 500 500 500``
 
   * This parameter determines if the landscape metrics are also calculated for pixels covered by the background class.

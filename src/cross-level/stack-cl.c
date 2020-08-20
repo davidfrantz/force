@@ -525,7 +525,7 @@ int i;
   stack->ty = 0;
 
   copy_string(stack->proj,NPOW_10, "NA");
-  copy_string(stack->par, NPOW_13, "NA");
+  copy_string(stack->par, NPOW_14, "NA");
 
   stack->save   = NULL;
   stack->nodata = NULL;
@@ -673,23 +673,23 @@ int i = 0;
 
   //CPLPushErrorHandler(CPLQuietErrorHandler);
 
-  alloc_2DC((void***)&fp_meta,   n_fp_meta,   NPOW_13, sizeof(char));
-  alloc_2DC((void***)&band_meta, n_band_meta, NPOW_13, sizeof(char));
+  alloc_2DC((void***)&fp_meta,   n_fp_meta,   NPOW_14, sizeof(char));
+  alloc_2DC((void***)&band_meta, n_band_meta, NPOW_14, sizeof(char));
   sys_meta = system_info(&n_sys_meta);
 
 
-  copy_string(fp_meta[i++], NPOW_13, "FORCE_version");
-  copy_string(fp_meta[i++], NPOW_13, _VERSION_);
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_version");
+  copy_string(fp_meta[i++], NPOW_14, _VERSION_);
   
-  copy_string(fp_meta[i++], NPOW_13, "FORCE_description");
-  copy_string(fp_meta[i++], NPOW_13, stack->name);
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
+  copy_string(fp_meta[i++], NPOW_14, stack->name);
   
-  copy_string(fp_meta[i++], NPOW_13, "FORCE_product");
-  copy_string(fp_meta[i++], NPOW_13, stack->product);
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_product");
+  copy_string(fp_meta[i++], NPOW_14, stack->product);
   
-  copy_string(fp_meta[i++], NPOW_13, "FORCE_param");
-  copy_string(fp_meta[i++], NPOW_13, stack->par);
-  
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_param");
+  copy_string(fp_meta[i++], NPOW_14, stack->par);
+
 
   // how many bands to output?
   for (b=0, b_=0; b<stack->nb; b++) b_ += stack->save[b];
@@ -909,28 +909,29 @@ int i = 0;
 
       i = 0;
 
-      copy_string(band_meta[i++], NPOW_13, "Domain");
-      copy_string(band_meta[i++], NPOW_13, stack->domain[b_stack]);
 
-      copy_string(band_meta[i++], NPOW_13, "Wavelength");
-      nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->wavelength[b_stack]); i++;
-      if (nchar < 0 || nchar >= NPOW_13){ 
+      copy_string(band_meta[i++], NPOW_14, "Domain");
+      copy_string(band_meta[i++], NPOW_14, stack->domain[b_stack]);
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->wavelength[b_stack]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
-      copy_string(band_meta[i++], NPOW_13, "Wavelength_unit");
-      copy_string(band_meta[i++], NPOW_13, stack->unit[b_stack]);
+      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
+      copy_string(band_meta[i++], NPOW_14, stack->unit[b_stack]);
 
-      copy_string(band_meta[i++], NPOW_13, "Scale");
-      nchar = snprintf(band_meta[i], NPOW_13, "%.3f", stack->scale[b_stack]); i++;
-      if (nchar < 0 || nchar >= NPOW_13){ 
+      copy_string(band_meta[i++], NPOW_14, "Scale");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->scale[b_stack]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
-      copy_string(band_meta[i++], NPOW_13, "Sensor");
-      copy_string(band_meta[i++], NPOW_13, stack->sensor[b_stack]);
+      copy_string(band_meta[i++], NPOW_14, "Sensor");
+      copy_string(band_meta[i++], NPOW_14, stack->sensor[b_stack]);
 
       get_stack_longdate(stack, b_stack, ldate, NPOW_05-1);
-      copy_string(band_meta[i++], NPOW_13, "Date");
-      copy_string(band_meta[i++], NPOW_13, ldate);
+      copy_string(band_meta[i++], NPOW_14, "Date");
+      copy_string(band_meta[i++], NPOW_14, ldate);
 
 
       band = GDALGetRasterBand(fp, b_file);
@@ -987,7 +988,7 @@ int i = 0;
 
     // in case of ENVI, update description
     //if (format == _FMT_ENVI_) 
-    GDALSetDescription(fp, stack->name);
+    //GDALSetDescription(fp, stack->name);
 
 
     for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
@@ -2632,7 +2633,7 @@ void get_stack_proj(stack_t *stack, char proj[], size_t size){
 void set_stack_par(stack_t *stack, const char *par){
 
 
-  copy_string(stack->par, NPOW_13, par);
+  copy_string(stack->par, NPOW_14, par);
 
   return;
 }

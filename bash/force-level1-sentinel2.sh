@@ -56,7 +56,9 @@ if [ $# -ne $EXPECTED_ARGS ] && [ $# -ne $MAXIMUM_ARGS ]; then
   echo "  dry will trigger a dry run that will only return the number of images"
   echo "  and their total data volume"
   echo ""
-  echo "  Your ESA credentials must be placed in $HOME/.scihub"
+  echo "  Your ESA credentials must be placed in \$HOME/.scihub"
+  echo "  (OR in \$FORCE_CREDENTIALS/.scihub if the FORCE_CREDENTIALS environment"
+  echo "   variable is defined)."
   echo "    First line: User name" 
   echo "    Second line: Password, special characters might be problematic"
   echo ""
@@ -76,7 +78,7 @@ fi
 
 POOL=$1
 POOLLIST=$2
-BOUND=$(echo $3 | sed 's_/_%20_g')
+BOUND=$(echo $3 | sed 's_/_%20_g' | sed 's/ //g')
 S0=$4
 S1=$5
 C0=$6
@@ -88,14 +90,21 @@ if [ ! -w $POOL ]; then
 fi
 
 
-if [ ! -r $HOME/.scihub ]; then
-  echo "Your ESA credentials must be placed in $HOME/.scihub"
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  CREDDIR=$HOME/.scihub
+else
+  CREDDIR=$FORCE_CREDENTIALS/.scihub
+fi
+
+
+if [ ! -r $CREDDIR ]; then
+  echo "Your ESA credentials were not found in $CREDDIR"
   echo "    First line: User name" 
   echo "    Second line: Password, special characters might be problematic"
   exit
 fi
 
-H=$(head -n 2 $HOME/.scihub)
+H=$(head -n 2 $CREDDIR)
 USER=$(echo $H | cut -d ' ' -f 1)
 PW=$(echo $H | cut -d ' ' -f 2)
 CRED="--user=$USER --password=$PW"

@@ -78,7 +78,7 @@ typedef struct {
   int tx, ty;            // ID of tile
   char proj[NPOW_10];      // projection
 
-  char par[NPOW_13];       // parameterization
+  char par[NPOW_14];       // parameterization
 
   bool  *save;           // save band?
   int   *nodata;         // nodata value

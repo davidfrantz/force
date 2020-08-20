@@ -336,11 +336,11 @@ bool valid;
 
         if (regression){
           mn  = mean*phl->mcl.scale;
-          if (mn > 32767)  mn = 32767;
-          if (mn < -32767) mn = -32767;
+          if (mn > SHRT_MAX) mn = SHRT_MAX;
+          if (mn < SHRT_MIN) mn = SHRT_MIN;
           if (ml.mlp_ != NULL) ml.mlp_[s][p] = (short)mn;  
           std = standdev(var, m)*10000.0;
-          if (std > 32767) std = 32767;
+          if (std > SHRT_MAX) std = SHRT_MAX;
           if (ml.mlu_ != NULL) ml.mlu_[s][p] = (short)(std);
         } else {
           if (ml.mlp_ != NULL) ml.mlp_[s][p] = (short)mode(ipred[s], phl->mcl.nmodel[s]);

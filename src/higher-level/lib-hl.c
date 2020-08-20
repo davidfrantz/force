@@ -225,11 +225,11 @@ double mae, min_mae, min_mae_all, k;
 
 
       
-      min_mae_all = INT_MAX;
+      min_mae_all = SHRT_MAX;
       
       for (l=0; l<library->n; l++){
         
-        min_mae = INT_MAX;
+        min_mae = SHRT_MAX;
 
         for (f=0; f<nf; f++){
           if (phl->lib.rescale){
@@ -259,17 +259,13 @@ double mae, min_mae, min_mae_all, k;
         }
         
         if (min_mae < min_mae_all) min_mae_all = min_mae;
-        if (min_mae < INT_MAX){
-          if (phl->lib.rescale) min_mae *= 1000;
-          lib.mae_[l][p] = (short)min_mae;
-        }
-        
+        if (min_mae < SHRT_MAX && phl->lib.rescale) min_mae *= 1000;
+        if (min_mae < SHRT_MAX) lib.mae_[l][p] = (short)min_mae;
+
       }
 
-      if (min_mae_all < INT_MAX){
-        if (phl->lib.rescale) min_mae_all *= 1000;
-        lib.mae_[library->n][p] = (short)min_mae_all;
-      }
+      if (min_mae_all < SHRT_MAX && phl->lib.rescale) min_mae_all *= 1000;
+      if (min_mae_all < SHRT_MAX) lib.mae_[library->n][p] = (short)min_mae_all;
 
     }
     

@@ -79,9 +79,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``X_TILE_RANGE = 0 0``
     | ``Y_TILE_RANGE = 0 0``
     
-  * White list of tiles.
+  * Allow-list of tiles.
     Can be used to further limit the analysis extent to non-square extents.
-    The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+    The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
     Optional. If NULL, the complete analysis extent is processed
 
     | *Type:* full file path
@@ -115,7 +115,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``USE_L2_IMPROPHE = FALSE``
 
-* **Sensor white list**
+* **Sensor allow-list**
 
   * Sensors to be used in the analysis.
     Multi-sensor analyses are restricted to the overlapping bands (see table).
@@ -369,6 +369,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
   * This parameter defines the nodata value for the LSP.
   
-    | *Type:* Integer. Valid values: [-32767,32767]
-    | ``LSP_NODATA = -32767``
+    | *Type:* Integer. Valid values: [-32768,32767]
+    | ``LSP_NODATA = -9999``
 

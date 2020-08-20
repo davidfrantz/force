@@ -21,14 +21,14 @@ Usage
 
 .. _tilelist:
   
-Tile white-list
+Tile allow-list
 ^^^^^^^^^^^^^^^  
 
-Tile white-lists are optional, and can be used to limit the analysis extent to non-square extents.
-The white list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the white-list will be processed.
+Tile allow-lists are optional, and can be used to limit the analysis extent to non-square extents.
+The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
 It is specified via ``FILE_TILE`` in the parameter files.
 
-As an example, if the extent of your study area (e.g. country) is 4x5 tiles, but the study area is actually only covered by 10 tiles (X-Signature), you will save 50% processing time when using a tile white-list.
+As an example, if the extent of your study area (e.g. country) is 4x5 tiles, but the study area is actually only covered by 10 tiles (X-Signature), you will save 50% processing time when using a tile allow-list.
 
 +---+---+---+---+---+
 + / + X + X + / + / +

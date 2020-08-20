@@ -104,8 +104,8 @@ int cube_nx, cube_ny, cube_nc;
   for (ty=cube->tminy; ty<=cube->tmaxy; ty++){
   for (tx=cube->tminx; tx<=cube->tmaxx; tx++){
 
-    // if tile is not whitelisted (if specified), skip
-    if (tile_whitelisted(tiles_x, tiles_y, tiles_k, tx, ty) == FAILURE) continue;
+    // if tile is not allowlisted (if specified), skip
+    if (tile_allowlisted(tiles_x, tiles_y, tiles_k, tx, ty) == FAILURE) continue;
 
     // upper left coordinate of current tile
     tulx = cube->origin_map.x + tx*cube->tilesize;
