@@ -825,12 +825,6 @@ const char *separator = " =";
             *params->par[i].date_ = parse_date(ptr);
             break;
           case _PAR_CHAR_:
-            //if (strlen(ptr) > NPOW_10-1){
-            //  printf("cannot copy, string too long.\n"); exit(1);
-            //} else {
-            //  strncpy(*params->par[i].char_, ptr, strlen(ptr));
-            //  (*params->par[i].char_)[strlen(ptr)] = '\0';
-            //}
             copy_string(*params->par[i].char_, NPOW_10, ptr);
             break;
           default:
@@ -875,12 +869,6 @@ const char *separator = " =";
               params->par[i].date_vec_[0][n] = parse_date(ptr);
               break;
             case _PAR_CHAR_:
-              //if (strlen(ptr) > NPOW_10-1){
-              //  printf("cannot copy, string too long.\n"); exit(1);
-              //} else {
-              //  strncpy(params->par[i].char_vec_[0][n], ptr, strlen(ptr));
-              //  params->par[i].char_vec_[0][n][strlen(ptr)] = '\0';
-              //}
               copy_string(params->par[i].char_vec_[0][n], NPOW_10, ptr);
               break;
             default:

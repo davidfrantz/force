@@ -41,7 +41,8 @@ int main ( int argc, char *argv[] ){
 int b, nb;
 GDALDatasetH src, dst;
 GDALRasterBandH bsrc, bdst;
-char fsrc[NPOW_10], fdst[NPOW_10];
+char  *fsrc  = NULL;
+char  *fdst  = NULL;
 char **meta  = NULL;
 char **bmeta = NULL;
 const char *bname = NULL;
@@ -51,12 +52,8 @@ const char *bname = NULL;
   if (argc != 3){ printf("Usage: %s src dst\n\n", argv[0]); return FAILURE;}
 
 
-  if (strlen(argv[1]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { strncpy(fsrc, argv[1], strlen(argv[1])); fsrc[strlen(argv[1])] = '\0';}
-  if (strlen(argv[2]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { strncpy(fdst, argv[2], strlen(argv[2])); fdst[strlen(argv[2])] = '\0';}
+  fsrc = argv[1];
+  fdst = argv[2];
 
 
   GDALAllRegister();
