@@ -219,12 +219,12 @@ short ***ptr[98] = {
               nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_domain(TSA[o], t, domain);
+              //set_stack_domain(TSA[o], t, domain);
               set_stack_bandname(TSA[o], t, domain);
               break;
             case _stats_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              //set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
@@ -238,7 +238,7 @@ short ***ptr[98] = {
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _year_:
@@ -250,7 +250,7 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case  _quarter_:
@@ -263,7 +263,7 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "quarter");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -277,7 +277,7 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "month");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -291,7 +291,7 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "week");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -305,7 +305,7 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "day of year");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -318,17 +318,17 @@ short ***ptr[98] = {
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
+              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               break;
             default:
@@ -384,6 +384,7 @@ stack_t *stack = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
+char domain[NPOW_10];
 int nchar;
 
 
@@ -416,10 +417,12 @@ int nchar;
   set_stack_explode(stack, phl->explode);
   set_stack_par(stack, phl->params->log);
 
+  sprintf(domain, "%s_%s", phl->tsa.index_name[idx], prodname);
+
   for (b=0; b<nb; b++){
     set_stack_save(stack, b, true);
     set_stack_date(stack, b, date);
-    set_stack_domain(stack, b, phl->tsa.index_name[idx]);
+    set_stack_domain(stack, b, domain);
   }
 
   return stack;
