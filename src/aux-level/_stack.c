@@ -69,6 +69,7 @@ img_t *out = NULL;
 
 char *f_dst = NULL;
 char d_out[NPOW_10];
+char e_out[NPOW_10];
 
 char **meta  = NULL;
 char **bmeta = NULL;
@@ -95,14 +96,20 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
   // output name
   f_dst = argv[argc-1];
   directoryname(f_dst, d_out, NPOW_10);
+  extension(f_dst,     e_out, NPOW_10);
+
+  if (strcmp(e_out, "VRT") != 0){
+    printf("Output file must have .vrt extension\n\n"); 
+    return FAILURE;}
 
   if (fileexist(f_dst)){
     printf("Output file already exists: %s\n", f_dst);
     printf("Delete or user another filename\n\n"); 
     return FAILURE;}
 
-  chdir(d_out);
-
+  if (chdir(d_out) != 0){
+    printf("Couldn't change to output directory\n\n"); 
+    return FAILURE;}
 
 
   GDALAllRegister();
@@ -173,6 +180,7 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
 
   alloc((void**)&out, nb, sizeof(img_t));
 
+  // choose interleave type, and build band order
   switch (interleave){
     case _BYFILE_:
       printf("\nDifferent number of bands detected. Stacking by file.\n\n");
@@ -200,11 +208,13 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
   }
 
 
+  // create file with VRT driver
   if ((driver = GDALGetDriverByName("VRT")) == NULL){
     printf("Error getting VRT driver.\n\n"); return FAILURE;}
 
   if ((dst = GDALCreate(driver, f_dst, nx, ny, 0, GDT_Int16, NULL)) == NULL){
     printf("Error creating file %s\n\n", f_dst); return FAILURE;}
+
 
   // copy file-level metadata
   if ((src = GDALOpenEx(inp[0].fname, GDAL_OF_READONLY, NULL, NULL, NULL)) == NULL){
@@ -219,19 +229,19 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
   // add the bands to vrt
   for (b=0; b<nb; b++){
 
+    // get band-level metadata
     if ((src = GDALOpenEx(out[b].fname, GDAL_OF_READONLY, NULL, NULL, NULL)) == NULL){
       printf("Unable to open %s\n\n", out[b].fname); return FAILURE;}
-
     bsrc = GDALGetRasterBand(src, out[b].b);
-
     bmeta = GDALGetMetadata(bsrc, "FORCE");
     bname = GDALGetDescription(bsrc);
     nodata = (int)GDALGetRasterNoDataValue(bsrc, NULL);
 
-
+    // add new band
     GDALAddBand(dst, GDT_Int16, NULL);
     bdst = GDALGetRasterBand(dst, GDALGetRasterCount(dst));
 
+    // set source
     sprintf(source,
       "<ComplexSource>"
       "  <SourceFilename relativeToVRT=\"1\">%s</SourceFilename>"
@@ -242,6 +252,7 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
       "</ComplexSource>", 
       out[b].bname, out[b].b, out[b].nx, out[b].ny, out[b].nx, out[b].ny, nodata);
 
+    // update source and metadata
     GDALSetMetadataItem(bdst, "source_0", source, "new_vrt_sources");
     GDALSetMetadata(bdst, bmeta, "FORCE");
     GDALSetDescription(bdst, bname);
