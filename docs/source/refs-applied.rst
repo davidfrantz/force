@@ -8,6 +8,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2020**
 
+  | H. Bendini, L. Fonseca, M. Schwieder, P. Rufin, T. Korting, A. Koumrouyan, and P. Hostert(2020): Combining Environmental and Landsat Analysis Ready Data for Vegetation Mapping: A Case Study in the Brazilian Savanna Biome. The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences, Volume XLIII-B3-2020.
+  | https://doi.org/10.5194/isprs-archives-XLIII-B3-2020-953-2020
+
   | B. Jakimow, S. van der Linden, F. Thiel, D. Frantz, and Patrick Hostert (2020): Visualizing and labeling dense multi-sensor earth observation time series: The EO Time Series Viewer. Environmental Modelling & Software 125, 104631.
   | https://doi.org/10.1016/j.envsoft.2020.104631
 
