@@ -76,7 +76,7 @@ cross: enum_cl cite_cl utils_cl alloc_cl stack_cl imagefuns_cl param_cl date_cl 
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl
 aux: param_aux param_train_aux train_aux
-exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp
+exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack
 .PHONY: temp all install install_ bash python clean build
 
 
@@ -349,6 +349,9 @@ force-lut-modis: temp cross lower $(DL)/_lut-modis.c
 
 force-mdcp: temp cross $(DA)/_md_copy.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-mdcp $(DA)/_md_copy.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+
+force-stack: temp cross $(DA)/_stack.c
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stack $(DA)/_stack.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 ### dummy code for testing stuff  
 
