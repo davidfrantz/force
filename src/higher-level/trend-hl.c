@@ -1,6 +1,6 @@
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This file is part of FORCE - Framework for Operational Radiometric 
+This file is part of FORCE - Framework for Operational Radiometric
 Correction for Environmental monitoring.
 
 Copyright (C) 2013-2020 David Frantz
@@ -33,7 +33,7 @@ int cat(short **fld_, date_t *d_fld, small *mask_, int nc, int nf, short **cat_,
 
 
 /** This function computes a trend analysis for any time series. Currently
-+++ implemented trend parameters are mean, intercept, slope, R-squared, 
++++ implemented trend parameters are mean, intercept, slope, R-squared,
 +++ significance of slope, RMSE, MAE, max. absolute residual and # of obs.
 --- fld_:   folded image array
 --- d_fld:  dates of folded time series
@@ -57,7 +57,7 @@ double mae, rmse;
 
 
   if (trd_ == NULL) return CANCEL;
-  
+
 
   #pragma omp parallel private(b,f,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,trd_,nc,nf,by,nodata,in_ce,trd) default(none)
   {
@@ -79,7 +79,7 @@ double mae, rmse;
       for (f=0; f<nf; f++){
 
         if (fld_[f][p] == nodata) continue;
-        
+
         switch (by){
           case _FLD_YEAR_:
             x = d_fld[f].year - d_fld[0].year;
@@ -126,7 +126,7 @@ double mae, rmse;
       for (f=0; f<nf; f++){
 
         if (fld_[f][p] == nodata) continue;
-        
+
         switch (by){
           case _FLD_YEAR_:
             x = d_fld[f].year - d_fld[0].year;
@@ -173,15 +173,16 @@ double mae, rmse;
       trd_[_TRD_MEAN_][p]   = (short)my;
       trd_[_TRD_OFFSET_][p] = (short)off;
       trd_[_TRD_SLOPE_][p]  = (short)slp;
+      trd_[_TRD_GAIN_][p]   = (short)(slp*nf/off*1000);
       trd_[_TRD_RSQ_][p]    = (short)rsq;
       trd_[_TRD_SIG_][p]    = (short)sig;
       trd_[_TRD_RMSE_][p]   = (short)rmse;
       trd_[_TRD_MAE_][p]    = (short)mae;
       trd_[_TRD_MAXE_][p]   = (short)maxe;
-      trd_[_TRD_NUM_][p]   = (short)k;
-      
+      trd_[_TRD_NUM_][p]    = (short)k;
+
     }
-    
+
   }
 
   return SUCCESS;
@@ -189,7 +190,7 @@ double mae, rmse;
 
 
 /** This function computes a trend analysis for any time series. Currently
-+++ implemented trend parameters are mean, intercept, slope, R-squared, 
++++ implemented trend parameters are mean, intercept, slope, R-squared,
 +++ significance of slope, RMSE, MAE, max. absolute residual and # of obs.
 +++ Trend parameters are computed for three parts of the time series: be-
 +++ fore/after the change, and for the full time series. Change parameters
@@ -207,7 +208,7 @@ double mae, rmse;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int cat(short **fld_, date_t *d_fld, small *mask_, int nc, int nf, short **cat_, short nodata, int by, bool in_ce, par_trd_t *trd){
-int p, f, f_pre, f_change, f_min[3], f_max[3];
+int p, f, f_pre, f_change, f_min[3], f_max[3], f_len[3];
 float change;
 int x, b, part, sig;
 double mx, my, vx, vy, cv, k;
@@ -219,9 +220,9 @@ double mae, rmse;
 
 
   if (cat_ == NULL) return CANCEL;
-  
-  
-  #pragma omp parallel private(b,part,f,f_pre,f_change,f_min,f_max,change,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
+
+
+  #pragma omp parallel private(b,part,f,f_pre,f_change,f_min,f_max,f_len,change,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
   {
 
     #pragma omp for
@@ -233,7 +234,7 @@ double mae, rmse;
       }
 
 
-  
+
       f_change = 0;
       change = SHRT_MIN;
 
@@ -259,7 +260,7 @@ double mae, rmse;
         continue;
       }
 
-      
+
       switch (by){
         case _FLD_YEAR_:
           x = d_fld[f_change].year;
@@ -290,16 +291,20 @@ double mae, rmse;
       f_min[_PART_BEFORE_] = 0;        f_max[_PART_BEFORE_] = f_change-1; // before
       f_min[_PART_AFTER_]  = f_change; f_max[_PART_AFTER_]  = nf;         // after
 
-      
+      f_len[_PART_TOTAL_]  = f_max[_PART_TOTAL_]  - f_min[_PART_TOTAL_];  // complete
+      f_len[_PART_BEFORE_] = f_max[_PART_BEFORE_] - f_min[_PART_BEFORE_]; // before
+      f_len[_PART_AFTER_]  = f_max[_PART_AFTER_]  - f_min[_PART_AFTER_];  // after
+
+
       for (part=0; part<_PART_LENGTH_; part++){
-        
+
         mx = my = vx = vy = cv = k = 0.0;
-        
+
         // compute stats
         for (f=f_min[part]; f<f_max[part]; f++){
 
           if (fld_[f][p] == nodata) continue;
-          
+
           switch (by){
             case _FLD_YEAR_:
               x = d_fld[f].year - d_fld[0].year;
@@ -345,11 +350,11 @@ double mae, rmse;
 
         // compute residual metrics
         ssqe = sae = sxsq = 0; maxe = SHRT_MIN;
-        
+
         for (f=f_min[part]; f<f_max[part]; f++){
 
           if (fld_[f][p] == nodata) continue;
-          
+
           switch (by){
             case _FLD_YEAR_:
               x = d_fld[f].year - d_fld[0].year;
@@ -377,7 +382,7 @@ double mae, rmse;
 
         }
 
-        
+
         // account for values given in continuous days
         if (in_ce){
           my  -= 365*(nf-1)/2;  my -= d_fld[0].year; my *= 1000;
@@ -394,6 +399,7 @@ double mae, rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p]   = (short)my;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)off;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]  = (short)slp;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_GAIN_][p]   = (short)(slp*f_len[part]/off*1000);
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]    = (short)rsq;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SIG_][p]    = (short)sig;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RMSE_][p]   = (short)rmse;
@@ -402,9 +408,9 @@ double mae, rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]    = (short)k;
 
       }
-      
+
     }
-    
+
   }
 
 
@@ -435,7 +441,7 @@ bool in_ce = false;
   trend(ts->fbw_, ts->d_fbw, mask_, nc, phl->nw, ts->trw_, nodata, _FLD_WEEK_,    in_ce, &phl->tsa.trd);
   trend(ts->fbd_, ts->d_fbd, mask_, nc, phl->nd, ts->trd_, nodata, _FLD_DOY_,     in_ce, &phl->tsa.trd);
 
-  
+
   if (phl->tsa.lsp.otrd){
     for (l=0; l<nlsp; l++){
       if (l < 7) in_ce = true; else in_ce = false;
@@ -469,7 +475,7 @@ bool in_ce = false;
   cat(ts->fbw_, ts->d_fbw, mask_, nc, phl->nw, ts->caw_, nodata, _FLD_WEEK_,    in_ce, &phl->tsa.trd);
   cat(ts->fbd_, ts->d_fbd, mask_, nc, phl->nd, ts->cad_, nodata, _FLD_DOY_,     in_ce, &phl->tsa.trd);
 
-  
+
   if (phl->tsa.lsp.ocat){
     for (l=0; l<nlsp; l++){
       if (l < 7) in_ce = true; else in_ce = false;

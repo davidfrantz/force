@@ -197,27 +197,30 @@ enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGT
 enum { _PART_TOTAL_, _PART_BEFORE_, _PART_AFTER_, _PART_LENGTH_ };
  
 // trend
-enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_, 
-       _TRD_RSQ_,  _TRD_SIG_,    _TRD_RMSE_,  
-       _TRD_MAE_,  _TRD_MAXE_,   _TRD_NUM_,  _TRD_LENGTH_ };
+enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
+       _TRD_GAIN_, _TRD_RSQ_,    _TRD_SIG_,
+       _TRD_RMSE_, _TRD_MAE_,    _TRD_MAXE_,
+       _TRD_NUM_,  _TRD_LENGTH_ };
        
 // change, aftereffect, trend
-enum { _CAT_CHANGE_,        _CAT_YEAR_,
-       _CAT_TOTAL_MEAN_,    _CAT_TOTAL_OFFSET_, 
-       _CAT_TOTAL_SLOPE_,   _CAT_TOTAL_RSQ_, 
-       _CAT_TOTAL_SIG_,     _CAT_TOTAL_RMSE_,   
-       _CAT_TOTAL_MAE_,     _CAT_TOTAL_MAXE_, 
-       _CAT_TOTAL_NUM_,     _CAT_BEFORE_MEAN_, 
-       _CAT_BEFORE_OFFSET_, _CAT_BEFORE_SLOPE_, 
-       _CAT_BEFORE_RSQ_,    _CAT_BEFORE_SIG_, 
-       _CAT_BEFORE_RMSE_,   _CAT_BEFORE_MAE_,  
-       _CAT_BEFORE_MAXE_,   _CAT_BEFORE_NUM_,
-       _CAT_AFTER_MEAN_,    _CAT_AFTER_OFFSET_, 
-       _CAT_AFTER_SLOPE_,   _CAT_AFTER_RSQ_, 
-       _CAT_AFTER_SIG_,     _CAT_AFTER_RMSE_, 
-       _CAT_AFTER_MAE_,     _CAT_AFTER_MAXE_, 
-       _CAT_AFTER_NUM_,     _CAT_LENGTH_ };
- 
+enum { _CAT_CHANGE_,       _CAT_YEAR_,
+       _CAT_TOTAL_MEAN_,   _CAT_TOTAL_OFFSET_,
+       _CAT_TOTAL_SLOPE_,  _CAT_TOTAL_GAIN_,
+       _CAT_TOTAL_RSQ_,    _CAT_TOTAL_SIG_,
+       _CAT_TOTAL_RMSE_,   _CAT_TOTAL_MAE_,
+       _CAT_TOTAL_MAXE_,   _CAT_TOTAL_NUM_,
+       _CAT_BEFORE_MEAN_,  _CAT_BEFORE_OFFSET_,
+       _CAT_BEFORE_SLOPE_, _CAT_BEFORE_GAIN_,
+       _CAT_BEFORE_RSQ_,   _CAT_BEFORE_SIG_,
+       _CAT_BEFORE_RMSE_,  _CAT_BEFORE_MAE_,
+       _CAT_BEFORE_MAXE_,  _CAT_BEFORE_NUM_,
+       _CAT_AFTER_MEAN_,   _CAT_AFTER_OFFSET_,
+       _CAT_AFTER_SLOPE_,  _CAT_AFTER_GAIN_,
+       _CAT_AFTER_RSQ_,    _CAT_AFTER_SIG_,
+       _CAT_AFTER_RMSE_,   _CAT_AFTER_MAE_,
+       _CAT_AFTER_MAXE_,   _CAT_AFTER_NUM_,
+       _CAT_LENGTH_ };
+
 // texture metrics
 enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_, 
        _TXT_GRD_, _TXT_THT_, _TXT_BHT_, _TXT_LENGTH_ };
