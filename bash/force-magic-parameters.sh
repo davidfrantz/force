@@ -57,22 +57,17 @@ exit 1
 #cmd_not_found "...";    # important, check required commands !!! dies on missing
 
 # now get the options --------------------------------------------------------------------
+ARGS=`getopt -o hc: --long help,combine: -n "$0" -- "$@"`
+if [ $? != 0 ] ; then help; fi
+eval set -- "$ARGS"
+
 combtype='all'
 while :; do
-  case $1 in
-    -h|-\?|--help) 
-      help ;;
-    -c|--combine) 
-      shift
-      if [ $# -le $MANDATORY_ARGS ]; then 
-        echoerr "Option -c is missing an argument or mandatory argument is missing"; help; 
-      fi
-      combtype=$1 ;;
-    -?*) 
-      echoerr "Incorrect option specified"; 
-      help ;;
-    *) 
-      break #no more options
+  case "$1" in
+    -h|--help) help ;;
+    -c|--combine) combtype="$2"; shift ;;
+    -- ) shift; break ;;
+    * ) break ;;
   esac
   shift
 done
