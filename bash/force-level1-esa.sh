@@ -69,7 +69,6 @@ HELP
 exit 1
 }
 
-echo $@
 # check for optional args and set dryrun var
 case $1 in 
   -d)
