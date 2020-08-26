@@ -37,7 +37,7 @@ Usage
   | This is the same as ``-c all``.
   
   | If ``-c paired``, pairwise combinations are used.
-  | In this case, the repplacement vectors must be of the same length.
+  | In this case, the replacement vectors must be of the same length.
 
 
 Syntax
