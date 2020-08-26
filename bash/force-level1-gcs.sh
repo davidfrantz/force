@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TO DO 
+# 1. Sanity check for CC fails if cc is specified as float
+# 2. Check filesize if a scene has been downloaded already to catch broken downloads (delete and do again or check if gsutil can handle partial downloads)
+
 ##########################################################################
 #
 # This file is part of FORCE - Framework for Operational Radiometric
@@ -29,6 +33,8 @@
 
 trap "echo Exited!; exit;" SIGINT SIGTERM # make sure that CTRL-C breaks out of download loop
 set -e # make sure script exits if any process exits unsuccessfully
+
+echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
 
 show_help() {
 cat << HELP
@@ -137,27 +143,33 @@ DRYRUN=0
 LANDSAT=0
 SENTINEL=0
 # set variables for urls, file names, layer names, print, ...
+
+TEMP=`getopt --o c:d:nhs:t:u --long cloudcover:,daterange:,no-act,help,sensors:,tier:,update -n 'force-level1' -- "$@"`
+eval set -- $TEMP
+
+
+echo $@
 while :; do
   case $1 in
-    -c|--cloudcover)
+    -c | --cloudcover)
       CCMIN=$(echo $2 | cut -d"," -f1)
       CCMAX=$(echo $2 | cut -d"," -f2)
       shift ;;
-    -d|--daterange)
+    -d | --daterange)
       DATEMIN=$(echo $2 | cut -d"," -f1)
       DATEMAX=$(echo $2 | cut -d"," -f2)
       shift ;;
-    -n|--no-act)
+    -n | --no-act)
       DRYRUN=1 ;;
-    -h|-\?|--help)
+    -h | --help)
       show_help ;;
-    -s|--sensors)
+    -s | --sensors)
       SENSIN=$2
       shift ;;
-    -t|--tier)
+    -t | --tier)
       TIER=$2
       shift ;;
-    -u)
+    -u | --update)
       METADIR=$2
       if [ $# -lt 2 ]; then
         echo "Metadata directory not specified, exiting"
@@ -179,15 +191,16 @@ while :; do
       echo "Done. You can run this script without option -u to download data now."
       exit
       fi ;;
-    -?*)
-      printf "%s\n" "" "Incorrect option specified" ""
-      show_help >&2 ;;
+    -- ) shift; break ;;
+    #-?*)
+    #  printf "%s\n" "" "Incorrect option specified" ""
+    #  show_help >&2 ;;
     *)
       break #no more options
   esac
   shift
 done
-
+echo $@
 if [ $# -ne 4 ]; then
   printf "%s\n" "" "Incorrect number of mandatory input arguments provided" "Expected: 4 Received: $#: $(echo "$@" | sed 's/ /,/g')"
   show_help
@@ -233,10 +246,6 @@ fi
 
 
 # FAILS FOR FLOATING POINTS, BASH DOESN'T DO FLOAT COMPARISON
-
-
-
-
 if [ $CCMIN -lt 0 ] || [ $CCMIN -gt 100 ] || [ $CCMAX -lt 0 ] || [ $CCMAX -gt 100 ]; then
   printf "%s\n" "Error: Cloud cover minimum and maximum must be specified between 0 and 100" "Cloud cover minimum: $CCMIN, cloud cover maximum: $CCMAX" ""
   exit 1
@@ -450,20 +459,20 @@ get_data() {
   # ============================================================
   # Download scenes
   progress() {
-    local width=80 perc=$(echo $1 | cut -d"." -f1); shift
-    printf -v dots "%*s" "$(( $perc*$width/100 ))" ""; dots=${dots// /=};
-    printf "\r\e[K|%-*s| %3d %% %s" "$w" "$dots" "$p" "$*"; 
-    }
-  dl_done() {
     SIZEDONE=$(awk -v done=$SIZEDONE -v fsize=$FILESIZE 'BEGIN { print (done + fsize) }' )
     PERCDONE=$(awk -v total=$TOTALSIZE -v done=$SIZEDONE 'BEGIN { printf( "%.2f\n", (100 / total * done) )}')
-  }
+    local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | cut -d"." -f1) + 1 ))
+    printf -v INCREMENT "%*s" "$(( $PERCINT*$WIDTH/100 ))" ""; INCREMENT=${INCREMENT// /=}
+    printf "\r\e[K|%-*s| %3d %% %s" "$WIDTH" "$INCREMENT" "$PERCINT" "$*"
+    }
+
   PERCDONE=0
   SIZEDONE=0
   if [[ $DRYRUN -eq 0 && ! -z $LINKS ]]; then
 
     POOL=$(cd $POOL; pwd)
-    echo "Starting to download "$NSCENES" "$PRINTNAME" Level 1 scenes"
+    printf "%s\n" "" "Starting to download "$NSCENES" "$PRINTNAME" Level 1 scenes" "" "" "" "" ""
+    
     ITER=1
     for LINK in $LINKS
     do
@@ -479,6 +488,20 @@ get_data() {
         FILESIZE=$(( $(echo $LINK | cut -d, -f 17) / 1048576 ))
       fi
 
+      SCENEPATH=$TILEPATH/$SCENEID
+      if [ $SATELLITE = "sentinel2" ]; then
+        SCENEPATH=$SCENEPATH".SAFE"
+      fi
+      # Check if scene already exists
+      # Implement size check to catch broken downloads!
+      if [ -d $SCENEPATH ]; then
+        printf "\e[4A\e[100D\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
+        #dl_done 
+        progress
+        ((ITER++))
+        continue
+      fi
+      
       # create target directory if it doesn't exist
       TILEPATH=$POOL/$TILE
       if [ ! -w $TILEPATH ]; then
@@ -489,27 +512,16 @@ get_data() {
         fi
       fi
 
-      # Check if scene already exists
-# Implement size check to catch broken downloads!
-      SCENEPATH=$TILEPATH/$SCENEID
-      if [ $SATELLITE = "sentinel2" ]; then
-        SCENEPATH=$SCENEPATH".SAFE"
-      fi
-      if [ -d $SCENEPATH ]; then
-        echo "Scene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping..."
-        dl_done 
-        ((ITER++))
-        continue
-      fi
-      printf "Downloading "$SCENEID"("$ITER" of "$NSCENES")..."
+
+      printf "\e[100D\e[2A\e[2KDownloading "$SCENEID"("$ITER" of "$NSCENES")...\e[2B"
       gsutil -m -q cp -c -L $POOL"/download_log.txt" -R $URL $TILEPATH
 
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
       lockfile-remove $QUEUE
 
-      dl_done
-      progress $PERCDONE
+      #dl_done
+      progress 
       ((ITER++))
     done
   fi
