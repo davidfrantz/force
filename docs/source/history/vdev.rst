@@ -54,6 +54,8 @@ Master release: TBA
     The second option implements a 4D data model (think of time series), which is consistent with the QGIS plugins Raster Time Series Manager and Raster Data Plotting (C) Andreas Rabe.
     A tutorial is in development to illustrate the interoperable use between FORCE and said QGIS plugins.
 
+  * in force-magic-parameters:
 
-
-
+    The user can now change between "all combinations" or "paired combinations".
+    Please refer to the program description:
+    https://force-eo.readthedocs.io/en/latest/components/auxilliary/magic-parameters.htm
