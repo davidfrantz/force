@@ -24,6 +24,12 @@ Master release: TBA
   
     The domain tag of the bandwise FORCE metadata domain was updated to be interoperable with a 4D data model (see force-stack below).
 
+  * in force-higher-level, TSA sub-module, trend and CAT analyses: 
+
+    Added a new band to for computing relative change, i.e. gain/loss relative to initial value: (slope*timesteps)/offset. 
+    This makes most sense when the index has a physical meaning like fractional cover. 
+    This does not make sense at all when offset is negative! Take care.
+
 * **FORCE AUX**
 
   * in force-mosaic:
