@@ -190,15 +190,38 @@ typedef struct {
   int ospl;       // flag: output spline fit
   int olsp;       // flag: output LSP metrics
   int *metrics, nmetrics;
-  int odem, odss, odri, odps, odfi, odes;
-  int odlm, olts, olgs, ovem, ovss, ovri;;
-  int ovps, ovfi, oves, ovlm, ovbl, ovsa;
-  int oist, oibl, oibt, oigs, orar, oraf;
-  int ormr, ormf;
+  int use[_LSP_LENGTH_];
+  //int odem, odss, odri, odps, odfi, odes;
+  //int odlm, olts, olgs, ovem, ovss, ovri;;
+  //int ovps, ovfi, oves, ovlm, ovbl, ovsa;
+  //int oist, oibl, oibt, oigs, orar, oraf;
+  //int ormr, ormf;
   int otrd;       // flag: output LSP trends
   int ocat;       // flag: output LSP cats
   int standard;
 } par_lsp_t;
+
+// polar metrics
+typedef struct {
+  int ny;
+  int ns;
+  float start;
+  float mid;
+  float end;
+  int opct;       // flag: output polar coordinate transformed TS
+  int opol;       // flag: output polar metrics
+  int *metrics, nmetrics;
+  int use[_POL_LENGTH_];
+  //int odem, odss, odev, odms, odav, odlv;
+  //int odes, odlm, olts, olgs, olgv, ovem;
+  //int ovss, ovev, ovms, ovav, ovlv, oves;
+  //int ovlm, ovbl, ovsa, ovga, ovgv, odpy;
+  //int odpv;
+  int otrd;       // flag: output POL trends
+  int ocat;       // flag: output POL cats
+  int standard;
+  int adaptive;
+} par_pol_t;
 
 // trend
 typedef struct {
@@ -249,6 +272,7 @@ typedef struct {
   par_tsi_t tsi;
   par_sma_t sma;
   par_lsp_t lsp;
+  par_pol_t pol;
   par_trd_t trd;
 } par_tsa_t;
 

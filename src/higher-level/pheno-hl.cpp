@@ -257,32 +257,32 @@ Spline *spl;
 
         /** copy LSP if all OK **/
         if (valid){
-          if (lsp->odem) ts->lsp_[_LSP_DEM_][y_index][p] = (short)(ph.doy_early_min*dce+ce0);   // days since 1st LSP year
-          if (lsp->odss) ts->lsp_[_LSP_DSS_][y_index][p] = (short)(ph.doy_start_green*dce+ce0); // days since 1st LSP year
-          if (lsp->odri) ts->lsp_[_LSP_DRI_][y_index][p] = (short)(ph.doy_early_flex*dce+ce0);  // days since 1st LSP year
-          if (lsp->odps) ts->lsp_[_LSP_DPS_][y_index][p] = (short)(ph.doy_peak*dce+ce0);        // days since 1st LSP year
-          if (lsp->odfi) ts->lsp_[_LSP_DFI_][y_index][p] = (short)(ph.doy_late_flex*dce+ce0);   // days since 1st LSP year
-          if (lsp->odes) ts->lsp_[_LSP_DES_][y_index][p] = (short)(ph.doy_end_green*dce+ce0);   // days since 1st LSP year
-          if (lsp->odlm) ts->lsp_[_LSP_DLM_][y_index][p] = (short)(ph.doy_late_min*dce+ce0);    // days since 1st LSP year
-          if (lsp->olts) ts->lsp_[_LSP_LTS_][y_index][p] = (short)(ph.min_min_duration*dce);    // days
-          if (lsp->olgs) ts->lsp_[_LSP_LGS_][y_index][p] = (short)(ph.green_duration*dce);      // days
-          if (lsp->ovem) ts->lsp_[_LSP_VEM_][y_index][p] = (short)(ph.early_min_val);           // index value
-          if (lsp->ovss) ts->lsp_[_LSP_VSS_][y_index][p] = (short)(ph.start_green_val);         // index value
-          if (lsp->ovri) ts->lsp_[_LSP_VRI_][y_index][p] = (short)(ph.early_flex_val);          // index value
-          if (lsp->ovps) ts->lsp_[_LSP_VPS_][y_index][p] = (short)(ph.peak_val);                // index value
-          if (lsp->ovfi) ts->lsp_[_LSP_VFI_][y_index][p] = (short)(ph.late_flex_val);           // index value
-          if (lsp->oves) ts->lsp_[_LSP_VES_][y_index][p] = (short)(ph.end_green_val);           // index value
-          if (lsp->ovlm) ts->lsp_[_LSP_VLM_][y_index][p] = (short)(ph.late_min_val);            // index value
-          if (lsp->ovbl) ts->lsp_[_LSP_VBL_][y_index][p] = (short)(ph.latent_val);              // index value
-          if (lsp->ovsa) ts->lsp_[_LSP_VSA_][y_index][p] = (short)(ph.amplitude);               // index value
-          if (lsp->oist) ts->lsp_[_LSP_IST_][y_index][p] = (short)(ph.min_min_integral*dce*0.001); // days * index value * 10
-          if (lsp->oibl) ts->lsp_[_LSP_IBL_][y_index][p] = (short)(ph.latent_integral*dce*0.001);  // days * index value * 10
-          if (lsp->oibt) ts->lsp_[_LSP_IBT_][y_index][p] = (short)(ph.total_integral*dce*0.001);   // days * index value * 10
-          if (lsp->oigs) ts->lsp_[_LSP_IGS_][y_index][p] = (short)(ph.green_integral*dce*0.001);   // days * index value * 10
-          if (lsp->orar) ts->lsp_[_LSP_RAR_][y_index][p] = (short)(ph.greenup_rate/dce);        // index value / days
-          if (lsp->oraf) ts->lsp_[_LSP_RAF_][y_index][p] = (short)(ph.senescence_rate/dce);     // index value / days
-          if (lsp->ormr) ts->lsp_[_LSP_RMR_][y_index][p] = (short)(ph.early_flex_rate/dce);     // index value / days
-          if (lsp->ormf) ts->lsp_[_LSP_RMF_][y_index][p] = (short)(ph.late_flex_rate/dce);      // index value / days
+          if (lsp->use[_LSP_DEM_]) ts->lsp_[_LSP_DEM_][y_index][p] = (short)(ph.doy_early_min*dce+ce0);   // days since 1st LSP year
+          if (lsp->use[_LSP_DSS_]) ts->lsp_[_LSP_DSS_][y_index][p] = (short)(ph.doy_start_green*dce+ce0); // days since 1st LSP year
+          if (lsp->use[_LSP_DRI_]) ts->lsp_[_LSP_DRI_][y_index][p] = (short)(ph.doy_early_flex*dce+ce0);  // days since 1st LSP year
+          if (lsp->use[_LSP_DPS_]) ts->lsp_[_LSP_DPS_][y_index][p] = (short)(ph.doy_peak*dce+ce0);        // days since 1st LSP year
+          if (lsp->use[_LSP_DFI_]) ts->lsp_[_LSP_DFI_][y_index][p] = (short)(ph.doy_late_flex*dce+ce0);   // days since 1st LSP year
+          if (lsp->use[_LSP_DES_]) ts->lsp_[_LSP_DES_][y_index][p] = (short)(ph.doy_end_green*dce+ce0);   // days since 1st LSP year
+          if (lsp->use[_LSP_DLM_]) ts->lsp_[_LSP_DLM_][y_index][p] = (short)(ph.doy_late_min*dce+ce0);    // days since 1st LSP year
+          if (lsp->use[_LSP_LTS_]) ts->lsp_[_LSP_LTS_][y_index][p] = (short)(ph.min_min_duration*dce);    // days
+          if (lsp->use[_LSP_LGS_]) ts->lsp_[_LSP_LGS_][y_index][p] = (short)(ph.green_duration*dce);      // days
+          if (lsp->use[_LSP_VEM_]) ts->lsp_[_LSP_VEM_][y_index][p] = (short)(ph.early_min_val);           // index value
+          if (lsp->use[_LSP_VSS_]) ts->lsp_[_LSP_VSS_][y_index][p] = (short)(ph.start_green_val);         // index value
+          if (lsp->use[_LSP_VRI_]) ts->lsp_[_LSP_VRI_][y_index][p] = (short)(ph.early_flex_val);          // index value
+          if (lsp->use[_LSP_VPS_]) ts->lsp_[_LSP_VPS_][y_index][p] = (short)(ph.peak_val);                // index value
+          if (lsp->use[_LSP_VFI_]) ts->lsp_[_LSP_VFI_][y_index][p] = (short)(ph.late_flex_val);           // index value
+          if (lsp->use[_LSP_VES_]) ts->lsp_[_LSP_VES_][y_index][p] = (short)(ph.end_green_val);           // index value
+          if (lsp->use[_LSP_VLM_]) ts->lsp_[_LSP_VLM_][y_index][p] = (short)(ph.late_min_val);            // index value
+          if (lsp->use[_LSP_VBL_]) ts->lsp_[_LSP_VBL_][y_index][p] = (short)(ph.latent_val);              // index value
+          if (lsp->use[_LSP_VSA_]) ts->lsp_[_LSP_VSA_][y_index][p] = (short)(ph.amplitude);               // index value
+          if (lsp->use[_LSP_IST_]) ts->lsp_[_LSP_IST_][y_index][p] = (short)(ph.min_min_integral*dce*0.001); // days * index value * 10
+          if (lsp->use[_LSP_IBL_]) ts->lsp_[_LSP_IBL_][y_index][p] = (short)(ph.latent_integral*dce*0.001);  // days * index value * 10
+          if (lsp->use[_LSP_IBT_]) ts->lsp_[_LSP_IBT_][y_index][p] = (short)(ph.total_integral*dce*0.001);   // days * index value * 10
+          if (lsp->use[_LSP_IGS_]) ts->lsp_[_LSP_IGS_][y_index][p] = (short)(ph.green_integral*dce*0.001);   // days * index value * 10
+          if (lsp->use[_LSP_RAR_]) ts->lsp_[_LSP_RAR_][y_index][p] = (short)(ph.greenup_rate/dce);        // index value / days
+          if (lsp->use[_LSP_RAF_]) ts->lsp_[_LSP_RAF_][y_index][p] = (short)(ph.senescence_rate/dce);     // index value / days
+          if (lsp->use[_LSP_RMR_]) ts->lsp_[_LSP_RMR_][y_index][p] = (short)(ph.early_flex_rate/dce);     // index value / days
+          if (lsp->use[_LSP_RMF_]) ts->lsp_[_LSP_RMF_][y_index][p] = (short)(ph.late_flex_rate/dce);      // index value / days
         }
 
         destroy_spline(spl);
@@ -534,32 +534,32 @@ Spline *spl;
 
           /** copy LSP if all OK **/
           if (valid){
-            if (lsp->odem) ts->lsp_[_LSP_DEM_][year][p] = (short)(ph.doy_early_min*dce+ce0);   // days since 1st LSP year
-            if (lsp->odss) ts->lsp_[_LSP_DSS_][year][p] = (short)(ph.doy_start_green*dce+ce0); // days since 1st LSP year
-            if (lsp->odri) ts->lsp_[_LSP_DRI_][year][p] = (short)(ph.doy_early_flex*dce+ce0);  // days since 1st LSP year
-            if (lsp->odps) ts->lsp_[_LSP_DPS_][year][p] = (short)(ph.doy_peak*dce+ce0);        // days since 1st LSP year
-            if (lsp->odfi) ts->lsp_[_LSP_DFI_][year][p] = (short)(ph.doy_late_flex*dce+ce0);   // days since 1st LSP year
-            if (lsp->odes) ts->lsp_[_LSP_DES_][year][p] = (short)(ph.doy_end_green*dce+ce0);   // days since 1st LSP year
-            if (lsp->odlm) ts->lsp_[_LSP_DLM_][year][p] = (short)(ph.doy_late_min*dce+ce0);    // days since 1st LSP year
-            if (lsp->olts) ts->lsp_[_LSP_LTS_][year][p] = (short)(ph.min_min_duration*dce);    // days
-            if (lsp->olgs) ts->lsp_[_LSP_LGS_][year][p] = (short)(ph.green_duration*dce);      // days
-            if (lsp->ovem) ts->lsp_[_LSP_VEM_][year][p] = (short)(ph.early_min_val);           // index value
-            if (lsp->ovss) ts->lsp_[_LSP_VSS_][year][p] = (short)(ph.start_green_val);         // index value
-            if (lsp->ovri) ts->lsp_[_LSP_VRI_][year][p] = (short)(ph.early_flex_val);          // index value
-            if (lsp->ovps) ts->lsp_[_LSP_VPS_][year][p] = (short)(ph.peak_val);                // index value
-            if (lsp->ovfi) ts->lsp_[_LSP_VFI_][year][p] = (short)(ph.late_flex_val);           // index value
-            if (lsp->oves) ts->lsp_[_LSP_VES_][year][p] = (short)(ph.end_green_val);           // index value
-            if (lsp->ovlm) ts->lsp_[_LSP_VLM_][year][p] = (short)(ph.late_min_val);            // index value
-            if (lsp->ovbl) ts->lsp_[_LSP_VBL_][year][p] = (short)(ph.latent_val);              // index value
-            if (lsp->ovsa) ts->lsp_[_LSP_VSA_][year][p] = (short)(ph.amplitude);               // index value
-            if (lsp->oist) ts->lsp_[_LSP_IST_][year][p] = (short)(ph.min_min_integral*dce*0.001); // days * index value * 10
-            if (lsp->oibl) ts->lsp_[_LSP_IBL_][year][p] = (short)(ph.latent_integral*dce*0.001);  // days * index value * 10
-            if (lsp->oibt) ts->lsp_[_LSP_IBT_][year][p] = (short)(ph.total_integral*dce*0.001);   // days * index value * 10
-            if (lsp->oigs) ts->lsp_[_LSP_IGS_][year][p] = (short)(ph.green_integral*dce*0.001);   // days * index value * 10
-            if (lsp->orar) ts->lsp_[_LSP_RAR_][year][p] = (short)(ph.greenup_rate/dce);        // index value / days
-            if (lsp->oraf) ts->lsp_[_LSP_RAF_][year][p] = (short)(ph.senescence_rate/dce);     // index value / days
-            if (lsp->ormr) ts->lsp_[_LSP_RMR_][year][p] = (short)(ph.early_flex_rate/dce);     // index value / days
-            if (lsp->ormf) ts->lsp_[_LSP_RMF_][year][p] = (short)(ph.late_flex_rate/dce);      // index value / days
+            if (lsp->use[_LSP_DEM_]) ts->lsp_[_LSP_DEM_][year][p] = (short)(ph.doy_early_min*dce+ce0);   // days since 1st LSP year
+            if (lsp->use[_LSP_DSS_]) ts->lsp_[_LSP_DSS_][year][p] = (short)(ph.doy_start_green*dce+ce0); // days since 1st LSP year
+            if (lsp->use[_LSP_DRI_]) ts->lsp_[_LSP_DRI_][year][p] = (short)(ph.doy_early_flex*dce+ce0);  // days since 1st LSP year
+            if (lsp->use[_LSP_DPS_]) ts->lsp_[_LSP_DPS_][year][p] = (short)(ph.doy_peak*dce+ce0);        // days since 1st LSP year
+            if (lsp->use[_LSP_DFI_]) ts->lsp_[_LSP_DFI_][year][p] = (short)(ph.doy_late_flex*dce+ce0);   // days since 1st LSP year
+            if (lsp->use[_LSP_DES_]) ts->lsp_[_LSP_DES_][year][p] = (short)(ph.doy_end_green*dce+ce0);   // days since 1st LSP year
+            if (lsp->use[_LSP_DLM_]) ts->lsp_[_LSP_DLM_][year][p] = (short)(ph.doy_late_min*dce+ce0);    // days since 1st LSP year
+            if (lsp->use[_LSP_LTS_]) ts->lsp_[_LSP_LTS_][year][p] = (short)(ph.min_min_duration*dce);    // days
+            if (lsp->use[_LSP_LGS_]) ts->lsp_[_LSP_LGS_][year][p] = (short)(ph.green_duration*dce);      // days
+            if (lsp->use[_LSP_VEM_]) ts->lsp_[_LSP_VEM_][year][p] = (short)(ph.early_min_val);           // index value
+            if (lsp->use[_LSP_VSS_]) ts->lsp_[_LSP_VSS_][year][p] = (short)(ph.start_green_val);         // index value
+            if (lsp->use[_LSP_VRI_]) ts->lsp_[_LSP_VRI_][year][p] = (short)(ph.early_flex_val);          // index value
+            if (lsp->use[_LSP_VPS_]) ts->lsp_[_LSP_VPS_][year][p] = (short)(ph.peak_val);                // index value
+            if (lsp->use[_LSP_VFI_]) ts->lsp_[_LSP_VFI_][year][p] = (short)(ph.late_flex_val);           // index value
+            if (lsp->use[_LSP_VES_]) ts->lsp_[_LSP_VES_][year][p] = (short)(ph.end_green_val);           // index value
+            if (lsp->use[_LSP_VLM_]) ts->lsp_[_LSP_VLM_][year][p] = (short)(ph.late_min_val);            // index value
+            if (lsp->use[_LSP_VBL_]) ts->lsp_[_LSP_VBL_][year][p] = (short)(ph.latent_val);              // index value
+            if (lsp->use[_LSP_VSA_]) ts->lsp_[_LSP_VSA_][year][p] = (short)(ph.amplitude);               // index value
+            if (lsp->use[_LSP_IST_]) ts->lsp_[_LSP_IST_][year][p] = (short)(ph.min_min_integral*dce*0.001); // days * index value * 10
+            if (lsp->use[_LSP_IBL_]) ts->lsp_[_LSP_IBL_][year][p] = (short)(ph.latent_integral*dce*0.001);  // days * index value * 10
+            if (lsp->use[_LSP_IBT_]) ts->lsp_[_LSP_IBT_][year][p] = (short)(ph.total_integral*dce*0.001);   // days * index value * 10
+            if (lsp->use[_LSP_IGS_]) ts->lsp_[_LSP_IGS_][year][p] = (short)(ph.green_integral*dce*0.001);   // days * index value * 10
+            if (lsp->use[_LSP_RAR_]) ts->lsp_[_LSP_RAR_][year][p] = (short)(ph.greenup_rate/dce);        // index value / days
+            if (lsp->use[_LSP_RAF_]) ts->lsp_[_LSP_RAF_][year][p] = (short)(ph.senescence_rate/dce);     // index value / days
+            if (lsp->use[_LSP_RMR_]) ts->lsp_[_LSP_RMR_][year][p] = (short)(ph.early_flex_rate/dce);     // index value / days
+            if (lsp->use[_LSP_RMF_]) ts->lsp_[_LSP_RMF_][year][p] = (short)(ph.late_flex_rate/dce);      // index value / days
           }
           
         }

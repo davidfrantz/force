@@ -31,6 +31,319 @@ This file contains functions for Level 3 processing
 stack_t *compile_tsa_stack(stack_t *ard, int nb, int idx, int write, char *prodname, par_hl_t *phl);
 stack_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
 
+typedef struct {
+  int  prodlen;
+  char prodname[NPOW_03];
+  int  prodtype;
+  int  enable;
+  int  write;
+  short ***ptr;
+} stack_compile_info_t;
+
+enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_ };
+
+
+int info_tss(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
+
+  info[o].prodlen  = nt;
+  strncpy(info[o].prodname, "TSS", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _full_;
+  info[o].enable   = true;
+  info[o].write    = phl->tsa.otss;
+  info[o].ptr      = &ts->tss_;
+
+  return o+1;
+}
+
+int info_tsi(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+
+
+  info[o].prodlen  = ni;
+  strncpy(info[o].prodname, "TSI", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _inter_;
+  info[o].enable   = true;
+  info[o].write    = phl->tsa.tsi.otsi;
+  info[o].ptr      = &ts->tsi_;
+
+  return o+1;
+}
+
+int info_stm(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+
+
+  info[o].prodlen  = phl->tsa.stm.sta.nmetrics;
+  strncpy(info[o].prodname, "STM", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _stats_;
+  info[o].enable   = phl->tsa.stm.ostm;
+  info[o].write    = phl->tsa.stm.ostm;
+  info[o].ptr      = &ts->stm_;
+
+  return o+1;
+}
+
+int info_rms(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
+
+
+  info[o].prodlen  = nt;
+  strncpy(info[o].prodname, "RMS", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _full_;
+  info[o].enable   = phl->tsa.sma.orms;
+  info[o].write    = phl->tsa.sma.orms;
+  info[o].ptr      = &ts->rms_;
+
+  return o+1;
+}
+
+int info_spl(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+
+
+  info[o].prodlen  = ni;
+  strncpy(info[o].prodname, "SPL", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _inter_;
+  info[o].enable   = phl->tsa.lsp.ospl;
+  info[o].write    = phl->tsa.lsp.ospl;
+  info[o].ptr      = &ts->spl_;
+
+  return o+1;
+}
+
+int info_fby(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int p = o;
+
+
+  info[p].prodlen  = phl->ny;
+  strncpy(info[p].prodname, "FBY", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _year_;
+  info[p].enable   = phl->tsa.fld.ofby+phl->tsa.fld.otry;
+  info[p].write    = phl->tsa.fld.ofby;
+  info[p++].ptr    = &ts->fby_;
+
+  info[p].prodlen  = _TRD_LENGTH_;
+  strncpy(info[p].prodname, "TRY", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _trd_;
+  info[p].enable   = phl->tsa.fld.otry;
+  info[p].write    = phl->tsa.fld.otry;
+  info[p++].ptr    = &ts->try_;
+
+  info[p].prodlen  = _CAT_LENGTH_;
+  strncpy(info[p].prodname, "CAY", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _cat_;
+  info[p].enable   = phl->tsa.fld.ocay;
+  info[p].write    = phl->tsa.fld.ocay;
+  info[p++].ptr    = &ts->cay_;
+
+  return p;
+}
+
+int info_fbq(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int p = o;
+
+
+  info[p].prodlen  = phl->nq;
+  strncpy(info[p].prodname, "FBQ", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _quarter_;
+  info[p].enable   = phl->tsa.fld.ofbq+phl->tsa.fld.otrq;
+  info[p].write    = phl->tsa.fld.ofbq;
+  info[p++].ptr    = &ts->fbq_;
+
+  info[p].prodlen  = _TRD_LENGTH_;
+  strncpy(info[p].prodname, "TRQ", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _trd_;
+  info[p].enable   = phl->tsa.fld.otrq;
+  info[p].write    = phl->tsa.fld.otrq;
+  info[p++].ptr    = &ts->trq_;
+
+  info[p].prodlen  = _CAT_LENGTH_;
+  strncpy(info[p].prodname, "CAQ", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _cat_;
+  info[p].enable   = phl->tsa.fld.ocaq;
+  info[p].write    = phl->tsa.fld.ocaq;
+  info[p++].ptr    = &ts->caq_;
+
+  return p;
+}
+
+int info_fbm(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int p = o;
+
+
+  info[p].prodlen  = phl->nm;
+  strncpy(info[p].prodname, "FBM", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _month_;
+  info[p].enable   = phl->tsa.fld.ofbm+phl->tsa.fld.otrm;
+  info[p].write    = phl->tsa.fld.ofbm;
+  info[p++].ptr    = &ts->fbm_;
+
+  info[p].prodlen  = _TRD_LENGTH_;
+  strncpy(info[p].prodname, "TRM", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _trd_;
+  info[p].enable   = phl->tsa.fld.otrm;
+  info[p].write    = phl->tsa.fld.otrm;
+  info[p++].ptr    = &ts->trm_;
+
+  info[p].prodlen  = _CAT_LENGTH_;
+  strncpy(info[p].prodname, "CAM", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _cat_;
+  info[p].enable   = phl->tsa.fld.ocam;
+  info[p].write    = phl->tsa.fld.ocam;
+  info[p++].ptr    = &ts->cam_;
+
+  return p;
+}
+
+int info_fbw(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int p = o;
+
+
+  info[p].prodlen  = phl->nw;
+  strncpy(info[p].prodname, "FBW", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _week_;
+  info[p].enable   = phl->tsa.fld.ofbw+phl->tsa.fld.otrw;
+  info[p].write    = phl->tsa.fld.ofbw;
+  info[p++].ptr    = &ts->fbw_;
+
+  info[p].prodlen  = _TRD_LENGTH_;
+  strncpy(info[p].prodname, "TRW", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _trd_;
+  info[p].enable   = phl->tsa.fld.otrw;
+  info[p].write    = phl->tsa.fld.otrw;
+  info[p++].ptr    = &ts->trw_;
+
+  info[p].prodlen  = _CAT_LENGTH_;
+  strncpy(info[p].prodname, "CAW", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _cat_;
+  info[p].enable   = phl->tsa.fld.ocaw;
+  info[p].write    = phl->tsa.fld.ocaw;
+  info[p++].ptr    = &ts->caw_;
+
+  return p;
+}
+
+int info_fbd(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int p = o;
+
+
+  info[p].prodlen  = phl->nd;
+  strncpy(info[p].prodname, "FBD", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _day_;
+  info[p].enable   = phl->tsa.fld.ofbd+phl->tsa.fld.otrd;
+  info[p].write    = phl->tsa.fld.ofbd;
+  info[p++].ptr    = &ts->fbd_;
+
+  info[p].prodlen  = _TRD_LENGTH_;
+  strncpy(info[p].prodname, "TRD", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _trd_;
+  info[p].enable   = phl->tsa.fld.otrd;
+  info[p].write    = phl->tsa.fld.otrd;
+  info[p++].ptr    = &ts->trd_;
+
+  info[p].prodlen  = _CAT_LENGTH_;
+  strncpy(info[p].prodname, "CAD", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _cat_;
+  info[p].enable   = phl->tsa.fld.ocad;
+  info[p].write    = phl->tsa.fld.ocad;
+  info[p++].ptr    = &ts->cad_;
+
+  return p;
+}
+
+int info_lsp(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int l, p = o;
+int nchar;
+
+
+  for (l=0; l<_LSP_LENGTH_; l++, p++){
+    info[p].prodlen  = phl->tsa.lsp.ny;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-LSP", _TAGGED_ENUM_LSP_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _lsp_;
+    info[p].enable   = phl->tsa.lsp.use[l]*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat);
+    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.olsp;
+    info[p].ptr      = &ts->lsp_[l];
+  }
+
+  for (l=0; l<_LSP_LENGTH_; l++, p++){
+    info[p].prodlen  =_TRD_LENGTH_;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-TRP", _TAGGED_ENUM_LSP_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _trd_;
+    info[p].enable   = phl->tsa.lsp.use[l]*phl->tsa.lsp.otrd;
+    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.otrd;
+    info[p].ptr      = &ts->trp_[l];
+  }
+
+  for (l=0; l<_LSP_LENGTH_; l++, p++){
+    info[p].prodlen  = _CAT_LENGTH_;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-CAP", _TAGGED_ENUM_LSP_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _cat_;
+    info[p].enable   = phl->tsa.lsp.use[l]*phl->tsa.lsp.ocat;
+    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.ocat;
+    info[p].ptr      = &ts->cap_[l];
+  }
+
+  return p;
+}
+
+int info_pol(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+int l, p = o;
+int nchar;
+
+  info[p].prodlen  = ni;
+  strncpy(info[p].prodname, "PCX", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _inter_;
+  info[p].enable   = phl->tsa.pol.opct;
+  info[p].write    = phl->tsa.pol.opct;
+  info[p++].ptr    = &ts->pcx_;
+
+  info[p].prodlen  = ni;
+  strncpy(info[p].prodname, "PCY", 3); info[p].prodname[3] = '\0';
+  info[p].prodtype = _inter_;
+  info[p].enable   = phl->tsa.pol.opct;
+  info[p].write    = phl->tsa.pol.opct;
+  info[p++].ptr    = &ts->pcy_;
+
+  for (l=0; l<_POL_LENGTH_; l++, p++){
+    info[p].prodlen  = phl->tsa.pol.ny;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-POL", _TAGGED_ENUM_POL_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _pol_;
+    info[p].enable   = phl->tsa.pol.use[l]*(phl->tsa.pol.opol+phl->tsa.pol.otrd+phl->tsa.pol.ocat);
+    info[p].write    = phl->tsa.pol.use[l]*phl->tsa.pol.opol;
+    info[p].ptr      = &ts->pol_[l];
+  }
+
+  for (l=0; l<_POL_LENGTH_; l++, p++){
+    info[p].prodlen  =_TRD_LENGTH_;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-TRO", _TAGGED_ENUM_POL_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _trd_;
+    info[p].enable   = phl->tsa.pol.use[l]*phl->tsa.pol.otrd;
+    info[p].write    = phl->tsa.pol.use[l]*phl->tsa.pol.otrd;
+    info[p].ptr      = &ts->tro_[l];
+  }
+
+  for (l=0; l<_POL_LENGTH_; l++, p++){
+    info[p].prodlen  = _CAT_LENGTH_;
+    nchar = snprintf(info[p].prodname, NPOW_03, "%s-CAO", _TAGGED_ENUM_POL_[l].tag);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); exit(1);}
+    info[p].prodtype = _cat_;
+    info[p].enable   = phl->tsa.pol.use[l]*phl->tsa.pol.ocat;
+    info[p].write    = phl->tsa.pol.use[l]*phl->tsa.pol.ocat;
+    info[p].ptr      = &ts->cao_[l];
+  }
+
+  return p;
+}
+
+
+
 
 /** This function compiles the stacks, in which TSA results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
@@ -53,127 +366,40 @@ char fdate[NPOW_10];
 char sensor[NPOW_04];
 char domain[NPOW_10];
 int nchar;
-int o, nprod = 98;
+int o = 0, nprod;
 int error = 0;
-enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _trd_, _cat_ };
-int prodlen[11] = { nt, phl->tsa.stm.sta.nmetrics, ni, 
-                    phl->ny, phl->nq, phl->nm, phl->nw, phl->nd,
-                    phl->tsa.lsp.ny, _TRD_LENGTH_, _CAT_LENGTH_ };
-char prodname[98][NPOW_03] = { 
-  "TSS", "RMS", "STM", "TSI", "SPL",
-  "FBY", "FBQ", "FBM", "FBW", "FBD",
-  "DEM-LSP", "DSS-LSP", "DRI-LSP", "DPS-LSP", "DFI-LSP", "DES-LSP", 
-  "DLM-LSP", "LTS-LSP", "LGS-LSP", "VEM-LSP", "VSS-LSP", "VRI-LSP", 
-  "VPS-LSP", "VFI-LSP", "VES-LSP", "VLM-LSP", "VBL-LSP", "VSA-LSP", 
-  "IST-LSP", "IBL-LSP", "IBT-LSP", "IGS-LSP", "RAR-LSP", "RAF-LSP", 
-  "RMR-LSP", "RMF-LSP",
-  "DEM-TRP", "DSS-TRP", "DRI-TRP", "DPS-TRP", "DFI-TRP", "DES-TRP", 
-  "DLM-TRP", "LTS-TRP", "LGS-TRP", "VEM-TRP", "VSS-TRP", "VRI-TRP", 
-  "VPS-TRP", "VFI-TRP", "VES-TRP", "VLM-TRP", "VBL-TRP", "VSA-TRP", 
-  "IST-TRP", "IBL-TRP", "IBT-TRP", "IGS-TRP", "RAR-TRP", "RAF-TRP", 
-  "RMR-TRP", "RMF-TRP", 
-  "TRY", "TRQ", "TRM", "TRW", "TRD",
-  "DEM-CAP", "DSS-CAP", "DRI-CAP", "DPS-CAP", "DFI-CAP", "DES-CAP", 
-  "DLM-CAP", "LTS-CAP", "LGS-CAP", "VEM-CAP", "VSS-CAP", "VRI-CAP", 
-  "VPS-CAP", "VFI-CAP", "VES-CAP", "VLM-CAP", "VBL-CAP", "VSA-CAP", 
-  "IST-CAP", "IBL-CAP", "IBT-CAP", "IGS-CAP", "RAR-CAP", "RAF-CAP", 
-  "RMR-CAP", "RMF-CAP", 
-  "CAY", "CAQ", "CAM", "CAW", "CAD" };
 
-int prodtype[98] = { 
-  _full_, _full_, _stats_, _inter_, _inter_,
-  _year_, _quarter_, _month_, _week_, _day_, 
-  _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
-  _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
-  _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
-  _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, _lsp_, 
-  _lsp_, _lsp_, 
-  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
-  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
-  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
-  _trd_, _trd_, _trd_, _trd_, _trd_, _trd_, 
-  _trd_, _trd_, 
-  _trd_, _trd_, _trd_, _trd_, _trd_,
-  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
-  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
-  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
-  _cat_, _cat_, _cat_, _cat_, _cat_, _cat_, 
-  _cat_, _cat_, 
-  _cat_, _cat_, _cat_, _cat_, _cat_ };
+stack_compile_info_t *info = NULL;
 
-int enable[98] = { 
-  true, phl->tsa.sma.orms, phl->tsa.stm.ostm, true, phl->tsa.lsp.ospl,
-  phl->tsa.fld.ofby+phl->tsa.fld.otry+phl->tsa.fld.ocay, phl->tsa.fld.ofbq+phl->tsa.fld.otrq+phl->tsa.fld.ocaq,
-  phl->tsa.fld.ofbm+phl->tsa.fld.otrm+phl->tsa.fld.ocam, phl->tsa.fld.ofbw+phl->tsa.fld.otrw+phl->tsa.fld.ocaw,
-  phl->tsa.fld.ofbd+phl->tsa.fld.otrd+phl->tsa.fld.ocad, 
-  phl->tsa.lsp.odem*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.odss*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.odri*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.odps*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.odfi*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.odes*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.odlm*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.olts*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.olgs*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ovem*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.ovss*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ovri*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.ovps*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ovfi*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.oves*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ovlm*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.ovbl*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ovsa*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.oist*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.oibl*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.oibt*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.oigs*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.orar*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.oraf*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.ormr*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat), phl->tsa.lsp.ormf*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat),
-  phl->tsa.lsp.otrd*phl->tsa.lsp.odem, phl->tsa.lsp.otrd*phl->tsa.lsp.odss, phl->tsa.lsp.otrd*phl->tsa.lsp.odri, phl->tsa.lsp.otrd*phl->tsa.lsp.odps, phl->tsa.lsp.otrd*phl->tsa.lsp.odfi, phl->tsa.lsp.otrd*phl->tsa.lsp.odes, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.odlm, phl->tsa.lsp.otrd*phl->tsa.lsp.olts, phl->tsa.lsp.otrd*phl->tsa.lsp.olgs, phl->tsa.lsp.otrd*phl->tsa.lsp.ovem, phl->tsa.lsp.otrd*phl->tsa.lsp.ovss, phl->tsa.lsp.otrd*phl->tsa.lsp.ovri, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.ovps, phl->tsa.lsp.otrd*phl->tsa.lsp.ovfi, phl->tsa.lsp.otrd*phl->tsa.lsp.oves, phl->tsa.lsp.otrd*phl->tsa.lsp.ovlm, phl->tsa.lsp.otrd*phl->tsa.lsp.ovbl, phl->tsa.lsp.otrd*phl->tsa.lsp.ovsa, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.oist, phl->tsa.lsp.otrd*phl->tsa.lsp.oibl, phl->tsa.lsp.otrd*phl->tsa.lsp.oibt, phl->tsa.lsp.otrd*phl->tsa.lsp.oigs, phl->tsa.lsp.otrd*phl->tsa.lsp.orar, phl->tsa.lsp.otrd*phl->tsa.lsp.oraf, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.ormr, phl->tsa.lsp.otrd*phl->tsa.lsp.ormf,
-  phl->tsa.fld.otry, phl->tsa.fld.otrq, phl->tsa.fld.otrm, phl->tsa.fld.otrw, phl->tsa.fld.otrd, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.odem, phl->tsa.lsp.ocat*phl->tsa.lsp.odss, phl->tsa.lsp.ocat*phl->tsa.lsp.odri, phl->tsa.lsp.ocat*phl->tsa.lsp.odps, phl->tsa.lsp.ocat*phl->tsa.lsp.odfi, phl->tsa.lsp.ocat*phl->tsa.lsp.odes, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.odlm, phl->tsa.lsp.ocat*phl->tsa.lsp.olts, phl->tsa.lsp.ocat*phl->tsa.lsp.olgs, phl->tsa.lsp.ocat*phl->tsa.lsp.ovem, phl->tsa.lsp.ocat*phl->tsa.lsp.ovss, phl->tsa.lsp.ocat*phl->tsa.lsp.ovri, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.ovps, phl->tsa.lsp.ocat*phl->tsa.lsp.ovfi, phl->tsa.lsp.ocat*phl->tsa.lsp.oves, phl->tsa.lsp.ocat*phl->tsa.lsp.ovlm, phl->tsa.lsp.ocat*phl->tsa.lsp.ovbl, phl->tsa.lsp.ocat*phl->tsa.lsp.ovsa, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.oist, phl->tsa.lsp.ocat*phl->tsa.lsp.oibl, phl->tsa.lsp.ocat*phl->tsa.lsp.oibt, phl->tsa.lsp.ocat*phl->tsa.lsp.oigs, phl->tsa.lsp.ocat*phl->tsa.lsp.orar, phl->tsa.lsp.ocat*phl->tsa.lsp.oraf, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.ormr, phl->tsa.lsp.ocat*phl->tsa.lsp.ormf,
-  phl->tsa.fld.ocay, phl->tsa.fld.ocaq, phl->tsa.fld.ocam, phl->tsa.fld.ocaw, phl->tsa.fld.ocad };
 
-int write[98]  = { 
-  phl->tsa.otss, phl->tsa.sma.orms, phl->tsa.stm.ostm, phl->tsa.tsi.otsi, phl->tsa.lsp.ospl,
-  phl->tsa.fld.ofby, phl->tsa.fld.ofbq, phl->tsa.fld.ofbm, phl->tsa.fld.ofbw, phl->tsa.fld.ofbd, 
-  phl->tsa.lsp.olsp*phl->tsa.lsp.odem, phl->tsa.lsp.olsp*phl->tsa.lsp.odss, phl->tsa.lsp.olsp*phl->tsa.lsp.odri, phl->tsa.lsp.olsp*phl->tsa.lsp.odps, phl->tsa.lsp.olsp*phl->tsa.lsp.odfi, phl->tsa.lsp.olsp*phl->tsa.lsp.odes, 
-  phl->tsa.lsp.olsp*phl->tsa.lsp.odlm, phl->tsa.lsp.olsp*phl->tsa.lsp.olts, phl->tsa.lsp.olsp*phl->tsa.lsp.olgs, phl->tsa.lsp.olsp*phl->tsa.lsp.ovem, phl->tsa.lsp.olsp*phl->tsa.lsp.ovss, phl->tsa.lsp.olsp*phl->tsa.lsp.ovri, 
-  phl->tsa.lsp.olsp*phl->tsa.lsp.ovps, phl->tsa.lsp.olsp*phl->tsa.lsp.ovfi, phl->tsa.lsp.olsp*phl->tsa.lsp.oves, phl->tsa.lsp.olsp*phl->tsa.lsp.ovlm, phl->tsa.lsp.olsp*phl->tsa.lsp.ovbl, phl->tsa.lsp.olsp*phl->tsa.lsp.ovsa, 
-  phl->tsa.lsp.olsp*phl->tsa.lsp.oist, phl->tsa.lsp.olsp*phl->tsa.lsp.oibl, phl->tsa.lsp.olsp*phl->tsa.lsp.oibt, phl->tsa.lsp.olsp*phl->tsa.lsp.oigs, phl->tsa.lsp.olsp*phl->tsa.lsp.orar, phl->tsa.lsp.olsp*phl->tsa.lsp.oraf, 
-  phl->tsa.lsp.olsp*phl->tsa.lsp.ormr, phl->tsa.lsp.olsp*phl->tsa.lsp.ormf,
-  phl->tsa.lsp.otrd*phl->tsa.lsp.odem, phl->tsa.lsp.otrd*phl->tsa.lsp.odss, phl->tsa.lsp.otrd*phl->tsa.lsp.odri, phl->tsa.lsp.otrd*phl->tsa.lsp.odps, phl->tsa.lsp.otrd*phl->tsa.lsp.odfi, phl->tsa.lsp.otrd*phl->tsa.lsp.odes, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.odlm, phl->tsa.lsp.otrd*phl->tsa.lsp.olts, phl->tsa.lsp.otrd*phl->tsa.lsp.olgs, phl->tsa.lsp.otrd*phl->tsa.lsp.ovem, phl->tsa.lsp.otrd*phl->tsa.lsp.ovss, phl->tsa.lsp.otrd*phl->tsa.lsp.ovri, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.ovps, phl->tsa.lsp.otrd*phl->tsa.lsp.ovfi, phl->tsa.lsp.otrd*phl->tsa.lsp.oves, phl->tsa.lsp.otrd*phl->tsa.lsp.ovlm, phl->tsa.lsp.otrd*phl->tsa.lsp.ovbl, phl->tsa.lsp.otrd*phl->tsa.lsp.ovsa, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.oist, phl->tsa.lsp.otrd*phl->tsa.lsp.oibl, phl->tsa.lsp.otrd*phl->tsa.lsp.oibt, phl->tsa.lsp.otrd*phl->tsa.lsp.oigs, phl->tsa.lsp.otrd*phl->tsa.lsp.orar, phl->tsa.lsp.otrd*phl->tsa.lsp.oraf, 
-  phl->tsa.lsp.otrd*phl->tsa.lsp.ormr, phl->tsa.lsp.otrd*phl->tsa.lsp.ormf,
-  phl->tsa.fld.otry, phl->tsa.fld.otrq, phl->tsa.fld.otrm, phl->tsa.fld.otrw, phl->tsa.fld.otrd, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.odem, phl->tsa.lsp.ocat*phl->tsa.lsp.odss, phl->tsa.lsp.ocat*phl->tsa.lsp.odri, phl->tsa.lsp.ocat*phl->tsa.lsp.odps, phl->tsa.lsp.ocat*phl->tsa.lsp.odfi, phl->tsa.lsp.ocat*phl->tsa.lsp.odes, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.odlm, phl->tsa.lsp.ocat*phl->tsa.lsp.olts, phl->tsa.lsp.ocat*phl->tsa.lsp.olgs, phl->tsa.lsp.ocat*phl->tsa.lsp.ovem, phl->tsa.lsp.ocat*phl->tsa.lsp.ovss, phl->tsa.lsp.ocat*phl->tsa.lsp.ovri, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.ovps, phl->tsa.lsp.ocat*phl->tsa.lsp.ovfi, phl->tsa.lsp.ocat*phl->tsa.lsp.oves, phl->tsa.lsp.ocat*phl->tsa.lsp.ovlm, phl->tsa.lsp.ocat*phl->tsa.lsp.ovbl, phl->tsa.lsp.ocat*phl->tsa.lsp.ovsa, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.oist, phl->tsa.lsp.ocat*phl->tsa.lsp.oibl, phl->tsa.lsp.ocat*phl->tsa.lsp.oibt, phl->tsa.lsp.ocat*phl->tsa.lsp.oigs, phl->tsa.lsp.ocat*phl->tsa.lsp.orar, phl->tsa.lsp.ocat*phl->tsa.lsp.oraf, 
-  phl->tsa.lsp.ocat*phl->tsa.lsp.ormr, phl->tsa.lsp.ocat*phl->tsa.lsp.ormf,
-  phl->tsa.fld.ocay, phl->tsa.fld.ocaq, phl->tsa.fld.ocam, phl->tsa.fld.ocaw, phl->tsa.fld.ocad };
+  nprod = 5 +            // TSS, RMS, TSI, STM, SPL,
+          5 +            // folds
+          5 +            // trend on folds
+          5 +            // cat on folds
+          _LSP_LENGTH_ + // phenometrics
+          _LSP_LENGTH_ + // trend on phenometrics
+          _LSP_LENGTH_ + // cat on phenometrics
+          2 +            // polar-transformed coordinates
+          _POL_LENGTH_ + // polarmetrics
+          _POL_LENGTH_ + // trend on polarmetrics
+          _POL_LENGTH_;  // cat on polarmetrics
 
-short ***ptr[98] = { 
-  &ts->tss_, &ts->rms_, &ts->stm_, &ts->tsi_, &ts->spl_,
-  &ts->fby_, &ts->fbq_, &ts->fbm_, &ts->fbw_, &ts->fbd_, 
-  &ts->lsp_[0],  &ts->lsp_[1],  &ts->lsp_[2],  &ts->lsp_[3],  &ts->lsp_[4],  &ts->lsp_[5], 
-  &ts->lsp_[6],  &ts->lsp_[7],  &ts->lsp_[8],  &ts->lsp_[9],  &ts->lsp_[10], &ts->lsp_[11], 
-  &ts->lsp_[12], &ts->lsp_[13], &ts->lsp_[14], &ts->lsp_[15], &ts->lsp_[16], &ts->lsp_[17], 
-  &ts->lsp_[18], &ts->lsp_[19], &ts->lsp_[20], &ts->lsp_[21], &ts->lsp_[22], &ts->lsp_[23], 
-  &ts->lsp_[24], &ts->lsp_[25], 
-  &ts->trp_[0],  &ts->trp_[1],  &ts->trp_[2],  &ts->trp_[3],  &ts->trp_[4],  &ts->trp_[5], 
-  &ts->trp_[6],  &ts->trp_[7],  &ts->trp_[8],  &ts->trp_[9],  &ts->trp_[10], &ts->trp_[11], 
-  &ts->trp_[12], &ts->trp_[13], &ts->trp_[14], &ts->trp_[15], &ts->trp_[16], &ts->trp_[17], 
-  &ts->trp_[18], &ts->trp_[19], &ts->trp_[20], &ts->trp_[21], &ts->trp_[22], &ts->trp_[23], 
-  &ts->trp_[24], &ts->trp_[25],
-  &ts->try_, &ts->trq_, &ts->trm_, &ts->trw_, &ts->trd_, 
-  &ts->cap_[0],  &ts->cap_[1],  &ts->cap_[2],  &ts->cap_[3],  &ts->cap_[4],  &ts->cap_[5], 
-  &ts->cap_[6],  &ts->cap_[7],  &ts->cap_[8],  &ts->cap_[9],  &ts->cap_[10], &ts->cap_[11], 
-  &ts->cap_[12], &ts->cap_[13], &ts->cap_[14], &ts->cap_[15], &ts->cap_[16], &ts->cap_[17], 
-  &ts->cap_[18], &ts->cap_[19], &ts->cap_[20], &ts->cap_[21], &ts->cap_[22], &ts->cap_[23], 
-  &ts->cap_[24], &ts->cap_[25], 
-  &ts->cay_, &ts->caq_, &ts->cam_, &ts->caw_, &ts->cad_ };
+  //printf("%d potential products.\n", nprod);
 
+  alloc((void**)&info, nprod, sizeof(stack_compile_info_t));
+
+  o = info_tss(info, o, nt, ts, phl);
+  o = info_rms(info, o, nt, ts, phl);
+  o = info_tsi(info, o, ni, ts, phl);
+  o = info_stm(info, o,     ts, phl);
+  o = info_spl(info, o, ni, ts, phl);
+  o = info_fby(info, o,     ts, phl);
+  o = info_fbq(info, o,     ts, phl);
+  o = info_fbm(info, o,     ts, phl);
+  o = info_fbw(info, o,     ts, phl);
+  o = info_fbd(info, o,     ts, phl);
+  o = info_lsp(info, o,     ts, phl);
+  o = info_pol(info, o, ni, ts, phl);
 
 
   alloc((void**)&TSA, nprod, sizeof(stack_t*));
@@ -190,24 +416,29 @@ short ***ptr[98] = {
   if (phl->nw         > 0) alloc((void**)&ts->d_fbw, phl->nw, sizeof(date_t));         else ts->d_fbw = NULL;
   if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
   if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
+  if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
   //printf("scale, date, ts, bandnames, and sensor ID must be set in compile_tsa!!!\n");
 
   
   for (o=0; o<nprod; o++){
+
+    //printf("%03d: compiling %s product? ", o, info[o].prodname);
     
-    if (enable[o]){
+    if (info[o].enable){
       
-      if ((TSA[o] = compile_tsa_stack(ard[0].DAT, prodlen[prodtype[o]], idx, write[o], prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(TSA[o])) == NULL){
-        printf("Error compiling %s product. ", prodname[o]); error++;
+      //printf("Yes\n");
+      
+      if ((TSA[o] = compile_tsa_stack(ard[0].DAT, info[o].prodlen, idx, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
+        printf("Error compiling %s product. ", info[o].prodname); error++;
       } else {
 
         init_date(&date);
         set_date(&date, 2000, 1, 1);
 
-        for (t=0, k=1; t<prodlen[prodtype[o]]; t++){
+        for (t=0, k=1; t<info[o].prodlen; t++){
 
-          switch (prodtype[o]){
+          switch (info[o].prodtype){
             case _full_:
               date = get_stack_date(ard[t].DAT, 0);
               get_stack_sensor(ard[t].DAT, 0, sensor, NPOW_04);
@@ -321,6 +552,18 @@ short ***ptr[98] = {
               //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
+            case _pol_: 
+              set_date_year(&date, phl->date_range[_MIN_].year+t);
+              set_stack_sensor(TSA[o], t, "BLEND");
+              copy_date(&date, &ts->d_pol[t]);
+              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
+              if (nchar < 0 || nchar >= NPOW_10){ 
+                printf("Buffer Overflow in assembling domain\n"); error++;}
+              set_stack_wavelength(TSA[o], t, date.year);
+              set_stack_unit(TSA[o], t, "year");
+              set_stack_domain(TSA[o], t, fdate);
+              set_stack_bandname(TSA[o], t, fdate);
+              break;
             case _trd_:
               set_stack_sensor(TSA[o], t, "BLEND");
               //set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
@@ -343,10 +586,42 @@ short ***ptr[98] = {
       }
 
     } else {
+      //printf("No\n");
       TSA[o]  = NULL;
-      *ptr[o] = NULL;
+      *info[o].ptr = NULL;
     }
+    
+    //printf(" ptr: %p\n", *info[o].ptr);
+    
   }
+
+
+  //printf("%02d: ts ptr tss: %p\n", 0, ts->tss_);
+  //printf("%02d: ts ptr rms: %p\n", 0, ts->rms_);
+  //printf("%02d: ts ptr tsi: %p\n", 0, ts->tsi_);
+  //printf("%02d: ts ptr stm: %p\n", 0, ts->stm_);
+  //printf("%02d: ts ptr spl: %p\n", 0, ts->spl_);
+  //printf("%02d: ts ptr fby: %p\n", 0, ts->fby_);
+  //printf("%02d: ts ptr fbq: %p\n", 0, ts->fbq_);
+  //printf("%02d: ts ptr fbm: %p\n", 0, ts->fbm_);
+  //printf("%02d: ts ptr fbw: %p\n", 0, ts->fbw_);
+  //printf("%02d: ts ptr fbd: %p\n", 0, ts->fbd_);
+  //printf("%02d: ts ptr try: %p\n", 0, ts->try_);
+  //printf("%02d: ts ptr trq: %p\n", 0, ts->trq_);
+  //printf("%02d: ts ptr trm: %p\n", 0, ts->trm_);
+  //printf("%02d: ts ptr trw: %p\n", 0, ts->trw_);
+  //printf("%02d: ts ptr trd: %p\n", 0, ts->trd_);
+  //printf("%02d: ts ptr cay: %p\n", 0, ts->cay_);
+  //printf("%02d: ts ptr caq: %p\n", 0, ts->caq_);
+  //printf("%02d: ts ptr cam: %p\n", 0, ts->cam_);
+  //printf("%02d: ts ptr caw: %p\n", 0, ts->caw_);
+  //printf("%02d: ts ptr cad: %p\n", 0, ts->cad_);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr lsp: %p\n", o, ts->lsp_[o]);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr trp: %p\n", o, ts->trp_[o]);
+  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr cap: %p\n", o, ts->cap_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr pol: %p\n", o, ts->pol_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr tro: %p\n", o, ts->tro_[o]);
+  //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr cao: %p\n", o, ts->cao_[o]);
 
 
   if (error > 0){
@@ -361,8 +636,11 @@ short ***ptr[98] = {
     if (ts->d_fbw != NULL){ free((void*)ts->d_fbw); ts->d_fbw = NULL;}
     if (ts->d_fbd != NULL){ free((void*)ts->d_fbd); ts->d_fbd = NULL;}
     if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
+    if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
     return NULL;
   }
+
+  free((void*)info);
 
   *nproduct = nprod;
   return TSA;
@@ -496,15 +774,17 @@ short nodata;
     
     tsa_fold(&ts, mask_, nc, ni, nodata, phl);
     
+    tsa_polar(&ts, mask_, nc, ni, nodata, phl);
+    
     tsa_pheno(&ts, mask_, nc, ni, nodata, phl);
-
+    
     tsa_trend(&ts, mask_, nc, nodata, phl);
-   
+    
     tsa_cat(&ts, mask_, nc, nodata, phl);
     
     tsa_standardize(&ts, mask_, nc, nt, ni, nodata, phl);
 
-      
+
     // clean temporal information
     if (ts.d_tss != NULL){ free((void*)ts.d_tss); ts.d_tss = NULL;}
     if (ts.d_tsi != NULL){ free((void*)ts.d_tsi); ts.d_tsi = NULL;}
@@ -514,6 +794,7 @@ short nodata;
     if (ts.d_fbw != NULL){ free((void*)ts.d_fbw); ts.d_fbw = NULL;}
     if (ts.d_fbd != NULL){ free((void*)ts.d_fbd); ts.d_fbd = NULL;}
     if (ts.d_lsp != NULL){ free((void*)ts.d_lsp); ts.d_lsp = NULL;}
+    if (ts.d_pol != NULL){ free((void*)ts.d_pol); ts.d_pol = NULL;}
 
   }
   

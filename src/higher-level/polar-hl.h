@@ -21,60 +21,26 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-TSA Processing header
+Polarmetrics header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef TSA_HL_H
-#define TSA_HL_H
+#ifndef POLAR_HL_H
+#define POLAR_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/cite-cl.h"
 #include "../higher-level/param-hl.h"
-#include "../higher-level/read-ard-hl.h"
+#include "../higher-level/tsa-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-  double **tab; // table
-  int nb;       // number of bands
-  int ne;       // number of endmembers
-} aux_emb_t;
-
-typedef struct {
-  short **tss_, **rms_, **stm_, **tsi_, **spl_;
-  short **fby_, **fbq_, **fbm_, **fbw_, **fbd_;
-  short **try_, **trq_, **trm_, **trw_, **trd_;
-  short **cay_, **caq_, **cam_, **caw_, **cad_;
-  short **lsp_[_LSP_LENGTH_];
-  short **trp_[_LSP_LENGTH_];
-  short **cap_[_LSP_LENGTH_];
-  short **pcx_, **pcy_;
-  short **pol_[_POL_LENGTH_];
-  short **tro_[_POL_LENGTH_];
-  short **cao_[_POL_LENGTH_];
-  date_t *d_tss, *d_tsi;
-  date_t *d_fby, *d_fbq, *d_fbm, *d_fbw, *d_fbd;
-  date_t *d_lsp, *d_pol;
-} tsa_t;
-
-#include "../higher-level/index-hl.h"
-#include "../higher-level/interpolate-hl.h"
-#include "../higher-level/stm-hl.h"
-#include "../higher-level/fold-hl.h"
-#include "../higher-level/trend-hl.h"
-#include "../higher-level/pheno-hl.h"
-#include "../higher-level/polar-hl.h"
-#include "../higher-level/standardize-hl.h"
-
-stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
-
+int tsa_polar(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus
 }
