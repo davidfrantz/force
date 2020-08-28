@@ -88,7 +88,7 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
   directoryname(f_dst, d_out, NPOW_10);
   extension(f_dst,     e_out, NPOW_10);
 
-  if (strcmp(e_out, "vrt") != 0){
+  if (strcmp(e_out, ".vrt") != 0){
     printf("Output file must have .vrt extension\n\n"); 
     return FAILURE;}
 
