@@ -19,12 +19,17 @@ Usage
 
   force-magic-parameters
 
-  Usage: force-magic-parameters.sh [-h] [-c {all,paired}] parameter-file
+  Usage: $PROG [-h] [-c {all,paired}] [-o] parameter-file
 
-    -h  = show his help
-    -c  = combination type
-          all:    all combinations (default)
-          paired: pairwise combinations
+    optional:
+    -h = show this help
+    -c = combination type
+         all:    all combinations (default)
+         paired: pairwise combinations
+    -o = output directory, defaults to directory of parameter-file
+
+    mandatory:
+    parameter-file: base parameter-file that includes replacement vectors
 
 
 * parameter-file

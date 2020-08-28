@@ -22,119 +22,80 @@
 # 
 ##########################################################################
 
+# functions/definitions ------------------------------------------------------------------
+PROG=`basename $0`;
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+MANDATORY_ARGS=1
+
+RASTER_INFO_EXE="gdalinfo"
+VECTOR_INFO_EXE="ogrinfo"
+VECTOR_WARP_EXE="ogr2ogr"
+RASTER_WARP_EXE="gdalwarp"
+RASTER_MERGE_EXE="gdal_merge.py"
+RASTERIZE_EXE="gdal_rasterize"
+PARALLEL_EXE="parallel"
+#GDAL_CMD="$GDAL_EXE -of 'JPEG' -ot 'Byte' -b 3 -b 2 -b 1 -outsize 256 256 -scale 0 1000 -q "
+
+
+echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
+
+cmd_not_found(){      # check required external commands
+  for cmd in "$@"; do
+    stat=`which $cmd`
+    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
+  done
+}
+
+help(){
+cat <<HELP
+
+Usage: $PROG [-h] [-r] [-s] [-o] input-file
+
+  optional:
+  -h = show this help
+  -r = resampling method
+       any GDAL resampling method for raster data, e.g. cubic (default)
+       is ignored for vector data
+  -s = pixel resolution of cubed data, defaults to 10
+  -o = output directory: the directory where you want to store the cubes
+       defaults to current directory
+       \"datacube-definition.prj\" needs to exist in there
+
+  mandatory;
+  input-file = the file you want to cube
+
+$PROG: cube raster images or vector geometries
+  see https://force-eo.readthedocs.io/en/latest/components/auxilliary/cube.html
+
+HELP
+exit 1
+}
+
+# important, check required commands !!! dies on missing
+cmd_not_found "$RASTER_INFO_EXE"
+cmd_not_found "$VECTOR_INFO_EXE"
+cmd_not_found "$VECTOR_WARP_EXE"
+cmd_not_found "$RASTER_WARP_EXE"
+cmd_not_found "$RASTER_MERGE_EXE"
+cmd_not_found "$RASTERIZE_EXE"
+cmd_not_found "$PARALLEL_EXE"
 
 issmaller(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print n1<n2}'
+  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
 }
 
-floor(){
-  echo $1
-  awk -v n1="$1" 'BEGIN{x=int(n1);print(x==n1||n1>0)?x:x-1}'
+isgreater(){
+  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
 }
-
-
-EXPECTED_ARGS=4
-
-if [ $# -ne $EXPECTED_ARGS ]
-then
-  echo "Usage: `basename $0` input-file datacube-dir resample resolution"
-  echo ""
-  echo "       input-file:   the file you want to cube"
-  echo "       datacube-dir: the directory you want to store the cubes;"
-  echo "                     datacube-definition.prj needs to exist in there"
-  echo "       resample:     resampling method"
-  echo "                     (1) any GDAL resampling method for raster data, e.g. cubic"
-  echo "                     (2) rasterize for vector data"
-  echo "       resolution:   the resolution of the cubed data"
-  echo ""
-  exit
-fi
-
-
-INP=$1
-OUT=$2
-RESAMPLE=$3
-RES=$4
-
-if [ ! -r $INP ]; then
-  echo "$INP is not existing/readable"
-  exit
-fi
-
-if [ ! -r $OUT/datacube-definition.prj ]; then
-  echo "$OUT/datacube-definition.prj is not existing/readable"
-  exit
-fi
-
-BASE=$(basename $INP)
-BASE=${BASE%%.*}
-TMP=$(echo $INP | sed 's+/+_+g')
-
-
-WKT=$(head -n 1 $OUT/datacube-definition.prj)
-ORIGX=$(head -n 4 $OUT/datacube-definition.prj  | tail -1 )
-ORIGY=$(head -n 5 $OUT/datacube-definition.prj | tail -1 )
-TILESIZE=$(head -n 6 $OUT/datacube-definition.prj | tail -1 )
-CHUNKSIZE=$(head -n 7 $OUT/datacube-definition.prj | tail -1 )
-
-if [[ ! "$RESAMPLE" =~ "rasterize" ]]; then
-  NODATA=$(gdalinfo $INP | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
-fi
-
-
-#echo $WKT $ORIGX $ORIGY $TILESIZE $CHUNKSIZE
-
-if [ "$RESAMPLE" == "rasterize" ]; then
-  TMP=$TMP"_force-cube-temp.shp"
-  ogr2ogr -t_srs "$WKT" $TMP $INP &> /dev/null
-  XMIN=$(ogrinfo $TMP -so ${TMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)  
-  YMIN=$(ogrinfo $TMP -so ${TMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)  
-  XMAX=$(ogrinfo $TMP -so ${TMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-  YMAX=$(ogrinfo $TMP -so ${TMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-  INP=$TMP
-else
-  TMP=$TMP"_force-cube-temp.vrt"
-  gdalwarp -q -of 'VRT' -t_srs "$WKT" -tr $RES $RES -r near $INP $TMP
-  XMIN=$(gdalinfo $TMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-  YMAX=$(gdalinfo $TMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-  XMAX=$(gdalinfo $TMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-  YMIN=$(gdalinfo $TMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-fi
-
-#echo $XMIN $YMAX $XMAX $YMIN
-
-
-TXMIN=$(echo $XMIN $ORIGX $TILESIZE | awk '{f=($1-$2)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
-TYMIN=$(echo $YMAX $ORIGY $TILESIZE | awk '{f=($2-$1)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
-
-
-ULX=$(echo $ORIGX $TXMIN $TILESIZE | awk '{printf "%f", $1 + $2*$3}')
-ULY=$(echo $ORIGY $TYMIN $TILESIZE | awk '{printf "%f", $1 - $2*$3}')
-#echo $TXMIN $TYMIN $ULX $ULY
-
-TXMAX=$TXMIN
-TYMAX=$TYMIN
-
-ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
-while [[ $(issmaller $ULX $XMAX) -eq 1 ]]; do
-  TXMAX=$(echo $TXMAX | awk '{print $1+1}')
-  ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
-done
-
-ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
-while [[ $(issmaller $YMIN $ULY) -eq 1 ]]; do
-  TYMAX=$(echo $TYMAX | awk '{print $1+1}')
-  ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
-done
-
 
 
 function cubethis(){
-
+exit 1
   x=$1
   y=$2
 
-  #echo $x $y $ORIGX $ORIGY $TILESIZE $CHUNKSIZE $RES $INP $OUT $BASE
+  #echo $x $y $ORIGX $ORIGY $TILESIZE $CHUNKSIZE $RES $FINP $DOUT $CINP
 
   ULX=$(echo $ORIGX $x $TILESIZE | awk '{printf "%f",  $1 + $2*$3}')
   ULY=$(echo $ORIGY $y $TILESIZE | awk '{printf "%f",  $1 - $2*$3}')
@@ -147,15 +108,15 @@ function cubethis(){
   XBLOCK=$(echo $TILESIZE  $RES | awk '{print int($1/$2)}')
   YBLOCK=$(echo $CHUNKSIZE $RES | awk '{print int($1/$2)}')
   
-  mkdir -p $OUT/$TILE
+  mkdir -p $DOUT/$TILE
 
-  OUTFILE=$OUT/$TILE/$BASE".tif"
+  OUTFILE=$DOUT/$TILE/$CINP".tif"
   
   if [ "$RESAMPLE" == "rasterize" ]; then
 
-    gdal_rasterize -burn 1 -a_nodata 255 -ot 'Byte' -of 'GTiff' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $INP $OUTFILE
+    $RASTERIZE_EXE -burn 1 -a_nodata 255 -ot 'Byte' -of 'GTiff' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $FINP $OUTFILE
 
-    MAX=$(gdalinfo -stats $OUTFILE | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    MAX=$($RASTER_INFO_EXE -stats $OUTFILE | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
     rm $OUTFILE".aux.xml"
     #echo "max: " $MAX
 
@@ -169,38 +130,173 @@ function cubethis(){
     if [ -r $OUTFILE ]; then
       #echo "exists"
       EXIST=1
-      OUTFILE=$OUT/$TILE/$BASE"_TEMP2.tif"
+      OUTFILE=$DOUT/$TILE/$CINP"_TEMP2.tif"
     else
       EXIST=0
     fi
   
-    gdalwarp -q -srcnodata $NODATA -dstnodata $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -t_srs "$WKT" -te $ULX $LRY $LRX $ULY -tr $RES $RES -r $RESAMPLE $INP $OUTFILE
+    $RASTER_WARP_EXE -q -srcnodata $NODATA -dstnodata $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -t_srs "$WKT" -te $ULX $LRY $LRX $ULY -tr $RES $RES -r $RESAMPLE $FINP $OUTFILE
 
     if [ $EXIST -eq 1 ]; then
       #echo "building mosaic"
-      mv $OUT/$TILE/$BASE".tif" $OUT/$TILE/$BASE"_TEMP1.tif"
-      gdal_merge.py -q -o $OUT/$TILE/$BASE".tif" -n $NODATA -a_nodata $NODATA -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" $OUT/$TILE/$BASE"_TEMP1.tif" $OUT/$TILE/$BASE"_TEMP2.tif"
-      rm $OUT/$TILE/$BASE"_TEMP1.tif" $OUT/$TILE/$BASE"_TEMP2.tif"
+      mv $DOUT/$TILE/$CINP".tif" $DOUT/$TILE/$CINP"_TEMP1.tif"
+      $RASTER_MERGE_EXE.py -q -o $DOUT/$TILE/$CINP".tif" -n $NODATA -a_nodata $NODATA -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" $DOUT/$TILE/$CINP"_TEMP1.tif" $DOUT/$TILE/$CINP"_TEMP2.tif"
+      rm $DOUT/$TILE/$CINP"_TEMP1.tif" $DOUT/$TILE/$CINP"_TEMP2.tif"
     fi
 
   fi
 
 }
 
-export -f cubethis 
-export WKT=$WKT
-export ORIGX=$ORIGX
-export ORIGY=$ORIGY
-export TILESIZE=$TILESIZE
-export CHUNKSIZE=$CHUNKSIZE
-export RES=$RES
-export INP=$INP
-export OUT=$OUT
-export BASE=$BASE
-export NODATA=$NODATA
-export RESAMPLE=$RESAMPLE
+export -f cubethis
 
-parallel cubethis {1} {2}  ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
+# now get the options --------------------------------------------------------------------
+ARGS=`getopt -o hr:s:o: --long help,output: -n "$0" -- "$@"`
+if [ $? != 0 ] ; then help; fi
+eval set -- "$ARGS"
 
-rm *_force-cube-temp* 
+RESAMPLE='cubic'
+RES=10
+DOUT=$PWD
+while :; do
+  case "$1" in
+    -h|--help) help ;;
+    -r) RESAMPLE="$2"; shift ;;
+    -s) RES="$2"; shift ;;
+    -o|--output) DOUT="$2"; shift ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+  shift
+done
+
+if [ $# -ne $MANDATORY_ARGS ] ; then 
+  echoerr "Mandatory argument is missing."; help
+else
+  FINP=$(readlink -f $1) # absolute file path
+  BINP=$(basename $FINP) # basename
+  CINP=${BINP%%.*}       # corename (without extension)
+  DINP=$(dirname  $FINP) # directory name
+fi
+
+# options received, check now ------------------------------------------------------------
+RESOPT=$($RASTER_WARP_EXE 2>/dev/null | grep -A 1 'Available resampling methods:')
+TEMP=$(echo $RESOPT | sed 's/[., ]/%/g')
+if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then 
+  echoerr "Unknown resampling method."; 
+  echo $RESOPT
+  help
+fi
+
+if [ $(isgreater $RES 0) == "false" ]; then 
+  echoerr "Resolution must be > 0"; help
+fi
+
+# further checks and preparations --------------------------------------------------------
+if ! [[ -f "$FINP" && -r "$FINP" ]]; then
+  echoerr "$FINP is not a readable file, exiting."; exit 1;
+fi
+
+# raster, vector, or non-such (then die)
+if $RASTER_INFO_EXE $FINP >& /dev/null; then 
+  RASTER=1
+elif $VECTOR_INFO_EXE $FINP >& /dev/null; then 
+  RASTER=0
+else
+  echoerr "$FINP is not recognized as vector or raster file, exiting."; exit 1;
+fi
+
+if ! [[ -d "$DOUT" && -w "$DOUT" ]]; then
+  echoerr "$DOUT is not a writeable directory, exiting."; exit 1;
+fi
+
+DCDEF="$DOUT/datacube-definition.prj"
+if ! [[ -f "$DCDEF" && -r "$DCDEF" ]]; then
+  echo "$DCDEF is not a readable file, exiting."; exit 1;
+fi
+
+
+# main thing -----------------------------------------------------------------------------
+
+TMPSTRING="_force-cube-temp"
+FTMP=$(echo $FINP | sed 's+/+_+g')
+FTMP="$FTMP$TMPSTRING"
+
+# datacube parameters
+WKT=$(head -n 1 $DCDEF)
+ORIGX=$(head -n 4 $DCDEF  | tail -1 )
+ORIGY=$(head -n 5 $DCDEF | tail -1 )
+TILESIZE=$(head -n 6 $DCDEF | tail -1 )
+CHUNKSIZE=$(head -n 7 $DCDEF | tail -1 )
+#echo $WKT $ORIGX $ORIGY $TILESIZE $CHUNKSIZE
+
+# nodata value
+if [[ "$RASTER" -eq 1 ]]; then
+  NODATA=$($RASTER_INFO_EXE $FINP | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
+  #echo $NODATA
+fi
+
+
+# bounding box
+if [[ "$RASTER" -eq 0 ]]; then
+  FTMP="$FTMP.gpkg"
+  $VECTOR_WARP_EXE -f 'GPKG' -t_srs "$WKT" $FTMP $FINP &> /dev/null
+  XMIN=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMIN=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+  XMAX=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMAX=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+  FINP=$FTMP
+else
+  FTMP="$FTMP.vrt"
+  $RASTER_WARP_EXE -q -of 'VRT' -t_srs "$WKT" -tr $RES $RES -r near $FINP $FTMP &> /dev/null
+  XMIN=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMAX=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+  XMAX=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMIN=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+fi
+#echo $XMIN $YMAX $XMAX $YMIN
+
+
+# 1st tile, and ulx/uly of 1st tile
+TXMIN=$(echo $XMIN $ORIGX $TILESIZE | awk '{f=($1-$2)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
+TYMIN=$(echo $YMAX $ORIGY $TILESIZE | awk '{f=($2-$1)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
+ULX=$(echo $ORIGX $TXMIN $TILESIZE | awk '{printf "%f", $1 + $2*$3}')
+ULY=$(echo $ORIGY $TYMIN $TILESIZE | awk '{printf "%f", $1 - $2*$3}')
+TXMAX=$TXMIN
+TYMAX=$TYMIN
+#echo $TXMIN $TYMIN $ULX $ULY
+
+
+# step a tile to the west, and check if image is in tile, find last tile
+ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
+while [ $(issmaller $ULX $XMAX) == "true" ]; do
+  TXMAX=$(echo $TXMAX | awk '{print $1+1}')
+  ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
+done
+
+# step a tile to the south, and check if image is in tile, find last tile
+ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
+while [ $(issmaller $YMIN $ULY) == "true" ]; do
+  TYMAX=$(echo $TYMAX | awk '{print $1+1}')
+  ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
+done
+#echo $TXMAX $TYMAX
+
+export WKT=$WKT                   # is this here needed like this`??????
+export ORIGX=$ORIGX               # is this here needed like this`??????
+export ORIGY=$ORIGY               # is this here needed like this`??????
+export TILESIZE=$TILESIZE         # is this here needed like this`??????
+export CHUNKSIZE=$CHUNKSIZE       # is this here needed like this`??????
+export RES=$RES                   # is this here needed like this`??????
+export FINP=$FINP                 # is this here needed like this`??????
+export DOUT=$DOUT                 # is this here needed like this`??????
+export CINP=$CINP                 # is this here needed like this`??????
+export NODATA=$NODATA             # is this here needed like this`??????
+export RESAMPLE=$RESAMPLE         # is this here needed like this`??????
+
+# cube the file, spawn multiple jobs for each tile
+$PARALLEL_EXE cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
+
+# remove the temporary file
+rm "$FTMP"
 
