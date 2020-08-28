@@ -61,28 +61,18 @@ GDALDatasetH    src    = NULL;
 GDALDatasetH    dst    = NULL;
 GDALRasterBandH bsrc   = NULL;
 GDALRasterBandH bdst   = NULL;
-
 img_t *inp = NULL;
 img_t *out = NULL;
-
-
-
 char *f_dst = NULL;
 char d_out[NPOW_10];
 char e_out[NPOW_10];
-
 char **meta  = NULL;
 char **bmeta = NULL;
 const char *bname = NULL;
 const char *proj_ = NULL;
-
-
 char source[NPOW_16];
-
-
 int interleave;
 enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
-
 
 
   if (argc >= 2) check_arg(argv[1]);
@@ -98,7 +88,7 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
   directoryname(f_dst, d_out, NPOW_10);
   extension(f_dst,     e_out, NPOW_10);
 
-  if (strcmp(e_out, "VRT") != 0){
+  if (strcmp(e_out, "vrt") != 0){
     printf("Output file must have .vrt extension\n\n"); 
     return FAILURE;}
 
