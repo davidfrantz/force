@@ -1,28 +1,14 @@
-.. _higher-level:
+.. _hl-aux:
 
-force-higher-level
-==================
+Auxiliary data
+==============
 
-
-Usage
-^^^^^
-
-.. code-block:: bash
-
-  force-higher-level
-
-  Usage: force-higher-level parameter-file
-
-* parameter-file
-
-  | Any higher-level parameter file needs to be given as sole argument.
-  | Depending on the parameter file, the program will figure out which submodule to execute, e.g. time series analysis or machine learning predictions.
-
+FORCE HLPS supports the optional usage of several auxiliary datasets as explained below.
 
 .. _tilelist:
-  
+
 Tile allow-list
-^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^
 
 Tile allow-lists are optional, and can be used to limit the analysis extent to non-square extents.
 The allow-list is intersected with the analysis extent, i.e. only tiles included in both the analysis extent AND the allow-list will be processed.
