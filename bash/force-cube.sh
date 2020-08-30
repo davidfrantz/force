@@ -23,22 +23,27 @@
 ##########################################################################
 
 # functions/definitions ------------------------------------------------------------------
-PROG=`basename $0`;
-BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export PROG=`basename $0`;
+export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 MANDATORY_ARGS=1
 
-RASTER_INFO_EXE="gdalinfo"
-VECTOR_INFO_EXE="ogrinfo"
-VECTOR_WARP_EXE="ogr2ogr"
-RASTER_WARP_EXE="gdalwarp"
-RASTER_MERGE_EXE="gdal_merge.py"
-RASTERIZE_EXE="gdal_rasterize"
-PARALLEL_EXE="parallel"
+export RASTER_INFO_EXE="gdalinfo"
+export VECTOR_INFO_EXE="ogrinfo"
+export VECTOR_WARP_EXE="ogr2ogr"
+export RASTER_WARP_EXE="gdalwarp"
+export RASTER_MERGE_EXE="gdal_merge.py"
+export RASTERIZE_EXE="gdal_rasterize"
+export PARALLEL_EXE="parallel"
 #GDAL_CMD="$GDAL_EXE -of 'JPEG' -ot 'Byte' -b 3 -b 2 -b 1 -outsize 256 256 -scale 0 1000 -q "
 
 
 echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
+export -f echoerr
+
+export DEBUG=true # display debug messages?
+debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
+export -f debug
 
 cmd_not_found(){      # check required external commands
   for cmd in "$@"; do
@@ -46,6 +51,7 @@ cmd_not_found(){      # check required external commands
     if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
   done
 }
+export -f cmd_not_found
 
 help(){
 cat <<HELP
@@ -71,6 +77,7 @@ $PROG: cube raster images or vector geometries
 HELP
 exit 1
 }
+export -f help
 
 # important, check required commands !!! dies on missing
 cmd_not_found "$RASTER_INFO_EXE"
@@ -84,71 +91,70 @@ cmd_not_found "$PARALLEL_EXE"
 issmaller(){
   awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
 }
+export -f issmaller
 
 isgreater(){
   awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
 }
-
+export -f isgreater
 
 function cubethis(){
-exit 1
+
   x=$1
   y=$2
 
-  #echo $x $y $ORIGX $ORIGY $TILESIZE $CHUNKSIZE $RES $FINP $DOUT $CINP
+  debug "$x $y $ORIGX $ORIGY $TILESIZE $CHUNKSIZE $RES $FINP $DOUT $CINP"
 
   ULX=$(echo $ORIGX $x $TILESIZE | awk '{printf "%f",  $1 + $2*$3}')
   ULY=$(echo $ORIGY $y $TILESIZE | awk '{printf "%f",  $1 - $2*$3}')
   LRX=$(echo $ORIGX $x $TILESIZE | awk '{printf "%f",  $1 + ($2+1)*$3}')
   LRY=$(echo $ORIGY $y $TILESIZE | awk '{printf "%f",  $1 - ($2+1)*$3}')
-  
   TILE=$(printf "X%04d_Y%04d" $x $y)
-  #echo $ULX $ULY $LRX $LRY $TILE
-
   XBLOCK=$(echo $TILESIZE  $RES | awk '{print int($1/$2)}')
   YBLOCK=$(echo $CHUNKSIZE $RES | awk '{print int($1/$2)}')
-  
-  mkdir -p $DOUT/$TILE
+  debug "$ULX $ULY $LRX $LRY $TILE $XBLOCK $YBLOCK"
 
-  OUTFILE=$DOUT/$TILE/$CINP".tif"
-  
-  if [ "$RESAMPLE" == "rasterize" ]; then
+  mkdir -p "$DOUT/$TILE"
+  FOUT="$DOUT/$TILE/$CINP.tif"
+  debug "$FOUT"
 
-    $RASTERIZE_EXE -burn 1 -a_nodata 255 -ot 'Byte' -of 'GTiff' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $FINP $OUTFILE
+  if [ "$RASTER" == "false" ]; then
 
-    MAX=$($RASTER_INFO_EXE -stats $OUTFILE | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
-    rm $OUTFILE".aux.xml"
-    #echo "max: " $MAX
+    $RASTERIZE_EXE "-burn 1 -a_nodata 255 -ot Byte -of GTiff -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY $FINP $FOUT"
+
+    MAX=$($RASTER_INFO_EXE -stats "$FOUT" | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    rm "$FOUT.aux.xml"
+    debug "max: $MAX"
 
     if [ $MAX -lt 1 ]; then
-      rm $OUTFILE
-      exit
+      rm "$FOUT"
+      exit 1
     fi
 
   else
-  
-    if [ -r $OUTFILE ]; then
-      #echo "exists"
-      EXIST=1
-      OUTFILE=$DOUT/$TILE/$CINP"_TEMP2.tif"
-    else
-      EXIST=0
-    fi
-  
-    $RASTER_WARP_EXE -q -srcnodata $NODATA -dstnodata $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" -t_srs "$WKT" -te $ULX $LRY $LRX $ULY -tr $RES $RES -r $RESAMPLE $FINP $OUTFILE
 
-    if [ $EXIST -eq 1 ]; then
-      #echo "building mosaic"
-      mv $DOUT/$TILE/$CINP".tif" $DOUT/$TILE/$CINP"_TEMP1.tif"
-      $RASTER_MERGE_EXE.py -q -o $DOUT/$TILE/$CINP".tif" -n $NODATA -a_nodata $NODATA -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" -co "BLOCKYSIZE=$YBLOCK" $DOUT/$TILE/$CINP"_TEMP1.tif" $DOUT/$TILE/$CINP"_TEMP2.tif"
-      rm $DOUT/$TILE/$CINP"_TEMP1.tif" $DOUT/$TILE/$CINP"_TEMP2.tif"
+    if [ -r "$FOUT" ]; then
+      debug "exists"
+      EXIST="true"
+      FOUT="$DOUT/$TILE/$CINP'_TEMP2.tif'"
+    else
+      EXIST="false"
+    fi
+
+    $RASTER_WARP_EXE "-q -srcnodata $NODATA -dstnodata $NODATA -of GTiff -co INTERLEAVE=BAND -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK -t_srs $WKT -te $ULX $LRY $LRX $ULY -tr $RES $RES -r $RESAMPLE $FINP $FOUT"
+
+    if [ "$EXIST" == "true" ]; then
+      debug "building mosaic"
+      mv "$DOUT/$TILE/$CINP.tif" "$DOUT/$TILE/$CINP'_TEMP1.tif'"
+      $RASTER_MERGE_EXE.py "-q -o $DOUT/$TILE/$CINP.tif -n $NODATA -a_nodata $NODATA -init $NODATA -of GTiff -co INTERLEAVE=BAND -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK $DOUT/$TILE/$CINP'_TEMP1.tif' $DOUT/$TILE/$CINP'_TEMP2.tif'"
+      rm "$DOUT/$TILE/$CINP'_TEMP1.tif'" "$DOUT/$TILE/$CINP'_TEMP2.tif'"
     fi
 
   fi
 
 }
-
 export -f cubethis
+
 
 # now get the options --------------------------------------------------------------------
 ARGS=`getopt -o hr:s:o: --long help,output: -n "$0" -- "$@"`
@@ -199,9 +205,9 @@ fi
 
 # raster, vector, or non-such (then die)
 if $RASTER_INFO_EXE $FINP >& /dev/null; then 
-  RASTER=1
+  RASTER=true
 elif $VECTOR_INFO_EXE $FINP >& /dev/null; then 
-  RASTER=0
+  RASTER=false
 else
   echoerr "$FINP is not recognized as vector or raster file, exiting."; exit 1;
 fi
@@ -228,33 +234,35 @@ ORIGX=$(head -n 4 $DCDEF  | tail -1 )
 ORIGY=$(head -n 5 $DCDEF | tail -1 )
 TILESIZE=$(head -n 6 $DCDEF | tail -1 )
 CHUNKSIZE=$(head -n 7 $DCDEF | tail -1 )
-#echo $WKT $ORIGX $ORIGY $TILESIZE $CHUNKSIZE
+debug "$WKT $ORIGX $ORIGY $TILESIZE $CHUNKSIZE"
 
 # nodata value
-if [[ "$RASTER" -eq 1 ]]; then
+if [ "$RASTER" == "true" ]; then
   NODATA=$($RASTER_INFO_EXE $FINP | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
-  #echo $NODATA
+  debug "$NODATA"
 fi
 
 
 # bounding box
-if [[ "$RASTER" -eq 0 ]]; then
-  FTMP="$FTMP.gpkg"
-  $VECTOR_WARP_EXE -f 'GPKG' -t_srs "$WKT" $FTMP $FINP &> /dev/null
-  XMIN=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-  YMIN=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-  XMAX=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-  YMAX=$($VECTOR_INFO_EXE $FTMP -so ${FTMP%.*} | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-  FINP=$FTMP
-else
+if [ "$RASTER" == "true" ]; then
   FTMP="$FTMP.vrt"
+  debug "$FTMP"
   $RASTER_WARP_EXE -q -of 'VRT' -t_srs "$WKT" -tr $RES $RES -r near $FINP $FTMP &> /dev/null
   XMIN=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
   YMAX=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
   XMAX=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
   YMIN=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+else
+  FTMP="$FTMP.gpkg"
+  debug "$FTMP"
+  $VECTOR_WARP_EXE -f 'GPKG' -t_srs "$WKT" $FTMP $FINP &> /dev/null
+  XMIN=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMIN=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+  XMAX=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+  YMAX=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+  FINP=$FTMP
 fi
-#echo $XMIN $YMAX $XMAX $YMIN
+debug "$XMIN $YMAX $XMAX $YMIN"
 
 
 # 1st tile, and ulx/uly of 1st tile
@@ -262,12 +270,10 @@ TXMIN=$(echo $XMIN $ORIGX $TILESIZE | awk '{f=($1-$2)/$3;i=int(f);print(i==f||f>
 TYMIN=$(echo $YMAX $ORIGY $TILESIZE | awk '{f=($2-$1)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
 ULX=$(echo $ORIGX $TXMIN $TILESIZE | awk '{printf "%f", $1 + $2*$3}')
 ULY=$(echo $ORIGY $TYMIN $TILESIZE | awk '{printf "%f", $1 - $2*$3}')
-TXMAX=$TXMIN
-TYMAX=$TYMIN
-#echo $TXMIN $TYMIN $ULX $ULY
-
+debug "UL grid $ULX $ULY"
 
 # step a tile to the west, and check if image is in tile, find last tile
+TXMAX=$TXMIN
 ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
 while [ $(issmaller $ULX $XMAX) == "true" ]; do
   TXMAX=$(echo $TXMAX | awk '{print $1+1}')
@@ -275,26 +281,18 @@ while [ $(issmaller $ULX $XMAX) == "true" ]; do
 done
 
 # step a tile to the south, and check if image is in tile, find last tile
+TYMAX=$TYMIN
 ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
 while [ $(issmaller $YMIN $ULY) == "true" ]; do
   TYMAX=$(echo $TYMAX | awk '{print $1+1}')
   ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
 done
-#echo $TXMAX $TYMAX
+debug "X_TILE_RANGE = $TXMIN $TXMAX"
+debug "Y_TILE_RANGE = $TYMIN $TYMAX"
 
-export WKT=$WKT                   # is this here needed like this`??????
-export ORIGX=$ORIGX               # is this here needed like this`??????
-export ORIGY=$ORIGY               # is this here needed like this`??????
-export TILESIZE=$TILESIZE         # is this here needed like this`??????
-export CHUNKSIZE=$CHUNKSIZE       # is this here needed like this`??????
-export RES=$RES                   # is this here needed like this`??????
-export FINP=$FINP                 # is this here needed like this`??????
-export DOUT=$DOUT                 # is this here needed like this`??????
-export CINP=$CINP                 # is this here needed like this`??????
-export NODATA=$NODATA             # is this here needed like this`??????
-export RESAMPLE=$RESAMPLE         # is this here needed like this`??????
 
 # cube the file, spawn multiple jobs for each tile
+export WKT ORIGX ORIGY TILESIZE CHUNKSIZE RES FINP DOUT CINP NODATA RESAMPLE 
 $PARALLEL_EXE cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
 
 # remove the temporary file
