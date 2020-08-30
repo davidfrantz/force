@@ -5,8 +5,8 @@ Higher Level
 
 The FORCE Higher Level Processing System (HLPS) provides functionality for Higher Level Processing.
 
-HLPS consists of one executable only, i.e. :ref:`higher-level`. 
-Multiple :ref:`hl-submodules` are available, which either process ARD or feature datasets (see :ref:`hl-input)`, both in datacube format. 
+HLPS consists of one executable only, i.e. ``force-higher-level``. 
+Multiple :ref:`hl-submodules` are available, which either process ARD or feature datasets (see :ref:`hl-input`). 
 
 
 **Table 1** Higher Level module.
@@ -19,10 +19,10 @@ Multiple :ref:`hl-submodules` are available, which either process ARD or feature
 +        + :ref:`higher-level`     + 3-4   + Higher Level processing                                                                             +
 +--------+-------------------------+-------+-----------------------------------------------------------------------------------------------------+
 
+
 .. higher-level:
 
-Usage
-^^^^^
+**Usage**
 
 .. code-block:: bash
 
@@ -38,7 +38,7 @@ Usage
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
 
    higher-level.rst
    hl-input.rst
