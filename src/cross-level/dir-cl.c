@@ -248,7 +248,14 @@ char *slash;
 
   // Locate the last slash and set terminating 0
   slash = strrchr(dirname, '/');
-  if (slash != NULL) *slash = '\0';
+  if (slash != NULL){
+    *slash = '\0';
+  } else {
+    if (getcwd(dirname, size) == NULL){
+     printf("No directoryname detected and getting current directory failed.\n"); 
+     exit(1);
+   }
+  }
 
   return;
 }
