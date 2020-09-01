@@ -21,33 +21,23 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Datacube header
+String handling header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef CUBE_LL_H
-#define CUBE_LL_H
+#ifndef STRING_CL_H
+#define STRING_CL_H
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
-
-#include "../cross-level/string-cl.h"
-#include "../cross-level/cube-cl.h"
-#include "../cross-level/tile-cl.h"
-#include "../cross-level/stack-cl.h"
-#include "../cross-level/quality-cl.h"
-#include "../lower-level/param-ll.h"
-#include "../lower-level/meta-ll.h"
-#include "../lower-level/equi7-ll.h"
-#include "../lower-level/glance7-ll.h"
+#include <stdio.h>    // core input and output functions
+#include <stdlib.h>   // standard general utilities library
+#include <string.h>   // string handling functions
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, stack_t **LEVEL2, int nprod);
-multicube_t *start_multicube(par_ll_t *pl2, stack_t *stack);
+void copy_string(char *dst, size_t size, const char *src);
 
 #ifdef __cplusplus
 }

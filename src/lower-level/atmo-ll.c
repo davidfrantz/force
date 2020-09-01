@@ -1068,9 +1068,9 @@ stack_t *BOA = TOA;
 
   // set metadata
   if (pl2->doatmo){
-    strncpy(product, "BOA", 3); product[3] = '\0';
+    copy_string(product, NPOW_02, "BOA");
   } else {
-    strncpy(product, "TOA", 3); product[3] = '\0';
+    copy_string(product, NPOW_02, "TOA");
   }
   set_stack_product(BOA, product);
   set_stack_name(BOA, "FORCE Level 2 Processing System");
@@ -1140,7 +1140,7 @@ short *qa_ = NULL;
   
 
   // set metadata
-  strncpy(product, "QAI", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "QAI");
   set_stack_product(QA, product);
   set_stack_name(QA, "FORCE Level 2 Processing System");
   get_stack_sensor(QA, 0, sensor, NPOW_04);
@@ -1204,7 +1204,7 @@ short  *dst_ = NULL;
 
 
   // set metadata
-  strncpy(product, "DST", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "DST");
   set_stack_product(DST, product);
   set_stack_name(DST, "FORCE Level 2 Processing System");
   get_stack_compactdate(DST, 0, date, NPOW_04);
@@ -1359,7 +1359,7 @@ enum { R, G, B };
 
 
   // set metadata
-  strncpy(product, "OVV", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "OVV");
   set_stack_product(OVV, product);
   set_stack_name(OVV, "FORCE Level 2 Processing System");
   get_stack_compactdate(OVV, 0, date, NPOW_04);
@@ -1536,7 +1536,7 @@ GDALDataType eOutputType = GDT_Float64;
   free((void*)fcoarse_);
 
   // set metadata
-  strncpy(product, "VZN", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "VZN");
   set_stack_product(VZN, product);
   set_stack_name(VZN, "FORCE Level 2 Processing System");
   get_stack_compactdate(VZN, 0, date, NPOW_04);
@@ -1627,7 +1627,7 @@ short *hot_ = NULL;
 
   // set metadata
 
-  strncpy(product, "HOT", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "HOT");
   set_stack_product(HOT, product);
   set_stack_name(HOT, "FORCE Level 2 Processing System");
   get_stack_compactdate(HOT, 0, date, NPOW_04);
@@ -1739,7 +1739,7 @@ float **xy_aod_ = NULL;
 
 
   // set metadata
-  strncpy(product, "AOD", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "AOD");
   set_stack_product(AOD, product);
   set_stack_name(AOD, "FORCE Level 2 Processing System");
   get_stack_compactdate(AOD, 0, date, NPOW_04);
@@ -1828,7 +1828,7 @@ short *wvp_ = NULL;
   
 
   // set metadata
-  strncpy(product, "WVP", 3); product[3] = '\0';
+  copy_string(product, NPOW_02, "WVP");
   set_stack_product(WV, product);
   set_stack_name(WV, "FORCE Level 2 Processing System");
   get_stack_compactdate(WV, 0, date, NPOW_04);

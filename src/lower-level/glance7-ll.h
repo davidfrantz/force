@@ -32,6 +32,7 @@ GLANCE header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../lower-level/param-ll.h"
 

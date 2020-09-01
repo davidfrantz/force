@@ -33,6 +33,7 @@ Library completeness header
 
 
 #include "../cross-level/stack-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/read-ard-hl.h"
 

@@ -465,124 +465,124 @@ int *band_ptr[_WVL_LENGTH_] = {
     switch (tsa->index[idx]){
       case _IDX_BLU_:
         v[_WVL_BLUE_] = true;
-        strncpy(tsa->index_name[idx] , "BLU", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BLU");
         break;
       case _IDX_GRN_:
         v[_WVL_GREEN_] = true;
-        strncpy(tsa->index_name[idx] , "GRN", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "GRN");
         break;
       case _IDX_RED_:
         v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "RED", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RED");
         break;
       case _IDX_NIR_:
         v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NIR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NIR");
         break;
       case _IDX_SW1_:
         v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "SW1", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SW1");
         break;
       case _IDX_SW2_:
         v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "SW2", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SW2");
         break;
       case _IDX_RE1_:
         v[_WVL_REDEDGE1_] = true;
-        strncpy(tsa->index_name[idx] , "RE1", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE1");
         break;
       case _IDX_RE2_:
         v[_WVL_REDEDGE2_] = true;
-        strncpy(tsa->index_name[idx] , "RE2", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE2");
         break;
       case _IDX_RE3_:
         v[_WVL_REDEDGE3_] = true;
-        strncpy(tsa->index_name[idx] , "RE3", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE3");
         break;
       case _IDX_BNR_:
         v[_WVL_BNIR_] = true;
-        strncpy(tsa->index_name[idx] , "BNR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BNR");
         break;
       case _IDX_NDV_:
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "NDV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDV");
         break;
       case _IDX_EVI_:
         v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        strncpy(tsa->index_name[idx] , "EVI", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "EVI"); 
         break;
       case _IDX_NBR_:
         v[_WVL_NIR_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "NBR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NBR"); 
         break;
       case _IDX_ARV_:
         v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "ARV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
         break;
       case _IDX_SAV_:
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "SAV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
         break;
       case _IDX_SRV_:
         v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "SRV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SRV"); 
         break;
       case _IDX_TCB_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCB", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCB"); 
         break;
       case _IDX_TCG_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCG", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCG"); 
         break;
       case _IDX_TCW_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCW"); 
         break;
       case _IDX_TCD_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCD", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCD"); 
         break;
       case _IDX_NDB_:
         v[_WVL_SWIR1_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NDB", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDB"); 
         break;
       case _IDX_NDW_:
         v[_WVL_GREEN_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NDW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDW"); 
         break;
       case _IDX_MNW_:
         v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "MNW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "MNW"); 
         break;
       case _IDX_NDS_:
         v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "NDS", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDS"); 
         break;
       case _IDX_SMA_:
         for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-        strncpy(tsa->index_name[idx] , "SMA", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SMA"); 
         tsa->sma.v = true;
         break;
       case _IDX_BVV_:
         v[_WVL_VV_] = true;
-        strncpy(tsa->index_name[idx] , "BVV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BVV"); 
         break;
       case _IDX_BVH_:
         v[_WVL_VH_] = true;
-        strncpy(tsa->index_name[idx] , "BVH", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BVH"); 
         break;
       case _IDX_NDT_:
         v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "NDT", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDT"); 
         break;
       case _IDX_NDM_:
         v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "NDM", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDM"); 
         break;
       default:
         printf("unknown INDEX\n");
@@ -704,14 +704,10 @@ int i, j, k;
 
   for (i=0, k=0; i<ftr->ntags; i++){
     for (j=1; j<ftr->ifeature[i]; j++, k++){
-      if (strlen(ftr->cfeature[i][0]) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else {
-        strncpy(ftr->bname[k], ftr->cfeature[i][0], strlen(ftr->cfeature[i][0])); 
-        ftr->bname[k][strlen(ftr->cfeature[i][0])] = '\0';
-      }
-      
+
+      copy_string(ftr->bname[k], NPOW_10, ftr->cfeature[i][0]);
       ftr->band[k] = atoi(ftr->cfeature[i][j]);
+
       #ifdef FORCE_DEBUG
       printf("Feature # %04d: %s, band %d\n", k, ftr->bname[k], ftr->band[k]);
       #endif
@@ -1015,15 +1011,15 @@ int *band_ptr[_WVL_LENGTH_] = {
 
   // set target sensor
   if (sen->nb == 6){
-    strncpy(sen->target, "LNDLG", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "LNDLG");
   } else if (sen->nb == 10){
-    strncpy(sen->target, "SEN2L", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "SEN2L");
   } else if (sen->nb == 4){
-    strncpy(sen->target, "SEN2H", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "SEN2H");
   } else if (sen->nb == 3){
-    strncpy(sen->target, "R-G-B", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "R-G-B");
   } else if (sen->nb == 2){
-    strncpy(sen->target, "VVVHP", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "VVVHP");
   } else {
     printf("unknown sensors.\n"); return FAILURE;
   }
@@ -1036,15 +1032,11 @@ int *band_ptr[_WVL_LENGTH_] = {
 
   for (b=0, bb=0; b<nb; b++){
     if (!vb[b]) continue;
-    if (strlen(domains[b]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { strncpy(sen->domain[bb], domains[b], strlen(domains[b])); sen->domain[bb][strlen(domains[b])] = '\0';}
+    copy_string(sen->domain[bb], NPOW_10, domains[b]);
     for (s=0, ss=0; s<ns; s++){
       if (!vs[s]) continue;
       for (c=0; c<5; c++) upper[c] = toupper(sensor[s][c]);
-      if (strlen(upper) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); exit(1);
-      } else { strncpy(sen->sensor[ss], upper, strlen(upper)); sen->sensor[ss][strlen(upper)] = '\0';}
+      copy_string(sen->sensor[ss], NPOW_10, upper);
       sen->band[ss][bb] = band[s][b];
       ss++;
     }

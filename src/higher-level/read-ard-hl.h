@@ -32,6 +32,7 @@ Reading ARD header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/quality-cl.h"

@@ -288,15 +288,7 @@ dir_t d;
   for (m=0, d.n=0; m<d.N; m++){
 
     if (strcmp(d.LIST[m]->d_name, phl->b_mask) == 0){
-      
-      if (strlen(d.LIST[m]->d_name) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(d.list[d.n], d.LIST[m]->d_name, strlen(d.LIST[m]->d_name)); 
-        d.list[d.n][strlen(d.LIST[m]->d_name)] = '\0';
-        d.n++;
-      }
-      
+      copy_string(d.list[d.n++], NPOW_10, d.LIST[m]->d_name);
       break;
     }
 
@@ -375,15 +367,7 @@ int nchar;
       if (!phl->date_doys[date.doy])  vs = false;
 
       // allow-list image
-      if (vs){
-        if (strlen(d.LIST[t]->d_name) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); return FAILURE;
-        } else { 
-          strncpy(d.list[d.n], d.LIST[t]->d_name, strlen(d.LIST[t]->d_name)); 
-          d.list[d.n][strlen(d.LIST[t]->d_name)] = '\0';
-          d.n++;
-        }
-      }
+      if (vs) copy_string(d.list[d.n++], NPOW_10, d.LIST[t]->d_name);
 
     }
 
@@ -428,25 +412,14 @@ int n;
   for (t=0, n=0; t<dir.n; t++){
     date_ard(&date, dir.list[t]);
     if (date.ce < cemin || date.ce > cemax) continue;
-    if (strlen(dir.list[t]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(list[n], dir.list[t], strlen(dir.list[t])); 
-      list[n][strlen(dir.list[t])] = '\0';
-      n++;
-    }
+    copy_string(list[n++], NPOW_10, dir.list[t]);
   }
 
   for (t=0; t<dir.n; t++){
     if (t >= n){
-      strncpy(dir.list[t], "NULL",  4); dir.list[t][4] = '\0';
+      copy_string(dir.list[t], NPOW_10, "NULL");
     } else {
-      if (strlen(list[t]) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(dir.list[t], list[t], strlen(list[t])); 
-        dir.list[t][strlen(list[t])] = '\0';
-      }
+      copy_string(dir.list[t], NPOW_10, list[t]);
     }
   }
   free_2D((void**)list, dir.n);
@@ -827,10 +800,8 @@ bool level3 = false;
       if (phl->prd.imp){
         
         // backup filename
-        if (strlen(fname) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); exit(1);
-        } else { strncpy(temp, fname, strlen(fname)); temp[strlen(fname)] = '\0';}
-        
+        copy_string(temp, NPOW_10, fname);
+
 
         // new filename
         if (strstr(fname, "BOA")  != NULL) pch = strstr(fname, "BOA");
@@ -839,11 +810,7 @@ bool level3 = false;
         strncpy(pch, "IMP", 3);
 
         // if no improphed product exists, use normal one
-        if (!fileexist(fname)){
-          if (strlen(temp) > NPOW_10-1){
-            printf("cannot copy, string too long.\n"); exit(1);
-          } else { strncpy(fname, temp, strlen(temp)); fname[strlen(temp)] = '\0';}
-        }
+        if (!fileexist(fname)) copy_string(fname, NPOW_10, temp);
 
       }
 
@@ -1368,9 +1335,7 @@ int nchar;
   }
   
   // copy file name
-  if (strlen(file) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return NULL;
-  } else { strncpy(fname, file, strlen(file)); fname[strlen(file)] = '\0';}
+  copy_string(fname, NPOW_10, file);
   
   nchar = snprintf(c_tc, NPOW_04, "X%04d_Y%04d", tx, ty);
   if (nchar < 0 || nchar >= NPOW_04){ 
@@ -1428,9 +1393,7 @@ int nchar;
         printf("error in assembling filename for neighboring block.\n"); return NULL;
       } else strncpy(pch, c_tn, 11);
 
-      if (strlen(c_tn) > NPOW_04-1){
-        printf("cannot copy, string too long.\n"); return NULL;
-      } else { strncpy(c_tc, c_tn, strlen(c_tn)); c_tc[strlen(c_tn)] = '\0';}
+      copy_string(c_tc, NPOW_04, c_tn);
           
       
       #ifdef FORCE_DEBUG

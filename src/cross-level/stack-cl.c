@@ -492,11 +492,13 @@ int datatype;
 void init_stack(stack_t *stack){
 int i;
 
-  strncpy(stack->name,      "NA", 2); stack->name[2]      = '\0';
-  strncpy(stack->product,   "NA", 2); stack->product[2]   = '\0';
-  strncpy(stack->dname,     "NA", 2); stack->dname[2]     = '\0';
-  strncpy(stack->fname,     "NA", 2); stack->fname[2]     = '\0';
-  strncpy(stack->extension, "NA", 2); stack->extension[2] = '\0';
+
+  copy_string(stack->name,      NPOW_10, "NA");
+  copy_string(stack->product,   NPOW_03, "NA");
+  copy_string(stack->dname,     NPOW_10, "NA");
+  copy_string(stack->fname,     NPOW_10, "NA");
+  copy_string(stack->extension, NPOW_02, "NA");
+
   stack->sid = -1;
   stack->format = 0;
   stack->open = OPEN_FALSE;
@@ -521,9 +523,10 @@ int i;
   stack->nchunk = 0;
   stack->tx = 0;
   stack->ty = 0;
-  strncpy(stack->proj, "NA", 2); stack->proj[2] = '\0';
-  strncpy(stack->par,  "NA", 2); stack->par[2]  = '\0';
-  
+
+  copy_string(stack->proj,NPOW_10, "NA");
+  copy_string(stack->par, NPOW_14, "NA");
+
   stack->save   = NULL;
   stack->nodata = NULL;
   stack->scale  = NULL;
@@ -557,10 +560,10 @@ int b;
     stack->nodata[b] = 0;
     stack->scale[b] = 0;
     stack->wavelength[b] = 0;
-    strncpy(stack->unit[b],     "NA", 2); stack->unit[b][2]     = '\0';
-    strncpy(stack->domain[b],   "NA", 2); stack->domain[b][2]   = '\0';
-    strncpy(stack->bandname[b], "NA", 2); stack->bandname[b][2] = '\0';
-    strncpy(stack->sensor[b],   "NA", 2); stack->sensor[b][2]   = '\0';
+    copy_string(stack->unit[b],     NPOW_04, "NA");
+    copy_string(stack->domain[b],   NPOW_10, "NA");
+    copy_string(stack->bandname[b], NPOW_10, "NA");
+    copy_string(stack->sensor[b],   NPOW_04, "NA");
     init_date(&stack->date[b]);
   }
 
@@ -673,40 +676,20 @@ int i = 0;
   alloc_2DC((void***)&fp_meta,   n_fp_meta,   NPOW_14, sizeof(char));
   alloc_2DC((void***)&band_meta, n_band_meta, NPOW_14, sizeof(char));
   sys_meta = system_info(&n_sys_meta);
-  
 
-  strncpy(fp_meta[i], "FORCE_version",     13); fp_meta[i][13] = '\0'; i++;
-  if (strlen(_VERSION_) > NPOW_14-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { 
-    strncpy(fp_meta[i], _VERSION_, strlen(_VERSION_)); 
-    fp_meta[i][strlen(_VERSION_)] = '\0'; i++;
-  }
+
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_version");
+  copy_string(fp_meta[i++], NPOW_14, _VERSION_);
   
-  strncpy(fp_meta[i], "FORCE_description", 17); fp_meta[i][17] = '\0'; i++;
-  if (strlen(stack->name) > NPOW_14-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { 
-    strncpy(fp_meta[i], stack->name, strlen(stack->name)); 
-    fp_meta[i][strlen(stack->name)] = '\0'; i++;
-  }
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
+  copy_string(fp_meta[i++], NPOW_14, stack->name);
   
-  strncpy(fp_meta[i], "FORCE_product",     13); fp_meta[i][13] = '\0'; i++;
-  if (strlen(stack->product) > NPOW_14-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { 
-    strncpy(fp_meta[i], stack->product, strlen(stack->product)); 
-    fp_meta[i][strlen(stack->product)] = '\0'; i++;
-  }
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_product");
+  copy_string(fp_meta[i++], NPOW_14, stack->product);
   
-  strncpy(fp_meta[i], "FORCE_param",       11); fp_meta[i][11] = '\0'; i++;
-  if (strlen(stack->par) > NPOW_14-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { 
-    strncpy(fp_meta[i], stack->par, strlen(stack->par)); 
-    fp_meta[i][strlen(stack->par)] = '\0'; i++;
-  }
-  
+  copy_string(fp_meta[i++], NPOW_14, "FORCE_param");
+  copy_string(fp_meta[i++], NPOW_14, stack->par);
+
 
   // how many bands to output?
   for (b=0, b_=0; b<stack->nb; b++) b_ += stack->save[b];
@@ -926,48 +909,29 @@ int i = 0;
 
       i = 0;
 
-      strncpy(band_meta[i], "Domain", 6); band_meta[i][6] = '\0'; i++;
-      if (strlen(stack->domain[b_stack]) > NPOW_14-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(band_meta[i], stack->domain[b_stack], strlen(stack->domain[b_stack])); 
-        band_meta[i][strlen(stack->domain[b_stack])] = '\0'; i++;
-      }
 
-      strncpy(band_meta[i], "Wavelength", 10); band_meta[i][10] = '\0'; i++;
+      copy_string(band_meta[i++], NPOW_14, "Domain");
+      copy_string(band_meta[i++], NPOW_14, stack->domain[b_stack]);
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength");
       nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->wavelength[b_stack]); i++;
       if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
-      strncpy(band_meta[i], "Wavelength_unit", 15); band_meta[i][15] = '\0'; i++;
-      if (strlen(stack->unit[b_stack]) > NPOW_14-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(band_meta[i], stack->unit[b_stack], strlen(stack->unit[b_stack])); 
-        band_meta[i][strlen(stack->unit[b_stack])] = '\0'; i++;
-      }
+      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
+      copy_string(band_meta[i++], NPOW_14, stack->unit[b_stack]);
 
-      strncpy(band_meta[i], "Scale", 5); band_meta[i][5] = '\0'; i++;
+      copy_string(band_meta[i++], NPOW_14, "Scale");
       nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->scale[b_stack]); i++;
       if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
-      strncpy(band_meta[i], "Sensor", 6); band_meta[i][6] = '\0'; i++;
-      if (strlen(stack->sensor[b_stack]) > NPOW_14-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(band_meta[i], stack->sensor[b_stack], strlen(stack->sensor[b_stack])); 
-        band_meta[i][strlen(stack->sensor[b_stack])] = '\0'; i++;
-      }
+      copy_string(band_meta[i++], NPOW_14, "Sensor");
+      copy_string(band_meta[i++], NPOW_14, stack->sensor[b_stack]);
 
       get_stack_longdate(stack, b_stack, ldate, NPOW_05-1);
-      strncpy(band_meta[i], "Date", 4); band_meta[i][4] = '\0'; i++;
-      if (strlen(ldate) > NPOW_14-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(band_meta[i], ldate, strlen(ldate)); 
-        band_meta[i][strlen(ldate)] = '\0'; i++;
-      }
+      copy_string(band_meta[i++], NPOW_14, "Date");
+      copy_string(band_meta[i++], NPOW_14, ldate);
 
 
       band = GDALGetRasterBand(fp, b_file);
@@ -1767,13 +1731,8 @@ char domain_[NPOW_10];
 void set_stack_name(stack_t *stack, const char *name){
 
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->name, name, strlen(name)); 
-    stack->name[strlen(name)] = '\0';
-  }
-  
+  copy_string(stack->name, NPOW_10, name);
+
   return;
 }
 
@@ -1787,12 +1746,7 @@ void set_stack_name(stack_t *stack, const char *name){
 void get_stack_name(stack_t *stack, char name[], size_t size){
 
 
-  if (strlen(stack->name) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(name, stack->name, strlen(stack->name)); 
-    name[strlen(stack->name)] = '\0';
-  }
+  copy_string(name, size, stack->name);
 
   return;
 }
@@ -1806,13 +1760,8 @@ void get_stack_name(stack_t *stack, char name[], size_t size){
 void set_stack_product(stack_t *stack, const char *product){
   
 
-  if (strlen(product) > NPOW_03-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->product, product, strlen(product)); 
-    stack->product[strlen(product)] = '\0';
-  }
- 
+  copy_string(stack->product, NPOW_03, product);
+
   return;
 }
 
@@ -1826,12 +1775,7 @@ void set_stack_product(stack_t *stack, const char *product){
 void get_stack_product(stack_t *stack, char product[], size_t size){
 
 
-  if (strlen(stack->product) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(product, stack->product, strlen(stack->product)); 
-    product[strlen(stack->product)] = '\0';
-  }
+  copy_string(product, size, stack->product);
 
   return;
 }
@@ -1845,12 +1789,7 @@ void get_stack_product(stack_t *stack, char product[], size_t size){
 void set_stack_dirname(stack_t *stack, const char *dname){
 
 
-  if (strlen(dname) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->dname, dname, strlen(dname)); 
-    stack->dname[strlen(dname)] = '\0';
-  }
+  copy_string(stack->dname, NPOW_10, dname);
 
   return;
 }
@@ -1865,12 +1804,7 @@ void set_stack_dirname(stack_t *stack, const char *dname){
 void get_stack_dirname(stack_t *stack, char dname[], size_t size){
 
 
-  if (strlen(stack->dname) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(dname, stack->dname, strlen(stack->dname)); 
-    dname[strlen(stack->dname)] = '\0';
-  }
+  copy_string(dname, size, stack->dname);
 
   return;
 }
@@ -1884,12 +1818,7 @@ void get_stack_dirname(stack_t *stack, char dname[], size_t size){
 void set_stack_filename(stack_t *stack, const char *fname){
 
 
-  if (strlen(fname) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->fname, fname, strlen(fname)); 
-    stack->fname[strlen(fname)] = '\0';
-  }
+  copy_string(stack->fname, NPOW_10, fname);
 
   return;
 }
@@ -1904,12 +1833,7 @@ void set_stack_filename(stack_t *stack, const char *fname){
 void get_stack_filename(stack_t *stack, char fname[], size_t size){
 
 
-  if (strlen(stack->fname) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(fname, stack->fname, strlen(stack->fname)); 
-    fname[strlen(stack->fname)] = '\0';
-  }
+  copy_string(fname, size, stack->fname);
 
   return;
 }
@@ -1930,13 +1854,8 @@ void set_stack_extension(stack_t *stack, const char *extension){
   if (get_stack_format(stack) == _FMT_JPEG_ && strcmp(extension, "jpg") != 0){
     printf("extension does not match with format.\n");}
 
-  if (strlen(extension) > NPOW_02-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->extension, extension, strlen(extension)); 
-    stack->extension[strlen(extension)] = '\0';
-  }
-  
+  copy_string(stack->extension, NPOW_02, extension);
+
   return;
 }
 
@@ -1950,12 +1869,7 @@ void set_stack_extension(stack_t *stack, const char *extension){
 void get_stack_extension(stack_t *stack, char extension[], size_t size){
 
 
-  if (strlen(stack->extension) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(extension, stack->extension, strlen(stack->extension)); 
-    extension[strlen(stack->extension)] = '\0';
-  }
+  copy_string(extension, size, stack->extension);
 
   return;
 }
@@ -2690,12 +2604,7 @@ double get_stack_chunkheight(stack_t *stack){
 void set_stack_proj(stack_t *stack, const char *proj){
 
 
-  if (strlen(proj) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->proj, proj, strlen(proj)); 
-    stack->proj[strlen(proj)] = '\0';
-  }
+  copy_string(stack->proj, NPOW_10, proj);
   
   return;
 }
@@ -2710,12 +2619,7 @@ void set_stack_proj(stack_t *stack, const char *proj){
 void get_stack_proj(stack_t *stack, char proj[], size_t size){
 
 
-  if (strlen(stack->proj) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(proj, stack->proj, strlen(stack->proj)); 
-    proj[strlen(stack->proj)] = '\0';
-  }
+  copy_string(proj, size, stack->proj);
   
   return;
 }
@@ -2729,12 +2633,7 @@ void get_stack_proj(stack_t *stack, char proj[], size_t size){
 void set_stack_par(stack_t *stack, const char *par){
 
 
-  if (strlen(par) > NPOW_14-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->par, par, strlen(par)); 
-    stack->par[strlen(par)] = '\0';
-  }
+  copy_string(stack->par, NPOW_14, par);
 
   return;
 }
@@ -2749,12 +2648,7 @@ void set_stack_par(stack_t *stack, const char *par){
 void get_stack_par(stack_t *stack, char par[], size_t size){
 
 
-  if (strlen(stack->par) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(par, stack->par, strlen(stack->par)); 
-    par[strlen(stack->par)] = '\0';
-  }
+  copy_string(par, size, stack->par);
 
   return;
 }
@@ -2881,12 +2775,7 @@ float get_stack_wavelength(stack_t *stack, int b){
 void set_stack_unit(stack_t *stack, int b, const char *unit){
 
 
-  if (strlen(unit) > NPOW_04-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->unit[b], unit, strlen(unit)); 
-    stack->unit[b][strlen(unit)] = '\0';
-  }
+  copy_string(stack->unit[b], NPOW_04, unit);
 
   return;
 }
@@ -2902,12 +2791,7 @@ void set_stack_unit(stack_t *stack, int b, const char *unit){
 void get_stack_unit(stack_t *stack, int b, char unit[], size_t size){
 
 
-  if (strlen(stack->unit[b]) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(unit, stack->unit[b], strlen(stack->unit[b])); 
-    unit[strlen(stack->unit[b])] = '\0';
-  }
+  copy_string(unit, size, stack->unit[b]);
 
   return;
 }
@@ -2922,12 +2806,7 @@ void get_stack_unit(stack_t *stack, int b, char unit[], size_t size){
 void set_stack_domain(stack_t *stack, int b, const char *domain){
 
 
-  if (strlen(domain) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->domain[b], domain, strlen(domain)); 
-    stack->domain[b][strlen(domain)] = '\0';
-  }
+  copy_string(stack->domain[b], NPOW_10, domain);
 
   return;
 }
@@ -2943,12 +2822,7 @@ void set_stack_domain(stack_t *stack, int b, const char *domain){
 void get_stack_domain(stack_t *stack, int b, char domain[], size_t size){
 
 
-  if (strlen(stack->domain[b]) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(domain, stack->domain[b], strlen(stack->domain[b])); 
-    domain[strlen(stack->domain[b])] = '\0';
-  }
+  copy_string(domain, size, stack->domain[b]);
 
   return;
 }
@@ -2963,12 +2837,7 @@ void get_stack_domain(stack_t *stack, int b, char domain[], size_t size){
 void set_stack_bandname(stack_t *stack, int b, const char *bandname){
 
 
-  if (strlen(bandname) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->bandname[b], bandname, strlen(bandname)); 
-    stack->bandname[b][strlen(bandname)] = '\0';
-  }
+  copy_string(stack->bandname[b], NPOW_10, bandname);
 
   return;
 }
@@ -2984,12 +2853,7 @@ void set_stack_bandname(stack_t *stack, int b, const char *bandname){
 void get_stack_bandname(stack_t *stack, int b, char bandname[], size_t size){
 
   
-  if (strlen(stack->bandname[b]) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(bandname, stack->bandname[b], strlen(stack->bandname[b])); 
-    bandname[strlen(stack->bandname[b])] = '\0';
-  }
+  copy_string(bandname, size, stack->bandname[b]);
 
   return;
 }
@@ -3004,12 +2868,7 @@ void get_stack_bandname(stack_t *stack, int b, char bandname[], size_t size){
 void set_stack_sensor(stack_t *stack, int b, const char *sensor){
 
 
-  if (strlen(sensor) > NPOW_04-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(stack->sensor[b], sensor, strlen(sensor)); 
-    stack->sensor[b][strlen(sensor)] = '\0';
-  }
+  copy_string(stack->sensor[b], NPOW_04, sensor);
 
   return;
 }
@@ -3025,12 +2884,7 @@ void set_stack_sensor(stack_t *stack, int b, const char *sensor){
 void get_stack_sensor(stack_t *stack, int b, char sensor[], size_t size){
 
 
-  if (strlen(stack->sensor[b]) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(sensor, stack->sensor[b], strlen(stack->sensor[b])); 
-    sensor[strlen(stack->sensor[b])] = '\0';
-  }
+  copy_string(sensor, size, stack->sensor[b]);
 
   return;
 }

@@ -39,6 +39,7 @@ Directory/file support header
 #include <errno.h>    // error numbers
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 
 
 #ifdef __cplusplus

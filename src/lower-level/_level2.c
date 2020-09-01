@@ -30,6 +30,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include <string.h>  // string handling functions
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
 #include "../cross-level/stack-cl.h"
@@ -100,20 +101,8 @@ GDALDriverH driver;
   pl2 = allocate_param_lower();
 
   // get command line parameters
-  if (strlen(argv[1]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;;
-  } else { 
-    strncpy(pl2->d_level1, argv[1], strlen(argv[1]));
-    pl2->d_level1[strlen(argv[1])] = '\0';
-  }
-
-  if (strlen(argv[2]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;;
-  } else { 
-    strncpy(pl2->f_par, argv[2], strlen(argv[2]));
-    pl2->f_par[strlen(argv[2])] = '\0';
-  }
-
+  copy_string(pl2->d_level1, NPOW_10, argv[1]);
+  copy_string(pl2->f_par,    NPOW_10, argv[2]);
   check_arg(argv[2]);
 
 

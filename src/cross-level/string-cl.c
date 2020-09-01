@@ -21,37 +21,32 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Datacube header
+This file contains functions for string handling
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef CUBE_LL_H
-#define CUBE_LL_H
-
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
-
-#include "../cross-level/string-cl.h"
-#include "../cross-level/cube-cl.h"
-#include "../cross-level/tile-cl.h"
-#include "../cross-level/stack-cl.h"
-#include "../cross-level/quality-cl.h"
-#include "../lower-level/param-ll.h"
-#include "../lower-level/meta-ll.h"
-#include "../lower-level/equi7-ll.h"
-#include "../lower-level/glance7-ll.h"
+#include "string-cl.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/** Copy string
++++ This function copies a source string into a destination buffer. 
++++ strncpy copies as many characters from src to dst as there is space
++++ in src. The string is padded with zeros. This way, buffer overflow 
++++ won't happen. If dst is longer than src, dst will be truncated. The 
++++ truncation will be detected and the program will interrupt.
+--- dst:    destination buffer
+--- size:   size of destination buffer
+--- src:    source string
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void copy_string(char *dst, size_t size, const char *src){
 
-int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, stack_t **LEVEL2, int nprod);
-multicube_t *start_multicube(par_ll_t *pl2, stack_t *stack);
+  strncpy(dst, src, size);
+  if (dst[size-1] != '\0'){
+    printf("cannot copy, string too long.\n");
+    exit(1);
+  }
 
-#ifdef __cplusplus
+  return;
 }
-#endif
-
-#endif
 
