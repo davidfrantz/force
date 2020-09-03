@@ -494,7 +494,9 @@ polar_t *theta0 = NULL;
           }
 
           // max of season
-          if (polar[i].val > timing[_PEAK_].val){
+          if (polar[i].cum >= pol->start && 
+              polar[i].cum <  pol->end   && 
+              polar[i].val > timing[_PEAK_].val){
             memcpy(&timing[_PEAK_],   &polar[i], sizeof(polar_t));}
 
           // average vector of early growing season part
@@ -570,7 +572,8 @@ polar_t *theta0 = NULL;
 
       }
 
-      if (theta0 != NULL) free((void*)theta0); theta0 = NULL;
+      if (theta0 != NULL) free((void*)theta0); 
+      theta0 = NULL;
 
     }
 
