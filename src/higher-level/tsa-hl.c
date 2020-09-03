@@ -561,7 +561,7 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              set_stack_domain(TSA[o], t, fdate);
+              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
