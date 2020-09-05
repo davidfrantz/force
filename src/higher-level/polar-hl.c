@@ -557,6 +557,14 @@ float green_val, base_val;
         mean_rate[_EARLY_] /= n_window[_EARLY_];
         mean_rate[_LATE_]  /= n_window[_LATE_];
 
+        // scale the rates in relation to a steady increase from 0 to 10000, i.e.
+        // to 10000/365 = 27.4 per day
+        // values are reported in scales percent
+        mean_rate[_EARLY_] = mean_rate[_EARLY_] / (1e4/365.0) * 1e4;
+        mean_rate[_LATE_]  = mean_rate[_LATE_]  / (1e4/365.0) * 1e4;
+        max_rate[_EARLY_]  = max_rate[_EARLY_]  / (1e4/365.0) * 1e4;
+        max_rate[_LATE_]   = max_rate[_LATE_]   / (1e4/365.0) * 1e4;
+
         green_val = (timing[_START_].val + timing[_END_].val)   / 2.0;
         base_val  = (timing[_LEFT_].val  + timing[_RIGHT_].val) / 2.0;
 
