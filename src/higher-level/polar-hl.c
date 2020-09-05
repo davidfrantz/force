@@ -321,6 +321,9 @@ polar_t timing[_EVENT_LEN_];
 polar_t vector[_WINDOW_LEN_];
 float mean_window[_WINDOW_LEN_][2];
 int   n_window[_WINDOW_LEN_];
+float max_rate[_WINDOW_LEN_];
+float mean_rate[_WINDOW_LEN_];
+float rate;
 double recurrence[2];
 double integral[_INTEGRAL_LEN_];
 
@@ -339,7 +342,7 @@ float green_val, base_val;
 
 
 
-  #pragma omp parallel private(l,g,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,recurrence,integral,polar,theta0,green_val,base_val) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
+  #pragma omp parallel private(l,g,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,max_rate,mean_rate,rate,recurrence,integral,polar,theta0,green_val,base_val) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
   {
 
     // allocate
@@ -453,6 +456,8 @@ float green_val, base_val;
         memset(&timing,     0, sizeof(polar_t)*_EVENT_LEN_);
         memset(mean_window, 0, sizeof(float)*_WINDOW_LEN_*2);
         memset(n_window,    0, sizeof(float)*_WINDOW_LEN_);
+        memset(max_rate,    0, sizeof(float)*_WINDOW_LEN_);
+        memset(mean_rate,   0, sizeof(float)*_WINDOW_LEN_);
         memset(recurrence,  0, sizeof(double)*2);
 
         if (vector[_THETA_].doy < 182) y = s; else y = s+1;
@@ -504,18 +509,30 @@ float green_val, base_val;
             memcpy(&timing[_PEAK_],   &polar[i], sizeof(polar_t));}
 
           // average vector of early growing season part
+          // + average and maximum rising rate
           if (polar[i].cum >= pol->start && 
               polar[i].cum <  pol->mid){
             mean_window[_EARLY_][_X_] += polar[i].pcx;
             mean_window[_EARLY_][_Y_] += polar[i].pcy;
+            if (i > 0 && polar[i].val - polar[i-1].val > 0){
+              rate = (polar[i].val - polar[i-1].val)/tsi->step;
+              mean_rate[_EARLY_] += rate;
+              if (rate > max_rate[_EARLY_]) max_rate[_EARLY_] = rate;
+            }
             n_window[_EARLY_]++;
           }
           
           // average vector of late growing season part
+          // + average and maximum falling rate
           if (polar[i].cum >= pol->mid && 
               polar[i].cum <  pol->end){
             mean_window[_LATE_][_X_] += polar[i].pcx;
             mean_window[_LATE_][_Y_] += polar[i].pcy;
+            if (i > 0 && polar[i].val - polar[i-1].val < 0){
+              rate = (polar[i-1].val - polar[i].val)/tsi->step;
+              mean_rate[_LATE_] += rate;
+              if (rate > max_rate[_LATE_]) max_rate[_LATE_] = rate;
+            }
             n_window[_LATE_]++;
           }
 
@@ -537,6 +554,8 @@ float green_val, base_val;
         ce_from_polar_vector(s, &vector[_THETA_], &vector[_EARLY_]);
         ce_from_polar_vector(s, &vector[_THETA_], &vector[_LATE_]);
 
+        mean_rate[_EARLY_] /= n_window[_EARLY_];
+        mean_rate[_LATE_]  /= n_window[_LATE_];
 
         green_val = (timing[_START_].val + timing[_END_].val)   / 2.0;
         base_val  = (timing[_LEFT_].val  + timing[_RIGHT_].val) / 2.0;
@@ -583,11 +602,18 @@ float green_val, base_val;
         }
 
 
-        //scale integrals to percent in relation to a 
+        // scale integrals to scaled percent in relation to a 
         // 365 days * 10000 value boxcar integral
+        // 10000 -> 100%
         for (g=0; g<_INTEGRAL_LEN_; g++){
           integral[g] = integral[g] / (1e4*365.0) * 10000;
         }
+
+        // adjust scaling for derivative integrals, i.e. 
+        // scaled percent in relation to a steady increase from 0 to 10000, i.e.
+        // half the 365 days * 10000 value boxcar integral
+        integral[_RISING_INT_]  *= 2;
+        integral[_FALLING_INT_] *= 2;
 
 
         // date parameters
@@ -631,6 +657,12 @@ float green_val, base_val;
         if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)integral[_GREEN_INT_];
         if (pol->use[_POL_IRD_]) ts->pol_[_POL_IRD_][y][p] = (short)integral[_RISING_INT_];
         if (pol->use[_POL_IFD_]) ts->pol_[_POL_IFD_][y][p] = (short)integral[_FALLING_INT_];
+
+        // rate parameters
+        if (pol->use[_POL_RAR_]) ts->pol_[_POL_RAR_][y][p] = (short)mean_rate[_EARLY_];
+        if (pol->use[_POL_RAF_]) ts->pol_[_POL_RAF_][y][p] = (short)mean_rate[_LATE_];
+        if (pol->use[_POL_RMR_]) ts->pol_[_POL_RMR_][y][p] = (short)max_rate[_EARLY_];
+        if (pol->use[_POL_RMF_]) ts->pol_[_POL_RMF_][y][p] = (short)max_rate[_LATE_];
 
       }
 

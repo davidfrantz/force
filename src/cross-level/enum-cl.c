@@ -128,7 +128,8 @@ const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_] = {
   { _POL_VGA_, "VGA" }, { _POL_VGV_, "VGV" }, { _POL_DPY_, "DPY" }, 
   { _POL_DPV_, "DPV" }, { _POL_IST_, "IST" }, { _POL_IBL_, "IBL" }, 
   { _POL_IBT_, "IBT" }, { _POL_IGS_, "IGS" }, { _POL_IRD_, "IRD" }, 
-  { _POL_IFD_, "IFD" }};
+  { _POL_IFD_, "IFD" }, { _POL_RAR_, "RAR" }, { _POL_RAF_, "RAF" },
+  { _POL_RMR_, "RMR" }, { _POL_RMF_,"RMF" }};
 
 const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
