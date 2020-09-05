@@ -636,18 +636,18 @@ float green_val, base_val;
         if (pol->use[_POL_VGV_]) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
 
         // integral parameters
-        if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)(integral[_SEASONAL_INT_] * 10);
-        if (pol->use[_POL_IBL_]) ts->pol_[_POL_IBL_][y][p] = (short)(integral[_LATENT_INT_]   * 10);
-        if (pol->use[_POL_IBT_]) ts->pol_[_POL_IBT_][y][p] = (short)(integral[_TOTAL_INT_]    * 10);
-        if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)(integral[_GREEN_INT_]    * 10);
-        if (pol->use[_POL_IRR_]) ts->pol_[_POL_IRR_][y][p] = (short)(integral[_RISING_INT_]   * 100);
-        if (pol->use[_POL_IFR_]) ts->pol_[_POL_IFR_][y][p] = (short)(integral[_FALLING_INT_]  * 100);
+        if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)(integral[_SEASONAL_INT_] / 365.0); // integral of year
+        if (pol->use[_POL_IBL_]) ts->pol_[_POL_IBL_][y][p] = (short)(integral[_LATENT_INT_]   / 365.0); // integral of year
+        if (pol->use[_POL_IBT_]) ts->pol_[_POL_IBT_][y][p] = (short)(integral[_TOTAL_INT_]    / 365.0); // integral of year
+        if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)(integral[_GREEN_INT_]    / 365.0); // integral of year
+        if (pol->use[_POL_IRR_]) ts->pol_[_POL_IRR_][y][p] = (short)(integral[_RISING_INT_]   / 365.0);
+        if (pol->use[_POL_IFR_]) ts->pol_[_POL_IFR_][y][p] = (short)(integral[_FALLING_INT_]  / 365.0);
 
         // rate parameters
-        if (pol->use[_POL_RAR_]) ts->pol_[_POL_RAR_][y][p] = (short)(mean_rate[_EARLY_] * 100);
-        if (pol->use[_POL_RAF_]) ts->pol_[_POL_RAF_][y][p] = (short)(mean_rate[_LATE_]  * 100);
-        if (pol->use[_POL_RMR_]) ts->pol_[_POL_RMR_][y][p] = (short)(max_rate[_EARLY_]  * 100);
-        if (pol->use[_POL_RMF_]) ts->pol_[_POL_RMF_][y][p] = (short)(max_rate[_LATE_]   * 100);
+        if (pol->use[_POL_RAR_]) ts->pol_[_POL_RAR_][y][p] = (short)(mean_rate[_EARLY_] * 30); // increase per month
+        if (pol->use[_POL_RAF_]) ts->pol_[_POL_RAF_][y][p] = (short)(mean_rate[_LATE_]  * 30); // decrease per month
+        if (pol->use[_POL_RMR_]) ts->pol_[_POL_RMR_][y][p] = (short)(max_rate[_EARLY_]  * 30); // increase per month
+        if (pol->use[_POL_RMF_]) ts->pol_[_POL_RMF_][y][p] = (short)(max_rate[_LATE_]   * 30); // decrease per month
 
       }
 
