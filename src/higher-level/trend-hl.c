@@ -158,7 +158,7 @@ double mae, rmse;
 
       // account for values given in continuous days
       if (in_ce){
-        my  -= 365*(nf-1)/2;  my -= d_fld[0].year; my *= 1000;
+        my  -= 365*(nf-1)/2;
         slp -= 365; slp *= 1000;
       }
 
@@ -385,7 +385,7 @@ double mae, rmse;
 
         // account for values given in continuous days
         if (in_ce){
-          my  -= 365*(nf-1)/2;  my -= d_fld[0].year; my *= 1000;
+          my  -= 365*(nf-1)/2;
           slp -= 365; slp *= 1000;
         }
 

@@ -307,6 +307,7 @@ int l;
 int p;
 int i, i_, i0;
 int s, y;
+int g;
 float r, v;
 bool valid;
 float ce_left, ce_right, ce;
@@ -314,15 +315,18 @@ float v_left, v_right;
 
 enum { _LEFT_, _START_, _MID_, _PEAK_, _END_, _RIGHT_, _EVENT_LEN_ };
 enum { _ALPHA_, _THETA_, _EARLY_, _GROW_, _LATE_, _WINDOW_LEN_ };
+enum { _GREEN_INT_, _SEASONAL_INT_, _LATENT_INT_, _TOTAL_INT_, _RISING_INT_, _FALLING_INT_, _INTEGRAL_LEN_ };
 
 polar_t timing[_EVENT_LEN_];
 polar_t vector[_WINDOW_LEN_];
 float mean_window[_WINDOW_LEN_][2];
 int   n_window[_WINDOW_LEN_];
 double recurrence[2];
+double integral[_INTEGRAL_LEN_];
 
 polar_t *polar = NULL;
 polar_t *theta0 = NULL;
+float green_val, base_val;
 
 
   valid = false;
@@ -335,7 +339,7 @@ polar_t *theta0 = NULL;
 
 
 
-  #pragma omp parallel private(l,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,recurrence,polar,theta0) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
+  #pragma omp parallel private(l,g,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,recurrence,integral,polar,theta0,green_val,base_val) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
   {
 
     // allocate
@@ -458,7 +462,7 @@ polar_t *theta0 = NULL;
         for (i=i0; i<ni; i++){
           
           if (polar[i].season < s) continue;
-          if (polar[i].season > s){ i0 = i; break; }
+          if (polar[i].season > s) break;
 
           // start of phenological year
           if (polar[i].cum > 0 && timing[_LEFT_].cum == 0){
@@ -534,6 +538,58 @@ polar_t *theta0 = NULL;
         ce_from_polar_vector(s, &vector[_THETA_], &vector[_LATE_]);
 
 
+        green_val = (timing[_START_].val + timing[_END_].val)   / 2.0;
+        base_val  = (timing[_LEFT_].val  + timing[_RIGHT_].val) / 2.0;
+
+        memset(integral, 0, sizeof(double)*_INTEGRAL_LEN_);
+
+        for (i=i0; i<ni; i++){
+
+          if (polar[i].season < s) continue;
+          if (polar[i].season > s){ i0 = i; break; }
+
+          // green integral
+          if (polar[i].cum >= pol->start && 
+              polar[i].cum <  pol->end &&
+              polar[i].val > green_val){
+            integral[_GREEN_INT_] += polar[i].val*tsi->step;
+          }
+
+          // min-min integral
+          if (polar[i].val > base_val){
+            integral[_SEASONAL_INT_] += (polar[i].val-base_val)*tsi->step;
+          }
+
+          // latent integral
+          if (polar[i].val > base_val){
+            integral[_LATENT_INT_] += base_val*tsi->step;
+          } else {
+            integral[_LATENT_INT_] += polar[i].val*tsi->step;
+          }
+
+          // total integral
+          integral[_TOTAL_INT_] += polar[i].val*tsi->step;
+
+          // rising integral
+          if (i > 0 && polar[i].val - polar[i-1].val > 0){
+            integral[_RISING_INT_]  += (polar[i].val - polar[i-1].val)*tsi->step;
+          }
+
+          // falling integral
+          if (i > 0 && polar[i].val - polar[i-1].val < 0){
+            integral[_FALLING_INT_] += (polar[i-1].val - polar[i].val)*tsi->step;
+          }
+
+        }
+
+
+        //scale integrals to percent in relation to a 
+        // 365 days * 10000 value boxcar integral
+        for (g=0; g<_INTEGRAL_LEN_; g++){
+          integral[g] = integral[g] / (1e4*365.0) * 10000;
+        }
+
+
         // date parameters
         if (pol->use[_POL_DEM_]) ts->pol_[_POL_DEM_][y][p] = (short)timing[_LEFT_].ce;
         if (pol->use[_POL_DSS_]) ts->pol_[_POL_DSS_][y][p] = (short)timing[_START_].ce;
@@ -547,7 +603,7 @@ polar_t *theta0 = NULL;
         if (pol->use[_POL_DPY_]) ts->pol_[_POL_DPY_][y][p] = (short)(vector[_THETA_].ce);
         if (pol->use[_POL_DPV_]) ts->pol_[_POL_DPV_][y][p] = (short)(theta0[s].ce - vector[_THETA_].ce);
 
-        // length paramaters
+        // length parameters
         if (pol->use[_POL_LGS_]) ts->pol_[_POL_LGS_][y][p] = (short)(timing[_END_].ce   - timing[_START_].ce);
         if (pol->use[_POL_LGV_]) ts->pol_[_POL_LGV_][y][p] = (short)(vector[_LATE_].ce  - vector[_EARLY_].ce);
         if (pol->use[_POL_LTS_]) ts->pol_[_POL_LTS_][y][p] = (short)(timing[_RIGHT_].ce - timing[_LEFT_].ce);
@@ -562,13 +618,19 @@ polar_t *theta0 = NULL;
         if (pol->use[_POL_VEV_]) ts->pol_[_POL_VEV_][y][p] = (short)vector[_EARLY_].val;
         if (pol->use[_POL_VAV_]) ts->pol_[_POL_VAV_][y][p] = (short)vector[_GROW_].val;
         if (pol->use[_POL_VLV_]) ts->pol_[_POL_VLV_][y][p] = (short)vector[_LATE_].val;
-        if (pol->use[_POL_VSA_]) ts->pol_[_POL_VSA_][y][p] = (short)(timing[_PEAK_].val - 
-          (timing[_START_].val+timing[_END_].val)/2.0);
+        if (pol->use[_POL_VSA_]) ts->pol_[_POL_VSA_][y][p] = (short)(timing[_PEAK_].val - green_val);
         if (pol->use[_POL_VPA_]) ts->pol_[_POL_VPA_][y][p] = (short)(timing[_PEAK_].val - timing[_MID_].val);
-        if (pol->use[_POL_VBL_]) ts->pol_[_POL_VBL_][y][p] = (short)((timing[_LEFT_].val+timing[_RIGHT_].val)/2.0);
+        if (pol->use[_POL_VBL_]) ts->pol_[_POL_VBL_][y][p] = (short)base_val;
         if (pol->use[_POL_VGA_]) ts->pol_[_POL_VGA_][y][p] = (short)recurrence[0];
         if (pol->use[_POL_VGV_]) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
 
+        // integral parameters
+        if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)integral[_SEASONAL_INT_];
+        if (pol->use[_POL_IBL_]) ts->pol_[_POL_IBL_][y][p] = (short)integral[_LATENT_INT_];
+        if (pol->use[_POL_IBT_]) ts->pol_[_POL_IBT_][y][p] = (short)integral[_TOTAL_INT_];
+        if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)integral[_GREEN_INT_];
+        if (pol->use[_POL_IRD_]) ts->pol_[_POL_IRD_][y][p] = (short)integral[_RISING_INT_];
+        if (pol->use[_POL_IFD_]) ts->pol_[_POL_IFD_][y][p] = (short)integral[_FALLING_INT_];
 
       }
 
