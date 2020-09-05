@@ -307,7 +307,6 @@ int l;
 int p;
 int i, i_, i0;
 int s, y;
-int g;
 float r, v;
 bool valid;
 float ce_left, ce_right, ce;
@@ -342,7 +341,7 @@ float green_val, base_val;
 
 
 
-  #pragma omp parallel private(l,g,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,max_rate,mean_rate,rate,recurrence,integral,polar,theta0,green_val,base_val) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
+  #pragma omp parallel private(l,i,i0,i_,ce_left,ce_right,v_left,v_right,valid,ce,v,s,y,r,timing,vector,mean_window,n_window,max_rate,mean_rate,rate,recurrence,integral,polar,theta0,green_val,base_val) shared(mask_,ts,nc,ni,year_min,nodata,pol,tsi) default(none)
   {
 
     // allocate
@@ -557,14 +556,6 @@ float green_val, base_val;
         mean_rate[_EARLY_] /= n_window[_EARLY_];
         mean_rate[_LATE_]  /= n_window[_LATE_];
 
-        // scale the rates in relation to a steady increase from 0 to 10000, i.e.
-        // to 10000/365 = 27.4 per day
-        // values are reported in scales percent
-        mean_rate[_EARLY_] = mean_rate[_EARLY_] / (1e4/365.0) * 1e4;
-        mean_rate[_LATE_]  = mean_rate[_LATE_]  / (1e4/365.0) * 1e4;
-        max_rate[_EARLY_]  = max_rate[_EARLY_]  / (1e4/365.0) * 1e4;
-        max_rate[_LATE_]   = max_rate[_LATE_]   / (1e4/365.0) * 1e4;
-
         green_val = (timing[_START_].val + timing[_END_].val)   / 2.0;
         base_val  = (timing[_LEFT_].val  + timing[_RIGHT_].val) / 2.0;
 
@@ -610,20 +601,6 @@ float green_val, base_val;
         }
 
 
-        // scale integrals to scaled percent in relation to a 
-        // 365 days * 10000 value boxcar integral
-        // 10000 -> 100%
-        for (g=0; g<_INTEGRAL_LEN_; g++){
-          integral[g] = integral[g] / (1e4*365.0) * 10000;
-        }
-
-        // adjust scaling for derivative integrals, i.e. 
-        // scaled percent in relation to a steady increase from 0 to 10000, i.e.
-        // half the 365 days * 10000 value boxcar integral
-        integral[_RISING_INT_]  *= 2;
-        integral[_FALLING_INT_] *= 2;
-
-
         // date parameters
         if (pol->use[_POL_DEM_]) ts->pol_[_POL_DEM_][y][p] = (short)timing[_LEFT_].ce;
         if (pol->use[_POL_DSS_]) ts->pol_[_POL_DSS_][y][p] = (short)timing[_START_].ce;
@@ -659,18 +636,18 @@ float green_val, base_val;
         if (pol->use[_POL_VGV_]) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
 
         // integral parameters
-        if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)integral[_SEASONAL_INT_];
-        if (pol->use[_POL_IBL_]) ts->pol_[_POL_IBL_][y][p] = (short)integral[_LATENT_INT_];
-        if (pol->use[_POL_IBT_]) ts->pol_[_POL_IBT_][y][p] = (short)integral[_TOTAL_INT_];
-        if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)integral[_GREEN_INT_];
-        if (pol->use[_POL_IRD_]) ts->pol_[_POL_IRD_][y][p] = (short)integral[_RISING_INT_];
-        if (pol->use[_POL_IFD_]) ts->pol_[_POL_IFD_][y][p] = (short)integral[_FALLING_INT_];
+        if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)(integral[_SEASONAL_INT_] * 10);
+        if (pol->use[_POL_IBL_]) ts->pol_[_POL_IBL_][y][p] = (short)(integral[_LATENT_INT_]   * 10);
+        if (pol->use[_POL_IBT_]) ts->pol_[_POL_IBT_][y][p] = (short)(integral[_TOTAL_INT_]    * 10);
+        if (pol->use[_POL_IGS_]) ts->pol_[_POL_IGS_][y][p] = (short)(integral[_GREEN_INT_]    * 10);
+        if (pol->use[_POL_IRR_]) ts->pol_[_POL_IRR_][y][p] = (short)(integral[_RISING_INT_]   * 100);
+        if (pol->use[_POL_IFR_]) ts->pol_[_POL_IFR_][y][p] = (short)(integral[_FALLING_INT_]  * 100);
 
         // rate parameters
-        if (pol->use[_POL_RAR_]) ts->pol_[_POL_RAR_][y][p] = (short)mean_rate[_EARLY_];
-        if (pol->use[_POL_RAF_]) ts->pol_[_POL_RAF_][y][p] = (short)mean_rate[_LATE_];
-        if (pol->use[_POL_RMR_]) ts->pol_[_POL_RMR_][y][p] = (short)max_rate[_EARLY_];
-        if (pol->use[_POL_RMF_]) ts->pol_[_POL_RMF_][y][p] = (short)max_rate[_LATE_];
+        if (pol->use[_POL_RAR_]) ts->pol_[_POL_RAR_][y][p] = (short)(mean_rate[_EARLY_] * 100);
+        if (pol->use[_POL_RAF_]) ts->pol_[_POL_RAF_][y][p] = (short)(mean_rate[_LATE_]  * 100);
+        if (pol->use[_POL_RMR_]) ts->pol_[_POL_RMR_][y][p] = (short)(max_rate[_EARLY_]  * 100);
+        if (pol->use[_POL_RMF_]) ts->pol_[_POL_RMF_][y][p] = (short)(max_rate[_LATE_]   * 100);
 
       }
 
