@@ -67,7 +67,7 @@ bool alloc_q_array = false;
   {
     
     // initialize _STAts
-    if (alloc_q_array) alloc((void**)&q_array, nf, sizeof(float));
+    if (alloc_q_array) alloc((void**)&q_array, ni, sizeof(float));
 
     #pragma omp for
     for (p=0; p<nc; p++){
