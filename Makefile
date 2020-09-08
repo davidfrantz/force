@@ -361,7 +361,7 @@ force-stack: temp cross $(DA)/_stack.c
 
 ### dummy code for testing stuff  
 
-dummy: temp cross aux src/dummy.c
+dummy: temp cross aux higher src/dummy.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
 
   
