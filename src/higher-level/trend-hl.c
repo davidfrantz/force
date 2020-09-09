@@ -159,12 +159,15 @@ double mae, rmse;
       // account for values given in continuous days
       if (in_ce){
         my  -= 365*(nf-1)/2;
-        slp -= 365; slp *= 1000;
+        slp -= 365;
       }
 
       // standard error of slope, and significance of slope
       seb = sqrt(1.0/(k-2)*ssqe)/sqrt(sxsq);
       sig = slope_significant(1-trd->conf, trd->tail, k, slp, 0.0, seb);
+
+      // account for values given in continuous days
+      if (in_ce) slp *= 1000;
 
       rmse = sqrt(ssqe/k);
       mae = sae/k;
