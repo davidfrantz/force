@@ -570,7 +570,7 @@ float green_val, base_val;
           if (polar[i].cum >= pol->start && 
               polar[i].cum <  pol->end &&
               polar[i].val > green_val){
-            integral[_GREEN_INT_] += polar[i].val*tsi->step;
+            integral[_GREEN_INT_] += (polar[i].val-green_val)*tsi->step;
           }
 
           // min-min integral
