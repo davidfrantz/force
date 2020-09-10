@@ -39,6 +39,7 @@
 EXP_ARGS=4
 MAX_ARGS=5
 
+printf "%s\n" "" "This tool is deprecated and will only receive minimal support in the future." "Please consider using force-level1-csd instead" ""
 
 if [ $# -ne $EXP_ARGS ] && [ $# -ne $MAX_ARGS ]; then
   echo "Usage: `basename $0` from to queue cp/mv [dry]"
