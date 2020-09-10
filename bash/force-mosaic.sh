@@ -64,7 +64,7 @@ function mosaic_this(){
   bin=$3
   LIST="force-mosaic_list_$2.txt"
 
-  echo $bin
+  #echo $bin
 
   echo "mosaicking" $prd
 
@@ -114,6 +114,8 @@ function mosaic_this(){
     echo "deleting file listing failed."
     exit
   fi
+  
+  echo ""
 
 }
 
