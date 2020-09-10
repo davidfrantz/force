@@ -24,66 +24,59 @@
 
 # this script downloads Sentinel-2 from ESA and maintains a clean Level-1 datapool
 
-show_help() {
-cat << HELP
+printf "%s\n" "" "This tool is deprecated and will only receive minimal support in the future." "Please consider using force-level1-csd instead" ""
 
-Usage: `basename $0` [-d] Level-1-Datapool queue Boundingbox
-                   starttime endtime min-cc max-cc
-
-Mandatory arguments:
-  Level-1-Datapool
-  An existing directory, your files will be stored here
-
-  queue
-  Downloaded files are appended to a file queue, which is needed for
-  the Level 2 processing. The file doesn't need to exist. If it exists,
-  new lines will be appended on successful ingestion
-
-  Boundingbox
-  The coordinates of your study area: \"X1/Y1,X2/Y2,X3/Y3,...,X1/Y1\"
-  The box must be closed (first X/Y = last X/Y). X/Y must be given as
-  decimal degrees with negative values for West and South coordinates.
-  Note that the box doesn't have to be square, you can specify a polygon
-
-  starttime endtime
-  Dates must be given as YYYY-MM-DD
-
-  min-cc max-cc
-  The cloud cover range must be given in %
-
-Optional arguments (always placed BEFORE mandatory arguments):
-  -d 
-  will trigger a dry run that will only return the number of images
-  and their total data volume
-  
-  -h|--help 
-  show this help
-  
-  Your ESA credentials must be placed in \$HOME/.scihub
-  (OR in \$FORCE_CREDENTIALS/.scihub if the FORCE_CREDENTIALS environment
-   variable is defined).
-    First line: User name
-    Second line: Password, special characters might be problematic
-    
-HELP
-exit 1
-}
-
-# check for optional args and set dryrun var
-case $1 in 
-  -d)
-    dryrun=1
-    shift ;;
-  -h|--help)
-    show_help ;;
-  *) 
-    dryrun=0 ;;
-esac
+EXPECTED_ARGS=7
+MAXIMUM_ARGS=8
 
 # if wrong number of input args, stop
-if [ $# -ne 7 ]; then
-  printf "%s\n" "" "Invalid number of input arguments specified"
-  show_help
+if [ $# -ne $EXPECTED_ARGS ] && [ $# -ne $MAXIMUM_ARGS ]; then
+  echo ""
+  echo "Usage: `basename $0` Level-1-Datapool queue Boundingbox"
+  echo "                   starttime endtime min-cc max-cc [dry]"
+  echo ""
+  echo "  Level-1-Datapool"
+  echo "  An existing directory, your files will be stored here"
+  echo ""
+  echo "  queue"
+  echo "  Downloaded files are appended to a file queue, which is needed for"
+  echo "  the Level 2 processing. The file doesn't need to exist. If it exists,"
+  echo "  new lines will be appended on successful ingestion"
+  echo ""
+  echo "  Boundingbox"
+  echo "  The coordinates of your study area: \"X1/Y1,X2/Y2,X3/Y3,...,X1/Y1\""
+  echo "  The box must be closed (first X/Y = last X/Y). X/Y must be given as"
+  echo "  decimal degrees with negative values for West and South coordinates."
+  echo "  Note that the box doesn't have to be square, you can specify a polygon"
+  echo ""
+  echo "  starttime endtime"
+  echo "  Dates must be given as YYYY-MM-DD"
+  echo ""
+  echo "  min-cc max-cc"
+  echo "  The cloud cover range must be given in %"
+  echo ""
+  echo "  dry will trigger a dry run that will only return the number of images"
+  echo "  and their total data volume"
+  echo ""
+  echo "  Your ESA credentials must be placed in \$HOME/.scihub"
+  echo "  (OR in \$FORCE_CREDENTIALS/.scihub if the FORCE_CREDENTIALS environment"
+  echo "   variable is defined)."
+  echo "    First line: User name" 
+  echo "    Second line: Password, special characters might be problematic"
+  echo ""
+  exit
+fi
+
+
+if [ $# -eq $MAXIMUM_ARGS ]; then
+  if [ $8 == dry ]; then
+    dryrun=1
+  else
+    echo "unknown option, optional argument 7 must be dry"
+    exit
+  fi
+else
+  dryrun=0
 fi
 
 POOL=$1

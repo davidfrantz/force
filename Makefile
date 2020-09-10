@@ -24,7 +24,7 @@
 # Modify the following lines to match your needs
 
 # Installation directory
-BINDIR=/develop
+BINDIR=/usr/local/bin
 
 # Libraries
 GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
@@ -366,6 +366,7 @@ clean:
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
 	cp $(DB)/force-l2ps_.sh $(TB)/force-l2ps_
+	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
 	cp $(DB)/force-level1-landsat.sh $(TB)/force-level1-landsat
 	cp $(DB)/force-level1-sentinel2.sh $(TB)/force-level1-sentinel2
 	cp $(DB)/force-level2.sh $(TB)/force-level2

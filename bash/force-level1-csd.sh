@@ -57,9 +57,9 @@ Mandatory arguments:
   An existing directory, your files will be stored here
 
   queue
-  Downloaded files are appended to a file queue, which is needed for the Level 2 
-  processing. The file doesn't need to exist. If it exists, new lines will be 
-  appended on successful ingestion
+  Downloaded files are appended to a file queue, which is needed for the 
+  Level 2 processing. The file doesn't need to exist. If it exists, new 
+  lines will be appended on successful ingestion
 
   area of interest
   (1) The coordinates of your study area: 
@@ -88,8 +88,8 @@ Optional arguments (always placed BEFORE mandatory arguments):
   
   -d | --daterange
   starttime,endtime
-  Dates must be given in the following format: YYYY-MM-DD,YYYY-MM-DD
-  Default: 1970-01-01,today
+  Dates must be given in the following format: YYYYMMDD,YYYYMMDD
+  Default: 19700101,today
   
   -h | --help
   Show this help
@@ -97,6 +97,11 @@ Optional arguments (always placed BEFORE mandatory arguments):
   -n | --no-act
   Will trigger a dry run that will only return the number of images
   and their total data volume
+  
+  -k | --keep-meta
+  Will write the results of the query to the metadata directory.
+  Two files will be created if Landsat and Sentinel-2 data is queried
+  at the same time. Filename: csd_metadata_YYYY-MM-DDTHH-MM-SS
   
   -s | --sensor
   Sensors to include in the query, comma-separated.
@@ -114,11 +119,13 @@ Optional arguments (always placed BEFORE mandatory arguments):
   
   -u | --update
   Will update the metadata catalogue (download and extract from GCS)
-  Only specify the metadata dir as argument when using this option
-
+  Only specify the metadata dir as mandatory argument when using this option.
+  Use the -s option to only update Landsat or Sentinel-2 metadata.
+    
 HELP
 exit 1
 }
+
 
 is_in_range() {
   awk -v value="$1" -v lower="$2" -v upper="$3" 'BEGIN {print (lower <= value && value <= upper)}'
@@ -137,10 +144,11 @@ show_progress() {
 }
 
 update_meta() {
-  echo "Updating metadata catalogue..."
-  gsutil -m cp gs://gcp-public-data-$1/index.csv.gz $METADIR
-  gunzip $METADIR/index.csv.gz
-  mv $METADIR/index.csv $METADIR/metadata_$2.csv
+  printf "%s\n" "" "Downloading ${1^} metadata catalogue..."
+  gsutil -m -q cp gs://gcp-public-data-$1/index.csv.gz "$METADIR"
+  printf "%s\n" "Extracting compressed ${1^} metadata catalogue..."
+  gunzip "$METADIR"/index.csv.gz
+  mv "$METADIR"/index.csv "$METADIR"/metadata_$2.csv
 }
 
 which_satellite() {
@@ -162,8 +170,8 @@ which_satellite() {
 # ============================================================
 # Initialize arguments and parse command line input
 SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
-DATEMIN="1970-01-01"
-DATEMAX=$(date +%Y-%m-%d)
+DATEMIN="19700101"
+DATEMAX=$(date +%F)
 CCMIN=0
 CCMAX=100
 TIER="T1"
@@ -171,35 +179,37 @@ DRYRUN=0
 LANDSAT=0
 SENTINEL=0
 UPDATE=0
+KEEPMETA=0
 
-ARGS=`getopt -o c:d:nhs:t:u --long cloudcover:,daterange:,no-act,help,sensors:,tier:,update -n $0 -- "$@"`
-if [ $? != 0 ] ; then echo "Error in command line options. Please check your options." >&2 ; show_help ; fi
+ARGS=`getopt -o c:d:nhks:t:u --long cloudcover:,daterange:,no-act,help,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
+if [ $? != 0 ] ; then  printf "%s\n" "" "Error in command line options. Please check your options." >&2 ; show_help ; fi
 eval set -- "$ARGS"
 
 while :; do
   case "$1" in
-    -c | --cloudcover)
-      CCMIN=$(echo $2 | cut -d"," -f1)
-      CCMAX=$(echo $2 | cut -d"," -f2)
+    -c|--cloudcover)
+      CCMIN=$(echo "$2" | cut -d"," -f1)
+      CCMAX=$(echo "$2" | cut -d"," -f2)
       shift ;;
-    -d | --daterange)
-      DATEMIN=$(echo $2 | cut -d"," -f1)
-      DATEMAX=$(echo $2 | cut -d"," -f2)
+    -d|--daterange)
+      DATEMIN=$(echo "$2" | cut -d"," -f1)
+      DATEMAX=$(echo "$2" | cut -d"," -f2)
       shift ;;
-    -n | --no-act)
+    -n|--no-act)
       DRYRUN=1 ;;
-    -h | --help)
+    -h|--help)
       show_help ;;
-    -s | --sensors)
+    -k|--keepmeta)
+      KEEPMETA=1 ;;
+    -s|--sensors)
       SENSIN="$2"
       shift ;;
-    -t | --tier)
+    -t|--tier)
       TIER="$2"
       shift ;;
-    -u | --update)
-      METADIR="$2"
+    -u|--update)
       UPDATE=1 ;;
-    -- ) 
+    --) 
       shift; break ;;
     *)
       break 
@@ -207,27 +217,33 @@ while :; do
   shift
 done
 
+
 # Check for update flag and update metadata catalogue if set
 if [ $UPDATE -eq 1 ]; then
-  if [ $# -lt 2 ]; then
-    echo "Metadata directory not specified, exiting"
+  METADIR="$1"
+  if [ $# -lt  1 ]; then
+    printf "%s\n" "" "Metadata directory not specified, exiting" ""
     exit 1
-  elif [ $# -gt 2 ]; then
-    echo "Error: Please only specify the metadata directory when using the update option (-u)"
+  elif [ $# -gt 1 ]; then
+    printf "%s\n" "" "Error: Invalid argument." "Only specify the metadata directory when using the update option (-u)." "The only allowed optional argument is -s. Use it if you don't want to" "update the Landsat and Sentinel-2 metadata catalogues at the same time." ""
+    #"Please only specify the metadata directory when using the update option (-u)" "To only update either of the LS / S2 catalogues, you may also use the -s option" ""
     exit 1
   elif ! [ -w $METADIR ]; then
-    echo "Can not write to metadata directory, exiting"
+    printf "%s\n" "" "Metadata directory does not exist, exiting" ""
+    exit 1
+  elif ! [ -w $METADIR ]; then
+    printf "%s\n" "" "Can not write to metadata directory, exiting" ""
     exit 1
   else
     which_satellite
-    if [ $SENTINEL -eq 1 ]; then
-      update_meta sentinel-2 sentinel2
-    fi
     if [ $LANDSAT -eq 1 ]; then
       update_meta landsat landsat
     fi
+    if [ $SENTINEL -eq 1 ]; then
+      update_meta sentinel-2 sentinel2
+    fi
   fi
-  echo "Done. You can run this script without option -u to download data now."
+  printf "%s\n" "" "Done. You can run this script without option -u to download data now." ""
   exit 0
 fi
 
@@ -241,14 +257,14 @@ which_satellite
 
 # ============================================================
 # Check user input and set up variables
-METADIR=$1
-POOL=$2
-QUEUE=$3
-AOI=$4
+METADIR="$1"
+POOL="$2"
+QUEUE="$3"
+AOI="$4"
 
-# check for empty options
+# check for empty arguments
 if [[ -z $METADIR || -z $POOL || -z $QUEUE || -z $AOI || -z $CCMIN || -z $CCMAX || -z $DATEMIN || -z $DATEMAX || -z $SENSIN || -z $TIER ]]; then
-  printf "%s\n" "" "Error: One or more variables are undefined, please check the following" "" "Metadata directory: $METADIR" "Level-1 pool: $POOL" "Queue: $QUEUE" "AOI: $AOI" "Sensors: $SENSIN" "Start date: $DATEMIN, End date: $DATEMAX" "Cloud cover minimum: $CCMIN, cloud cover maximum: $CCMAX" "Tier (Landsat only): $TIER" ""
+  printf "%s\n" "" "Error: One or more arguments are undefined, please check the following" "" "Metadata directory: $METADIR" "Level-1 pool: $POOL" "Queue: $QUEUE" "AOI: $AOI" "Sensors: $SENSIN" "Start date: $DATEMIN, End date: $DATEMAX" "Cloud cover minimum: $CCMIN, cloud cover maximum: $CCMAX" "Tier (Landsat only): $TIER" ""
   exit 1
 fi
 
@@ -264,15 +280,18 @@ for T in $(echo $TIER | sed 's/,/ /g'); do
 done
 
 # check if dates are correct
-if [ $(date -d $DATEMIN +%s) -gt $(date -d $DATEMAX +%s) ]; then
+if ! [[ $DATEMIN =~ ^[[:digit:]]+$ ]] || ! [[ $DATEMAX  =~ ^[[:digit:]]+$ ]]; then
+  printf "%s\n" "" "Error: One of the entered dates seems to contain non-numeric characters." "Start: $DATEMIN, End: $DATEMAX" ""
+  exit 1
+elif ! date -d $DATEMIN &> /dev/null; then
+  printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
+  exit 1
+elif ! date -d $DATEMAX &> /dev/null; then
+    printf "%s\n" "" "endtime ($DATEMAX) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
+  exit 1
+elif [ $(date -d $DATEMIN +%s) -gt $(date -d $DATEMAX +%s) ]; then
   printf "%s\n" "Error: Start of date range is larger than end of date range" "Start: $DATEMIN, End: $DATEMAX" ""
   exit 1
-  elif ! date -d $DATEMIN &> /dev/null; then
-    printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
-    exit 1
-    elif ! date -d $DATEMAX &> /dev/null; then
-      printf "%s\n" "" "endtime ($DATEMAX) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
-    exit 1
 fi
 
 # check if cloud cover is valid
@@ -366,7 +385,7 @@ fi
 # 3. Download data
 get_data() {
   SATELLITE=$1
-  PRINTNAME=$2
+  PRINTNAME=${SATELLITE^}
   case $SATELLITE in
     landsat) SENSORS=$(echo $SENSIN | grep -o "L[C,E,T]0[4,5,7,8]") ;;
     sentinel2) SENSORS=$(echo $SENSIN | grep -o "S2[A-B]") ;;
@@ -395,16 +414,16 @@ get_data() {
     ogr2ogr -f "GPKG" merged.gpkg WFS:"$WFSURL" -append -update
     ogr2ogr -f "GPKG" merged.gpkg $AOI -append -update
 
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.Name FROM $SATELLITE, $AOINE WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOINE.geom, 4326))" merged.gpkg)
-    TILES="_"$(echo $TILERAW | sed 's/Name, //; s/ /_|_/g')"_"
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOINE WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOINE.geom, 4326))" merged.gpkg)
+    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
     rm merged.gpkg
 
   elif [ "$AOITYPE" -eq 2 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
     WKT=$(echo $AOI | sed 's/,/%20/g; s/\//,/g')
     WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "Name" WFS:"$WFSURL")
-    TILES="_"$(echo $TILERAW | sed 's/Name, //; s/ /_|_/g')"_"
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL")
+    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
 
   elif [ "$AOITYPE" -eq 3 ]; then
     sensor_tile_mismatch() {
@@ -425,23 +444,30 @@ get_data() {
 
   printf "%s\n" "" "Querying the metadata catalogue for $PRINTNAME data" "Sensor(s): "$(echo $SENSORS | sed 's/ /,/g')
   if [ $SATELLITE == "landsat" ]; then printf "%s\n" "Tier(s): $TIER"; fi
-  printf "%s\n" "Tile(s): "$(echo $TILERAW | sed 's/Name, //; s/ /,/g') "Daterange: "$DATEMIN" to "$DATEMAX "Cloud cover minimum: "$CCMIN"%, maximum: "$CCMAX"%" ""
+  printf "%s\n" "Tile(s): "$(echo $TILERAW | sed 's/PRFID, //; s/ /,/g') "Daterange: "$DATEMIN" to "$DATEMAX "Cloud cover minimum: "$CCMIN"%, maximum: "$CCMAX"%" ""
+
 
   # ============================================================
   # Filter metadata and extract download links
   if [ $SATELLITE = "sentinel2" ]; then
-    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start=$DATEMIN -v stop=$DATEMAX -v clow=$CCMIN -v chigh=$CCMAX -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh')
+    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh')
   elif [ $SATELLITE = "landsat" ]; then
-    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start=$DATEMIN -v stop=$DATEMAX -v clow=$CCMIN -v chigh=$CCMAX -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh')
+    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh')
   fi
 
-  printf "%s" "$LINKS" > filtered_metadata.txt
+  METAFNAME=$METADIR/csd_metadata_$(date +%FT%H-%M-%S).txt
+  printf "%s" "$LINKS" > $METAFNAME
   case $SATELLITE in
     sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
     landsat) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$17/1048576} END {printf "%f", s}') ;;
   esac
-  NSCENES=$(sed -n '$=' filtered_metadata.txt)
-  rm filtered_metadata.txt
+  NSCENES=$(sed -n '$=' $METAFNAME)
+  
+  if [ $KEEPMETA -eq 0 ]; then
+    rm $METAFNAME
+  else
+    sed -i "1 s/^/$(head -n 1 $METACAT)\n/" $METAFNAME
+  fi
 
 
   # ============================================================
@@ -518,7 +544,7 @@ get_data() {
       fi
 
       printf "\e[500D\e[2A\e[2KDownloading "$SCENEID"("$ITER" of "$NSCENES")...\e[2B"
-      gsutil -m -q cp -c $POOL"/download_log.txt" -R $URL $TILEPATH
+      gsutil -m -q cp -c -L $POOL"/download_log.txt" -R $URL $TILEPATH
 
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
@@ -534,10 +560,10 @@ if [[ $LANDSAT -eq 1 && $SENTINEL -eq 1 ]]; then
   printf "%s\n" "" "Landsat and Sentinel-2 data requested." "Landsat data will be queried and downloaded first."
 fi
 if [ $LANDSAT -eq 1 ]; then
-  get_data landsat Landsat
+  get_data landsat
 fi
 if [ $SENTINEL -eq 1 ]; then
-  get_data sentinel2 Sentinel-2
+  get_data sentinel2
 fi
 
 printf "%s\n" "" "Done." ""
