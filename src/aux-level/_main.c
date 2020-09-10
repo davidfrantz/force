@@ -89,15 +89,25 @@ char user[NPOW_10];
   printf("\nTutorials are available at davidfrantz.github.io/tutorials\n");
 
   printf("\nFORCE consists of several components:\n"
+         "\nLevel 1 Archiving System (L1AS)\n"
+         "+ force-level1-csd       Download from cloud storage + maintenance of Level 1 "
+         "Landsat and Sentinel-2 data pool\n"
          "+ force-level1-landsat   Maintenance of Level 1 Landsat "
-         "data pool\n"
-         "+ force-level1-sentinel2 Download + maintenance of Level 1 "
-         "Sentinel-2 data pool\n"
-         "+ force-parameter        Generation of parameter files\n"
+         "data pool (deprecated)\n"
+         "+ force-level1-sentinel2 Download from ESA + maintenance of Level 1 "
+         "Sentinel-2 data pool (deprecated)\n"
+         "\nLevel 2 Processing System (L2PS)\n"
          "+ force-level2           Level 2 processing of image archive\n"
          "+ force-l2ps             Level 2 processing of single image\n"
+         "\nWater Vapor Database (WVDB)\n"
+         "+ force-lut-modis        Generation and maintenance of water vapor database "
+         "using MODIS products\n"
+         "\nHigher Level Processing System (HLPS)\n"
          "+ force-higher-level     Higher level processing (compositing, "
          "time series analysis, ...)\n"
+         "\nAuxiliary (AUX)\n"
+         "+ force-parameter        Generation of parameter files\n"
+         "+ force-magic-parameters Replace variables in parameter file with vectors\n"
          "+ force-train            Training (and validation) of Machine "
          "Learning models\n"
          "+ force-synthmix         Synthetic Mixing of training data\n"
@@ -111,7 +121,9 @@ char user[NPOW_10];
          "cube format\n"
          "+ force-procmask         Processing masks from raster images\n"
          "+ force-pyramid          Generation of image pyramids\n"
-         "+ force-mosaic           Mosaicking of image chips\n");
+         "+ force-mosaic           Mosaicking of image chips\n"
+         "+ force-stack            Stack images, works with 4D data model\n"
+         "+ force-mdcp             Copy FORCE metadata from one file to another\n");
 
   printf("\n##########################################################################\n\n");
 
