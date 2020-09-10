@@ -62,25 +62,27 @@ Mandatory arguments:
   lines will be appended on successful ingestion
 
   area of interest
-  (1) The coordinates of your study area: 
-      Path to a file containing one coordinate per line or
-      as comma separated command line input
+  (1) user-supplied coordinates of your study area: 
       The polygon must be closed (first X/Y = last X/Y). X/Y must be given as
       decimal degrees with negative values for West and South coordinates.
-      Comma-separated if provided on command line, one line per coordinate pair
-      if provided in a text file.
+      You can either give the path to a file, or give the coordinates on the command line.
+      If in the file, put one coordinate per line.
+      If on the command line, give a comma separated list.
   (2) a shapefile (point/polygon/line). On-the-fly reprojection is provided,
       but using EPSG4326 is recommended.
-  (3) Path/Row (Landsat): "PPPRR" 
-      Make sure to keep leading zeros - correct: 181034, incorrect: 18134
-      Tile name (Sentinel-2): "TXXXXX"
-      Make sure to keep the leading T before the MGRS tile number
-      Comma-separated if provided on command line, one line per tile if
-      provided in a text file.
-      
-      
+  (3) Scene identifier.
+      Landsat: Path/Row as "PPPRRR". Make sure to keep leading zeros:
+        correct: 181034, incorrect: 18134
+      Sentinel-2: MGRS tile as "TXXXXX". Make sure to keep the leading T before the MGRS tile number.
+      You can either give the path to a file, or give the IDs on the command line.
+      If in the file, put one ID per line.
+      If on the command line, give a comma separated list.
+  
 Optional arguments (always placed BEFORE mandatory arguments):
 
+  -h | --help
+  Show this help
+  
   -c | --cloudcover
   minimum,maximum
   The cloud cover range must be specified in %
@@ -90,9 +92,6 @@ Optional arguments (always placed BEFORE mandatory arguments):
   starttime,endtime
   Dates must be given in the following format: YYYYMMDD,YYYYMMDD
   Default: 19700101,today
-  
-  -h | --help
-  Show this help
   
   -n | --no-act
   Will trigger a dry run that will only return the number of images
@@ -106,20 +105,20 @@ Optional arguments (always placed BEFORE mandatory arguments):
   -s | --sensor
   Sensors to include in the query, comma-separated.
   Valid sensors:
-  Landsat                             Sentinel-2
-  LT04 - Landsat 4 TM                 S2A
-  LT05 - Landsat 5 TM                 S2B
+  Landsat                             Sentinel
+  LT04 - Landsat 4 TM                 S2A - Sentinel-2A MSI
+  LT05 - Landsat 5 TM                 S2B - Sentinel-2B MSI
   LE07 - Landsat 7 ETM+               
   LC08 - Landsat 8 OLI
   Default: LT04,LT05,LE07,LC08,S2A,S2B
-
+  
   -t | --tier
   Landsat collection tier level. Valid tiers: T1,T2,RT
   Default: T1
   
   -u | --update
   Will update the metadata catalogue (download and extract from GCS)
-  Only specify the metadata dir as mandatory argument when using this option.
+  If this option is used, only one mandatory argument is expected (metadata-dir).
   Use the -s option to only update Landsat or Sentinel-2 metadata.
     
 HELP
