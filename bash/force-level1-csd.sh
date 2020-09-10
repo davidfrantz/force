@@ -78,7 +78,7 @@ Mandatory arguments:
       If in the file, put one ID per line.
       If on the command line, give a comma separated list.
   
-Optional arguments (always placed BEFORE mandatory arguments):
+Optional arguments:
 
   -h | --help
   Show this help
