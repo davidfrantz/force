@@ -194,10 +194,10 @@ enum { _LSP_DEM_, _LSP_DSS_, _LSP_DRI_, _LSP_DPS_, _LSP_DFI_, _LSP_DES_,
 enum { _POL_DEM_, _POL_DLM_, _POL_DPS_, _POL_DSS_, _POL_DMS_, _POL_DES_, 
        _POL_DEV_, _POL_DAV_, _POL_DLV_, _POL_LTS_, _POL_LGS_, _POL_LGV_, 
        _POL_VEM_, _POL_VLM_, _POL_VPS_, _POL_VSS_, _POL_VMS_, _POL_VES_, 
-       _POL_VEV_, _POL_VAV_, _POL_VLV_, _POL_VBL_, _POL_VSA_, _POL_VPA_, 
-       _POL_VGA_, _POL_VGV_, _POL_DPY_, _POL_DPV_, _POL_IST_, _POL_IBL_, 
-       _POL_IBT_, _POL_IGS_, _POL_IRR_, _POL_IFR_, _POL_RAR_, _POL_RAF_, 
-       _POL_RMR_, _POL_RMF_, _POL_LENGTH_ };
+       _POL_VEV_, _POL_VAV_, _POL_VLV_, _POL_VBL_, _POL_VGA_, _POL_VSA_, 
+       _POL_VPA_, _POL_VGM_, _POL_VGV_, _POL_DPY_, _POL_DPV_, _POL_IST_, 
+       _POL_IBL_, _POL_IBT_, _POL_IGS_, _POL_IRR_, _POL_IFR_, _POL_RAR_, 
+       _POL_RAF_, _POL_RMR_, _POL_RMF_, _POL_LENGTH_ };
 
 // folding
 enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGTH_ };

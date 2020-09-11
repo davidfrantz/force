@@ -629,11 +629,14 @@ float green_val, base_val;
         if (pol->use[_POL_VEV_]) ts->pol_[_POL_VEV_][y][p] = (short)vector[_EARLY_].val;
         if (pol->use[_POL_VAV_]) ts->pol_[_POL_VAV_][y][p] = (short)vector[_GROW_].val;
         if (pol->use[_POL_VLV_]) ts->pol_[_POL_VLV_][y][p] = (short)vector[_LATE_].val;
-        if (pol->use[_POL_VSA_]) ts->pol_[_POL_VSA_][y][p] = (short)(timing[_PEAK_].val - green_val);
-        if (pol->use[_POL_VPA_]) ts->pol_[_POL_VPA_][y][p] = (short)(timing[_PEAK_].val - timing[_MID_].val);
         if (pol->use[_POL_VBL_]) ts->pol_[_POL_VBL_][y][p] = (short)base_val;
         if (pol->use[_POL_VGA_]) ts->pol_[_POL_VGA_][y][p] = (short)recurrence[0];
         if (pol->use[_POL_VGV_]) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
+
+        // amplitude parameters
+        if (pol->use[_POL_VGA_]) ts->pol_[_POL_VGA_][y][p] = (short)(timing[_PEAK_].val - green_val);
+        if (pol->use[_POL_VPA_]) ts->pol_[_POL_VPA_][y][p] = (short)(timing[_PEAK_].val - timing[_MID_].val);
+        if (pol->use[_POL_VSA_]) ts->pol_[_POL_VSA_][y][p] = (short)(timing[_PEAK_].val - base_val);
 
         // integral parameters
         if (pol->use[_POL_IST_]) ts->pol_[_POL_IST_][y][p] = (short)(integral[_SEASONAL_INT_] / 365.0); // integral, unit of time: year
