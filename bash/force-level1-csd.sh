@@ -551,8 +551,7 @@ get_data() {
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
       lockfile-remove $QUEUE
-
-      #show_progress 
+ 
       ((ITER++))
     done
   fi
