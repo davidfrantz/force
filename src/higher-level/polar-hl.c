@@ -630,7 +630,7 @@ float green_val, base_val;
         if (pol->use[_POL_VAV_]) ts->pol_[_POL_VAV_][y][p] = (short)vector[_GROW_].val;
         if (pol->use[_POL_VLV_]) ts->pol_[_POL_VLV_][y][p] = (short)vector[_LATE_].val;
         if (pol->use[_POL_VBL_]) ts->pol_[_POL_VBL_][y][p] = (short)base_val;
-        if (pol->use[_POL_VGA_]) ts->pol_[_POL_VGA_][y][p] = (short)recurrence[0];
+        if (pol->use[_POL_VGM_]) ts->pol_[_POL_VGM_][y][p] = (short)recurrence[0];
         if (pol->use[_POL_VGV_]) ts->pol_[_POL_VGV_][y][p] = (short)standdev(recurrence[1], n_window[_GROW_]);
 
         // amplitude parameters
