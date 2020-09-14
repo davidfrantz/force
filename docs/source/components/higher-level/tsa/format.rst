@@ -352,17 +352,17 @@ The Trend Analysis products contains trend parameters:
 The Change, Aftereffect, Trend (CAT) product (following [Hird et al. 2016](https://ieeexplore.ieee.org/document/7094220) contains extended change and trend parameters.
 CAT detects one change per time series, splits the time series into three parts, and derives trend parameters for the three parts:
 
-+-------+--------------------------------------------------------------------+
-+ Band  + Description                                                        +
-+=======+====================================================================+
-+ 1     + Magnitude of change                                                +
-+-------+--------------------------------------------------------------------+
-+ 2     + Time of change                                                     +
-+-------+--------------------------------------------------------------------+
-+ 3–12  + Trend parameters for complete time series (see Trend product)      +
-+-------+--------------------------------------------------------------------+
-+ 13–22 + Trend parameters for time series before change (see Trend product) +
-+-------+--------------------------------------------------------------------+
-+ 23–32 + Trend parameters for time series after change (see Trend product)  +
-+-------+--------------------------------------------------------------------+
++----------+--------------------------------------------------------------------+
++ Band     + Description                                                        +
++==========+====================================================================+
++ 1        + Magnitude of change                                                +
++----------+--------------------------------------------------------------------+
++ 2        + Time of change                                                     +
++----------+--------------------------------------------------------------------+
++ 3 to 12  + Trend parameters for complete time series (see Trend product)      +
++----------+--------------------------------------------------------------------+
++ 13 to 22 + Trend parameters for time series before change (see Trend product) +
++----------+--------------------------------------------------------------------+
++ 23 to 32 + Trend parameters for time series after change (see Trend product)  +
++----------+--------------------------------------------------------------------+
 
