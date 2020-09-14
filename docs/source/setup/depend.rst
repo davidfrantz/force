@@ -56,7 +56,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
   *There are known problems with earlier releases (< 1.10.0). FORCE < 3.5 should not be used with GDAL >= 3.0.
   However, the reporting of errors and warnings differs between versions, and GDAL may report many non-critical errors to stderr (e.g. ``ERROR 6 - not supported``, please refer to the GDAL error code description whether these are critical errors or just warnings that can be ignored). Please note that GDAL is a very dynamic development, therefore it is hard to develop applications that cover all cases and exceptions in all possible GDAL versions and builds. If you come across a GDAL version that does not work, please inform us.*
-  
+
 * The **GSL library** is used for optimization purposes.
   We developed the code using version 1.15.
   The software can be installed with:
