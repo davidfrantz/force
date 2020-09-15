@@ -29,6 +29,7 @@ This program inflates QAI layers
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../higher-level/read-ard-hl.h"
@@ -39,10 +40,10 @@ This program inflates QAI layers
 
 int main( int argc, char *argv[] ){
 double geotran[6];
-char iname[NPOW_10];
+char *iname = NULL;
+char *d_out = NULL;
+char *pch   = NULL;
 char oname[NPOW_10];
-char d_out[NPOW_10];
-char *pch = NULL;
 const char *proj;
 GDALDatasetH fp;
 stack_t *QAI = NULL;
@@ -56,13 +57,8 @@ cube_t *cube = NULL;
   if (argc != 3){ printf("Usage: %s QAI dir\n\n", argv[0]); exit(1);}
 
   // parse arguments
-  if (strlen(argv[1]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { strncpy(iname, argv[1], strlen(argv[1])); iname[strlen(argv[1])] = '\0';}
-  if (strlen(argv[2]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { strncpy(d_out, argv[2], strlen(argv[2])); d_out[strlen(argv[2])] = '\0';}
-
+  iname = argv[1];
+  d_out = argv[2];
 
   GDALAllRegister();
 
@@ -85,9 +81,7 @@ cube_t *cube = NULL;
   cube->chunksize = cube->ny*cube->res;
 
   proj = GDALGetProjectionRef(fp);
-  if (strlen(proj) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;
-  } else { strncpy(cube->proj, proj, strlen(proj)); cube->proj[strlen(proj)] = '\0';}
+  copy_string(cube->proj, NPOW_10, proj);
 
   GDALClose(fp);
   

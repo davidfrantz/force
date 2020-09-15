@@ -1,3 +1,27 @@
+##########################################################################
+# 
+# This file is part of FORCE - Framework for Operational Radiometric 
+# Correction for Environmental monitoring.
+# 
+# Copyright (C) 2013-2020 David Frantz
+# 
+# FORCE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# FORCE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FORCE. If not, see <http://www.gnu.org/licenses/>.
+# 
+##########################################################################
+
+# Copyright (C) 2020 Gergely Padányi-Gulyás (github user fegyi001)
+
 FROM ubuntu:18.04 as builder
 
 # Install folder
@@ -21,8 +45,8 @@ RUN apt-get -y install wget unzip curl git build-essential libgdal-dev gdal-bin 
 # Set python aliases for Python 3.x
 RUN echo 'alias python=python3' >> ~/.bashrc \
   && echo 'alias pip=pip3' >> ~/.bashrc
-# NumPy is needed for OpenCV
-RUN pip3 install numpy==1.18.1 
+# NumPy is needed for OpenCV, gsutil for Google downloads
+RUN pip3 install numpy==1.18.1 gsutil
 
 # Build OpenCV from source
 RUN mkdir -p $INSTALL_DIR/opencv

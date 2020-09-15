@@ -24,6 +24,8 @@
 
 # this script downloads Sentinel-2 from ESA and maintains a clean Level-1 datapool
 
+printf "%s\n" "" "This tool is deprecated and will only receive minimal support in the future." "Please consider using force-level1-csd instead" ""
+
 EXPECTED_ARGS=7
 MAXIMUM_ARGS=8
 
@@ -64,6 +66,7 @@ if [ $# -ne $EXPECTED_ARGS ] && [ $# -ne $MAXIMUM_ARGS ]; then
   echo ""
   exit
 fi
+
 
 if [ $# -eq $MAXIMUM_ARGS ]; then
   if [ $8 == dry ]; then

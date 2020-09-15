@@ -32,6 +32,7 @@ Image header
 #include <string.h>  // string handling functions
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/date-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/warp-cl.h"
@@ -77,7 +78,7 @@ typedef struct {
   int tx, ty;            // ID of tile
   char proj[NPOW_10];      // projection
 
-  char par[NPOW_13];       // parameterization
+  char par[NPOW_14];       // parameterization
 
   bool  *save;           // save band?
   int   *nodata;         // nodata value

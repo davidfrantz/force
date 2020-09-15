@@ -22,54 +22,138 @@
 # 
 ##########################################################################
 
-EXPECTED_ARGS=1
+# functions/definitions ------------------------------------------------------------------
+PROG=`basename $0`;
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [ $# -ne $EXPECTED_ARGS ]
-then
-  echo "Usage: `basename $0` parameter-file"
-  echo ""
-  exit
+MANDATORY_ARGS=1
+
+echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
+
+cmd_not_found() {      # check required external commands
+  for cmd in "$@"; do
+    stat=`which $cmd`
+    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
+  done
+}
+
+help () {
+cat <<HELP
+
+Usage: $PROG [-h] [-c {all,paired}] parameter-file
+
+  -h  = show his help
+  -c  = combination type
+        all:    all combinations (default)
+        paired: pairwise combinations
+
+$PROG:  replace variables in parameterfile
+        see https://force-eo.readthedocs.io/en/latest/components/auxilliary/magic-parameters.html
+
+HELP
+exit 1
+}
+
+#cmd_not_found "...";    # important, check required commands !!! dies on missing
+
+# now get the options --------------------------------------------------------------------
+ARGS=`getopt -o hc: --long help,combine: -n "$0" -- "$@"`
+if [ $? != 0 ] ; then help; fi
+eval set -- "$ARGS"
+
+combtype='all'
+while :; do
+  case "$1" in
+    -h|--help) help ;;
+    -c|--combine) combtype="$2"; shift ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+  shift
+done
+
+if [ $# -ne $MANDATORY_ARGS ] ; then 
+  echoerr "Mandatory argument is missing."; help
+else
+  FINP=$(readlink -f $1) # absolute file path
+  BINP=$(basename $FINP) # basename
+  CINP=${BINP%%.*}       # corename (without extension)
+  DINP=$(dirname  $FINP) # directory name
 fi
 
-
-INP=$1
-
-if [ ! -r $INP ]; then
-  echo "$INP is not existing/readable"
-  exit
+# options received, check now ------------------------------------------------------------
+if [ ! "$combtype" = "all" ] && [ ! "$combtype" = "paired" ]; then 
+  echoerr "Invalid combination type"; help
 fi
 
-DIR=$(dirname $INP)
-BASE=$(basename $INP)
-BASE=${BASE%%.*}
+# further checks and preparations --------------------------------------------------------
+if ! [[ -f "$FINP" && -r "$FINP" ]]; then
+  echoerr "$FINP is not a readable file, exiting."; exit 1;
+fi
 
+if ! [[ -d "$DINP" && -w "$DINP" ]]; then
+  echoerr "$DINP is not a writeable directory, exiting."; exit 1;
+fi
+
+# main thing -----------------------------------------------------------------------------
 
 # detect replacement vectors
-KEYS=$(sed -e '/^+/q' $INP | grep '%:' | sed 's/^%//g' | sed 's/%:.*$//g' )
+KEYS=$(sed -e '/^+/q' $FINP | grep '%:' | sed 's/^%//g' | sed 's/%:.*$//g' )
 NKEYS=$(echo $KEYS | wc -w)
 #echo $KEYS
 #echo $NKEYS
 
 if [ $NKEYS -lt 1 ]; then
-  echo "No replacement vector detected"
-  exit
+  echoerr "No replacement vector detected"; help
 else 
   echo "$NKEYS replacement vectors detected"
 fi
 
 
-# combine values
-for k in $KEYS; do
+if [ "$combtype" = "all" ]; then 
 
-  VALUES={$(grep "%$k%:" $INP | sed 's/^.*%: //' | tr -s ' ' | sed 's/^ //' | sed 's/ /,/g' )}
-  #echo $VALUES
+  # combine values
+  for k in $KEYS; do
+    VALUES={$(grep "%$k%:" $FINP | sed 's/^.*%: //' | tr -s ' ' | sed 's/^ //' | sed 's/ /,/g' )}
+    #echo $VALUES
+    combis="$combis%$VALUES"
+    #echo $combis
+  done
 
-  combis="$combis%$VALUES"
+  COMBS=$(eval "echo "$combis"")
+  #echo $COMBS
 
-done
+elif [ "$combtype" = "paired" ]; then 
 
-COMBS=$(eval "echo "$combis"")
-#echo $COMBS
+  # get array lengths
+  NVALUES=0
+  for k in $KEYS; do
+    VALUES=$(grep "%$k%:" $FINP | sed 's/^.*%: //' | tr -s ' ' | sed 's/^ //')
+    if [ "$NVALUES" -gt 0 ] && [ "$NVALUES" -ne "$(echo $VALUES | wc -w)" ]; then
+      echoerr "Replacement vector misformed. If -c paired, all vectors must have the same length"; help
+    fi
+    NVALUES=$(echo $VALUES | wc -w)
+  done
+
+  # combine values
+  combis=()
+  for k in $KEYS; do
+    VALUES=$(grep "%$k%:" $FINP | sed 's/^.*%: //' | tr -s ' ' | sed 's/^ //')
+    #echo ${VALUES[*]}
+    i=0
+    for v in $VALUES; do
+      combis[$i]=${combis[$i]}"%""$v"
+      ((i++))
+    done
+    #echo ${combis[*]}
+  done
+  
+  COMBS=${combis[*]}
+  #echo $COMBS
+
+else
+  echoerr "Invalid combination type"; help
+fi
 
 
 # for each combination: replace
@@ -82,25 +166,26 @@ for comb in $COMBS; do
   # bandname
   ((NPAR++))
   C_NPAR=$(printf "%05d" $NPAR)
-  OUT=$DIR/$BASE"_"$C_NPAR".prm"
+  FOUT=$DINP/$CINP"_"$C_NPAR".prm"
 
   # init new par
-  cp $INP $OUT
+  cp $FINP $FOUT
 
   # remove magic parameter definition
-  sed -i '/^\+/,$!d' $OUT
+  sed -i '/^\+/,$!d' $FOUT
 
   # replace
   n=0
   for k in $KEYS; do
     #echo "replace {%$k%} with ${v[n]}"
-    sed -i "s+{%$k%}+${v[n]}+g" $OUT
+    sed -i "s+{%$k%}+${v[n]}+g" $FOUT
     ((n++))
   done
 
 done
 
 echo "$NPAR parameter files were generated"
+
 
 exit 0
 

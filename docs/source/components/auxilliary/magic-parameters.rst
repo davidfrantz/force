@@ -19,11 +19,25 @@ Usage
 
   force-magic-parameters
 
-  Usage: force-magic-parameters parameter-file
-  
+  Usage: force-magic-parameters.sh [-h] [-c {all,paired}] parameter-file
+
+    -h  = show his help
+    -c  = combination type
+          all:    all combinations (default)
+          paired: pairwise combinations
+
+
 * parameter-file
 
   | Any FORCE parameterfile can be used.
+  
+* combination type
+
+  | If this argument is not given, we will use all combinations of all replacement vectors.
+  | This is the same as ``-c all``.
+  
+  | If ``-c paired``, pairwise combinations are used.
+  | In this case, the replacement vectors must be of the same length.
 
 
 Syntax

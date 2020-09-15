@@ -21,18 +21,23 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Version number
+String handling header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef VERSION_CL_H
-#define VERSION_CL_H
+#ifndef STRING_CL_H
+#define STRING_CL_H
+
+#include <stdio.h>    // core input and output functions
+#include <stdlib.h>   // standard general utilities library
+#include <string.h>   // string handling functions
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define _VERSION_ "3.5.0"
+void copy_string(char *dst, size_t size, const char *src);
 
 #ifdef __cplusplus
 }

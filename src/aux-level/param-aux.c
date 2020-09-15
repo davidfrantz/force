@@ -1508,7 +1508,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
 void write_par_hl_lsp(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS\n");
+  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS - SPLITS-BASED\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   fprintf(fp, "# The Land Surface Phenology (LSP) options are only available if FORCE was\n");
   fprintf(fp, "# compiled with SPLITS (see installation section in the FORCE user guide).\n");
@@ -1598,7 +1598,7 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# Compute and output a linear trend analysis on the requested Phenometric time\n");
-    fprintf(fp, "# series? Note that the OUTPUT_FBX parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# series? Note that the OUTPUT_LSP parameters don't need to be TRUE to do this.\n");
     fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
@@ -1607,11 +1607,113 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on\n");
     fprintf(fp, "# the requested Phenometric time series?\n");
-    fprintf(fp, "# Note that the OUTPUT_FBX parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# Note that the OUTPUT_LSP parameters don't need to be TRUE to do this.\n");
     fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_CAP = FALSE\n");
+  
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level polarmetrics pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_pol(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS - POLAR-BASED\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing Start of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_START_THRESHOLD = 0.2\n");
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing Mid of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_MID_THRESHOLD = 0.5\n");
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing End of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_END_THRESHOLD = 0.8\n");
+
+
+  if (verbose){
+    fprintf(fp, "# Should the start of each phenological year be adapated?\n");
+    fprintf(fp, "# If FALSE, the start is static, i.e. Date of Early Minimum and Date of Late\n");
+    fprintf(fp, "# Minimum are the same for all years and 365 days apart. If TRUE, they differ\n");
+    fprintf(fp, "# from year to year and a phenological year is not forced to be 365 days long.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "POL_ADAPTIVE = TRUE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Which Polarmetrics should be computed? There will be a POL output file for\n");
+    fprintf(fp, "# each metric (with years as bands).\n");
+    fprintf(fp, "# Currently available are the dates of the early minimum, late minimum, peak of season,\n");
+    fprintf(fp, "# start of season, mid of season, end of season, early average vector, average vector,\n");
+    fprintf(fp, "# late average vector; lengths of the total season, green season, between averge vectors;\n");
+    fprintf(fp, "# values of the early minimum, late minimum, peak of season, start of season, mid of season,\n");
+    fprintf(fp, "# end of season, early average vector, average vector, late average vector, base level,\n");
+    fprintf(fp, "# green amplitude, seasonal amplitude, peak amplitude, green season mean , green season\n");
+    fprintf(fp, "# variability, dates of start of phenological year, difference between start of phenological\n");
+    fprintf(fp, "# year and its longterm average; integrals of the total season, base level, base+total,\n");
+    fprintf(fp, "# green season, rising rate, falling rate; rates of average rising, average falling, maximum\n");
+    fprintf(fp, "# rising, maximum falling.\n");
+    fprintf(fp, "# Type: Character list. Valid values: {DEM,DLM,DPS,DSS,DMS,DES,DEV,DAV,DLV,LTS,\n");
+    fprintf(fp, "#   LGS,LGV,VEM,VLM,VPS,VSS,VMS,VES,VEV,VAV,VLV,VBL,VGA,VSA,VPA,VGM,VGV,DPY,DPV,\n");
+    fprintf(fp, "#   IST,IBL,IBT,IGS,IRR,IFR,RAR,RAF,RMR,RMF}\n");
+  }
+  fprintf(fp, "POL = VSS VPS VES VSA RMR IGS\n");
+
+  if (verbose){
+    fprintf(fp, "# Standardize the POL time series with pixel mean and/or standard deviation?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}\n");
+  }
+  fprintf(fp, "STANDARDIZE_POL = NONE\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the polar-transformed time series? These are layer stack of cartesian X-\n");
+    fprintf(fp, "# and Y-coordinates for each interpolated date. This results in two files, product\n");
+    fprintf(fp, "# IDs are PCX and PCY.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_PCT = FALSE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Output the Polarmetrics? These are layer stacks per polarmetric with as many\n");
+    fprintf(fp, "# bands as years.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_POL = FALSE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Compute and output a linear trend analysis on the requested Polarmetric time\n");
+    fprintf(fp, "# series? Note that the OUTPUT_POL parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_TRO = FALSE\n");
+  
+  if (verbose){
+    fprintf(fp, "# Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on\n");
+    fprintf(fp, "# the requested Polarmetric time series?\n");
+    fprintf(fp, "# Note that the OUTPUT_POL parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_CAO = FALSE\n");
   
   return;
 }

@@ -54,9 +54,9 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
   
       sudo apt-get install libgdal1-dev gdal-bin python-gdal
 
-  *There are known problems with earlier releases (< 1.10.0), there are no known problems with later releases.
+  *There are known problems with earlier releases (< 1.10.0). FORCE < 3.5 should not be used with GDAL >= 3.0.
   However, the reporting of errors and warnings differs between versions, and GDAL may report many non-critical errors to stderr (e.g. ``ERROR 6 - not supported``, please refer to the GDAL error code description whether these are critical errors or just warnings that can be ignored). Please note that GDAL is a very dynamic development, therefore it is hard to develop applications that cover all cases and exceptions in all possible GDAL versions and builds. If you come across a GDAL version that does not work, please inform us.*
-  
+
 * The **GSL library** is used for optimization purposes.
   We developed the code using version 1.15.
   The software can be installed with:
@@ -97,6 +97,23 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
   .. code-block:: bash
 
     sudo apt-get install rename
+
+* **python** is used by a couple of auxilliary scripts.
+  python should already be installed. If not, you can install a new python version like this:
+
+  .. code-block:: bash
+
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo apt-get install python3.8 python3-pip
+    echo 'alias python=python3' >> ~/.bashrc
+    echo 'alias pip=pip3' >> ~/.bashrc
+
+* Some **python packages** are needed:
+
+  .. code-block:: bash
+
+    pip install numpy gsutil
 
 * **OpenCV** is used for machine learning and image processing tasks
   We developed the code using OpenCV v. 4.1. 

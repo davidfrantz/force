@@ -33,9 +33,11 @@ if [ $# -ne $EXPECTED_ARGS ]; then
 fi
 
 NOW=$PWD
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 INP=$(readlink -f $1)
 OUT=$INP/mosaic
+
 
 
 # input dir exists?
@@ -59,7 +61,10 @@ function mosaic_this(){
 
   num=$1
   prd=$2
+  bin=$3
   LIST="force-mosaic_list_$2.txt"
+
+  #echo $bin
 
   echo "mosaicking" $prd
 
@@ -85,11 +90,20 @@ function mosaic_this(){
 
   # build vrt
   if [ $N -gt 0 ]; then
+
     echo $N "chips found".
+
+    #build VRT
     gdalbuildvrt -q -srcnodata $NODATA -vrtnodata $NODATA -input_file_list $LIST $ONAME
+
+    # set vrt to relative paths
     sed -i.tmp 's/relativeToVRT="0"/relativeToVRT="1"/g' $ONAME
     chmod --reference $ONAME".tmp" $ONAME
     rm $ONAME".tmp"
+
+    # copy metadata
+    $bin"/"force-mdcp $FIRST $ONAME
+
   else
     echo "no chip found."
   fi
@@ -100,6 +114,8 @@ function mosaic_this(){
     echo "deleting file listing failed."
     exit
   fi
+  
+  echo ""
 
 }
 
@@ -109,11 +125,11 @@ export -f mosaic_this
 PRODUCTS="force-mosaic_products.txt"
 
 find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
-NPROD=$(wc -l $PRODUCTS)
+NPROD=$(wc -l $PRODUCTS | cut -d " " -f 1)
 
 echo "mosaicking $NPROD products:"
 parallel -a $PRODUCTS echo        {#} {}
-parallel -a $PRODUCTS mosaic_this {#} {}
+parallel -a $PRODUCTS mosaic_this {#} {} $BINDIR
 
 rm $PRODUCTS
 

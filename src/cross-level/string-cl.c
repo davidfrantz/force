@@ -21,22 +21,32 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Version number
+This file contains functions for string handling
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef VERSION_CL_H
-#define VERSION_CL_H
+#include "string-cl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#define _VERSION_ "3.5.0"
+/** Copy string
++++ This function copies a source string into a destination buffer. 
++++ strncpy copies as many characters from src to dst as there is space
++++ in src. The string is padded with zeros. This way, buffer overflow 
++++ won't happen. If dst is longer than src, dst will be truncated. The 
++++ truncation will be detected and the program will interrupt.
+--- dst:    destination buffer
+--- size:   size of destination buffer
+--- src:    source string
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void copy_string(char *dst, size_t size, const char *src){
 
-#ifdef __cplusplus
+  strncpy(dst, src, size);
+  if (dst[size-1] != '\0'){
+    printf("cannot copy, string too long.\n");
+    exit(1);
+  }
+
+  return;
 }
-#endif
-
-#endif
 

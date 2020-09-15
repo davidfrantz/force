@@ -21,18 +21,26 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Version number
+Polarmetrics header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef VERSION_CL_H
-#define VERSION_CL_H
+#ifndef POLAR_HL_H
+#define POLAR_HL_H
+
+#include <stdio.h>   // core input and output functions
+#include <stdlib.h>  // standard general utilities library
+
+#include "../cross-level/cite-cl.h"
+#include "../higher-level/param-hl.h"
+#include "../higher-level/tsa-hl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define _VERSION_ "3.5.0"
+int tsa_polar(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

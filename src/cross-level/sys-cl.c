@@ -47,82 +47,52 @@ int i = 0, num = 6*2;
 
   // system info
   if (uname(&sys) != -1){
-    
-    strncpy(stringlist[i], "Sys_system_name", 15); stringlist[i][15] = '\0'; i++;
-    if (strlen(sys.sysname) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], sys.sysname, strlen(sys.sysname)); 
-      stringlist[i][strlen(sys.sysname)] = '\0'; i++;
-    }
-    
-    strncpy(stringlist[i], "Sys_host_name",   13); stringlist[i][13] = '\0'; i++;
-    if (strlen(sys.nodename) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], sys.nodename, strlen(sys.nodename)); 
-      stringlist[i][strlen(sys.nodename)] = '\0'; i++;
-    }
-    
-    strncpy(stringlist[i], "Sys_OS_release",  14); stringlist[i][14] = '\0'; i++;
-    if (strlen(sys.release) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], sys.release, strlen(sys.release)); 
-      stringlist[i][strlen(sys.release)] = '\0'; i++;
-    }
-    
-    strncpy(stringlist[i], "Sys_OS_version",  14); stringlist[i][14] = '\0'; i++;
-    if (strlen(sys.version) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], sys.version, strlen(sys.version)); 
-      stringlist[i][strlen(sys.version)] = '\0'; i++;
-    }
-    
-    strncpy(stringlist[i], "Sys_machine",     11); stringlist[i][11] = '\0'; i++;
-    if (strlen(sys.machine) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], sys.machine, strlen(sys.machine)); 
-      stringlist[i][strlen(sys.machine)] = '\0'; i++;
-    }
-    
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_system_name");
+    copy_string(stringlist[i++], NPOW_10, sys.sysname);
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_host_name");
+    copy_string(stringlist[i++], NPOW_10, sys.nodename);
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_OS_release");
+    copy_string(stringlist[i++], NPOW_10, sys.release);
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_OS_version");
+    copy_string(stringlist[i++], NPOW_10, sys.version);
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_machine");
+    copy_string(stringlist[i++], NPOW_10, sys.machine);
+
   } else {
-    
-    strncpy(stringlist[i], "Sys_system_name", 15); stringlist[i][15] = '\0'; i++;
-    strncpy(stringlist[i], "unknown",          7); stringlist[i][7]  = '\0'; i++;
-    
-    strncpy(stringlist[i], "Sys_host_name",   13); stringlist[i][13] = '\0'; i++;
-    strncpy(stringlist[i], "unknown",          7); stringlist[i][7]  = '\0'; i++;
-    
-    strncpy(stringlist[i], "Sys_OS_release",  14); stringlist[i][14] = '\0'; i++;
-    strncpy(stringlist[i], "unknown",          7); stringlist[i][7]  = '\0'; i++;
-    
-    strncpy(stringlist[i], "Sys_OS_version",  14); stringlist[i][14] = '\0'; i++;
-    strncpy(stringlist[i], "unknown",          7); stringlist[i][7]  = '\0'; i++;
-    
-    strncpy(stringlist[i], "Sys_machine",     11); stringlist[i][11] = '\0'; i++;
-    strncpy(stringlist[i], "unknown",          7); stringlist[i][7]  = '\0'; i++;
-    
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_system_name");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_host_name");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_OS_release");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_OS_version");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_machine");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
   }
 
-  
+
   if (getlogin_r(user, NPOW_10) == 0){
-    
-    strncpy(stringlist[i], "Sys_operator", 12);    stringlist[i][12] = '\0'; i++;
-    if (strlen(user) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(stringlist[i], user, strlen(user)); 
-      stringlist[i][strlen(user)] = '\0'; i++;
-    }
-    
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_operator");
+    copy_string(stringlist[i++], NPOW_10, user);
+
   } else {
-    
-    strncpy(stringlist[i], "Sys_operator", 12);    stringlist[i][12] = '\0'; i++;
-    strncpy(stringlist[i], "unknown", 7);          stringlist[i][7]  = '\0'; i++;
-    
+
+    copy_string(stringlist[i++], NPOW_10, "Sys_operator");
+    copy_string(stringlist[i++], NPOW_10, "unknown");
+
   }
 
   *n = num;

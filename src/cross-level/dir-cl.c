@@ -153,9 +153,7 @@ char *dot;
   // Locate the first dot and copy from there
   dot = strchr(basename, '.');
   if (dot != NULL){
-    if (strlen(dot) > size-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { strncpy(extension, dot, strlen(dot)); extension[strlen(dot)] = '\0';}
+    copy_string(extension, size, dot);
   } else {
     extension[0] = '\0';
   }
@@ -217,9 +215,7 @@ char *start;
 
 
   // copy string from starting point, add terminating 0
-  if (strlen(start) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(basename, start, strlen(start)); basename[strlen(start)] = '\0';}
+  copy_string(basename, size, start);
 
   return;
 }
@@ -241,14 +237,19 @@ char *slash;
 
 
   // copy path to dir
-  if (strlen(path) > size-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(dirname, path, strlen(path)); dirname[strlen(path)] = '\0';}
+  copy_string(dirname, size, path);
 
 
   // Locate the last slash and set terminating 0
   slash = strrchr(dirname, '/');
-  if (slash != NULL) *slash = '\0';
+  if (slash != NULL){
+    *slash = '\0';
+  } else {
+    if (getcwd(dirname, size) == NULL){
+     printf("No directoryname detected and getting current directory failed.\n"); 
+     exit(1);
+   }
+  }
 
   return;
 }

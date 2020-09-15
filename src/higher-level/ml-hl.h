@@ -34,6 +34,7 @@ Machine learning header
 #include <opencv2/ml.hpp>
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
