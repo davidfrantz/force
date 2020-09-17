@@ -138,6 +138,7 @@ show_progress() {
   SIZEDONE=$(awk -v done=$SIZEDONE -v fsize=$FILESIZE 'BEGIN { print (done + fsize) }' )
   PERCDONE=$(awk -v total=$TOTALSIZE -v done=$SIZEDONE 'BEGIN { printf( "%.2f\n", (100 / total * done) )}')
   local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | cut -d"." -f1) + 1 ))
+  if [ $ITER -eq 1 ]; then local PERCINT=0; fi
   printf -v INCREMENT "%*s" "$(( $PERCINT*$WIDTH/100 ))" ""; INCREMENT=${INCREMENT// /=}
   printf "\r\e[K|%-*s| %3d %% %s" "$WIDTH" "$INCREMENT" "$PERCINT" "$*"
 }
@@ -170,7 +171,7 @@ which_satellite() {
 # Initialize arguments and parse command line input
 SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
 DATEMIN="19700101"
-DATEMAX=$(date +%F)
+DATEMAX=$(date +%Y%m%d)
 CCMIN=0
 CCMAX=100
 TIER="T1"
@@ -518,6 +519,8 @@ get_data() {
       fi
       FILESIZE=$(( $FILESIZEBYTE / 1048576 ))
       
+      show_progress
+      
       TILEPATH=$POOL/$TILE    
       SCENEPATH=$TILEPATH/$SCENEID
       if [ $SATELLITE = "sentinel2" ]; then
@@ -548,8 +551,7 @@ get_data() {
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
       lockfile-remove $QUEUE
-
-      show_progress 
+ 
       ((ITER++))
     done
   fi

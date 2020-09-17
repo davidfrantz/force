@@ -524,6 +524,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 .. _tsa-param-polar:
 
+
+* **Land surface phenology parameters (Polar-based)**
+
   .. note::
      The Polar-based Land Surface Phenology (LSP) metrics are always available (they do not rely on SPLITS).
 
