@@ -212,7 +212,8 @@ enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
        _TRD_NUM_,  _TRD_LENGTH_ };
        
 // change, aftereffect, trend
-enum { _CAT_CHANGE_,       _CAT_YEAR_,
+enum { _CAT_CHANGE_,       _CAT_LOSS_, 
+       _CAT_YEAR_,
        _CAT_TOTAL_MEAN_,   _CAT_TOTAL_OFFSET_,
        _CAT_TOTAL_SLOPE_,  _CAT_TOTAL_GAIN_,
        _CAT_TOTAL_RSQ_,    _CAT_TOTAL_SIG_,

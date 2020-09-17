@@ -141,7 +141,8 @@ const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_] = {
   { _TRD_NUM_,  "NUM"}};
        
 const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_] = {
-  { _CAT_CHANGE_, "CHANGE"},             { _CAT_YEAR_, "YEAR-OF-CHANGE"},
+  { _CAT_CHANGE_, "CHANGE"},             { _CAT_LOSS_, "LOSS"}, 
+  { _CAT_YEAR_, "YEAR-OF-CHANGE"},
   { _CAT_TOTAL_MEAN_, "TOTAL-MEAN"},     { _CAT_TOTAL_OFFSET_, "TOTAL-OFFSET"},
   { _CAT_TOTAL_SLOPE_, "TOTAL-SLOPE"},   { _CAT_TOTAL_GAIN_, "TOTAL-GAIN"},
   { _CAT_TOTAL_RSQ_, "TOTAL-RSQ"},       { _CAT_TOTAL_SIG_, "TOTAL-SIG"},
