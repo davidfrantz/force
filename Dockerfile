@@ -73,16 +73,19 @@ RUN ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive \
   && make clean
 
 # Build FORCE from source
-RUN mkdir -p $INSTALL_DIR/force
+RUN mkdir -p $INSTALL_DIR/force && \
+  # This is needed in case of develop branch
+  mkdir -p /develop
 WORKDIR $INSTALL_DIR/force
 COPY . . 
-# Conditionally disable SPLITS which is enabled by default
 ARG splits=true 
-RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enable; fi
-# Conditionally enable DEBUG mode
 ARG debug=false 
-RUN if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi
-RUN make -j7 \
+# Conditionally disable SPLITS which is enabled by default
+RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enable; fi && \
+  # Conditionally enable DEBUG mode
+  if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi && \
+  # Compile FORCE
+  make -j7 \
   && make install \
   && make clean
 
@@ -90,12 +93,13 @@ RUN make -j7 \
 RUN rm -rf $INSTALL_DIR
 RUN apt-get purge -y --auto-remove apt-utils cmake git build-essential software-properties-common
 
-# Create a dedicated user for running FORCE commands
-RUN useradd -m force-user -p force && \
-  chown -R force-user /usr/local/bin/
-# Use this user by default
-USER force-user
-WORKDIR /home/force-user
+# Create a dedicated 'docker' group and user for running FORCE commands
+RUN groupadd docker && \
+  useradd -m docker -g docker -p docker && \
+  chgrp docker /usr/local/bin/ && \
+  chgrp docker /develop
 
-# Test FORCE run
-RUN force
+WORKDIR /usr/local/bin
+
+# In case of develop branch FORCE is installed into /develop folder
+RUN if test -f "/develop/force"; then /develop/force; else force; fi
