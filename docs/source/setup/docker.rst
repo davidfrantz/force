@@ -90,16 +90,6 @@ If you wish to enter the running container's terminal run it with the ``-it`` fl
   .. code-block:: bash
 
     docker run -it -v /my/local/folder:/opt/data fegyi001/force
-
-It is highly recommended to use the Docker image with docker user. By default Docker uses the ``root`` user which can raise security issues. Therefore it is always advised to run FORCE in Docker with the ``-u`` (or ``--user``) flag like this:
-
-  .. code-block:: bash
-
-    # Uses the logged in user and group
-    docker run -it -u $(id -u):$(id -g) fegyi001/force bash
-
-    # Uses a specific user and group
-    docker run -it -u 1000:1000 fegyi001/force bash
   
 
 User credentials
