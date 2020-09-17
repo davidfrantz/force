@@ -22,7 +22,7 @@ Operating system
 The software was developed and tested under Ubuntu 12.04 LTS, 14.04 LTS, 16.04 LTS, and 18.04 LTS operating systems.
 Note that we do not provide support for migrating the code to any other OS.
 
-The code can also be installed in other Linux dsitributions, e.g. CentOS.
+The code can also be installed in other Linux distributions, e.g. CentOS.
 However, installation instructions are only given for Ubuntu.
 
 We were able to successfully install and run FORCE on the Windows 10 subsystem for Linux, too.

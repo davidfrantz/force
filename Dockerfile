@@ -76,9 +76,9 @@ RUN ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive \
 RUN mkdir -p $INSTALL_DIR/force
 WORKDIR $INSTALL_DIR/force
 COPY . . 
-# Conditionally enable SPLITS which is disabled by default
-ARG splits=false 
-RUN if [ "$splits" = "true" ] ; then ./splits.sh enable; else ./splits.sh disable; fi
+# Conditionally disable SPLITS which is enabled by default
+ARG splits=true 
+RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enable; fi
 # Conditionally enable DEBUG mode
 ARG debug=false 
 RUN if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi
@@ -89,6 +89,13 @@ RUN make -j7 \
 # Cleanup after successfull builds
 RUN rm -rf $INSTALL_DIR
 RUN apt-get purge -y --auto-remove apt-utils cmake git build-essential software-properties-common
+
+# Create a dedicated user for running FORCE commands
+RUN useradd -m force-user -p force && \
+  chown -R force-user /usr/local/bin/
+# Use this user by default
+USER force-user
+WORKDIR /home/force-user
 
 # Test FORCE run
 RUN force
