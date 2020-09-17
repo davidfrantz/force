@@ -85,6 +85,7 @@ RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enab
   # Conditionally enable DEBUG mode
   if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi && \
   # Compile FORCE
+  sed -i 's+BINDIR=/develop+BINDIR=/usr/local/bin+' Makefile && \
   make -j7 \
   && make install \
   && make clean
@@ -98,8 +99,9 @@ RUN groupadd docker && \
   useradd -m docker -g docker -p docker && \
   chgrp docker /usr/local/bin/ && \
   chgrp docker /develop
+# Use this user by default
+USER docker
 
-WORKDIR /usr/local/bin
+WORKDIR /home/docker
 
-# In case of develop branch FORCE is installed into /develop folder
-RUN if test -f "/develop/force"; then /develop/force; else force; fi
+RUN force
