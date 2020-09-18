@@ -16,7 +16,7 @@ Release: 17.09.2020
 * **FORCE HIGHER LEVEL**
 
   * in force-higher-level, TSA sub-module, CAT analysis: 
-    There is another change parameter: loss = is change / offset * 1000. 
+    There is another change parameter: loss = change / offset * 1000. 
     The offset is the regression intercept of the linear trend applied to the full time series.
 
 
