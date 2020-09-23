@@ -343,7 +343,7 @@ int nchar;
 }
 
 
-int info_pyp(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 
 
   info[o].prodlen  = phl->tsa.pyp.nb;
@@ -465,11 +465,11 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_bandname(TSA[o], t, domain);
+              set_brick_bandname(TSA[o], t, domain);
               break;
             case _stats_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
               if (phl->tsa.tsi.method == _INT_NONE_){
@@ -480,9 +480,9 @@ brick_compile_info_t *info = NULL;
               set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_tsi[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
-              set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
-              set_stack_unit(TSA[o], t, "decimal year");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
+              set_brick_unit(TSA[o], t, "decimal year");
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
@@ -491,9 +491,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case  _quarter_:
               while (k < 5 && !phl->date_quarters[k]) k++;
@@ -503,9 +503,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "quarter");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "quarter");
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _month_: 
@@ -516,9 +516,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "month");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "month");
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _week_: 
@@ -529,9 +529,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "week");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "week");
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _day_: 
@@ -542,9 +542,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "day of year");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "day of year");
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _lsp_: 
@@ -554,9 +554,9 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _pol_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t);
@@ -565,21 +565,21 @@ brick_compile_info_t *info = NULL;
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               break;
             case _pyp_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              set_stack_bandname(TSA[o], t, "unknown");  // needs to become flexible
+              set_brick_sensor(TSA[o], t, "BLEND");
+              set_brick_bandname(TSA[o], t, "unknown");  // needs to become flexible
               break;
             default:
               printf("unknown tsa type.\n"); error++;

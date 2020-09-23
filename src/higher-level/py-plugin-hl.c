@@ -27,6 +27,8 @@ This file contains functions for spectral temporal metrics
 
 #include "py-plugin-hl.h"
 
+#include <Python.h>
+
 
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
