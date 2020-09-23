@@ -52,7 +52,7 @@ int nw = 701;
   #endif
 
 
-  _WVLUT_.nb = nb = get_stack_nbands(atc->xy_Tg);
+  _WVLUT_.nb = nb = get_brick_nbands(atc->xy_Tg);
   _WVLUT_.nw = nw;
   _WVLUT_.nm = nm;
   alloc_3D((void****)&_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw, _WVLUT_.nm, sizeof(float));
@@ -194,12 +194,12 @@ int kms, kmv, kw;
 +++ flag is set in this case.
 --- meta:   metadata
 --- atc:    atmospheric correction factors
---- TOA:    TOA stack
---- QAI:    QAI stack
---- DEM:    DEM stack
-+++ Return: Water vapor stack
+--- TOA:    TOA brick
+--- QAI:    QAI brick
+--- DEM:    DEM brick
++++ Return: Water vapor brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *water_vapor(meta_t *meta, atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *DEM){
+brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM){
 int i, j, ii, jj, p, nx, ny, g, z, k;
 int b_reference, b_measure;
 float reference, measure, dem;
@@ -213,7 +213,7 @@ gsl_multimin_function minex_func;
 size_t iter;
 int status;
 double size;
-stack_t *WVP = NULL;
+brick_t *WVP = NULL;
 short  *wvp_ = NULL;
 small  *dem_ = NULL;
 short **toa_ = NULL;
@@ -240,16 +240,16 @@ float **xyz_s_m = NULL;
     printf("error in water vapor transmittance LUT. "); return NULL;}
 
 
-  /** Water Vapor stack **/
-  WVP = copy_stack(QAI, 1, _DT_SHORT_);
-  set_stack_name(WVP, "FORCE Water Vapor");
-  set_stack_product(WVP, "WVP");
-  set_stack_filename(WVP, "WVP");
-  set_stack_bandname(WVP, 0, "WVP");
-  set_stack_nodata(WVP, 0, -9999);
+  /** Water Vapor brick **/
+  WVP = copy_brick(QAI, 1, _DT_SHORT_);
+  set_brick_name(WVP, "FORCE Water Vapor");
+  set_brick_product(WVP, "WVP");
+  set_brick_filename(WVP, "WVP");
+  set_brick_bandname(WVP, 0, "WVP");
+  set_brick_nodata(WVP, 0, -9999);
 
-  nx = get_stack_ncols(WVP);
-  ny = get_stack_nrows(WVP);
+  nx = get_brick_ncols(WVP);
+  ny = get_brick_nrows(WVP);
 
   if ((wvp_ = get_band_short(WVP, 0))       == NULL) return NULL;
   if ((dem_ = get_band_small(DEM, 0))       == NULL) return NULL;
@@ -332,9 +332,9 @@ float **xyz_s_m = NULL;
 
       measure = toa_[b_measure][p]/10000.0;
 
-      g = convert_stack_ji2p(QAI, atc->xy_view, i, j);
+      g = convert_brick_ji2p(QAI, atc->xy_view, i, j);
 
-      if (fequal(xy_mv[g], get_stack_nodata(atc->xy_view, cZEN))) continue;
+      if (fequal(xy_mv[g], get_brick_nodata(atc->xy_view, cZEN))) continue;
 
 
       /** copy variables to param, and initialize minimizer
@@ -440,7 +440,7 @@ float **xyz_s_m = NULL;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(WVP); set_stack_open(WVP, OPEN_CREATE); write_stack(WVP);
+  print_brick_info(WVP); set_brick_open(WVP, OPEN_CREATE); write_brick(WVP);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -457,11 +457,11 @@ float **xyz_s_m = NULL;
 +++ mated water vapor content. Gaseous Transmittance is scaled by 10000.
 --- atc:    atmospheric correction factors
 --- b:      band for which the transmittance is computed
---- WVP:    Water vapor stack
---- QAI:    QAI stack
+--- WVP:    Water vapor brick
+--- QAI:    QAI brick
 +++ Return: Gaseous transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *gas_transmittance(atc_t *atc, int b, stack_t *WVP, stack_t *QAI){
+short *gas_transmittance(atc_t *atc, int b, brick_t *WVP, brick_t *QAI){
 int i, j, ii, jj, p, nx, ny, g;
 int kw, kms, kmv;
 float w, ms, mv, Tsw, Tvw, Tso, Tvo, tg;
@@ -477,8 +477,8 @@ float *xy_Tvo = NULL;
   time_t TIME; time(&TIME);
   #endif
 
-  nx = get_stack_ncols(WVP);
-  ny = get_stack_nrows(WVP);
+  nx = get_brick_ncols(WVP);
+  ny = get_brick_nrows(WVP);
   if ((wvp_ = get_band_short(WVP, 0))       == NULL) return NULL;
   
   if ((xy_ms       = get_band_float(atc->xy_sun, cZEN))   == NULL) return NULL;
@@ -502,9 +502,9 @@ float *xy_Tvo = NULL;
 
       p = i*nx+j;
 
-      g = convert_stack_ji2p(WVP, atc->xy_view, i, j);
+      g = convert_brick_ji2p(WVP, atc->xy_view, i, j);
 
-      if (fequal(xy_mv[g], get_stack_nodata(atc->xy_view, cZEN))) continue;
+      if (fequal(xy_mv[g], get_brick_nodata(atc->xy_view, cZEN))) continue;
 
 
       /** gaseous transmittance
@@ -630,12 +630,12 @@ int year, month, day;
 
   
   // scene center
-  nf = get_stack_ncols(atc->xy_sun);
-  ne = get_stack_nrows(atc->xy_sun);
-  get_stack_geo(atc->xy_sun, nf/2, ne/2, &center_x, &center_y);
-  year  = get_stack_year(atc->xy_sun, 0);
-  month = get_stack_month(atc->xy_sun, 0);
-  day   = get_stack_day(atc->xy_sun, 0);
+  nf = get_brick_ncols(atc->xy_sun);
+  ne = get_brick_nrows(atc->xy_sun);
+  get_brick_geo(atc->xy_sun, nf/2, ne/2, &center_x, &center_y);
+  year  = get_brick_year(atc->xy_sun, 0);
+  month = get_brick_month(atc->xy_sun, 0);
+  day   = get_brick_day(atc->xy_sun, 0);
 
   // initialize
   wvp = avg = -1;

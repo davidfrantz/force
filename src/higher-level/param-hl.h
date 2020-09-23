@@ -272,7 +272,7 @@ typedef struct {
   int n;                      // number of indices
   int  *index;           // index type
   char **index_name;     // short name index type
-  int otss;           // flag: output time series stack
+  int otss;           // flag: output time series brick
   int standard;
 
   par_stm_t stm;

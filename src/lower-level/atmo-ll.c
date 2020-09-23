@@ -41,19 +41,19 @@ float wtop, wdown;
 
 iweights_t interpolation_weights(int j, int i, int nf, int ne, float res, float full_res, float *COARSE, float nodata);
 float interpolate_coarse(iweights_t weight, float *COARSE);
-int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, stack_t *QAI);
-short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, stack_t *QAI);
-int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, stack_t *QAI);
-int atmo_elevdep(par_ll_t *pl2, atc_t *atc, stack_t *QAI, top_t *TOP);
-stack_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, stack_t *QAI);
-stack_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, stack_t *WVP, top_t *TOP);
-stack_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, stack_t *QAI);
-stack_t *compile_l2_ovv(par_ll_t *pl2, stack_t *BOA, stack_t *QAI);
-stack_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI);
-stack_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, stack_t *TOA, stack_t *QAI);
-stack_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI, top_t *TOP);
-stack_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI, stack_t *WVP);
-stack_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, stack_t *WVP, top_t *TOP, int *nproduct);
+int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, brick_t *QAI);
+short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI);
+int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI);
+int atmo_elevdep(par_ll_t *pl2, atc_t *atc, brick_t *QAI, top_t *TOP);
+brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
+brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
+brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
+brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI);
+brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI);
+brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI);
+brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP);
+brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP);
+brick_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct);
 
 
 /** This function computes the weights to interpolate the coarse atmos-
@@ -187,7 +187,7 @@ float ul, ur, ll, lr;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, stack_t *QAI){
+int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, brick_t *QAI){
 int i, j, p, nx, ny, ne, nf, z, b_sw2;
 float fres, gres;
 float A = 1.0;
@@ -224,13 +224,13 @@ float **xyz_tsd_sw2 = NULL;
   #endif
 
 
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  fres  = get_stack_res(QAI);
-  nf  = get_stack_ncols(atc->xy_view);
-  ne  = get_stack_nrows(atc->xy_view);
-  gres  = get_stack_res(atc->xy_view);
-  vnodata = get_stack_nodata(atc->xy_view, ZEN);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  fres  = get_brick_res(QAI);
+  nf  = get_brick_ncols(atc->xy_view);
+  ne  = get_brick_nrows(atc->xy_view);
+  gres  = get_brick_res(atc->xy_view);
+  vnodata = get_brick_nodata(atc->xy_view, ZEN);
   if ((b_sw2 = find_domain(atc->xy_mod, "SWIR2")) < 0)   return FAILURE;
 
   if ((xyz_T       = atc_get_band_reshaped(atc->xyz_T,     b))     == NULL) return FAILURE;
@@ -394,7 +394,7 @@ float **xyz_tsd_sw2 = NULL;
 --- QAI:    Quality Assurance Information (modified)
 +++ Return: Background reflectance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, stack_t *QAI){
+short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI){
 int i, j, p, nx, ny, nc, g, z, k;
 float F[3], Fr, Fa, km[3], r[3], dF[3], sF, aod, mod;
 float rho_p, T, s, F_, res;
@@ -422,10 +422,10 @@ float **xyz_F = NULL;
   cite_me(_CITE_ADJACENCY_);
 
   
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
   if ((xyz_rho_p = atc_get_band_reshaped(atc->xyz_rho_p, b)) == NULL) return NULL;
   if ((xyz_T     = atc_get_band_reshaped(atc->xyz_T,     b)) == NULL) return NULL;
@@ -467,7 +467,7 @@ float **xyz_F = NULL;
 
       if (get_off(QAI, p)) continue;
 
-      g = convert_stack_p2p(QAI, atc->xy_sun, p);
+      g = convert_brick_p2p(QAI, atc->xy_sun, p);
       z = dem_[p];
 
       if (Tg_ == NULL){
@@ -636,7 +636,7 @@ float **xyz_F = NULL;
 
       if (get_off(QAI, p)) continue;
 
-      g = convert_stack_p2p(QAI, atc->xy_sun, p);
+      g = convert_brick_p2p(QAI, atc->xy_sun, p);
       z = dem_[p];
 
       F_ = xyz_F[z][g];
@@ -672,7 +672,7 @@ float **xyz_F = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, stack_t *QAI){
+int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI){
 int e, f, g, ne, nf, b, nb;
 int dem, doy;
 float ms, mv, psi, Hr;
@@ -685,9 +685,9 @@ double lon, lat;
   #endif
   
   
-  ne = get_stack_ncols(atc->xy_mod);
-  nf = get_stack_nrows(atc->xy_mod);
-  nb = get_stack_nbands(atc->xy_mod);
+  ne = get_brick_ncols(atc->xy_mod);
+  nf = get_brick_nrows(atc->xy_mod);
+  nb = get_brick_nbands(atc->xy_mod);
 
   #pragma omp parallel private(g, b, ms, mv, psi, Hr, doy, lon, lat, ozone, dem) shared(nb, ne, nf, meta, atc, pl2, QAI, TOP) default(none) 
   {
@@ -699,55 +699,55 @@ double lon, lat;
 
       g = e*nf+f;
 
-      if (is_stack_nodata(atc->xy_view, 0, g)) continue;
+      if (is_brick_nodata(atc->xy_view, 0, g)) continue;
 
       // bi-directional correction parameter
       brdf_factor(atc->xy_sun, atc->xy_view, atc->xy_brdf, g);
 
       // relative air mass
-      ms = get_stack(atc->xy_sun,  cZEN, g);
-      mv = get_stack(atc->xy_view, cZEN, g);
+      ms = get_brick(atc->xy_sun,  cZEN, g);
+      mv = get_brick(atc->xy_view, cZEN, g);
 
       // cosine of backscattering angle
       psi = backscatter(ms, mv, 
-        get_stack(atc->xy_sun, AZI, g), get_stack(atc->xy_view, AZI, g));
-      set_stack(atc->xy_psi, 0, g, psi);
+        get_brick(atc->xy_sun, AZI, g), get_brick(atc->xy_view, AZI, g));
+      set_brick(atc->xy_psi, 0, g, psi);
 
       // phase functions for molecular and aerosol scattering
-      set_stack(atc->xy_Pr, 0, g, phase_molecular(psi));
-      set_stack(atc->xy_Pa, 0, g, phase_aerosol(psi, atc->tthg.hg));
+      set_brick(atc->xy_Pr, 0, g, phase_molecular(psi));
+      set_brick(atc->xy_Pa, 0, g, phase_aerosol(psi, atc->tthg.hg));
 
       // ozone amount (very rough approximation)
-      get_stack_geo(atc->xy_sun, f, e, &lon, &lat);
-      doy   = get_stack_doy(atc->xy_sun, 0);
+      get_brick_geo(atc->xy_sun, f, e, &lon, &lat);
+      doy   = get_brick_doy(atc->xy_sun, 0);
       ozone = ozone_amount(lon, lat, doy);
 
       for (b=0; b<nb; b++){
 
         // gaseous transmittance
-        set_stack(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, meta->cal[b].rsr_band));
-        set_stack(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, meta->cal[b].rsr_band));
-        set_stack(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, meta->cal[b].rsr_band));
-        set_stack(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, meta->cal[b].rsr_band));
         
-        set_stack(atc->xy_Tg, b, g, gas_transmitt(
-          get_stack(atc->xy_Tsw, b, g), get_stack(atc->xy_Tvw, b, g),
-          get_stack(atc->xy_Tso, b, g), get_stack(atc->xy_Tvo, b, g)));
+        set_brick(atc->xy_Tg, b, g, gas_transmitt(
+          get_brick(atc->xy_Tsw, b, g), get_brick(atc->xy_Tvw, b, g),
+          get_brick(atc->xy_Tso, b, g), get_brick(atc->xy_Tvo, b, g)));
 
       }
 
       // average elevation
       average_elevation_cell(g, atc->xy_dem, TOP->dem, QAI);
-      dem = get_stack(atc->xy_dem, 0, g);
+      dem = get_brick(atc->xy_dem, 0, g);
 
       // correct rayleigh for elevation
       Hr = mod_elev_factor(dem*atc->dem.step+atc->dem.min+atc->dem.step/2);
-      set_stack(atc->xy_Hr, 0, g, Hr);
-      for (b=0; b<nb; b++) set_stack(atc->xy_mod, b, g, mod_elev_scale(atc->mod[b], 1, Hr));
+      set_brick(atc->xy_Hr, 0, g, Hr);
+      for (b=0; b<nb; b++) set_brick(atc->xy_mod, b, g, mod_elev_scale(atc->mod[b], 1, Hr));
 
       // Fresnel reflection for AOD from water retrieval 
       // --> assumed that the water body is flat -> incidence angle = szen
-      set_stack(atc->xy_fresnel, 0, g, fresnel_reflection(get_stack(atc->xy_sun, ZEN, g)));
+      set_brick(atc->xy_fresnel, 0, g, fresnel_reflection(get_brick(atc->xy_sun, ZEN, g)));
 
     }
     }
@@ -756,20 +756,20 @@ double lon, lat;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(atc->xy_brdf);  set_stack_open(atc->xy_brdf,  OPEN_CREATE); write_stack(atc->xy_brdf);
-  print_stack_info(atc->xy_psi); set_stack_open(atc->xy_psi, OPEN_CREATE); write_stack(atc->xy_psi);
-  print_stack_info(atc->xy_Pr); set_stack_open(atc->xy_Pr, OPEN_CREATE); write_stack(atc->xy_Pr);
-  print_stack_info(atc->xy_Pa); set_stack_open(atc->xy_Pa, OPEN_CREATE); write_stack(atc->xy_Pa);
-  print_stack_info(atc->xy_Hr); set_stack_open(atc->xy_Hr, OPEN_CREATE); write_stack(atc->xy_Hr);
-  print_stack_info(atc->xy_Ha); set_stack_open(atc->xy_Ha, OPEN_CREATE); write_stack(atc->xy_Ha);
-  print_stack_info(atc->xy_Tsw); set_stack_open(atc->xy_Tsw, OPEN_CREATE); write_stack(atc->xy_Tsw);
-  print_stack_info(atc->xy_Tvw); set_stack_open(atc->xy_Tvw, OPEN_CREATE); write_stack(atc->xy_Tvw);
-  print_stack_info(atc->xy_Tso); set_stack_open(atc->xy_Tso, OPEN_CREATE); write_stack(atc->xy_Tso);
-  print_stack_info(atc->xy_Tvo); set_stack_open(atc->xy_Tvo, OPEN_CREATE); write_stack(atc->xy_Tvo);
-  print_stack_info(atc->xy_Tg); set_stack_open(atc->xy_Tg, OPEN_CREATE); write_stack(atc->xy_Tg);
-  print_stack_info(atc->xy_mod); set_stack_open(atc->xy_mod, OPEN_CREATE); write_stack(atc->xy_mod);
-  print_stack_info(atc->xy_fresnel); set_stack_open(atc->xy_fresnel, OPEN_CREATE); write_stack(atc->xy_fresnel);
-  print_stack_info(atc->xy_dem); set_stack_open(atc->xy_dem, OPEN_CREATE); write_stack(atc->xy_dem);
+  print_brick_info(atc->xy_brdf);  set_brick_open(atc->xy_brdf,  OPEN_CREATE); write_brick(atc->xy_brdf);
+  print_brick_info(atc->xy_psi); set_brick_open(atc->xy_psi, OPEN_CREATE); write_brick(atc->xy_psi);
+  print_brick_info(atc->xy_Pr); set_brick_open(atc->xy_Pr, OPEN_CREATE); write_brick(atc->xy_Pr);
+  print_brick_info(atc->xy_Pa); set_brick_open(atc->xy_Pa, OPEN_CREATE); write_brick(atc->xy_Pa);
+  print_brick_info(atc->xy_Hr); set_brick_open(atc->xy_Hr, OPEN_CREATE); write_brick(atc->xy_Hr);
+  print_brick_info(atc->xy_Ha); set_brick_open(atc->xy_Ha, OPEN_CREATE); write_brick(atc->xy_Ha);
+  print_brick_info(atc->xy_Tsw); set_brick_open(atc->xy_Tsw, OPEN_CREATE); write_brick(atc->xy_Tsw);
+  print_brick_info(atc->xy_Tvw); set_brick_open(atc->xy_Tvw, OPEN_CREATE); write_brick(atc->xy_Tvw);
+  print_brick_info(atc->xy_Tso); set_brick_open(atc->xy_Tso, OPEN_CREATE); write_brick(atc->xy_Tso);
+  print_brick_info(atc->xy_Tvo); set_brick_open(atc->xy_Tvo, OPEN_CREATE); write_brick(atc->xy_Tvo);
+  print_brick_info(atc->xy_Tg); set_brick_open(atc->xy_Tg, OPEN_CREATE); write_brick(atc->xy_Tg);
+  print_brick_info(atc->xy_mod); set_brick_open(atc->xy_mod, OPEN_CREATE); write_brick(atc->xy_mod);
+  print_brick_info(atc->xy_fresnel); set_brick_open(atc->xy_fresnel, OPEN_CREATE); write_brick(atc->xy_fresnel);
+  print_brick_info(atc->xy_dem); set_brick_open(atc->xy_dem, OPEN_CREATE); write_brick(atc->xy_dem);
   #endif
 
 
@@ -789,7 +789,7 @@ double lon, lat;
 --- TOP:    Topographic Derivatives
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int atmo_elevdep(par_ll_t *pl2, atc_t *atc, stack_t *QAI, top_t *TOP){
+int atmo_elevdep(par_ll_t *pl2, atc_t *atc, brick_t *QAI, top_t *TOP){
 int e, f, g, ne, nf, b, nb, z, nz, p, nc, b_green;
 float z0, zmed;
 float ms, mv, Pr, Pa;
@@ -805,10 +805,10 @@ small *xy_interp = NULL;
   #endif
 
   
-  ne = get_stack_ncols(atc->xy_mod);
-  nf = get_stack_nrows(atc->xy_mod);
-  nb = get_stack_nbands(atc->xy_mod);
-  nc = get_stack_ncells(QAI);
+  ne = get_brick_ncols(atc->xy_mod);
+  nf = get_brick_nrows(atc->xy_mod);
+  nb = get_brick_nbands(atc->xy_mod);
+  nc = get_brick_ncells(QAI);
   if ((b_green = find_domain(atc->xy_mod, "GREEN")) < 0) return FAILURE;
   if ((dem_ =  get_band_small(TOP->dem, 0)) == NULL) return FAILURE;
   nz = NPOW_08;
@@ -826,15 +826,15 @@ small *xy_interp = NULL;
 
       g = e*nf+f;
       
-      if (is_stack_nodata(atc->xy_view, 0, g)) continue;
+      if (is_brick_nodata(atc->xy_view, 0, g)) continue;
 
       // phase functions
-      Pr = get_stack(atc->xy_Pr, 0, g);
-      Pa = get_stack(atc->xy_Pa, 0, g);
+      Pr = get_brick(atc->xy_Pr, 0, g);
+      Pa = get_brick(atc->xy_Pa, 0, g);
       
       // relative air mass
-      ms = get_stack(atc->xy_sun,  cZEN, g);
-      mv = get_stack(atc->xy_view, cZEN, g);
+      ms = get_brick(atc->xy_sun,  cZEN, g);
+      mv = get_brick(atc->xy_view, cZEN, g);
 
       // for every possible elevation (100m steps)
       for (z=0, zmed=z0; z<nz; z++, zmed+=atc->dem.step){
@@ -843,8 +843,8 @@ small *xy_interp = NULL;
         Hr = mod_elev_factor(zmed);
         Ha = aod_elev_factor(zmed, atc->Hp);
 
-        set_stack(atc->xyz_Hr[z], 0, g, Hr);
-        set_stack(atc->xyz_Ha[z], 0, g, Ha);
+        set_brick(atc->xyz_Hr[z], 0, g, Hr);
+        set_brick(atc->xyz_Ha[z], 0, g, Ha);
 
 
         // down/up-welling scattering transmittances
@@ -852,40 +852,40 @@ small *xy_interp = NULL;
 
           // correct mod and aod for elevation
           mod = mod_elev_scale(atc->mod[b], 1, Hr);
-          set_stack(atc->xyz_mod[z], b, g, mod);
+          set_brick(atc->xyz_mod[z], b, g, mod);
 
           if (atc->aodmap){
-            aod = aod_elev_scale(get_stack(atc->xy_aod, b, g), atc->Ha, Ha);
+            aod = aod_elev_scale(get_brick(atc->xy_aod, b, g), atc->Ha, Ha);
           } else {
             aod = aod_elev_scale(atc->aod[b], atc->Ha, Ha);
           }
-          set_stack(atc->xyz_aod[z], b, g, aod);
+          set_brick(atc->xyz_aod[z], b, g, aod);
 
           // optical depth
           od = optical_depth(aod, mod);
-          set_stack(atc->xyz_od[z], b, g, od);
+          set_brick(atc->xyz_od[z], b, g, od);
 
           // scattering transmittance
           T = scatt_transmitt(aod, mod, od, ms, mv, 
                 &Ts, &Tv, &tsd, &tss, &tvd, &tvs);
-          set_stack(atc->xyz_T[z], b, g, T);
-          set_stack(atc->xyz_Ts[z], b, g, Ts);
-          set_stack(atc->xyz_Tv[z], b, g, Tv);
-          set_stack(atc->xyz_tsd[z], b, g, tsd);
-          set_stack(atc->xyz_tvd[z], b, g, tvd);
-          set_stack(atc->xyz_tss[z], b, g, tss);
-          set_stack(atc->xyz_tvs[z], b, g, tvs);
+          set_brick(atc->xyz_T[z], b, g, T);
+          set_brick(atc->xyz_Ts[z], b, g, Ts);
+          set_brick(atc->xyz_Tv[z], b, g, Tv);
+          set_brick(atc->xyz_tsd[z], b, g, tsd);
+          set_brick(atc->xyz_tvd[z], b, g, tvd);
+          set_brick(atc->xyz_tss[z], b, g, tss);
+          set_brick(atc->xyz_tvs[z], b, g, tvs);
 
           // path reflectance
           rho_p = path_ref(pl2->domulti, atc->tthg.sob, aod, mod, od, Pa, Pr, tsd, tvd, ms, mv);
-          set_stack(atc->xyz_rho_p[z], b, g, rho_p);
+          set_brick(atc->xyz_rho_p[z], b, g, rho_p);
 
           // spherical albedo
-          set_stack(atc->xyz_s[z], b, g, sphere_albedo(aod, mod, od));
+          set_brick(atc->xyz_s[z], b, g, sphere_albedo(aod, mod, od));
 
           // environmental weighting function
           if (pl2->doenv) F = env_weight(aod, mod, atc->Fa, atc->Fr);
-          set_stack(atc->xyz_F[z], b, g, F);
+          set_brick(atc->xyz_F[z], b, g, F);
 
         }
 
@@ -908,7 +908,7 @@ small *xy_interp = NULL;
     for (p=0; p<nc; p++){
 
       if (get_off(QAI, p)) continue;
-      g = convert_stack_p2p(QAI, atc->xy_sun, p);
+      g = convert_brick_p2p(QAI, atc->xy_sun, p);
       z = dem_[p];
 
       if (!atc->aodmap){
@@ -942,9 +942,9 @@ small *xy_interp = NULL;
 --- QAI:    Quality Assurance Information
 --- WVP:    water vapor
 --- TOP:    Topographic Derivatives
-+++ Return: BOA stack
++++ Return: BOA brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, stack_t *WVP, top_t *TOP){
+brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP){
 int p, nc;
 int b, b_red, b_nir, b_sw1;
 #ifndef ACIX
@@ -978,7 +978,7 @@ short  *toa_     = NULL;
 short  *boa_     = NULL;
 short  **boa__   = NULL;
 
-stack_t *BOA = TOA;
+brick_t *BOA = TOA;
 
 
   #ifdef FORCE_CLOCK 
@@ -987,7 +987,7 @@ stack_t *BOA = TOA;
   
   
   
-  nc  = get_stack_ncells(BOA);
+  nc  = get_brick_ncells(BOA);
   if ((dem_ =  get_band_small(TOP->dem, 0))  == NULL) return NULL;
 
   if (pl2->dotopo){
@@ -1003,7 +1003,7 @@ stack_t *BOA = TOA;
   }
 
   #ifdef FORCE_DEBUG
-  printf("nb is %d, nb_ is %d\n", get_stack_nbands(BOA), nb_);
+  printf("nb is %d, nb_ is %d\n", get_brick_nbands(BOA), nb_);
   #endif
 
 
@@ -1028,9 +1028,9 @@ stack_t *BOA = TOA;
     if (surface_reflectance(pl2, atc, b, bck_, toa_, Tg_, boa_, dem_, ill_, sky_, cf_, QAI) == FAILURE){
     printf("error in surface reflectance.\n"); return NULL;}
 
-    set_stack_wavelength(BOA, b_, get_stack_wavelength(BOA, b));
-    get_stack_domain(BOA,   b, domain,   NPOW_10); set_stack_domain(BOA,   b_, domain);
-    get_stack_bandname(BOA, b, bandname, NPOW_10); set_stack_bandname(BOA, b_, bandname);
+    set_brick_wavelength(BOA, b_, get_brick_wavelength(BOA, b));
+    get_brick_domain(BOA,   b, domain,   NPOW_10); set_brick_domain(BOA,   b_, domain);
+    get_brick_bandname(BOA, b, bandname, NPOW_10); set_brick_bandname(BOA, b_, bandname);
 
     if (Tg_ != NULL) free((void*)Tg_);  
     Tg_ = NULL;
@@ -1054,14 +1054,14 @@ stack_t *BOA = TOA;
   }
 
 
-  // resize the stack
-  if (reallocate_stack(BOA, nb_) == FAILURE){
-    printf("error in reallocating stack.\n"); return NULL;}
+  // resize the brick
+  if (reallocate_brick(BOA, nb_) == FAILURE){
+    printf("error in reallocating brick.\n"); return NULL;}
 
 
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, pl2->resample, pl2->nthread, BOA, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, BOA, cube) == FAILURE){
       printf("warping BOA failed.\n"); return NULL;}
   }
 
@@ -1072,10 +1072,10 @@ stack_t *BOA = TOA;
   } else {
     copy_string(product, NPOW_02, "TOA");
   }
-  set_stack_product(BOA, product);
-  set_stack_name(BOA, "FORCE Level 2 Processing System");
-  get_stack_compactdate(BOA, 0, date, NPOW_04);
-  get_stack_sensor(BOA, 0, sensor, NPOW_04);
+  set_brick_product(BOA, product);
+  set_brick_name(BOA, "FORCE Level 2 Processing System");
+  get_brick_compactdate(BOA, 0, date, NPOW_04);
+  get_brick_sensor(BOA, 0, sensor, NPOW_04);
   
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1086,9 +1086,9 @@ stack_t *BOA = TOA;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(BOA, fname);
-  set_stack_open(BOA, OPEN_MERGE);
-  set_stack_explode(BOA, false);
+  set_brick_filename(BOA, fname);
+  set_brick_open(BOA, OPEN_MERGE);
+  set_brick_explode(BOA, false);
 
   if ((b_nir = find_domain(BOA, "NIR"))   < 0) return NULL;
   if ((b_sw1 = find_domain(BOA, "SWIR1")) < 0) return NULL;
@@ -1107,15 +1107,15 @@ stack_t *BOA = TOA;
 --- pl2:    L2 parameters
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
-+++ Return: QAI stack
++++ Return: QAI brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, stack_t *QAI){
+brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI){
 char fname[NPOW_10];
 char product[NPOW_02];
 char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
-stack_t *QA = QAI;
+brick_t *QA = QAI;
 int p, nc;
 short *qa_ = NULL;
 
@@ -1127,12 +1127,12 @@ short *qa_ = NULL;
   
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, 0, pl2->nthread, QA, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, 0, pl2->nthread, QA, cube) == FAILURE){
       printf("warping QAI failed.\n"); return NULL;}
   }
 
   // make sure that OFF bit is set exclusively
-  nc = get_stack_ncells(QA);
+  nc = get_brick_ncells(QA);
   qa_ = get_band_short(QA, 0);
   for (p=0; p<nc; p++){
     if (get_off(QA, p)) qa_[p] = 1;
@@ -1141,10 +1141,10 @@ short *qa_ = NULL;
 
   // set metadata
   copy_string(product, NPOW_02, "QAI");
-  set_stack_product(QA, product);
-  set_stack_name(QA, "FORCE Level 2 Processing System");
-  get_stack_sensor(QA, 0, sensor, NPOW_04);
-  get_stack_compactdate(QA, 0, date, NPOW_04);
+  set_brick_product(QA, product);
+  set_brick_name(QA, "FORCE Level 2 Processing System");
+  get_brick_sensor(QA, 0, sensor, NPOW_04);
+  get_brick_compactdate(QA, 0, date, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1155,15 +1155,15 @@ short *qa_ = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(QA, fname);
-  set_stack_open(QA, OPEN_UPDATE);
-  set_stack_explode(QA, false);
-  set_stack_nodata(QA, 0, 1);
-  set_stack_scale(QA, 0, 1);
-  set_stack_wavelength(QA, 0, 1);
-  set_stack_unit(QA, 0, "unknown");
-  set_stack_domain(QA, 0, "QAI");
-  set_stack_bandname(QA, 0, "Quality assurance information");
+  set_brick_filename(QA, fname);
+  set_brick_open(QA, OPEN_UPDATE);
+  set_brick_explode(QA, false);
+  set_brick_nodata(QA, 0, 1);
+  set_brick_scale(QA, 0, 1);
+  set_brick_wavelength(QA, 0, 1);
+  set_brick_unit(QA, 0, "unknown");
+  set_brick_domain(QA, 0, "QAI");
+  set_brick_bandname(QA, 0, "Quality assurance information");
 
  
   #ifdef FORCE_CLOCK
@@ -1178,16 +1178,16 @@ short *qa_ = NULL;
 --- pl2:    L2 parameters
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
-+++ Return: DST stack
++++ Return: DST brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, stack_t *QAI){
+brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI){
 char fname[NPOW_10];
 char product[NPOW_02];
 char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
-stack_t *DST = NULL;
+brick_t *DST = NULL;
 short  *dst_ = NULL;
 
 
@@ -1195,8 +1195,8 @@ short  *dst_ = NULL;
   time_t TIME; time(&TIME);
   #endif
   
-  DST = copy_stack(QAI, 1, _DT_SHORT_);
-  set_stack_nodata(DST, 0, nodata);
+  DST = copy_brick(QAI, 1, _DT_SHORT_);
+  set_brick_nodata(DST, 0, nodata);
 
   if ((dst_ = get_band_short(DST, 0)) == NULL) return NULL;
 
@@ -1205,10 +1205,10 @@ short  *dst_ = NULL;
 
   // set metadata
   copy_string(product, NPOW_02, "DST");
-  set_stack_product(DST, product);
-  set_stack_name(DST, "FORCE Level 2 Processing System");
-  get_stack_compactdate(DST, 0, date, NPOW_04);
-  get_stack_sensor(DST, 0, sensor, NPOW_04);
+  set_brick_product(DST, product);
+  set_brick_name(DST, "FORCE Level 2 Processing System");
+  get_brick_compactdate(DST, 0, date, NPOW_04);
+  get_brick_sensor(DST, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1219,14 +1219,14 @@ short  *dst_ = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(DST, fname);
-  set_stack_open(DST, OPEN_MERGE);
-  set_stack_explode(DST, false);
-  set_stack_scale(DST, 0, 1);
-  set_stack_wavelength(DST, 0, 1);
-  set_stack_unit(DST, 0, "unknown");
-  set_stack_domain(DST, 0, product);
-  set_stack_bandname(DST, 0, "Cloud/shadow/snow distance");
+  set_brick_filename(DST, fname);
+  set_brick_open(DST, OPEN_MERGE);
+  set_brick_explode(DST, false);
+  set_brick_scale(DST, 0, 1);
+  set_brick_wavelength(DST, 0, 1);
+  set_brick_unit(DST, 0, "unknown");
+  set_brick_domain(DST, 0, product);
+  set_brick_bandname(DST, 0, "Cloud/shadow/snow distance");
 
 
   #ifdef FORCE_CLOCK
@@ -1239,11 +1239,11 @@ short  *dst_ = NULL;
 
 /** This function compiles the OVV product ready to be output
 --- pl2:    L2 parameters
---- cube:   BOA stack
+--- cube:   BOA brick
 --- QAI:    Quality Assurance Information
-+++ Return: OVV stack
++++ Return: OVV brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_ovv(par_ll_t *pl2, stack_t *BOA, stack_t *QAI){
+brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI){
 int i, j, p, i_, j_, p_, b;
 int nx, ny, nx_, ny_, nc_;
 double res, res_, step, scale;
@@ -1252,7 +1252,7 @@ char product[NPOW_02];
 char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
-stack_t *OVV = NULL;
+brick_t *OVV = NULL;
 short **ovv_ = NULL;
 short  *red_ = NULL;
 short  *green_ = NULL;
@@ -1263,9 +1263,9 @@ enum { R, G, B };
   time_t TIME; time(&TIME);
   #endif
   
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  res = get_stack_res(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  res = get_brick_res(QAI);
 
   res_ = 150;
   nx_ = nx*res/res_;
@@ -1275,13 +1275,13 @@ enum { R, G, B };
   step = res_/res;
   scale = 2500;
 
-  OVV = copy_stack(QAI, 3, _DT_NONE_);
-  set_stack_format(OVV, _FMT_JPEG_);
-  set_stack_res(OVV, res_);
-  set_stack_ncols(OVV, nx_);
-  set_stack_nrows(OVV, ny_);
-  allocate_stack_bands(OVV, 3, nc_, _DT_SHORT_);
-  for (b=0; b<3; b++) set_stack_nodata(OVV, b, 0);
+  OVV = copy_brick(QAI, 3, _DT_NONE_);
+  set_brick_format(OVV, _FMT_JPEG_);
+  set_brick_res(OVV, res_);
+  set_brick_ncols(OVV, nx_);
+  set_brick_nrows(OVV, ny_);
+  allocate_brick_bands(OVV, 3, nc_, _DT_SHORT_);
+  for (b=0; b<3; b++) set_brick_nodata(OVV, b, 0);
 
   if ((ovv_   = get_bands_short(OVV)) == NULL) return NULL;
   if ((red_   = get_domain_short(BOA, "RED"))   == NULL) return NULL;
@@ -1360,10 +1360,10 @@ enum { R, G, B };
 
   // set metadata
   copy_string(product, NPOW_02, "OVV");
-  set_stack_product(OVV, product);
-  set_stack_name(OVV, "FORCE Level 2 Processing System");
-  get_stack_compactdate(OVV, 0, date, NPOW_04);
-  get_stack_sensor(OVV, 0, sensor, NPOW_04);
+  set_brick_product(OVV, product);
+  set_brick_name(OVV, "FORCE Level 2 Processing System");
+  get_brick_compactdate(OVV, 0, date, NPOW_04);
+  get_brick_sensor(OVV, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1374,16 +1374,16 @@ enum { R, G, B };
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(OVV, fname);
-  set_stack_open(OVV, OPEN_UPDATE);
-  set_stack_explode(OVV, false);
+  set_brick_filename(OVV, fname);
+  set_brick_open(OVV, OPEN_UPDATE);
+  set_brick_explode(OVV, false);
   
   for (b=0; b<3; b++){
-    set_stack_scale(OVV, b, 1);
-    set_stack_wavelength(OVV, b, 1);
-    set_stack_unit(OVV, b, "unknown");
-    set_stack_domain(OVV, b, product);
-    set_stack_bandname(OVV, b, "Product overview");
+    set_brick_scale(OVV, b, 1);
+    set_brick_wavelength(OVV, b, 1);
+    set_brick_unit(OVV, b, "unknown");
+    set_brick_domain(OVV, b, product);
+    set_brick_bandname(OVV, b, "Product overview");
   }
 
 
@@ -1400,9 +1400,9 @@ enum { R, G, B };
 --- atc:    atmospheric correction factors
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
-+++ Return: VZN stack
++++ Return: VZN brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI){
+brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI){
 int e, f, g, i, j, p, ne, nf, ng, nx, ny, k = 0;
 char fname[NPOW_10];
 char product[NPOW_02];
@@ -1412,8 +1412,8 @@ int nchar;
 iweights_t weights;
 short nodata = -9999;
 float res, fres, gres;
-stack_t *VZN      = NULL;
-stack_t *COARSE   = NULL;
+brick_t *VZN      = NULL;
+brick_t *COARSE   = NULL;
 short   *vzn_     = NULL;
 short   *coarse_  = NULL;
 float   *fcoarse_ = NULL;
@@ -1431,26 +1431,26 @@ GDALDataType eOutputType = GDT_Float64;
 
 
   // copy coarse view zenith
-  COARSE = copy_stack(atc->xy_view, 1, _DT_SHORT_);
-  set_stack_nodata(COARSE, 0, nodata);
-  ng = get_stack_ncells(COARSE);
+  COARSE = copy_brick(atc->xy_view, 1, _DT_SHORT_);
+  set_brick_nodata(COARSE, 0, nodata);
+  ng = get_brick_ncells(COARSE);
   if ((coarse_ = get_band_short(COARSE, ZEN)) == NULL) return NULL;
   
   for (g=0; g<ng; g++){
-    if (is_stack_nodata(atc->xy_view, ZEN, g)){
+    if (is_brick_nodata(atc->xy_view, ZEN, g)){
       coarse_[g] = nodata;
     } else {
-      coarse_[g] = (short)(get_stack(atc->xy_view, ZEN, g)*_R2D_CONV_*100);
+      coarse_[g] = (short)(get_brick(atc->xy_view, ZEN, g)*_R2D_CONV_*100);
     }
   }
   
   
   res = cube->res;
-  cube->res = get_stack_res(COARSE);
+  cube->res = get_brick_res(COARSE);
 
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, pl2->resample, pl2->nthread, COARSE, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, COARSE, cube) == FAILURE){
       printf("warping VZN failed.\n"); return NULL;}
   }
 
@@ -1458,10 +1458,10 @@ GDALDataType eOutputType = GDT_Float64;
 
 
 
-  nf = get_stack_ncols(COARSE);
-  ne = get_stack_nrows(COARSE);
-  ng = get_stack_ncells(COARSE);
-  gres  = get_stack_res(COARSE);
+  nf = get_brick_ncols(COARSE);
+  ne = get_brick_nrows(COARSE);
+  ng = get_brick_ncells(COARSE);
+  gres  = get_brick_res(COARSE);
   if ((coarse_ = get_band_short(COARSE, ZEN)) == NULL) return NULL;
 
   ParseAlgorithmAndOptions(szAlgNameInvDist, &eAlgorithm, &pOptions);
@@ -1503,16 +1503,16 @@ GDALDataType eOutputType = GDT_Float64;
   free((void**)grid_y);
   free((void**)grid_z);
   free((void**)grid_i);
-  free_stack(COARSE);
+  free_brick(COARSE);
   
 
   // interpolate at full res
-  VZN = copy_stack(QAI, 1, _DT_SHORT_);
-  set_stack_nodata(VZN, 0, nodata);
+  VZN = copy_brick(QAI, 1, _DT_SHORT_);
+  set_brick_nodata(VZN, 0, nodata);
 
-  nx = get_stack_ncols(VZN);
-  ny = get_stack_nrows(VZN);
-  fres  = get_stack_res(VZN);
+  nx = get_brick_ncols(VZN);
+  ny = get_brick_nrows(VZN);
+  fres  = get_brick_res(VZN);
   if ((vzn_  = get_band_short(VZN, 0)) == NULL) return NULL;
 
 
@@ -1537,10 +1537,10 @@ GDALDataType eOutputType = GDT_Float64;
 
   // set metadata
   copy_string(product, NPOW_02, "VZN");
-  set_stack_product(VZN, product);
-  set_stack_name(VZN, "FORCE Level 2 Processing System");
-  get_stack_compactdate(VZN, 0, date, NPOW_04);
-  get_stack_sensor(VZN, 0, sensor, NPOW_04);
+  set_brick_product(VZN, product);
+  set_brick_name(VZN, "FORCE Level 2 Processing System");
+  get_brick_compactdate(VZN, 0, date, NPOW_04);
+  get_brick_sensor(VZN, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1551,14 +1551,14 @@ GDALDataType eOutputType = GDT_Float64;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(VZN, fname);
-  set_stack_open(VZN, OPEN_MERGE);
-  set_stack_explode(VZN, false);
-  set_stack_scale(VZN, 0, 100);
-  set_stack_wavelength(VZN, 0, 1);
-  set_stack_unit(VZN, 0, "unknown");
-  set_stack_domain(VZN, 0, product);
-  set_stack_bandname(VZN, 0, "View zenith");
+  set_brick_filename(VZN, fname);
+  set_brick_open(VZN, OPEN_MERGE);
+  set_brick_explode(VZN, false);
+  set_brick_scale(VZN, 0, 100);
+  set_brick_wavelength(VZN, 0, 1);
+  set_brick_unit(VZN, 0, "unknown");
+  set_brick_domain(VZN, 0, product);
+  set_brick_bandname(VZN, 0, "View zenith");
 
 
   #ifdef FORCE_CLOCK
@@ -1574,9 +1574,9 @@ GDALDataType eOutputType = GDT_Float64;
 --- cube:   data cube parameters
 --- TOA:    TOA reflectance
 --- QAI:    Quality Assurance Information
-+++ Return: HOT stack
++++ Return: HOT brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, stack_t *TOA, stack_t *QAI){
+brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI){
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_02];
@@ -1586,7 +1586,7 @@ int nchar;
 short nodata = -9999;
 short  *blue_    = NULL;
 short  *red_     = NULL;
-stack_t *HOT = NULL;
+brick_t *HOT = NULL;
 short *hot_ = NULL;
 
 
@@ -1595,10 +1595,10 @@ short *hot_ = NULL;
   #endif
 
 
-  HOT = copy_stack(QAI, 1, _DT_SHORT_);
-  set_stack_nodata(HOT, 0, nodata);
+  HOT = copy_brick(QAI, 1, _DT_SHORT_);
+  set_brick_nodata(HOT, 0, nodata);
 
-  nc = get_stack_ncells(HOT);
+  nc = get_brick_ncells(HOT);
   if ((hot_ = get_band_short(HOT, 0)) == NULL) return NULL;
   if ((blue_ = get_domain_short(TOA, "BLUE")) == NULL) return NULL;
   if ((red_  = get_domain_short(TOA, "RED"))  == NULL) return NULL;
@@ -1620,7 +1620,7 @@ short *hot_ = NULL;
 
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, pl2->resample, pl2->nthread, HOT, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, HOT, cube) == FAILURE){
       printf("warping HOT failed.\n"); return NULL;}
   }
 
@@ -1628,10 +1628,10 @@ short *hot_ = NULL;
   // set metadata
 
   copy_string(product, NPOW_02, "HOT");
-  set_stack_product(HOT, product);
-  set_stack_name(HOT, "FORCE Level 2 Processing System");
-  get_stack_compactdate(HOT, 0, date, NPOW_04);
-  get_stack_sensor(HOT, 0, sensor, NPOW_04);
+  set_brick_product(HOT, product);
+  set_brick_name(HOT, "FORCE Level 2 Processing System");
+  get_brick_compactdate(HOT, 0, date, NPOW_04);
+  get_brick_sensor(HOT, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1642,13 +1642,13 @@ short *hot_ = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(HOT, fname);
-  set_stack_open(HOT, OPEN_MERGE);
-  set_stack_explode(HOT, false);
-  set_stack_wavelength(HOT, 0, 1);
-  set_stack_unit(HOT, 0, "unknown");
-  set_stack_domain(HOT, 0, product);
-  set_stack_bandname(HOT, 0, "Haze optimized transform");
+  set_brick_filename(HOT, fname);
+  set_brick_open(HOT, OPEN_MERGE);
+  set_brick_explode(HOT, false);
+  set_brick_wavelength(HOT, 0, 1);
+  set_brick_unit(HOT, 0, "unknown");
+  set_brick_domain(HOT, 0, product);
+  set_brick_bandname(HOT, 0, "Haze optimized transform");
 
   
   #ifdef FORCE_CLOCK
@@ -1665,9 +1665,9 @@ short *hot_ = NULL;
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 --- TOP:    Topographic Derivatives
-+++ Return: AOD stack
++++ Return: AOD brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI, top_t *TOP){
+brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP){
 int i, j, p, nx, ny, ne, nf, z;
 int b_green;
 float fres, gres;
@@ -1681,7 +1681,7 @@ iweights_t weights;
 short nodata = -9999;
 short vnodata;
 small  *dem_     = NULL;
-stack_t *AOD = NULL;
+brick_t *AOD = NULL;
 short  *aod_ = NULL;
 float **xy_aod_ = NULL;
 
@@ -1692,22 +1692,22 @@ float **xy_aod_ = NULL;
 
 
 
-  AOD = copy_stack(QAI, 1, _DT_SHORT_);
-  set_stack_nodata(AOD, 0, nodata);
+  AOD = copy_brick(QAI, 1, _DT_SHORT_);
+  set_brick_nodata(AOD, 0, nodata);
 
-  nx = get_stack_ncols(AOD);
-  ny = get_stack_nrows(AOD);
-  fres  = get_stack_res(QAI);
+  nx = get_brick_ncols(AOD);
+  ny = get_brick_nrows(AOD);
+  fres  = get_brick_res(QAI);
   if ((aod_ = get_band_short(AOD, 0)) == NULL) return NULL;
   if ((dem_ =  get_band_small(TOP->dem, 0)) == NULL) return NULL;
 
   if ((b_green = find_domain(atc->xy_aod, "GREEN"))   < 0) return NULL;
-  wvl = get_stack_wavelength(atc->xy_aod, b_green);
+  wvl = get_brick_wavelength(atc->xy_aod, b_green);
 
-  nf  = get_stack_ncols(atc->xy_aod);
-  ne  = get_stack_nrows(atc->xy_aod);
-  gres  = get_stack_res(atc->xy_aod);
-  vnodata = get_stack_nodata(atc->xy_aod, b_green);
+  nf  = get_brick_ncols(atc->xy_aod);
+  ne  = get_brick_nrows(atc->xy_aod);
+  gres  = get_brick_res(atc->xy_aod);
+  vnodata = get_brick_nodata(atc->xy_aod, b_green);
   if ((xy_aod_ = atc_get_band_reshaped(atc->xyz_aod, b_green)) == NULL) return NULL;
 
 
@@ -1733,17 +1733,17 @@ float **xy_aod_ = NULL;
 
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, pl2->resample, pl2->nthread, AOD, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, AOD, cube) == FAILURE){
       printf("warping AOD failed.\n"); return NULL;}
   }
 
 
   // set metadata
   copy_string(product, NPOW_02, "AOD");
-  set_stack_product(AOD, product);
-  set_stack_name(AOD, "FORCE Level 2 Processing System");
-  get_stack_compactdate(AOD, 0, date, NPOW_04);
-  get_stack_sensor(AOD, 0, sensor, NPOW_04);
+  set_brick_product(AOD, product);
+  set_brick_name(AOD, "FORCE Level 2 Processing System");
+  get_brick_compactdate(AOD, 0, date, NPOW_04);
+  get_brick_sensor(AOD, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1754,14 +1754,14 @@ float **xy_aod_ = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(AOD, fname);
-  set_stack_open(AOD, OPEN_MERGE);
-  set_stack_explode(AOD, false);
-  set_stack_scale(AOD, 0, 1000);
-  set_stack_wavelength(AOD, 0, wvl);
-  set_stack_unit(AOD, 0, "micrometers");
-  set_stack_domain(AOD, 0, product);
-  set_stack_bandname(AOD, 0, "Aerosol optical depth");
+  set_brick_filename(AOD, fname);
+  set_brick_open(AOD, OPEN_MERGE);
+  set_brick_explode(AOD, false);
+  set_brick_scale(AOD, 0, 1000);
+  set_brick_wavelength(AOD, 0, wvl);
+  set_brick_unit(AOD, 0, "micrometers");
+  set_brick_domain(AOD, 0, product);
+  set_brick_bandname(AOD, 0, "Aerosol optical depth");
 
 
   #ifdef FORCE_CLOCK
@@ -1778,9 +1778,9 @@ float **xy_aod_ = NULL;
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 --- WVP:    Water vapor
-+++ Return: WVP stack
++++ Return: WVP brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, stack_t *QAI, stack_t *WVP){
+brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP){
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_02];
@@ -1788,7 +1788,7 @@ char sensor[NPOW_04];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
-stack_t *WV = WVP;
+brick_t *WV = WVP;
 short *wvp_ = NULL;
 
 
@@ -1799,10 +1799,10 @@ short *wvp_ = NULL;
   
   if (WV == NULL){
     
-    WV = copy_stack(QAI, 1, _DT_SHORT_);
-    set_stack_nodata(WV, 0, nodata);
+    WV = copy_brick(QAI, 1, _DT_SHORT_);
+    set_brick_nodata(WV, 0, nodata);
 
-    nc = get_stack_ncells(WV);
+    nc = get_brick_ncells(WV);
     if ((wvp_ = get_band_short(WV, 0)) == NULL) return NULL;
 
     #pragma omp parallel shared(nc, QAI, wvp_, nodata, atc, pl2) default(none) 
@@ -1822,17 +1822,17 @@ short *wvp_ = NULL;
 
   // reproj the data
   if (pl2->doreproj){
-    if (warp_from_stack_to_unknown_stack(pl2->dotile, pl2->resample, pl2->nthread, WV, cube) == FAILURE){
+    if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, WV, cube) == FAILURE){
       printf("warping WVP failed.\n"); return NULL;}
   }
   
 
   // set metadata
   copy_string(product, NPOW_02, "WVP");
-  set_stack_product(WV, product);
-  set_stack_name(WV, "FORCE Level 2 Processing System");
-  get_stack_compactdate(WV, 0, date, NPOW_04);
-  get_stack_sensor(WV, 0, sensor, NPOW_04);
+  set_brick_product(WV, product);
+  set_brick_name(WV, "FORCE Level 2 Processing System");
+  get_brick_compactdate(WV, 0, date, NPOW_04);
+  get_brick_sensor(WV, 0, sensor, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1843,14 +1843,14 @@ short *wvp_ = NULL;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
-  set_stack_filename(WV, fname);
-  set_stack_open(WV, OPEN_MERGE);
-  set_stack_explode(WV, false);
-  set_stack_scale(WV, 0, 1000);
-  set_stack_wavelength(WV, 0, 1);
-  set_stack_unit(WV, 0, "unknown");
-  set_stack_domain(WV, 0, product);
-  set_stack_bandname(WV, 0, "Water vapor");
+  set_brick_filename(WV, fname);
+  set_brick_open(WV, OPEN_MERGE);
+  set_brick_explode(WV, false);
+  set_brick_scale(WV, 0, 1000);
+  set_brick_wavelength(WV, 0, 1);
+  set_brick_unit(WV, 0, "unknown");
+  set_brick_domain(WV, 0, product);
+  set_brick_bandname(WV, 0, "Water vapor");
 
   #ifdef FORCE_CLOCK
   proctime_print("compile WVP", TIME);
@@ -1870,11 +1870,11 @@ short *wvp_ = NULL;
 --- WVP:      water vapor
 --- TOP:      Topographic Derivatives
 --- nproduct: number of products
-+++ Return: array of product stacks
++++ Return: array of product bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, stack_t *WVP, top_t *TOP, int *nproduct){
+brick_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct){
 int nprod, p_boa, p_qai, p_dst, p_vzn, p_hot, p_aod, p_wvp, p_ovv;
-stack_t **LEVEL2 = NULL;
+brick_t **LEVEL2 = NULL;
 
 
   #ifdef FORCE_CLOCK 
@@ -1898,7 +1898,7 @@ stack_t **LEVEL2 = NULL;
   #endif
 
 
-  alloc((void**)&LEVEL2, nprod, sizeof(stack_t*));
+  alloc((void**)&LEVEL2, nprod, sizeof(brick_t*));
 
 
 
@@ -1919,7 +1919,7 @@ stack_t **LEVEL2 = NULL;
   // do WVP after BOA (WVP is altered within)
   if (p_wvp >= 0){
     if ((LEVEL2[p_wvp] = compile_l2_wvp(pl2, atc, cube, QAI, WVP)) == NULL){
-      printf("error in compiling L2 WVP. "); return NULL;}} else free_stack(WVP);
+      printf("error in compiling L2 WVP. "); return NULL;}} else free_brick(WVP);
 
   // do QAI at the very end (QAI is altered within)
   if ((LEVEL2[p_qai] = compile_l2_qai(pl2, cube, QAI)) == NULL){
@@ -1967,12 +1967,12 @@ stack_t **LEVEL2 = NULL;
 --- QAI:     Quality Assurance Information
 --- TOP:     Topographic Derivatives
 --- nprod:   number of products
-+++ Return:  array of product stacks
++++ Return:  array of product bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, top_t *TOP, int *nprod){
+brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, top_t *TOP, int *nprod){
 int b, nb;
-stack_t  *WVP    = NULL;
-stack_t **L2 = NULL;
+brick_t  *WVP    = NULL;
+brick_t **L2 = NULL;
 
 
   #ifdef FORCE_CLOCK
@@ -1980,7 +1980,7 @@ stack_t **L2 = NULL;
   #endif
 
 
-  nb = get_stack_nbands(TOA);
+  nb = get_brick_nbands(TOA);
 
 
   if (pl2->doatmo){
@@ -2054,7 +2054,7 @@ stack_t **L2 = NULL;
     
   #ifdef FORCE_DEBUG
   int prod;
-  for (prod=0; prod<(*nprod); prod++){ print_stack_info(L2[prod]); write_stack(L2[prod]);}
+  for (prod=0; prod<(*nprod); prod++){ print_brick_info(L2[prod]); write_brick(L2[prod]);}
   #endif
 
 

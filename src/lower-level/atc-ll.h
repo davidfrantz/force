@@ -32,7 +32,7 @@ Atm. correction parameter header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta-ll.h"
 
@@ -85,53 +85,53 @@ typedef struct {
   float wvp;                 // water vapor concentration
   float ***Tw_lut;           // water vapor transmittance LUT
 
-  stack_t *xy_mod;     // molecular optical depth
-  stack_t *xy_aod;     // aerosol optical depth
-  stack_t *xy_Pr;      // phase function, molecular scatt.
-  stack_t *xy_Pa;      // phase function, aerosol scatt.
-  stack_t *xy_Hr;      // elevation correction factors for MOD
-  stack_t *xy_Ha;      // elevation correction factors for AOD
-  stack_t *xy_Tvw;     // water vapor transmittance up
-  stack_t *xy_Tsw;     // water vapor transmittance down
-  stack_t *xy_Tvo;     // ozone transmittance up 
-  stack_t *xy_Tso;     // ozone transmittance down
-  stack_t *xy_Tg;      // gaseous transmittance
-  stack_t *xy_brdf;    // BRDF correction factor
-  stack_t *xy_fresnel; // Fresnel reflection
-  stack_t *xy_dem;     // elevation bin
-  stack_t *xy_interp;  // aod interpolation flag
-  stack_t *xy_view;    // view angles
-  stack_t *xy_sun;     // sun angles
-  stack_t *xy_psi;     // backscattering angle
+  brick_t *xy_mod;     // molecular optical depth
+  brick_t *xy_aod;     // aerosol optical depth
+  brick_t *xy_Pr;      // phase function, molecular scatt.
+  brick_t *xy_Pa;      // phase function, aerosol scatt.
+  brick_t *xy_Hr;      // elevation correction factors for MOD
+  brick_t *xy_Ha;      // elevation correction factors for AOD
+  brick_t *xy_Tvw;     // water vapor transmittance up
+  brick_t *xy_Tsw;     // water vapor transmittance down
+  brick_t *xy_Tvo;     // ozone transmittance up 
+  brick_t *xy_Tso;     // ozone transmittance down
+  brick_t *xy_Tg;      // gaseous transmittance
+  brick_t *xy_brdf;    // BRDF correction factor
+  brick_t *xy_fresnel; // Fresnel reflection
+  brick_t *xy_dem;     // elevation bin
+  brick_t *xy_interp;  // aod interpolation flag
+  brick_t *xy_view;    // view angles
+  brick_t *xy_sun;     // sun angles
+  brick_t *xy_psi;     // backscattering angle
 
-//  stack_t xy_mv;      // air mass, up & down --> atc.cg[g].mv = atc.cg[g].cosvzen;
-//  stack_t xy_ms;      // air mass, up & down --> atc.cg[g].ms = atc.cg[g].cosszen;
+//  brick_t xy_mv;      // air mass, up & down --> atc.cg[g].mv = atc.cg[g].cosvzen;
+//  brick_t xy_ms;      // air mass, up & down --> atc.cg[g].ms = atc.cg[g].cosszen;
 
 // wvp and ozone, both not in cg anymore, doesn*t make sense
   
-  stack_t **xyz_od;    // total optical depth
-  stack_t **xyz_mod;   // molecular optical depth
-  stack_t **xyz_aod;   // aerosol optical depth
-  stack_t **xyz_Hr;    // elevation correction factors for MOD
-  stack_t **xyz_Ha;    // elevation correction factors for AOD
-  stack_t **xyz_rho_p; // path reflectance
-  stack_t **xyz_Ts;    // scattering transmittance total, down
-  stack_t **xyz_tsd;   // scattering transmittance direct, down
-  stack_t **xyz_tss;   // scattering transmittance diffuse, down
-  stack_t **xyz_Tv;    // scattering transmittance total, up
-  stack_t **xyz_tvd;   // scattering transmittance direct, up
-  stack_t **xyz_tvs;   // scattering transmittance diffuse, up
-  stack_t **xyz_T;     // total scattering transmittance
-  stack_t **xyz_s;     // spherical albedo
-  stack_t **xyz_F;     // environmental reflectance weighting function
-  stack_t **xyz_Tg;    // gaseous transmittance
+  brick_t **xyz_od;    // total optical depth
+  brick_t **xyz_mod;   // molecular optical depth
+  brick_t **xyz_aod;   // aerosol optical depth
+  brick_t **xyz_Hr;    // elevation correction factors for MOD
+  brick_t **xyz_Ha;    // elevation correction factors for AOD
+  brick_t **xyz_rho_p; // path reflectance
+  brick_t **xyz_Ts;    // scattering transmittance total, down
+  brick_t **xyz_tsd;   // scattering transmittance direct, down
+  brick_t **xyz_tss;   // scattering transmittance diffuse, down
+  brick_t **xyz_Tv;    // scattering transmittance total, up
+  brick_t **xyz_tvd;   // scattering transmittance direct, up
+  brick_t **xyz_tvs;   // scattering transmittance diffuse, up
+  brick_t **xyz_T;     // total scattering transmittance
+  brick_t **xyz_s;     // spherical albedo
+  brick_t **xyz_F;     // environmental reflectance weighting function
+  brick_t **xyz_Tg;    // gaseous transmittance
 
 } atc_t;
 
 
-atc_t *allocate_atc(par_ll_t *pl2, meta_t *meta, stack_t *DN);
+atc_t *allocate_atc(par_ll_t *pl2, meta_t *meta, brick_t *DN);
 void free_atc(atc_t *atc);
-float **atc_get_band_reshaped(stack_t **xyz, int b);
+float **atc_get_band_reshaped(brick_t **xyz, int b);
 
 #ifdef __cplusplus
 }

@@ -33,7 +33,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../lower-level/param-ll.h"
@@ -63,11 +63,11 @@ multicube_t   *multicube = NULL;
 atc_t    *atc  = NULL;
 
 top_t   *TOP = NULL;
-stack_t *DN  = NULL;
-stack_t *TOA = NULL;
-stack_t *QAI = NULL;
+brick_t *DN  = NULL;
+brick_t *TOA = NULL;
+brick_t *QAI = NULL;
 
-stack_t **LEVEL2 = NULL;
+brick_t **LEVEL2 = NULL;
 int nprod;
 int err;
 GDALDriverH driver;
@@ -169,7 +169,7 @@ GDALDriverH driver;
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (convert_level1(meta, mission, atc, DN, &TOA, QAI) != SUCCESS){
       printf("DN to TOA conversion failed.\n"); return FAILURE;}
-    free_stack_bands(DN);
+    free_brick_bands(DN);
 
 
     /** read/reproject/ckeck DEM and compute slope/aspect
@@ -216,7 +216,7 @@ GDALDriverH driver;
   }
 
   free_param_lower(pl2); free_metadata(meta); free_multicube(multicube);
-  free_stack(DN);
+  free_brick(DN);
 
   cite_push(pl2->d_level2);
   

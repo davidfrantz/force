@@ -61,13 +61,13 @@ This file contains functions for BRDF forward modelling
 +++ ted Reflectance (NBAR) and Quantification of Red-Edge Band BRDF Effect
 +++ s. Remote Sensing 9 (12), 1325.
 +++-----------------------------------------------------------------------
---- sun:    sun angle stack
---- view:   view angle stack
---- cor:    brdf correction factor stack
+--- sun:    sun angle brick
+--- view:   view angle brick
+--- cor:    brdf correction factor brick
 --- g:      Coarse grid cell
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int brdf_factor(stack_t *sun, stack_t *view, stack_t *cor, int g){
+int brdf_factor(brick_t *sun, brick_t *view, brick_t *cor, int g){
 float szen, sazi, vzen, vazi;
 float brdf_correction;
 int b,  nb; // band ID of actual bands
@@ -81,14 +81,14 @@ char domain[10][NPOW_10] = { "BLUE", "GREEN", "RED",
                            "NIR", "SWIR1", "SWIR2" };
 
 
-  nb = get_stack_nbands(cor);
-  szen = get_stack(sun,  ZEN, g);
-  vzen = get_stack(view, ZEN, g);
-  sazi = get_stack(sun,  AZI, g);
-  vazi = get_stack(view, AZI, g);
+  nb = get_brick_nbands(cor);
+  szen = get_brick(sun,  ZEN, g);
+  vzen = get_brick(view, ZEN, g);
+  sazi = get_brick(sun,  AZI, g);
+  vazi = get_brick(view, AZI, g);
 
   // initialize
-  for (b=0; b<nb; b++) set_stack(cor, b, g, 1.0);
+  for (b=0; b<nb; b++) set_brick(cor, b, g, 1.0);
 
   #ifdef FORCE_DEBUG
   printf("BRDF: ");
@@ -102,7 +102,7 @@ char domain[10][NPOW_10] = { "BLUE", "GREEN", "RED",
       brdf_forward(45*_D2R_CONV_, 0, 0,   iso[b_], vol[b_], geo[b_]) / 
       brdf_forward(szen, vzen, sazi-vazi, iso[b_], vol[b_], geo[b_]);
 
-    set_stack(cor, b, g, brdf_correction);
+    set_brick(cor, b, g, brdf_correction);
 
     #ifdef FORCE_DEBUG
     printf(" %.3f", brdf_correction);

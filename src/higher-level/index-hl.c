@@ -300,7 +300,7 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
-  if (endmember->nb != get_stack_nbands(ard[0].DAT)){
+  if (endmember->nb != get_brick_nbands(ard[0].DAT)){
     printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
     
 

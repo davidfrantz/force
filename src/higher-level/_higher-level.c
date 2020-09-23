@@ -29,7 +29,7 @@ This program is the FORCE Higher Level Processing System
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/tile-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
@@ -52,8 +52,8 @@ ard_t       **ARD1    = NULL;
 ard_t       **ARD2    = NULL;
 int         *nt1      = NULL;
 int         *nt2      = NULL;
-stack_t     **MASK    = NULL;
-stack_t     ***OUTPUT = NULL;
+brick_t     **MASK    = NULL;
+brick_t     ***OUTPUT = NULL;
 int         *nprod    = NULL;
 GDALDriverH driver;
 progress_t  pro;
@@ -100,8 +100,8 @@ progress_t  pro;
   // allocate array of Level 2 structs
   alloc((void**)&ARD1,   pro.npu, sizeof(ard_t*));
   alloc((void**)&ARD2,   pro.npu, sizeof(ard_t*));
-  alloc((void**)&MASK,   pro.npu, sizeof(stack_t*));
-  alloc((void**)&OUTPUT, pro.npu, sizeof(stack_t**));
+  alloc((void**)&MASK,   pro.npu, sizeof(brick_t*));
+  alloc((void**)&OUTPUT, pro.npu, sizeof(brick_t**));
   alloc((void**)&nprod,  pro.npu, sizeof(int));
   alloc((void**)&nt1,    pro.npu, sizeof(int));
   alloc((void**)&nt2,    pro.npu, sizeof(int));

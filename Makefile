@@ -74,7 +74,7 @@ TA=temp-aux
 ### TARGETS
 
 all: temp cross lower higher aux exe
-cross: string_cl enum_cl cite_cl utils_cl alloc_cl stack_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
+cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl pyp_hl
 aux: param_aux param_train_aux train_aux
@@ -105,8 +105,8 @@ utils_cl: temp $(DC)/utils-cl.c
 alloc_cl: temp $(DC)/alloc-cl.c
 	$(GCC) $(CFLAGS) -c $(DC)/alloc-cl.c -o $(TC)/alloc_cl.o
 
-stack_cl: temp $(DC)/stack-cl.c
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/stack-cl.c -o $(TC)/stack_cl.o $(LDGDAL)
+brick_cl: temp $(DC)/brick-cl.c
+	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/brick-cl.c -o $(TC)/brick_cl.o $(LDGDAL)
 
 imagefuns_cl: temp $(DC)/imagefuns-cl.c
 	$(GCC) $(CFLAGS) -c $(DC)/imagefuns-cl.c -o $(TC)/imagefuns_cl.o

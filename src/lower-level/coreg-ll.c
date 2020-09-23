@@ -68,10 +68,10 @@ typedef struct{
   double rmse;
 } match_t;
 
-int coreg(short **target, short *base, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
+int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
 int cumulative_scale(int toplayer, int *scales);
 void free_pyramids(short ***pyramids_, int nlayer);
-void build_pyramids(short *image, stack_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr);
+void build_pyramids(short *image, brick_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr);
 void build_pyramidlayer(int nx, int ny, short nodata, int scale, int *nx_new_, int *ny_new_, short *image_, short **pyramid);
 poi_t points_of_interest(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodata, int iLayer, int iMinPOINum);
 bool mask_and_base(short *target, short *base, int nx, int ny, small *mask, bool *pbImage1);
@@ -97,7 +97,7 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 --- nodata:  nodata value
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coreg(short **target, short *base, stack_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
+int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
 int h, max_h, b;
 int i, j, p;
 double SAM, SAM_original;
@@ -121,7 +121,7 @@ int nland = 0;
   #endif
 
   if ((qai_ = get_bands_short(QAI)) == NULL) return FAILURE;
-  qai_nodata = (short)get_stack_nodata(QAI, 0);
+  qai_nodata = (short)get_brick_nodata(QAI, 0);
   
   // number of valid land pixels
   #pragma omp parallel private(j,p) shared(ny,nx,QAI,target,base,band,band_value_thr) reduction(+: nland) default(none)
@@ -309,7 +309,7 @@ int type, layer;
 --- ny_pyr:   number of rows of pyramid layers
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void build_pyramids(short *image, stack_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr){
+void build_pyramids(short *image, brick_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr){
 int layer, p;
 short **pyramids_ = NULL;
 int *nx_ = NULL;
@@ -1610,7 +1610,7 @@ match_t dm;
 --- QAI:     Quality Assurance Information
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coregister(int mission, par_ll_t *pl2, stack_t *TOA, stack_t *QAI){
+int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI){
 int p, nx, ny, nc, nb, band, err, year, month, dy;
 float res;
 char fname[NPOW_10], cyear[NPOW_03];
@@ -1618,7 +1618,7 @@ int nchar;
 short nodata;
 short  **target = NULL;
 short   *base   = NULL;
-stack_t *BASE   = NULL;
+brick_t *BASE   = NULL;
 int success = FAILURE;
 
 
@@ -1636,18 +1636,18 @@ int success = FAILURE;
 
   cite_me(_CITE_COREG_);
 
-  nx  = get_stack_ncols(TOA);
-  ny  = get_stack_nrows(TOA);
-  nc  = get_stack_nrows(TOA);
-  nb  = get_stack_nbands(TOA);
-  res = get_stack_res(TOA);
+  nx  = get_brick_ncols(TOA);
+  ny  = get_brick_nrows(TOA);
+  nc  = get_brick_nrows(TOA);
+  nb  = get_brick_nbands(TOA);
+  res = get_brick_res(TOA);
 
   // import target
   if ((target = get_bands_short(TOA)) == NULL) return FAILURE;
   if ((band = find_domain(TOA, "BROADNIR")) < 0) return FAILURE;
-  nodata = get_stack_nodata(TOA, band);
-  year  =  get_stack_year(TOA, band);
-  month =  get_stack_month(TOA, band);
+  nodata = get_brick_nodata(TOA, band);
+  year  =  get_brick_year(TOA, band);
+  month =  get_brick_month(TOA, band);
 
   // get base
   dy = 0;
@@ -1671,14 +1671,14 @@ int success = FAILURE;
   #endif
 
 
-  BASE = copy_stack(TOA, 1, _DT_SHORT_);
-  if ((warp_from_disc_to_known_stack(2, pl2->nthread, fname, BASE, month-1, 0, pl2->coreg_nodata)) != SUCCESS){
+  BASE = copy_brick(TOA, 1, _DT_SHORT_);
+  if ((warp_from_disc_to_known_brick(2, pl2->nthread, fname, BASE, month-1, 0, pl2->coreg_nodata)) != SUCCESS){
     printf("Warping base failed! "); return FAILURE;}
   if ((base = get_band_short(BASE, 0)) == NULL) return FAILURE;
   
   
   err = coreg(target, base, QAI, res, nx, ny, nb, band, nodata);
-  free_stack(BASE);
+  free_brick(BASE);
   if (err == FAILURE){
     printf("error in coregistering image.\n"); return FAILURE;
   } else if (err == CANCEL){
@@ -1704,8 +1704,8 @@ int success = FAILURE;
 
 
   #ifdef FORCE_DEBUG
-  set_stack_filename(TOA, "TOA-COREG");
-  print_stack_info(TOA); set_stack_open(TOA, OPEN_CREATE); write_stack(TOA);
+  set_brick_filename(TOA, "TOA-COREG");
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
   #endif
 
   #ifdef FORCE_CLOCK

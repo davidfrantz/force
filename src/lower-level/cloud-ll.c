@@ -37,15 +37,15 @@ This file contains functions for cloud and cloud shadow identification
 #include <omp.h> // multi-platform shared memory multiprocessing
 
 
-float finalize_cloud(int npix, atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *DEM, small *fcld_, small *fshd_);
-int potential_cloud(int *npix, int *nclear, int *nland, stack_t *TOA, stack_t *QAI, stack_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR);
-float land_probability(int nc, int nclear, int nland, int npix, float cldprob, float *lowt, float *hight, small *lnd_, small *clr_, short *temp_, short *var_, stack_t *QAI, float **PROB);
-float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short *sw2_, stack_t *QAI, float **PROB);
-int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, stack_t *TOA, stack_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
-int shadow_probability(int nthread, int nland, atc_t *atc, stack_t *TOA, stack_t *QAI, small *lnd_, small *cld_, short **SPR);
-int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, stack_t *TOA, stack_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
+float finalize_cloud(int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_);
+int potential_cloud(int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR);
+float land_probability(int nc, int nclear, int nland, int npix, float cldprob, float *lowt, float *hight, small *lnd_, small *clr_, short *temp_, short *var_, brick_t *QAI, float **PROB);
+float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short *sw2_, brick_t *QAI, float **PROB);
+int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
+int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t *QAI, small *lnd_, small *cld_, short **SPR);
+int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
 int shadow_position(float h, int x, int y, float res, int g, float **sun, float **view, int *newx, int *newy);
-int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *EXP, small *cld_, short *spr_, small **SHD);
+int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *EXP, small *cld_, short *spr_, small **SHD);
 
 
 /** This function builds the final cloud and cloud shadow classification.
@@ -58,7 +58,7 @@ int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, st
 +++ Return: total cloud cover in %
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 #ifdef EXCLUSIVE_QAI
-float finalize_cloud(int npix, stack_t *TOA, stack_t *QAI, small *fcld_, small *fshd_){
+float finalize_cloud(int npix, brick_t *TOA, brick_t *QAI, small *fcld_, small *fshd_){
 int p, nx, ny, nc, k = 0;
 float res, pct;
 short *blue_   = NULL;
@@ -70,10 +70,10 @@ short *cirrus_ = NULL;
   #endif
 
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
   if ((blue_  = get_domain_short(TOA, "BLUE")) == NULL) return FAILURE;
   cirrus_     = get_domain_short(TOA, "CIRRUS");
@@ -140,7 +140,7 @@ short *cirrus_ = NULL;
 --- fshd_:  shadow mask
 +++ Return: total cloud cover in %
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float finalize_cloud(int npix, atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *DEM, small *fcld_, small *fshd_){
+float finalize_cloud(int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_){
 int p, nx, ny, nc, k = 0;
 float res, pct;
 float z, cir_thr;
@@ -154,10 +154,10 @@ int cld_buf, shd_buf;
   #endif
 
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
   if ((dem_   = get_band_small(DEM, 0)) == NULL) return FAILURE;
   if ((blue_  = get_domain_short(TOA, "BLUE")) == NULL) return FAILURE;
@@ -217,45 +217,45 @@ int cld_buf, shd_buf;
   pct = 100.0*k/(float)npix;
   
   #ifdef FORCE_DEBUG
-  stack_t *STACK = NULL; small *stack_ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_CLOUD-BUFFERED");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, fcld_,  nc*sizeof(small));
-  set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_SHADOW-BUFFERED");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, fshd_,  nc*sizeof(small));
-  set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  brick_t *BRICK = NULL; small *brick_ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_CLOUD-BUFFERED");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, fcld_,  nc*sizeof(small));
+  set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_SHADOW-BUFFERED");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, fshd_,  nc*sizeof(small));
+  set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   for (p=0; p<nc; p++) if (get_cloud(QAI, p) == 3) cir_[p] = true;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_CIRRUS");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, cir_,  nc*sizeof(small));
-  set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK); free((void*)cir_);
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_CIRRUS");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, cir_,  nc*sizeof(small));
+  set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK); free((void*)cir_);
   #endif
 
   #ifdef CMIX_FAS
   #ifndef FORCE_DEBUG
-  stack_t *STACK = NULL; small *stack_ = NULL;
+  brick_t *BRICK = NULL; small *brick_ = NULL;
   #endif
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CMIX-FAS");
-  stack_ = get_band_small(STACK, 0); 
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CMIX-FAS");
+  brick_ = get_band_small(BRICK, 0); 
   for (p=0; p<nc; p++){
     if (get_off(QAI, p)){
-      stack_[p] = 0;
+      brick_[p] = 0;
     } else if (get_cloud(QAI, p) == 1 || get_cloud(QAI, p) == 2){
-      stack_[p] = 3;
+      brick_[p] = 3;
     } else if (get_cloud(QAI, p) == 3){
-      stack_[p] = 2;
+      brick_[p] = 2;
     } else if (get_shadow(QAI, p)){
-      stack_[p] = 4;
+      brick_[p] = 4;
     } else if (get_illumination(QAI, p) == 3){
-      stack_[p] = 7;
+      brick_[p] = 7;
     } else if (get_snow(QAI, p)){
-      stack_[p] = 6;
+      brick_[p] = 6;
     } else if (get_water(QAI, p)){
-      stack_[p] = 5;
+      brick_[p] = 5;
     } else {
-      stack_[p] = 1;
+      brick_[p] = 1;
     }
   }
-  set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -280,7 +280,7 @@ int cld_buf, shd_buf;
 --- VAR:    Variability probability (returned)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int potential_cloud(int *npix, int *nclear, int *nland, stack_t *TOA, stack_t *QAI, stack_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR){
+int potential_cloud(int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR){
 int p, nx, ny, nc;
 int non = 0, nsnw = 0, nwtr = 0, nclr = 0, nlnd = 0;
 float ndvi, ndsi, hot, vis, white, tmp, r45, vprob;
@@ -307,9 +307,9 @@ int snw_buf;
   #endif
 
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  nc = get_stack_ncells(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  nc = get_brick_ncells(QAI);
   
   if ((slp_   = get_band_ushort(EXP, ZEN))      == NULL) return FAILURE;
   if ((blue_  = get_domain_short(TOA, "BLUE"))  == NULL) return FAILURE; 
@@ -403,7 +403,7 @@ int snw_buf;
   // Zhu et al., 2015 update, buffer snow layer by 1px
   snw_buf = 1;
   #ifdef CMIX_FAS_2
-  snw_buf = 20/get_stack_res(QAI);
+  snw_buf = 20/get_brick_res(QAI);
   #endif
   buffer_(snw_, nx, ny, snw_buf);
 
@@ -430,16 +430,16 @@ int snw_buf;
   }
   
   #ifdef FORCE_DEBUG
-  stack_t *STACK = NULL; small *stack_ = NULL; short *stack__ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_SNW");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, snw_,  nc*sizeof(small));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_PCP");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, pcp_,  nc*sizeof(small));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
-  STACK = copy_stack(QAI, 1, _DT_SHORT_); set_stack_filename(STACK, "CLD_VPROB");
-  stack__ = get_band_short(STACK, 0);  memmove(stack__, var_,  nc*sizeof(short));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  brick_t *BRICK = NULL; small *brick_ = NULL; short *brick__ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_SNW");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, snw_,  nc*sizeof(small));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_PCP");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, pcp_,  nc*sizeof(small));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  BRICK = copy_brick(QAI, 1, _DT_SHORT_); set_brick_filename(BRICK, "CLD_VPROB");
+  brick__ = get_band_short(BRICK, 0);  memmove(brick__, var_,  nc*sizeof(short));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
   free((void*)snw_);
@@ -479,7 +479,7 @@ int snw_buf;
 --- PROB:    cloud probability
 +++ Return:  adaptive cloud probability threshold
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float land_probability(int nc, int nclear, int nland, int npix, float cldprob, float *lowt, float *hight, small *lnd_, small *clr_, short *temp_, short *var_, stack_t *QAI, float **PROB){
+float land_probability(int nc, int nclear, int nland, int npix, float cldprob, float *lowt, float *hight, small *lnd_, small *clr_, short *temp_, short *var_, brick_t *QAI, float **PROB){
 int p, k = 0;
 float lclr_max;
 float lo = 0.175, hi = 0.825;
@@ -574,7 +574,7 @@ float *CLEARTEMP = NULL;
 --- PROB:    cloud probability
 +++ Return:  adaptive cloud probability threshold
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short *sw2_, stack_t *QAI, float **PROB){
+float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short *sw2_, brick_t *QAI, float **PROB){
 int p, k = 0;
 float wclr_max;
 float hi = 0.825;
@@ -675,7 +675,7 @@ float *CLEARTEMP = NULL;
 --- CLD:     Cloud mask (returned)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, stack_t *TOA, stack_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD){
+int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD){
 int p, nx, ny, nc;
 int ncld = 0;
 
@@ -696,9 +696,9 @@ small *cld_  = NULL;
   #endif
 
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  nc = get_stack_ncells(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  nc = get_brick_ncells(QAI);
   
 
   if ((sw1_  = get_domain_short(TOA, "SWIR1")) == NULL) return FAILURE;
@@ -776,10 +776,10 @@ small *cld_  = NULL;
   }
   
   #ifdef FORCE_DEBUG
-  stack_t *STACK = NULL; small *stack_ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_CLOUD");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, cld_,  nc*sizeof(small));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  brick_t *BRICK = NULL; small *brick_ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_CLOUD");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, cld_,  nc*sizeof(small));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -810,7 +810,7 @@ small *cld_  = NULL;
 --- SPR:     Potential Shadow Pixels (returned)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int shadow_probability(int nthread, int nland, atc_t *atc, stack_t *TOA, stack_t *QAI, small *lnd_, small *cld_, short **SPR){
+int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t *QAI, small *lnd_, small *cld_, short **SPR){
 int i, j, p, k = 0, nx, ny, nc, b, nb = 2;
 int nthr;
 int err = 0;
@@ -832,10 +832,10 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
   #endif
 
 
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
   alloc((void**)&spr_, nc, sizeof(short));
   
@@ -939,7 +939,7 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 --- CLD:    Cloud mask (returned)
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, stack_t *TOA, stack_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD){
+int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD){
 int i, i_, j, j_, p, p_, ii, jj, ni, nj, np, np_;
 int nx,  ny,  nc;
 int nx_, ny_, nc_;
@@ -968,9 +968,9 @@ small *cld_  = NULL;
   #endif
 
 
-  nx = get_stack_ncols(QAI);  nx_ = nx/2;
-  ny = get_stack_nrows(QAI);  ny_ = ny/2;
-  nc = get_stack_ncells(QAI); nc_ = nx_*ny_;
+  nx = get_brick_ncols(QAI);  nx_ = nx/2;
+  ny = get_brick_nrows(QAI);  ny_ = ny/2;
+  nc = get_brick_ncells(QAI); nc_ = nx_*ny_;
 
   if ((re3_  = get_domain_short(TOA, "REDEDGE3")) == NULL) return FAILURE;
   if ((bnir_ = get_domain_short(TOA, "BROADNIR")) == NULL) return FAILURE;
@@ -1088,15 +1088,15 @@ small *cld_  = NULL;
   free((void*)gauss_);
 
   #ifdef FORCE_DEBUG
-  stack_t *STACK = NULL; float *stack_ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_NONE_); set_stack_filename(STACK, "CLD_R8A8");
-  set_stack_ncols(STACK, nx_); set_stack_nrows(STACK, ny_); allocate_stack_bands(STACK, 1, nc_, _DT_FLOAT_);
-  stack_ = get_band_float(STACK, 0);  memmove(stack_, ratio_[0],  nc_*sizeof(float));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
-  STACK = copy_stack(QAI, 1, _DT_NONE_); set_stack_filename(STACK, "CLD_R8A7");
-  set_stack_ncols(STACK, nx_); set_stack_nrows(STACK, ny_); allocate_stack_bands(STACK, 1, nc_, _DT_FLOAT_);
-  stack_ = get_band_float(STACK, 0);  memmove(stack_, ratio_[1],  nc_*sizeof(float));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  brick_t *BRICK = NULL; float *brick_ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_NONE_); set_brick_filename(BRICK, "CLD_R8A8");
+  set_brick_ncols(BRICK, nx_); set_brick_nrows(BRICK, ny_); allocate_brick_bands(BRICK, 1, nc_, _DT_FLOAT_);
+  brick_ = get_band_float(BRICK, 0);  memmove(brick_, ratio_[0],  nc_*sizeof(float));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  BRICK = copy_brick(QAI, 1, _DT_NONE_); set_brick_filename(BRICK, "CLD_R8A7");
+  set_brick_ncols(BRICK, nx_); set_brick_nrows(BRICK, ny_); allocate_brick_bands(BRICK, 1, nc_, _DT_FLOAT_);
+  brick_ = get_band_float(BRICK, 0);  memmove(brick_, ratio_[1],  nc_*sizeof(float));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
   
 
@@ -1180,15 +1180,15 @@ small *cld_  = NULL;
   free((void*)var2_);
   
   #ifdef FORCE_DEBUG
-  STACK = copy_stack(QAI, 1, _DT_NONE_); set_stack_filename(STACK, "CLOUD_CDI");
-  set_stack_ncols(STACK, nx_); set_stack_nrows(STACK, ny_); allocate_stack_bands(STACK, 1, nc_, _DT_FLOAT_);
-  stack_ = get_band_float(STACK, 0);  memmove(stack_, cdi_,  nc_*sizeof(float));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  BRICK = copy_brick(QAI, 1, _DT_NONE_); set_brick_filename(BRICK, "CLOUD_CDI");
+  set_brick_ncols(BRICK, nx_); set_brick_nrows(BRICK, ny_); allocate_brick_bands(BRICK, 1, nc_, _DT_FLOAT_);
+  brick_ = get_band_float(BRICK, 0);  memmove(brick_, cdi_,  nc_*sizeof(float));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
 
-  STACK = copy_stack(QAI, 1, _DT_NONE_); set_stack_filename(STACK, "CLOUD_S2PROBMIN");
-  set_stack_ncols(STACK, nx_); set_stack_nrows(STACK, ny_); allocate_stack_bands(STACK, 1, nc_, _DT_FLOAT_);
-  stack_ = get_band_float(STACK, 0);  memmove(stack_, var3_,  nc_*sizeof(float));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  BRICK = copy_brick(QAI, 1, _DT_NONE_); set_brick_filename(BRICK, "CLOUD_S2PROBMIN");
+  set_brick_ncols(BRICK, nx_); set_brick_nrows(BRICK, ny_); allocate_brick_bands(BRICK, 1, nc_, _DT_FLOAT_);
+  brick_ = get_band_float(BRICK, 0);  memmove(brick_, var3_,  nc_*sizeof(float));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
 
@@ -1368,10 +1368,10 @@ small *cld_  = NULL;
 
   
   #ifdef FORCE_DEBUG
-  small *stack__ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_CLOUD");
-  stack__ = get_band_small(STACK, 0);  memmove(stack__, cld_,  nc*sizeof(small));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  small *brick__ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_CLOUD");
+  brick__ = get_band_small(BRICK, 0);  memmove(brick__, cld_,  nc*sizeof(small));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -1455,7 +1455,7 @@ float dy_across, dy_cast;
 --- SHD:      Shadow mask (returned)
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *EXP, small *cld_, short *spr_, small **SHD){
+int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *EXP, small *cld_, short *spr_, small **SHD){
 int i, j, p, nx, ny, nc, nf, ne, g, k;
 int skip, influence = 8;
 int nobj, id, size_max = 0, size;
@@ -1484,10 +1484,10 @@ short  *temp_      = NULL;
   #endif
   
   
-  nx   = get_stack_ncols(QAI);
-  ny   = get_stack_nrows(QAI);
-  nc   = get_stack_ncells(QAI);
-  res  = get_stack_res(QAI);
+  nx   = get_brick_ncols(QAI);
+  ny   = get_brick_nrows(QAI);
+  nc   = get_brick_ncells(QAI);
+  res  = get_brick_res(QAI);
   
   if ((sun_  =  get_bands_float(atc->xy_sun))  == NULL) return FAILURE;
   if ((view_ =  get_bands_float(atc->xy_view)) == NULL) return FAILURE;
@@ -1574,8 +1574,8 @@ short  *temp_      = NULL;
   /** Determine the step size for the base height iteration
   +++ Pick height that coincides with a horizontal shift of 50m.
   +++ Use the sun zenith at scene center as approximation. **/
-  nf = get_stack_ncols(atc->xy_sun);
-  ne = get_stack_nrows(atc->xy_sun);
+  nf = get_brick_ncols(atc->xy_sun);
+  ne = get_brick_nrows(atc->xy_sun);
   base_step = 50 / sun_[tZEN][(ne/2)*nf+(nf/2)];
 
  
@@ -1665,7 +1665,7 @@ short  *temp_      = NULL;
           /** Position of projected shadow:
           +++ Copmpute the position of the projected shadow as a function of
           +++ view and sun geometry. **/
-          g = convert_stack_ji2p(QAI, atc->xy_sun, array_y[id][k], array_x[id][k]);
+          g = convert_brick_ji2p(QAI, atc->xy_sun, array_y[id][k], array_x[id][k]);
           shadow_position(height, array_x[id][k], array_y[id][k], res, g, sun_, view_, &x, &y);
 
           if (y < 0 || y >= ny || x < 0 || x >= nx){
@@ -1736,10 +1736,10 @@ short  *temp_      = NULL;
   
 
   #ifdef FORCE_DEBUG
-  stack_t *STACK = NULL; small *stack_ = NULL;
-  STACK = copy_stack(QAI, 1, _DT_SMALL_); set_stack_filename(STACK, "CLD_SHADOW");
-  stack_ = get_band_small(STACK, 0);  memmove(stack_, shd_,  nc*sizeof(small));
-  print_stack_info(STACK); set_stack_open(STACK, OPEN_CREATE); write_stack(STACK); free_stack(STACK);
+  brick_t *BRICK = NULL; small *brick_ = NULL;
+  BRICK = copy_brick(QAI, 1, _DT_SMALL_); set_brick_filename(BRICK, "CLD_SHADOW");
+  brick_ = get_band_small(BRICK, 0);  memmove(brick_, shd_,  nc*sizeof(small));
+  print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
 
 
@@ -1787,7 +1787,7 @@ short  *temp_      = NULL;
 --- QAI:     Quality Assurance Information (modified)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int detect_clouds(par_ll_t *pl2, int mission, atc_t *atc, stack_t *TOA, stack_t *DEM, stack_t *EXP, stack_t *QAI){
+int detect_clouds(par_ll_t *pl2, int mission, atc_t *atc, brick_t *TOA, brick_t *DEM, brick_t *EXP, brick_t *QAI){
 int npix, nclear, nland, ncloud, nc, p;
 float lowtemp = -1.0, hightemp = -1.0;
 float cc;
@@ -1809,7 +1809,7 @@ small *shd_   = NULL;
   cite_me(_CITE_CLOUD_);
 
 
-  nc = get_stack_ncells(QAI);
+  nc = get_brick_ncells(QAI);
 
 
   /** Potential Cloud Pixels **/
@@ -1886,7 +1886,7 @@ small *shd_   = NULL;
   free((void*)cld_); free((void*)shd_);
 
   #ifdef FORCE_DEBUG
-  print_stack_info(QAI); set_stack_open(QAI, OPEN_CREATE); write_stack(QAI);
+  print_brick_info(QAI); set_brick_open(QAI, OPEN_CREATE); write_brick(QAI);
   #endif
 
   printf("cc: %6.2f%%. ", atc->cc);
@@ -1911,7 +1911,7 @@ small *shd_   = NULL;
 --- DIST:   Distance (returned)
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int cloud_distance(stack_t *QAI, int nodata, short *DIST){
+int cloud_distance(brick_t *QAI, int nodata, short *DIST){
 int p, nx, ny, nc, k=0;
 float res, dist;
 small  *TO_DIST    = NULL;
@@ -1923,10 +1923,10 @@ ushort *DIST_PIX = NULL;
   #endif
   
   
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
 
   /** build binary mask **/
