@@ -28,20 +28,20 @@ This file contains functions that define the datacubes
 #include "cube-ll.h"
 
 
-int tile_level2(par_ll_t *pl2, cube_t *cube, stack_t **LEVEL2, int nprod);
-int flush_level2(par_ll_t *pl2, meta_t *meta, stack_t **LEVEL2, int nprod);
-multicube_t *start_datacube(par_ll_t *pl2, stack_t *stack);
+int tile_level2(par_ll_t *pl2, cube_t *cube, brick_t **LEVEL2, int nprod);
+int flush_level2(par_ll_t *pl2, meta_t *meta, brick_t **LEVEL2, int nprod);
+multicube_t *start_datacube(par_ll_t *pl2, brick_t *brick);
 
 
 /** This function tiles the image, computes tile cloud coverage and writes
 +++ gridded images to disc.
 --- pl2:    L2 parameters
 --- cube:   data cube parameters
---- LEVEL2: L2 stack
+--- LEVEL2: L2 brick
 --- nprod:  number of L2 products
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tile_level2(par_ll_t *pl2, cube_t *cube, stack_t **LEVEL2, int nprod){
+int tile_level2(par_ll_t *pl2, cube_t *cube, brick_t **LEVEL2, int nprod){
 int i, j, p, np, nx, ny, b, nb, prod;
 char dname[NPOW_10];
 int nchar;
@@ -57,7 +57,7 @@ int  tiles_k;
 int err = 0;
 bool empty;
 short nodata;
-stack_t **CUBED   = NULL;
+brick_t **CUBED   = NULL;
 short   **level2_ = NULL;
 short   **cubed_  = NULL;
 double ncld, ndata; // cloud cover
@@ -75,28 +75,28 @@ int cube_nx, cube_ny, cube_nc;
     printf("Reading tile file failed! "); return FAILURE;}
 
   // get dataset information
-  get_stack_geotran(LEVEL2[0], geotran, 6);
-  ulx = get_stack_ulx(LEVEL2[0]);
-  uly = get_stack_uly(LEVEL2[0]);
+  get_brick_geotran(LEVEL2[0], geotran, 6);
+  ulx = get_brick_ulx(LEVEL2[0]);
+  uly = get_brick_uly(LEVEL2[0]);
   
 
 
   // intersect the image with the tile grid
 
   // initialize smaller cubed products
-  alloc((void**)&CUBED, nprod, sizeof(stack_t*));
+  alloc((void**)&CUBED, nprod, sizeof(brick_t*));
 
   for (prod=0; prod<(nprod); prod++){
-    nb = get_stack_nbands(LEVEL2[prod]);
-    res = get_stack_res(LEVEL2[prod]);
+    nb = get_brick_nbands(LEVEL2[prod]);
+    res = get_brick_res(LEVEL2[prod]);
     scale = cube->res/res;
-    CUBED[prod] = copy_stack(LEVEL2[prod], nb, _DT_NONE_);
-    set_stack_geotran(CUBED[prod], geotran);
-    set_stack_ncols(CUBED[prod], (int)(cube->nx*scale));
-    set_stack_nrows(CUBED[prod], (int)(cube->ny*scale));
-    set_stack_chunkncols(CUBED[prod], (int)(cube->cx*scale));
-    set_stack_chunknrows(CUBED[prod], (int)(cube->cy*scale));
-    allocate_stack_bands(CUBED[prod], nb, (int)(cube->nc*scale), _DT_SHORT_);
+    CUBED[prod] = copy_brick(LEVEL2[prod], nb, _DT_NONE_);
+    set_brick_geotran(CUBED[prod], geotran);
+    set_brick_ncols(CUBED[prod], (int)(cube->nx*scale));
+    set_brick_nrows(CUBED[prod], (int)(cube->ny*scale));
+    set_brick_chunkncols(CUBED[prod], (int)(cube->cx*scale));
+    set_brick_chunknrows(CUBED[prod], (int)(cube->cy*scale));
+    allocate_brick_bands(CUBED[prod], nb, (int)(cube->nc*scale), _DT_SHORT_);
   }
 
 
@@ -120,10 +120,10 @@ int cube_nx, cube_ny, cube_nc;
       
       if (prod > 0 && empty) break;
 
-      nb = get_stack_nbands(LEVEL2[prod]);
-      nx  = get_stack_ncols(LEVEL2[prod]);
-      ny  = get_stack_nrows(LEVEL2[prod]);
-      res = get_stack_res(LEVEL2[prod]);
+      nb = get_brick_nbands(LEVEL2[prod]);
+      nx  = get_brick_ncols(LEVEL2[prod]);
+      ny  = get_brick_nrows(LEVEL2[prod]);
+      res = get_brick_res(LEVEL2[prod]);
       scale = cube->res/res;
       cube_nx = (int)(cube->nx*scale);
       cube_ny = (int)(cube->ny*scale);
@@ -142,7 +142,7 @@ int cube_nx, cube_ny, cube_nc;
 
       // init with nodata
       for (b=0; b<nb; b++){
-        nodata = get_stack_nodata(LEVEL2[prod], b);
+        nodata = get_brick_nodata(LEVEL2[prod], b);
         for (p=0; p<cube_nc; p++) cubed_[b][p] = nodata;
       }
 
@@ -199,9 +199,9 @@ int cube_nx, cube_ny, cube_nc;
         printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
 
       for (prod=0; prod<(nprod); prod++){
-        set_stack_geotran(CUBED[prod], geotran);
-        set_stack_dirname(CUBED[prod], dname);
-        if (write_stack(CUBED[prod]) == FAILURE){ err++; continue;}
+        set_brick_geotran(CUBED[prod], geotran);
+        set_brick_dirname(CUBED[prod], dname);
+        if (write_brick(CUBED[prod]) == FAILURE){ err++; continue;}
       }
 
       ntile++;
@@ -220,12 +220,12 @@ int cube_nx, cube_ny, cube_nc;
 
   // clean
   free((void*)tiles_x); free((void*)tiles_y);
-  for (prod=0; prod<nprod; prod++) free_stack(CUBED[prod]);
+  for (prod=0; prod<nprod; prod++) free_brick(CUBED[prod]);
   free((void*)CUBED);
 
 
   #ifdef FORCE_CLOCK
-  proctime_print("tiling output stack", TIME);
+  proctime_print("tiling output brick", TIME);
   #endif
 
   return SUCCESS;
@@ -236,11 +236,11 @@ int cube_nx, cube_ny, cube_nc;
 +++ image to dics as it is.
 --- pl2:    L2 parameters
 --- meta:   metadata
---- LEVEL2: L2 stack
+--- LEVEL2: L2 brick
 --- nprod:  number of L2 products
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int flush_level2(par_ll_t *pl2, meta_t *meta, stack_t **LEVEL2, int nprod){
+int flush_level2(par_ll_t *pl2, meta_t *meta, brick_t **LEVEL2, int nprod){
 int prod;
 char dname[NPOW_10];
 int nchar;
@@ -255,8 +255,8 @@ int nchar;
     printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
   
   for (prod=0; prod<nprod; prod++){
-    set_stack_dirname(LEVEL2[prod], dname);
-    if (write_stack(LEVEL2[prod]) == FAILURE){
+    set_brick_dirname(LEVEL2[prod], dname);
+    if (write_brick(LEVEL2[prod]) == FAILURE){
       printf("error flushing L2 products. \n"); return FAILURE;}
   }
 
@@ -264,7 +264,7 @@ int nchar;
 
 
   #ifdef FORCE_CLOCK
-  proctime_print("flushing output stack", TIME);
+  proctime_print("flushing output brick", TIME);
   #endif
 
   return SUCCESS;
@@ -274,10 +274,10 @@ int nchar;
 /** This function compiles the data cube parameters from the information
 +++ given in the parameter file.
 --- pl2:    L2 parameters
---- stack:  input image stack
+--- brick:  input image brick
 +++ Return: data cube parameters for one cube
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_datacube(par_ll_t *pl2, stack_t *stack){
+multicube_t *start_datacube(par_ll_t *pl2, brick_t *brick){
 multicube_t *multicube = NULL;
 cube_t *cube = NULL;
 double tilex, tiley;
@@ -308,8 +308,8 @@ double tol = 5e-3;
     
   } else {
 
-    cube->res = get_stack_res(stack);
-    get_stack_proj(stack, utm_proj, NPOW_10);
+    cube->res = get_brick_res(brick);
+    get_brick_proj(brick, utm_proj, NPOW_10);
     copy_string(cube->proj, NPOW_10, utm_proj);
     
   }
@@ -356,11 +356,11 @@ double tol = 5e-3;
       return NULL;
     }
 
-    utm_ulx = get_stack_ulx(stack);
-    utm_uly = get_stack_uly(stack);
-    utm_lrx = utm_ulx + get_stack_width(stack);
-    utm_lry = utm_uly - get_stack_height(stack);
-    get_stack_proj(stack, utm_proj, NPOW_10);
+    utm_ulx = get_brick_ulx(brick);
+    utm_uly = get_brick_uly(brick);
+    utm_lrx = utm_ulx + get_brick_width(brick);
+    utm_lry = utm_uly - get_brick_height(brick);
+    get_brick_proj(brick, utm_proj, NPOW_10);
 
     // UL
     if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
@@ -487,11 +487,11 @@ double tol = 5e-3;
 --- pl2:    L2 parameters
 --- meta:   metadata
 --- cube:   data cube parameters
---- LEVEL2: L2 stack
+--- LEVEL2: L2 brick
 --- nprod:  number of L2 products
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, stack_t **LEVEL2, int nprod){
+int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t **LEVEL2, int nprod){
 int prod;
 
 
@@ -505,13 +505,13 @@ int prod;
 
   if (pl2->dotile){
 
-    // tile the stacks
+    // tile the bricks
     if ((tile_level2(pl2, cube, LEVEL2, nprod)) != SUCCESS){
       printf("Tiling images failed! "); return FAILURE; }
 
   } else {
 
-    // write stacks as they are
+    // write bricks as they are
     if ((flush_level2(pl2, meta, LEVEL2, nprod)) != SUCCESS){
       printf("Flushing images to disc failed! "); return FAILURE; }
 
@@ -520,7 +520,7 @@ int prod;
 
   /** clean
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  for (prod=0; prod<nprod; prod++) free_stack(LEVEL2[prod]);
+  for (prod=0; prod<nprod; prod++) free_brick(LEVEL2[prod]);
   free((void*)LEVEL2);
 
 
@@ -537,10 +537,10 @@ int prod;
 +++ file - or predefined (EQUI7/GLANCE7) datacubes (can be multiple
 +++ continental cubes) are compiled.
 --- pl2:    L2 parameters
---- stack:  input image stack
+--- brick:  input image brick
 +++ Return: data cube parameters for one cube
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_multicube(par_ll_t *pl2, stack_t *stack){
+multicube_t *start_multicube(par_ll_t *pl2, brick_t *brick){
 multicube_t *multicube = NULL;
 
 
@@ -555,7 +555,7 @@ multicube_t *multicube = NULL;
       strcmp(pl2->proj, "EQUI7-SA") == 0)){
 
     // initialize datacubes in EQUI7 specification
-    if ((multicube = start_equi7cube(pl2, stack)) == NULL){
+    if ((multicube = start_equi7cube(pl2, brick)) == NULL){
       printf("Starting EQUI7 datacubes failed.\n"); return NULL;}
 
   } else if (pl2->doreproj && 
@@ -569,13 +569,13 @@ multicube_t *multicube = NULL;
       strcmp(pl2->proj, "GLANCE7-SA") == 0)){
     
     // initialize datacubes in GLANCE7 specification
-    if ((multicube = start_glance7cube(pl2, stack)) == NULL){
+    if ((multicube = start_glance7cube(pl2, brick)) == NULL){
       printf("Starting GLANCE7 datacubes failed.\n"); return NULL;}
 
   } else {
 
     // initialize a single datacube (default)
-    if ((multicube = start_datacube(pl2, stack)) == NULL){
+    if ((multicube = start_datacube(pl2, brick)) == NULL){
       printf("Starting datacube failed.\n"); return NULL;}
 
   }

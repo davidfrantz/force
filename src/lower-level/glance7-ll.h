@@ -33,7 +33,7 @@ GLANCE header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../lower-level/param-ll.h"
 
 
@@ -41,7 +41,7 @@ GLANCE header
 extern "C" {
 #endif
 
-multicube_t *start_glance7cube(par_ll_t *pl2, stack_t *stack);
+multicube_t *start_glance7cube(par_ll_t *pl2, brick_t *brick);
 
 #ifdef __cplusplus
 }

@@ -32,7 +32,7 @@ Texture header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../higher-level/read-ard-hl.h"
 
 
@@ -50,7 +50,7 @@ typedef struct {
   short **bht_;
 } txt_t;
 
-stack_t **texture(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t **texture(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

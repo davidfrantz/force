@@ -30,11 +30,11 @@ This file contains functions for handling topographic effects
 
 top_t *allocate_topography();
 int init_topography(top_t *top);
-int ocean_topography(stack_t *DEM);
-int smooth_topography(stack_t *DEM);
-int exposition_topography(stack_t *DEM, stack_t *EXP, stack_t *QAI);
-int stats_topography(atc_t *atc, stack_t *DEM, stack_t *CDEM, stack_t *QAI);
-int illumination_topography(atc_t *atc, stack_t *EXP, stack_t *ILL, stack_t *SKY, stack_t *QAI);
+int ocean_topography(brick_t *DEM);
+int smooth_topography(brick_t *DEM);
+int exposition_topography(brick_t *DEM, brick_t *EXP, brick_t *QAI);
+int stats_topography(atc_t *atc, brick_t *DEM, brick_t *CDEM, brick_t *QAI);
+int illumination_topography(atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI);
 
 
 /** This function allocates the topographic variables
@@ -72,7 +72,7 @@ int init_topography(top_t *top){
 --- DEM:    Digital Elevation Model
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int ocean_topography(stack_t *DEM){
+int ocean_topography(brick_t *DEM){
 int i, j, ii, jj, p, np, nx, ny;
 float *dem_ = NULL;
 float nodata;
@@ -83,9 +83,9 @@ float nodata;
   #endif
   
   
-  nx = get_stack_ncols(DEM);
-  ny = get_stack_nrows(DEM);
-  nodata = get_stack_nodata(DEM, 0);
+  nx = get_brick_ncols(DEM);
+  ny = get_brick_nrows(DEM);
+  nodata = get_brick_nodata(DEM, 0);
   if ((dem_ = get_band_float(DEM, 0)) == NULL) return FAILURE;
 
   #pragma omp parallel private(i, ii, p, np) shared(nx, ny, dem_, nodata) default(none) 
@@ -157,7 +157,7 @@ float nodata;
 --- DEM:    Digital Elevation Model
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int smooth_topography(stack_t *DEM){
+int smooth_topography(brick_t *DEM){
 int i, j, ii, jj, ni, nj, p, np, nx, ny, nc, k;
 float *buf = NULL;
 float sum, num;
@@ -171,11 +171,11 @@ float nodata;
   #endif
   
   
-  nx = get_stack_ncols(DEM);
-  ny = get_stack_nrows(DEM);
-  nc = get_stack_ncells(DEM);
-  res = get_stack_res(DEM);
-  nodata = get_stack_nodata(DEM, 0);
+  nx = get_brick_ncols(DEM);
+  ny = get_brick_nrows(DEM);
+  nc = get_brick_ncells(DEM);
+  res = get_brick_res(DEM);
+  nodata = get_brick_nodata(DEM, 0);
   if ((dem_ = get_band_float(DEM, 0)) == NULL) return FAILURE;
 
 
@@ -244,7 +244,7 @@ float nodata;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int exposition_topography(stack_t *DEM, stack_t *EXP, stack_t *QAI){
+int exposition_topography(brick_t *DEM, brick_t *EXP, brick_t *QAI){
 int i, j, ii, jj, p, nx, ny, nc;
 float devx, devy;
 float tmp, dem[3][3];
@@ -262,11 +262,11 @@ bool valid;
   #endif
   
   
-  nx = get_stack_ncols(DEM);
-  ny = get_stack_nrows(DEM);
-  nc = get_stack_ncells(DEM);
-  res = get_stack_res(DEM);
-  nodata = (short)get_stack_nodata(DEM, 0);
+  nx = get_brick_ncols(DEM);
+  ny = get_brick_nrows(DEM);
+  nc = get_brick_ncells(DEM);
+  res = get_brick_res(DEM);
+  nodata = (short)get_brick_nodata(DEM, 0);
   if ((dem_ = get_band_float(DEM, 0)) == NULL) return FAILURE;
 
   if ((slp_ = get_band_ushort(EXP, ZEN)) == NULL) return FAILURE;
@@ -428,7 +428,7 @@ bool valid;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int stats_topography(atc_t *atc, stack_t *DEM, stack_t *CDEM, stack_t *QAI){
+int stats_topography(atc_t *atc, brick_t *DEM, brick_t *CDEM, brick_t *QAI){
 int p, nc;
 float dem, mn = SHRT_MAX, mx = SHRT_MIN;
 double sum = 0, num = 0;
@@ -441,7 +441,7 @@ small  *cdem_ = NULL;
   #endif
   
 
-  nc = get_stack_ncells(DEM);
+  nc = get_brick_ncells(DEM);
   if ((dem_ = get_band_float(DEM, 0)) == NULL) return FAILURE;
   if ((cdem_ = get_band_small(CDEM, 0)) == NULL) return FAILURE;
 
@@ -512,7 +512,7 @@ small  *cdem_ = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int illumination_topography(atc_t *atc, stack_t *EXP, stack_t *ILL, stack_t *SKY, stack_t *QAI){
+int illumination_topography(atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI){
 int p, g, nc;
 float slp, asp;
 ushort *slp_ = NULL;
@@ -527,7 +527,7 @@ float **sun_ = NULL;
   #endif
 
 
-  nc = get_stack_ncells(EXP);
+  nc = get_brick_ncells(EXP);
   if ((slp_ = get_band_ushort(EXP, ZEN)) == NULL) return FAILURE;
   if ((asp_ = get_band_ushort(EXP, AZI)) == NULL) return FAILURE;
   if ((ill_ = get_band_short(ILL, 0)) == NULL) return FAILURE;
@@ -543,7 +543,7 @@ float **sun_ = NULL;
 
       if (get_off(QAI, p)){ ill_[p] = -10000; continue;}
 
-      g = convert_stack_p2p(QAI, atc->xy_sun, p);
+      g = convert_brick_p2p(QAI, atc->xy_sun, p);
 
       slp = slp_[p]/10000.0;
       asp = asp_[p]/10000.0;
@@ -593,11 +593,11 @@ void free_topography(top_t *top){
 
   if (top == NULL) return;
 
-  free_stack(top->dem);
-  free_stack(top->exp);
-  free_stack(top->ill);
-  free_stack(top->sky);
-  free_stack(top->c);
+  free_brick(top->dem);
+  free_brick(top->exp);
+  free_brick(top->ill);
+  free_brick(top->sky);
+  free_brick(top->c);
 
   free((void*)top); top = NULL;
 
@@ -614,9 +614,9 @@ void free_topography(top_t *top){
 --- QAI:        Quality Assurance Information
 +++ Return:     SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int compile_topography(par_ll_t *pl2, atc_t *atc, top_t **topography, stack_t *QAI){
+int compile_topography(par_ll_t *pl2, atc_t *atc, top_t **topography, brick_t *QAI){
 top_t *top = NULL;
-stack_t *DEM = NULL;
+brick_t *DEM = NULL;
 
 
   #ifdef FORCE_CLOCK
@@ -626,18 +626,18 @@ stack_t *DEM = NULL;
   top = allocate_topography();
 
 
-  /** Digital Elevation Model stack **/
-  DEM = copy_stack(QAI, 1, _DT_FLOAT_);
-  set_stack_name(DEM, "FORCE DEM stack");
-  set_stack_product(DEM, "DEM");
-  set_stack_filename(DEM, "DEM");
-  set_stack_bandname(DEM, 0, "DEM");
-  set_stack_nodata(DEM, 0, pl2->dem_nodata);
+  /** Digital Elevation Model brick **/
+  DEM = copy_brick(QAI, 1, _DT_FLOAT_);
+  set_brick_name(DEM, "FORCE DEM brick");
+  set_brick_product(DEM, "DEM");
+  set_brick_filename(DEM, "DEM");
+  set_brick_bandname(DEM, 0, "DEM");
+  set_brick_nodata(DEM, 0, pl2->dem_nodata);
 
 
   // warp DEM to MEM or use flat DEM (z = 0m)
   if (strcmp(pl2->fdem, "NULL") != 0){
-    if ((warp_from_disc_to_known_stack(1, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
+    if ((warp_from_disc_to_known_brick(1, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
       printf("Reprojecting of DEM failed! "); return FAILURE;}
   }
 
@@ -653,64 +653,64 @@ stack_t *DEM = NULL;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(DEM); set_stack_open(DEM, OPEN_CREATE); write_stack(DEM);
+  print_brick_info(DEM); set_brick_open(DEM, OPEN_CREATE); write_brick(DEM);
   #endif
 
 
-  /** exposition stack **/
-  top->exp = copy_stack(DEM, 2, _DT_USHORT_);
-  set_stack_name(top->exp, "FORCE terrain exposition stack");
-  set_stack_product(top->exp, "EXP");
-  set_stack_filename(top->exp, "DEM-EXPOSITION");
-  set_stack_bandname(top->exp, ZEN, "Slope");
-  set_stack_bandname(top->exp, AZI, "Aspect");
+  /** exposition brick **/
+  top->exp = copy_brick(DEM, 2, _DT_USHORT_);
+  set_brick_name(top->exp, "FORCE terrain exposition brick");
+  set_brick_product(top->exp, "EXP");
+  set_brick_filename(top->exp, "DEM-EXPOSITION");
+  set_brick_bandname(top->exp, ZEN, "Slope");
+  set_brick_bandname(top->exp, AZI, "Aspect");
 
   if ((exposition_topography(DEM, top->exp, QAI)) != SUCCESS){
     printf("Slope/aspect failed! "); return FAILURE;}
     
   #ifdef FORCE_DEBUG
-  print_stack_info(top->exp); set_stack_open(top->exp, OPEN_CREATE); write_stack(top->exp);
+  print_brick_info(top->exp); set_brick_open(top->exp, OPEN_CREATE); write_brick(top->exp);
   #endif
 
   
   /** calculate DEM stats + binned DEM **/
-  top->dem = copy_stack(DEM, 1, _DT_SMALL_);
-  set_stack_name(top->dem, "FORCE binned DEM stack");
-  set_stack_product(top->dem, "BEM");
-  set_stack_filename(top->dem, "DEM-BINNED");
-  set_stack_bandname(top->dem, 0, "binned DEM");
+  top->dem = copy_brick(DEM, 1, _DT_SMALL_);
+  set_brick_name(top->dem, "FORCE binned DEM brick");
+  set_brick_product(top->dem, "BEM");
+  set_brick_filename(top->dem, "DEM-BINNED");
+  set_brick_bandname(top->dem, 0, "binned DEM");
 
   if ((stats_topography(atc, DEM, top->dem, QAI)) != SUCCESS){
     printf("Elevation statistics failed! "); return FAILURE;}
 
   #ifdef FORCE_DEBUG
-  print_stack_info(top->dem); set_stack_open(top->dem, OPEN_CREATE); write_stack(top->dem);
+  print_brick_info(top->dem); set_brick_open(top->dem, OPEN_CREATE); write_brick(top->dem);
   #endif
 
 
   /** illumination angle and sky view factor **/
-  top->ill = copy_stack(DEM, 1, _DT_SHORT_);
-  set_stack_name(top->ill, "FORCE Illumination angle stack");
-  set_stack_product(top->ill, "ILL");
-  set_stack_filename(top->ill, "DEM-ILLUMINATION");
-  set_stack_bandname(top->ill, 0, "Illumination angle");
+  top->ill = copy_brick(DEM, 1, _DT_SHORT_);
+  set_brick_name(top->ill, "FORCE Illumination angle brick");
+  set_brick_product(top->ill, "ILL");
+  set_brick_filename(top->ill, "DEM-ILLUMINATION");
+  set_brick_bandname(top->ill, 0, "Illumination angle");
 
-  top->sky = copy_stack(DEM, 1, _DT_USHORT_);
-  set_stack_name(top->sky, "FORCE Sky View Factor stack");
-  set_stack_product(top->sky, "SKY");
-  set_stack_filename(top->sky, "DEM-SKY-VIEW");
-  set_stack_bandname(top->sky, 0, "Sky View Factor");
+  top->sky = copy_brick(DEM, 1, _DT_USHORT_);
+  set_brick_name(top->sky, "FORCE Sky View Factor brick");
+  set_brick_product(top->sky, "SKY");
+  set_brick_filename(top->sky, "DEM-SKY-VIEW");
+  set_brick_bandname(top->sky, 0, "Sky View Factor");
 
   if (illumination_topography(atc, top->exp, top->ill, top->sky, QAI) != SUCCESS){
     printf("error in topographic correction. "); return FAILURE;}
 
-  free_stack(DEM);
+  free_brick(DEM);
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(top->ill); set_stack_open(top->ill, OPEN_CREATE); write_stack(top->ill);
-  print_stack_info(top->sky); set_stack_open(top->sky, OPEN_CREATE); write_stack(top->sky);
-  print_stack_info(QAI); set_stack_open(QAI, OPEN_CREATE); write_stack(QAI);
+  print_brick_info(top->ill); set_brick_open(top->ill, OPEN_CREATE); write_brick(top->ill);
+  print_brick_info(top->sky); set_brick_open(top->sky, OPEN_CREATE); write_brick(top->sky);
+  print_brick_info(QAI); set_brick_open(QAI, OPEN_CREATE); write_brick(QAI);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -734,7 +734,7 @@ stack_t *DEM = NULL;
 --- ILL:    Illumination angle
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *cfactor_topography(atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *DEM, stack_t *EXP, stack_t *ILL){
+brick_t *cfactor_topography(atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, brick_t *EXP, brick_t *ILL){
 int i, j, p, ii, jj, ip, jp, np, nx, ny, nc, g, z;
 int b_sw2;
 ushort s_min  = 350; // 2° slope
@@ -747,7 +747,7 @@ float tmp, res;
 float *swir_ = NULL;
 float rho_p, tss, tsd, szen, ms;
 int k, nk = 0, *K = NULL;
-stack_t *CF = NULL;
+brick_t *CF = NULL;
 ushort  *cf_ = NULL;
 short *sw1_ = NULL;
 short *sw2_ = NULL;
@@ -769,17 +769,17 @@ float **xyz_tsd = NULL;
   cite_me(_CITE_TOPCOR_);
   
   
-  CF = copy_stack(QAI, 1, _DT_USHORT_);
-  set_stack_name(CF, "FORCE C-factor stack");
-  set_stack_product(CF, "CFC");
-  set_stack_filename(CF, "DEM-C-FACTOR");
-  set_stack_bandname(CF, 0, "C-Factor");
-  set_stack_nodata(CF, 0, -9999);
+  CF = copy_brick(QAI, 1, _DT_USHORT_);
+  set_brick_name(CF, "FORCE C-factor brick");
+  set_brick_product(CF, "CFC");
+  set_brick_filename(CF, "DEM-C-FACTOR");
+  set_brick_bandname(CF, 0, "C-Factor");
+  set_brick_nodata(CF, 0, -9999);
 
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
-  res = get_stack_res(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
+  res = get_brick_res(QAI);
 
   if ((cf_  = get_band_ushort(CF, 0))         == NULL) return NULL;
   if ((sw1_ = get_domain_short(TOA, "SWIR1")) == NULL) return NULL;
@@ -856,7 +856,7 @@ float **xyz_tsd = NULL;
       // only do for illuminated pixels
       if (get_off(QAI, p) || ill_[p] < 0) continue;
 
-      g = convert_stack_ji2p(QAI, atc->xy_sun, i, j);
+      g = convert_brick_ji2p(QAI, atc->xy_sun, i, j);
       z = dem_[p];
 
       // f-factor, h0-factor, theoretical C-factor
@@ -985,7 +985,7 @@ float **xyz_tsd = NULL;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(CF); set_stack_open(CF, OPEN_CREATE); write_stack(CF);
+  print_brick_info(CF); set_brick_open(CF, OPEN_CREATE); write_brick(CF);
   #endif
   
   #ifdef FORCE_CLOCK
@@ -1005,20 +1005,20 @@ float **xyz_tsd = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int average_elevation_cell(int g, stack_t *CDEM, stack_t *FDEM, stack_t *QAI){
+int average_elevation_cell(int g, brick_t *CDEM, brick_t *FDEM, brick_t *QAI){
 int i, j, ii, jj, p, cell_size, nx, ny;
 double sum = 0, num = 0;
 small *dem_ = NULL;
 
 
   // coarse cell to fine pos
-  convert_stack_p2ji(CDEM, FDEM, g, &i, &j);
+  convert_brick_p2ji(CDEM, FDEM, g, &i, &j);
 
   // cellsize in fine pixels
-  cell_size = floor(get_stack_res(CDEM)/get_stack_res(FDEM));
+  cell_size = floor(get_brick_res(CDEM)/get_brick_res(FDEM));
   
-  nx = get_stack_ncols(FDEM);
-  ny = get_stack_nrows(FDEM);
+  nx = get_brick_ncols(FDEM);
+  ny = get_brick_nrows(FDEM);
 
   if ((dem_  = get_band_small(FDEM, 0)) == NULL) return FAILURE;
 
@@ -1037,9 +1037,9 @@ small *dem_ = NULL;
   }
 
   if (num>0){
-    set_stack(CDEM, 0, g, round(sum/num));
+    set_brick(CDEM, 0, g, round(sum/num));
   } else {
-    set_stack(CDEM, 0, g, 0);
+    set_brick(CDEM, 0, g, 0);
   }
   
   return SUCCESS;

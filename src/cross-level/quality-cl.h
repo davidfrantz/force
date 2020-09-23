@@ -26,39 +26,39 @@ Quality assurance header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void set_qai(stack_t *qai, int index, int p, short val);
-short get_qai(stack_t *qai, int index, int p, int bitfields);
-bool get_off(stack_t *qai, int p);
-char get_cloud(stack_t *qai, int p);
-bool get_shadow(stack_t *qai, int p);
-bool get_snow(stack_t *qai, int p);
-bool get_water(stack_t *qai, int p);
-char get_aerosol(stack_t *qai, int p);
-bool get_subzero(stack_t *qai, int p);
-bool get_saturation(stack_t *qai, int p);
-bool get_lowsun(stack_t *qai, int p);
-char get_illumination(stack_t *qai, int p);
-bool get_slope(stack_t *qai, int p);
-bool get_vaporfill(stack_t *qai, int p);
-void set_off(stack_t *qai, int p, short val);
-void set_cloud(stack_t *qai, int p, short val);
-void set_shadow(stack_t *qai, int p, short val);
-void set_snow(stack_t *qai, int p, short val);
-void set_water(stack_t *qai, int p, short val);
-void set_aerosol(stack_t *qai, int p, short val);
-void set_subzero(stack_t *qai, int p, short val);
-void set_saturation(stack_t *qai, int p, short val);
-void set_lowsun(stack_t *qai, int p, short val);
-void set_illumination(stack_t *qai, int p, short val);
-void set_slope(stack_t *qai, int p, short val);
-void set_vaporfill(stack_t *qai, int p, short val);
+void set_qai(brick_t *qai, int index, int p, short val);
+short get_qai(brick_t *qai, int index, int p, int bitfields);
+bool get_off(brick_t *qai, int p);
+char get_cloud(brick_t *qai, int p);
+bool get_shadow(brick_t *qai, int p);
+bool get_snow(brick_t *qai, int p);
+bool get_water(brick_t *qai, int p);
+char get_aerosol(brick_t *qai, int p);
+bool get_subzero(brick_t *qai, int p);
+bool get_saturation(brick_t *qai, int p);
+bool get_lowsun(brick_t *qai, int p);
+char get_illumination(brick_t *qai, int p);
+bool get_slope(brick_t *qai, int p);
+bool get_vaporfill(brick_t *qai, int p);
+void set_off(brick_t *qai, int p, short val);
+void set_cloud(brick_t *qai, int p, short val);
+void set_shadow(brick_t *qai, int p, short val);
+void set_snow(brick_t *qai, int p, short val);
+void set_water(brick_t *qai, int p, short val);
+void set_aerosol(brick_t *qai, int p, short val);
+void set_subzero(brick_t *qai, int p, short val);
+void set_saturation(brick_t *qai, int p, short val);
+void set_lowsun(brick_t *qai, int p, short val);
+void set_illumination(brick_t *qai, int p, short val);
+void set_slope(brick_t *qai, int p, short val);
+void set_vaporfill(brick_t *qai, int p, short val);
 
 #ifdef __cplusplus
 }

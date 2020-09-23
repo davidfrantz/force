@@ -50,7 +50,7 @@ typedef struct {
 
 #include "../higher-level/bap-hl.h"
 
-stack_t **level3(ard_t *ard, ard_t *lsp, stack_t *mask, int nt, int nlsp, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t **level3(ard_t *ard, ard_t *lsp, brick_t *mask, int nt, int nlsp, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

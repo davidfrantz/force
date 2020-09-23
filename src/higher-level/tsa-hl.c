@@ -28,8 +28,8 @@ This file contains functions for Level 3 processing
 #include "tsa-hl.h"
 
 
-stack_t *compile_tsa_stack(stack_t *ard, int nb, int idx, int write, char *prodname, par_hl_t *phl);
-stack_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
+brick_t *compile_tsa_brick(brick_t *ard, int nb, int idx, int write, char *prodname, par_hl_t *phl);
+brick_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
 
 typedef struct {
   int  prodlen;
@@ -38,12 +38,12 @@ typedef struct {
   int  enable;
   int  write;
   short ***ptr;
-} stack_compile_info_t;
+} brick_compile_info_t;
 
 enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_ };
 
 
-int info_tss(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
+int info_tss(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
 
   info[o].prodlen  = nt;
   strncpy(info[o].prodname, "TSS", 3); info[o].prodname[3] = '\0';
@@ -55,7 +55,7 @@ int info_tss(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl
   return o+1;
 }
 
-int info_tsi(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+int info_tsi(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 
 
   info[o].prodlen  = ni;
@@ -68,7 +68,7 @@ int info_tsi(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl
   return o+1;
 }
 
-int info_stm(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_stm(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 
 
   info[o].prodlen  = phl->tsa.stm.sta.nmetrics;
@@ -81,7 +81,7 @@ int info_stm(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
   return o+1;
 }
 
-int info_rms(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
+int info_rms(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
 
 
   info[o].prodlen  = nt;
@@ -94,7 +94,7 @@ int info_rms(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl
   return o+1;
 }
 
-int info_spl(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+int info_spl(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 
 
   info[o].prodlen  = ni;
@@ -107,7 +107,7 @@ int info_spl(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl
   return o+1;
 }
 
-int info_fby(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_fby(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
@@ -135,7 +135,7 @@ int p = o;
   return p;
 }
 
-int info_fbq(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_fbq(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
@@ -163,7 +163,7 @@ int p = o;
   return p;
 }
 
-int info_fbm(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_fbm(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
@@ -191,7 +191,7 @@ int p = o;
   return p;
 }
 
-int info_fbw(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_fbw(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
@@ -219,7 +219,7 @@ int p = o;
   return p;
 }
 
-int info_fbd(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_fbd(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
@@ -247,7 +247,7 @@ int p = o;
   return p;
 }
 
-int info_lsp(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+int info_lsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int l, p = o;
 int nchar;
 
@@ -288,7 +288,7 @@ int nchar;
   return p;
 }
 
-int info_pol(stack_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
+int info_pol(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 int l, p = o;
 int nchar;
 
@@ -345,7 +345,7 @@ int nchar;
 
 
 
-/** This function compiles the stacks, in which TSA results are stored. 
+/** This function compiles the bricks, in which TSA results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
 +++ arrays.
 --- ard:      ARD
@@ -355,11 +355,11 @@ int nchar;
 --- nt:       number of ARD products over time
 --- ni:       number of interpolated products over time
 --- idx:      spectral index
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for TSA results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for TSA results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_tsa(ard_t *ard, tsa_t *ts, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct){
-stack_t **TSA = NULL;
+brick_t **compile_tsa(ard_t *ard, tsa_t *ts, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct){
+brick_t **TSA = NULL;
 int t, k;
 date_t date;
 char fdate[NPOW_10];
@@ -369,7 +369,7 @@ int nchar;
 int o = 0, nprod;
 int error = 0;
 
-stack_compile_info_t *info = NULL;
+brick_compile_info_t *info = NULL;
 
 
   nprod = 5 +            // TSS, RMS, TSI, STM, SPL,
@@ -386,7 +386,7 @@ stack_compile_info_t *info = NULL;
 
   //printf("%d potential products.\n", nprod);
 
-  alloc((void**)&info, nprod, sizeof(stack_compile_info_t));
+  alloc((void**)&info, nprod, sizeof(brick_compile_info_t));
 
   o = info_tss(info, o, nt, ts, phl);
   o = info_rms(info, o, nt, ts, phl);
@@ -402,7 +402,7 @@ stack_compile_info_t *info = NULL;
   o = info_pol(info, o, ni, ts, phl);
 
 
-  alloc((void**)&TSA, nprod, sizeof(stack_t*));
+  alloc((void**)&TSA, nprod, sizeof(brick_t*));
 
 
 //printf("about to allocate %d %d %d %d %d %d %d %d dates\n", 
@@ -429,7 +429,7 @@ stack_compile_info_t *info = NULL;
       
       //printf("Yes\n");
       
-      if ((TSA[o] = compile_tsa_stack(ard[0].DAT, info[o].prodlen, idx, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
+      if ((TSA[o] = compile_tsa_brick(ard[0].DAT, info[o].prodlen, idx, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
         printf("Error compiling %s product. ", info[o].prodname); error++;
       } else {
 
@@ -440,146 +440,146 @@ stack_compile_info_t *info = NULL;
 
           switch (info[o].prodtype){
             case _full_:
-              date = get_stack_date(ard[t].DAT, 0);
-              get_stack_sensor(ard[t].DAT, 0, sensor, NPOW_04);
-              set_stack_sensor(TSA[o], t, sensor);
+              date = get_brick_date(ard[t].DAT, 0);
+              get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+              set_brick_sensor(TSA[o], t, sensor);
               copy_date(&date, &ts->d_tss[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
-              set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
-              set_stack_unit(TSA[o], t, "decimal year");
+              set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
+              set_brick_unit(TSA[o], t, "decimal year");
               nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              //set_stack_domain(TSA[o], t, domain);
-              set_stack_bandname(TSA[o], t, domain);
+              //set_brick_domain(TSA[o], t, domain);
+              set_brick_bandname(TSA[o], t, domain);
               break;
             case _stats_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              //set_brick_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
               if (phl->tsa.tsi.method == _INT_NONE_){
-                date = get_stack_date(ard[t].DAT, 0);
+                date = get_brick_date(ard[t].DAT, 0);
               } else {
                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
               }
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_tsi[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
-              set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
-              set_stack_unit(TSA[o], t, "decimal year");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
+              set_brick_unit(TSA[o], t, "decimal year");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fby[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case  _quarter_:
               while (k < 5 && !phl->date_quarters[k]) k++;
               set_date_quarter(&date, k);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbq[t]);
               nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "quarter");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "quarter");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _month_: 
               while (k < 13 && !phl->date_months[k]) k++;
               set_date_month(&date, k);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbm[t]);
               nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "month");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "month");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _week_: 
               while (k < 53 && !phl->date_weeks[k]) k++;
               set_date_week(&date, k);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbw[t]);
               nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "week");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "week");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _day_: 
               while (k < 366 && !phl->date_doys[k]) k++;
               set_date_doy(&date, k);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_fbd[t]);
               nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, k);
-              set_stack_unit(TSA[o], t, "day of year");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, k);
+              set_brick_unit(TSA[o], t, "day of year");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               k++;
               break;
             case _lsp_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t+1);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_lsp[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _pol_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t);
-              set_stack_sensor(TSA[o], t, "BLEND");
+              set_brick_sensor(TSA[o], t, "BLEND");
               copy_date(&date, &ts->d_pol[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_stack_wavelength(TSA[o], t, date.year);
-              set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
-              set_stack_bandname(TSA[o], t, fdate);
+              set_brick_wavelength(TSA[o], t, date.year);
+              set_brick_unit(TSA[o], t, "year");
+              //set_brick_domain(TSA[o], t, fdate);
+              set_brick_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              //set_brick_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
-              set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
-              set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              set_brick_sensor(TSA[o], t, "BLEND");
+              //set_brick_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              set_brick_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               break;
             default:
               printf("unknown tsa type.\n"); error++;
               break;
           }
           
-          set_stack_date(TSA[o], t, date);
+          set_brick_date(TSA[o], t, date);
 
         }
 
@@ -626,7 +626,7 @@ stack_compile_info_t *info = NULL;
 
   if (error > 0){
     printf("%d compiling TSA product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(TSA[o]);
+    for (o=0; o<nprod; o++) free_brick(TSA[o]);
     free((void*)TSA);
     if (ts->d_tss != NULL){ free((void*)ts->d_tss); ts->d_tss = NULL;}
     if (ts->d_tsi != NULL){ free((void*)ts->d_tsi); ts->d_tsi = NULL;}
@@ -647,18 +647,18 @@ stack_compile_info_t *info = NULL;
 }
 
 
-/** This function compiles a TSA stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
+/** This function compiles a TSA brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
 --- idx:       spectral index
---- write:     should this stack be written, or only used internally?
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for TSA result
++++ Return:    brick for TSA result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_tsa_stack(stack_t *from, int nb, int idx, int write, char *prodname, par_hl_t *phl){
+brick_t *compile_tsa_brick(brick_t *from, int nb, int idx, int write, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
@@ -666,17 +666,17 @@ char domain[NPOW_10];
 int nchar;
 
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Time Series Analysis");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Time Series Analysis");
+  set_brick_product(brick, prodname);
 
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_TSA_%s_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
@@ -684,26 +684,26 @@ int nchar;
     phl->sen.target, phl->tsa.index_name[idx], prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
   
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else {
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   sprintf(domain, "%s_%s", phl->tsa.index_name[idx], prodname);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
-    set_stack_date(stack, b, date);
-    set_stack_domain(stack, b, domain);
+    set_brick_save(brick, b, true);
+    set_brick_date(brick, b, date);
+    set_brick_domain(brick, b, domain);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -718,13 +718,13 @@ int nchar;
 --- phl:       HL parameters
 --- endmember: endmember (if SMA was selected)
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with TSA results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with TSA results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **time_series_analysis(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct){
+brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct){
 tsa_t ts;
-stack_t ***TSA;
-stack_t **PTR;
+brick_t ***TSA;
+brick_t **PTR;
 small *mask_ = NULL;
 int idx;
 int o, k, nprod = 0;
@@ -733,9 +733,9 @@ int ni;
 short nodata;
 
 
-  // import stacks
-  nc = get_stack_chunkncells(ard[0].DAT);
-  nodata = get_stack_nodata(ard[0].DAT, 0);
+  // import bricks
+  nc = get_brick_chunkncells(ard[0].DAT);
+  nodata = get_brick_nodata(ard[0].DAT, 0);
 
   // import mask (if available)
   if (mask != NULL){
@@ -744,7 +744,7 @@ short nodata;
   }
 
 //  printf("allocating %d indices\n", phl->tsa.n);
-  alloc((void**)&TSA, phl->tsa.n, sizeof(stack_t**));
+  alloc((void**)&TSA, phl->tsa.n, sizeof(brick_t**));
 
   // number of steps for interpolation
   if (phl->tsa.tsi.method == _INT_NONE_){
@@ -757,7 +757,7 @@ short nodata;
   
   for (idx=0; idx<phl->tsa.n; idx++){
 
-    // compile products + stacks
+    // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, ni, idx, &nprod)) == NULL || nprod == 0){
       printf("Unable to compile TSA products!\n"); 
       free((void*)TSA);
@@ -799,8 +799,8 @@ short nodata;
   }
   
 
-  // flatten out TSA stacks for returning to main
-  alloc((void**)&PTR, phl->tsa.n*nprod, sizeof(stack_t*));
+  // flatten out TSA bricks for returning to main
+  alloc((void**)&PTR, phl->tsa.n*nprod, sizeof(brick_t*));
   
   for (idx=0, k=0; idx<phl->tsa.n; idx++){
     for (o=0; o<nprod; o++, k++) PTR[k] = TSA[idx][o];

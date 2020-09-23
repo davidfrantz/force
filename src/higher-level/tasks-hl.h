@@ -32,7 +32,7 @@ Higher level tasks header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/lock-cl.h"
 #include "../higher-level/progress-hl.h"
@@ -56,9 +56,9 @@ Higher level tasks header
 extern "C" {
 #endif
 
-void read_higher_level (progress_t *pro, stack_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl);
-void compute_higher_level (progress_t *pro, stack_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, stack_t ***OUTPUT, int *nprod);
-void output_higher_level (progress_t *pro, stack_t ***OUTPUT, int *nprod, par_hl_t *phl);
+void read_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl);
+void compute_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, brick_t ***OUTPUT, int *nprod);
+void output_higher_level (progress_t *pro, brick_t ***OUTPUT, int *nprod, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

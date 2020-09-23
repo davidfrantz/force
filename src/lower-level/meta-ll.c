@@ -72,7 +72,7 @@ void free_metadata(meta_t *meta){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int init_metadata(meta_t *meta){
   #ifdef FORCE_DEBUG
-printf("check that all meta is initialized, stack as well?\n");
+printf("check that all meta is initialized, brick as well?\n");
 #endif
 
   meta->fill = SHRT_MIN;
@@ -151,16 +151,16 @@ int init_calibration(cal_t *cal){
 /** This function tests if all metadata are OK
 --- pl2:    L2 parameters
 --- meta:   metadata
---- DN:     Digital Number stack
+--- DN:     Digital Number brick
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int check_metadata(par_ll_t *pl2, meta_t *meta, stack_t *DN){
+int check_metadata(par_ll_t *pl2, meta_t *meta, brick_t *DN){
 int b, b_temp, nb;
 #ifdef FORCE_DEBUG
-printf("init and check for stack struct, too?\n");
+printf("init and check for brick struct, too?\n");
 #endif
 
-  if ((nb = get_stack_nbands(DN)) < 0){
+  if ((nb = get_brick_nbands(DN)) < 0){
     printf("error in retrieving number of bands. "); return FAILURE;}
 
   if ((b_temp = find_domain(DN, "TEMP")) < 0){
@@ -260,11 +260,11 @@ char basename[NPOW_10];
 /** This function reads the Landsat metadata
 --- pl2:    L2 parameters
 --- meta:   metadata
---- dn:     Digital Number stack
+--- dn:     Digital Number brick
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, stack_t **dn){
-stack_t *DN = NULL;
+int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, brick_t **dn){
+brick_t *DN = NULL;
 FILE *fp = NULL;
 char metaname[NPOW_10];
 char  buffer[NPOW_10] = "\0";
@@ -320,13 +320,13 @@ GDALDatasetH fp_;
           nb = 7;
         }
 
-        DN = allocate_stack(nb, 0, _DT_NONE_);
+        DN = allocate_brick(nb, 0, _DT_NONE_);
 
         nchar = snprintf(sensor, NPOW_04, "LND%02d", lid);
         if (nchar < 0 || nchar >= NPOW_04){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
-        for (b=0; b<nb; b++) set_stack_sensor(DN, b, sensor);
+        for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
 
 
         meta->cal = allocate_calibration(nb);
@@ -362,84 +362,84 @@ GDALDatasetH fp_;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "1");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "ULTRABLUE");
+          set_brick_domain(DN, b, "ULTRABLUE");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "2");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "BLUE");
+          set_brick_domain(DN, b, "BLUE");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "3");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "GREEN");
+          set_brick_domain(DN, b, "GREEN");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "4");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "RED");
+          set_brick_domain(DN, b, "RED");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "5");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "NIR");
+          set_brick_domain(DN, b, "NIR");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "9");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "CIRRUS");
+          set_brick_domain(DN, b, "CIRRUS");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "6");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "SWIR1");
+          set_brick_domain(DN, b, "SWIR1");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "7");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "SWIR2");
+          set_brick_domain(DN, b, "SWIR2");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "10");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "TEMP");
+          set_brick_domain(DN, b, "TEMP");
           b++;
 
         } else {
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "1");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "BLUE");
+          set_brick_domain(DN, b, "BLUE");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "2");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "GREEN");
+          set_brick_domain(DN, b, "GREEN");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "3");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "RED");
+          set_brick_domain(DN, b, "RED");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "4");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "NIR");
+          set_brick_domain(DN, b, "NIR");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "5");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "SWIR1");
+          set_brick_domain(DN, b, "SWIR1");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "7");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "SWIR2");
+          set_brick_domain(DN, b, "SWIR2");
           b++;
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "6");
           meta->cal[b].rsr_band = b_rsr++;
-          set_stack_domain(DN, b, "TEMP");
+          set_brick_domain(DN, b, "TEMP");
           b++;
 
         }
@@ -471,23 +471,23 @@ GDALDatasetH fp_;
       // dimension variables
       } else if (strcmp(tag, "PRODUCT_SAMPLES_REF") == 0 ||
                  strcmp(tag, "REFLECTIVE_SAMPLES") == 0){
-        set_stack_ncols(DN, atoi(tokenptr));
+        set_brick_ncols(DN, atoi(tokenptr));
       } else if (strcmp(tag, "PRODUCT_LINES_REF") == 0 ||
                  strcmp(tag, "REFLECTIVE_LINES") == 0){
-        set_stack_nrows(DN, atoi(tokenptr));
+        set_brick_nrows(DN, atoi(tokenptr));
 
       // resolution variables
       } else if (strcmp(tag, "GRID_CELL_SIZE_REF") == 0 ||
                  strcmp(tag, "GRID_CELL_SIZE_REFLECTIVE") == 0){
-        set_stack_res(DN, atoi(tokenptr));
+        set_brick_res(DN, atoi(tokenptr));
 
       // bounding box variables: map
       } else if (strcmp(tag, "PRODUCT_UL_CORNER_MAPX") == 0 ||
           strcmp(tag, "CORNER_UL_PROJECTION_X_PRODUCT") == 0){
-        set_stack_ulx(DN, atof(tokenptr)-15);
+        set_brick_ulx(DN, atof(tokenptr)-15);
       } else if (strcmp(tag, "PRODUCT_UL_CORNER_MAPY") == 0 ||
           strcmp(tag, "CORNER_UL_PROJECTION_Y_PRODUCT") == 0){
-        set_stack_uly(DN, atof(tokenptr)+15);
+        set_brick_uly(DN, atof(tokenptr)+15);
 
       // acquisition variables
       } else if (strcmp(tag, "WRS_PATH") == 0){
@@ -555,38 +555,38 @@ GDALDatasetH fp_;
 
 
 
-  set_stack_name(DN, "FORCE Digital Number stack");
-  set_stack_open(DN, false);
-  set_stack_format(DN, pl2->format);
-  set_stack_datatype(DN, _DT_USHORT_);
-  set_stack_product(DN, "DN_");
+  set_brick_name(DN, "FORCE Digital Number brick");
+  set_brick_open(DN, false);
+  set_brick_format(DN, pl2->format);
+  set_brick_datatype(DN, _DT_USHORT_);
+  set_brick_product(DN, "DN_");
 
   if ((fp_ = GDALOpen(meta->cal[0].fname, GA_ReadOnly)) == NULL){
     printf("unable to open for fetching projection from %s. ", meta->cal[0].fname); return FAILURE;}
-  set_stack_proj(DN, (char*)GDALGetProjectionRef(fp_));
+  set_brick_proj(DN, (char*)GDALGetProjectionRef(fp_));
   GDALClose(fp_);
 
   for (b=0; b<nb; b++){
-    set_stack_save(DN, b, true);
-    set_stack_nodata(DN, b, 0);
-    set_stack_date(DN, b, date);
-    set_stack_scale(DN, b, 1);
-    set_stack_unit(DN, b, "micrometers");
-    get_stack_domain(DN, b, domain, NPOW_10);
-    set_stack_bandname(DN, b, domain);
+    set_brick_save(DN, b, true);
+    set_brick_nodata(DN, b, 0);
+    set_brick_date(DN, b, date);
+    set_brick_scale(DN, b, 1);
+    set_brick_unit(DN, b, "micrometers");
+    get_brick_domain(DN, b, domain, NPOW_10);
+    set_brick_bandname(DN, b, domain);
     if (b != b_temp){
-      set_stack_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
+      set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
     } else {
-      set_stack_wavelength(DN, b, 11.0); // approximate wavelength for thermal
+      set_brick_wavelength(DN, b, 11.0); // approximate wavelength for thermal
     }
   }
 
-  set_stack_dirname(DN, pl2->d_temp);
+  set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
-  set_stack_dirname(DN, pl2->d_level1);
+  set_brick_dirname(DN, pl2->d_level1);
   #endif
-  set_stack_filename(DN, "DIGITAL-NUMBERS");
-  set_stack_par(DN, pl2->params->log);
+  set_brick_filename(DN, "DIGITAL-NUMBERS");
+  set_brick_par(DN, pl2->params->log);
 
   nchar = snprintf(meta->refsys, NPOW_04, "%03d%03d", path, row);
   if (nchar < 0 || nchar >= NPOW_04){
@@ -611,7 +611,7 @@ GDALDatasetH fp_;
 
   #ifdef FORCE_DEBUG
   print_metadata(meta, nb);
-  print_stack_info(DN);
+  print_brick_info(DN);
   #endif
 
 
@@ -626,11 +626,11 @@ GDALDatasetH fp_;
 /** This function reads the Sentinel-2 metadata
 --- pl2:    L2 parameters
 --- meta:   metadata
---- dn:     Digital Number stack
+--- dn:     Digital Number brick
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, stack_t **dn){
-stack_t *DN = NULL;
+int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, brick_t **dn){
+brick_t *DN = NULL;
 FILE *fp = NULL;
 char metaname[NPOW_10];
 char  buffer[NPOW_13] = "\0";
@@ -670,11 +670,11 @@ int svgrid = 5000;
 
 
   nb = 13;
-  DN = allocate_stack(nb, 0, _DT_NONE_);
+  DN = allocate_brick(nb, 0, _DT_NONE_);
 
-  set_stack_res(DN, INT_MAX);
-  set_stack_ncols(DN, 1);
-  set_stack_nrows(DN, 1);
+  set_brick_res(DN, INT_MAX);
+  set_brick_ncols(DN, 1);
+  set_brick_nrows(DN, 1);
 
 
 
@@ -722,7 +722,7 @@ int svgrid = 5000;
         if (nchar < 0 || nchar >= NPOW_04){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
-        for (b=0; b<nb; b++) set_stack_sensor(DN, b, sensor);
+        for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
 
         meta->cal = allocate_calibration(nb);
         //alloc((void**)&meta->cal, nb, sizeof(cal_t));
@@ -745,67 +745,67 @@ int svgrid = 5000;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "01");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "ULTRABLUE");
+        set_brick_domain(DN, b, "ULTRABLUE");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "02");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "BLUE");
+        set_brick_domain(DN, b, "BLUE");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "03");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "GREEN");
+        set_brick_domain(DN, b, "GREEN");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "04");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "RED");
+        set_brick_domain(DN, b, "RED");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "05");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "REDEDGE1");
+        set_brick_domain(DN, b, "REDEDGE1");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "06");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "REDEDGE2");
+        set_brick_domain(DN, b, "REDEDGE2");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "07");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "REDEDGE3");
+        set_brick_domain(DN, b, "REDEDGE3");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "08");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "BROADNIR");
+        set_brick_domain(DN, b, "BROADNIR");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "8A");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "NIR");
+        set_brick_domain(DN, b, "NIR");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "09");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "VAPOR");
+        set_brick_domain(DN, b, "VAPOR");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "10");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "CIRRUS");
+        set_brick_domain(DN, b, "CIRRUS");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "11");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "SWIR1");
+        set_brick_domain(DN, b, "SWIR1");
         b++;
 
         copy_string(meta->cal[b].orig_band, NPOW_03, "12");
         meta->cal[b].rsr_band = b_rsr++;
-        set_stack_domain(DN, b, "SWIR2");
+        set_brick_domain(DN, b, "SWIR2");
         b++;
 
         nchar = snprintf(d_img, NPOW_10, "%s/IMG_DATA", pl2->d_level1);
@@ -863,10 +863,10 @@ int svgrid = 5000;
 
       // scaling factor
       } else if (strcmp(tag, "QUANTIFICATION_VALUE") == 0){
-        for (b=0; b<nb; b++) set_stack_scale(DN, b, atoi(tokenptr));
+        for (b=0; b<nb; b++) set_brick_scale(DN, b, atoi(tokenptr));
         while (strcmp(tokenptr, "/QUANTIFICATION_VALUE") != 0){
           if (atoi(tokenptr) != 0){
-            for (b=0; b<nb; b++) set_stack_scale(DN, b, atoi(tokenptr));
+            for (b=0; b<nb; b++) set_brick_scale(DN, b, atoi(tokenptr));
           }
           tag = tokenptr;
           tokenptr = strtok(NULL, separator);
@@ -912,17 +912,17 @@ int svgrid = 5000;
 
       // nx/ny/res of highest resolution bands
       if (strcmp(tag, "resolution") == 0){
-        if (atoi(tokenptr) < get_stack_res(DN)){
-          set_stack_res(DN, atoi(tokenptr));
+        if (atoi(tokenptr) < get_brick_res(DN)){
+          set_brick_res(DN, atoi(tokenptr));
         }
       } else if (strcmp(tag, "NROWS") == 0){
-        if (atoi(tokenptr) > get_stack_nrows(DN)) set_stack_nrows(DN, atoi(tokenptr));
+        if (atoi(tokenptr) > get_brick_nrows(DN)) set_brick_nrows(DN, atoi(tokenptr));
       } else if (strcmp(tag, "NCOLS") == 0){
-        if (atoi(tokenptr) > get_stack_ncols(DN)) set_stack_ncols(DN, atoi(tokenptr));
+        if (atoi(tokenptr) > get_brick_ncols(DN)) set_brick_ncols(DN, atoi(tokenptr));
       } else if (strcmp(tag, "ULX") == 0){
-        set_stack_ulx(DN, atof(tokenptr));
+        set_brick_ulx(DN, atof(tokenptr));
       } else if (strcmp(tag, "ULY") == 0){
-        set_stack_uly(DN, atof(tokenptr));
+        set_brick_uly(DN, atof(tokenptr));
 
       // sun/view grids
       } else if (strcmp(tag, "COL_STEP") == 0){
@@ -931,8 +931,8 @@ int svgrid = 5000;
         if (svgrid != atoi(tokenptr)){
           printf("SUN_VIEW_GRID is incompatible with Sentinel-2 metadata. "); return FAILURE;}
 
-        sv_nx = ceil(get_stack_width(DN)/(float)svgrid);
-        sv_ny = ceil(get_stack_height(DN)/(float)svgrid);
+        sv_nx = ceil(get_brick_width(DN)/(float)svgrid);
+        sv_ny = ceil(get_brick_height(DN)/(float)svgrid);
         if (s_sz == NULL) alloc_2D((void***)&s_sz, sv_ny, sv_nx, sizeof(float));
         if (s_vz == NULL) alloc_2D((void***)&s_vz, sv_ny, sv_nx, sizeof(float));
         if (s_sa == NULL) alloc_2D((void***)&s_sa, sv_ny, sv_nx, sizeof(float));
@@ -1041,7 +1041,7 @@ int svgrid = 5000;
 
   if (meta->s2.nx <= 0 || meta->s2.ny <= 0){
     printf("no valid cell after subsetting. Abort.\n");
-    free_stack(DN);
+    free_brick(DN);
     exit(SUCCESS);
   }
 
@@ -1104,13 +1104,13 @@ int svgrid = 5000;
   //right++;
   //bottom++;
 
-  meta->s2.left   = left   * svgrid/get_stack_res(DN);
-  meta->s2.top    = top    * svgrid/get_stack_res(DN);
-  meta->s2.right  = right  * svgrid/get_stack_res(DN);
-  meta->s2.bottom = bottom * svgrid/get_stack_res(DN);
+  meta->s2.left   = left   * svgrid/get_brick_res(DN);
+  meta->s2.top    = top    * svgrid/get_brick_res(DN);
+  meta->s2.right  = right  * svgrid/get_brick_res(DN);
+  meta->s2.bottom = bottom * svgrid/get_brick_res(DN);
 
-  if (meta->s2.right > get_stack_ncols(DN))  meta->s2.right  = get_stack_ncols(DN);
-  if (meta->s2.bottom > get_stack_nrows(DN)) meta->s2.bottom = get_stack_nrows(DN);
+  if (meta->s2.right > get_brick_ncols(DN))  meta->s2.right  = get_brick_ncols(DN);
+  if (meta->s2.bottom > get_brick_nrows(DN)) meta->s2.bottom = get_brick_nrows(DN);
 
   free_2D((void**)s_sz, sv_ny);
   free_2D((void**)s_sa, sv_ny);
@@ -1124,44 +1124,44 @@ int svgrid = 5000;
   printf("coarse cells: nx/ny %d/%d\n", meta->s2.nx, meta->s2.ny);
   #endif
 
-  set_stack_ncols(DN, meta->s2.right-meta->s2.left);
-  set_stack_nrows(DN, meta->s2.bottom-meta->s2.top);
+  set_brick_ncols(DN, meta->s2.right-meta->s2.left);
+  set_brick_nrows(DN, meta->s2.bottom-meta->s2.top);
 
-  set_stack_ulx(DN, get_stack_x(DN, meta->s2.left));
-  set_stack_uly(DN, get_stack_y(DN, meta->s2.top));
+  set_brick_ulx(DN, get_brick_x(DN, meta->s2.left));
+  set_brick_uly(DN, get_brick_y(DN, meta->s2.top));
 
-  set_stack_name(DN, "FORCE Digital Number stack");
-  set_stack_open(DN, false);
-  set_stack_format(DN, pl2->format);
-  set_stack_datatype(DN, _DT_USHORT_);
-  set_stack_product(DN, "DN_");
+  set_brick_name(DN, "FORCE Digital Number brick");
+  set_brick_open(DN, false);
+  set_brick_format(DN, pl2->format);
+  set_brick_datatype(DN, _DT_USHORT_);
+  set_brick_product(DN, "DN_");
 
   if ((fp_ = GDALOpen(meta->cal[0].fname, GA_ReadOnly)) == NULL){
     printf("unable to open %s. ", meta->cal[0].fname); return FAILURE;}
-  set_stack_proj(DN, (char*)GDALGetProjectionRef(fp_));
+  set_brick_proj(DN, (char*)GDALGetProjectionRef(fp_));
   GDALClose(fp_);
 
   for (b=0; b<nb; b++){
-    set_stack_save(DN, b, true);
-    set_stack_nodata(DN, b, 0);
-    set_stack_date(DN, b, date);
-    set_stack_unit(DN, b, "micrometers");
-    get_stack_domain(DN, b, domain, NPOW_10);
-    set_stack_bandname(DN, b, domain);
-    set_stack_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
+    set_brick_save(DN, b, true);
+    set_brick_nodata(DN, b, 0);
+    set_brick_date(DN, b, date);
+    set_brick_unit(DN, b, "micrometers");
+    get_brick_domain(DN, b, domain, NPOW_10);
+    set_brick_bandname(DN, b, domain);
+    set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
   }
 
-  set_stack_dirname(DN, pl2->d_temp);
+  set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
-  set_stack_dirname(DN, pl2->d_level1);
+  set_brick_dirname(DN, pl2->d_level1);
   #endif
-  set_stack_filename(DN, "DIGITAL-NUMBERS");
-  set_stack_par(DN, pl2->params->log);
+  set_brick_filename(DN, "DIGITAL-NUMBERS");
+  set_brick_par(DN, pl2->params->log);
 
 
   #ifdef FORCE_DEBUG
   print_metadata(meta, nb);
-  print_stack_info(DN);
+  print_brick_info(DN);
   #endif
 
   #ifdef FORCE_DEV
@@ -1334,10 +1334,10 @@ char metaname[NPOW_10];
 /** This function reads the metadata
 --- pl2:      L2 parameters
 --- metadata: metadata
---- dn:       Digital Number stack
+--- dn:       Digital Number brick
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, stack_t **DN){
+int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN){
 int mission;
 meta_t *meta = NULL;
 
