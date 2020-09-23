@@ -40,7 +40,7 @@ typedef struct {
   short ***ptr;
 } stack_compile_info_t;
 
-enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_ };
+enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _pyp_ };
 
 
 int info_tss(stack_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
@@ -343,6 +343,19 @@ int nchar;
 }
 
 
+int info_pyp(stack_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+
+
+  info[o].prodlen  = phl->tsa.pyp.nb;
+  strncpy(info[o].prodname, "PYP", 3); info[o].prodname[3] = '\0';
+  info[o].prodtype = _pyp_;
+  info[o].enable   = phl->tsa.pyp.opyp;
+  info[o].write    = phl->tsa.pyp.opyp;
+  info[o].ptr      = &ts->pyp_;
+
+  return o+1;
+}
+
 
 
 /** This function compiles the stacks, in which TSA results are stored. 
@@ -372,17 +385,18 @@ int error = 0;
 stack_compile_info_t *info = NULL;
 
 
-  nprod = 5 +            // TSS, RMS, TSI, STM, SPL,
-          5 +            // folds
-          5 +            // trend on folds
-          5 +            // cat on folds
-          _LSP_LENGTH_ + // phenometrics
-          _LSP_LENGTH_ + // trend on phenometrics
-          _LSP_LENGTH_ + // cat on phenometrics
-          2 +            // polar-transformed coordinates
-          _POL_LENGTH_ + // polarmetrics
-          _POL_LENGTH_ + // trend on polarmetrics
-          _POL_LENGTH_;  // cat on polarmetrics
+  nprod = 5 +              // TSS, RMS, TSI, STM, SPL,
+          5 +              // folds
+          5 +              // trend on folds
+          5 +              // cat on folds
+          _LSP_LENGTH_ +   // phenometrics
+          _LSP_LENGTH_ +   // trend on phenometrics
+          _LSP_LENGTH_ +   // cat on phenometrics
+          2 +              // polar-transformed coordinates
+          _POL_LENGTH_ +   // polarmetrics
+          _POL_LENGTH_ +   // trend on polarmetrics
+          _POL_LENGTH_ +   // cat on polarmetrics
+          phl->tsa.pyp.nb; // python plugin metrics
 
   //printf("%d potential products.\n", nprod);
 
@@ -400,6 +414,7 @@ stack_compile_info_t *info = NULL;
   o = info_fbd(info, o,     ts, phl);
   o = info_lsp(info, o,     ts, phl);
   o = info_pol(info, o, ni, ts, phl);
+  o = info_pyp(info, o,     ts, phl);
 
 
   alloc((void**)&TSA, nprod, sizeof(stack_t*));
@@ -450,12 +465,10 @@ stack_compile_info_t *info = NULL;
               nchar = snprintf(domain, NPOW_10, "%s_%s", fdate, sensor);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
-              //set_stack_domain(TSA[o], t, domain);
               set_stack_bandname(TSA[o], t, domain);
               break;
             case _stats_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o],   t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_STA_[phl->tsa.stm.sta.metrics[t]].tag);
               break;
             case _inter_:
@@ -469,7 +482,6 @@ stack_compile_info_t *info = NULL;
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_stack_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_stack_unit(TSA[o], t, "decimal year");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _year_:
@@ -481,7 +493,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case  _quarter_:
@@ -494,7 +505,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "quarter");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -508,7 +518,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "month");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -522,7 +531,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "week");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -536,7 +544,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, k);
               set_stack_unit(TSA[o], t, "day of year");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               k++;
               break;
@@ -549,7 +556,6 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _pol_: 
@@ -561,18 +567,19 @@ stack_compile_info_t *info = NULL;
                 printf("Buffer Overflow in assembling domain\n"); error++;}
               set_stack_wavelength(TSA[o], t, date.year);
               set_stack_unit(TSA[o], t, "year");
-              //set_stack_domain(TSA[o], t, fdate);
               set_stack_bandname(TSA[o], t, fdate);
               break;
             case _trd_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_TRD_[t].tag);
               break;
             case _cat_:
               set_stack_sensor(TSA[o], t, "BLEND");
-              //set_stack_domain(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               set_stack_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
+              break;
+            case _pyp_:
+              set_stack_sensor(TSA[o], t, "BLEND");
+              set_stack_bandname(TSA[o], t, "unknown");  // needs to become flexible
               break;
             default:
               printf("unknown tsa type.\n"); error++;
@@ -769,6 +776,8 @@ short nodata;
     tsa_spectral_index(ard, &ts, mask_, nc, nt, idx, nodata, &phl->tsa, &phl->sen, endmember);
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
+    
+    tsa_python_plugin(&ts, mask_, nc, ni, nodata, &phl->tsa.pyp);
     
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     

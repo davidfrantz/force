@@ -230,6 +230,13 @@ typedef struct {
   float conf;         // confidence level
 } par_trd_t;
 
+// python plugin
+typedef struct {
+  char *f_code;
+  int   opyp;
+  int   nb;
+} par_pyp_t;
+
 // aggregation statistics
 typedef struct {
   int *metrics, nmetrics;
@@ -275,6 +282,7 @@ typedef struct {
   par_lsp_t lsp;
   par_pol_t pol;
   par_trd_t trd;
+  par_pyp_t pyp;
 } par_tsa_t;
 
 // features
