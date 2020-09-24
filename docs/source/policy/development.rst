@@ -4,7 +4,7 @@ Development and Funding
 =======================
 
 FORCE is primarily developed by David Frantz (:ref:`contact`).
-The software has emerged from my PhD research at Trier University, supervised by Prof. Dr. Joachim Hill, `online available <http://ubt.opus.hbz-nrw.
+The software has emerged from my PhD research at `Trier University <https://www.uni-trier.de/index.php?id=11839&L=2>`_, supervised by `Prof. Dr. Joachim Hill <https://www.uni-trier.de/index.php?id=11265&L=2>`_, `online available <http://ubt.opus.hbz-nrw.
 de/volltexte/2017/1046/pdf/frantz_phd.pdf>`_.
 
 Many people have contributed to FORCE in one way or the other. 

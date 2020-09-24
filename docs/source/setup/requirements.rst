@@ -25,6 +25,8 @@ Note that we do not provide support for migrating the code to any other OS.
 The code can also be installed in other Linux distributions, e.g. CentOS.
 However, installation instructions are only given for Ubuntu.
 
+FORCE can also be run with Docker (see :ref:`docker`).
+
 We were able to successfully install and run FORCE on the Windows 10 subsystem for Linux, too.
 This can be enabled in Windows developer mode (`see this blogpost <https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/>`_).
 Please note that this procedure is in beta stage and might not be as stable as running FORCE on a real Linux system.
