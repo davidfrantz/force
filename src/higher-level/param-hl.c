@@ -250,7 +250,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
 
   // python plugin parameters
-  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_EXIST_, &phl->tsa.pyp.f_code);
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
   register_bool_par(params,    "OUTPUT_PYP",        &phl->tsa.pyp.opyp);
   phl->tsa.pyp.nb = 1;
 
