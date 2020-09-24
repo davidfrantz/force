@@ -5,6 +5,8 @@ Submodules
 
 There are multiple submodules available, which implement different workflows.
 They all share the higher-level :ref:`hl-compute`.
+There is one executable only, i.e. ``force-higher-level``. 
+Depending on the parameter file, the program will figure out which submodule to execute.
 
 
 **Table 2** Submodules of HLPS.

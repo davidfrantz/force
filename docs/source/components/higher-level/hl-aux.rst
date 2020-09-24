@@ -65,13 +65,3 @@ The pixels that have a mask value of 0 will be skipped.
   Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-masks/masks/>`_, which explains what processing masks are, why they are super-useful, how to generate them, and how to use them in the FORCE Higher Level Processing System.
 
 
-Following submodules are available:
-
-+---------------+------------+------------+
-+ :ref:`level3` + :ref:`cso` + :ref:`tsa` +
-+---------------+------------+------------+
-+ :ref:`ml`     + :ref:`txt` + :ref:`lsm` +
-+---------------+------------+------------+
-+ :ref:`l2i`    + :ref:`cfi` + :ref:`l2i` +
-+---------------+------------+------------+
- 
