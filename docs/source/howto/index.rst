@@ -1,13 +1,15 @@
 .. _howto:
 
-How to use the FORCE
-====================
+Tutorials
+=========
 
 New section here.
 
-Some general remarks on how FORCE programs work, e.g. help, force entry point.
+Entry point for tutorials.
 
 Move (or at least reference) tutorials here from my personal site.
+
+Have a sorted list here.
 
 .. toctree::
    :maxdepth: 1
