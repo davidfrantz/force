@@ -14,3 +14,4 @@ Have a sorted list here.
 .. toctree::
    :maxdepth: 1
 
+   datacube.rst
