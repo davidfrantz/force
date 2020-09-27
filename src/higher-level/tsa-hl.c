@@ -396,7 +396,7 @@ brick_compile_info_t *info = NULL;
           _POL_LENGTH_ +   // polarmetrics
           _POL_LENGTH_ +   // trend on polarmetrics
           _POL_LENGTH_ +   // cat on polarmetrics
-          phl->tsa.pyp.nb; // python plugin metrics
+          1;               // python plugin metrics
 
   //printf("%d potential products.\n", nprod);
 

@@ -81,6 +81,9 @@ progress_t  pro;
   if ((aux = read_aux(phl)) == NULL){
     printf("Reading aux file failed!\n"); return FAILURE;}
 
+  // register python plugins
+  register_python(phl);
+
   // copy and read datacube definition
   if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher, phl->blocksize)) == NULL){
     printf("Copying datacube definition failed.\n"); return FAILURE;}
@@ -158,7 +161,9 @@ progress_t  pro;
   free_datacube(cube);
   free_aux(phl, aux);
   free_param_higher(phl);
-  
+
+  deregister_python();
+
   CPLPopErrorHandler();
 
 
