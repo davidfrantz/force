@@ -21,7 +21,6 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 2. The data are organized in regular, non-overlapping **tiles**.
 
 .. image:: /img/tutorial-datacube-scheme.jpg
-
    Overview of the datacube concept in **FORCE**
 
 
@@ -49,7 +48,9 @@ When generating Level 2 ARD data with **FORCE L2PS**, you need to define the dat
 
 Two default projection / grid systems are predefined in **FORCE**. They can be specified via the `PROJECTION` parameter instead of giving a WKT string. The predefined options have their own settings for `ORIGIN_LAT`, `ORIGIN_LON`, `TILE_SIZE`, and `BLOCK_SIZE`, thus the values given in the parameterfile will be ignored. [EQUI7](https://cartography.tuwien.ac.at/eurocarto/wp-content/uploads/2015/09/3_6_ppt.pdf) consists of 7 Equi-Distant, continental projections with a tile size of 100km. [GLANCE7](https://measures-glance.github.io/glance-grids/) consists of 7 Equal-Area, continental projections, with a tile size of 150km. One datacube will be generated for each continent.
 
-_If you are not using the datacube options, i.e. `DO_REPROJ = FALSE` or `DO_TILE = FALSE`, you are running into a **dead end** for **FORCE**. In this case, the data cannot be further processed or analysed with any higher level FORCE functionality..._
+.. warning::
+   If you are not using the datacube options, i.e. `DO_REPROJ = FALSE` or `DO_TILE = FALSE`, you are running into a **dead end** for **FORCE**. 
+   In this case, the data cannot be further processed or analysed with any higher level FORCE functionality...
 
 
 How to validate the projection?
@@ -116,9 +117,14 @@ At the top level of the generated datacube, a text file will be generated (`data
    3000.0000000
 
 
-_In some rare circumstances, you might need to generate this file on your own. However, this only applies if - for any reason - you skip the Level 2 processing (e.g. if you only want to work with external features, or trick **FORCE** into using external ARD datasets)._
+.. note::
+   In some rare circumstances, you might need to generate this file on your own. 
+   However, this only applies if - for any reason - you skip the Level 2 processing (e.g. if you only want to work with external features, or trick **FORCE** into using external ARD datasets).
 
-## **How is the datacube organized?**
+
+How is the datacube organized?
+------------------------------
+
 In practice, the tiles are directories in the file system, and each chip represents one file. 
 
 
@@ -246,7 +252,6 @@ Another useful **FORCE** program can generate a vector file (shapefile or kml) f
 The grid can easily be loaded in GoogleEarth or any GIS. The attribute table contains the tile ID.
 
 .. image:: /img/tutorial-datacube-google-grid.jpg
-
    Exported grid loaded in Google Earth
 
 
@@ -334,6 +339,5 @@ Pyramids for all VRT mosaics can be parallely generated with:
 
 Any modern software based on GDAL (e.g. QGIS) is able to display VRTs, and can also handle the attached pyramid layers. Mosaicking is done on-the-fly, data outside of the display extent are not loaded.
 
-.. image:: /img/tutorial-datacube-mosaic.jpg
-
+.. image:: img/tutorial-datacube-mosaic.jpg
    VRT mosaick loaded in QGIS
