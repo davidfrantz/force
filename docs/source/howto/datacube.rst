@@ -28,6 +28,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 
 **Figure 1.**   Overview of the datacube concept in FORCE.
 
+.. admonition:: Definitions
 
    The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
    
@@ -43,7 +44,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
    
    The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
    
-> The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
+   The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
 
 
 How to define the datacube parameters?
