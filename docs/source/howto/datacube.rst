@@ -29,15 +29,20 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 **Figure 1.**   Overview of the datacube concept in FORCE.
 
 
-.. 
-
    The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
+   
    The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
+   
    The ‘tile’ is one entity of the grid, i.e., a grid cell with a unique tile identifier, e.g., X0003_Y0002. The tile is stationary, i.e., it always covers the same extent on the land surface.
+   
    The ‘tile size’ is defined in target coordinate system units (most commonly in meters). Tiles are square.
+   
    Each ‘original image’ is partitioned into several ‘chips’, i.e., any original image is intersected with the grid and then tiled into chips.
+   
    Chips are grouped in ‘datasets’, which group data, e.g. according to acquisition date and sensor.
+   
    The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
+   
    The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
 
 
