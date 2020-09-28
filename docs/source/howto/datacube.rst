@@ -30,32 +30,33 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 
 
 .. topic:: Definitions
-   - The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
-   - The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
-   - The ‘tile’ is one entity of the grid, i.e., a grid cell with a unique tile identifier, e.g., X0003_Y0002. The tile is stationary, i.e., it always covers the same extent on the land surface.
-   - The ‘tile size’ is defined in target coordinate system units (most commonly in meters). Tiles are square.
-   - Each ‘original image’ is partitioned into several ‘chips’, i.e., any original image is intersected with the grid and then tiled into chips.
-   - Chips are grouped in ‘datasets’, which group data, e.g. according to acquisition date and sensor.
-   - The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
-   - The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
+
+   The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
+   The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
+   The ‘tile’ is one entity of the grid, i.e., a grid cell with a unique tile identifier, e.g., X0003_Y0002. The tile is stationary, i.e., it always covers the same extent on the land surface.
+   The ‘tile size’ is defined in target coordinate system units (most commonly in meters). Tiles are square.
+   Each ‘original image’ is partitioned into several ‘chips’, i.e., any original image is intersected with the grid and then tiled into chips.
+   Chips are grouped in ‘datasets’, which group data, e.g. according to acquisition date and sensor.
+   The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
+   The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
 
 
 How to define the datacube parameters?
 --------------------------------------
 
-When generating Level 2 ARD data with **FORCE L2PS**, you need to define the datacube in the parameter file. Empty parameter files can be generated with ``force-parameter``.
+When generating Level 2 ARD data with FORCE L2PS, you need to define the datacube in the parameter file. Empty parameter files can be generated with ``force-parameter``.
 
 - ``DO_REPROJ`` indicates whether the images should be reprojected to the target coordinate system - or stay in their original UTM projection.
 - ``DO_TILE`` indicates whether the images should be tiled to chips that intersect with the grid system - or stay in the original reference system (WRS-2/MGRS).
-- ``PROJECTION`` defines the target coordinate system. This projection should ideally be valid for a large geographic extent. The projection needs to given as "WKT" string. You can verify your projection (and convert to WKT from another format) using ``gdalsrsinfo`` (see below). If this fails, you need to fix the projection - otherwise **FORCE L2PS** will likely fail, too. 
+- ``PROJECTION`` defines the target coordinate system. This projection should ideally be valid for a large geographic extent. The projection needs to given as "WKT" string. You can verify your projection (and convert to WKT from another format) using ``gdalsrsinfo`` (see below). If this fails, you need to fix the projection - otherwise FORCE L2PS will likely fail, too. 
 - ``ORIGIN_LAT`` and ``ORIGIN_LON`` are the origin coordinates of the grid system in decimal degree. The upper left corner of tile X0000_Y0000 represents this point. It is a good choice to use a coordinate that is North-West of your study area – to avoid negative tile numbers.
 - ``TILE_SIZE`` is the tile size (in target units, commonly in meters). Tiles are square.
 - ``BLOCK_SIZE`` is the block size (in target units, commonly in meters) of the image chips. Blocks are stripes, i.e. they are as wide as the tile and as high as specified here. The blocks represent the internal structure of the GeoTiffs, and represent the primary processing unit of the force-higher-level routines.
 
-Two default projection / grid systems are predefined in **FORCE**. They can be specified via the ``PROJECTION`` parameter instead of giving a WKT string. The predefined options have their own settings for ``ORIGIN_LAT``, ``ORIGIN_LON``, ``TILE_SIZE``, and ``BLOCK_SIZE``, thus the values given in the parameterfile will be ignored. [EQUI7](https://cartography.tuwien.ac.at/eurocarto/wp-content/uploads/2015/09/3_6_ppt.pdf) consists of 7 Equi-Distant, continental projections with a tile size of 100km. [GLANCE7](https://measures-glance.github.io/glance-grids/) consists of 7 Equal-Area, continental projections, with a tile size of 150km. One datacube will be generated for each continent.
+Two default projection / grid systems are predefined in FORCE. They can be specified via the ``PROJECTION`` parameter instead of giving a WKT string. The predefined options have their own settings for ``ORIGIN_LAT``, ``ORIGIN_LON``, ``TILE_SIZE``, and ``BLOCK_SIZE``, thus the values given in the parameterfile will be ignored. [EQUI7](https://cartography.tuwien.ac.at/eurocarto/wp-content/uploads/2015/09/3_6_ppt.pdf) consists of 7 Equi-Distant, continental projections with a tile size of 100km. [GLANCE7](https://measures-glance.github.io/glance-grids/) consists of 7 Equal-Area, continental projections, with a tile size of 150km. One datacube will be generated for each continent.
 
 .. warning::
-   If you are not using the datacube options, i.e. ``DO_REPROJ = FALSE`` or ``DO_TILE = FALSE``, you are running into a **dead end** for **FORCE**. 
+   If you are not using the datacube options, i.e. ``DO_REPROJ = FALSE`` or ``DO_TILE = FALSE``, you are running into a **dead end** for FORCE. 
    In this case, the data cannot be further processed or analysed with any higher level FORCE functionality...
 
 
@@ -100,7 +101,7 @@ Where is the datacube definition stored?
 ----------------------------------------
 
 At the top level of the generated datacube, a text file will be generated (``datacube-definition.prj``). This file is key for all
-**FORCE** higher-level functionality. Each higher-level module will save a copy of this file in the corresponding output directory. If this file is not present, the tools will fail. Therefore, **do not modify, move, or delete this file**. This file contains the datacube definition as defined above. 
+FORCE higher-level functionality. Each higher-level module will save a copy of this file in the corresponding output directory. If this file is not present, the tools will fail. Therefore, **do not modify, move, or delete this file**. This file contains the datacube definition as defined above. 
 1. projection in WKT
 2. grid origin, longitude
 3. grid origin, latitude
@@ -125,7 +126,7 @@ At the top level of the generated datacube, a text file will be generated (``dat
 
 .. note::
    In some rare circumstances, you might need to generate this file on your own. 
-   However, this only applies if - for any reason - you skip the Level 2 processing (e.g. if you only want to work with external features, or trick **FORCE** into using external ARD datasets).
+   However, this only applies if - for any reason - you skip the Level 2 processing (e.g. if you only want to work with external features, or trick FORCE into using external ARD datasets).
 
 
 How is the datacube organized?
@@ -167,7 +168,7 @@ In practice, the tiles are directories in the file system, and each chip represe
    /data/Dagobah/edc/level2/X0134_Y0097/20181230_LEVEL2_SEN2B_VZN.tif
 
 
-Within the tile, **FORCE** semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance ``BOA`` and Quality Assurance Information ``QAI``). 
+Within the tile, FORCE semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance ``BOA`` and Quality Assurance Information ``QAI``). 
 
 
 .. code-block:: bash
@@ -216,7 +217,7 @@ Given any coordinate \\((\lambda,\phi)\\), the computation of the corresponding 
 
 With some more math, you can also compute the exact pixel.
 
-However, there is also a **FORCE** program that relieves you from doing this on your own:
+However, there is also a FORCE program that relieves you from doing this on your own:
 
 
 .. code-block:: bash
@@ -234,7 +235,7 @@ However, there is also a **FORCE** program that relieves you from doing this on 
      is in tile X0069_Y0043 at pixel 2604/1355
 
 
-Another useful **FORCE** program can generate a vector file (shapefile or kml) for convenient display of the tiles.
+Another useful FORCE program can generate a vector file (shapefile or kml) for convenient display of the tiles.
 
 
 .. code-block:: bash
@@ -262,10 +263,10 @@ The grid can easily be loaded in GoogleEarth or any GIS. The attribute table con
 How to visualize data for a large extent more conveniently?
 -----------------------------------------------------------
 
-Whenever you use a FORCE routine, cubed data will be generated. It is a bit cumbersome to display such data for a large extent without some further treatment. The following recipe can be used for any cubed **FORCE** data - irrespective of processing level.
+Whenever you use a FORCE routine, cubed data will be generated. It is a bit cumbersome to display such data for a large extent without some further treatment. The following recipe can be used for any cubed FORCE data - irrespective of processing level.
 
 Lucky us, the [GDAL virtual format](https://gdal.org/drivers/raster/vrt.html) represents an ideal concept for this. With VRTs, mosaicks of cubed data can be generated without physically copying the data. The VRT is basically a text file in xml-Format, which both holds (relative) links to the original data and the rules to assemble the mosaic on-the-fly.
-**FORCE** comes with a tool to generate such mosaics:
+FORCE comes with a tool to generate such mosaics:
 
 
 
@@ -300,7 +301,7 @@ force-mosaic searches for image files in the datacube, and mosaics all files wit
    19840409_LEVEL2_LND05_VZN.vrt
 
 
-To speed up visualization, pyramids might be generated for the VRT files. This significantly increases loading and response times for visualization. However, pyramid layers are basically copies of the original data at reduced resolution, and as such, they consume some disc space. Consider from case to case whether fast display merits the excess disc usage. **FORCE** comes with a tool to generate pyramids:
+To speed up visualization, pyramids might be generated for the VRT files. This significantly increases loading and response times for visualization. However, pyramid layers are basically copies of the original data at reduced resolution, and as such, they consume some disc space. Consider from case to case whether fast display merits the excess disc usage. FORCE comes with a tool to generate pyramids:
 
 
 .. code-block:: bash
