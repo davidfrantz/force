@@ -29,7 +29,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 **Figure 1.**   Overview of the datacube concept in FORCE.
 
 
-.. topic:: Definitions
+.. 
 
    The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
    The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
@@ -102,6 +102,7 @@ Where is the datacube definition stored?
 
 At the top level of the generated datacube, a text file will be generated (``datacube-definition.prj``). This file is key for all
 FORCE higher-level functionality. Each higher-level module will save a copy of this file in the corresponding output directory. If this file is not present, the tools will fail. Therefore, **do not modify, move, or delete this file**. This file contains the datacube definition as defined above. 
+
 1. projection in WKT
 2. grid origin, longitude
 3. grid origin, latitude
