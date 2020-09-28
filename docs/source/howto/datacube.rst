@@ -24,12 +24,12 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 2. The data are organized in regular, non-overlapping **tiles**.
 
 
-.. image:: img/tutorial-datacube-scheme.jpg
+.. image:: tutorial-datacube-scheme.jpg
 
    Overview of the datacube concept in **FORCE**
 
 
-.. topic:: 
+.. topic:: Definitions
 
    - The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
    - The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
@@ -188,9 +188,14 @@ It is important to note that chips in different tiles have the same filename, th
 .. code-block:: bash
 
    ls /data/Dagobah/edc/level2/X*/20181225_LEVEL2_SEN2A_BOA.tif | wc -l
-   ls /data/Dagobah/edc/level2/X*/20181225_LEVEL2_SEN2A_BOA.tif | tail
 
    49
+
+
+.. code-block:: bash
+
+   ls /data/Dagobah/edc/level2/X*/20181225_LEVEL2_SEN2A_BOA.tif | tail
+
    /data/Dagobah/edc/level2/X0133_Y0100/20181225_LEVEL2_SEN2A_BOA.tif
    /data/Dagobah/edc/level2/X0134_Y0096/20181225_LEVEL2_SEN2A_BOA.tif
    /data/Dagobah/edc/level2/X0134_Y0097/20181225_LEVEL2_SEN2A_BOA.tif
@@ -222,9 +227,6 @@ However, there is also a **FORCE** program that relieves you from doing this on 
    usage: force-tile-finder datacube lon lat res
 
 
-
-
-
 .. code-block:: bash
 
    force-tile-finder /data/Dagobah/edc/level2 13.404194 52.502889 10
@@ -244,16 +246,11 @@ Another useful **FORCE** program can generate a vector file (shapefile or kml) f
                 format: shp or kml
 
 
-
-
-
 .. code-block:: bash
 
    force-tabulate-grid /data/Dagobah/edc/level2 35 60 0 20 kml
 
    /data/Dagobah/edc/level2/datacube-grid.kml
-
-
 
 
 The grid can easily be loaded in GoogleEarth or any GIS. The attribute table contains the tile ID.
@@ -278,7 +275,6 @@ Lucky us, the [GDAL virtual format](https://gdal.org/drivers/raster/vrt.html) re
    force-mosaic
 
    Usage: force-mosaic tiled-archive
-
 
 
 .. code-block:: bash
