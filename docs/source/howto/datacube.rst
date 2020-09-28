@@ -31,7 +31,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
    - The *grid origin* is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
    - The *tile* is one entity of the grid, i.e. a grid cell with a unique tile identifier, e.g. X0003_Y0002. The tile is stationary, i.e. it always covers the same extent on the land surface.
    - The *tile size* is defined in target coordinate system units (most commonly in meters). Tiles are square.
-   - Each *original image* is partitioned into several *chips`, i.e., any original image is intersected with the grid and then tiled into chips.
+   - Each *original image* is partitioned into several *chips*, i.e. any original image is intersected with the grid and then tiled into chips.
    - Chips are grouped in *datasets`, which group data according to acquisition date and sensor.
    - The *data cube* groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
    - The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
@@ -40,7 +40,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 How to define the datacube parameters?
 --------------------------------------
 
-When generating Level 2 ARD data with FORCE L2PS, you need to define the datacube in the parameter file. Empty parameter files can be generated with ``force-parameter``.
+When generating Level 2 ARD data with FORCE L2PS, you need to define the datacube in the parameter file. Empty parameter files can be generated with ``force-parameter``
 
 - ``DO_REPROJ`` indicates whether the images should be reprojected to the target coordinate system - or stay in their original UTM projection.
 - ``DO_TILE`` indicates whether the images should be tiled to chips that intersect with the grid system - or stay in the original reference system (WRS-2/MGRS).
@@ -204,9 +204,14 @@ It is important to note that chips in different tiles have the same filename, th
 I processed quite some data. There are many, many tiles. How do I find a POI?
 -----------------------------------------------------------------------------
 
-Given any coordinate \\((\lambda,\phi)\\), the computation of the corresponding tile is pretty straightforward.
-1. Convert the coordinate \\((\lambda,\phi)\\) to the projected coordinate \\((X,Y)\\)
-2. Given the tile size \\(t_s\\) and the grid origin in projected coordinates \\((X_O,Y_O)\\), the tile ID can be computed as \\(Tile_X = floor((X-X_O)/t_s)\\) and \\(Tile_Y = floor((Y_O-Y)/t_s)\\)
+Given any coordinate :math:`(\lambda,\phi)`, the computation of the corresponding tile is pretty straightforward.
+1. Convert the coordinate :math:`(\lambda,\phi)` to the projected coordinate :math:`(X,Y)`
+2. Given the tile size :math:`t_\text{s}` and the grid origin in projected coordinates :math:`(X_\text{O},Y_\text{O})`, the tile ID can be computed as 
+
+.. math::
+
+   Tile_\text{X} = floor((X-X_\text{O})/t_\text{s}) and 
+   Tile_\text{Y} = floor((Y_\text{O}-Y)/t_\text{s})
 
 With some more math, you can also compute the exact pixel.
 
