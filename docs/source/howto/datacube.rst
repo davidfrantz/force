@@ -23,7 +23,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 1. All data are in the **same coordinate system**, which should be valid for a large regional extent (e.g. a continental projection).
 2. The data are organized in regular, non-overlapping **tiles**.
 
-.. image:: /img/tutorial-datacube-scheme.jpg
+.. image:: img/tutorial-datacube-scheme.jpg
    Overview of the datacube concept in **FORCE**
 
 
@@ -254,7 +254,7 @@ Another useful **FORCE** program can generate a vector file (shapefile or kml) f
 
 The grid can easily be loaded in GoogleEarth or any GIS. The attribute table contains the tile ID.
 
-.. image:: /img/tutorial-datacube-google-grid.jpg
+.. image:: img/tutorial-datacube-google-grid.jpg
    Exported grid loaded in Google Earth
 
 
