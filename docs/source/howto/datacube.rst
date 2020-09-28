@@ -43,7 +43,7 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
    
    The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
    
-   The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
+> The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
 
 
 How to define the datacube parameters?
@@ -140,7 +140,6 @@ How is the datacube organized?
 
 In practice, the tiles are directories in the file system, and each chip represents one file. 
 
-
 .. code-block:: bash
 
    ls /data/Dagobah/edc/level2 | tail
@@ -155,7 +154,6 @@ In practice, the tiles are directories in the file system, and each chip represe
    X0135_Y0097
    X0135_Y0098
    X0135_Y0099
-
 
 
 .. code-block:: bash
@@ -174,8 +172,7 @@ In practice, the tiles are directories in the file system, and each chip represe
    /data/Dagobah/edc/level2/X0134_Y0097/20181230_LEVEL2_SEN2B_VZN.tif
 
 
-Within the tile, FORCE semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance ``BOA`` and Quality Assurance Information ``QAI``). 
-
+Within the tile, FORCE semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance `BOA` and Quality Assurance Information `QAI`). 
 
 .. code-block:: bash
 
@@ -189,7 +186,6 @@ Within the tile, FORCE semantically groups files into datasets if they have the 
 
 
 It is important to note that chips in different tiles have the same filename, thus they can easily be mosaicked. 
-
 
 .. code-block:: bash
 
