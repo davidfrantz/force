@@ -204,13 +204,15 @@ It is important to note that chips in different tiles have the same filename, th
 I processed quite some data. There are many, many tiles. How do I find a POI?
 -----------------------------------------------------------------------------
 
-Given any coordinate :math:`(\lambda,\phi)`, the computation of the corresponding tile is pretty straightforward.
-1. Convert the coordinate :math:`(\lambda,\phi)` to the projected coordinate :math:`(X,Y)`
+Given any geographic coordinate, the computation of the corresponding tile is pretty straightforward.
+
+1. Convert the geographic coordinate :math:`(\lambda,\phi)` to the projected coordinate :math:`(X,Y)`
 2. Given the tile size :math:`t_\text{s}` and the grid origin in projected coordinates :math:`(X_\text{O},Y_\text{O})`, the tile ID can be computed as 
 
 .. math::
 
-   Tile_\text{X} = floor((X-X_\text{O})/t_\text{s}) and 
+   Tile_\text{X} = floor((X-X_\text{O})/t_\text{s})
+   
    Tile_\text{Y} = floor((Y_\text{O}-Y)/t_\text{s})
 
 With some more math, you can also compute the exact pixel.
