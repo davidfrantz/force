@@ -24,13 +24,12 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 2. The data are organized in regular, non-overlapping **tiles**.
 
 
-.. image:: tutorial-datacube-scheme.jpg
+.. image:: img/tutorial-datacube-scheme.jpg
 
 **Figure 1.**   Overview of the datacube concept in FORCE.
 
 
 .. topic:: Definitions
-
    - The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
    - The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
    - The ‘tile’ is one entity of the grid, i.e., a grid cell with a unique tile identifier, e.g., X0003_Y0002. The tile is stationary, i.e., it always covers the same extent on the land surface.
