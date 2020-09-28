@@ -5,15 +5,12 @@ The Datacube
 
 **THIS HERE IS A TEST TO SEE HOW THE TUTORIALS RENDER ON RTD**
 
-
-*This tutorial uses FORCE v. 3.0*
-
-<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-
-Learning Objective
-------------------
-
 This tutorial explains what a datacube is, how it is parameterized, how you can find a POI, how to visualize the tiling grid, and how to conveniently display cubed data.
+
+.. info::
+
+   *This tutorial uses FORCE v. 3.0*
+
 
 Background
 ----------
@@ -30,13 +27,13 @@ FORCE makes heavy use of the data cube concept. This includes two main points:
 
 .. admonition:: Definitions
 
-   - The ‘grid’ is the regular spatial subdivision of the land surface in the target coordinate system.
-   - The ‘grid origin’ is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
-   - The ‘tile’ is one entity of the grid, i.e., a grid cell with a unique tile identifier, e.g., X0003_Y0002. The tile is stationary, i.e., it always covers the same extent on the land surface.
-   - The ‘tile size’ is defined in target coordinate system units (most commonly in meters). Tiles are square.
-   - Each ‘original image’ is partitioned into several ‘chips’, i.e., any original image is intersected with the grid and then tiled into chips.
-   - Chips are grouped in ‘datasets’, which group data, e.g. according to acquisition date and sensor.
-   - The ‘data cube’ groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
+   - The *grid* is the regular spatial subdivision of the land surface in the target coordinate system.
+   - The *grid origin* is the location, where the tile numbering starts with zero. Tile numbers increase toward the South and East. Although not recommended, negative tile numbers may be present if the tile origin is not North–West of the study area.
+   - The *tile* is one entity of the grid, i.e. a grid cell with a unique tile identifier, e.g. X0003_Y0002. The tile is stationary, i.e. it always covers the same extent on the land surface.
+   - The *tile size* is defined in target coordinate system units (most commonly in meters). Tiles are square.
+   - Each *original image* is partitioned into several *chips`, i.e., any original image is intersected with the grid and then tiled into chips.
+   - Chips are grouped in *datasets`, which group data according to acquisition date and sensor.
+   - The *data cube* groups all datasets within a tile in a time-ordered manner. The data cube may contain data from several sensors and different resolutions. Thus, the pixel size is allowed to vary, but the tile extent stays fixed. The tile size must be a multiple of the resolutions. Other data like features or auxiliary data are also permitted in the data cube (e.g. DEM or climate variables).
    - The data cube concept allows for non-redundant data storage and efficient data access, as well as simplified extraction of data and information.
 
 
@@ -166,7 +163,7 @@ In practice, the tiles are directories in the file system, and each chip represe
    /data/Dagobah/edc/level2/X0134_Y0097/20181230_LEVEL2_SEN2B_VZN.tif
 
 
-Within the tile, FORCE semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance `BOA` and Quality Assurance Information `QAI`). 
+Within the tile, FORCE semantically groups files into datasets if they have the same sensor and date (e.g. multiple products like Bottom-of-Atmosphere reflectance *BOA* and Quality Assurance Information *QAI*). 
 
 .. code-block:: bash
 
