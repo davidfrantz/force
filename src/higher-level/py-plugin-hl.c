@@ -62,7 +62,7 @@ void deregister_python(){
 void register_python_tsa(par_pyp_t *pyp){
 PyObject *main_module = NULL;
 PyObject *main_dict = NULL;
-PyObject *pyfun = NULL;
+PyObject *py_fun = NULL;
 PyObject *py_register = NULL;
 FILE *fpy = NULL;
 
@@ -81,9 +81,9 @@ FILE *fpy = NULL;
   fpy = fopen(pyp->f_code, "r");
   PyRun_SimpleFile(fpy, pyp->f_code);
 
-  pyfun = PyDict_GetItemString(main_dict, "force_register_hl_tsa_tsi");
+  py_fun = PyDict_GetItemString(main_dict, "force_register_hl_tsa_tsi");
 
-  py_register = PyObject_CallFunctionObjArgs(pyfun, NULL);
+  py_register = PyObject_CallFunctionObjArgs(py_fun, NULL);
 
   pyp->nb = (int)Py_SIZE(py_register);
   Py_DECREF(py_register);
@@ -115,10 +115,20 @@ npy_intp n = ni;
 
 PyObject *main_module = NULL;
 PyObject *main_dict = NULL;
-PyObject *pyfun = NULL;
+PyObject *py_fun = NULL;
 PyObject *py_return = NULL;
-void *ptr = NULL;
-PyObject *v = NULL;
+
+PyObject *py_val = NULL;
+PyArrayObject* py_tsi = NULL;
+PyArrayObject* py_ce = NULL;
+PyArrayObject* py_year = NULL;
+PyArrayObject* py_month = NULL;
+PyArrayObject* py_day = NULL;
+int* tsi_ = NULL;
+int* ce_ = NULL;
+int* year_ = NULL;
+int* month_ = NULL;
+int* day_ = NULL;
 
 
   if (ts->pyp_ == NULL) return CANCEL;
@@ -140,18 +150,28 @@ PyObject *v = NULL;
   fpy = fopen(pyp->f_code, "r");
   PyRun_SimpleFile(fpy, pyp->f_code);
 
-  pyfun = PyDict_GetItemString(main_dict, "force_hl_tsa_tsi");
+  py_fun = PyDict_GetItemString(main_dict, "force_hl_tsa_tsi");
 
-  //#pragma omp parallel private(b) shared(mask_,ts,nc,ni,nodata,pyp) default(none)
-//  {
+//  #pragma omp parallel private(py_tsi,py_ce,py_year,py_month,py_day,tsi_,ce_,year_,month_,day_,t,b,py_return,py_val) shared(mask_,ts,nc,ni,nodata,pyp,py_fun,n,main_module) default(shared)
+  {
+    
+ //   PyGILState_STATE gstate;
+ //   gstate = PyGILState_Ensure();
 
-    PyObject* py_tsi        = PyArray_SimpleNew(1, &n, NPY_INT);
-    PyObject* py_date_ce    = PyArray_SimpleNew(1, &n, NPY_INT);
-    PyObject* py_date_year  = PyArray_SimpleNew(1, &n, NPY_INT);
-    PyObject* py_date_month = PyArray_SimpleNew(1, &n, NPY_INT);
-    PyObject* py_date_day   = PyArray_SimpleNew(1, &n, NPY_INT);
+    py_tsi   = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
+    py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
+    py_year  = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
+    py_month = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
+    py_day   = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
+    
+    tsi_   = (int*)py_tsi->data;
+    ce_    = (int*)py_ce->data;
+    year_  = (int*)py_year->data;
+    month_ = (int*)py_month->data;
+    day_   = (int*)py_day->data;
 
-//    //#pragma omp for
+
+   // #pragma omp for
     for (p=0; p<nc; p++){
 
       if (mask_ != NULL && !mask_[p]){
@@ -159,59 +179,26 @@ PyObject *v = NULL;
         continue;
       }
 
-      //PyRun_SimpleString("print ('hello world, Python inline speaking!')");
-      //PyObject_CallObject(pyfun, NULL);
-      //PyObject *py_return = PyObject_CallFunction(pyfun, "ii", p, nc);
-      //PyObject* py_p   = PyLong_FromLong(p);
-      //PyObject* py_nc  = PyLong_FromLong(nc);
-      //PyObject* py_len = PyLong_FromLong(n);
 
+      for (t=0; t<ni; t++){
+        tsi_[t]   = ts->tsi_[t][p];
+        ce_[t]    = ts->d_tsi[t].ce;
+        year_[t]  = ts->d_tsi[t].year;
+        month_[t] = ts->d_tsi[t].month;
+        day_[t]   = ts->d_tsi[t].day;
+      }
 
-
-    for (t=0; t<ni; t++){
-
-      ptr = PyArray_GETPTR1(py_tsi, t);
-      v = PyLong_FromLong(ts->tsi_[t][p]);
-      PyArray_SETITEM(py_tsi, ptr, v); 
-      Py_DECREF(v);
-
-      ptr = PyArray_GETPTR1(py_date_ce, t);
-      v = PyLong_FromLong(ts->d_tsi[t].ce);
-      PyArray_SETITEM(py_date_ce, ptr, v);
-      Py_DECREF(v);
-
-      ptr = PyArray_GETPTR1(py_date_year, t);
-      v = PyLong_FromLong(ts->d_tsi[t].year);
-      PyArray_SETITEM(py_date_year, ptr, v);
-      Py_DECREF(v);
-
-      ptr = PyArray_GETPTR1(py_date_month, t);
-      v = PyLong_FromLong(ts->d_tsi[t].month);
-      PyArray_SETITEM(py_date_month, ptr, v); 
-      Py_DECREF(v);
-
-      ptr = PyArray_GETPTR1(py_date_day, t);
-      v = PyLong_FromLong(ts->d_tsi[t].day);
-      PyArray_SETITEM(py_date_day, ptr, v); 
-      Py_DECREF(v);
-
-
-      //PyArray_GETPTR1(PyArrayObject* obj, npy_intp i);
-
-      //int PyArray_SETITEM(py_tsi, void* itemptr, PyObject* obj)
-
-//Convert obj and place it in the ndarray, arr, at the place pointed to by itemptr. Return -1 if an error occurs or 0 on success.
-
-  //    PyObject* py_tsi     = PyArray_SimpleNewFromData(1, &n, NPY_SHORT, (void*)tsi);
-    //  PyObject* py_date_ce = PyArray_SimpleNewFromData(1, &n, NPY_SHORT, (void*)d_tsi[t].year);
-
-    }
-
-      //PyObject *py_return = PyObject_CallFunctionObjArgs(pyfun, py_tsi, NULL);
-      py_return = PyObject_CallFunctionObjArgs(pyfun, py_tsi, py_date_ce, py_date_year, py_date_month, py_date_day, NULL);
+      //PyObject *py_return = PyObject_CallFunctionObjArgs(py_fun, py_tsi, NULL);
+      py_return = PyObject_CallFunctionObjArgs(py_fun, py_tsi, py_ce, py_year, py_month, py_day, NULL);
       
       if (py_return == NULL){
         printf("NULL returned from python. Clean up the python plugin code!\n");
+        printf("Your code failed with this data:\n");
+        printf("tsi:   [%d", tsi_[0]);   for (t=0; t<ni; t++) printf(" %d", tsi_[t]);   printf("]\n");
+        printf("ce:    [%d", ce_[0]);    for (t=0; t<ni; t++) printf(" %d", ce_[t]);    printf("]\n");
+        printf("year:  [%d", year_[0]);  for (t=0; t<ni; t++) printf(" %d", year_[t]);  printf("]\n");
+        printf("month: [%d", month_[0]); for (t=0; t<ni; t++) printf(" %d", month_[t]); printf("]\n");
+        printf("day:   [%d", day_[0]);   for (t=0; t<ni; t++) printf(" %d", day_[t]);   printf("]\n");
         exit(FAILURE);}
       
       #ifdef FORCE_DEBUG
@@ -223,34 +210,23 @@ PyObject *v = NULL;
       //printf("%d values received from python\n", (int)Py_SIZE(py_return));
 
       for (b=0; b<pyp->nb; b++){
-        //ptr = PyArray_GETPTR1(py_return, b);
-        //v = PyArray_GETITEM(py_return, ptr); 
-        //ts->pyp_[b][p] = (short)v;
-        //Py_DECREF(v);
-        
-        v = PyList_GetItem(py_return, b);
-        ts->pyp_[b][p] = (short)PyLong_AsLong(v);
-        //printf("band %d: received %d\n", b, ts->pyp_[b][p]);
-      /* Add 1 to each item in the list (trivial, I know) */
-        
+        py_val = PyList_GetItem(py_return, b);
+        ts->pyp_[b][p] = (short)PyLong_AsLong(py_val);
       }
 
-      //assert(PyLong_Check(py_return) == 1);
-      //printf("C has received %d\n", (short) PyLong_AsLong(py_return));
       Py_DECREF(py_return);
-      //ts->pyp_[b][p] = ?
 
     }
-    
 
     Py_DECREF(py_tsi);
-    Py_DECREF(py_date_ce);
-    Py_DECREF(py_date_year);
-    Py_DECREF(py_date_month);
-    Py_DECREF(py_date_day);
-    
-//
-//  }
+    Py_DECREF(py_ce);
+    Py_DECREF(py_year);
+    Py_DECREF(py_month);
+    Py_DECREF(py_day);
+
+  // PyGILState_Release(gstate);
+
+  }
 
   fclose(fpy);
   //Py_Finalize();
