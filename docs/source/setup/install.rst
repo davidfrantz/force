@@ -3,6 +3,9 @@
 Installation
 ============
 
+Installation instructions
+-------------------------
+
 FORCE is mostly written in C/C++: Thus, it needs to be compiled. Administrator rights are not necessarily required, unless you want to install to the system-wide search path (e.g. to make it available to multiple users).
 
 1. Go to the directory, where you usually store source code, e.g.

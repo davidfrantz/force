@@ -1,5 +1,25 @@
 .. _v3:
 
+FORCE v. 3.5.1
+--------------
+
+Release: 17.09.2020
+
+* **Docker changes**
+
+  * Fegyi fixed an issue: files generated through docker were owned by root before.
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed a small issue with the force-csd progress bar, as well as an issue when the end data wasn't defined.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, TSA sub-module, CAT analysis: 
+    There is another change parameter: loss = change / offset * 1000. 
+    The offset is the regression intercept of the linear trend applied to the full time series.
+
+
 FORCE v. 3.5.0
 --------------
 

@@ -679,6 +679,8 @@ int year, month, day;
         // read line by line and find closest coordinate
         while (fgets(buffer, NPOW_10, fp) != NULL){
 
+          buffer[strcspn(buffer, "\r\n#")] = 0;
+
           tokenptr = strtok(buffer, separator);
 
           site_x = atof(tokenptr); tokenptr = strtok(NULL, separator);

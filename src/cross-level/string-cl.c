@@ -43,7 +43,7 @@ void copy_string(char *dst, size_t size, const char *src){
 
   strncpy(dst, src, size);
   if (dst[size-1] != '\0'){
-    printf("cannot copy, string too long.\n");
+    printf("cannot copy, string too long:\n%s\n", src);
     exit(1);
   }
 
