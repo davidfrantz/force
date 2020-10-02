@@ -456,12 +456,12 @@ get_data() {
   # Filter metadata and extract download links
   if [ $SATELLITE = "sentinel2" ]; then
     # 5: sensing time 9: generation time 
-    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh'| sort -t"," -k 14.76,14.78r -k9.1,9.4r -k9.6,9.7r -k9.9,9.10r  | awk -F"," '{OFS=","} !a[$4,$5]++' | sort -t"," -k 5)
+    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh'| sort -t"," -k 14.76,14.78r -k9r | awk -F"," '{OFS=","} !a[$4,$5]++' | sort -t"," -k 5)
   elif [ $SATELLITE = "landsat" ]; then
     LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh' | sort -t"," -k 5)
   fi
 
-  METAFNAME=$METADIR/csd_metadata_$(date +%FT%H-%M-%S).txt
+  METAFNAME=$POOL/csd_metadata_$(date +%FT%H-%M-%S).txt
   printf "%s" "$LINKS" > $METAFNAME
   case $SATELLITE in
     sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
