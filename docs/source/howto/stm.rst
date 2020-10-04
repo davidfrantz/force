@@ -3,7 +3,7 @@
 .. sidebar:: About
 
    .. |author-text| replace:: This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE.    Views are his own.
-   .. |author-pic|  image:: profile/dfrantz.jpg
+   .. |author-pic| image:: profile/dfrantz.jpg
 
    +--------------+---------------+
    + |author-pic| + |author-text| +
