@@ -1,6 +1,6 @@
 .. _tut-stm:
 
-.. sidebar::
+.. sidebar:: About
 
    .. image:: profile/dfrantz.jpg
 
