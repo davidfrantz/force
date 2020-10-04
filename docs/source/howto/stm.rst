@@ -2,14 +2,17 @@
 
 .. sidebar:: About
 
-   .. |author-text| replace:: This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE.    Views are his own.
+   .. |author-text| replace::
+      This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE.
+      Views are his own.
+
    .. |author-pic| image:: profile/dfrantz.jpg
 
    +--------------+---------------+
    + |author-pic| + |author-text| +
    +--------------+---------------+
 
-   **EO**, **ARD**, **FORCE**, **Data Science**, **Open Science**
+   **EO**, **ARD**, **Data Science**, **Open Science**
 
 
 Spectral Temporal Metrics
