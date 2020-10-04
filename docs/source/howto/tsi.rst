@@ -7,7 +7,7 @@ Time Series Interpolation
 
 This tutorial introduces the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS), shows how to interpolate time series, and how to visualize and animate them via QGIS plugins.
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.5*
 

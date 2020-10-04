@@ -7,7 +7,7 @@ Processing Masks
 
 This tutorial explains how to generate and use processing masks in the FORCE Higher Level Processing System.
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.0*
 

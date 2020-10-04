@@ -7,7 +7,7 @@ Digital Elevation Model
 
 This tutorial shows how to prepare a Digital Elevation Model (DEM) for the FORCE Level 2 Processing System (FORCE L2PS).
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.0*
 

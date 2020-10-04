@@ -7,7 +7,7 @@ Level 2 ARD
 
 This tutorial explains what Analysis Ready Data are, and how to use the FORCE Level 2 Processing System to generate them.
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.2*
 

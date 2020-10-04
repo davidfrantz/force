@@ -7,7 +7,7 @@ Water Vapor Database
 
 This tutorial shows how to prepare the Water Vapor Database (WVDB) for the FORCE Level 2 Processing System (FORCE L2PS).
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.0*
 

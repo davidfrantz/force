@@ -7,7 +7,7 @@ The Datacube
 
 This tutorial explains what a datacube is, how it is parameterized, how you can find a POI, how to visualize the tiling grid, and how to conveniently display cubed data.
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.0*
 

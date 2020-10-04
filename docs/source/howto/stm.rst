@@ -7,7 +7,7 @@ Spectral Temporal Metrics
 
 This tutorial explains what Spectral Temporal Metrics are, and how to generate them using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS).
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.5*
 

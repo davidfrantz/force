@@ -7,7 +7,7 @@ Sentinel-2 Level 1C
 
 This tutorial explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS) to download, organize, and maintain a clean and consistent Sentinel-2 Level 1 data pool, as well as corresponding data queues needed for the Level 2 processing.
 
-.. info::
+.. admonition:: Info
 
    *This tutorial uses FORCE v. 3.0*
 
