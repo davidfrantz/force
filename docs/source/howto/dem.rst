@@ -12,9 +12,11 @@ This tutorial shows how to prepare a Digital Elevation Model (DEM) for the FORCE
    *This tutorial uses FORCE v. 3.0*
 
 
+Background
 ----------
-Background**
+
 FORCE L2PS uses a DEM for 
+
 - enhanced cloud and cloud shadow detection, 
 - atmospheric correction, and to 
 - perform the topographic correction.
@@ -31,9 +33,11 @@ Plus, it is not complicated to acquire it, free options are available.
 You probably already have a DEM for your study area anyway.
 
 
-----------
-Data format**
+Data format
+-----------
+
 There are little requirements on the data format:
+
 - The unit must be meters.
 - The Nodata value shouldn't be 0, which is a valid elevation.
 - The DEM must cover the complete image(s) to be processed.
@@ -47,8 +51,10 @@ can be chosen freely - as long as GDAL is able to handle it (GDAL can handle pre
 Please note, that pixels with nodata values in the DEM will have nodata values in the Level 2 products, too.
 Thus, make sure your DEM covers the complete area of interest.
 
+
+Which DEM?
 ----------
-Which DEM?**
+
 The DEM should match the resolution of the Level 1 image data as closely as possible.
 If possible, it is advised to use a finer resolution.
 However, as it is hard to acquire high spatial resolution DEMs, especially for larger areas, lower resolution works too.
@@ -58,72 +64,67 @@ The SRTM DEM can be obtained from [EarthExplorer](https://earthexplorer.usgs.gov
 The ASTER DEM can be obtained from [EarthData](https://search.earthdata.nasa.gov/search/) or [Japan Space Systems](https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/).
 Both are free of charge.
 
-----------
-Prepare the mosaic**
+
+Prepare the mosaic
+------------------
+
 The following steps illustrate how to build a virtual mosaic from SRTM data.
 Generally, DEM data come in tiles (datacube style), e.g. each SRTM tile covers 1°.
 The [GDAL Virtual Format](gdal.org/drivers/raster/vrt.html) allows to mosaick data without producing a physical representation, i.e. the virtual mosaic only holds links to the original tiled data, plus some rules on how to combine them into the mosaic.
 
-
 Assuming you have downloaded some SRTM tiles, we first prepare a text file that holds all the filepaths:
-
 
 .. code-block:: bash
 
    find /data/Dagobah/global/dem/srtm -name '*.tif' > /data/Earth/global/dem/srtm.txt
-cat /data/Dagobah/global/dem/srtm.txt
+   cat /data/Dagobah/global/dem/srtm.txt
 
-
-    /data/Dagobah/global/dem/srtm/n35_e027_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n35_e026_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n37_e026_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n36_e025_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n37_e027_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n37_e025_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n36_e024_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n35_e023_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n37_e024_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n36_e026_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n37_e023_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n35_e024_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n35_e025_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n36_e023_1arc_v3.tif
-    /data/Dagobah/global/dem/srtm/n36_e027_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n35_e027_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n35_e026_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n37_e026_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n36_e025_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n37_e027_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n37_e025_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n36_e024_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n35_e023_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n37_e024_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n36_e026_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n37_e023_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n35_e024_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n35_e025_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n36_e023_1arc_v3.tif
+   /data/Dagobah/global/dem/srtm/n36_e027_1arc_v3.tif
 
 
 Then, we use the ``gdalbuildvrt`` command to generate the virtual mosaic.
-
 
 .. code-block:: bash
 
    gdalbuildvrt -input_file_list /data/Dagobah/global/dem/srtm.txt /data/Earth/global/dem/srtm.vrt
 
-
-    0...10...20...30...40...50...60...70...80...90...100 - done.
+   0...10...20...30...40...50...60...70...80...90...100 - done.
 
 
 The VRT file is a simple xml file:
-
 
 .. code-block:: bash
 
    head -n 14 /data/Dagobah/global/dem/srtm.vrt
 
-
-    <VRTDataset rasterXSize="18001" rasterYSize="10801">
-      <SRS>GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433],AUTHORITY["EPSG","4326"]]</SRS>
-      <GeoTransform>  2.2999861111111112e+01,  2.7777777777777794e-04,  0.0000000000000000e+00,  3.8000138888888891e+01,  0.0000000000000000e+00, -2.7777777777777794e-04</GeoTransform>
-      <VRTRasterBand dataType="Int16" band="1">
-        <NoDataValue>-32767</NoDataValue>
-        <ColorInterp>Gray</ColorInterp>
-        <ComplexSource>
-          <SourceFilename relativeToVRT="1">srtm/n35_e027_1arc_v3.tif</SourceFilename>
-          <SourceBand>1</SourceBand>
-          <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
-          <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
-          <DstRect xOff="14400" yOff="7200" xSize="3601" ySize="3601" />
-          <NODATA>-32767</NODATA>
-        </ComplexSource>
+   <VRTDataset rasterXSize="18001" rasterYSize="10801">
+     <SRS>GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433],AUTHORITY["EPSG","4326"]]</SRS>
+     <GeoTransform>  2.2999861111111112e+01,  2.7777777777777794e-04,  0.0000000000000000e+00,  3.8000138888888891e+01,  0.0000000000000000e+00, -2.7777777777777794e-04</GeoTransform>
+     <VRTRasterBand dataType="Int16" band="1">
+       <NoDataValue>-32767</NoDataValue>
+       <ColorInterp>Gray</ColorInterp>
+       <ComplexSource>
+         <SourceFilename relativeToVRT="1">srtm/n35_e027_1arc_v3.tif</SourceFilename>
+         <SourceBand>1</SourceBand>
+         <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+         <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+         <DstRect xOff="14400" yOff="7200" xSize="3601" ySize="3601" />
+         <NODATA>-32767</NODATA>
+       </ComplexSource>
 
 
 Any software that is based on GDAL is able to read this file, e.g. QGIS - and FORCE.
