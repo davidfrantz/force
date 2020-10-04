@@ -279,3 +279,17 @@ This works by requesting an App Key from [NASA Earthdata](https://ladsweb.modaps
 You can make this key available to FORCE by putting the character string in a file ``.laads`` in your home directory.
 With this, you should be able to download data.
 
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+

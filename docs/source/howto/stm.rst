@@ -318,6 +318,5 @@ For fast visualization, we are computing pyramids.
 +              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
 +              + *Views are his own.*                                                           +
 +--------------+--------------------------------------------------------------------------------+
-
-**EO**, **ARD**, **Data Science**, **Open Science**
-
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+

@@ -436,3 +436,18 @@ FORCE provides a lot of functionality to further process the generated ARD into 
 
 Please see the [Higher Level processing options](https://force-eo.readthedocs.io/en/latest/components/higher-level/index.html) in the documentation.
 Some more tutorials are planned, which deal with all these options.
+
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+

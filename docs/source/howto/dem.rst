@@ -131,3 +131,18 @@ Any software that is based on GDAL is able to read this file, e.g. QGIS - and FO
 The filepath of this file needs to given in the FORCE L2PS parameter file:
 
 ``FILE_DEM = /data/Dagobah/global/dem/srtm.vrt``
+
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+

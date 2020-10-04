@@ -221,3 +221,18 @@ The left image was produced by filtering nodata values only, the right image was
 .. figure:: img/tutorial-qai-avg.jpg
 
    `Average reflectance over three month; left: **not using** quality bits; right **with** quality bits`
+
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+

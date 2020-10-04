@@ -395,3 +395,18 @@ Mosaicking is done on-the-fly, data outside of the display extent are not loaded
 .. figure:: img/tutorial-datacube-mosaic.jpg
 
    *VRT mosaick loaded in QGIS*
+
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + postdoc at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+
