@@ -2,25 +2,18 @@
 
 .. sidebar:: About
 
-   .. image:: profile/dfrantz.jpg
+   .. |author-text| replace:: This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE.    Views are his own.
+   .. |author-pic|  image:: profile/dfrantz.jpg
 
-   This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE. 
-   Views are his own.
+   +--------------+---------------+
+   + |author-pic| + |author-text| +
+   +--------------+---------------+
 
    **EO**, **ARD**, **FORCE**, **Data Science**, **Open Science**
 
 
 Spectral Temporal Metrics
 =========================
-
-.. sidebar:: About2
-
-   .. image:: profile/dfrantz.jpg
-
-   This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_, main developer of FORCE. 
-   Views are his own.
-
-   **EO**, **ARD**, **FORCE**, **Data Science**, **Open Science**
 
 **How to aggregate time series**
 
