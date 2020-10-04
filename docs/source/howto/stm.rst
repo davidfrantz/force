@@ -1,5 +1,14 @@
 .. _tut-stm:
 
+.. sidebar::
+
+   .. image:: profile/dfrantz.jpg
+
+   This tutorial was written by `David Frantz <https://davidfrantz.github.io>`_. Views are his own.
+
+   **EO**, **ARD**, **FORCE**, **Data Science**, **Open Science**
+
+
 Spectral Temporal Metrics
 =========================
 
