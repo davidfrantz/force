@@ -14,4 +14,14 @@ Have a sorted list here.
 .. toctree::
    :maxdepth: 1
 
+   sentinel2-l1c.rst
+
    datacube.rst
+   l2-ard.rst
+   qai.rst
+   wvdb.rst
+   dem.rst
+
+   masks.rst
+   tsi.rst
+   stm.rst
