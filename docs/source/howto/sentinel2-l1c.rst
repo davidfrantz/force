@@ -14,8 +14,8 @@ This tutorial explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS)
 
 ----------
 Overview**
-ESA provides an application programming interface (API) for data query and automatic download (see [here](https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/BatchScripting?redirectedfrom=SciHubUserGuide.8BatchScripting)).
-Based on some user-defined parameters (coordinates etc.) **FORCE L1AS** pulls a metadata report from the Copernicus API Hub.
+ESA provides an application programming interface (API) for data query and automatic download (see `here <https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/BatchScripting?redirectedfrom=SciHubUserGuide.8BatchScripting>`_).
+Based on some user-defined parameters (coordinates etc.) FORCE L1AS pulls a metadata report from the Copernicus API Hub.
 Each hit is compared
 with the local data holdings you already downloaded.
 If a new file is sitting on ESA's end, the missing image is downloaded.
@@ -31,11 +31,11 @@ A file queue is generated and updated accordingly - which is the main input to t
 Setup**
 Now, the first step is to get access to ESA's data and services.
 For that, you need an account.
-If you don't have one, register [here](https://scihub.copernicus.eu/dhus/#/self-registration).
+If you don't have one, register `here <https://scihub.copernicus.eu/dhus/#/self-registration>`_.
 It's free.
 
 
-Then, your credentials must be made available to **FORCE L1AS** to be able to request and receive ESA data.
+Then, your credentials must be made available to FORCE L1AS to be able to request and receive ESA data.
 On your machine, your login credentials must be placed in a hidden file ``.scihub`` in your home directory.
 I advise to only give user reading rights to this file.
 The user name goes in the first line, the password in the second line.
@@ -46,7 +46,7 @@ Also note, if you generate this file from a Windows machine, the Windows EOL cha
 Download some data**
 """"""""""
 Instructions**
-After setting up your account, you should be able to download Sentinel-2 data via **FORCE L1AS**.
+After setting up your account, you should be able to download Sentinel-2 data via FORCE L1AS.
 As with any other FORCE program, you can display short usage instructions by executing the program without any parameters.
 
 
@@ -119,7 +119,7 @@ If you don't receive any data for your study area, or end up somewhere else enti
 """"""""""
 Download**
 The actual download is triggered by omitting the ``dry`` option.
-**FORCE L1AS** downloads all data that match the parameters provided - and which weren't downloaded before.
+FORCE L1AS downloads all data that match the parameters provided - and which weren't downloaded before.
 Note that the program checks against the files on the disc (not the file queue).
 Each downloaded image is unzipped after the download.
 If both steps were successful, the image is appended to the file queue.
@@ -356,7 +356,7 @@ Following line will start the download at 3:00 AM each day.
 ----------
 Long Term Archive**
 In September 2019, ESA has activated the Long Term Archive (LTA) to roll out old (and potentially infrequently used) data products from the online storage system to offline storage.
-For details, see [here](https://scihub.copernicus.eu/userguide/LongTermArchive).
+For details, see `here <https://scihub.copernicus.eu/userguide/LongTermArchive>`_.
 As of now (the following numbers might change in the future), the last year of data shall stay online, and is immediately ready for download.
 Offline data may be pulled from offline to online storage upon request.
 The data retrieval shall happen within 24h and the products shall stay online for 3 days.
@@ -366,12 +366,12 @@ A user quota is implemented to prevent users from pulling the entire archive - u
 **FORCE >= 3.0** is able to handle LTA data.
 Previous FORCE versions crash when trying to download offline products.
 
-**FORCE L1AS** determines whether a product is online or offline.
+FORCE L1AS determines whether a product is online or offline.
 
 - If online, the image is downloaded as described above.
 - If offline, a pull request from offline to online storage is sent.
-ESA hasn't implemented any callback for this retrieval, thus **FORCE L1AS** will simply send pull requests for each requested offline image, probably download some available online images, and then exit.
-**FORCE L1AS** needs to be run again to retrieve the restored data.
+ESA hasn't implemented any callback for this retrieval, thus FORCE L1AS will simply send pull requests for each requested offline image, probably download some available online images, and then exit.
+FORCE L1AS needs to be run again to retrieve the restored data.
 To this end, it comes in handy to set up a download scheduler as desribed above.
 
 

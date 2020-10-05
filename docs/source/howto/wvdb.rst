@@ -144,13 +144,13 @@ Frantz, D., Stellmes, M., & Hostert, P. (2019). A Global MODIS Water Vapor Datab
 Prepare the WVDB
 ----------------
 
-We generally use a WVDB generated from MODIS water vapor products ([MOD05 and MYD05](https://modis.gsfc.nasa.gov/data/dataprod/mod05.php)).
+We generally use a WVDB generated from MODIS water vapor products (`MOD05 and MYD05 <https://modis.gsfc.nasa.gov/data/dataprod/mod05.php>`_).
 
 
 Download the ready-to-go global WVDB
 """"""""""""""""""""""""""""""""""""
 
-You should start by downloading the pre-compiled WVDB with global coverage from [here](doi.pangaea.de/10.1594/PANGAEA.893109).
+You should start by downloading the pre-compiled WVDB with global coverage from `here <doi.pangaea.de/10.1594/PANGAEA.893109>`_.
 This saves you a lot of processing.
 This freely available dataset was generated with the FORCE WVDB component, and is comprised of daily global water vapor data for February 2000 to July 2018 for each land-intersecting WRS-2 scene (13281 coordinates), as well as a monthly climatology that can be used if no daily value is available.
 
@@ -167,7 +167,7 @@ However, if you are in need of more up-to-date data, you can use the FORCE WVDB 
 
 
 FORCE WVDB needs a table with input coordinates (center coordinates of WRS-2 frames).
-The [pre-compiled dataset](doi.pangaea.de/10.1594/PANGAEA.893109) includes such a table.
+The `pre-compiled dataset <doi.pangaea.de/10.1594/PANGAEA.893109>`_ includes such a table.
 If you are not interested in global coverage, you can subset this file.
 The file should contain two columns separated by white space, and no header.
 The first column should give the longitude (X), the second column the latitude (Y) with coordinates in decimal degree (negative values for West/South).
@@ -197,7 +197,7 @@ Any other column is ignored (in the example below, the WRS-2 Path/Row is in the 
 
 
 FORCE WVDB downloads each Terra/Aqua granule (collection 6.1) that intersects with any of these coordinates.
-The files are downloaded from the Level1 and Atmosphere Archive and Distribution System ([LAADS](ladsweb.modaps.eosdis.nasa.gov)) at NASA’s Goddard Space Flight Center.
+The files are downloaded from the Level1 and Atmosphere Archive and Distribution System (`LAADS <ladsweb.modaps.eosdis.nasa.gov`_) at NASA’s Goddard Space Flight Center.
 Note that any permanent or temporary change/shutdown/decommissioning on LAADS’ or MODIS’ end may result in the nonfunctioning of FORCE WVDB... Also note, that they perform a weekly maintenance, during which their servers are not accessable.
 
 As with any other FORCE program, you can display short usage instructions by executing the program without any parameters.
@@ -275,7 +275,7 @@ Get access to the LAADS DAAC
 ----------------------------
 
 You need authentification to download data from the LAADS DAAC.
-This works by requesting an App Key from [NASA Earthdata](https://ladsweb.modaps.eosdis.nasa.gov/tools-and-services/data-download-scripts/#requesting).
+This works by requesting an App Key from `NASA Earthdata <https://ladsweb.modaps.eosdis.nasa.gov/tools-and-services/data-download-scripts/#requesting>`_.
 You can make this key available to FORCE by putting the character string in a file ``.laads`` in your home directory.
 With this, you should be able to download data.
 

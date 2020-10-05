@@ -40,7 +40,7 @@ Interpolation might simply be used to close these gaps.
 It smoothes the time series, and thus effectively reduces noise.
 Equidistance is established, which might be needed for following processing steps.
 
-Time Series interpolation is a basic option within the [Time Series Analysis (TSA)](https://force-eo.readthedocs.io/en/latest/components/higher-level/tsa/index.html) submodule of the [FORCE Higher Level Processing system (HLPS)](https://force-eo.readthedocs.io/en/latest/components/higher-level/index.html), and may be performed before using more advanced time series analysis methods:
+Time Series interpolation is a basic option within the :ref:`tsa` submodule of the FORCE :ref:`hlps` Processing system (HLPS), and may be performed before using more advanced time series analysis methods:
 
 .. figure:: img/force-tsa-workflow.jpg
 
@@ -52,7 +52,7 @@ RBF interpolation**
 
 In FORCE, a couple of interpolation methods are implemented.
 
-Most often, we use ensembles of Radial Basis Function (RBF) convolution filters (see this paper [here](https://www.sciencedirect.com/science/article/pii/S0303243416301003)).
+Most often, we use ensembles of Radial Basis Function (RBF) convolution filters (see `this paper <https://www.sciencedirect.com/science/article/pii/S0303243416301003>`_).
 As this is a convolution filter, no fitting is involved (as e.g. compared to splines or Savitzky-Golay filters), thus the method is really fast, while keeping a good balance between retaining detail and smoothing.
 
 The method is basically a moving average filter on steroids.
@@ -104,13 +104,13 @@ We start by generating an empty TSA parameterfile, and rename the file.
 
 
 If you prefer a more compact parameterfile without all the comments, use ``0`` instead of ``1`` as the last parameter.
-The full set of parameters is also documented [here](https://force-eo.readthedocs.io/en/latest/components/higher-level/tsa/param.html).
+The full set of parameters is also documented here: :ref:`tsa-param`.
 
 
 Input / Output directories
 """"""""""""""""""""""""""
 
-For this tutorial, we assume that we already have an existing Level 2 ARD datapool, which contains preprocessed data for multiple years (see [ARD tutorial]({{< ref "/tutorials/force-ard/l2-ard.md" >}})).
+For this tutorial, we assume that we already have an existing Level 2 ARD datapool, which contains preprocessed data for multiple years (see :ref:`tut-ard` tutorial).
 The parent directory of this datapool goes into the ``DIR_LOWER`` parameter.
 
 The ``DIR_HIGHER`` parameter names the output directory, where the interpolated time series will be generated (although technically possible, I suggest to use a different file path).
@@ -126,7 +126,7 @@ Analysis mask
 """""""""""""
 
 As we are only interested in the land surface - and there is a lot of water around Crete - we use a processing mask.
-Have a look at the [processing mask tutorial]({{< ref "/tutorials/force-masks/masks.md" >}}) for further details.
+Have a look at the :ref:`tut-mask` tutorial for further details.
 
 .. code-block:: bash
 
@@ -169,7 +169,7 @@ Spatial extent
 
 FORCE HLPS requires a square processing extent, which can be set using ``X_TILE_RANGE`` and ``Y_TILE_RANGE``.
 Then, if the extent of our region of interest is not square, we can further refine the processing extent by specifying a tile allow-list (``FILE_TILE``).
-Please see the [datacube tutorial]({{< ref "/tutorials/force-datacube/datacube.md" >}}) for more details, and I also suggest you to have a look at the [computing model of HLPS](https://force-eo.readthedocs.io/en/latest/components/higher-level/hl-compute.html).
+Please see the :ref:`tut-datacube` tutorial for more details, and I also suggest you to have a look at the :ref:`hl-compute` of HLPS.
 
 There are different ways to obtain these values, e.g. by generating, and filtering a shapefile with tiles via ``force-tabulate-grid``.
 The easiest way, however, is to use ``force-tile-extent`` with a vector geometry.
@@ -198,7 +198,7 @@ Block size
 
 However, if the program is *killed* by the system, this can be mitigated by adjusting ``BLOCK_SIZE``.
 
-Please have a look at the [computing model](https://force-eo.readthedocs.io/en/latest/components/higher-level/hl-compute.html) to understand how blocks are implemented and used in FORCE.
+Please have a look at the :ref:`hl-compute` to understand how blocks are implemented and used in FORCE.
 
 The block size is a value, which was set in Level 2 Processing; thus the default block size aligns with the physical layout of the files, and can be considered optimal for reading speed.
 If you adjust it, it is recommended to use a block size, which is a fraction of the original block size (without remainder, e.g. 1/2 of the original value).
@@ -257,7 +257,7 @@ For this tutorial, we are using data from the Landsat sensors:
 
 All processing in the TSA submodule is performed band-wise.
 
-You can choose from a fairly long list of spectral bands and indices (see [here](https://force-eo.readthedocs.io/en/latest/components/higher-level/tsa/param.html)).
+You can choose from a fairly long list of :ref:`spectral bands and indices<tsa-param-index>`.
 
 HLPS will only read required bands to reduce I/O.
 
@@ -315,7 +315,7 @@ Parallelization
 """""""""""""""
 
 HLPS uses a computing model, which *streams* the data.
-Please have a detailed look the at [computing model of HLPS](https://force-eo.readthedocs.io/en/latest/components/higher-level/hl-compute.html).
+Please have a detailed look the at the :ref:`hl-compute` of HLPS.
 
 Most often, generating interpolated time series (without doing anything else) is input-, or output-bound.
 
@@ -458,7 +458,7 @@ The chosen stretch will later be applied to the animation as well.
 Time Series Plots
 """""""""""""""""
 
-You can conveniently look at the pixels's time series using the [Raster Data Plotting](https://raster-data-plotting.readthedocs.io/en/latest/) plugin (&copy; [Andreas Rabe](mailto:andreas.rabe@geo.hu-berlin.de)).
+You can conveniently look at the pixels's time series using the `Raster Data Plotting <https://raster-data-plotting.readthedocs.io/en/latest/>`_ plugin (|copy| `Andreas Rabe <https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/andreas_rabe>`_).
 I am using red, green, and blue lines for the Brigthness, Greenness, and Wetness components, respectively, and decrease the symbol size a bit.
 
 .. figure:: img/tutorial-tsi-rdp.jpg
@@ -469,13 +469,13 @@ I am using red, green, and blue lines for the Brigthness, Greenness, and Wetness
 Time Series Animation
 """""""""""""""""""""
 
-Let's use the [Raster Timeseries Manager](https://raster-timeseries-manager.readthedocs.io/en/latest/) plugin (&copy; [Andreas Rabe](mailto:andreas.rabe@geo.hu-berlin.de)) to generate a web- or presentation-ready animation.
+Let's use the `Raster Timeseries Manager <https://raster-timeseries-manager.readthedocs.io/en/latest/>`_ plugin (|copy| `Andreas Rabe <https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/andreas_rabe>`_) to generate a web- or presentation-ready animation.
 
 .. admonition:: One-time setup
 
    For preparing the animation, go to the plugin's ``System`` tab.
    This needs to be done only once and will set up all necessary tools for saving the animation.
-   For this, you need to install [ImageMagick](https://imagemagick.org/script/download.php), and then tell the plugin where the ``imagemagick`` and ``ffmpeg`` executables are located.
+   For this, you need to install `ImageMagick <https://imagemagick.org/script/download.php>`_, and then tell the plugin where the ``imagemagick`` and ``ffmpeg`` executables are located.
 
 Simply select ``4D-Tasseled-Cap-TSI`` in the ``Timeseries`` field.
 Now, you can already look at the animation (hit play ``>``).

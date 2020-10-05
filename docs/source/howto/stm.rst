@@ -23,7 +23,7 @@ Before calculating the statistics, the data is quality filtered, e.g. clouds are
 
 .. figure:: img/tutorial-stm-example.png
 
-   *STM concept &copy; Stefan Ernst*
+   *STM concept |copy| Stefan Ernst*
 
 It is important to note that STMs are statistical aggregations - and not composites as in *“we select the full spectrum for the optimal observation”*.
 
@@ -42,11 +42,11 @@ Due to their robustness (as compared to more advanced metrics) and their spatial
 Parameterfile
 -------------
 
-STMs are available within the [Time Series Analysis (TSA)](https://force-eo.readthedocs.io/en/latest/components/higher-level/tsa/index.html) submodule of the [FORCE Higher Level Processing system (HLPS)](https://force-eo.readthedocs.io/en/latest/components/higher-level/index.html).
+STMs are available within the :ref:`tsa` submodule of the FORCE :ref:`hlps` Processing system (HLPS).
 
 You can use ``force-parameter`` to generate an empty parameterfile.
 
-To familiarize yourself with the TSA submodule, I suggest taking a detour to the [interpolation tutorial]({{< ref "/tutorials/force-tsi/tsi.md" >}}) before advancing.
+To familiarize yourself with the TSA submodule, I suggest taking a detour to the :ref:`tut-tsi` before advancing.
 
 
 Temporal extent

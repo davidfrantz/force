@@ -60,8 +60,8 @@ If possible, it is advised to use a finer resolution.
 However, as it is hard to acquire high spatial resolution DEMs, especially for larger areas, lower resolution works too.
 Often, we use the 30m SRTM DEM or 30m ASTER DEM, or a combination thereof, e.g. SRTM filled with ASTER (SRTM is a bit better, but there are holes in mountainous regions, and coverage is only 60°N-60°S).
 
-The SRTM DEM can be obtained from [EarthExplorer](https://earthexplorer.usgs.gov/).
-The ASTER DEM can be obtained from [EarthData](https://search.earthdata.nasa.gov/search/) or [Japan Space Systems](https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/).
+The SRTM DEM can be obtained from `EarthExplorer <https://earthexplorer.usgs.gov/>`_.
+The ASTER DEM can be obtained from `EarthData <https://search.earthdata.nasa.gov/search/`_ or `Japan Space Systems <https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/>`_.
 Both are free of charge.
 
 
@@ -70,7 +70,7 @@ Prepare the mosaic
 
 The following steps illustrate how to build a virtual mosaic from SRTM data.
 Generally, DEM data come in tiles (datacube style), e.g. each SRTM tile covers 1°.
-The [GDAL Virtual Format](gdal.org/drivers/raster/vrt.html) allows to mosaick data without producing a physical representation, i.e. the virtual mosaic only holds links to the original tiled data, plus some rules on how to combine them into the mosaic.
+The `GDAL Virtual Format <gdal.org/drivers/raster/vrt.html>`_ allows to mosaick data without producing a physical representation, i.e. the virtual mosaic only holds links to the original tiled data, plus some rules on how to combine them into the mosaic.
 
 Assuming you have downloaded some SRTM tiles, we first prepare a text file that holds all the filepaths:
 

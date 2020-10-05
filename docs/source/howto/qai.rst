@@ -19,7 +19,7 @@ FORCE L2PS provides a description of the quality of each pixel in the form of qu
 This bit-packed information allows users to apply per pixel filters to all Level 2 products.
 The bits represent combinations of surface, atmospheric, and processing-related conditions that can affect the overall usefulness of a given pixel for a particular application.
 The success of any follow-up analysis depends on the rigorous usage of these information!
-A good explanation of quality bits is given by the [USGS](https://www.usgs.gov/land-resources/nli/landsat/landsat-collection-1-level-1-quality-assessment-band?qt-science_support_page_related_con=0#qt-science_support_page_related_con): 
+A good explanation of quality bits is given by the `USGS <https://www.usgs.gov/land-resources/nli/landsat/landsat-collection-1-level-1-quality-assessment-band?qt-science_support_page_related_con=0#qt-science_support_page_related_con>`_: 
 
 .. admonition:: USGS description
 
@@ -194,9 +194,9 @@ We strongly recommend to make use of  the bits directly (see remaining part of t
 Quality bit rendering in QGIS
 """""""""""""""""""""""""""""
 
-There is a nice QGIS plugin from my colleague [Benjamin Jakimow](https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/benjamin_jakimow), which can visualize quality bits in QGIS *on the fly*.
+There is a nice QGIS plugin from my colleague `Benjamin Jakimow <https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/benjamin_jakimow>`_, which can visualize quality bits in QGIS *on the fly*.
 Quality bit inflating is not necessary anymore!
-The [Bit Flag Renderer plugin](http://plugins.qgis.org/plugins/BitFlagRenderer/) provides a new renderer for QGIS, with which any quality bit product can flexibly be visualized.
+The `Bit Flag Renderer plugin <http://plugins.qgis.org/plugins/BitFlagRenderer/>`_ provides a new renderer for QGIS, with which any quality bit product can flexibly be visualized.
 The plugin includes predefined bit visualization rules for the FORCE QAI bits.
 The default visualization matches the information and colors from the quicklook images described above):
 

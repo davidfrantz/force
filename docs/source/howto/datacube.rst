@@ -72,8 +72,8 @@ Empty parameter files can be generated with ``force-parameter``
 Two default projection / grid systems are predefined in FORCE.
 They can be specified via the ``PROJECTION`` parameter instead of giving a WKT string.
 The predefined options have their own settings for ``ORIGIN_LAT``, ``ORIGIN_LON``, ``TILE_SIZE``, and ``BLOCK_SIZE``, thus the values given in the parameterfile will be ignored.
-[EQUI7](https://cartography.tuwien.ac.at/eurocarto/wp-content/uploads/2015/09/3_6_ppt.pdf) consists of 7 Equi-Distant, continental projections with a tile size of 100km.
-[GLANCE7](https://measures-glance.github.io/glance-grids/) consists of 7 Equal-Area, continental projections, with a tile size of 150km.
+`EQUI7 <https://github.com/TUW-GEO/Equi7Grid>`_ consists of 7 Equi-Distant, continental projections with a tile size of 100km.
+`GLANCE7 <https://measures-glance.github.io/glance-grids>`_ consists of 7 Equal-Area, continental projections, with a tile size of 150km.
 One datacube will be generated for each continent.
 
 .. warning::

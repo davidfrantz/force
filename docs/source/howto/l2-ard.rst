@@ -31,7 +31,7 @@ What are Analysis Ready Data?
 
 .. admonition:: CEOS description
 
-   Analysis Ready Data are satellite data that have been processed to a minimum set of requirements and organized into a form that allows immediate analysis with a minimum of additional user effort and interoperability both through time and with other datasets ([CEOS](http://ceos.org/ard)).
+   Analysis Ready Data are satellite data that have been processed to a minimum set of requirements and organized into a form that allows immediate analysis with a minimum of additional user effort and interoperability both through time and with other datasets (`CEOS <http://ceos.org/ard>`_).
 
 
 Simply put, ARD are readily usable for any application without much further processing.
@@ -70,7 +70,7 @@ Note that most options and corrections can be switched off (e.g. atmospheric cor
 Getting started
 ---------------
 
-This tutorial walks you through the main parts, for more details, please refer to the [documentation](https://force-eo.readthedocs.io/en/latest/components/lower-level/level2/index.html).
+This tutorial walks you through the main parts, for more details, please refer to the :ref:`l2ps`.
 
 Make sure to have enough horsepower
 """""""""""""""""""""""""""""""""""
@@ -124,7 +124,7 @@ An empty Level 2 parameter file can be generated with
 
 The trailing ``1`` means that descriptions for every parameter will be included.
 If you prefer a shorter parameter file, give a ``0`` instead.
-The descriptions can also be found in the [documentation](https://force-eo.readthedocs.io/en/latest/components/lower-level/level2/param.html).
+The descriptions can also be found here: :ref:`l2-param`.
 
 Let’s rename the file, and have a look:
 
@@ -170,7 +170,7 @@ Open the file in the text editor of your choice, e.g.
 The main input is a file queue that holds the full filepaths to all ingested images.
 All images that are enqueued (processing flag is ``QUEUED``) will be processed, all other are ignored.
 After processing, the flag will be set to ``DONE``.
-The [Sentinel-2 Level 1C tutorial]({{< ref "/tutorials/force-level1-s2/Sentinel-2-L1C.md" >}}) explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS) to download, organize, and maintain a clean and consistent Sentinel-2 Level 1 data pool, as well as corresponding data queues needed for the Level 2 processing.
+The :ref:`tut-s2l1c` tutorial explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS) to download, organize, and maintain a clean and consistent Sentinel-2 Level 1 data pool, as well as corresponding data queues needed for the Level 2 processing.
 There isn't a tutorial for Landsat yet, but it works similarly.
 Let's assume, we already have downloaded some images, the file queue is set like this:
 
@@ -193,7 +193,7 @@ The temp directory is mostly used for temporarily unpacking zip/tar.gz container
 """"""""""""""""""""""""""
 
 A Digital Elevation model is used to improve cloud and cloud shadow detection, atmospheric correction and to perform the topographic correction.
-The [DEM tutorial]({{< ref "/tutorials/force-dem/DEM.md" >}}) explains how to properly prepare a Digital Elevation Model (DEM).
+The :ref:`tut-dem`  tutorial explains how to properly prepare a Digital Elevation Model (DEM).
 Let's assume, we already have prepared the DEM, it is set like this.
 Make sure to set the nodata value correctly:
 
@@ -208,7 +208,7 @@ Make sure to set the nodata value correctly:
 
 The datacube parameters, e.g. resolution, projection, tile size, block size, grid origin etc.
 are under full user control.
-As data cubing is an essential concept of FORCE, I highly recommend to read the [Datacube tutorial]({{< ref "/tutorials/force-datacube/datacube.md" >}}), which explains what a datacube is, how it is parameterized, how you can find a POI, how to visualize the tiling grid, and how to conveniently display cubed data.
+As data cubing is an essential concept of FORCE, I highly recommend to read the :ref:`tut-datacube`, which explains what a datacube is, how it is parameterized, how you can find a POI, how to visualize the tiling grid, and how to conveniently display cubed data.
 
 Our parameter file already has some working defaults.
 You likely want to adjust them to your needs, but for starters, let's take the default values.
@@ -220,7 +220,7 @@ You likely want to adjust them to your needs, but for starters, let's take the d
 The default parameter file already has all radiometric corrections enabled, and this is the setup I commonly use for generating ARD.
 This includes atmospheric correction with multiple scattering effects, image-based AOD estimation, topographic correction, adjacency effect correction, and nadir BRDF correction.
 The only thing that needs to be changed (and only if processing Landsat data) is the parameterization of the water vapor correction.
-Please see the [Water Vapor Database tutorial]({{< ref "/tutorials/force-dem/DEM.md" >}}) for instructions on how to prepare/download the Water Vapor Database.
+Please see the :ref:`tut-wvdb` tutorial for instructions on how to prepare/download the Water Vapor Database.
 The directory that contains this database needs to be like this:
 
 .. code-block:: bash
@@ -245,7 +245,7 @@ It suppresses the output for chips (tiled image) that exceed the given threshold
 """""""""""""""""""
 
 This parameter defines the method used for improving the spatial resolution of Sentinel-2’s 20m bands to 10m.
-It defaults to the [ImproPhe code](https://ieeexplore.ieee.org/document/7452606), which is a data fusion option with both decent performance and quality.
+It defaults to the `ImproPhe code <https://ieeexplore.ieee.org/document/7452606>`_, which is a data fusion option with both decent performance and quality.
 Let's keep this method, but feel free to try the other options.
 
 
@@ -377,11 +377,11 @@ The processing time (real time) is appended at the end.
 Output format
 -------------
 
-For all details on the output format, please refer to the [documentation](https://force-eo.readthedocs.io/en/latest/components/lower-level/level2/format.html#metadata).
+For more details, see the :ref:`level2-format`.
 
 The output data are organized in data cubes.
 The tiles manifest as directories in the file system, and the images are stored within.
-This is decribed in more detail in the [Datacube tutorial]({{< ref "/tutorials/force-datacube/datacube.md" >}}).
+This is decribed in more detail in the :ref:`tut-datacube`.
 
 Basically, for each tile, you get a time series of square image chips that always show the same extent:
 
@@ -399,7 +399,7 @@ The reflectance products are multi-band images and consist of 6 bands for Landsa
 All bands are provided at the same spatial resolution, typically 30m for Landsat and 10m for Sentinel-2.
 
 QAI are provided bit-wise for each pixel.
-QAI are essential for making your analyses a success, therefore, please have a look at the [Quality Bits tutorial]({{< ref "/tutorials/force-qai/QAI.md" >}}).
+QAI are essential for making your analyses a success, therefore, please have a look at the :ref:`tut-qai` tutorial.
 
 Metadata are written to all output products.
 Note that FORCE-specific metadata will be written to the FORCE domain, and thus are probably not visible unless the FORCE domain (or all domains) are specifically requested:
@@ -434,7 +434,7 @@ ARD, now what?
 
 FORCE provides a lot of functionality to further process the generated ARD into hARD or hARD+ products, e.g. using pixel-based compositing or time series analyses.
 
-Please see the [Higher Level processing options](https://force-eo.readthedocs.io/en/latest/components/higher-level/index.html) in the documentation.
+Please see the :ref:'hlps' in the documentation.
 Some more tutorials are planned, which deal with all these options.
 
 
