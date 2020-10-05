@@ -134,6 +134,11 @@ is_smaller() {
   awk -v val1="$1" -v val2="$2" 'BEGIN {print (val1 < val2)}'
 }
 
+round() { 
+  local valmult=$(awk -v val="$1" -v digits="$2" 'BEGIN {print (val * 10^digits)}')
+  awk -v val="$valmult" -v digits="$2" 'BEGIN {print (int(val+0.5)) / 10^digits}'
+}
+
 show_progress() {
   SIZEDONE=$(awk -v done=$SIZEDONE -v fsize=$FILESIZE 'BEGIN { print (done + fsize) }' )
   PERCDONE=$(awk -v total=$TOTALSIZE -v done=$SIZEDONE 'BEGIN { printf( "%.2f\n", (100 / total * done) )}')
@@ -283,11 +288,11 @@ done
 if ! [[ $DATEMIN =~ ^[[:digit:]]+$ ]] || ! [[ $DATEMAX  =~ ^[[:digit:]]+$ ]]; then
   printf "%s\n" "" "Error: One of the entered dates seems to contain non-numeric characters." "Start: $DATEMIN, End: $DATEMAX" ""
   exit 1
-elif ! date -d $DATEMIN &> /dev/null; then
-  printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
+elif ! date -d $DATEMIN &> /dev/null || ! [ ${#DATEMIN} -eq 8 ]; then
+  printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYYMMDD" ""
   exit 1
-elif ! date -d $DATEMAX &> /dev/null; then
-    printf "%s\n" "" "endtime ($DATEMAX) is not a valid date." "Make sure date is formatted as YYYY-MM-DD" ""
+elif ! date -d $DATEMAX &> /dev/null || ! [ ${#DATEMAX} -eq 8 ]; then
+    printf "%s\n" "" "endtime ($DATEMAX) is not a valid date." "Make sure date is formatted as YYYYMMDD" ""
   exit 1
 elif [ $(date -d $DATEMIN +%s) -gt $(date -d $DATEMAX +%s) ]; then
   printf "%s\n" "Error: Start of date range is larger than end of date range" "Start: $DATEMIN, End: $DATEMAX" ""
@@ -450,19 +455,19 @@ get_data() {
   # ============================================================
   # Filter metadata and extract download links
   if [ $SATELLITE = "sentinel2" ]; then
-    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh')
+    # 5: sensing time 9: generation time 
+    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | awk -F "," '{OFS=","} {gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}Z|-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '{OFS=","} $5 >= start && $5 <= stop && $7 >= clow && $7 <= chigh'| sort -t"," -k 14.76,14.78r -k9r | awk -F"," '{OFS=","} !a[$4,$5]++' | sort -t"," -k 5)
   elif [ $SATELLITE = "landsat" ]; then
-    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh')
+    LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh' | sort -t"," -k 5)
   fi
 
-  METAFNAME=$METADIR/csd_metadata_$(date +%FT%H-%M-%S).txt
+  METAFNAME=$POOL/csd_metadata_$(date +%FT%H-%M-%S).txt
   printf "%s" "$LINKS" > $METAFNAME
   case $SATELLITE in
     sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
     landsat) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$17/1048576} END {printf "%f", s}') ;;
   esac
   NSCENES=$(sed -n '$=' $METAFNAME)
-  
   if [ $KEEPMETA -eq 0 ]; then
     rm $METAFNAME
   else
@@ -486,11 +491,13 @@ get_data() {
     PRSIZE=$(echo $PRSIZE | awk '{print $1 / 1024}')
     UNIT="PB"
   fi
+  PRSIZE=$(round $PRSIZE 2)
 
   if [ -z $NSCENES ];then
     printf "%s\n" "There were no $PRINTNAME Level 1 scenes found matching the search criteria." ""
   else
-    LC_NUMERIC="en_US.UTF-8" printf "%s\n%.2f%s\n" "$NSCENES $PRINTNAME Level 1 scenes matching criteria found" "$PRSIZE" "$UNIT data volume found."
+    #LC_NUMERIC="en_US.UTF-8" printf "%s\n%.2f%s\n" "$NSCENES $PRINTNAME Level 1 scenes matching criteria found" "$PRSIZE" "$UNIT data volume found."
+    printf "%s\n" "$NSCENES $PRINTNAME Level 1 scenes matching criteria found" "$PRSIZE$UNIT data volume found."
   fi
 
 
@@ -517,20 +524,23 @@ get_data() {
         URL=$(echo $LINK | cut -d"," -f 18)
         FILESIZEBYTE=$(echo $LINK | cut -d, -f 17)
       fi
-      FILESIZE=$(( $FILESIZEBYTE / 1048576 ))
+      FILESIZE=$(echo $(echo $FILESIZEBYTE | awk '{print $1 / 1048576}') | cut -d"." -f1)
       
       show_progress
       
       TILEPATH=$POOL/$TILE    
       SCENEPATH=$TILEPATH/$SCENEID
       if [ $SATELLITE = "sentinel2" ]; then
-        SCENEPATH=$SCENEPATH".SAFE"
+        if [[ $SCENEID == *"_OPER_"* ]]; then
+          SCENEID=$(echo $URL | rev | cut -d"/" -f1 | rev | cut -d"." -f1)
+        fi
+        SCENEPATH=$TILEPATH/$SCENEID".SAFE"
       fi
-      # Check if scene already exists, remove and download again if gsutil temp files are present
+      # Check if scene already exists, download anyway if gsutil temp files are present
       if [ -d $SCENEPATH ]; then
         if ! ls -r $SCENEPATH | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
           printf "\e[500D\e[4A\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
-          show_progress
+          
           ((ITER++))
           continue
         fi
@@ -546,7 +556,7 @@ get_data() {
       fi
 
       printf "\e[500D\e[2A\e[2KDownloading "$SCENEID"("$ITER" of "$NSCENES")...\e[2B"
-      gsutil -m -q cp -c -L $POOL"/download_log.txt" -R $URL $TILEPATH
+      gsutil -m -q cp -R $URL $TILEPATH
 
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE

@@ -54,7 +54,8 @@ char user[NPOW_10];
          "david.frantz@geo.hu-berlin.de\n");
          
   printf("With active code contributions from\n");
-  printf("  Franz Schug, franz.schug@geo.hu-berlin.de\n");
+  printf("  Franz Schug, franz.schug@geo.hu-berlin.de\n"
+         "  Stefan Ernst, stefan.ernst@geo.hu-berlin.de\n");
 
   printf("\nFORCE is free software under the terms of the "
          "GNU General Public License as published by the "

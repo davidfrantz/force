@@ -1,5 +1,51 @@
 .. _v3:
 
+FORCE v. 3.5.2
+--------------
+
+Release: 05.10.2020
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed some issues in force-csd.
+    Added check for S2 duplicate scenes. Only the scenes with highest processing baseline and latest processing date is downloaded
+    Check for already downloaded S2 scenes does not rely on scene name column anymore, as old GCS folder names don't represent old file naming convention. Scene name for check is extracted from URL now
+    Added check for length of date string
+    Fixed problem with converting filesize of scenes from bytes to megabytes
+    Fixed rounding of reported data volume (no more changing of locale)
+    gsutil does not create log files, check for downloaded data is handled by the script only
+    Files are downloaded following chronological order based on acquisition time
+    -k now saves filtered metadata to level1-datapool folder
+
+* **FORCE AUX**
+
+  * force-parameter now writes the polar-based phenology parameters into the TSA sekeleton.
+
+* **FORCE L2PS**
+
+  * fixed a "cannot copy" bug when using the water vapor database when correcting Landsat data.
+
+
+FORCE v. 3.5.1
+--------------
+
+Release: 17.09.2020
+
+* **Docker changes**
+
+  * Fegyi fixed an issue: files generated through docker were owned by root before.
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed a small issue with the force-csd progress bar, as well as an issue when the end data wasn't defined.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, TSA sub-module, CAT analysis: 
+    There is another change parameter: loss = change / offset * 1000. 
+    The offset is the regression intercept of the linear trend applied to the full time series.
+
+
 FORCE v. 3.5.0
 --------------
 
