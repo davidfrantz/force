@@ -777,7 +777,7 @@ short nodata;
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
     
-    tsa_python_plugin(&ts, mask_, nc, ni, nodata, &phl->tsa.pyp);
+    tsa_python_plugin(&ts, mask_, nc, ni, nodata, phl);
     
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     

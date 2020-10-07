@@ -41,7 +41,7 @@ extern "C" {
 void register_python(par_hl_t *phl);
 void deregister_python();
 void register_python_tsa(par_pyp_t *pyp);
-int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_pyp_t *pyp);
+int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus
 }
