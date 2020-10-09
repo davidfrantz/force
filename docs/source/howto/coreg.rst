@@ -74,8 +74,7 @@ To familiarize yourself with the TSA submodule, I suggest taking a detour to the
 You might want to adapt the parallel processing options ``NTHREAD_READ``, ``NTHREAD_COMPUTE``, and ``NTHREAD_WRITE`` to your needs.
 Typically, this is an input-bound job.
 
-Adapt the spatial extent.
-
+Adapt the spatial extent. 
 ``X_TILE_RANGE`` and ``Y_TILE_RANGE`` should be set, such that all Sentinel-2 images are covered (not only the part you are eventually interested in, but the complete image as provided by ESA).
 
 As we are generating Landsat near-infrared base images, use
@@ -148,6 +147,11 @@ Logfiles
 
 As usual, it is very much advised to look into the logfiles.
 This is especially true when using the coregistration.
+The logfile includes information about the success of the co-registration, and will report the
+
+- number of identified tie points
+- the shift in x and y direction 
+- the RMSE of the retrived image transformation
 
 .. code-block:: bash
 
@@ -194,6 +198,7 @@ If the RMSE is low, we have a similar shift for the different tie points; if the
 Eventually, the logfiles reports on the original shift in X- and Y-direction between the Sentinel-2 image and the  base, which can e.g. be visualized like this, where we see that we corrected for quite some big shifts that substantially exceeded the 12m nominal geolocation accuracy.
 
 .. figure:: img/tutorial-coreg-shift.png
+   :scale: 33 %
 
    *Density plot of detected image shifts (~1500 images investigated). |copy| Philippe Rufin*
 
