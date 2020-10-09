@@ -20,6 +20,7 @@ What is the problem?
 **THIS** is the problem:
 
 .. figure:: img/tutorial-coreg-animation.gif
+   :align: middle
 
    *Animation of Sentinel-2 images on Crete*
 
@@ -186,6 +187,7 @@ When fixing the geolocation, the time series plot contains less observations, bu
 Always remember: *trash in, trash out!*
 
 .. figure:: img/tutorial-coreg-ts.png
+   :align: middle
 
    *Exemplary Sentinel-2 time series before (top) and after (bottom) co-registration. |copy| Philippe Rufin*
 
@@ -198,6 +200,7 @@ If the RMSE is low, we have a similar shift for the different tie points; if the
 Eventually, the logfiles reports on the original shift in X- and Y-direction between the Sentinel-2 image and the  base, which can e.g. be visualized like this, where we see that we corrected for quite some big shifts that substantially exceeded the 12m nominal geolocation accuracy.
 
 .. figure:: img/tutorial-coreg-shift.png
+   :align: middle
    :scale: 33 %
 
    *Density plot of detected image shifts (~1500 images investigated). |copy| Philippe Rufin*
