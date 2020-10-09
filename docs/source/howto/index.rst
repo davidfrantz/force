@@ -18,6 +18,7 @@ Have a sorted list here.
 
    datacube.rst
    l2-ard.rst
+   coreg.rst
    qai.rst
    wvdb.rst
    dem.rst
