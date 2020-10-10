@@ -127,6 +127,14 @@ After this, we need to generate a virtual mosaic:
    force-mosaic /data/europe/base
 
 
+The base images look like this, i.e. 12 NIR images - one for each month:
+
+.. figure:: img/tutorial-coreg-base.png
+
+   *Landsat NIR base images. Stretch: white to green.*
+
+
+
 Coregistration
 --------------
 
