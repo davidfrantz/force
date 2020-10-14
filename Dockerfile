@@ -1,3 +1,27 @@
+##########################################################################
+# 
+# This file is part of FORCE - Framework for Operational Radiometric 
+# Correction for Environmental monitoring.
+# 
+# Copyright (C) 2013-2020 David Frantz
+# 
+# FORCE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# FORCE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FORCE. If not, see <http://www.gnu.org/licenses/>.
+# 
+##########################################################################
+
+# Copyright (C) 2020 Gergely Padányi-Gulyás (github user fegyi001)
+
 FROM ubuntu:18.04 as builder
 
 # Install folder
@@ -21,8 +45,8 @@ RUN apt-get -y install wget unzip curl git build-essential libgdal-dev gdal-bin 
 # Set python aliases for Python 3.x
 RUN echo 'alias python=python3' >> ~/.bashrc \
   && echo 'alias pip=pip3' >> ~/.bashrc
-# NumPy is needed for OpenCV
-RUN pip3 install numpy==1.18.1 
+# NumPy is needed for OpenCV, gsutil for Google downloads
+RUN pip3 install numpy==1.18.1 gsutil
 
 # Build OpenCV from source
 RUN mkdir -p $INSTALL_DIR/opencv
@@ -49,16 +73,20 @@ RUN ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive \
   && make clean
 
 # Build FORCE from source
-RUN mkdir -p $INSTALL_DIR/force
+RUN mkdir -p $INSTALL_DIR/force && \
+  # This is needed in case of develop branch
+  mkdir -p /develop
 WORKDIR $INSTALL_DIR/force
 COPY . . 
-# Conditionally enable SPLITS which is disabled by default
-ARG splits=false 
-RUN if [ "$splits" = "true" ] ; then ./splits.sh enable; else ./splits.sh disable; fi
-# Conditionally enable DEBUG mode
+ARG splits=true 
 ARG debug=false 
-RUN if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi
-RUN make -j7 \
+# Conditionally disable SPLITS which is enabled by default
+RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enable; fi && \
+  # Conditionally enable DEBUG mode
+  if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi && \
+  # Compile FORCE
+  sed -i 's+BINDIR=/develop+BINDIR=/usr/local/bin+' Makefile && \
+  make -j7 \
   && make install \
   && make clean
 
@@ -66,5 +94,14 @@ RUN make -j7 \
 RUN rm -rf $INSTALL_DIR
 RUN apt-get purge -y --auto-remove apt-utils cmake git build-essential software-properties-common
 
-# Test FORCE run
+# Create a dedicated 'docker' group and user for running FORCE commands
+RUN groupadd docker && \
+  useradd -m docker -g docker -p docker && \
+  chgrp docker /usr/local/bin/ && \
+  chgrp docker /develop
+# Use this user by default
+USER docker
+
+WORKDIR /home/docker
+
 RUN force

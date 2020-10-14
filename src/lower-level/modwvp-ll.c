@@ -279,9 +279,7 @@ float tmp, min[3];
     while (tokenptr != NULL){
 
       if (k == 0){ 
-        if (strlen(tokenptr) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); return FAILURE;
-        } else { strncpy(id[nline], tokenptr, strlen(tokenptr)); id[nline][strlen(tokenptr)] = '\0';}
+        copy_string(id[nline], NPOW_10, tokenptr);
       } else if (k == 4){
         if (strcmp(tokenptr, "D") == 0 || strcmp(tokenptr, "B") == 0){
           valid[nline] = true;  // day image
@@ -658,9 +656,7 @@ const char *separator = ",";
       while (fgets(buffer, NPOW_10, fp) != NULL){
         if (strstr(buffer, pattern) != NULL){
           str = strtok(buffer, separator);
-          if (strlen(str) > NPOW_10-1){
-            printf("cannot copy, string too long.\n"); exit(1);
-          } else { strncpy(basename, str, strlen(str)); basename[strlen(str)] = '\0';}
+          copy_string(basename, NPOW_10, str);
           ok = true;
         }
       }
@@ -871,22 +867,22 @@ float ctr = 0;
   for (c=0; c<nc; c++){
     if (!aqua){
       WVP[c] = modavg[c];
-      if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
     } else {
       if (modavg[c] < 9999 && mydavg[c] < 9999){
         if (modctr[c] >= mydctr[c]){
           WVP[c] = modavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
         } else {
           WVP[c] = mydavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[3] = '\0';}
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
         }
       } else if (modavg[c] < 9999 && mydavg[c] >= 9999){
         WVP[c] = modavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[3] = '\0';}
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
       } else if (modavg[c] >= 9999 && mydavg[c] < 9999){
         WVP[c] = mydavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[3] = '\0';}
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
       }
     }
     if (WVP[c] < 9999) ctr++;
@@ -1022,7 +1018,7 @@ double *modavg, *mydavg, *modctr, *mydctr;
   // initialize precipitable water with fill
   for (c=0; c<nc; c++){
     WVP[c] = 9999;
-    strncpy(SEN[c], "TBD", 3); SEN[3] = '\0';
+    copy_string(SEN[c], NPOW_02, "TBD");
   }
 
   // if TERRA geometa doesn't exist: download

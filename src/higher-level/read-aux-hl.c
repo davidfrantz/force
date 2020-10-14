@@ -91,6 +91,9 @@ int nchar;
       nchar = snprintf(fname, NPOW_10, "%s/%s", phl->mcl.d_model, phl->mcl.f_model[s][m]);
       if (nchar < 0 || nchar >= NPOW_10){
         printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+        
+      if (!fileexist(fname)){
+        printf("Model %s does not exist.\n", fname); return FAILURE;}
 
       if (phl->mcl.method == _ML_SVR_ || 
           phl->mcl.method == _ML_SVC_){

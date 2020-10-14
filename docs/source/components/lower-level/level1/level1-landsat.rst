@@ -1,7 +1,7 @@
 .. _level1-landsat:
 
-level1-landsat
-==============
+force-level1-landsat
+====================
 
 FORCE can process Level 1 Landsat data, generated using the Level 1 Product Generation System (LPGS) of the U.S. Geological Survey (USGS). 
 

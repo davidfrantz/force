@@ -50,6 +50,8 @@ char *wkt = dst_wkt;
 double x, y;
 
 
+  CPLSetConfigOption("OGR_CT_FORCE_TRADITIONAL_GIS_ORDER", "YES"); 
+
   if (srs_x < -180 || srs_x > 180){
     printf("Longitude is out of bounds.\n"); return FAILURE;}
   if (srs_y <  -90 || srs_y >  90){
@@ -90,6 +92,9 @@ OGRSpatialReference oSrcSRS, oDstSRS;
 OGRCoordinateTransformation *poCT = NULL;
 char *wkt = src_wkt;
 double x, y;
+
+
+  CPLSetConfigOption("OGR_CT_FORCE_TRADITIONAL_GIS_ORDER", "YES"); 
 
   x = srs_x; y = srs_y;
 
@@ -133,6 +138,9 @@ OGRCoordinateTransformation *poCT = NULL;
 char *src_css = src_wkt;
 char *dst_css = dst_wkt;
 double x, y;
+
+
+  CPLSetConfigOption("OGR_CT_FORCE_TRADITIONAL_GIS_ORDER", "YES"); 
 
   x = srs_x; y = srs_y;
 

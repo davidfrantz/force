@@ -738,7 +738,7 @@ int mod = x[0];
 int now = 1;
 
 
-  qsort (x, n, sizeof(int), comp);
+  qsort(x, n, sizeof(int), comp);
 
   for (i=1; i<n; i++){
     if (x[i] == x[i-1]){
@@ -759,6 +759,81 @@ int now = 1;
 
 
   return mod;
+}
+
+
+/** Number of unique values
++++ This function computes the number of unique values of an array. 
+--- x:      array
+--- n:      length of array
++++ Return: number
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int n_uniq(int *x, int n){
+int i;
+int *arr = NULL;
+int num = 1;
+
+
+  alloc((void**)&arr, n, sizeof(int));
+  for (i=0; i<n; i++) arr[i] = x[i];
+
+  qsort(arr, n, sizeof(int), comp);
+
+  for (i=1; i<n; i++){
+    if (arr[i] != arr[i-1]) num++;
+  }
+
+  free((void*)arr);
+
+
+  return num;
+}
+
+
+/** Histogram
++++ This function computes a histogram.
+--- x:      array
+--- n:      length of array
++++ Return: histogram
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int **histogram(int *x, int n, int *n_uniq){
+int i, k;
+int *arr = NULL;
+int **hist = NULL;
+int num = 1;
+
+
+  alloc((void**)&arr, n, sizeof(int));
+  for (i=0; i<n; i++) arr[i] = x[i];
+
+  qsort(arr, n, sizeof(int), comp);
+
+  for (i=1; i<n; i++){
+    if (arr[i] != arr[i-1]) num++;
+  }
+
+  alloc_2D((void***)&hist, 2, num, sizeof(int));
+
+  k = 0;
+
+  hist[0][k] = arr[0];
+  hist[1][k]++;
+
+  for (i=1; i<n; i++){
+
+    if (arr[i] != arr[i-1]){
+      k++;
+      hist[0][k] = arr[i];
+    }
+
+    hist[1][k]++;
+  }
+
+
+  free((void*)arr);
+
+  *n_uniq = num;
+  return hist;
 }
 
 

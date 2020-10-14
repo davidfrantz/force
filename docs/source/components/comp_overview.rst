@@ -4,11 +4,12 @@ Overview
 ========
 
 FORCE is a software framework and consists of several modules and executables, which are organized in components according to processing levels.
-"Lower Level" is defined as Levels 1-2, "Higher Level" as Level 3 and above, auxilliary components are helper programs for specific purposes.
 
-+--------------------+-------------+------------------+
-+ :ref:`lower-level` + :ref:`hlps` + :ref:`aux-level` +
-+--------------------+-------------+------------------+
+  * :ref:`lower-level` is defined as Levels 1-2, 
+
+  * :ref:`hlps` as Level 3 and above, 
+
+  * :ref:`aux-level` components are helper programs for specific purposes.
 
 
 A typical FORCE workflow consists of following main steps:

@@ -44,8 +44,10 @@ void register_train(params_t *params, par_train_t *train){
   register_char_par(params,     "FILE_RESPONSE",         _CHAR_TEST_EXIST_, &train->f_response);
   register_char_par(params,     "FILE_MODEL",            _CHAR_TEST_NONE_,  &train->f_model);
   register_char_par(params,     "FILE_LOG",              _CHAR_TEST_NONE_,  &train->f_log);
+  register_int_par(params,      "RESPONSE_VARIABLE",     1, INT_MAX, &train->response_var);
   register_float_par(params,    "PERCENT_TRAIN",         0.001, 100, &train->per_train);
   register_bool_par(params,     "RANDOM_SPLIT",          &train->random_split);
+  register_charvec_par(params,  "FEATURE_WEIGHTS",       _CHAR_TEST_NONE_, &train->class_weights, &train->nclass_weights);
   register_enum_par(params,     "ML_METHOD",             _TAGGED_ENUM_ML_, _ML_LENGTH_, &train->method);
   register_int_par(params,      "RF_NTREE",              0, INT_MAX, &train->rf.ntree);
   register_float_par(params,    "RF_OOB_ACCURACY",       0, INT_MAX, &train->rf.oob_accuracy);
@@ -90,6 +92,11 @@ par_train_t *train = NULL;
 void free_param_train(par_train_t *train){
 
   if (train == NULL) return;
+
+  free_params(train->params);
+
+  if (train->priors != NULL) free((void*)train->priors);
+
   free((void*)train); train = NULL;
 
   return;
@@ -103,6 +110,8 @@ void free_param_train(par_train_t *train){
 int parse_param_train(par_train_t *train){
 FILE *fpar = NULL;
 char  buffer[NPOW_10] = "\0";
+int i;
+float sum = 0.0, tol=0.01;
 
 
   train->params = allocate_params();
@@ -148,6 +157,19 @@ char  buffer[NPOW_10] = "\0";
   if (train->sv.Gammagrid[_MIN_] > train->sv.Gammagrid[_MAX_]){
     printf("SVM_GAMMA_GRID looks odd It needs to be a list of 3 floats: minVal maxVal logStep.\n"); return FAILURE;}
 
+  if (train->nclass_weights == 1){
+    if (strcmp(train->class_weights[0], "EQUALIZED")        != 0 && 
+        strcmp(train->class_weights[0], "PROPORTIONAL")     != 0 && 
+        strcmp(train->class_weights[0], "ANTIPROPORTIONAL") != 0){
+      printf("FEATURE_WEIGHTS needs to be a list with class weights OR\n");
+      printf("  EQUALIZED OR PROPORTIONAL OR ANTIPROPORTIONAL.\n"); 
+      return FAILURE;
+    }
+  } else {
+    for (i=0; i<train->nclass_weights; i++) sum += atof(train->class_weights[i]);
+    if (fabs(1.0-sum) > tol){
+      printf("FEATURE_WEIGHTS must sum to one.\n"); return FAILURE;}
+  }
 
 
   return SUCCESS;

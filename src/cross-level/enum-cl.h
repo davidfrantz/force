@@ -189,35 +189,48 @@ enum { _LSP_DEM_, _LSP_DSS_, _LSP_DRI_, _LSP_DPS_, _LSP_DFI_, _LSP_DES_,
        _LSP_VPS_, _LSP_VFI_, _LSP_VES_, _LSP_VLM_, _LSP_VBL_, _LSP_VSA_, 
        _LSP_IST_, _LSP_IBL_, _LSP_IBT_, _LSP_IGS_, _LSP_RAR_, _LSP_RAF_, 
        _LSP_RMR_, _LSP_RMF_, _LSP_LENGTH_ };
-       
+
+// polar metrics
+enum { _POL_DEM_, _POL_DLM_, _POL_DPS_, _POL_DSS_, _POL_DMS_, _POL_DES_, 
+       _POL_DEV_, _POL_DAV_, _POL_DLV_, _POL_LTS_, _POL_LGS_, _POL_LGV_, 
+       _POL_VEM_, _POL_VLM_, _POL_VPS_, _POL_VSS_, _POL_VMS_, _POL_VES_, 
+       _POL_VEV_, _POL_VAV_, _POL_VLV_, _POL_VBL_, _POL_VGA_, _POL_VSA_, 
+       _POL_VPA_, _POL_VGM_, _POL_VGV_, _POL_DPY_, _POL_DPV_, _POL_IST_, 
+       _POL_IBL_, _POL_IBT_, _POL_IGS_, _POL_IRR_, _POL_IFR_, _POL_RAR_, 
+       _POL_RAF_, _POL_RMR_, _POL_RMF_, _POL_LENGTH_ };
+
 // folding
 enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGTH_ };
 
 // time series parts
 enum { _PART_TOTAL_, _PART_BEFORE_, _PART_AFTER_, _PART_LENGTH_ };
- 
+
 // trend
-enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_, 
-       _TRD_RSQ_,  _TRD_SIG_,    _TRD_RMSE_,  
-       _TRD_MAE_,  _TRD_MAXE_,   _TRD_NUM_,  _TRD_LENGTH_ };
+enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
+       _TRD_GAIN_, _TRD_RSQ_,    _TRD_SIG_,
+       _TRD_RMSE_, _TRD_MAE_,    _TRD_MAXE_,
+       _TRD_NUM_,  _TRD_LENGTH_ };
        
 // change, aftereffect, trend
-enum { _CAT_CHANGE_,        _CAT_YEAR_,
-       _CAT_TOTAL_MEAN_,    _CAT_TOTAL_OFFSET_, 
-       _CAT_TOTAL_SLOPE_,   _CAT_TOTAL_RSQ_, 
-       _CAT_TOTAL_SIG_,     _CAT_TOTAL_RMSE_,   
-       _CAT_TOTAL_MAE_,     _CAT_TOTAL_MAXE_, 
-       _CAT_TOTAL_NUM_,     _CAT_BEFORE_MEAN_, 
-       _CAT_BEFORE_OFFSET_, _CAT_BEFORE_SLOPE_, 
-       _CAT_BEFORE_RSQ_,    _CAT_BEFORE_SIG_, 
-       _CAT_BEFORE_RMSE_,   _CAT_BEFORE_MAE_,  
-       _CAT_BEFORE_MAXE_,   _CAT_BEFORE_NUM_,
-       _CAT_AFTER_MEAN_,    _CAT_AFTER_OFFSET_, 
-       _CAT_AFTER_SLOPE_,   _CAT_AFTER_RSQ_, 
-       _CAT_AFTER_SIG_,     _CAT_AFTER_RMSE_, 
-       _CAT_AFTER_MAE_,     _CAT_AFTER_MAXE_, 
-       _CAT_AFTER_NUM_,     _CAT_LENGTH_ };
- 
+enum { _CAT_CHANGE_,       _CAT_LOSS_, 
+       _CAT_YEAR_,
+       _CAT_TOTAL_MEAN_,   _CAT_TOTAL_OFFSET_,
+       _CAT_TOTAL_SLOPE_,  _CAT_TOTAL_GAIN_,
+       _CAT_TOTAL_RSQ_,    _CAT_TOTAL_SIG_,
+       _CAT_TOTAL_RMSE_,   _CAT_TOTAL_MAE_,
+       _CAT_TOTAL_MAXE_,   _CAT_TOTAL_NUM_,
+       _CAT_BEFORE_MEAN_,  _CAT_BEFORE_OFFSET_,
+       _CAT_BEFORE_SLOPE_, _CAT_BEFORE_GAIN_,
+       _CAT_BEFORE_RSQ_,   _CAT_BEFORE_SIG_,
+       _CAT_BEFORE_RMSE_,  _CAT_BEFORE_MAE_,
+       _CAT_BEFORE_MAXE_,  _CAT_BEFORE_NUM_,
+       _CAT_AFTER_MEAN_,   _CAT_AFTER_OFFSET_,
+       _CAT_AFTER_SLOPE_,  _CAT_AFTER_GAIN_,
+       _CAT_AFTER_RSQ_,    _CAT_AFTER_SIG_,
+       _CAT_AFTER_RMSE_,   _CAT_AFTER_MAE_,
+       _CAT_AFTER_MAXE_,   _CAT_AFTER_NUM_,
+       _CAT_LENGTH_ };
+
 // texture metrics
 enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_, 
        _TXT_GRD_, _TXT_THT_, _TXT_BHT_, _TXT_LENGTH_ };
@@ -262,6 +275,7 @@ extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STD_[_STD_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_ML_[_ML_LENGTH_];

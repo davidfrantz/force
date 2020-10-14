@@ -108,38 +108,56 @@ const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_] = {
   { _HEMI_NORTH_, "NORTH" }, { _HEMI_SOUTH_, "SOUTH" }, { _HEMI_MIXED_, "MIXED" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_] = {
-  {_LSP_DEM_, "DEM" }, {_LSP_DSS_, "DSS" }, {_LSP_DRI_, "DRI" }, {_LSP_DPS_, "DPS" },
-  {_LSP_DFI_, "DFI" }, {_LSP_DES_, "DES" }, {_LSP_DLM_, "DLM" }, {_LSP_LTS_, "LTS" },
-  {_LSP_LGS_, "LGS" }, {_LSP_VEM_, "VEM" }, {_LSP_VSS_, "VSS" }, {_LSP_VRI_, "VRI" },
-  {_LSP_VPS_, "VPS" }, {_LSP_VFI_, "VFI" }, {_LSP_VES_, "VES" }, {_LSP_VLM_, "VLM" },
-  {_LSP_VBL_, "VBL" }, {_LSP_VSA_, "VSA" }, {_LSP_IST_, "IST" }, {_LSP_IBL_, "IBL" },
-  {_LSP_IBT_, "IBT" }, {_LSP_IGS_, "IGS" }, {_LSP_RAR_, "RAR" }, {_LSP_RAF_, "RAF" },
-  {_LSP_RMR_, "RMR" }, {_LSP_RMF_, "RMF" }};
+  { _LSP_DEM_, "DEM" }, { _LSP_DSS_, "DSS" }, { _LSP_DRI_, "DRI" }, { _LSP_DPS_, "DPS" },
+  { _LSP_DFI_, "DFI" }, { _LSP_DES_, "DES" }, { _LSP_DLM_, "DLM" }, { _LSP_LTS_, "LTS" },
+  { _LSP_LGS_, "LGS" }, { _LSP_VEM_, "VEM" }, { _LSP_VSS_, "VSS" }, { _LSP_VRI_, "VRI" },
+  { _LSP_VPS_, "VPS" }, { _LSP_VFI_, "VFI" }, { _LSP_VES_, "VES" }, { _LSP_VLM_, "VLM" },
+  { _LSP_VBL_, "VBL" }, { _LSP_VSA_, "VSA" }, { _LSP_IST_, "IST" }, { _LSP_IBL_, "IBL" },
+  { _LSP_IBT_, "IBT" }, { _LSP_IGS_, "IGS" }, { _LSP_RAR_, "RAR" }, { _LSP_RAF_, "RAF" },
+  { _LSP_RMR_, "RMR" }, { _LSP_RMF_, "RMF" }};
+
+const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_] = {
+  { _POL_DEM_, "DEM" }, { _POL_DLM_, "DLM" }, { _POL_DPS_, "DPS" }, 
+  { _POL_DSS_, "DSS" }, { _POL_DMS_, "DMS" }, { _POL_DES_, "DES" }, 
+  { _POL_DEV_, "DEV" }, { _POL_DAV_, "DAV" }, { _POL_DLV_, "DLV" }, 
+  { _POL_LTS_, "LTS" }, { _POL_LGS_, "LGS" }, { _POL_LGV_, "LGV" }, 
+  { _POL_VEM_, "VEM" }, { _POL_VLM_, "VLM" }, { _POL_VPS_, "VPS" }, 
+  { _POL_VSS_, "VSS" }, { _POL_VMS_, "VMS" }, { _POL_VES_, "VES" }, 
+  { _POL_VEV_, "VEV" }, { _POL_VAV_, "VAV" }, { _POL_VLV_, "VLV" }, 
+  { _POL_VBL_, "VBL" }, { _POL_VGA_, "VGA" }, { _POL_VSA_, "VSA" }, 
+  { _POL_VPA_, "VPA" }, { _POL_VGM_, "VGM" }, { _POL_VGV_, "VGV" }, 
+  { _POL_DPY_, "DPY" }, { _POL_DPV_, "DPV" }, { _POL_IST_, "IST" }, 
+  { _POL_IBL_, "IBL" }, { _POL_IBT_, "IBT" }, { _POL_IGS_, "IGS" }, 
+  { _POL_IRR_, "IRR" }, { _POL_IFR_, "IFR" }, { _POL_RAR_, "RAR" }, 
+  { _POL_RAF_, "RAF" }, { _POL_RMR_, "RMR" }, { _POL_RMF_, "RMF" }};
 
 const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
 
 const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_] = {
   { _TRD_MEAN_, "MEAN"}, { _TRD_OFFSET_, "OFFSET"}, { _TRD_SLOPE_, "SLOPE"}, 
-  { _TRD_RSQ_,  "RSQ"},  { _TRD_SIG_,    "SIG"},    { _TRD_RMSE_,  "RMSE"},  
-  { _TRD_MAE_,  "MAE"},  { _TRD_MAXE_,   "MAXRES"}, { _TRD_NUM_,   "NUM"}};
+  { _TRD_GAIN_, "GAIN"}, { _TRD_RSQ_,    "RSQ"},    { _TRD_SIG_,   "SIG"}, 
+  { _TRD_RMSE_, "RMSE"}, { _TRD_MAE_,    "MAE"},    { _TRD_MAXE_,  "MAXRES"}, 
+  { _TRD_NUM_,  "NUM"}};
        
 const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_] = {
-  { _CAT_CHANGE_, "CHANGE"},               { _CAT_YEAR_, "YEAR-OF-CHANGE"},
-  { _CAT_TOTAL_MEAN_, "TOTAL-MEAN"},       { _CAT_TOTAL_OFFSET_, "TOTAL-OFFSET"}, 
-  { _CAT_TOTAL_SLOPE_, "TOTAL-SLOPE"},     { _CAT_TOTAL_RSQ_, "TOTAL-RSQ"}, 
-  { _CAT_TOTAL_SIG_, "TOTAL-SIG"},         { _CAT_TOTAL_RMSE_, "TOTAL-RMSE"},   
-  { _CAT_TOTAL_MAE_, "TOTAL-MAE"},         { _CAT_TOTAL_MAXE_, "TOTAL-MAXRES"}, 
-  { _CAT_TOTAL_NUM_, "TOTAL-NUM"},         { _CAT_BEFORE_MEAN_, "BEFORE-MEAN"}, 
-  { _CAT_BEFORE_OFFSET_, "BEFORE-OFFSET"}, { _CAT_BEFORE_SLOPE_, "BEFORE-SLOPE"}, 
-  { _CAT_BEFORE_RSQ_, "BEFORE-RSQ"},       { _CAT_BEFORE_SIG_, "BEFORE-SIG"}, 
-  { _CAT_BEFORE_RMSE_, "BEFORE-RMSE"},     { _CAT_BEFORE_MAE_, "BEFORE-MAE"},  
-  { _CAT_BEFORE_MAXE_, "BEFORE-MAXRES"},   { _CAT_BEFORE_NUM_, "BEFORE-NUM"},
-  { _CAT_AFTER_MEAN_, "AFTER-MEAN"},       { _CAT_AFTER_OFFSET_, "AFTER-OFFSET"}, 
-  { _CAT_AFTER_SLOPE_, "AFTER-SLOPE"},     { _CAT_AFTER_RSQ_, "AFTER-RSQ"}, 
-  { _CAT_AFTER_SIG_, "AFTER-SIG"},         { _CAT_AFTER_RMSE_, "AFTER-RMSE"}, 
-  { _CAT_AFTER_MAE_, "AFTER-MAE"},         { _CAT_AFTER_MAXE_, "AFTER-MAXRES"}, 
-  { _CAT_AFTER_NUM_, "AFTER-NUM"}};
+  { _CAT_CHANGE_, "CHANGE"},             { _CAT_LOSS_, "LOSS"}, 
+  { _CAT_YEAR_, "YEAR-OF-CHANGE"},
+  { _CAT_TOTAL_MEAN_, "TOTAL-MEAN"},     { _CAT_TOTAL_OFFSET_, "TOTAL-OFFSET"},
+  { _CAT_TOTAL_SLOPE_, "TOTAL-SLOPE"},   { _CAT_TOTAL_GAIN_, "TOTAL-GAIN"},
+  { _CAT_TOTAL_RSQ_, "TOTAL-RSQ"},       { _CAT_TOTAL_SIG_, "TOTAL-SIG"},
+  { _CAT_TOTAL_RMSE_, "TOTAL-RMSE"},     { _CAT_TOTAL_MAE_, "TOTAL-MAE"},
+  { _CAT_TOTAL_MAXE_, "TOTAL-MAXRES"},   { _CAT_TOTAL_NUM_, "TOTAL-NUM"},
+  { _CAT_BEFORE_MEAN_, "BEFORE-MEAN"},   { _CAT_BEFORE_OFFSET_, "BEFORE-OFFSET"},
+  { _CAT_BEFORE_SLOPE_, "BEFORE-SLOPE"}, { _CAT_BEFORE_GAIN_, "BEFORE-GAIN"},
+  { _CAT_BEFORE_RSQ_, "BEFORE-RSQ"},     { _CAT_BEFORE_SIG_, "BEFORE-SIG"},
+  { _CAT_BEFORE_RMSE_, "BEFORE-RMSE"},   { _CAT_BEFORE_MAE_, "BEFORE-MAE"},
+  { _CAT_BEFORE_MAXE_, "BEFORE-MAXRES"}, { _CAT_BEFORE_NUM_, "BEFORE-NUM"},
+  { _CAT_AFTER_MEAN_, "AFTER-MEAN"},     { _CAT_AFTER_OFFSET_, "AFTER-OFFSET"},
+  { _CAT_AFTER_SLOPE_, "AFTER-SLOPE"},   { _CAT_AFTER_GAIN_, "AFTER-GAIN"},
+  { _CAT_AFTER_RSQ_, "AFTER-RSQ"},       { _CAT_AFTER_SIG_, "AFTER-SIG"},
+  { _CAT_AFTER_RMSE_, "AFTER-RMSE"},     { _CAT_AFTER_MAE_, "AFTER-MAE"},
+  { _CAT_AFTER_MAXE_, "AFTER-MAXRES"},   { _CAT_AFTER_NUM_, "AFTER-NUM"}};
   
 const tagged_enum_t _TAGGED_ENUM_STD_[_STD_LENGTH_] = {
   { _STD_NONE_, "NONE" }, {_STD_NORMAL_, "NORMALIZE"}, {_STD_CENTER_, "CENTER" }};

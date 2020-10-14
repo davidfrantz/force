@@ -56,4 +56,5 @@ This figure shows a Google Earth screenshot with ARD grid overlay. The grid cell
    pyramid.rst
    cube.rst
    train.rst
+   magic-parameters.rst
 

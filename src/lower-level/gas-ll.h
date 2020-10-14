@@ -33,6 +33,7 @@ Atmospheric Gas header
 #include <stdbool.h>  // boolean data type
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../lower-level/meta-ll.h"

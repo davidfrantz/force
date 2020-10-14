@@ -646,7 +646,7 @@ int year, month, day;
   if (strcmp(pl2->d_wvp, "NULL") == 0){
 
     wvp = avg = pl2->wvp;
-    strncpy(source, "PRM", 3); source[3] = '\0';
+    copy_string(source, NPOW_02, "PRM");
 
     #ifdef FORCE_DEBUG
     printf("Use wvp from parameter file: %.2f\n", wvp);
@@ -679,6 +679,8 @@ int year, month, day;
         // read line by line and find closest coordinate
         while (fgets(buffer, NPOW_10, fp) != NULL){
 
+          buffer[strcspn(buffer, "\r\n#")] = 0;
+
           tokenptr = strtok(buffer, separator);
 
           site_x = atof(tokenptr); tokenptr = strtok(NULL, separator);
@@ -693,10 +695,10 @@ int year, month, day;
             wvp = atof(tokenptr);
             if (k == 0){
               avg = wvp;
-              strncpy(source, "AVG", 3); source[3] = '\0';
+              copy_string(source, NPOW_02, "AVG");
             } else {
               tokenptr = strtok(NULL, separator);
-              strncpy(source, tokenptr, 3); source[3] = '\0';
+              copy_string(source, NPOW_02, tokenptr);
             }
           }
 

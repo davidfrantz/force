@@ -33,6 +33,7 @@ Equi7 header
 #include <stdbool.h>  // boolean data type
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/cite-cl.h"
 #include "../cross-level/stack-cl.h"
 #include "../lower-level/param-ll.h"

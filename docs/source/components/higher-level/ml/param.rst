@@ -145,7 +145,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``FILE_MODEL = biomass-1.xml biomass-2.xml biomass-3.xml``
     | ``FILE_MODEL = canopy-cover.xml``
     | ``FILE_MODEL = tree-height.xml``
-    
+
   * Machine learning method.
     Currently implemented are Random Forest and Support Vector Machines, both in regression and classification flavors.
     The method must match the models as given with FILE_MODEL.

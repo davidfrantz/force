@@ -3,6 +3,9 @@
 Installation
 ============
 
+Installation instructions
+-------------------------
+
 FORCE is mostly written in C/C++: Thus, it needs to be compiled. Administrator rights are not necessarily required, unless you want to install to the system-wide search path (e.g. to make it available to multiple users).
 
 1. Go to the directory, where you usually store source code, e.g.
@@ -66,6 +69,8 @@ Installation of the development version
 To install FORCE with all "bleeding-edge features", consider to use the develop version.
 
 * After point (3), change to the develop branch, then proceed with (4).
+  Note that `BINDIR` defaults to ``/develop`` on this branch. Not installing to ``/usr/local/bin`` (which is the default for the master branch) might make sense in the case you want to have both the master and develop versions installed.
+  You might want to change `BINDIR` to a directory that suits you (e.g. ``/usr/local/bin`` or a local directory).
 
   .. code-block:: bash
 

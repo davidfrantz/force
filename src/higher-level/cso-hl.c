@@ -59,15 +59,15 @@ int nchar;
 short ***ptr[NPOW_08];
 
 
-  if (phl->cso.sta.num > -1){ strncpy(prodname[phl->cso.sta.num], "NUM", 3); prodname[phl->cso.sta.num][3] = '\0';}
-  if (phl->cso.sta.min > -1){ strncpy(prodname[phl->cso.sta.min], "MIN", 3); prodname[phl->cso.sta.min][3] = '\0';}
-  if (phl->cso.sta.max > -1){ strncpy(prodname[phl->cso.sta.max], "MAX", 3); prodname[phl->cso.sta.max][3] = '\0';}
-  if (phl->cso.sta.rng > -1){ strncpy(prodname[phl->cso.sta.rng], "RNG", 3); prodname[phl->cso.sta.rng][3] = '\0';}
-  if (phl->cso.sta.iqr > -1){ strncpy(prodname[phl->cso.sta.iqr], "IQR", 3); prodname[phl->cso.sta.iqr][3] = '\0';}
-  if (phl->cso.sta.avg > -1){ strncpy(prodname[phl->cso.sta.avg], "AVG", 3); prodname[phl->cso.sta.avg][3] = '\0';}
-  if (phl->cso.sta.std > -1){ strncpy(prodname[phl->cso.sta.std], "STD", 3); prodname[phl->cso.sta.std][3] = '\0';}
-  if (phl->cso.sta.skw > -1){ strncpy(prodname[phl->cso.sta.skw], "SKW", 3); prodname[phl->cso.sta.skw][3] = '\0';}
-  if (phl->cso.sta.krt > -1){ strncpy(prodname[phl->cso.sta.krt], "KRT", 3); prodname[phl->cso.sta.krt][3] = '\0';}
+  if (phl->cso.sta.num > -1) copy_string(prodname[phl->cso.sta.num], NPOW_03, "NUM");
+  if (phl->cso.sta.min > -1) copy_string(prodname[phl->cso.sta.min], NPOW_03, "MIN");
+  if (phl->cso.sta.max > -1) copy_string(prodname[phl->cso.sta.max], NPOW_03, "MAX");
+  if (phl->cso.sta.rng > -1) copy_string(prodname[phl->cso.sta.rng], NPOW_03, "RNG");
+  if (phl->cso.sta.iqr > -1) copy_string(prodname[phl->cso.sta.iqr], NPOW_03, "IQR");
+  if (phl->cso.sta.avg > -1) copy_string(prodname[phl->cso.sta.avg], NPOW_03, "AVG");
+  if (phl->cso.sta.std > -1) copy_string(prodname[phl->cso.sta.std], NPOW_03, "STD");
+  if (phl->cso.sta.skw > -1) copy_string(prodname[phl->cso.sta.skw], NPOW_03, "SKW");
+  if (phl->cso.sta.krt > -1) copy_string(prodname[phl->cso.sta.krt], NPOW_03, "KRT");
   for (q=0; q<phl->cso.sta.nquantiles; q++){
     nchar = snprintf(prodname[phl->cso.sta.qxx[q]], NPOW_03, "Q%02.0f", phl->cso.sta.q[q]*100);
     if (nchar < 0 || nchar >= NPOW_03){

@@ -51,6 +51,7 @@ void free_mcl(par_mcl_t *mcl);
 int parse_ftr(par_ftr_t *ftr);
 int parse_sta(par_sta_t *sta);
 int parse_lsp(par_lsp_t *lsp);
+int parse_pol(par_pol_t *pol);
 int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
 int parse_quality(par_qai_t *qai);
@@ -231,6 +232,18 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "OUTPUT_LSP",        &phl->tsa.lsp.olsp);
   register_bool_par(params,    "OUTPUT_TRP",        &phl->tsa.lsp.otrd);
   register_bool_par(params,    "OUTPUT_CAP",        &phl->tsa.lsp.ocat);
+
+  // polar parameters
+  register_float_par(params,   "POL_START_THRESHOLD", 0.01, 0.99, &phl->tsa.pol.start);
+  register_float_par(params,   "POL_MID_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.mid);
+  register_float_par(params,   "POL_END_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.end);
+  register_bool_par(params,    "POL_ADAPTIVE",        &phl->tsa.pol.adaptive);
+  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
+  register_enum_par(params,    "STANDARDIZE_POL", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.pol.standard);
+  register_bool_par(params,    "OUTPUT_PCT",        &phl->tsa.pol.opct);
+  register_bool_par(params,    "OUTPUT_POL",        &phl->tsa.pol.opol);
+  register_bool_par(params,    "OUTPUT_TRO",        &phl->tsa.pol.otrd);
+  register_bool_par(params,    "OUTPUT_CAO",        &phl->tsa.pol.ocat);
 
   // trend parameters
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
@@ -452,124 +465,124 @@ int *band_ptr[_WVL_LENGTH_] = {
     switch (tsa->index[idx]){
       case _IDX_BLU_:
         v[_WVL_BLUE_] = true;
-        strncpy(tsa->index_name[idx] , "BLU", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BLU");
         break;
       case _IDX_GRN_:
         v[_WVL_GREEN_] = true;
-        strncpy(tsa->index_name[idx] , "GRN", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "GRN");
         break;
       case _IDX_RED_:
         v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "RED", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RED");
         break;
       case _IDX_NIR_:
         v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NIR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NIR");
         break;
       case _IDX_SW1_:
         v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "SW1", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SW1");
         break;
       case _IDX_SW2_:
         v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "SW2", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SW2");
         break;
       case _IDX_RE1_:
         v[_WVL_REDEDGE1_] = true;
-        strncpy(tsa->index_name[idx] , "RE1", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE1");
         break;
       case _IDX_RE2_:
         v[_WVL_REDEDGE2_] = true;
-        strncpy(tsa->index_name[idx] , "RE2", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE2");
         break;
       case _IDX_RE3_:
         v[_WVL_REDEDGE3_] = true;
-        strncpy(tsa->index_name[idx] , "RE3", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "RE3");
         break;
       case _IDX_BNR_:
         v[_WVL_BNIR_] = true;
-        strncpy(tsa->index_name[idx] , "BNR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BNR");
         break;
       case _IDX_NDV_:
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "NDV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDV");
         break;
       case _IDX_EVI_:
         v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        strncpy(tsa->index_name[idx] , "EVI", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "EVI"); 
         break;
       case _IDX_NBR_:
         v[_WVL_NIR_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "NBR", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NBR"); 
         break;
       case _IDX_ARV_:
         v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "ARV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
         break;
       case _IDX_SAV_:
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        strncpy(tsa->index_name[idx] , "SAV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
         break;
       case _IDX_SRV_:
         v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "SRV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SRV"); 
         break;
       case _IDX_TCB_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCB", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCB"); 
         break;
       case _IDX_TCG_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCG", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCG"); 
         break;
       case _IDX_TCW_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCW"); 
         break;
       case _IDX_TCD_:
         v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
         v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "TCD", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "TCD"); 
         break;
       case _IDX_NDB_:
         v[_WVL_SWIR1_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NDB", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDB"); 
         break;
       case _IDX_NDW_:
         v[_WVL_GREEN_] = v[_WVL_NIR_] = true;
-        strncpy(tsa->index_name[idx] , "NDW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDW"); 
         break;
       case _IDX_MNW_:
         v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "MNW", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "MNW"); 
         break;
       case _IDX_NDS_:
         v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "NDS", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDS"); 
         break;
       case _IDX_SMA_:
         for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-        strncpy(tsa->index_name[idx] , "SMA", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "SMA"); 
         tsa->sma.v = true;
         break;
       case _IDX_BVV_:
         v[_WVL_VV_] = true;
-        strncpy(tsa->index_name[idx] , "BVV", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BVV"); 
         break;
       case _IDX_BVH_:
         v[_WVL_VH_] = true;
-        strncpy(tsa->index_name[idx] , "BVH", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "BVH"); 
         break;
       case _IDX_NDT_:
         v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        strncpy(tsa->index_name[idx] , "NDT", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDT"); 
         break;
       case _IDX_NDM_:
         v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
-        strncpy(tsa->index_name[idx] , "NDM", 3); tsa->index_name[idx][3] = '\0';
+        copy_string(tsa->index_name[idx], NPOW_02, "NDM"); 
         break;
       default:
         printf("unknown INDEX\n");
@@ -691,14 +704,10 @@ int i, j, k;
 
   for (i=0, k=0; i<ftr->ntags; i++){
     for (j=1; j<ftr->ifeature[i]; j++, k++){
-      if (strlen(ftr->cfeature[i][0]) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else {
-        strncpy(ftr->bname[k], ftr->cfeature[i][0], strlen(ftr->cfeature[i][0])); 
-        ftr->bname[k][strlen(ftr->cfeature[i][0])] = '\0';
-      }
-      
+
+      copy_string(ftr->bname[k], NPOW_10, ftr->cfeature[i][0]);
       ftr->band[k] = atoi(ftr->cfeature[i][j]);
+
       #ifdef FORCE_DEBUG
       printf("Feature # %04d: %s, band %d\n", k, ftr->bname[k], ftr->band[k]);
       #endif
@@ -780,64 +789,22 @@ int parse_lsp(par_lsp_t *lsp){
 int i;
 
 
-  for (i=0; i<lsp->nmetrics; i++){
-    if (lsp->metrics[i] == _LSP_DEM_){
-      lsp->odem = true;
-    } else if (lsp->metrics[i] == _LSP_DSS_){
-      lsp->odss = true;
-    } else if (lsp->metrics[i] == _LSP_DRI_){
-      lsp->odri = true;
-    } else if (lsp->metrics[i] == _LSP_DPS_){
-      lsp->odps = true;
-    } else if (lsp->metrics[i] == _LSP_DFI_){
-      lsp->odfi = true;
-    } else if (lsp->metrics[i] == _LSP_DES_){
-      lsp->odes = true;
-    } else if (lsp->metrics[i] == _LSP_DLM_){
-      lsp->odlm = true;
-    } else if (lsp->metrics[i] == _LSP_LTS_){
-      lsp->olts = true;
-    } else if (lsp->metrics[i] == _LSP_LGS_){
-      lsp->olgs = true;
-    } else if (lsp->metrics[i] == _LSP_VEM_){
-      lsp->ovem = true;
-    } else if (lsp->metrics[i] == _LSP_VSS_){
-      lsp->ovss = true;
-    } else if (lsp->metrics[i] == _LSP_VRI_){
-      lsp->ovri = true;
-    } else if (lsp->metrics[i] == _LSP_VPS_){
-      lsp->ovps = true;
-    } else if (lsp->metrics[i] == _LSP_VFI_){
-      lsp->ovfi = true;
-    } else if (lsp->metrics[i] == _LSP_VES_){
-      lsp->oves = true;
-    } else if (lsp->metrics[i] == _LSP_VLM_){
-      lsp->ovlm = true;
-    } else if (lsp->metrics[i] == _LSP_VBL_){
-      lsp->ovbl = true;
-    } else if (lsp->metrics[i] == _LSP_VSA_){
-      lsp->ovsa = true;
-    } else if (lsp->metrics[i] == _LSP_IST_){
-      lsp->oist = true;
-    } else if (lsp->metrics[i] == _LSP_IBL_){
-      lsp->oibl = true;
-    } else if (lsp->metrics[i] == _LSP_IBT_){
-      lsp->oibt = true;
-    } else if (lsp->metrics[i] == _LSP_IGS_){
-      lsp->oigs = true;
-    } else if (lsp->metrics[i] == _LSP_RAR_){
-      lsp->orar = true;
-    } else if (lsp->metrics[i] == _LSP_RAF_){
-      lsp->oraf = true;
-    } else if (lsp->metrics[i] == _LSP_RMR_){
-      lsp->ormr = true;
-    } else if (lsp->metrics[i] == _LSP_RMF_){
-      lsp->ormf = true;
-    } else {
-      printf("warning: unknown lsp.\n");
-    }
-  }
+  for (i=0; i<lsp->nmetrics; i++) lsp->use[lsp->metrics[i]] = true;
 
+  return SUCCESS;
+}
+
+
+/** This function reparses polarmetrics parameters (special para-
++++ meter that cannot be parsed with the general parser).
+--- lsp:    phenometrics parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int parse_pol(par_pol_t *pol){
+int i;
+
+
+  for (i=0; i<pol->nmetrics; i++) pol->use[pol->metrics[i]] = true;
 
   return SUCCESS;
 }
@@ -1044,15 +1011,15 @@ int *band_ptr[_WVL_LENGTH_] = {
 
   // set target sensor
   if (sen->nb == 6){
-    strncpy(sen->target, "LNDLG", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "LNDLG");
   } else if (sen->nb == 10){
-    strncpy(sen->target, "SEN2L", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "SEN2L");
   } else if (sen->nb == 4){
-    strncpy(sen->target, "SEN2H", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "SEN2H");
   } else if (sen->nb == 3){
-    strncpy(sen->target, "R-G-B", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "R-G-B");
   } else if (sen->nb == 2){
-    strncpy(sen->target, "VVVHP", 5); sen->target[5] = '\0';
+    copy_string(sen->target, NPOW_10, "VVVHP");
   } else {
     printf("unknown sensors.\n"); return FAILURE;
   }
@@ -1065,15 +1032,11 @@ int *band_ptr[_WVL_LENGTH_] = {
 
   for (b=0, bb=0; b<nb; b++){
     if (!vb[b]) continue;
-    if (strlen(domains[b]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { strncpy(sen->domain[bb], domains[b], strlen(domains[b])); sen->domain[bb][strlen(domains[b])] = '\0';}
+    copy_string(sen->domain[bb], NPOW_10, domains[b]);
     for (s=0, ss=0; s<ns; s++){
       if (!vs[s]) continue;
       for (c=0; c<5; c++) upper[c] = toupper(sensor[s][c]);
-      if (strlen(upper) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); exit(1);
-      } else { strncpy(sen->sensor[ss], upper, strlen(upper)); sen->sensor[ss][strlen(upper)] = '\0';}
+      copy_string(sen->sensor[ss], NPOW_10, upper);
       sen->band[ss][bb] = band[s][b];
       ss++;
     }
@@ -1322,6 +1285,8 @@ double tol = 5e-3;
   if (phl->type == _HL_CSO_) parse_sta(&phl->cso.sta);
   
   if (phl->type == _HL_TSA_) parse_lsp(&phl->tsa.lsp);
+
+  if (phl->type == _HL_TSA_) parse_pol(&phl->tsa.pol);
   
   if (phl->type == _HL_TXT_) parse_txt(&phl->txt);
   
@@ -1367,6 +1332,10 @@ double tol = 5e-3;
 
     // phenology not possible for first and last year
     phl->tsa.lsp.ny = phl->ny-2;
+    
+    // polarmetrics not possible for one year
+    phl->tsa.pol.ny = phl->ny;
+    phl->tsa.pol.ns = phl->ny-1;
     
     #ifdef FORCE_DEBUG
     printf("ny: %d, nq: %d, nm: %d, nw: %d, nd: %d\n",
@@ -1415,6 +1384,10 @@ double tol = 5e-3;
     // total scoring weight
     phl->bap.w.t = phl->bap.w.d + phl->bap.w.y + phl->bap.w.c  + phl->bap.w.h +
              phl->bap.w.r + phl->bap.w.v;
+
+    if (phl->bap.w.t == 0){
+      printf("ALL scoring weights are zero. This is not allowed. "
+             "At least, the seasonal score should be > 0.\n"); return FAILURE;}
 
     // number of years
     phl->bap.Yn = (phl->bap.Yr*2)+1;
@@ -1516,6 +1489,20 @@ double tol = 5e-3;
           return FAILURE;
         }
       }
+
+    }
+ 
+ 
+    if (phl->tsa.pol.opct || phl->tsa.pol.opol || phl->tsa.pol.otrd || phl->tsa.pol.ocat){
+          
+      if (phl->tsa.pol.ns < 1){
+        printf("POL cannot be estimated for one year.\n");
+        printf("Time window is too short.\n");
+        return FAILURE;
+      }
+
+      if (phl->tsa.tsi.method == _INT_NONE_){
+        printf("Polarmetrics require INTERPOLATE != NONE\n"); return FAILURE;}
 
     }
  

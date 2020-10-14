@@ -5,7 +5,7 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.2.1**
+**Version 3.5.2**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
@@ -45,7 +45,7 @@ Related Links
 
 **Get the source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
-**Learn how to use FORCE**. Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
+**Learn how to use FORCE**. Have a look at the :ref:`howto`. Check regularly for new content.
 
 **Get help**, and help others in the FORCE self-help `Google group <https://groups.google.com/d/forum/force_eo>`_
 
@@ -65,7 +65,14 @@ Related Links
 
    about.rst
 
-   
+
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   history/index.rst
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Usage Policy
@@ -75,14 +82,7 @@ Related Links
    policy/development.rst
    policy/license.rst
 
-   
-.. toctree::
-   :maxdepth: 3
-   :hidden:
 
-   history/index.rst
-   
-   
 .. toctree::
    :maxdepth: 1
    :caption: Setup
@@ -93,7 +93,16 @@ Related Links
    setup/depend_opt.rst
    setup/install.rst
    setup/docker.rst
-   
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: How to use the FORCE
+   :hidden:
+
+   howto/index.rst
+
+
 .. toctree::
    :maxdepth: 4
    :caption: Software components
@@ -122,5 +131,4 @@ Related Links
    proj.rst
    issues.rst
    contact.rst
-
 

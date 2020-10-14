@@ -36,7 +36,7 @@ fi
 for i in "$@"; do
 
   INP=$(readlink -f $i)
-  echo $INP
+  #echo $INP
   # input file exists?
   if [ ! -r $INP ]; then
     echo $INP "ist not readable/existing"
