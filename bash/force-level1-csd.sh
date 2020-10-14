@@ -26,7 +26,6 @@
 # Contact: stefan.ernst@hu-berlin.de
 
 # This script downloads Landsat and Sentinel-2 Level 1 data from GCS
-
 trap "echo Exited!; exit;" SIGINT SIGTERM # make sure that CTRL-C breaks out of download loop
 set -e # make sure script exits if any process exits unsuccessfully
 echoerr() { echo "$PROG: $@" 1>&2; }
@@ -58,25 +57,26 @@ Mandatory arguments:
 
   queue
   Downloaded files are appended to a file queue, which is needed for the 
-  Level 2 processing. The file doesn't need to exist. If it exists, new 
-  lines will be appended on successful ingestion
+  Level 2 processing. The file doesn't need to exist. If it does exist,
+  new lines will be appended on successful ingestion
 
   area of interest
   (1) user-supplied coordinates of your study area: 
       The polygon must be closed (first X/Y = last X/Y). X/Y must be given as
       decimal degrees with negative values for West and South coordinates.
-      You can either give the path to a file, or give the coordinates on the command line.
-      If in the file, put one coordinate per line.
-      If on the command line, give a comma separated list.
+      Either specify the path to a file, or the coordinates on the command line.
+      If in a file, provide one coordinate per line.
+      If on the command line, provide a comma separated list.
   (2) a shapefile (point/polygon/line). On-the-fly reprojection is provided,
       but using EPSG4326 is recommended.
-  (3) Scene identifier.
+  (3) grid identifier:
       Landsat: Path/Row as "PPPRRR". Make sure to keep leading zeros:
         correct: 181034, incorrect: 18134
-      Sentinel-2: MGRS tile as "TXXXXX". Make sure to keep the leading T before the MGRS tile number.
+      Sentinel-2: MGRS tile as "TXXXXX". Make sure to keep the leading T before 
+        the MGRS tile number.
       You can either give the path to a file, or give the IDs on the command line.
-      If in the file, put one ID per line.
-      If on the command line, give a comma separated list.
+      If in a file, provide one ID per line.
+      If on the command line, provide a comma separated list.
   
 Optional arguments:
 
@@ -98,7 +98,7 @@ Optional arguments:
   and their total data volume
   
   -k | --keep-meta
-  Will write the results of the query to the metadata directory.
+  Will write the results of the query to the level 1 datapool directory.
   Two files will be created if Landsat and Sentinel-2 data is queried
   at the same time. Filename: csd_metadata_YYYY-MM-DDTHH-MM-SS
   
@@ -186,7 +186,11 @@ SENTINEL=0
 UPDATE=0
 KEEPMETA=0
 
-ARGS=`getopt -o c:d:nhks:t:u --long cloudcover:,daterange:,no-act,help,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
+# change - to %dummy% if followed by integer: prevent interpretation as option by getopt
+ARGS=$(echo "$@" | sed -E "s/-([0-9])/%dummy%\1/g")
+set -- $ARGS
+
+ARGS=`getopt -o c:d:nhks:t:u -l cloudcover:,daterange:,no-act,help,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
 if [ $? != 0 ] ; then  printf "%s\n" "" "Error in command line options. Please check your options." >&2 ; show_help ; fi
 eval set -- "$ARGS"
 
@@ -204,7 +208,7 @@ while :; do
       DRYRUN=1 ;;
     -h|--help)
       show_help ;;
-    -k|--keepmeta)
+    -k|--keep-meta)
       KEEPMETA=1 ;;
     -s|--sensors)
       SENSIN="$2"
@@ -222,6 +226,10 @@ while :; do
   shift
 done
 
+# change %dummy% back to -
+ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
+eval set -- "$ARGS"
+
 
 # Check for update flag and update metadata catalogue if set
 if [ $UPDATE -eq 1 ]; then
@@ -230,8 +238,7 @@ if [ $UPDATE -eq 1 ]; then
     printf "%s\n" "" "Metadata directory not specified, exiting" ""
     exit 1
   elif [ $# -gt 1 ]; then
-    printf "%s\n" "" "Error: Invalid argument." "Only specify the metadata directory when using the update option (-u)." "The only allowed optional argument is -s. Use it if you don't want to" "update the Landsat and Sentinel-2 metadata catalogues at the same time." ""
-    #"Please only specify the metadata directory when using the update option (-u)" "To only update either of the LS / S2 catalogues, you may also use the -s option" ""
+    printf "%s\n" "" "Error: Too many arguments." "Only specify the metadata directory when using the update option (-u)." "The only allowed optional argument is -s. Use it if you would like" "to only update either the Landsat or Sentinel-2 metadata catalogue." ""
     exit 1
   elif ! [ -w $METADIR ]; then
     printf "%s\n" "" "Metadata directory does not exist, exiting" ""
@@ -289,10 +296,10 @@ if ! [[ $DATEMIN =~ ^[[:digit:]]+$ ]] || ! [[ $DATEMAX  =~ ^[[:digit:]]+$ ]]; th
   printf "%s\n" "" "Error: One of the entered dates seems to contain non-numeric characters." "Start: $DATEMIN, End: $DATEMAX" ""
   exit 1
 elif ! date -d $DATEMIN &> /dev/null || ! [ ${#DATEMIN} -eq 8 ]; then
-  printf "%s\n" "" "starttime ($DATEMIN) is not a valid date." "Make sure date is formatted as YYYYMMDD" ""
+  printf "%s\n" "" "Starttime ($DATEMIN) is not a valid date." "Make sure dates are formatted as YYYYMMDD" ""
   exit 1
 elif ! date -d $DATEMAX &> /dev/null || ! [ ${#DATEMAX} -eq 8 ]; then
-    printf "%s\n" "" "endtime ($DATEMAX) is not a valid date." "Make sure date is formatted as YYYYMMDD" ""
+    printf "%s\n" "" "Sndtime ($DATEMAX) is not a valid date." "Make sure dates are formatted as YYYYMMDD" ""
   exit 1
 elif [ $(date -d $DATEMIN +%s) -gt $(date -d $DATEMAX +%s) ]; then
   printf "%s\n" "Error: Start of date range is larger than end of date range" "Start: $DATEMIN, End: $DATEMAX" ""
@@ -326,7 +333,7 @@ if [ -f $AOI ]; then
     AOI=$(cat $AOI | sed 's/,/./g')
     OGR=0
   fi
-# if soi is not a file, it's a polygon or tile list as cmd line input
+# if aoi is not a file, it's a polygon or tile list as cmd line input
 else
   AOI=$(echo $AOI | sed 's/,/ /g')
   OGR=0
@@ -338,13 +345,15 @@ if [ $OGR -eq 0 ]; then
     AOITYPE=2
     # are coords valid lat/lon?
     for COORD in $AOI; do
-      LAT=$(echo COORD | cut -d"/" -f1)
-      LON=$(echo COORD | cut -d"/" -f2)
-      if ! grep -q "/" $COORD; then
-        printf  "%s\n" "Error: At least one of the AOI coordinates does not seem to be in the format LAT/LON" "Coordinate: $COORD" ""
+      if ! $(echo $COORD | grep -q "/"); then
+        printf  "%s\n" "Error: At least one of the AOI coordinates does not seem to be separated by a forward slash /" "Coordinate: $COORD" ""
         exit 1
-      elif ! [ $(is_in_range $LAT -90 90) -eq 1 ]; then
-        printf "%s\n" "Error: Latitude out of range" "Coordinate: $COORD - $LAT is not in range -90 to 90" ""
+      fi
+      LAT=$(echo $COORD | cut -d"/" -f1)
+      LON=$(echo $COORD | cut -d"/" -f2)
+
+      if ! [ $(is_in_range $LAT -90 90) -eq 1 ]; then
+        printf "%s\n" "Error: Latitude out of range" "Coordinate: $COORD - $LAT is not in range -90 to 90" "This error may also mean that you tried to use a vector file as AOI but provided an incorrect path" ""
         exit 1
       elif ! [ $(is_in_range $LON -180 180) -eq 1 ]; then
         printf "%s\n" "Error: Longitute out of range" "Coordinate: $COORD - $LON is not in range -180 to 180" ""
@@ -374,7 +383,7 @@ if [ $OGR -eq 0 ]; then
         fi
         continue
       else
-        printf "%s\n" "" "Tile list as AOI detected." "" "Error: One or more tiles seem to be formatted incorrectly." "Please check $ENTRY" ""
+        printf "%s\n" "" "Tile list as AOI detected." "" "Error: One or more tiles seem to be formatted incorrectly." "Please check $ENTRY" "If you are trying to define an AOI using coordinates, makes sure X and Y are separated using a forward slash /"
         exit 1
       fi
     done
@@ -419,13 +428,14 @@ get_data() {
     ogr2ogr -f "GPKG" merged.gpkg WFS:"$WFSURL" -append -update
     ogr2ogr -f "GPKG" merged.gpkg $AOI -append -update
 
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOINE WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOINE.geom, 4326))" merged.gpkg)
-    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
+    # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs | 
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOINE WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOINE.geom, 4326))" merged.gpkg | xargs -n 1 | sort -u | xargs)
     rm merged.gpkg
-
+    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
+    
   elif [ "$AOITYPE" -eq 2 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
-    WKT=$(echo $AOI | sed 's/,/%20/g; s/\//,/g')
+    WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
     WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
     TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL")
     TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
@@ -538,7 +548,7 @@ get_data() {
       fi
       # Check if scene already exists, download anyway if gsutil temp files are present
       if [ -d $SCENEPATH ]; then
-        if ! ls -r $SCENEPATH | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
+        if ! ls -R $SCENEPATH | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
           printf "\e[500D\e[4A\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
           
           ((ITER++))
