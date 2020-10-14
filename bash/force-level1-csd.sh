@@ -299,7 +299,7 @@ elif ! date -d $DATEMIN &> /dev/null || ! [ ${#DATEMIN} -eq 8 ]; then
   printf "%s\n" "" "Starttime ($DATEMIN) is not a valid date." "Make sure dates are formatted as YYYYMMDD" ""
   exit 1
 elif ! date -d $DATEMAX &> /dev/null || ! [ ${#DATEMAX} -eq 8 ]; then
-    printf "%s\n" "" "Sndtime ($DATEMAX) is not a valid date." "Make sure dates are formatted as YYYYMMDD" ""
+    printf "%s\n" "" "Endtime ($DATEMAX) is not a valid date." "Make sure dates are formatted as YYYYMMDD" ""
   exit 1
 elif [ $(date -d $DATEMIN +%s) -gt $(date -d $DATEMAX +%s) ]; then
   printf "%s\n" "Error: Start of date range is larger than end of date range" "Start: $DATEMIN, End: $DATEMAX" ""
