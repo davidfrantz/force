@@ -1,5 +1,8 @@
 .. _tut-stm:
 
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
+
+
 Spectral Temporal Metrics
 =========================
 

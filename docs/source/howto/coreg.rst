@@ -1,5 +1,8 @@
 .. _tut-coreg:
 
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
+
+
 Coregistration
 ==============
 
