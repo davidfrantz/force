@@ -187,7 +187,7 @@ UPDATE=0
 KEEPMETA=0
 
 # change - to %dummy% if followed by integer: prevent interpretation as option by getopt
-ARGS=$(echo "$@" | sed -E "s/-([0-9])/%dummy%\1/g")
+ARGS=$(echo "$@" | sed -E "s/ -([0-9])/ %dummy%\1/g")
 set -- $ARGS
 
 ARGS=`getopt -o c:d:nhks:t:u -l cloudcover:,daterange:,no-act,help,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
@@ -229,6 +229,7 @@ done
 # change %dummy% back to -
 ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
 eval set -- "$ARGS"
+echo $ARGS
 
 
 # Check for update flag and update metadata catalogue if set
@@ -482,6 +483,7 @@ get_data() {
     rm $METAFNAME
   else
     sed -i "1 s/^/$(head -n 1 $METACAT)\n/" $METAFNAME
+    mv $METAFNAME "${METAFNAME/_metadata_/_metadata_"$SATELLITE"_}"
   fi
 
 
