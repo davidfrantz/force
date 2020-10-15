@@ -229,7 +229,6 @@ done
 # change %dummy% back to -
 ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
 eval set -- "$ARGS"
-echo $ARGS
 
 
 # Check for update flag and update metadata catalogue if set
