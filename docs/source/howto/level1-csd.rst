@@ -403,6 +403,7 @@ You can work around this by mounting the folder where your ``.boto`` file is loc
 +              + `Stefan Ernst <https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/stefan-ernst>`_,+
 +              + contributor to **FORCE**,                                                                                  +
 +              + researcher at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_.                          +
++              + *Views are his own.*                                                                                       +
 +--------------+------------------------------------------------------------------------------------------------------------+
 + **EO**, **ARD**, **Data Science**, **Open Science**                                                                       +
 +--------------+------------------------------------------------------------------------------------------------------------+
