@@ -11,9 +11,9 @@ There are several tutorials available that showcase how to use the FORCE.
 +==============+========+=====================+=========================================================================+
 + Essential    +        + :ref:`tut-datacube` + How to handle cubed data                                                +
 +--------------+--------+---------------------+-------------------------------------------------------------------------+
-+ Lower Level  + L1AS   + :ref:`tut-s2l1c`    + How to download and manage Sentinel-2 Level 1C data                     +
-+              +        +---------------------+-------------------------------------------------------------------------+
 + Lower Level  + L1AS   + :ref:`tut-l1csd`    + How to download Landsat and Sentinel-2 Level-1 data from cloud services +
++              +        +---------------------+-------------------------------------------------------------------------+
++              + L1AS   + :ref:`tut-s2l1c`    + How to download and manage Sentinel-2 Level 1C data from the ESA hub    +
 +              +--------+---------------------+-------------------------------------------------------------------------+
 +              + L2PS   + :ref:`tut-ard`      + How to generate Analysis Ready Data                                     +
 +              +        +---------------------+-------------------------------------------------------------------------+
@@ -37,8 +37,8 @@ There are several tutorials available that showcase how to use the FORCE.
    :maxdepth: 1
    :hidden:
 
-   sentinel2-l1c.rst
    level1-csd.rst
+   sentinel2-l1c.rst
 
    datacube.rst
    l2-ard.rst
