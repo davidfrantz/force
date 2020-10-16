@@ -69,7 +69,7 @@ Mandatory arguments:
       If on the command line, provide a comma separated list.
   (2) a shapefile (point/polygon/line). On-the-fly reprojection is provided,
       but using EPSG4326 is recommended.
-  (3) grid identifier:
+  (3) scene identifier:
       Landsat: Path/Row as "PPPRRR". Make sure to keep leading zeros:
         correct: 181034, incorrect: 18134
       Sentinel-2: MGRS tile as "TXXXXX". Make sure to keep the leading T before 
