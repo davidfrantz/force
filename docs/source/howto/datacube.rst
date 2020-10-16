@@ -242,8 +242,8 @@ How do I find a POI?
 
 Given any geographic coordinate, the computation of the corresponding tile is pretty straightforward.
 
-1. Convert the geographic coordinate :math:``(\lambda,\phi)`` to the projected coordinate :math:``(X,Y)``
-2. Given the tile size :math:``t_\text{s}`` and the grid origin in projected coordinates :math:``(X_\text{O},Y_\text{O})``, the tile ID can be computed as 
+1. Convert the geographic coordinate :math:`(\lambda,\phi)` to the projected coordinate :math:`(X,Y)`
+2. Given the tile size :math:`t_\text{s}` and the grid origin in projected coordinates :math:`(X_\text{O},Y_\text{O})`, the tile ID can be computed as 
 
 .. math::
 
