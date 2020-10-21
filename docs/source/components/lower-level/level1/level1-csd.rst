@@ -9,7 +9,7 @@ FORCE can download Landsat and Sentinel-2 data from cloud storage providers (cur
 
 .. note::
 
-    If you need to bypass ``force-level1-sentinel2``, it is recommended to store the images in a consistent data pool without duplicates.
+    If you need to bypass ``force-level1-csd``, it is recommended to store the images in a consistent data pool without duplicates.
     You will need to prepare a :ref:`queue`.
 
 
@@ -132,3 +132,4 @@ The remaining optional arguments are used to perform a search without actually d
 
     To learn more about FORCE Level 1 CSD, check the `tutorial <https://davidfrantz.github.io/tutorials/force-level1-csd>`_.
     It covers the set up, usage, and provides some more general information.
+
