@@ -16,6 +16,12 @@ FORCE-dev
     This also enables "cloud shadow on top of cloud" scenarios.
     Thanks to Haili Hu for reporting this issue.
 
+* new program force-import-modis
+
+higher level: new sensors MOD01 MOD02, as well as output bandset MODIS
+              new band SWIR0
+
+
 Master release: TBA
 
 -- No changes yet, master is in sync with develop.
