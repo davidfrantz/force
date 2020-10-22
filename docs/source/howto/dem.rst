@@ -3,7 +3,7 @@
 Digital Elevation Model
 =======================
 
-**Prepare a DEM for Level 2 Processing**
+**How to prepare a DEM for Level 2 Processing**
 
 This tutorial shows how to prepare a Digital Elevation Model (DEM) for the FORCE Level 2 Processing System (FORCE L2PS).
 

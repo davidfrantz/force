@@ -253,8 +253,7 @@ Let's keep this method, but feel free to try the other options.
 """"""""""""""""""
 
 Since v. 3.0, FORCE is able to perform a co-registration of Sentinel-2 images with Landsat time series.
-For starters, we will not use this option.
-A separate tutorial is planned asap that will explain how to do this.
+For starters, we will not use this option, but see the :ref:`tut-coreg` tutorial.
 
 
 8) Parallel Processing
