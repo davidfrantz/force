@@ -137,7 +137,7 @@ struct stat sb;
 }
 
 
-/** This function extracts the extension from a file (after 1st dot in 
+/** This function extracts the extension from a file (after 1st! dot in 
 +++ basename)
 --- path:      file path
 --- extension: buffer that will hold the extension
@@ -152,6 +152,31 @@ char *dot;
 
   // Locate the first dot and copy from there
   dot = strchr(basename, '.');
+  if (dot != NULL){
+    copy_string(extension, size, dot);
+  } else {
+    extension[0] = '\0';
+  }
+
+  return;
+}
+
+
+/** This function extracts the extension from a file (after last! dot in 
++++ basename)
+--- path:      file path
+--- extension: buffer that will hold the extension
+--- size:      length of the buffer
++++ Return:    void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void extension2(char* path, char extension[], int size){
+char basename[NPOW_10];
+char *dot;
+
+  basename_with_ext(path, basename, NPOW_10);
+
+  // Locate the first dot and copy from there
+  dot = strrchr(basename, '.');
   if (dot != NULL){
     copy_string(extension, size, dot);
   } else {

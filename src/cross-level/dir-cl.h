@@ -59,6 +59,7 @@ int findfile(char *dir_path, char *pattern, char *filter, char fname[], int size
 int countfile(char *dir_path, char *pattern);
 int createdir(char *dir_path);
 void extension(char* path, char extension[], int size);
+void extension2(char* path, char extension[], int size);
 void basename_without_ext(char* path, char basename[], int size);
 void basename_with_ext(char* path, char basename[], int size);
 void directoryname(char* path, char dirname[], int size);

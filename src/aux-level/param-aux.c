@@ -819,15 +819,16 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
     fprintf(fp, "# Sentinel-2B), sen2a (4-band Sentinel-2A), sen2b (4-band Sentinel-2B),\n");
     fprintf(fp, "# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-\n");
     fprintf(fp, "# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID\n");
-    fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending).\n");
+    fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.\n");
+    fprintf(fp, "# (7-band Aqua MODIS).\n");
     fprintf(fp, "# The resulting outputs are named according to their band designation, i.e. \n");
     fprintf(fp, "# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface\n");
     fprintf(fp, "# bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or\n");
-    fprintf(fp, "# VVVHP (VV/VH polarized).\n");
+    fprintf(fp, "# VVVHP (VV/VH polarized), MODIS (7-band MODIS).\n");
     fprintf(fp, "# BAP Composites with such a band designation can be input again (e.g. \n");
     fprintf(fp, "# SENSORS = LNDLG).\n");
     fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,\n");
-    fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP}\n");
+    fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}\n");
   }
   fprintf(fp, "SENSORS = LND08 SEN2A SEN2B\n");
   
