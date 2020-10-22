@@ -205,9 +205,8 @@ int cld_buf, shd_buf;
         z = atc->dem.min+atc->dem.step/2.0 + dem_[p]*atc->dem.step;
         if ((cir_thr = 70 + 70*z*z) < 100) cir_thr = 100; // Baetens et al. 2019
         if (cirrus_[p] > cir_thr) set_cloud(QAI, p, 3);
-      } else if (fshd_[p]){
-        set_shadow(QAI, p, true);
       }
+      if (fshd_[p]) set_shadow(QAI, p, true);
       if (get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) k++;
     }
 
