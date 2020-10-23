@@ -46,7 +46,9 @@ const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_] = {
   { _SEN_LNDLG_, "LNDLG" }, { _SEN_SEN2L_, "SEN2L" },
   { _SEN_SEN2H_, "SEN2H" }, { _SEN_RGB_,   "R-G-B" },
   { _SEN_S1AIA_, "S1AIA" }, { _SEN_S1AID_, "S1AID" },
-  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" }};
+  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" },
+  { _SEN_VVVHP_, "VVVHP" }, { _SEN_MOD01_, "MOD01" }, 
+  { _SEN_MOD02_, "MOD02" }, { _SEN_MOD02_, "MODIS" }};
 
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },
@@ -69,7 +71,7 @@ const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
   { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"     },
   { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"     },
   { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       },
-  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }};
+  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    }};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
   { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },

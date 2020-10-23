@@ -667,6 +667,9 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_NIR_:
       index_band(ard, mask_, ts, sen->nir, nc, nt, nodata);
       break;
+    case _IDX_SW0_:
+      index_band(ard, mask_, ts, sen->swir0, nc, nt, nodata);
+      break;
     case _IDX_SW1_:
       index_band(ard, mask_, ts, sen->swir1, nc, nt, nodata);
       break;

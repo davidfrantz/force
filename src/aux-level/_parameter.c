@@ -197,6 +197,7 @@ bool verbose;
     write_par_hl_stm(fp, verbose);
     write_par_hl_fold(fp, verbose);
     write_par_hl_lsp(fp, verbose);
+    write_par_hl_pol(fp, verbose);
     write_par_hl_trend(fp, verbose);
   }
 

@@ -85,6 +85,7 @@ typedef struct {
   int rededge3;
   int bnir;
   int nir;
+  int swir0;
   int swir1;
   int swir2;
   int vv;

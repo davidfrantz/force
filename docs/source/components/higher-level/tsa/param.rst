@@ -207,6 +207,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Integer list. Valid values: [1,365]
     | ``DOY_RANGE = 1 365``
 
+.. _tsa-param-index:
+
 * **Spectral index**
 
   * Perform the time series analysis using the specified band or index.
@@ -217,7 +219,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}
     | ``INDEX = NDVI EVI NBR``
-
 
 
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+

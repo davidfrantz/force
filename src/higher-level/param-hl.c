@@ -455,7 +455,7 @@ bool v[_WVL_LENGTH_] = {
 int *band_ptr[_WVL_LENGTH_] = { 
   &sen->blue, &sen->green, &sen->red,
   &sen->rededge1, &sen->rededge2, &sen->rededge3,
-  &sen->bnir, &sen->nir, &sen->swir1, &sen->swir2,
+  &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
   &sen->vv, &sen->vh };
 
 
@@ -481,6 +481,10 @@ int *band_ptr[_WVL_LENGTH_] = {
       case _IDX_NIR_:
         v[_WVL_NIR_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "NIR");
+        break;
+      case _IDX_SW0_:
+        v[_WVL_SWIR0_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "SW0");
         break;
       case _IDX_SW1_:
         v[_WVL_SWIR1_] = true;
@@ -959,33 +963,37 @@ const char sensor[_SEN_LENGTH_][NPOW_10] = {
   "sen2a", "sen2b", "LNDLG",
   "SEN2L", "SEN2H", "R-G-B",
   "S1AIA", "S1AID", "S1BIA",
-  "S1BID", "VVVHP" };
+  "S1BID", "VVVHP", "MOD01",
+  "MOD02", "MODIS" };
 const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat legacy bands
-  { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
-  { 1, 2, 3, 0, 0, 0, 0, 0, 0,  0, 0, 0 },  // VIS bands
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 }}; // VV/VH polarized
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
+  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
+  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
+  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
+  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat legacy bands
+  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
+  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
+  { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0 },  // VIS bands
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Ascending
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Descending
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // VV/VH polarized
+  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Terra
+  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Aqua
+  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 }}; // MODIS
 char domains[_WVL_LENGTH_][NPOW_10] = {
   "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
-  "REDEDGE3", "BROADNIR", "NIR", "SWIR1", "SWIR2",
+  "REDEDGE3", "BROADNIR", "NIR", "SWIR0", "SWIR1", "SWIR2",
   "VV", "VH" };
 bool vs[_SEN_LENGTH_], vb[_WVL_LENGTH_];
 int *band_ptr[_WVL_LENGTH_] = {
   &sen->blue, &sen->green, &sen->red, &sen->rededge1, &sen->rededge2,
-  &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir1, &sen->swir2,
+  &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
   &sen->vv, &sen->vh };
 
 
@@ -1021,6 +1029,8 @@ int *band_ptr[_WVL_LENGTH_] = {
     copy_string(sen->target, NPOW_10, "SEN2H");
   } else if (sen->nb == 3){
     copy_string(sen->target, NPOW_10, "R-G-B");
+  } else if (sen->nb == 7){
+    copy_string(sen->target, NPOW_10, "MODIS");
   } else if (sen->nb == 2){
     copy_string(sen->target, NPOW_10, "VVVHP");
   } else {
@@ -1049,8 +1059,9 @@ int *band_ptr[_WVL_LENGTH_] = {
   #ifdef FORCE_DEBUG
   printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
   printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
-  printf("bnir  %02d, nir   %02d, swir1 %02d\n", sen->bnir, sen->nir, sen->swir1);
-  printf("swir2 %02d, vv    %02d, vh    %02d\n", sen->swir2, sen->vv, sen->vh);
+  printf("bnir  %02d, nir   %02d, swir0 %02d\n", sen->bnir, sen->nir, sen->swir0);
+  printf("swir1 %02d, swir2 %02d\n", sen->swir1, sen->swir2, 
+  printf("vv    %02d, vh    %02d\n", sen->vv, sen->vh);
   #endif
 
   #ifdef FORCE_DEBUG
