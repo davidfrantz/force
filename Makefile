@@ -31,7 +31,7 @@ GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
 GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
-PYTHON=-I/usr/include/python3.5m
+PYTHON != python3-config --includes
 #SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
 
 # Linked libs
@@ -40,7 +40,7 @@ LDGSL=-lgsl -lgslcblas
 #LDSPLITS=-lsplits -larmadillo
 LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
 LDCURL=-lcurl
-LDPYTHON=-lpython3.5m -lpthread -ldl  -lutil -lm
+LDPYTHON != python3-config --libs
 
 # NO! changes below this line (unless you know what to do, then go ahead)
 ##########################################################################
