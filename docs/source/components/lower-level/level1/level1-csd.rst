@@ -130,6 +130,6 @@ The remaining optional arguments are used to perform a search without actually d
 
 .. seealso::
 
-    To learn more about FORCE Level 1 CSD, check the `tutorial <https://davidfrantz.github.io/tutorials/force-level1-csd>`_.
+    To learn more about FORCE Level 1 CSD, check the :ref:`tut-l1csd` tutorial.
     It covers the set up, usage, and provides some more general information.
 
