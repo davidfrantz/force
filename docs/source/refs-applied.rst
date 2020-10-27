@@ -20,6 +20,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | P. Brun, A. Psomas, C. Ginzler, W. Thuiller, M. Zappa, and N. Zimmermann (2020): Large-scale early-wilting response of Central European forests to the 2018 extreme drought. Global Change Biology.
   | https://doi.org/10.1111/gcb.15360
 
+  | S. Cooper, A. Okujeni, C. Jänicke, M.w Clark, S. van der Linden, and P. Hostert (2020): Disentangling fractional vegetation cover: Regression-based unmixing of simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment 246, 111856.
+  | https://doi.org/10.1016/j.rse.2020.111856
+
   | B. Jakimow, S. van der Linden, F. Thiel, D. Frantz, and Patrick Hostert (2020): Visualizing and labeling dense multi-sensor earth observation time series: The EO Time Series Viewer. Environmental Modelling & Software 125, 104631.
   | https://doi.org/10.1016/j.envsoft.2020.104631
 
