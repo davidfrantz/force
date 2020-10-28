@@ -22,10 +22,20 @@ FORCE-dev
     Now, the pixel is only flagged as saturated, and reflectance is capped at the maximum Int16 value.
     Note that this happens because the assumptions for estimating **surface** reflectance are not valid over clouds.
 
-* new program force-import-modis
+* **FORCE Import**
 
-higher level: new sensors MOD01 MOD02, as well as output bandset MODIS
-              new band SWIR0
+  * new program added: force-import-modis
+    A new tool was added, which imports the MODIS Surface Reflectance Daily product MOD09GA/MYD09GA into FORCE.
+    The tool generates a FORCE-compatible datacube in Sinusoidal projection; MODIS tile h18v03 is ingested into FORCE tile X0018_Y0003.
+    The tool converts the MODIS hdf file into a pair of BOA/QAI images in compressed GeoTiff format according to FORCE data structure and naming convention.
+    The BOA product holds the 7 surface reflectance bands (ordered by wavelength).
+    The QAI product holds the Reflectance Data State QA, wherein the MODIS quality flags are translated into the usual FORCE quality flags.
+    File naming is like this: 20150101_LEVEL2_MOD01_BOA.tif (MOD01 = MODIS Terra, MOD02 = MODIS Aqua).
+
+* **FORCE HIGHER LEVEL**
+
+  * force-higher-level is aware of the newly added MODIS sensors, i.e. MOD01 and MOD02 can be specified in the sensor list (``SENSORS``).
+    A new spectral band is available as ``INDEX = SWIR0``, which represents MODIS band 5 (1230 - 1250).
 
 
 Master release: TBA
