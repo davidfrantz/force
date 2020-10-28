@@ -352,9 +352,11 @@ float **xyz_tsd_sw2 = NULL;
       if (ref > 1.0) set_saturation(QAI, p, true);
 
 
-      if (ref < -1.0 || ref >  2.0){
+      if (ref < -1.0){
         boa_[p] = nodata;
         set_off(QAI, p, true);
+      } else if (ref*10000.0 > SHRT_MAX){
+        boa_[p] = (short)SHRT_MAX;
       } else {
         boa_[p] = (short)(ref*10000.0);
       }
