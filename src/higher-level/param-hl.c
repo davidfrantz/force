@@ -615,7 +615,8 @@ int *band_ptr[_WVL_LENGTH_] = {
   printf("filtered bandlist with requested indices:\n");
   for (s=0; s<sen->n; s++){
     printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); printf("\n");
+    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
+    printf("\n");
   }
   #endif
 
@@ -963,17 +964,17 @@ const char sensor[_SEN_LENGTH_][NPOW_10] = {
   "S1BID", "VVVHP", "MOD01",
   "MOD02", "MODIS" };
 const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
-  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
+  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
+  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
   { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
   { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Landsat legacy bands
-  { 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
-  { 1, 2, 3, 0, 0, 0, 0, 0, 4, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat legacy bands
+  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
   { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0 },  // VIS bands
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Ascending
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Descending
@@ -1057,13 +1058,14 @@ int *band_ptr[_WVL_LENGTH_] = {
   printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
   printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
   printf("bnir  %02d, nir   %02d, swir0 %02d\n", sen->bnir, sen->nir, sen->swir0);
-  printf("swir1 %02d, swir2 %02d\n", sen->swir1, sen->swir2, 
+  printf("swir1 %02d, swir2 %02d\n", sen->swir1, sen->swir2); 
   printf("vv    %02d, vh    %02d\n", sen->vv, sen->vh);
   #endif
 
   #ifdef FORCE_DEBUG
   printf("waveband mapping:\n");
-  for (b=0; b<nb; b++) printf("%s %d\n", domains[b], vb[b]); printf("\n");
+  for (b=0; b<nb; b++) printf("%s %d\n", domains[b], vb[b]);
+  printf("\n");
   printf("%d bands, target sensor: %s\n", sen->nb, sen->target);
   #endif
 
@@ -1071,7 +1073,8 @@ int *band_ptr[_WVL_LENGTH_] = {
   printf("processing with %d sensors and %d bands\n", sen->n, sen->nb);
   for (s=0; s<sen->n; s++){
     printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); printf("\n");
+    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
+    printf("\n");
   }
   #endif
 
