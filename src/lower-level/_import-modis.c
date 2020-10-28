@@ -172,12 +172,12 @@ int p, b;
     if (get_modqa(modqa_,  2, p, 1) >  0) set_shadow(QAI, p, 1);  // cloud shadow
     if (get_modqa(modqa_,  3, p, 3) != 1) set_water(QAI, p, 1);   // any water type
     if (get_modqa(modqa_,  6, p, 2) == 0) set_aerosol(QAI, p, 3); // aerosol climatology
-    if (get_modqa(modqa_,  6, p, 2) >  1) set_aerosol(QAI, p, 2); // high aerosol
-    if (get_modqa(modqa_,  8, p, 2) >  1) set_cloud(QAI, p, 3);   // cirrus
-    if (get_modqa(modqa_, 10, p, 1) >  1) set_cloud(QAI, p, 2);   // internal cloud algo
-    if (get_modqa(modqa_, 12, p, 1) >  1) set_snow(QAI, p, 1);    // snow/ice
-    if (get_modqa(modqa_, 13, p, 1) >  1) set_cloud(QAI, p, 1);   // adjacent to cloud
-    if (get_modqa(modqa_, 15, p, 1) >  1) set_snow(QAI, p, 1);    // internal snow algo
+    if (get_modqa(modqa_,  6, p, 2) >  2) set_aerosol(QAI, p, 2); // high aerosol
+    if (get_modqa(modqa_,  8, p, 2) >  0) set_cloud(QAI, p, 3);   // cirrus
+    if (get_modqa(modqa_, 10, p, 1) >  0) set_cloud(QAI, p, 2);   // internal cloud algo
+    if (get_modqa(modqa_, 12, p, 1) >  0) set_snow(QAI, p, 1);    // snow/ice
+    if (get_modqa(modqa_, 13, p, 1) >  0) set_cloud(QAI, p, 1);   // adjacent to cloud
+    if (get_modqa(modqa_, 15, p, 1) >  0) set_snow(QAI, p, 1);    // internal snow algo
 
     for (b=0; b<nb; b++){
       if (b == 5 && sid == _SEN_MOD02_) continue;
