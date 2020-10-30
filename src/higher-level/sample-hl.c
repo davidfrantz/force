@@ -98,7 +98,7 @@ FILE *fp = NULL;
   if (!(fp = fopen(fname, "a"))){
     printf("unable to open %s. ", fname); exit(FAILURE);}
 
-  for (row=0; row<=nrow; row++){
+  for (row=0; row<nrow; row++){
 
     if (allow[row]){
 
