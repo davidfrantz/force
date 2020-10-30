@@ -18,9 +18,10 @@ FORCE-dev
 
   * Changed the behaviour of over-saturated surface reflectance over cold cloud tops.
     Before, if surface reflectance > 200%, the pixel was set to nodata.
-    Thus, holes in the clouds appearead.
+    Thus, holes in the clouds appeared.
     Now, the pixel is only flagged as saturated, and reflectance is capped at the maximum Int16 value.
     Note that this happens because the assumptions for estimating **surface** reflectance are not valid over clouds.
+    Thanks to Philip Frost for reporting this issue.
 
 * **FORCE Import**
 
