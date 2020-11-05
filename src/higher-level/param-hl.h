@@ -231,6 +231,13 @@ typedef struct {
   float conf;         // confidence level
 } par_trd_t;
 
+// python plugin
+typedef struct {
+  char *f_code;
+  int   opyp;
+  int   nb;
+} par_pyp_t;
+
 // aggregation statistics
 typedef struct {
   int *metrics, nmetrics;
@@ -266,7 +273,7 @@ typedef struct {
   int n;                      // number of indices
   int  *index;           // index type
   char **index_name;     // short name index type
-  int otss;           // flag: output time series stack
+  int otss;           // flag: output time series brick
   int standard;
 
   par_stm_t stm;
@@ -276,6 +283,7 @@ typedef struct {
   par_lsp_t lsp;
   par_pol_t pol;
   par_trd_t trd;
+  par_pyp_t pyp;
 } par_tsa_t;
 
 // features

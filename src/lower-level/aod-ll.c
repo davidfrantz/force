@@ -61,7 +61,7 @@ float *aod_lut = NULL;
 
 
 
-  nb = get_stack_nbands(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
   alloc((void**)&aod_lut, nb, sizeof(float));
 
 
@@ -86,10 +86,10 @@ float *aod_lut = NULL;
   +** *******************************************************************/
   
   // scene center
-  nf = get_stack_ncols(atc->xy_aod);
-  ne = get_stack_nrows(atc->xy_aod);
-  get_stack_geo(atc->xy_aod, nf/2, ne/2, &center_x, &center_y);
-  doy   = get_stack_doy(atc->xy_aod, 0);
+  nf = get_brick_ncols(atc->xy_aod);
+  ne = get_brick_nrows(atc->xy_aod);
+  get_brick_geo(atc->xy_aod, nf/2, ne/2, &center_x, &center_y);
+  doy   = get_brick_doy(atc->xy_aod, 0);
 
 
   // daily LUT
@@ -147,7 +147,7 @@ float *aod_lut = NULL;
 --- DOBJ:   Extracted targets (returned)
 +++ Return: Number of candidate targets
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int extract_dark_target(atc_t *atc, stack_t *TOA, stack_t *QAI, top_t *TOP, int type, darkobj_t **DOBJ){
+int extract_dark_target(atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP, int type, darkobj_t **DOBJ){
 int b, bb, nb;
 int blue, green, red, nir, sw2;
 int i, j, p, nx, ny, nc, o, cell_size;
@@ -188,12 +188,12 @@ short **toa_   = NULL;
   }
 
 
-  nb = get_stack_nbands(TOA);
-  nx = get_stack_ncols(TOA);
-  ny = get_stack_nrows(TOA);
-  nc = get_stack_ncells(TOA);
+  nb = get_brick_nbands(TOA);
+  nx = get_brick_ncols(TOA);
+  ny = get_brick_nrows(TOA);
+  nc = get_brick_ncells(TOA);
 
-  cell_size = floor(get_stack_res(atc->xy_aod)/get_stack_res(TOA));
+  cell_size = floor(get_brick_res(atc->xy_aod)/get_brick_res(TOA));
 
   if ((dem_   = get_band_small(TOP->dem,  0))   == NULL) return FAILURE;
   if ((slp_   = get_band_ushort(TOP->exp, ZEN)) == NULL) return FAILURE;
@@ -547,13 +547,13 @@ short **toa_   = NULL;
       dobj[o].j = (int)((dobj[o].jmax+dobj[o].jmin)/2);
 
       // target centroid in coarse grid
-      convert_stack_ji2jip(QAI, atc->xy_aod, dobj[o].i, dobj[o].j, &dobj[o].e, &dobj[o].f, &dobj[o].g);
+      convert_brick_ji2jip(QAI, atc->xy_aod, dobj[o].i, dobj[o].j, &dobj[o].e, &dobj[o].f, &dobj[o].g);
       
       // sun angles
-      dobj[o].ms   = get_stack(atc->xy_sun,  cZEN, dobj[o].g);
-      dobj[o].mv   = get_stack(atc->xy_view, cZEN, dobj[o].g);
-      dobj[o].razi = get_stack(atc->xy_view,  AZI, dobj[o].g) - 
-                     get_stack(atc->xy_sun,   AZI, dobj[o].g);
+      dobj[o].ms   = get_brick(atc->xy_sun,  cZEN, dobj[o].g);
+      dobj[o].mv   = get_brick(atc->xy_view, cZEN, dobj[o].g);
+      dobj[o].razi = get_brick(atc->xy_view,  AZI, dobj[o].g) - 
+                     get_brick(atc->xy_sun,   AZI, dobj[o].g);
 
 
       // target      reflectance
@@ -679,7 +679,7 @@ float coef[3], coefbest[3];
   #endif
 
 
-  nb = get_stack_nbands(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
 
   ultrablue  = find_domain(atc->xy_aod, "ULTRABLUE");
   if ((blue  = find_domain(atc->xy_aod, "BLUE"))  < 0) return FAILURE; 
@@ -1081,12 +1081,12 @@ double upper = 1000;
   atc->Ha = aod_elev_factor(atc->dem.avg, atc->Hp);
 
   // AOD scaling factor for grid cells
-  ng = get_stack_ncells(atc->xy_aod);
+  ng = get_brick_ncells(atc->xy_aod);
   for (g=0; g<ng; g++){
-    if (is_stack_nodata(atc->xy_view, 0, g)) continue;
-    dem = get_stack(atc->xy_dem, 0, g);
+    if (is_brick_nodata(atc->xy_view, 0, g)) continue;
+    dem = get_brick(atc->xy_dem, 0, g);
     Ha = aod_elev_factor(dem*atc->dem.step+atc->dem.min+atc->dem.step/2, atc->Hp);
-    set_stack(atc->xy_Ha, 0, g, Ha);
+    set_brick(atc->xy_Ha, 0, g, Ha);
   }
 
   // AOD scaling factor for dark targets
@@ -1226,12 +1226,12 @@ float E0_, Eg, Egc, k;
 
   g = dobj.g;
   
-  nb = get_stack_nbands(atc->xy_aod);
-  ms = get_stack(atc->xy_sun,  cZEN, g);
-  mv = get_stack(atc->xy_view, cZEN, g);
-  Pr = get_stack(atc->xy_Pr, 0, g);
-  Pa = get_stack(atc->xy_Pa, 0, g);
-  fresnel = get_stack(atc->xy_fresnel, 0, g);
+  nb = get_brick_nbands(atc->xy_aod);
+  ms = get_brick(atc->xy_sun,  cZEN, g);
+  mv = get_brick(atc->xy_view, cZEN, g);
+  Pr = get_brick(atc->xy_Pr, 0, g);
+  Pa = get_brick(atc->xy_Pa, 0, g);
+  fresnel = get_brick(atc->xy_fresnel, 0, g);
   if ((blue  = find_domain(atc->xy_aod, "BLUE"))  < 0) return FAILURE; 
   if ((green = find_domain(atc->xy_aod, "GREEN")) < 0) return FAILURE; 
   if ((red   = find_domain(atc->xy_aod, "RED"))   < 0) return FAILURE; 
@@ -1246,22 +1246,22 @@ float E0_, Eg, Egc, k;
     if (!atc->aod_bands[b] || b == sw2) continue;
 
     // BRDF adjustment for vegetation targets
-    brdf = get_stack(atc->xy_brdf, b, g);
+    brdf = get_brick(atc->xy_brdf, b, g);
 
     // initilaize best match
     for (w=0; w<lib->n; w++) bestmatch[w] = INT_MAX;
 
     // exoatmospheric solar irradiance, ozone corrected
-    Tso = get_stack(atc->xy_Tso, b, g);
-    Tvo = get_stack(atc->xy_Tvo, b, g);
+    Tso = get_brick(atc->xy_Tso, b, g);
+    Tvo = get_brick(atc->xy_Tvo, b, g);
     E0_ = atc->E0[b] * Tso*Tvo;
 
     // total  gaseous transmittance
-    Tg = get_stack(atc->xy_Tg, b, g);
+    Tg = get_brick(atc->xy_Tg, b, g);
 
     // elevation scale factor for MOD
-    mod = get_stack(atc->xy_mod, b, g);
-    Hr = get_stack(atc->xy_Hr, 0, g);
+    mod = get_brick(atc->xy_mod, b, g);
+    Hr = get_brick(atc->xy_Hr, 0, g);
     mod = mod_elev_scale(mod, Hr, dobj.Hr);
 
 
@@ -1370,7 +1370,7 @@ float csum = 0, vsum = 0, cv, vr;
 float slope, inter;
 
 
-  nb = get_stack_nbands(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
 
   // mean
   for (b=0, k=0; b<nb; b++){
@@ -1451,7 +1451,7 @@ int status;
 double size;
 
 
-  nb = get_stack_nbands(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
 
   alloc((void**)&param, naod*2+1, sizeof(float));
 
@@ -1521,8 +1521,8 @@ float w, aod;
 float **map = NULL;
 float *weight = NULL;
 
-  nb = get_stack_nbands(atc->xy_aod);
-  ng = get_stack_ncells(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
+  ng = get_brick_ncells(atc->xy_aod);
 
   // alocate memory
   alloc_2D((void***)&map, nb, ng, sizeof(float));
@@ -1572,7 +1572,7 @@ float *weight = NULL;
       if (weight[g] > 0){ 
         map[b][g] /= weight[g];
       } else {
-        set_stack(atc->xy_interp, 0, g, true);
+        set_brick(atc->xy_interp, 0, g, true);
       }
     }
   }
@@ -1617,10 +1617,10 @@ double **aod_z   = NULL;
 double *interpol = NULL;
 
 
-  nb = get_stack_nbands(atc->xy_aod);
-  nf = get_stack_ncols(atc->xy_aod);
-  ne = get_stack_nrows(atc->xy_aod);
-  ng = get_stack_ncells(atc->xy_aod);
+  nb = get_brick_nbands(atc->xy_aod);
+  nf = get_brick_ncols(atc->xy_aod);
+  ne = get_brick_nrows(atc->xy_aod);
+  ng = get_brick_ncells(atc->xy_aod);
   if ((green = find_domain(atc->xy_aod, "GREEN")) < 0) return FAILURE; 
 
   ParseAlgorithmAndOptions(szAlgNameInvDist, &eAlgorithm, &pOptions);
@@ -1665,7 +1665,7 @@ double *interpol = NULL;
     for (e=0, g=0; e<ne; e++){
     for (f=0; f<nf; f++, g++){
 
-      if (get_stack(atc->xy_view, ZEN, g) < 0) continue;
+      if (get_brick(atc->xy_view, ZEN, g) < 0) continue;
 
       gsum = gnum = 0;
       for (ee=-1; ee<=1; ee++){
@@ -1677,7 +1677,7 @@ double *interpol = NULL;
       }
       
       if (gnum > 0) aod = (float)(gsum/gnum); else aod = 0.0;
-      set_stack(atc->xy_aod, b, g, aod); 
+      set_brick(atc->xy_aod, b, g, aod); 
 
       if (aod > 0){
         sum += aod;
@@ -1716,7 +1716,7 @@ double *interpol = NULL;
 --- TOP:    Topographic Derivatives
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int compile_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, stack_t *TOA, stack_t *QAI, top_t *TOP){
+int compile_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP){
 int b, nb, o;
 int green, sw2;
 float res;
@@ -1730,8 +1730,8 @@ dark_t dark;
   #endif
   
 
-  nb = get_stack_nbands(TOA);
-  res = get_stack_res(TOA);
+  nb = get_brick_nbands(TOA);
+  res = get_brick_res(TOA);
   if ((green = find_domain(TOA, "GREEN")) < 0) return FAILURE; 
   if ((sw2   = find_domain(TOA, "SWIR2")) < 0) return FAILURE; 
 
@@ -1822,8 +1822,8 @@ printf("aod_bands as local variable?\n");
     atc->aod[green], dark.nwat, dark.nveg);
     
   #ifdef FORCE_DEBUG
-  print_stack_info(atc->xy_aod);    set_stack_open(atc->xy_aod,    OPEN_CREATE); write_stack(atc->xy_aod);
-  print_stack_info(atc->xy_interp); set_stack_open(atc->xy_interp, OPEN_CREATE); write_stack(atc->xy_interp);
+  print_brick_info(atc->xy_aod);    set_brick_open(atc->xy_aod,    OPEN_CREATE); write_brick(atc->xy_aod);
+  print_brick_info(atc->xy_interp); set_brick_open(atc->xy_interp, OPEN_CREATE); write_brick(atc->xy_interp);
   #endif
 
   #ifdef FORCE_CLOCK

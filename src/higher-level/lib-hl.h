@@ -32,7 +32,7 @@ Library completeness header
 #include <stdlib.h>  // standard general utilities library
 
 
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/read-ard-hl.h"
@@ -55,7 +55,7 @@ typedef struct {
   short **mae_;
 } lib_t;
 
-stack_t **library_completeness(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

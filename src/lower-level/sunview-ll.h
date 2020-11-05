@@ -32,7 +32,7 @@ Sun/view geometry header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/sun-cl.h"
 #include "../lower-level/meta-ll.h"
@@ -44,9 +44,9 @@ Sun/view geometry header
 extern "C" {
 #endif
 
-int sun_target_view(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, stack_t *QAI);
-int viewgeo(par_ll_t *pl2, stack_t *QAI, atc_t *atc);
-int view_angle(meta_t *meta, int mission, atc_t *atc, stack_t *QAI, int f, int e, int g);
+int sun_target_view(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, brick_t *QAI);
+int viewgeo(par_ll_t *pl2, brick_t *QAI, atc_t *atc);
+int view_angle(meta_t *meta, int mission, atc_t *atc, brick_t *QAI, int f, int e, int g);
 
 #ifdef __cplusplus
 }

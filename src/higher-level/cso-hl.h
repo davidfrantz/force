@@ -34,7 +34,7 @@ CSO Processing header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/cite-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
@@ -49,7 +49,7 @@ typedef struct {
   date_t *d_cso;
 } cso_t;
 
-stack_t **clear_sky_observations(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t **clear_sky_observations(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

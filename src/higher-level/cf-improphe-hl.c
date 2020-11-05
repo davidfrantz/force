@@ -28,11 +28,11 @@ This file contains functions for Continuous Field  ImproPhing
 #include "cf-improphe-hl.h"
 
 
-stack_t **compile_cfi(ard_t *ard, cfi_t *cfi, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
-stack_t *compile_cfi_stack(stack_t *ard, int nb, bool write, char *bname, char *prodname, par_hl_t *phl);
+brick_t **compile_cfi(ard_t *ard, cfi_t *cfi, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t *compile_cfi_brick(brick_t *ard, int nb, bool write, char *bname, char *prodname, par_hl_t *phl);
 
 
-/** This function compiles the stacks, in which CFI results are stored. 
+/** This function compiles the bricks, in which CFI results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
 +++ arrays.
 --- cf:       coarse resolution continuous field
@@ -40,11 +40,11 @@ stack_t *compile_cfi_stack(stack_t *ard, int nb, bool write, char *bname, char *
 --- ncf:      number of CF products
 --- phl:      HL parameters
 --- cube:     datacube definition
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for CFI results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for CFI results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_cfi(ard_t *cf, cfi_t *cfi, int ncf, par_hl_t *phl, cube_t *cube, int *nproduct){
-stack_t **CFI = NULL;
+brick_t **compile_cfi(ard_t *cf, cfi_t *cfi, int ncf, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **CFI = NULL;
 int b, o, nprod = ncf;
 int error = 0;
 date_t date;
@@ -60,7 +60,7 @@ short ****ptr = NULL;
   for (o=0; o<nprod; o++) ptr[o] = &cfi->imp_[o];
 
 
-  alloc((void**)&CFI, nprod, sizeof(stack_t*));
+  alloc((void**)&CFI, nprod, sizeof(brick_t*));
   prodlen = phl->cfi.nyears;
 
 
@@ -68,7 +68,7 @@ short ****ptr = NULL;
     
     basename_without_ext(phl->con.fname[o], bname, NPOW_10);
 
-    if ((CFI[o] = compile_cfi_stack(cf[o].DAT, prodlen, true, bname, "IMP", phl)) == NULL || (*ptr[o] = get_bands_short(CFI[o])) == NULL){
+    if ((CFI[o] = compile_cfi_brick(cf[o].DAT, prodlen, true, bname, "IMP", phl)) == NULL || (*ptr[o] = get_bands_short(CFI[o])) == NULL){
       printf("Error compiling %s product. ", bname); error++;
     } else {
       
@@ -80,8 +80,8 @@ short ****ptr = NULL;
         nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
         if (nchar < 0 || nchar >= NPOW_10){ 
           printf("Buffer Overflow in assembling domain\n"); error++;}
-        set_stack_domain(CFI[o],   b, fdate);
-        set_stack_bandname(CFI[o], b, fdate);
+        set_brick_domain(CFI[o],   b, fdate);
+        set_brick_bandname(CFI[o], b, fdate);
       }
     }
 
@@ -91,7 +91,7 @@ short ****ptr = NULL;
 
   if (error > 0){
     printf("%d compiling CFI product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(CFI[o]);
+    for (o=0; o<nprod; o++) free_brick(CFI[o]);
     free((void*)CFI);
     free((void*)cfi->imp_);
     return NULL;
@@ -102,55 +102,55 @@ short ****ptr = NULL;
 }
 
 
-/** This function compiles a CFI stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
---- write:     should this stack be written, or only used internally?
+/** This function compiles a CFI brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for CFI result
++++ Return:    brick for CFI result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_cfi_stack(stack_t *from, int nb, bool write, char *bname, char *prodname, par_hl_t *phl){
+brick_t *compile_cfi_brick(brick_t *from, int nb, bool write, char *bname, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 char dname[NPOW_10];
 char fname[NPOW_10];
 int nchar;
 
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Continuous Field ImproPhe");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Continuous Field ImproPhe");
+  set_brick_product(brick, prodname);
 
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
 
   nchar = snprintf(fname, NPOW_10, "%s_%s", bname, prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
 
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
 
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else {
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
+    set_brick_save(brick, b, true);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -166,12 +166,12 @@ int nchar;
 --- ncf:       number of CF products
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with CFI results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with CFI results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **confield_improphe(ard_t *ard, ard_t *cf, stack_t *mask, int nt, int ncf, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **confield_improphe(ard_t *ard, ard_t *cf, brick_t *mask, int nt, int ncf, par_hl_t *phl, cube_t *cube, int *nproduct){
 cfi_t cfi;
-stack_t **CFI;
+brick_t **CFI;
 small *mask_ = NULL;
 float **ard_ = NULL;
 float **cf_ = NULL;
@@ -195,16 +195,16 @@ bool is_empty;
     return NULL;
   }
 
-  // import stacks
-  nx = get_stack_chunkncols(ard[0].DAT);
-  ny = get_stack_chunknrows(ard[0].DAT);
-  nc = get_stack_chunkncells(ard[0].DAT);
+  // import bricks
+  nx = get_brick_chunkncols(ard[0].DAT);
+  ny = get_brick_chunknrows(ard[0].DAT);
+  nc = get_brick_chunkncells(ard[0].DAT);
   
-  ard_nodata = get_stack_nodata(ard[0].DAT, 0);
-  cf_nodata  = get_stack_nodata(cf[0].DAT, 0);
+  ard_nodata = get_brick_nodata(ard[0].DAT, 0);
+  cf_nodata  = get_brick_nodata(cf[0].DAT, 0);
 
-  nb_ard = get_stack_nbands(ard[0].DAT);
-  ny_cf = get_stack_nbands(cf[0].DAT);
+  nb_ard = get_brick_nbands(ard[0].DAT);
+  ny_cf = get_brick_nbands(cf[0].DAT);
 
   for (y=0; y<phl->cfi.nyears; y++){
     if ((b_cf = phl->cfi.years[y]-phl->cfi.y0) >= ny_cf){
@@ -224,7 +224,7 @@ bool is_empty;
   }
 
 
-  // compile products + stacks
+  // compile products + bricks
   if ((CFI = compile_cfi(cf, &cfi, ncf, phl, cube, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile CFI products!\n"); 
     *nproduct = 0;

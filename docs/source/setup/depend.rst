@@ -90,7 +90,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
     sudo apt-get install lockfile-progs
 
   *There is a known problem with CIFS mounted network drives. You may get a lot of warnings like ``lockfile creation failed: exceeded maximum number of lock attempts``. You can ignore these warnings; they are no fatal errors. But you might want to inspect the file queue after Level 2 processing, as there is a minor possibility that there were some conflicts due to parallel write attempts: a few images might not have been switched from ``QUEUED`` to ``DONE`` status.*
-  
+
 * **rename** is used to rename files.
   The tool is missing in new Ubuntu distributions (Ubuntu > 17.10). The software can be installed with:
 
@@ -98,8 +98,8 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
     sudo apt-get install rename
 
-* **python** is used by a couple of auxilliary scripts.
-  python should already be installed. If not, you can install a new python version like this:
+* **python3** is used by a couple of auxilliary scripts.
+  python3 should already be installed. If not, you can install like this:
 
   .. code-block:: bash
 
@@ -120,9 +120,9 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
   The installation process might need some more dependencies, e.g. ``cmake``.
   The software needs to be installed manually. 
   See the `installation instructions <https://docs.opencv.org/4.1.0/d7/d9f/tutorial_linux_install.html>`_ or try following recipe:
-  
+
   .. code-block:: bash
-  
+
      mkdir -p ~/src/opencv
      cd ~/src/opencv
      wget https://github.com/opencv/opencv/archive/4.1.0.zip

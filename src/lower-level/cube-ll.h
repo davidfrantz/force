@@ -34,7 +34,7 @@ Datacube header
 #include "../cross-level/string-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/tile-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta-ll.h"
@@ -46,8 +46,8 @@ Datacube header
 extern "C" {
 #endif
 
-int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, stack_t **LEVEL2, int nprod);
-multicube_t *start_multicube(par_ll_t *pl2, stack_t *stack);
+int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t **LEVEL2, int nprod);
+multicube_t *start_multicube(par_ll_t *pl2, brick_t *brick);
 
 #ifdef __cplusplus
 }

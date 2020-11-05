@@ -34,43 +34,15 @@ This program imports MODIS 09 GA products to FORCE
 #include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/date-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
-//#include "../lower-level/cube-ll.h"
 
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "cpl_string.h"     // various convenience functions for strings
 #include "gdal.h"           // public (C callable) GDAL entry points
 
-/** OpenMP **/
-//#include <omp.h> // multi-platform shared memory multiprocessing
-
-
-
-
-////-------------------------------------------------------------------
-//// convert integer to bit array
-//void int2bit(int x, int *bin, int size){
-//int quotient = x, i;
-//
-//  for (i=0; i<size; i++){
-//    bin[i]= quotient % 2;
-//    quotient = quotient / 2;
-//  }
-//}
-//
-////-------------------------------------------------------------------
-//// get integer value of a bit word
-//int bit2int(int *bin, int from, int len){
-//int x, k, i;
-//
-//  for (i=0, k=0, x=0; i<len; i++, k++){
-//    x += bin[from+i]*pow(2,k);
-//  }
-//  return x;
-//}
 
 int get_modqa(ushort *modqa_, int index, int p, int bitfields){
 int i;
@@ -83,7 +55,7 @@ short val = 0;
 }
 
 
-void set_meta(stack_t *STACK, date_t *date, double geotran[6], int nx, int ny, const char *proj, int tx, int ty, int sid, const char *sensor, const char *prd, const char *dout){
+void set_meta(brick_t *BRICK, date_t *date, double geotran[6], int nx, int ny, const char *proj, int tx, int ty, int sid, const char *sensor, const char *prd, const char *dout){
 char fname[NPOW_10];
 int nchar;
 
@@ -92,45 +64,45 @@ int nchar;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling output name name\n"); exit(FAILURE);}
 
-  set_stack_open(STACK, 1);
-  set_stack_format(STACK, _FMT_GTIFF_);
-  set_stack_explode(STACK, 0);
+  set_brick_open(BRICK, 1);
+  set_brick_format(BRICK, _FMT_GTIFF_);
+  set_brick_explode(BRICK, 0);
 
-  set_stack_res(STACK, geotran[1]);
-  set_stack_ulx(STACK, geotran[0]);
-  set_stack_uly(STACK, geotran[3]);
-  set_stack_ncols(STACK, nx);
-  set_stack_nrows(STACK, ny);
-  set_stack_chunkncols(STACK, nx);
-  set_stack_chunknrows(STACK, ny/10);
-  set_stack_nchunks(STACK, 10);
-  set_stack_proj(STACK, proj);
-  set_stack_tilex(STACK, tx);
-  set_stack_tiley(STACK, ty);
+  set_brick_res(BRICK, geotran[1]);
+  set_brick_ulx(BRICK, geotran[0]);
+  set_brick_uly(BRICK, geotran[3]);
+  set_brick_ncols(BRICK, nx);
+  set_brick_nrows(BRICK, ny);
+  set_brick_chunkncols(BRICK, nx);
+  set_brick_chunknrows(BRICK, ny/10);
+  set_brick_nchunks(BRICK, 10);
+  set_brick_proj(BRICK, proj);
+  set_brick_tilex(BRICK, tx);
+  set_brick_tiley(BRICK, ty);
 
-  set_stack_product(STACK, prd);
-  set_stack_sensorid(STACK, sid);
+  set_brick_product(BRICK, prd);
+  set_brick_sensorid(BRICK, sid);
 
-  set_stack_name(STACK, "FORCE Level 2 MODIS Import");
-  set_stack_dirname(STACK, dout);
-  set_stack_filename(STACK, fname);
+  set_brick_name(BRICK, "FORCE Level 2 MODIS Import");
+  set_brick_dirname(BRICK, dout);
+  set_brick_filename(BRICK, fname);
 
   return;
 }
 
 
-void set_meta_band(stack_t *STACK, int b, int scale, short nodata, const char *sensor, const char *domain, float wvl, const char *unit, date_t *date){
+void set_meta_band(brick_t *BRICK, int b, int scale, short nodata, const char *sensor, const char *domain, float wvl, const char *unit, date_t *date){
 
 
-  set_stack_scale(STACK, b, scale);
-  set_stack_nodata(STACK, b, nodata);
-  set_stack_sensor(STACK, b, sensor);
-  set_stack_domain(STACK, b, domain);
-  set_stack_wavelength(STACK, b, wvl);
-  set_stack_unit(STACK, b, unit);
-  set_stack_date(STACK, b, *date);
-  set_stack_save(STACK, b, 1);
-  set_stack_bandname(STACK, b, domain);
+  set_brick_scale(BRICK, b, scale);
+  set_brick_nodata(BRICK, b, nodata);
+  set_brick_sensor(BRICK, b, sensor);
+  set_brick_domain(BRICK, b, domain);
+  set_brick_wavelength(BRICK, b, wvl);
+  set_brick_unit(BRICK, b, unit);
+  set_brick_date(BRICK, b, *date);
+  set_brick_save(BRICK, b, 1);
+  set_brick_bandname(BRICK, b, domain);
 
   return;
 }
@@ -157,7 +129,7 @@ cube_t cube;
 }
 
 
-void compile_qai(stack_t *QAI, ushort *modqa_, short **boa_, int nc, int nb, int sid, short nodata){
+void compile_qai(brick_t *QAI, ushort *modqa_, short **boa_, int nc, int nb, int sid, short nodata){
 int p, b;
 
 
@@ -220,9 +192,9 @@ int b, nb = 7, b_ref[7] = { 14, 15, 12, 13, 16, 17, 18 }, b_qai = 2;
 int nchar;
 
 int nx, ny, nc, nx_, ny_;
-stack_t *BOA = NULL;
+brick_t *BOA = NULL;
 short **boa_ = NULL;
-stack_t *QAI = NULL;
+brick_t *QAI = NULL;
 ushort *modqa_ = NULL;
 
 char domain[7][NPOW_10] = { "BLUE", "GREEN", "RED", "NIR", "SWIR0", "SWIR1", "SWIR2" };
@@ -322,7 +294,7 @@ short nodata = -9999;
     GDALGetGeoTransform(fs, geotran);
 
     if (BOA == NULL){
-      BOA = allocate_stack(nb, nc, _DT_SHORT_);
+      BOA = allocate_brick(nb, nc, _DT_SHORT_);
       if ((boa_ = get_bands_short(BOA)) == NULL) return FAILURE;
     }
 
@@ -349,7 +321,7 @@ short nodata = -9999;
   nx_ = GDALGetRasterXSize(fs);
   ny_ = GDALGetRasterYSize(fs);
 
-  QAI = allocate_stack(1, nc, _DT_SHORT_);
+  QAI = allocate_brick(1, nc, _DT_SHORT_);
   alloc((void**)&modqa_, nc, sizeof(ushort));
 
   band = GDALGetRasterBand(fs, 1);
@@ -369,15 +341,15 @@ short nodata = -9999;
   set_meta(BOA, &date, geotran, nx, ny, proj, tx, ty, sid, sensor, "BOA", dtile);
   set_meta(QAI, &date, geotran, nx, ny, proj, tx, ty, sid, sensor, "QAI", dtile);
 
-  //print_stack_info(BOA);
-  //print_stack_info(QAI);
+  //print_brick_info(BOA);
+  //print_brick_info(QAI);
 
-  write_stack(BOA);
-  write_stack(QAI);
+  write_brick(BOA);
+  write_brick(QAI);
   write_modcube(dout, proj);
 
-  free_stack(BOA);
-  free_stack(QAI);
+  free_brick(BOA);
+  free_brick(QAI);
 
   free((void*)modqa_);
   

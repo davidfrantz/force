@@ -35,7 +35,7 @@ This file contains functions for reading Level 1 data
 --- pl2:     L2 parameters
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int read_level1(meta_t *meta, int mission, stack_t *DN, par_ll_t *pl2){
+int read_level1(meta_t *meta, int mission, brick_t *DN, par_ll_t *pl2){
 int b, nb, nx, ny, nc;
 int nx_, ny_, xoff_ = 0, yoff_ = 0;
 float res, res_;
@@ -52,12 +52,12 @@ int threads;
   #endif
 
 
-  nb  = get_stack_nbands(DN);
-  nx  = get_stack_ncols(DN);
-  ny  = get_stack_nrows(DN);
-  nc  = get_stack_ncells(DN);
-  res = get_stack_res(DN);
-  allocate_stack_bands(DN, nb, nc, _DT_USHORT_);
+  nb  = get_brick_nbands(DN);
+  nx  = get_brick_ncols(DN);
+  ny  = get_brick_nrows(DN);
+  nc  = get_brick_ncells(DN);
+  res = get_brick_res(DN);
+  allocate_brick_bands(DN, nb, nc, _DT_USHORT_);
   if ((dn_ = get_bands_ushort(DN)) == NULL) return FAILURE;
 
   CPLSetConfigOption("GDAL_PAM_ENABLED", "NO");
@@ -126,7 +126,7 @@ int threads;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(DN); set_stack_open(DN, OPEN_CREATE); write_stack(DN);
+  print_brick_info(DN); set_brick_open(DN, OPEN_CREATE); write_brick(DN);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -145,9 +145,9 @@ int threads;
 --- pl2:    L2 parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int bounds_level1(meta_t *meta, stack_t *DN, stack_t **QAI, par_ll_t *pl2){
+int bounds_level1(meta_t *meta, brick_t *DN, brick_t **QAI, par_ll_t *pl2){
 int b, b_temp, nb, p, nx, ny, nc;
-stack_t *qai  = NULL;
+brick_t *qai  = NULL;
 ushort **dn_  = NULL;
 small   *off_ = NULL;
 int tvalid = 0;
@@ -158,23 +158,23 @@ int tvalid = 0;
   #endif
 
   
-  nb = get_stack_nbands(DN);
-  nx = get_stack_ncols(DN);
-  ny = get_stack_nrows(DN);
-  nc = get_stack_ncells(DN);
+  nb = get_brick_nbands(DN);
+  nx = get_brick_ncols(DN);
+  ny = get_brick_nrows(DN);
+  nc = get_brick_ncells(DN);
   b_temp = find_domain(DN,  "TEMP");
 
-  // initialize a stack with general metadata
-  qai = copy_stack(DN, 1, _DT_SHORT_);
+  // initialize a brick with general metadata
+  qai = copy_brick(DN, 1, _DT_SHORT_);
 
-  // set stack metadata
-  set_stack_name(qai, "FORCE QAI stack");
-  set_stack_product(qai, "QAI");
-  set_stack_filename(qai, "QAI");
-  set_stack_nodata(qai, 0, 1); 
-  set_stack_wavelength(qai, 0, 1);
-  set_stack_domain(qai, 0, "QAI");
-  set_stack_bandname(qai, 0, "Quality assurance information");
+  // set brick metadata
+  set_brick_name(qai, "FORCE QAI brick");
+  set_brick_product(qai, "QAI");
+  set_brick_filename(qai, "QAI");
+  set_brick_nodata(qai, 0, 1); 
+  set_brick_wavelength(qai, 0, 1);
+  set_brick_domain(qai, 0, "QAI");
+  set_brick_bandname(qai, 0, "Quality assurance information");
 
 
   // get DN and OFF arrays for faster computation
@@ -218,7 +218,7 @@ int tvalid = 0;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(qai); set_stack_open(qai, OPEN_CREATE); write_stack(qai);
+  print_brick_info(qai); set_brick_open(qai, OPEN_CREATE); write_brick(qai);
   #endif
 
   #ifdef FORCE_CLOCK
@@ -241,7 +241,7 @@ int tvalid = 0;
 --- pl2:    L2 parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int impulse_noise_level1(meta_t *meta, stack_t *DN, stack_t *QAI, par_ll_t *pl2){
+int impulse_noise_level1(meta_t *meta, brick_t *DN, brick_t *QAI, par_ll_t *pl2){
 int k, count = 0, b, bands[3], nb = 3;
 int i, j, ii, jj, p, q, nx, ny;
 double mx[3],varx[3], sd[3];
@@ -258,8 +258,8 @@ ushort **dn_  = NULL;
   if (meta->dtype != 8) return SUCCESS;
   if (!pl2->impulse) return SUCCESS;
 
-  nx = get_stack_ncols(DN);
-  ny = get_stack_nrows(DN);
+  nx = get_brick_ncols(DN);
+  ny = get_brick_nrows(DN);
 
   if ((bands[0] = find_domain(DN,  "BLUE"))  < 0){
     printf("no BLUE band available.\n"); return FAILURE;}
@@ -338,8 +338,8 @@ ushort **dn_  = NULL;
 --- QAI:     Quality Assurance Information
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int convert_level1(meta_t *meta, int mission, atc_t *atc, stack_t *DN, stack_t **toa, stack_t *QAI){
-stack_t  *TOA  = NULL;
+int convert_level1(meta_t *meta, int mission, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI){
+brick_t  *TOA  = NULL;
 ushort **dn_  = NULL;
 short  **toa_ = NULL;
 float    *sun_ = NULL;
@@ -354,33 +354,33 @@ float dn_scale, toa_scale;
   #endif
 
 
-  nb = get_stack_nbands(DN);
-  nc = get_stack_ncells(DN);
+  nb = get_brick_nbands(DN);
+  nc = get_brick_ncells(DN);
   nodata = -9999;
 
-  TOA = copy_stack(DN, nb, _DT_SHORT_);
+  TOA = copy_brick(DN, nb, _DT_SHORT_);
   
   // temperature band?
   b_temp = find_domain(TOA, "TEMP");
 
   // update metadata
-  set_stack_name(TOA, "FORCE TOA stack");
-  set_stack_product(TOA, "TOA");
-  set_stack_filename(TOA, "TOA");
+  set_brick_name(TOA, "FORCE TOA brick");
+  set_brick_product(TOA, "TOA");
+  set_brick_filename(TOA, "TOA");
 
   for (b=0; b<nb; b++){
 
-    set_stack_nodata(TOA, b, nodata);
+    set_brick_nodata(TOA, b, nodata);
     if (b != b_temp){
-      set_stack_scale(TOA, b, 10000);
+      set_brick_scale(TOA, b, 10000);
     } else {
-      set_stack_scale(TOA, b, 100);
+      set_brick_scale(TOA, b, 100);
     }
 
   }
 
 
-  // get stack arrays for faster computation
+  // get brick arrays for faster computation
   if ((dn_  = get_bands_ushort(DN)) == NULL) return FAILURE;
   if ((toa_ = get_bands_short(TOA)) == NULL) return FAILURE;
   if ((sun_ = get_band_float(atc->xy_sun, cZEN)) == NULL) return FAILURE;
@@ -392,8 +392,8 @@ float dn_scale, toa_scale;
 
     for (b=0; b<nb; b++){
       
-      dn_scale  = get_stack_scale(DN,  b);
-      toa_scale = get_stack_scale(TOA, b);
+      dn_scale  = get_brick_scale(DN,  b);
+      toa_scale = get_brick_scale(TOA, b);
       
       #pragma omp parallel shared(b, nc, dn_scale, toa_scale, dn_, toa_) default(none) 
       {
@@ -408,12 +408,12 @@ float dn_scale, toa_scale;
   /** digital numbers to TOA reflectance and brightness temperature (Landsat) **/
   } else {
 
-    dsun = doy2dsun(get_stack_doy(TOA, 0));
+    dsun = doy2dsun(get_brick_doy(TOA, 0));
     pi_dsun2  = M_PI*dsun*dsun;
 
     for (b=0; b<nb; b++){
 
-      toa_scale = get_stack_scale(TOA, b);
+      toa_scale = get_brick_scale(TOA, b);
 
       A = (meta->cal[b].lmax-meta->cal[b].lmin) / 
           (meta->cal[b].qmax-meta->cal[b].qmin);
@@ -442,7 +442,7 @@ float dn_scale, toa_scale;
           // radiance to reflectance
           } else {
 
-            g = convert_stack_p2p(QAI, atc->xy_sun, p);
+            g = convert_brick_p2p(QAI, atc->xy_sun, p);
 
             if (meta->cal[b].rmul == meta->cal[b].fill){
               // old-style DN -> radiance -> reflectance conversion
@@ -472,7 +472,7 @@ float dn_scale, toa_scale;
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(TOA); set_stack_open(TOA, OPEN_CREATE); write_stack(TOA);
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
   #endif
 
   #ifdef FORCE_CLOCK

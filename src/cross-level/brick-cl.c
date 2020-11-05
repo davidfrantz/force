@@ -21,11 +21,11 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-This file contains functions for organizing stacks in memory, and output
+This file contains functions for organizing bricks in memory, and output
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#include "stack-cl.h"
+#include "brick-cl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "cpl_conv.h"       // various convenience functions for CPL
@@ -36,230 +36,230 @@ This file contains functions for organizing stacks in memory, and output
 #include "ogr_spatialref.h" // coordinate systems services
 
 
-/** This function allocates a stack
+/** This function allocates a brick
 --- nb:       number of bands
 --- nc:       number of cells
 --- datatype: datatype
-+++ Return:   stack (must be freed with free_stack)
++++ Return:   brick (must be freed with free_brick)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *allocate_stack(int nb, int nc, int datatype){
-stack_t *stack = NULL;
+brick_t *allocate_brick(int nb, int nc, int datatype){
+brick_t *brick = NULL;
 
 
   if (nb < 1){
-    printf("cannot allocate %d-band stack.\n", nb); 
+    printf("cannot allocate %d-band brick.\n", nb); 
     return NULL;}
 
   if (nc < 1 && datatype != _DT_NONE_){
-    printf("cannot allocate %d-cell stack.\n", nc);
+    printf("cannot allocate %d-cell brick.\n", nc);
     return NULL;}
 
-  alloc((void**)&stack, 1, sizeof(stack_t));
+  alloc((void**)&brick, 1, sizeof(brick_t));
 
-  init_stack(stack);    
-  set_stack_nbands(stack, nb);
+  init_brick(brick);    
+  set_brick_nbands(brick, nb);
 
-  alloc((void**)&stack->save,       nb, sizeof(bool));
-  alloc((void**)&stack->nodata,     nb, sizeof(int));
-  alloc((void**)&stack->scale,      nb, sizeof(float));
-  alloc((void**)&stack->wavelength, nb, sizeof(float));
-  alloc_2D((void***)&stack->unit, nb, NPOW_04, sizeof(char));
-  alloc_2D((void***)&stack->domain, nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&stack->bandname,   nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&stack->sensor,     nb, NPOW_04, sizeof(char));
-  alloc((void**)&stack->date, nb, sizeof(date_t));
+  alloc((void**)&brick->save,       nb, sizeof(bool));
+  alloc((void**)&brick->nodata,     nb, sizeof(int));
+  alloc((void**)&brick->scale,      nb, sizeof(float));
+  alloc((void**)&brick->wavelength, nb, sizeof(float));
+  alloc_2D((void***)&brick->unit, nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&brick->domain, nb, NPOW_10, sizeof(char));
+  alloc_2D((void***)&brick->bandname,   nb, NPOW_10, sizeof(char));
+  alloc_2D((void***)&brick->sensor,     nb, NPOW_04, sizeof(char));
+  alloc((void**)&brick->date, nb, sizeof(date_t));
   
-  init_stack_bands(stack);
+  init_brick_bands(brick);
 
-  if (allocate_stack_bands(stack, nb, nc, datatype) == FAILURE){
+  if (allocate_brick_bands(brick, nb, nc, datatype) == FAILURE){
     printf("couldn't allocate bands.\n"); return NULL;}
 
-  return stack;
+  return brick;
 }
 
 
-/** This function re-allocates a stack
---- stack:  stack (modified)
+/** This function re-allocates a brick
+--- brick:  brick (modified)
 --- nb:     number of bands (new)
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int reallocate_stack(stack_t *stack, int nb){
+int reallocate_brick(brick_t *brick, int nb){
 int b;
-int nb0 = get_stack_nbands(stack);
-int nc = get_stack_ncells(stack);
-int datatype = get_stack_datatype(stack);
+int nb0 = get_brick_nbands(brick);
+int nc = get_brick_ncells(brick);
+int datatype = get_brick_datatype(brick);
 
   if (nb == nb0) return SUCCESS;
 
   if (nb < 1){
-    printf("cannot reallocate %d-band stack.\n", nb); 
+    printf("cannot reallocate %d-band brick.\n", nb); 
     return FAILURE;}
 
   if (nc < 1){
-    printf("cannot reallocate %d-cell stack.\n", nc);
+    printf("cannot reallocate %d-cell brick.\n", nc);
     return FAILURE;}
 
   if (datatype == _DT_NONE_){
-    printf("cannot reallocate stack with no datatype.\n");
+    printf("cannot reallocate brick with no datatype.\n");
     return FAILURE;}
 
-  re_alloc((void**)&stack->save,         nb0, nb, sizeof(bool));
-  re_alloc((void**)&stack->nodata,       nb0, nb, sizeof(int));
-  re_alloc((void**)&stack->scale,        nb0, nb, sizeof(float));
-  re_alloc((void**)&stack->wavelength,   nb0, nb, sizeof(float));
-  re_alloc_2D((void***)&stack->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
-  re_alloc_2D((void***)&stack->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&stack->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&stack->sensor,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
-  re_alloc((void**)&stack->date,         nb0, nb, sizeof(date_t));
+  re_alloc((void**)&brick->save,         nb0, nb, sizeof(bool));
+  re_alloc((void**)&brick->nodata,       nb0, nb, sizeof(int));
+  re_alloc((void**)&brick->scale,        nb0, nb, sizeof(float));
+  re_alloc((void**)&brick->wavelength,   nb0, nb, sizeof(float));
+  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc_2D((void***)&brick->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
+  re_alloc_2D((void***)&brick->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
+  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc((void**)&brick->date,         nb0, nb, sizeof(date_t));
 
-  if (reallocate_stack_bands(stack, nb) == FAILURE){
+  if (reallocate_brick_bands(brick, nb) == FAILURE){
     printf("couldn't reallocate bands.\n"); return FAILURE;}
 
   if (nb > nb0){
-    for (b=nb0; b<nb; b++) copy_stack_band(stack, b, stack, 0);
+    for (b=nb0; b<nb; b++) copy_brick_band(brick, b, brick, 0);
   }
 
-  set_stack_nbands(stack, nb);
+  set_brick_nbands(brick, nb);
 
   return SUCCESS;
 }
 
 
-/** This function copies a stack
---- from:     source stack
+/** This function copies a brick
+--- from:     source brick
 --- nb:       number of bands (new)
 --- datatype: datatype (new)
-+++ Return:   new stack (must be freed with free_stack)
++++ Return:   new brick (must be freed with free_brick)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *copy_stack(stack_t *from, int nb, int datatype){
-stack_t *stack = NULL; 
+brick_t *copy_brick(brick_t *from, int nb, int datatype){
+brick_t *brick = NULL; 
 int  b;
 
   if (from->chunk < 0){
-    if ((stack = allocate_stack(nb, from->nc, datatype)) == NULL) return NULL;
+    if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
   } else {
-    if ((stack = allocate_stack(nb, from->cc, datatype)) == NULL) return NULL;
+    if ((brick = allocate_brick(nb, from->cc, datatype)) == NULL) return NULL;
   }
 
 
-  set_stack_name(stack, from->name);
-  set_stack_product(stack, from->product);
-  set_stack_dirname(stack, from->dname);
-  set_stack_filename(stack, from->fname);
-  set_stack_sensorid(stack, from->sid);
-  set_stack_format(stack, from->format);
-  set_stack_open(stack, from->open);
-  set_stack_explode(stack, from->explode);
+  set_brick_name(brick, from->name);
+  set_brick_product(brick, from->product);
+  set_brick_dirname(brick, from->dname);
+  set_brick_filename(brick, from->fname);
+  set_brick_sensorid(brick, from->sid);
+  set_brick_format(brick, from->format);
+  set_brick_open(brick, from->open);
+  set_brick_explode(brick, from->explode);
 
-  set_stack_geotran(stack, from->geotran);
-  set_stack_nbands(stack, nb);
-  set_stack_ncols(stack, from->nx);
-  set_stack_nrows(stack, from->ny);
-  set_stack_chunkncols(stack, from->cx);
-  set_stack_chunknrows(stack, from->cy);
-  set_stack_chunkwidth(stack, from->cwidth);
-  set_stack_chunkheight(stack, from->cheight);
-  set_stack_nchunks(stack, from->nchunk);
-  set_stack_chunk(stack, from->chunk);
-  set_stack_tilex(stack, from->tx);
-  set_stack_tiley(stack, from->ty);
-  set_stack_proj(stack, from->proj);
-  set_stack_par(stack, from->par);
+  set_brick_geotran(brick, from->geotran);
+  set_brick_nbands(brick, nb);
+  set_brick_ncols(brick, from->nx);
+  set_brick_nrows(brick, from->ny);
+  set_brick_chunkncols(brick, from->cx);
+  set_brick_chunknrows(brick, from->cy);
+  set_brick_chunkwidth(brick, from->cwidth);
+  set_brick_chunkheight(brick, from->cheight);
+  set_brick_nchunks(brick, from->nchunk);
+  set_brick_chunk(brick, from->chunk);
+  set_brick_tilex(brick, from->tx);
+  set_brick_tiley(brick, from->ty);
+  set_brick_proj(brick, from->proj);
+  set_brick_par(brick, from->par);
 
   if (nb == from->nb){
-    for (b=0; b<nb; b++) copy_stack_band(stack, b, from, b);
+    for (b=0; b<nb; b++) copy_brick_band(brick, b, from, b);
   } else {
-    for (b=0; b<nb; b++) copy_stack_band(stack, b, from, 0);
+    for (b=0; b<nb; b++) copy_brick_band(brick, b, from, 0);
   }
 
-  return stack;
+  return brick;
 }
 
 
-/** This function frees a stack
---- stack:  stack
+/** This function frees a brick
+--- brick:  brick
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void free_stack(stack_t *stack){
+void free_brick(brick_t *brick){
 int nb;
 
-  if (stack == NULL) return;
+  if (brick == NULL) return;
   
-  nb = get_stack_nbands(stack);
+  nb = get_brick_nbands(brick);
   
-  if (stack->save        != NULL) free((void*)stack->save);
-  if (stack->nodata      != NULL) free((void*)stack->nodata);
-  if (stack->scale       != NULL) free((void*)stack->scale);
-  if (stack->wavelength  != NULL) free((void*)stack->wavelength);
-  if (stack->date        != NULL) free((void*)stack->date);
-  stack->save        = NULL;
-  stack->nodata      = NULL;
-  stack->scale       = NULL;
-  stack->wavelength  = NULL;
-  stack->date        = NULL;
+  if (brick->save        != NULL) free((void*)brick->save);
+  if (brick->nodata      != NULL) free((void*)brick->nodata);
+  if (brick->scale       != NULL) free((void*)brick->scale);
+  if (brick->wavelength  != NULL) free((void*)brick->wavelength);
+  if (brick->date        != NULL) free((void*)brick->date);
+  brick->save        = NULL;
+  brick->nodata      = NULL;
+  brick->scale       = NULL;
+  brick->wavelength  = NULL;
+  brick->date        = NULL;
   
-  if (stack->unit     != NULL) free_2D((void**)stack->unit,     nb);
-  if (stack->domain   != NULL) free_2D((void**)stack->domain,   nb);
-  if (stack->bandname != NULL) free_2D((void**)stack->bandname, nb);
-  if (stack->sensor   != NULL) free_2D((void**)stack->sensor,   nb);
-  stack->unit     = NULL;
-  stack->domain   = NULL;
-  stack->bandname = NULL;
-  stack->sensor   = NULL;
+  if (brick->unit     != NULL) free_2D((void**)brick->unit,     nb);
+  if (brick->domain   != NULL) free_2D((void**)brick->domain,   nb);
+  if (brick->bandname != NULL) free_2D((void**)brick->bandname, nb);
+  if (brick->sensor   != NULL) free_2D((void**)brick->sensor,   nb);
+  brick->unit     = NULL;
+  brick->domain   = NULL;
+  brick->bandname = NULL;
+  brick->sensor   = NULL;
   
-  free_stack_bands(stack);
+  free_brick_bands(brick);
 
-  free((void*)stack);
-  stack = NULL;
+  free((void*)brick);
+  brick = NULL;
 
   return;
 }
 
 
-/** This function allocates the bandwise information in a stack
---- stack:    stack (modified)
+/** This function allocates the bandwise information in a brick
+--- brick:    brick (modified)
 --- nb:       number of bands
 --- nc:       number of cells
 --- datatype: datatype
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int allocate_stack_bands(stack_t *stack, int nb, int nc, int datatype){
+int allocate_brick_bands(brick_t *brick, int nb, int nc, int datatype){
 int nbyte;
 
 
   switch (datatype){
     case _DT_NONE_:
-      set_stack_datatype(stack, _DT_NONE_);
-      set_stack_byte(stack, (nbyte = 0));
+      set_brick_datatype(brick, _DT_NONE_);
+      set_brick_byte(brick, (nbyte = 0));
       return SUCCESS;
     case _DT_SHORT_:
-      set_stack_datatype(stack, _DT_SHORT_);
-      set_stack_byte(stack, (nbyte = sizeof(short)));
-      alloc_2D((void***)&stack->vshort, nb, nc, nbyte);
+      set_brick_datatype(brick, _DT_SHORT_);
+      set_brick_byte(brick, (nbyte = sizeof(short)));
+      alloc_2D((void***)&brick->vshort, nb, nc, nbyte);
       break;
     case _DT_SMALL_:
-      set_stack_datatype(stack, _DT_SMALL_);
-      set_stack_byte(stack, (nbyte = sizeof(small)));
-      alloc_2D((void***)&stack->vsmall, nb, nc, nbyte);
+      set_brick_datatype(brick, _DT_SMALL_);
+      set_brick_byte(brick, (nbyte = sizeof(small)));
+      alloc_2D((void***)&brick->vsmall, nb, nc, nbyte);
       break;
     case _DT_FLOAT_:
-      set_stack_datatype(stack, _DT_FLOAT_);
-      set_stack_byte(stack, (nbyte = sizeof(float)));
-      alloc_2D((void***)&stack->vfloat, nb, nc, nbyte);
+      set_brick_datatype(brick, _DT_FLOAT_);
+      set_brick_byte(brick, (nbyte = sizeof(float)));
+      alloc_2D((void***)&brick->vfloat, nb, nc, nbyte);
       break;
     case _DT_INT_:
-      set_stack_datatype(stack, _DT_INT_);
-      set_stack_byte(stack, (nbyte = sizeof(int)));
-      alloc_2D((void***)&stack->vint, nb, nc, nbyte);
+      set_brick_datatype(brick, _DT_INT_);
+      set_brick_byte(brick, (nbyte = sizeof(int)));
+      alloc_2D((void***)&brick->vint, nb, nc, nbyte);
       break;
     case _DT_USHORT_:
-      set_stack_datatype(stack, _DT_USHORT_);
-      set_stack_byte(stack, (nbyte = sizeof(ushort)));
-      alloc_2D((void***)&stack->vushort, nb, nc, nbyte);
+      set_brick_datatype(brick, _DT_USHORT_);
+      set_brick_byte(brick, (nbyte = sizeof(ushort)));
+      alloc_2D((void***)&brick->vushort, nb, nc, nbyte);
       break;
     default:
-      printf("unknown datatype for allocating stack. ");
+      printf("unknown datatype for allocating brick. ");
       return FAILURE;
   }
 
@@ -267,37 +267,37 @@ int nbyte;
 }
 
 
-/** This function re-allocates the bandwise information in a stack
---- stack:    stack (modified)
+/** This function re-allocates the bandwise information in a brick
+--- brick:    brick (modified)
 --- nb:       number of bands (new)
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int reallocate_stack_bands(stack_t *stack, int nb){
-int nbyte = get_stack_byte(stack);
-int nb0 = get_stack_nbands(stack);
-int nc0 = get_stack_ncells(stack);
-int nc  = get_stack_ncells(stack);
-int datatype = get_stack_datatype(stack);
+int reallocate_brick_bands(brick_t *brick, int nb){
+int nbyte = get_brick_byte(brick);
+int nb0 = get_brick_nbands(brick);
+int nc0 = get_brick_ncells(brick);
+int nc  = get_brick_ncells(brick);
+int datatype = get_brick_datatype(brick);
 
 
   switch (datatype){
     case _DT_SHORT_:
-      re_alloc_2D((void***)&stack->vshort, nb0, nc0, nb, nc, nbyte);
+      re_alloc_2D((void***)&brick->vshort, nb0, nc0, nb, nc, nbyte);
       break;
     case _DT_SMALL_:
-      re_alloc_2D((void***)&stack->vsmall, nb0, nc0, nb, nc, nbyte);
+      re_alloc_2D((void***)&brick->vsmall, nb0, nc0, nb, nc, nbyte);
       break;
     case _DT_FLOAT_:
-      re_alloc_2D((void***)&stack->vfloat, nb0, nc0, nb, nc, nbyte);
+      re_alloc_2D((void***)&brick->vfloat, nb0, nc0, nb, nc, nbyte);
       break;
     case _DT_INT_:
-      re_alloc_2D((void***)&stack->vint, nb0, nc0, nb, nc, nbyte);
+      re_alloc_2D((void***)&brick->vint, nb0, nc0, nb, nc, nbyte);
       break;
     case _DT_USHORT_:
-      re_alloc_2D((void***)&stack->vushort, nb0, nc0, nb, nc, nbyte);
+      re_alloc_2D((void***)&brick->vushort, nb0, nc0, nb, nc, nbyte);
       break;
     default:
-      printf("unknown datatype for allocating stack. ");
+      printf("unknown datatype for allocating brick. ");
       return FAILURE;
   }
 
@@ -305,67 +305,67 @@ int datatype = get_stack_datatype(stack);
 }
 
 
-/** This function copies a bandwise in a stack
---- stack:  target stack (modified)
+/** This function copies a bandwise in a brick
+--- brick:  target brick (modified)
 --- b:      target band
---- from:   source stack
+--- from:   source brick
 --- b_from: source band
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void copy_stack_band(stack_t *stack, int b, stack_t *from, int b_from){
+void copy_brick_band(brick_t *brick, int b, brick_t *from, int b_from){
   
   
-  set_stack_save(stack, b, from->save[b_from]);
-  set_stack_nodata(stack, b, from->nodata[b_from]);
-  set_stack_scale(stack, b, from->scale[b_from]);
-  set_stack_wavelength(stack, b, from->wavelength[b_from]);
-  set_stack_unit(stack, b, from->unit[b_from]);
-  set_stack_domain(stack, b, from->domain[b_from]);
-  set_stack_bandname(stack, b, from->bandname[b_from]);
-  set_stack_sensor(stack, b, from->sensor[b_from]);
-  set_stack_date(stack, b, from->date[b_from]);
+  set_brick_save(brick, b, from->save[b_from]);
+  set_brick_nodata(brick, b, from->nodata[b_from]);
+  set_brick_scale(brick, b, from->scale[b_from]);
+  set_brick_wavelength(brick, b, from->wavelength[b_from]);
+  set_brick_unit(brick, b, from->unit[b_from]);
+  set_brick_domain(brick, b, from->domain[b_from]);
+  set_brick_bandname(brick, b, from->bandname[b_from]);
+  set_brick_sensor(brick, b, from->sensor[b_from]);
+  set_brick_date(brick, b, from->date[b_from]);
 
   return;
 }
 
 
-/** This function frees the bandwise information in a stack
---- stack:  stack
+/** This function frees the bandwise information in a brick
+--- brick:  brick
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void free_stack_bands(stack_t *stack){
+void free_brick_bands(brick_t *brick){
 int nb;
 
-  if (stack == NULL) return;
+  if (brick == NULL) return;
   
-  nb = get_stack_nbands(stack);
+  nb = get_brick_nbands(brick);
 
-  if (stack->vshort  != NULL) free_2D((void**)stack->vshort,  nb); 
-  if (stack->vsmall  != NULL) free_2D((void**)stack->vsmall,  nb); 
-  if (stack->vfloat  != NULL) free_2D((void**)stack->vfloat,  nb); 
-  if (stack->vint    != NULL) free_2D((void**)stack->vint,    nb); 
-  if (stack->vushort != NULL) free_2D((void**)stack->vushort, nb); 
+  if (brick->vshort  != NULL) free_2D((void**)brick->vshort,  nb); 
+  if (brick->vsmall  != NULL) free_2D((void**)brick->vsmall,  nb); 
+  if (brick->vfloat  != NULL) free_2D((void**)brick->vfloat,  nb); 
+  if (brick->vint    != NULL) free_2D((void**)brick->vint,    nb); 
+  if (brick->vushort != NULL) free_2D((void**)brick->vushort, nb); 
   
-  stack->vshort  = NULL;
-  stack->vsmall  = NULL;  
-  stack->vfloat  = NULL;  
-  stack->vint    = NULL;  
-  stack->vushort = NULL;  
+  brick->vshort  = NULL;
+  brick->vsmall  = NULL;  
+  brick->vfloat  = NULL;  
+  brick->vint    = NULL;  
+  brick->vushort = NULL;  
 
   return;
 }
 
 
-/** This function crops a stack. The cropping radius is given in projection
+/** This function crops a brick. The cropping radius is given in projection
 +++ units, and the corresponding number of pixels is removed from each side
-+++ of the image. The input stack is freed within. The cropped stack is 
++++ of the image. The input brick is freed within. The cropped brick is 
 +++ returned.
---- from:     source stack (freed)
+--- from:     source brick (freed)
 --- radius:   cropping radius in projection units
-+++ Return:   cropped stack (must be freed with free_stack)
++++ Return:   cropped brick (must be freed with free_brick)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *crop_stack(stack_t *from, double radius){
-stack_t *stack = NULL; 
+brick_t *crop_brick(brick_t *from, double radius){
+brick_t *brick = NULL; 
 int b, nb;
 int pix;
 double res;
@@ -379,22 +379,22 @@ int datatype;
   
   if (radius <= 0){
     printf("negative radius. cannot crop.");
-    free_stack(from);
+    free_brick(from);
     return NULL;
   }
 
-  nb = get_stack_nbands(from);
-  res = get_stack_res(from);
-  datatype = get_stack_datatype(from);
+  nb = get_brick_nbands(from);
+  res = get_brick_res(from);
+  datatype = get_brick_datatype(from);
   
-  stack = copy_stack(from, nb, _DT_NONE_);
+  brick = copy_brick(from, nb, _DT_NONE_);
 
   if (from->chunk < 0){
-    nx = get_stack_ncols(from);
-    ny = get_stack_nrows(from);
+    nx = get_brick_ncols(from);
+    ny = get_brick_nrows(from);
   } else {
-    nx = get_stack_chunkncols(from);
-    ny = get_stack_chunknrows(from);
+    nx = get_brick_chunkncols(from);
+    ny = get_brick_chunknrows(from);
   }
 
   pix = (int)(radius/res);
@@ -403,20 +403,20 @@ int datatype;
   nc_ = nx_*ny_;
 
   if (from->chunk < 0){
-    set_stack_ncols(stack, nx_);
-    set_stack_nrows(stack, ny_);
+    set_brick_ncols(brick, nx_);
+    set_brick_nrows(brick, ny_);
   } else {
-    set_stack_chunkncols(stack, nx_);
-    set_stack_chunknrows(stack, ny_);
+    set_brick_chunkncols(brick, nx_);
+    set_brick_chunknrows(brick, ny_);
   }
-  allocate_stack_bands(stack, nb, nc_, datatype);
+  allocate_brick_bands(brick, nb, nc_, datatype);
   
   #ifdef FORCE_DEBUG
   int nc;
   if (from->chunk < 0){
-    nc = get_stack_ncells(from);
+    nc = get_brick_ncells(from);
   } else {
-    nc = get_stack_chunkncells(from);
+    nc = get_brick_chunkncells(from);
   }
   printf("cropping %d -> %d cols\n", nx, nx_);
   printf("cropping %d -> %d rows\n", ny, ny_);
@@ -425,14 +425,14 @@ int datatype;
 
   switch (datatype){
     case _DT_NONE_:
-      free_stack(from);
-      return stack;
+      free_brick(from);
+      return brick;
     case _DT_SHORT_:
       for (i=0; i<ny_; i++){
       for (j=0; j<nx_; j++){
         p_ = i*nx_+j;
         p  = (i+pix)*nx + (j+pix);
-        for (b=0; b<nb; b++) stack->vshort[b][p_] = from->vshort[b][p];
+        for (b=0; b<nb; b++) brick->vshort[b][p_] = from->vshort[b][p];
       }
       }
       break;
@@ -441,7 +441,7 @@ int datatype;
       for (j=0; j<nx_; j++){
         p  = i*nx_+j;
         p_ = (i+pix)*nx + (j+pix);
-        for (b=0; b<nb; b++) stack->vsmall[b][p_] = from->vsmall[b][p];
+        for (b=0; b<nb; b++) brick->vsmall[b][p_] = from->vsmall[b][p];
       }
       }
       break;
@@ -450,7 +450,7 @@ int datatype;
       for (j=0; j<nx_; j++){
         p  = i*nx_+j;
         p_ = (i+pix)*nx + (j+pix);
-        for (b=0; b<nb; b++) stack->vfloat[b][p_] = from->vfloat[b][p];
+        for (b=0; b<nb; b++) brick->vfloat[b][p_] = from->vfloat[b][p];
       }
       }
       break;
@@ -459,7 +459,7 @@ int datatype;
       for (j=0; j<nx_; j++){
         p  = i*nx_+j;
         p_ = (i+pix)*nx + (j+pix);
-        for (b=0; b<nb; b++) stack->vint[b][p_] = from->vint[b][p];
+        for (b=0; b<nb; b++) brick->vint[b][p_] = from->vint[b][p];
       }
       }
       break;
@@ -468,137 +468,137 @@ int datatype;
       for (j=0; j<nx_; j++){
         p  = i*nx_+j;
         p_ = (i+pix)*nx + (j+pix);
-        for (b=0; b<nb; b++) stack->vushort[b][p_] = from->vushort[b][p];
+        for (b=0; b<nb; b++) brick->vushort[b][p_] = from->vushort[b][p];
       }
       }
       break;
     default:
       printf("unknown datatype. ");
-      free_stack(stack);
-      free_stack(from);
+      free_brick(brick);
+      free_brick(from);
       return NULL;
   }
 
-  free_stack(from);
+  free_brick(from);
 
-  return stack;
+  return brick;
 }
 
 
-/** This function initializes all values in a stack
---- stack:  stack
+/** This function initializes all values in a brick
+--- brick:  brick
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_stack(stack_t *stack){
+void init_brick(brick_t *brick){
 int i;
 
 
-  copy_string(stack->name,      NPOW_10, "NA");
-  copy_string(stack->product,   NPOW_03, "NA");
-  copy_string(stack->dname,     NPOW_10, "NA");
-  copy_string(stack->fname,     NPOW_10, "NA");
-  copy_string(stack->extension, NPOW_02, "NA");
+  copy_string(brick->name,      NPOW_10, "NA");
+  copy_string(brick->product,   NPOW_03, "NA");
+  copy_string(brick->dname,     NPOW_10, "NA");
+  copy_string(brick->fname,     NPOW_10, "NA");
+  copy_string(brick->extension, NPOW_02, "NA");
 
-  stack->sid = -1;
-  stack->format = 0;
-  stack->open = OPEN_FALSE;
-  stack->explode = 0;
-  stack->datatype = _DT_NONE_;
-  stack->byte = 0;
+  brick->sid = -1;
+  brick->format = 0;
+  brick->open = OPEN_FALSE;
+  brick->explode = 0;
+  brick->datatype = _DT_NONE_;
+  brick->byte = 0;
 
-  stack->nb =  0;
-  stack->nx =  0;
-  stack->ny =  0;
-  stack->nc =  0;
-  stack->cx =  0;
-  stack->cy =  0;
-  stack->cc =  0;
-  stack->res = 0;
-  for (i=0; i<6; i++) stack->geotran[i] = 0;
-  stack->width  = 0;
-  stack->height = 0;
-  stack->cwidth  = 0;
-  stack->cheight = 0;
-  stack->chunk = -1;
-  stack->nchunk = 0;
-  stack->tx = 0;
-  stack->ty = 0;
+  brick->nb =  0;
+  brick->nx =  0;
+  brick->ny =  0;
+  brick->nc =  0;
+  brick->cx =  0;
+  brick->cy =  0;
+  brick->cc =  0;
+  brick->res = 0;
+  for (i=0; i<6; i++) brick->geotran[i] = 0;
+  brick->width  = 0;
+  brick->height = 0;
+  brick->cwidth  = 0;
+  brick->cheight = 0;
+  brick->chunk = -1;
+  brick->nchunk = 0;
+  brick->tx = 0;
+  brick->ty = 0;
 
-  copy_string(stack->proj,NPOW_10, "NA");
-  copy_string(stack->par, NPOW_14, "NA");
+  copy_string(brick->proj,NPOW_10, "NA");
+  copy_string(brick->par, NPOW_14, "NA");
 
-  stack->save   = NULL;
-  stack->nodata = NULL;
-  stack->scale  = NULL;
+  brick->save   = NULL;
+  brick->nodata = NULL;
+  brick->scale  = NULL;
 
-  stack->wavelength = NULL;
-  stack->unit = NULL;
-  stack->domain = NULL;
-  stack->bandname   = NULL;
-  stack->sensor     = NULL;
-  stack->date       = NULL;
+  brick->wavelength = NULL;
+  brick->unit = NULL;
+  brick->domain = NULL;
+  brick->bandname   = NULL;
+  brick->sensor     = NULL;
+  brick->date       = NULL;
 
-  stack->vshort  = NULL;
-  stack->vfloat  = NULL;
-  stack->vint    = NULL;
-  stack->vushort = NULL;
-  stack->vsmall   = NULL;
+  brick->vshort  = NULL;
+  brick->vfloat  = NULL;
+  brick->vint    = NULL;
+  brick->vushort = NULL;
+  brick->vsmall   = NULL;
 
   return;  
 }
 
 
-/** This function initializes all bandwise information in a stack
---- stack:  stack
+/** This function initializes all bandwise information in a brick
+--- brick:  brick
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_stack_bands(stack_t *stack){
+void init_brick_bands(brick_t *brick){
 int b;
 
-  for (b=0; b<stack->nb; b++){
-    stack->save[b] = false;
-    stack->nodata[b] = 0;
-    stack->scale[b] = 0;
-    stack->wavelength[b] = 0;
-    copy_string(stack->unit[b],     NPOW_04, "NA");
-    copy_string(stack->domain[b],   NPOW_10, "NA");
-    copy_string(stack->bandname[b], NPOW_10, "NA");
-    copy_string(stack->sensor[b],   NPOW_04, "NA");
-    init_date(&stack->date[b]);
+  for (b=0; b<brick->nb; b++){
+    brick->save[b] = false;
+    brick->nodata[b] = 0;
+    brick->scale[b] = 0;
+    brick->wavelength[b] = 0;
+    copy_string(brick->unit[b],     NPOW_04, "NA");
+    copy_string(brick->domain[b],   NPOW_10, "NA");
+    copy_string(brick->bandname[b], NPOW_10, "NA");
+    copy_string(brick->sensor[b],   NPOW_04, "NA");
+    init_date(&brick->date[b]);
   }
 
   return;
 }
 
 
-/** This function prints a stack
---- stack:  stack
+/** This function prints a brick
+--- brick:  brick
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_stack_info(stack_t *stack){
+void print_brick_info(brick_t *brick){
 int b;
 
 
-  printf("\nstack info for %s - %s - SID %d\n", stack->name, stack->product, stack->sid);
+  printf("\nbrick info for %s - %s - SID %d\n", brick->name, brick->product, brick->sid);
   printf("open: %d, format %d, explode %d\n", 
-    stack->open, stack->format, stack->explode);
+    brick->open, brick->format, brick->explode);
   printf("datatype %d with %d bytes\n", 
-    stack->datatype, stack->byte);
-  printf("filename: %s/%s.%s\n", stack->dname, stack->fname, stack->extension);
+    brick->datatype, brick->byte);
+  printf("filename: %s/%s.%s\n", brick->dname, brick->fname, brick->extension);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
-    stack->nx, stack->ny, stack->nc, 
-    stack->res, stack->nb);
+    brick->nx, brick->ny, brick->nc, 
+    brick->res, brick->nb);
   printf("width: %.1f, height: %.1f\n", 
-    stack->width, stack->height);
+    brick->width, brick->height);
   printf("chunking: nx: %d, ny: %d, nc: %d, width: %.1f, height: %.1f, #: %d\n", 
-    stack->cx, stack->cy, stack->cc, stack->cwidth, stack->cheight, stack->nchunk);
-  printf("active chunk: %d, tile X%04d_Y%04d\n", stack->chunk, stack->tx, stack->ty);
+    brick->cx, brick->cy, brick->cc, brick->cwidth, brick->cheight, brick->nchunk);
+  printf("active chunk: %d, tile X%04d_Y%04d\n", brick->chunk, brick->tx, brick->ty);
   printf("ulx: %.3f, uly: %.3f\n", 
-    stack->geotran[0], stack->geotran[3]);
-  printf("proj: %s\n", stack->proj);
-  printf("par: %s\n", stack->par);
+    brick->geotran[0], brick->geotran[3]);
+  printf("proj: %s\n", brick->proj);
+  printf("par: %s\n", brick->par);
 
-  for (b=0; b<stack->nb; b++) print_stack_band_info(stack, b);
+  for (b=0; b<brick->nb; b++) print_brick_band_info(brick, b);
 
   printf("\n");
 
@@ -606,30 +606,30 @@ int b;
 }
 
 
-/** This function prints bandwise information in a stack
---- stack:  stack
+/** This function prints bandwise information in a brick
+--- brick:  brick
 --- b:      band
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_stack_band_info(stack_t *stack, int b){
+void print_brick_band_info(brick_t *brick, int b){
   
   printf("++band # %d - save %d, nodata: %d, scale: %f\n", 
-    b, stack->save[b], stack->nodata[b], stack->scale[b]);
+    b, brick->save[b], brick->nodata[b], brick->scale[b]);
   printf("wvl: %f, domain: %s, band name: %s, sensor ID: %s\n", 
-    stack->wavelength[b], stack->domain[b], stack->bandname[b], stack->sensor[b]);
-  print_date(&stack->date[b]);
+    brick->wavelength[b], brick->domain[b], brick->bandname[b], brick->sensor[b]);
+  print_date(&brick->date[b]);
     
   return;
 }
 
 
-/** This function outputs a stack
---- stack:  stack
+/** This function outputs a brick
+--- brick:  brick
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int write_stack(stack_t *stack){
+int write_brick(brick_t *brick){
 int f, b, b_, p;
-int b_stack, b_file, nbands, nfiles;
+int b_brick, b_file, nbands, nfiles;
 int ***bands = NULL;
 char *lock = NULL;
 double timeout;
@@ -664,10 +664,10 @@ int n_sys_meta = 0;
 int i = 0;
 
 
-  if (stack == NULL || stack->open == OPEN_FALSE) return SUCCESS;
+  if (brick == NULL || brick->open == OPEN_FALSE) return SUCCESS;
 
   #ifdef FORCE_DEBUG
-  print_stack_info(stack);
+  print_brick_info(brick);
   #endif
   
 
@@ -682,19 +682,19 @@ int i = 0;
   copy_string(fp_meta[i++], NPOW_14, _VERSION_);
   
   copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
-  copy_string(fp_meta[i++], NPOW_14, stack->name);
+  copy_string(fp_meta[i++], NPOW_14, brick->name);
   
   copy_string(fp_meta[i++], NPOW_14, "FORCE_product");
-  copy_string(fp_meta[i++], NPOW_14, stack->product);
+  copy_string(fp_meta[i++], NPOW_14, brick->product);
   
   copy_string(fp_meta[i++], NPOW_14, "FORCE_param");
-  copy_string(fp_meta[i++], NPOW_14, stack->par);
+  copy_string(fp_meta[i++], NPOW_14, brick->par);
 
 
   // how many bands to output?
-  for (b=0, b_=0; b<stack->nb; b++) b_ += stack->save[b];
+  for (b=0, b_=0; b<brick->nb; b++) b_ += brick->save[b];
 
-  if (stack->explode){
+  if (brick->explode){
     nfiles = b_;
     nbands = 1;
   } else {
@@ -702,21 +702,21 @@ int i = 0;
     nbands = b_;
   }
 
-  enum { _STACK_, _FILE_};
+  enum { _brick_, _FILE_};
   alloc_3D((void****)&bands, NPOW_01, nfiles, nbands, sizeof(int));
-  // dim 1: 2 slots - stack and file
+  // dim 1: 2 slots - brick and file
   // dim 2: output files
   // dim 3: band numbers
 
-  for (b=0, b_=0; b<stack->nb; b++){
+  for (b=0, b_=0; b<brick->nb; b++){
     
-    if (!stack->save[b]) continue;
+    if (!brick->save[b]) continue;
     
-    if (stack->explode){
-      bands[_STACK_][b_][0] = b;
+    if (brick->explode){
+      bands[_brick_][b_][0] = b;
       bands[_FILE_][b_][0]  = 1;
     } else {
-      bands[_STACK_][0][b_] = b;
+      bands[_brick_][0][b_] = b;
       bands[_FILE_][0][b_]  = b_+1;
     }
 
@@ -729,7 +729,7 @@ int i = 0;
   
 
   // choose between formats
-  switch (stack->format){
+  switch (brick->format){
     case _FMT_ENVI_:
       driver = GDALGetDriverByName("ENVI");
       break;
@@ -739,14 +739,14 @@ int i = 0;
       options = CSLSetNameValue(options, "PREDICTOR", "2");
       options = CSLSetNameValue(options, "INTERLEAVE", "BAND");
       options = CSLSetNameValue(options, "BIGTIFF", "YES");
-      if (stack->cx > 0){
-        nchar = snprintf(xchunk, NPOW_08, "%d", stack->cx);
+      if (brick->cx > 0){
+        nchar = snprintf(xchunk, NPOW_08, "%d", brick->cx);
         if (nchar < 0 || nchar >= NPOW_08){ 
           printf("Buffer Overflow in assembling BLOCKXSIZE\n"); return FAILURE;}
         options = CSLSetNameValue(options, "BLOCKXSIZE", xchunk);
       }
-      if (stack->cy > 0){
-        nchar = snprintf(ychunk, NPOW_08, "%d", stack->cy);
+      if (brick->cy > 0){
+        nchar = snprintf(ychunk, NPOW_08, "%d", brick->cy);
         if (nchar < 0 || nchar >= NPOW_08){ 
           printf("Buffer Overflow in assembling BLOCKYSIZE\n"); return FAILURE;}
         options = CSLSetNameValue(options, "BLOCKYSIZE", ychunk);
@@ -761,7 +761,7 @@ int i = 0;
       return FAILURE;
   }
 
-  switch (stack->datatype){
+  switch (brick->datatype){
     case _DT_SHORT_:
       file_datatype = GDT_Int16;
       break;
@@ -778,45 +778,45 @@ int i = 0;
       file_datatype = GDT_UInt16;
       break;
     default:
-      printf("unknown datatype for writing stack. ");
+      printf("unknown datatype for writing brick. ");
       return FAILURE;
   }
 
 
   // output path
-  if ((lock = (char*)CPLLockFile(stack->dname, 60)) == NULL){
-    printf("Unable to lock directory %s (timeout: %ds). ", stack->dname, 60);
+  if ((lock = (char*)CPLLockFile(brick->dname, 60)) == NULL){
+    printf("Unable to lock directory %s (timeout: %ds). ", brick->dname, 60);
     return FAILURE;}
-  createdir(stack->dname);
+  createdir(brick->dname);
   CPLUnlockFile(lock);
   lock = NULL;
 
   
   for (f=0; f<nfiles; f++){
     
-    if (stack->explode){
-      nchar = snprintf(bname, NPOW_10, "_%s", stack->bandname[bands[_STACK_][f][0]]);
+    if (brick->explode){
+      nchar = snprintf(bname, NPOW_10, "_%s", brick->bandname[bands[_brick_][f][0]]);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
     } else bname[0] = '\0';
   
-    nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", stack->dname, 
-      stack->fname, bname, stack->extension);
+    nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", brick->dname, 
+      brick->fname, bname, brick->extension);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
-    timeout = lock_timeout(get_stack_size(stack));
+    timeout = lock_timeout(get_brick_size(brick));
 
     if ((lock = (char*)CPLLockFile(fname, timeout)) == NULL){
-      printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, stack->nx, stack->ny);
+      printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, brick->nx, brick->ny);
       return FAILURE;}
 
 
     // mosaicking into existing file
-    // read and rewrite stack (safer when using compression)
-    if (stack->open != OPEN_CREATE && stack->open != OPEN_BLOCK && fileexist(fname)){
+    // read and rewrite brick (safer when using compression)
+    if (brick->open != OPEN_CREATE && brick->open != OPEN_BLOCK && fileexist(fname)){
 
-      // read stack
+      // read brick
       #ifdef FORCE_DEBUG
       printf("reading existing file.\n");
       #endif
@@ -828,40 +828,40 @@ int i = 0;
         printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
           nbands, GDALGetRasterCount(fo)); 
         return FAILURE;}
-      if (GDALGetRasterXSize(fo) != stack->nx){
+      if (GDALGetRasterXSize(fo) != brick->nx){
         printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          stack->nx, GDALGetRasterXSize(fo)); 
+          brick->nx, GDALGetRasterXSize(fo)); 
         return FAILURE;}
-      if (GDALGetRasterYSize(fo) != stack->ny){
+      if (GDALGetRasterYSize(fo) != brick->ny){
         printf("Number of rows %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          stack->ny, GDALGetRasterYSize(fo)); 
+          brick->ny, GDALGetRasterYSize(fo)); 
         return FAILURE;}
 
-      alloc((void**)&buf, stack->nc, sizeof(float));
+      alloc((void**)&buf, brick->nc, sizeof(float));
 
       for (b=0; b<nbands; b++){
 
-        b_stack = bands[_STACK_][f][b];
+        b_brick = bands[_brick_][f][b];
         b_file  = bands[_FILE_][f][b];
         
         band = GDALGetRasterBand(fo, b_file);
 
-        if (GDALRasterIO(band, GF_Read, 0, 0, stack->nx, stack->ny, buf, 
-          stack->nx, stack->ny, GDT_Float32, 0, 0) == CE_Failure){
+        if (GDALRasterIO(band, GF_Read, 0, 0, brick->nx, brick->ny, buf, 
+          brick->nx, brick->ny, GDT_Float32, 0, 0) == CE_Failure){
           printf("Unable to read %s. ", fname); return FAILURE;} 
 
 
-        for (p=0; p<stack->nc; p++){
+        for (p=0; p<brick->nc; p++){
 
-          now = get_stack(stack, b_stack, p);
+          now = get_brick(brick, b_brick, p);
           old = buf[p];
 
           // if both old and now are valid: keep now or merge now and old
-          if (now != stack->nodata[b_stack] && old != stack->nodata[b_stack]){
-            if (stack->open == OPEN_MERGE) set_stack(stack, b_stack, p, (now+old)/2.0);
+          if (now != brick->nodata[b_brick] && old != brick->nodata[b_brick]){
+            if (brick->open == OPEN_MERGE) set_brick(brick, b_brick, p, (now+old)/2.0);
           // if only old is valid, take old value
-          } else if (now == stack->nodata[b_stack] && old != stack->nodata[b_stack]){
-            set_stack(stack, b_stack, p, old);
+          } else if (now == brick->nodata[b_brick] && old != brick->nodata[b_brick]){
+            set_brick(brick, b_brick, p, old);
           }
           // if only now is valid, nothing to do
 
@@ -877,26 +877,26 @@ int i = 0;
 
 
     // open for block mode or write from scratch
-    if (stack->open == OPEN_BLOCK && fileexist(fname) && stack->chunk > 0){
+    if (brick->open == OPEN_BLOCK && fileexist(fname) && brick->chunk > 0){
       if ((fp = GDALOpen(fname, GA_Update)) == NULL){
         printf("Unable to open %s. ", fname); return FAILURE;}
     } else {
-      if ((fp = GDALCreate(driver, fname, stack->nx, stack->ny, nbands, file_datatype, options)) == NULL){
+      if ((fp = GDALCreate(driver, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
         printf("Error creating file %s. ", fname); return FAILURE;}
     }
       
-    if (stack->open == OPEN_BLOCK){
-      if (stack->chunk < 0){
+    if (brick->open == OPEN_BLOCK){
+      if (brick->chunk < 0){
         printf("attempting to write invalid chunk\n");
         return FAILURE;
       }
-      nx_write     = stack->cx;
-      ny_write     = stack->cy;
+      nx_write     = brick->cx;
+      ny_write     = brick->cy;
       xoff_write   = 0;
-      yoff_write   = stack->chunk*stack->cy;
+      yoff_write   = brick->chunk*brick->cy;
     } else {
-      nx_write     = stack->nx;
-      ny_write     = stack->ny;
+      nx_write     = brick->nx;
+      ny_write     = brick->ny;
       xoff_write   = 0;
       yoff_write   = 0;
     }
@@ -904,77 +904,77 @@ int i = 0;
 
     for (b=0; b<nbands; b++){
 
-      b_stack = bands[_STACK_][f][b];
+      b_brick = bands[_brick_][f][b];
       b_file  = bands[_FILE_][f][b];
 
       i = 0;
 
 
       copy_string(band_meta[i++], NPOW_14, "Domain");
-      copy_string(band_meta[i++], NPOW_14, stack->domain[b_stack]);
+      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
 
       copy_string(band_meta[i++], NPOW_14, "Wavelength");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->wavelength[b_stack]); i++;
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
       if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
       copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
-      copy_string(band_meta[i++], NPOW_14, stack->unit[b_stack]);
+      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
 
       copy_string(band_meta[i++], NPOW_14, "Scale");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", stack->scale[b_stack]); i++;
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
       if (nchar < 0 || nchar >= NPOW_14){ 
         printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
 
       copy_string(band_meta[i++], NPOW_14, "Sensor");
-      copy_string(band_meta[i++], NPOW_14, stack->sensor[b_stack]);
+      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
 
-      get_stack_longdate(stack, b_stack, ldate, NPOW_05-1);
+      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
       copy_string(band_meta[i++], NPOW_14, "Date");
       copy_string(band_meta[i++], NPOW_14, ldate);
 
 
       band = GDALGetRasterBand(fp, b_file);
 
-      switch (stack->datatype){
+      switch (brick->datatype){
         case _DT_SHORT_:
           if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, stack->vshort[b_stack], 
+            nx_write, ny_write, brick->vshort[b_brick], 
             nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
             printf("Unable to write %s. ", fname); return FAILURE;}
           break;
         case _DT_SMALL_:
           if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, stack->vsmall[b_stack], 
+            nx_write, ny_write, brick->vsmall[b_brick], 
             nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
             printf("Unable to write %s. ", fname); return FAILURE;} 
           break;
         case _DT_FLOAT_:
           if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, stack->vfloat[b_stack], 
+            nx_write, ny_write, brick->vfloat[b_brick], 
             nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
             printf("Unable to write %s. ", fname); return FAILURE;} 
           break;
         case _DT_INT_:
           if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, stack->vint[b_stack], 
+            nx_write, ny_write, brick->vint[b_brick], 
             nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
             printf("Unable to write %s. ", fname); return FAILURE;} 
           break;
         case _DT_USHORT_:
           if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, stack->vushort[b_stack], 
+            nx_write, ny_write, brick->vushort[b_brick], 
             nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
             printf("Unable to write %s. ", fname); return FAILURE;} 
           break;
 
         default:
-          printf("unknown datatype for writing stack. ");
+          printf("unknown datatype for writing brick. ");
           return FAILURE;
       }
 
-      GDALSetDescription(band, stack->bandname[b_stack]);
-      GDALSetRasterNoDataValue(band, stack->nodata[b_stack]);
+      GDALSetDescription(band, brick->bandname[b_brick]);
+      GDALSetRasterNoDataValue(band, brick->nodata[b_brick]);
       for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
 
     }
@@ -982,20 +982,20 @@ int i = 0;
     // write essential geo-metadata
     #pragma omp critical
     {
-      GDALSetGeoTransform(fp, stack->geotran);
-      GDALSetProjection(fp,   stack->proj);
+      GDALSetGeoTransform(fp, brick->geotran);
+      GDALSetProjection(fp,   brick->proj);
     }
 
     // in case of ENVI, update description
     //if (format == _FMT_ENVI_) 
-    //GDALSetDescription(fp, stack->name);
+    //GDALSetDescription(fp, brick->name);
 
 
     for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
     for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp, fp_meta[i],  fp_meta[i+1],  "FORCE");
     
     
-    if (stack->format == _FMT_JPEG_){
+    if (brick->format == _FMT_JPEG_){
       if ((fp_cpy = GDALCreateCopy(driver_cpy, fname, fp, FALSE, NULL, NULL, NULL)) == NULL){
           printf("Error creating file %s. ", fname); return FAILURE;}
       GDALClose(fp_cpy);
@@ -1019,7 +1019,7 @@ int i = 0;
 }
 
 
-/** This function reprojects a stack into any other projection. The extent
+/** This function reprojects a brick into any other projection. The extent
 +++ of the warped image is unknown, thus it needs to be estimated first.
 +++ The reprojection might be performed in chunks if the number of pixels
 +++ is too large to do it in one step.
@@ -1027,11 +1027,11 @@ int i = 0;
              with the tiling scheme
 --- rsm:     resampling method
 --- threads: number of threads to perform warping
---- from:    source stack (modified)
+--- from:    source brick (modified)
 --- cube:    datacube definition (holds all projection parameters)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int warp_from_stack_to_unknown_stack(bool tile, int rsm, int threads, stack_t *src, cube_t *cube){
+int warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube){
 int i, j, p, k, b, b_, chunk_nb, nb;
 GDALDriverH driver;
 GDALDatasetH src_dataset;
@@ -1071,12 +1071,12 @@ char **papszWarpOptions = NULL;
 
 
 
-  nb = get_stack_nbands(src);
-  src_nx = get_stack_ncols(src);
-  src_ny = get_stack_nrows(src);
-  src_nc = get_stack_ncells(src);
-  get_stack_geotran(src, src_geotran, 6);
-  get_stack_proj(src, src_proj, NPOW_10);
+  nb = get_brick_nbands(src);
+  src_nx = get_brick_ncols(src);
+  src_ny = get_brick_nrows(src);
+  src_nc = get_brick_ncells(src);
+  get_brick_geotran(src, src_geotran, 6);
+  get_brick_proj(src, src_proj, NPOW_10);
 
   // create source image
   if ((src_dataset = GDALCreate(driver, "mem", src_nx, src_ny, nb, dt, NULL)) == NULL){
@@ -1096,7 +1096,7 @@ char **papszWarpOptions = NULL;
   }
 
   #ifdef FORCE_DEBUG
-  printf("WKT of stack: %s\n", src_proj);
+  printf("WKT of brick: %s\n", src_proj);
   #endif
 
 
@@ -1187,7 +1187,7 @@ char **papszWarpOptions = NULL;
     // buffer to hold warped image
     alloc_2DC((void***)&buf_, chunk_nb, dst_nc, sizeof(short));
     for (b_=0; b_<chunk_nb; b_++){
-      if ((nodata = get_stack_nodata(src, b+b_)) != 0){
+      if ((nodata = get_brick_nodata(src, b+b_)) != 0){
         #pragma omp parallel shared(b_, dst_nc, buf_, nodata) default(none) 
         {
           #pragma omp for schedule(static)
@@ -1215,12 +1215,12 @@ char **papszWarpOptions = NULL;
     wopt->eWorkingDataType = dt;
 
     wopt->padfSrcNoDataReal = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfSrcNoDataReal[b_] = get_stack_nodata(src, b_+b);
+    for (b_=0; b_<chunk_nb; b_++) wopt->padfSrcNoDataReal[b_] = get_brick_nodata(src, b_+b);
     wopt->padfSrcNoDataImag = (double*)CPLMalloc(sizeof(double)*chunk_nb);
     for (b_=0; b_<chunk_nb; b_++) wopt->padfSrcNoDataImag[b_] = 0;
 
     wopt->padfDstNoDataReal = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataReal[b_] = get_stack_nodata(src, b_+b);
+    for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataReal[b_] = get_brick_nodata(src, b_+b);
     wopt->padfDstNoDataImag = (double*)CPLMalloc(sizeof(double)*chunk_nb);
     for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataImag[b_] = 0;
 
@@ -1242,7 +1242,7 @@ char **papszWarpOptions = NULL;
       k++;}
     
     #ifdef FORCE_DEBUG
-    printf("\nImage stack is warped in %d chunks.\n", k+1);
+    printf("\nImage brick is warped in %d chunks.\n", k+1);
     #endif
 
     /** warp the image, use chunks if necessary
@@ -1280,18 +1280,18 @@ char **papszWarpOptions = NULL;
 
 
   // update geo metadata
-  set_stack_geotran(src, dst_geotran);
-  set_stack_ncols(src, dst_nx);
-  set_stack_nrows(src, dst_ny);
-  set_stack_proj(src, cube->proj);
+  set_brick_geotran(src, dst_geotran);
+  set_brick_ncols(src, dst_nx);
+  set_brick_nrows(src, dst_ny);
+  set_brick_proj(src, cube->proj);
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(src);
+  print_brick_info(src);
   #endif
 
   #ifdef FORCE_CLOCK
-  proctime_print("warping stack to stack", TIME);
+  proctime_print("warping brick to brick", TIME);
   #endif
 
   return SUCCESS;
@@ -1299,20 +1299,20 @@ char **papszWarpOptions = NULL;
 
 
 /** This function reprojects an image from disc into any other projection. 
-+++ The extent of the warped image is known, and a target stack needs to 
++++ The extent of the warped image is known, and a target brick needs to 
 +++ be given, which defines extent, projection etc. 
 +++ The reprojection might be performed in chunks if the number of pixels
 +++ is too large to do it in one step.
 --- rsm:         resampling method
 --- threads:     number of threads to perform warping
 --- fname:       filename
---- dst:         destination stack (modified)
+--- dst:         destination brick (modified)
 --- src_b:       which band to warp?    (band in file)
---- dst_b:       which band to warp to? (band in destination stack)
+--- dst_b:       which band to warp to? (band in destination brick)
 --- src_nodata:  nodata value of band in file
 +++ Return:      SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int warp_from_disc_to_known_stack(int rsm, int threads, const char *fname, stack_t *dst, int src_b, int dst_b, int src_nodata){
+int warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata){
 GDALDatasetH src_dataset;
 GDALDatasetH dst_dataset;
 //GDALRasterBandH src_band;
@@ -1346,7 +1346,7 @@ char **papszWarpOptions = NULL;
   #endif
 
 #ifdef FORCE_DEBUG
-printf("warp_from_disc_to_known_stack should handle multiband src and dst images\n");
+printf("warp_from_disc_to_known_brick should handle multiband src and dst images\n");
 #endif
   
   // register drivers and fetch in-memory driver
@@ -1382,15 +1382,15 @@ printf("warp_from_disc_to_known_stack should handle multiband src and dst images
   /** "create" the destination dataset
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
 
-  get_stack_geotran(dst, dst_geotran, 6);
-  get_stack_proj(dst, dst_proj, NPOW_10);
-  dst_nodata = get_stack_nodata(dst, 0);
-  dst_nb = get_stack_nbands(dst);
-  dst_nx = get_stack_ncols(dst);
-  dst_ny = get_stack_nrows(dst);
+  get_brick_geotran(dst, dst_geotran, 6);
+  get_brick_proj(dst, dst_proj, NPOW_10);
+  dst_nodata = get_brick_nodata(dst, 0);
+  dst_nb = get_brick_nbands(dst);
+  dst_nx = get_brick_ncols(dst);
+  dst_ny = get_brick_nrows(dst);
 
   if (dst_b >= dst_nb){
-    printf("Requested band %d is out of bounds %d (stack)! ", dst_b, dst_nb); return FAILURE;}
+    printf("Requested band %d is out of bounds %d (brick)! ", dst_b, dst_nb); return FAILURE;}
 
   if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, 1, dt, NULL)) == NULL){
     printf("could not create dst image. "); return FAILURE;}
@@ -1461,7 +1461,7 @@ printf("warp_from_disc_to_known_stack should handle multiband src and dst images
     #pragma omp parallel shared(dst_nx, dst_ny, dst, dst_b, dst_nodata) default(none) 
     {
       #pragma omp for schedule(static)
-      for (p=0; p<dst_nx*dst_ny; p++) set_stack(dst, dst_b, p, dst_nodata);
+      for (p=0; p<dst_nx*dst_ny; p++) set_brick(dst, dst_b, p, dst_nodata);
     }
   }
 
@@ -1523,7 +1523,7 @@ printf("warp_from_disc_to_known_stack should handle multiband src and dst images
           if (i >= dst_ny || j >= dst_nx) continue;
           p  = i*dst_nx+j;
           np = (i-chunk_yoff)*chunk_nx + (j-chunk_xoff);
-          set_stack(dst, dst_b, p, buf[np]);
+          set_brick(dst, dst_b, p, buf[np]);
           buf[np] = dst_nodata;
           nc_done_++;
         }
@@ -1566,21 +1566,21 @@ printf("warp_from_disc_to_known_stack should handle multiband src and dst images
   GDALClose(dst_dataset);
 
   #ifdef FORCE_CLOCK
-  proctime_print("warping disc to stack", TIME);
+  proctime_print("warping disc to brick", TIME);
   #endif
 
   return SUCCESS;
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- p_from: source pixel
 +++ Return: target pixel
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int convert_stack_p2p(stack_t *from, stack_t *to, int p_from){
+int convert_brick_p2p(brick_t *from, brick_t *to, int p_from){
 int i_from, i_to;
 int j_from, j_to;
 
@@ -1594,16 +1594,16 @@ int j_from, j_to;
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- p_from: source pixel
 --- i_to:   target row    (returned)
 --- j_to:   target column (returned)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void convert_stack_p2ji(stack_t *from, stack_t *to, int p_from, int *i_to, int *j_to){
+void convert_brick_p2ji(brick_t *from, brick_t *to, int p_from, int *i_to, int *j_to){
 int i_from;
 int j_from;
 
@@ -1617,17 +1617,17 @@ int j_from;
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- p_from: source pixel
 --- i_to:   target row    (returned)
 --- j_to:   target column (returned)
 --- p_to:   target pixel  (returned)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void convert_stack_p2jip(stack_t *from, stack_t *to, int p_from, int *i_to, int *j_to, int *p_to){
+void convert_brick_p2jip(brick_t *from, brick_t *to, int p_from, int *i_to, int *j_to, int *p_to){
 int i_from;
 int j_from;
 
@@ -1643,15 +1643,15 @@ int j_from;
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- i_from: source row
 --- j_from: source column
 +++ Return: target pixel
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int convert_stack_ji2p(stack_t *from, stack_t *to, int i_from, int j_from){
+int convert_brick_ji2p(brick_t *from, brick_t *to, int i_from, int j_from){
 int i_to;
 int j_to;
 
@@ -1663,17 +1663,17 @@ int j_to;
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- i_from: source row
 --- j_from: source column
 --- i_to:   target row    (returned)
 --- j_to:   target column (returned)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void convert_stack_ji2ji(stack_t *from, stack_t *to, int i_from, int j_from, int *i_to, int *j_to){
+void convert_brick_ji2ji(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to){
 
   *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
   *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
@@ -1682,10 +1682,10 @@ void convert_stack_ji2ji(stack_t *from, stack_t *to, int i_from, int j_from, int
 }
 
 
-/** This function convertes the pixel location from one stack to another.
-+++ The stacks differ in spatial resolution.
---- from:   source stack
---- to:     target stack
+/** This function convertes the pixel location from one brick to another.
++++ The bricks differ in spatial resolution.
+--- from:   source brick
+--- to:     target brick
 --- i_from: source row
 --- j_from: source column
 --- i_to:   target row    (returned)
@@ -1693,7 +1693,7 @@ void convert_stack_ji2ji(stack_t *from, stack_t *to, int i_from, int j_from, int
 --- p_to:   target pixel  (returned)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void convert_stack_ji2jip(stack_t *from, stack_t *to, int i_from, int j_from, int *i_to, int *j_to, int *p_to){
+void convert_brick_ji2jip(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to, int *p_to){
 
   *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
   *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
@@ -1704,18 +1704,18 @@ void convert_stack_ji2jip(stack_t *from, stack_t *to, int i_from, int j_from, in
 
 
 /** This function returns the band that matches the given domain, e.g.
-+++ spectral band. If the domain is not present in the stack, -1 is 
++++ spectral band. If the domain is not present in the brick, -1 is 
 +++ returned.
---- stack:  stack
+--- brick:  brick
 --- domain: domain
 +++ Return: band that holds the given domain
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int find_domain(stack_t *stack, const char *domain){
-int b, n = get_stack_nbands(stack);
+int find_domain(brick_t *brick, const char *domain){
+int b, n = get_brick_nbands(brick);
 char domain_[NPOW_10];
 
   for (b=0; b<n; b++){
-    get_stack_domain(stack, b, domain_, NPOW_10);
+    get_brick_domain(brick, b, domain_, NPOW_10);
     if (strcmp(domain_, domain) == 0) return b;
   }
   
@@ -1723,731 +1723,731 @@ char domain_[NPOW_10];
 }
 
 
-/** This function sets the name of a stack
---- stack:  stack
+/** This function sets the name of a brick
+--- brick:  brick
 --- name:   name
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_name(stack_t *stack, const char *name){
+void set_brick_name(brick_t *brick, const char *name){
 
 
-  copy_string(stack->name, NPOW_10, name);
+  copy_string(brick->name, NPOW_10, name);
 
   return;
 }
 
 
-/** This function gets the name of a stack
---- stack:  stack
+/** This function gets the name of a brick
+--- brick:  brick
 --- name:   name (modified)
 --- size:   length of the buffer for name
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_name(stack_t *stack, char name[], size_t size){
+void get_brick_name(brick_t *brick, char name[], size_t size){
 
 
-  copy_string(name, size, stack->name);
+  copy_string(name, size, brick->name);
 
   return;
 }
 
 
-/** This function sets the product of a stack
---- stack:   stack
+/** This function sets the product of a brick
+--- brick:   brick
 --- product: product
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_product(stack_t *stack, const char *product){
+void set_brick_product(brick_t *brick, const char *product){
   
 
-  copy_string(stack->product, NPOW_03, product);
+  copy_string(brick->product, NPOW_03, product);
 
   return;
 }
 
 
-/** This function gets the product of a stack
---- stack:   stack
+/** This function gets the product of a brick
+--- brick:   brick
 --- product: product (modified)
 --- size:    length of the buffer for product
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_product(stack_t *stack, char product[], size_t size){
+void get_brick_product(brick_t *brick, char product[], size_t size){
 
 
-  copy_string(product, size, stack->product);
+  copy_string(product, size, brick->product);
 
   return;
 }
 
 
-/** This function sets the directory-name of a stack
---- stack:  stack
+/** This function sets the directory-name of a brick
+--- brick:  brick
 --- dname:  directory-name
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_dirname(stack_t *stack, const char *dname){
+void set_brick_dirname(brick_t *brick, const char *dname){
 
 
-  copy_string(stack->dname, NPOW_10, dname);
+  copy_string(brick->dname, NPOW_10, dname);
 
   return;
 }
 
 
-/** This function gets the directory-name of a stack
---- stack:  stack
+/** This function gets the directory-name of a brick
+--- brick:  brick
 --- dname:  directory-name (modified)
 --- size:   length of the buffer for dname
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_dirname(stack_t *stack, char dname[], size_t size){
+void get_brick_dirname(brick_t *brick, char dname[], size_t size){
 
 
-  copy_string(dname, size, stack->dname);
+  copy_string(dname, size, brick->dname);
 
   return;
 }
 
 
-/** This function sets the filename of a stack
---- stack:  stack
+/** This function sets the filename of a brick
+--- brick:  brick
 --- fname:  filename
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_filename(stack_t *stack, const char *fname){
+void set_brick_filename(brick_t *brick, const char *fname){
 
 
-  copy_string(stack->fname, NPOW_10, fname);
+  copy_string(brick->fname, NPOW_10, fname);
 
   return;
 }
 
 
-/** This function gets the filename of a stack
---- stack:  stack
+/** This function gets the filename of a brick
+--- brick:  brick
 --- fname:  filename (modified)
 --- size:   length of the buffer for fname
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_filename(stack_t *stack, char fname[], size_t size){
+void get_brick_filename(brick_t *brick, char fname[], size_t size){
 
 
-  copy_string(fname, size, stack->fname);
+  copy_string(fname, size, brick->fname);
 
   return;
 }
 
 
-/** This function sets the extension of a stack
---- stack:     stack
+/** This function sets the extension of a brick
+--- brick:     brick
 --- extension: extension
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_extension(stack_t *stack, const char *extension){
+void set_brick_extension(brick_t *brick, const char *extension){
   
   
-  if (get_stack_format(stack) == _FMT_ENVI_ && strcmp(extension, "dat") != 0){
+  if (get_brick_format(brick) == _FMT_ENVI_ && strcmp(extension, "dat") != 0){
     printf("extension does not match with format.\n");}
-  if (get_stack_format(stack) == _FMT_GTIFF_ && strcmp(extension, "tif") != 0){
+  if (get_brick_format(brick) == _FMT_GTIFF_ && strcmp(extension, "tif") != 0){
     printf("extension does not match with format.\n");}
-  if (get_stack_format(stack) == _FMT_JPEG_ && strcmp(extension, "jpg") != 0){
+  if (get_brick_format(brick) == _FMT_JPEG_ && strcmp(extension, "jpg") != 0){
     printf("extension does not match with format.\n");}
 
-  copy_string(stack->extension, NPOW_02, extension);
+  copy_string(brick->extension, NPOW_02, extension);
 
   return;
 }
 
 
-/** This function gets the extension of a stack
---- stack:     stack
+/** This function gets the extension of a brick
+--- brick:     brick
 --- extension: extension (modified)
 --- size:      length of the buffer for extension
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_extension(stack_t *stack, char extension[], size_t size){
+void get_brick_extension(brick_t *brick, char extension[], size_t size){
 
 
-  copy_string(extension, size, stack->extension);
+  copy_string(extension, size, brick->extension);
 
   return;
 }
 
 
-/** This function sets the sensor ID of a stack
---- stack:  stack
+/** This function sets the sensor ID of a brick
+--- brick:  brick
 --- sid:    sensor ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_sensorid(stack_t *stack, int sid){
+void set_brick_sensorid(brick_t *brick, int sid){
 
-  stack->sid = sid;
+  brick->sid = sid;
 
   return;
 }
 
 
-/** This function gets the sensor ID of a stack
---- stack:  stack
+/** This function gets the sensor ID of a brick
+--- brick:  brick
 +++ Return: sensor ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_sensorid(stack_t *stack){
+int get_brick_sensorid(brick_t *brick){
   
-  return stack->sid;
+  return brick->sid;
 }
 
 
-/** This function sets the format of a stack
---- stack:   stack
+/** This function sets the format of a brick
+--- brick:   brick
 --- format:  format
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_format(stack_t *stack, int format){
+void set_brick_format(brick_t *brick, int format){
 
-  stack->format = format;
+  brick->format = format;
 
   if (format == _FMT_ENVI_){
-    set_stack_extension(stack, "dat");
+    set_brick_extension(brick, "dat");
   } else if (format == _FMT_GTIFF_){
-    set_stack_extension(stack, "tif");
+    set_brick_extension(brick, "tif");
   } else if (format == _FMT_JPEG_){
-    set_stack_extension(stack, "jpg");
+    set_brick_extension(brick, "jpg");
   } else {
-    set_stack_extension(stack, "xxx");
+    set_brick_extension(brick, "xxx");
     printf("unknown format.\n");
   }
 
   return;
 }
 
-/** This function gets the format of a stack
---- stack:  stack
+/** This function gets the format of a brick
+--- brick:  brick
 +++ Return: format
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_format(stack_t *stack){
+int get_brick_format(brick_t *brick){
   
-  return stack->format;
+  return brick->format;
 }
 
 
-/** This function sets the opening option of a stack
---- stack:  stack
+/** This function sets the opening option of a brick
+--- brick:  brick
 --- open:   opening option
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_open(stack_t *stack, int open){
+void set_brick_open(brick_t *brick, int open){
 
-  stack->open = open;
+  brick->open = open;
 
   return;
 }
 
 
-/** This function gets the opening option of a stack
---- stack:  stack
+/** This function gets the opening option of a brick
+--- brick:  brick
 +++ Return: opening option
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool get_stack_open(stack_t *stack){
+bool get_brick_open(brick_t *brick){
   
-  return stack->open;
+  return brick->open;
 }
 
 
-/** This function sets the explode-bands option of a stack
---- stack:   stack
+/** This function sets the explode-bands option of a brick
+--- brick:   brick
 --- explode: explode bands?
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_explode(stack_t *stack, int explode){
+void set_brick_explode(brick_t *brick, int explode){
 
-  stack->explode = explode;
+  brick->explode = explode;
 
   return;
 }
 
 
-/** This function gets the explode-bands option of a stack
---- stack:  stack
+/** This function gets the explode-bands option of a brick
+--- brick:  brick
 +++ Return: explode bands?
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool get_stack_explode(stack_t *stack){
+bool get_brick_explode(brick_t *brick){
   
-  return stack->explode;
+  return brick->explode;
 }
 
 
-/** This function sets the datatype of a stack
---- stack:    stack
+/** This function sets the datatype of a brick
+--- brick:    brick
 --- datatype: datatype
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_datatype(stack_t *stack, int datatype){
+void set_brick_datatype(brick_t *brick, int datatype){
 
   if (datatype != _DT_SHORT_ && datatype != _DT_SMALL_ &&
       datatype != _DT_FLOAT_ && datatype != _DT_INT_  && 
       datatype != _DT_USHORT_ && datatype != _DT_NONE_){
     printf("unknown datatype %d.\n", datatype);}
 
-  if (stack->datatype != _DT_NONE_ && stack->datatype != datatype){
+  if (brick->datatype != _DT_NONE_ && brick->datatype != datatype){
     printf("WARNING: re-setting datatype.\n");
     printf("This might result in double-allocations.\n");}
 
-  stack->datatype  = datatype;
+  brick->datatype  = datatype;
 
   return;
 }
 
 
-/** This function gets the datatype of a stack
---- stack:  stack
+/** This function gets the datatype of a brick
+--- brick:  brick
 +++ Return: datatype
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_datatype(stack_t *stack){
+int get_brick_datatype(brick_t *brick){
   
-  return stack->datatype;
+  return brick->datatype;
 }
 
 
-/** This function sets the bytesize of a stack
---- stack:  stack
+/** This function sets the bytesize of a brick
+--- brick:  brick
 --- byte:   bytesize
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_byte(stack_t *stack, size_t byte){
+void set_brick_byte(brick_t *brick, size_t byte){
 
-  stack->byte = (int)byte;
+  brick->byte = (int)byte;
 
   return;
 }
 
 
-/** This function gets the bytesize of a stack
---- stack:  stack
+/** This function gets the bytesize of a brick
+--- brick:  brick
 +++ Return: bytesize
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_byte(stack_t *stack){
+int get_brick_byte(brick_t *brick){
   
-  return stack->byte;
+  return brick->byte;
 }
 
 
-/** This function sets the number of bands of a stack
---- stack:  stack
+/** This function sets the number of bands of a brick
+--- brick:  brick
 --- nb:     number of bands
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_nbands(stack_t *stack, int nb){
+void set_brick_nbands(brick_t *brick, int nb){
 
   if (nb <= 0) printf("number of bands must be > 0.\n");
 
-  stack->nb = nb;
+  brick->nb = nb;
 
   return;
 }
 
 
-/** This function gets the number of bands of a stack
---- stack:  stack
+/** This function gets the number of bands of a brick
+--- brick:  brick
 +++ Return: number of bands
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_nbands(stack_t *stack){
+int get_brick_nbands(brick_t *brick){
   
-  return stack->nb;
+  return brick->nb;
 }
 
 
-/** This function sets the number of columns of a stack
---- stack:  stack
+/** This function sets the number of columns of a brick
+--- brick:  brick
 --- nx:     number of columns
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_ncols(stack_t *stack, int nx){
+void set_brick_ncols(brick_t *brick, int nx){
 
   if (nx <= 0) printf("number of cols must be > 0.\n");
 
-  stack->nx = nx;
-  stack->nc = stack->nx*stack->ny;
-  stack->width = stack->nx*stack->res;
+  brick->nx = nx;
+  brick->nc = brick->nx*brick->ny;
+  brick->width = brick->nx*brick->res;
 
   return;
 }
 
 
-/** This function gets the number of columns of a stack
---- stack:  stack
+/** This function gets the number of columns of a brick
+--- brick:  brick
 +++ Return: number of columns
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_ncols(stack_t *stack){
+int get_brick_ncols(brick_t *brick){
   
-  return stack->nx;
+  return brick->nx;
 }
 
 
-/** This function sets the number of rows of a stack
---- stack:  stack
+/** This function sets the number of rows of a brick
+--- brick:  brick
 --- ny:     number of rows
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_nrows(stack_t *stack, int ny){
+void set_brick_nrows(brick_t *brick, int ny){
 
   if (ny <= 0) printf("number of rows must be > 0.\n");
 
-  stack->ny = ny;
-  stack->nc = stack->nx*stack->ny;
-  stack->height = stack->ny*stack->res;
+  brick->ny = ny;
+  brick->nc = brick->nx*brick->ny;
+  brick->height = brick->ny*brick->res;
 
   return;
 }
 
 
-/** This function gets the number of rows of a stack
---- stack:  stack
+/** This function gets the number of rows of a brick
+--- brick:  brick
 +++ Return: number of rows
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_nrows(stack_t *stack){
+int get_brick_nrows(brick_t *brick){
   
-  return stack->ny;
+  return brick->ny;
 }
 
 
-/** This function sets the number of cells of a stack
---- stack:  stack
+/** This function sets the number of cells of a brick
+--- brick:  brick
 --- nc:     number of cells
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_ncells(stack_t *stack, int nc){
+void set_brick_ncells(brick_t *brick, int nc){
   
-  if (nc != stack->nx*stack->ny) printf("number of cells do not match with nx*ny.\n");
+  if (nc != brick->nx*brick->ny) printf("number of cells do not match with nx*ny.\n");
 
-  stack->nc = stack->nx*stack->ny;
+  brick->nc = brick->nx*brick->ny;
   
   return;
 }
 
 
-/** This function gets the number of cells of a stack
---- stack:  stack
+/** This function gets the number of cells of a brick
+--- brick:  brick
 +++ Return: number of cells
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_ncells(stack_t *stack){
+int get_brick_ncells(brick_t *brick){
   
-  return stack->nc;
+  return brick->nc;
 }
 
 
-/** This function gets the total bytesize of a stack
---- stack:  stack
+/** This function gets the total bytesize of a brick
+--- brick:  brick
 +++ Return: total bytesize
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-size_t get_stack_size(stack_t *stack){
+size_t get_brick_size(brick_t *brick){
 int b = 0;
 size_t size = 0;
 
-  for (b=0; b<stack->nb; b++){
-    if (get_stack_save(stack, b)) size += stack->nc*stack->byte;
+  for (b=0; b<brick->nb; b++){
+    if (get_brick_save(brick, b)) size += brick->nc*brick->byte;
   }
 
   return size;
 }
 
 
-/** This function sets the number of columns in chunk of a stack
---- stack:  stack
+/** This function sets the number of columns in chunk of a brick
+--- brick:  brick
 --- cx:     number of columns in chunk
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-void set_stack_chunkncols(stack_t *stack, int cx){
+void set_brick_chunkncols(brick_t *brick, int cx){
 
   if (cx < 0) printf("number of chunking cols must be >= 0.\n");
 
-  stack->cx = cx;
-  stack->cc = stack->cx*stack->cy;
-  stack->cwidth = stack->cx*stack->res;
+  brick->cx = cx;
+  brick->cc = brick->cx*brick->cy;
+  brick->cwidth = brick->cx*brick->res;
 
   return;
 }
 
 
-/** This function gets the number of columns in chunk of a stack
---- stack:  stack
+/** This function gets the number of columns in chunk of a brick
+--- brick:  brick
 +++ Return: number of columns in chunk
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_chunkncols(stack_t *stack){
+int get_brick_chunkncols(brick_t *brick){
   
-  return stack->cx;
+  return brick->cx;
 }
 
 
-/** This function sets the number of rows in chunk of a stack
---- stack:  stack
+/** This function sets the number of rows in chunk of a brick
+--- brick:  brick
 --- cy:     number of rows in chunk
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_chunknrows(stack_t *stack, int cy){
+void set_brick_chunknrows(brick_t *brick, int cy){
 
   if (cy < 0) printf("number of chunking rows must be >= 0.\n");
 
-  stack->cy = cy;
-  stack->cc = stack->cx*stack->cy;
-  stack->cheight = stack->cy*stack->res;
+  brick->cy = cy;
+  brick->cc = brick->cx*brick->cy;
+  brick->cheight = brick->cy*brick->res;
 
   return;
 }
 
 
-/** This function gets the number of rows in chunk of a stack
---- stack:  stack
+/** This function gets the number of rows in chunk of a brick
+--- brick:  brick
 +++ Return: number of rows in chunk
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_chunknrows(stack_t *stack){
+int get_brick_chunknrows(brick_t *brick){
   
-  return stack->cy;
+  return brick->cy;
 }
 
 
-/** This function sets the number of cells in chunk of a stack
---- stack:  stack
+/** This function sets the number of cells in chunk of a brick
+--- brick:  brick
 --- cc:     number of cells in chunk
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_chunkncells(stack_t *stack, int cc){
+void set_brick_chunkncells(brick_t *brick, int cc){
   
-  if (cc != stack->cx*stack->cy) printf("number of chunking cells do not match with cx*cy.\n");
+  if (cc != brick->cx*brick->cy) printf("number of chunking cells do not match with cx*cy.\n");
 
-  stack->cc = stack->cx*stack->cy;
+  brick->cc = brick->cx*brick->cy;
   
   return;
 }
 
 
-/** This function gets the number of cells in chunk of a stack
---- stack:  stack
+/** This function gets the number of cells in chunk of a brick
+--- brick:  brick
 +++ Return: number of cells in chunk
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_chunkncells(stack_t *stack){
+int get_brick_chunkncells(brick_t *brick){
   
-  return stack->cc;
+  return brick->cc;
 }
 
 
-/** This function sets the chunk ID of a stack
---- stack:  stack
+/** This function sets the chunk ID of a brick
+--- brick:  brick
 --- chunk:  chunk ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_chunk(stack_t *stack, int chunk){
+void set_brick_chunk(brick_t *brick, int chunk){
   
-  if (chunk >= 0 && chunk >= stack->nchunk) printf("current chunk %d is higher than max chunks %d.\n", chunk, stack->nchunk);
+  if (chunk >= 0 && chunk >= brick->nchunk) printf("current chunk %d is higher than max chunks %d.\n", chunk, brick->nchunk);
 
-  stack->chunk = chunk;
+  brick->chunk = chunk;
   
   return;
 }
 
 
-/** This function gets the chunk ID of a stack
---- stack:  stack
+/** This function gets the chunk ID of a brick
+--- brick:  brick
 +++ Return: chunk ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_chunk(stack_t *stack){
+int get_brick_chunk(brick_t *brick){
   
-  return stack->chunk;
+  return brick->chunk;
 }
 
 
-/** This function sets the number of chunks of a stack
---- stack:  stack
+/** This function sets the number of chunks of a brick
+--- brick:  brick
 --- nchunk: number of chunks
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_nchunks(stack_t *stack, int nchunk){
+void set_brick_nchunks(brick_t *brick, int nchunk){
   
   if (nchunk < 0) printf("nchunks %d < 0.\n", nchunk);
 
-  stack->nchunk = nchunk;
+  brick->nchunk = nchunk;
   
   return;
 }
 
 
-/** This function gets the number of chunks of a stack
---- stack:  stack
+/** This function gets the number of chunks of a brick
+--- brick:  brick
 +++ Return: number of chunks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_nchunks(stack_t *stack){
+int get_brick_nchunks(brick_t *brick){
   
-  return stack->nchunk;
+  return brick->nchunk;
 }
 
 
-/** This function sets the tile X-ID of a stack
---- stack:  stack
+/** This function sets the tile X-ID of a brick
+--- brick:  brick
 --- tx:     tile X-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_tilex(stack_t *stack, int tx){
+void set_brick_tilex(brick_t *brick, int tx){
   
   if (tx >= 9999 || tx < -999) printf("tile-x is out of bounds.\n");
 
-  stack->tx = tx;
+  brick->tx = tx;
   
   return;
 }
 
 
-/** This function gets the tile X-ID of a stack
---- stack:  stack
+/** This function gets the tile X-ID of a brick
+--- brick:  brick
 +++ Return: tile X-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_tilex(stack_t *stack){
+int get_brick_tilex(brick_t *brick){
   
-  return stack->tx;
+  return brick->tx;
 }
 
 
-/** This function sets the tile Y-ID of a stack
---- stack:  stack
+/** This function sets the tile Y-ID of a brick
+--- brick:  brick
 --- ty:     tile Y-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_tiley(stack_t *stack, int ty){
+void set_brick_tiley(brick_t *brick, int ty){
   
   if (ty >= 9999 || ty < -999) printf("tile-y is out of bounds.\n");
 
-  stack->ty = ty;
+  brick->ty = ty;
   
   return;
 }
 
 
-/** This function gets the tile Y-ID of a stack
---- stack:  stack
+/** This function gets the tile Y-ID of a brick
+--- brick:  brick
 +++ Return: tile Y-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_tiley(stack_t *stack){
+int get_brick_tiley(brick_t *brick){
   
-  return stack->ty;
+  return brick->ty;
 }
 
 
-/** This function sets the resolution of a stack
---- stack:  stack
+/** This function sets the resolution of a brick
+--- brick:  brick
 --- res:    resolution
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_res(stack_t *stack, double res){
+void set_brick_res(brick_t *brick, double res){
 
   if (res <= 0) printf("resolution must be > 0.\n");
 
-  stack->res = res;
-  stack->geotran[1] = res;
-  stack->geotran[5] = res*-1;
-  stack->width  = stack->nx*stack->res;
-  stack->height = stack->ny*stack->res;
+  brick->res = res;
+  brick->geotran[1] = res;
+  brick->geotran[5] = res*-1;
+  brick->width  = brick->nx*brick->res;
+  brick->height = brick->ny*brick->res;
 
   return;
 }
 
 
-/** This function gets the resolution of a stack
---- stack:  stack
+/** This function gets the resolution of a brick
+--- brick:  brick
 +++ Return: resolution
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_res(stack_t *stack){
+double get_brick_res(brick_t *brick){
   
-  return stack->res;
+  return brick->res;
 }
 
 
-/** This function sets the UL-X coordinate of a stack
---- stack:   stack
+/** This function sets the UL-X coordinate of a brick
+--- brick:   brick
 --- ulx: UL-X coordinate
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_ulx(stack_t *stack, double ulx){
+void set_brick_ulx(brick_t *brick, double ulx){
 
-  stack->geotran[0] = ulx;
+  brick->geotran[0] = ulx;
 
   return;
 }
 
 
-/** This function gets the UL-X coordinate of a stack
---- stack:  stack
+/** This function gets the UL-X coordinate of a brick
+--- brick:  brick
 +++ Return: UL-X coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_ulx(stack_t *stack){
+double get_brick_ulx(brick_t *brick){
   
-  return stack->geotran[0];
+  return brick->geotran[0];
 }
 
 
-/** This function gets the X coordinate of a column of a stack
---- stack:  stack
+/** This function gets the X coordinate of a column of a brick
+--- brick:  brick
 --- j:      column
 +++ Return: X coordinate of a column
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_x(stack_t *stack, int j){
+double get_brick_x(brick_t *brick, int j){
   
-  return (stack->geotran[0] + j*stack->geotran[1]);
+  return (brick->geotran[0] + j*brick->geotran[1]);
 }
 
 
-/** This function sets the UL-Y coordinate of a stack
---- stack:  stack
+/** This function sets the UL-Y coordinate of a brick
+--- brick:  brick
 --- uly:    UL-Y coordinate
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_uly(stack_t *stack, double uly){
+void set_brick_uly(brick_t *brick, double uly){
 
-  stack->geotran[3] = uly;
+  brick->geotran[3] = uly;
 
   return;
 }
 
 
-/** This function gets the UL-Y coordinate of a stack
---- stack:  stack
+/** This function gets the UL-Y coordinate of a brick
+--- brick:  brick
 +++ Return: UL-Y coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_uly(stack_t *stack){
+double get_brick_uly(brick_t *brick){
   
-  return stack->geotran[3];
+  return brick->geotran[3];
 }
 
 
-/** This function gets the Y coordinate of a row of a stack
---- stack:  stack
+/** This function gets the Y coordinate of a row of a brick
+--- brick:  brick
 --- i:      row
 +++ Return: Y coordinate of a row 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_y(stack_t *stack, int i){
+double get_brick_y(brick_t *brick, int i){
   
-  return (stack->geotran[3] + i*stack->geotran[5]);
+  return (brick->geotran[3] + i*brick->geotran[5]);
 }
 
 
-/** This function gets the geographic coordinates of a column/row of a stack
---- stack:  stack
+/** This function gets the geographic coordinates of a column/row of a brick
+--- brick:  brick
 --- j:      column
 --- i:      row
 +++ lon:    longitude (returned)
 +++ lat:    latiitude (returned)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_geo(stack_t *stack, int j, int i, double *lon, double *lat){
+void get_brick_geo(brick_t *brick, int j, int i, double *lon, double *lat){
 double mapx, mapy;
 double geox, geoy;
 
   // map coordinate
-  mapx = get_stack_x(stack, j);
-  mapy = get_stack_y(stack, i);
+  mapx = get_brick_x(brick, j);
+  mapy = get_brick_y(brick, i);
 
   // geo coordinate
-  warp_any_to_geo(mapx, mapy, &geox, &geoy, stack->proj);
+  warp_any_to_geo(mapx, mapy, &geox, &geoy, brick->proj);
   
   *lon = geox;
   *lat = geoy;
@@ -2455,740 +2455,740 @@ double geox, geoy;
 }
 
 
-/** This function sets the geotransformation of a stack
---- stack:   stack
+/** This function sets the geotransformation of a brick
+--- brick:   brick
 --- geotran: geotransformation
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_geotran(stack_t *stack, double *geotran){
+void set_brick_geotran(brick_t *brick, double *geotran){
 
-  stack->res = geotran[1];
-  stack->geotran[0] = geotran[0];
-  stack->geotran[1] = geotran[1];
-  stack->geotran[2] = geotran[2];
-  stack->geotran[3] = geotran[3];
-  stack->geotran[4] = geotran[4];
-  stack->geotran[5] = geotran[5];
+  brick->res = geotran[1];
+  brick->geotran[0] = geotran[0];
+  brick->geotran[1] = geotran[1];
+  brick->geotran[2] = geotran[2];
+  brick->geotran[3] = geotran[3];
+  brick->geotran[4] = geotran[4];
+  brick->geotran[5] = geotran[5];
 
   return;
 }
 
 
-/** This function gets the geotransformation of a stack
---- stack:   stack
+/** This function gets the geotransformation of a brick
+--- brick:   brick
 --- geotran: geotransformation (modified)
 --- size:    length of the buffer for geotran
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_geotran(stack_t *stack, double geotran[], size_t size){
+void get_brick_geotran(brick_t *brick, double geotran[], size_t size){
 
   if (size != 6){
     printf("array is not compatible for getting geotran.\n"); return;}
 
-  geotran[0] = stack->geotran[0];
-  geotran[1] = stack->geotran[1];
-  geotran[2] = stack->geotran[2];
-  geotran[3] = stack->geotran[3];
-  geotran[4] = stack->geotran[4];
-  geotran[5] = stack->geotran[5];
+  geotran[0] = brick->geotran[0];
+  geotran[1] = brick->geotran[1];
+  geotran[2] = brick->geotran[2];
+  geotran[3] = brick->geotran[3];
+  geotran[4] = brick->geotran[4];
+  geotran[5] = brick->geotran[5];
   
   return;
 }
 
 
-/** This function sets the width of a stack
---- stack:  stack
+/** This function sets the width of a brick
+--- brick:  brick
 --- width:  width
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_width(stack_t *stack, double width){
+void set_brick_width(brick_t *brick, double width){
   
-  if (width != stack->nx*stack->res) printf("width does not match with nx*res.\n");
+  if (width != brick->nx*brick->res) printf("width does not match with nx*res.\n");
 
-  stack->width = stack->nx*stack->res;
+  brick->width = brick->nx*brick->res;
 
   return;
 }
 
 
-/** This function gets the width of a stack
---- stack:  stack
+/** This function gets the width of a brick
+--- brick:  brick
 +++ Return: width
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_width(stack_t *stack){
+double get_brick_width(brick_t *brick){
   
-  return stack->width;
+  return brick->width;
 }
 
 
-/** This function sets the height of a stack
---- stack:  stack
+/** This function sets the height of a brick
+--- brick:  brick
 --- height: height
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_height(stack_t *stack, double height){
+void set_brick_height(brick_t *brick, double height){
   
-  if (height != stack->ny*stack->res) printf("height does not match with ny*res.\n");
+  if (height != brick->ny*brick->res) printf("height does not match with ny*res.\n");
 
-  stack->height = stack->ny*stack->res;
+  brick->height = brick->ny*brick->res;
   
   return;
 }
 
 
-/** This function gets the height of a stack
---- stack:  stack
+/** This function gets the height of a brick
+--- brick:  brick
 +++ Return: height
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_height(stack_t *stack){
+double get_brick_height(brick_t *brick){
   
-  return stack->height;
+  return brick->height;
 }
 
 
-/** This function sets the chunk width of a stack
---- stack:   stack
+/** This function sets the chunk width of a brick
+--- brick:   brick
 --- cwidth: chunk width
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_chunkwidth(stack_t *stack, double cwidth){
+void set_brick_chunkwidth(brick_t *brick, double cwidth){
   
-  if (cwidth != stack->cx*stack->res) printf("chunking width does not match with cx*res.\n");
+  if (cwidth != brick->cx*brick->res) printf("chunking width does not match with cx*res.\n");
 
-  stack->cwidth = stack->cx*stack->res;
+  brick->cwidth = brick->cx*brick->res;
 
   return;
 }
 
 
-/** This function gets the chunk width of a stack
---- stack:  stack
+/** This function gets the chunk width of a brick
+--- brick:  brick
 +++ Return: chunk width
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_chunkwidth(stack_t *stack){
+double get_brick_chunkwidth(brick_t *brick){
   
-  return stack->cwidth;
+  return brick->cwidth;
 }
 
 
-/** This function sets the chunk height of a stack
---- stack:   stack
+/** This function sets the chunk height of a brick
+--- brick:   brick
 --- cheight: chunk height
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_chunkheight(stack_t *stack, double cheight){
+void set_brick_chunkheight(brick_t *brick, double cheight){
   
-  if (cheight != stack->cy*stack->res) printf("chunking height does not match with cy*res.\n");
+  if (cheight != brick->cy*brick->res) printf("chunking height does not match with cy*res.\n");
 
-  stack->cheight = stack->cy*stack->res;
+  brick->cheight = brick->cy*brick->res;
   
   return;
 }
 
 
-/** This function gets the chunk height of a stack
---- stack:  stack
+/** This function gets the chunk height of a brick
+--- brick:  brick
 +++ Return: chunk height
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double get_stack_chunkheight(stack_t *stack){
+double get_brick_chunkheight(brick_t *brick){
   
-  return stack->cheight;
+  return brick->cheight;
 }
 
 
-/** This function sets the projection of a stack
---- stack:  stack
+/** This function sets the projection of a brick
+--- brick:  brick
 --- proj:   projection
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_proj(stack_t *stack, const char *proj){
+void set_brick_proj(brick_t *brick, const char *proj){
 
 
-  copy_string(stack->proj, NPOW_10, proj);
+  copy_string(brick->proj, NPOW_10, proj);
   
   return;
 }
 
 
-/** This function gets the projection of a stack
---- stack:  stack
+/** This function gets the projection of a brick
+--- brick:  brick
 --- proj:   projection (modified)
 --- size:   length of the buffer for proj
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_proj(stack_t *stack, char proj[], size_t size){
+void get_brick_proj(brick_t *brick, char proj[], size_t size){
 
 
-  copy_string(proj, size, stack->proj);
+  copy_string(proj, size, brick->proj);
   
   return;
 }
 
 
-/** This function sets the parameters of a stack
---- stack:  stack
+/** This function sets the parameters of a brick
+--- brick:  brick
 --- par:    parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_par(stack_t *stack, const char *par){
+void set_brick_par(brick_t *brick, const char *par){
 
 
-  copy_string(stack->par, NPOW_14, par);
+  copy_string(brick->par, NPOW_14, par);
 
   return;
 }
 
 
-/** This function gets the parameters of a stack
---- stack:  stack
+/** This function gets the parameters of a brick
+--- brick:  brick
 --- par:    parameters (modified)
 --- size:   length of the buffer for par
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_par(stack_t *stack, char par[], size_t size){
+void get_brick_par(brick_t *brick, char par[], size_t size){
 
 
-  copy_string(par, size, stack->par);
+  copy_string(par, size, brick->par);
 
   return;
 }
 
 
-/** This function sets the write flag of a stack band
---- stack:  stack
+/** This function sets the write flag of a brick band
+--- brick:  brick
 --- b:      band
 --- save:   write flag
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_save(stack_t *stack, int b, bool save){
+void set_brick_save(brick_t *brick, int b, bool save){
 
-  stack->save[b] = save;
+  brick->save[b] = save;
 
   return;
 }
 
 
-/** This function gets the write flag of a stack band
---- stack:  stack
+/** This function gets the write flag of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: write flag
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool get_stack_save(stack_t *stack, int b){
+bool get_brick_save(brick_t *brick, int b){
 
-  return stack->save[b];
+  return brick->save[b];
 }
 
 
-/** This function sets the nodata value of a stack band
---- stack:  stack
+/** This function sets the nodata value of a brick band
+--- brick:  brick
 --- b:      band
 --- nodata: nodata value
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_nodata(stack_t *stack, int b, int nodata){
+void set_brick_nodata(brick_t *brick, int b, int nodata){
 
-  stack->nodata[b] = nodata;
+  brick->nodata[b] = nodata;
 
   return;
 }
 
 
-/** This function gets the nodata value of a stack band
---- stack:  stack
+/** This function gets the nodata value of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: nodata value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_nodata(stack_t *stack, int b){
+int get_brick_nodata(brick_t *brick, int b){
 
-  return stack->nodata[b];
+  return brick->nodata[b];
 }
 
 
 /** This function tests if pixel is nodata
---- stack:  stack
+--- brick:  brick
 --- b:      band
 --- p:      pixel
 +++ Return: nodata?
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool is_stack_nodata(stack_t *stack, int b, int p){
+bool is_brick_nodata(brick_t *brick, int b, int p){
   
-  return fequal(get_stack(stack, b, p), (float)stack->nodata[b]);
+  return fequal(get_brick(brick, b, p), (float)brick->nodata[b]);
 }
 
 
-/** This function sets the scale of a stack band
---- stack:  stack
+/** This function sets the scale of a brick band
+--- brick:  brick
 --- b:      band
 --- scale:  scale
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_scale(stack_t *stack, int b, float scale){
+void set_brick_scale(brick_t *brick, int b, float scale){
 
-  stack->scale[b] = scale;
+  brick->scale[b] = scale;
 
   return;
 }
 
 
-/** This function gets the scale of a stack band
---- stack:  stack
+/** This function gets the scale of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: scale
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float get_stack_scale(stack_t *stack, int b){
+float get_brick_scale(brick_t *brick, int b){
   
-  return stack->scale[b];
+  return brick->scale[b];
 }
 
 
-/** This function sets the wavelength of a stack band
---- stack:      stack
+/** This function sets the wavelength of a brick band
+--- brick:      brick
 --- b:          band
 --- wavelength: wavelength
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_wavelength(stack_t *stack, int b, float wavelength){
+void set_brick_wavelength(brick_t *brick, int b, float wavelength){
 
-  stack->wavelength[b] = wavelength;
+  brick->wavelength[b] = wavelength;
 
   return;
 }
 
 
-/** This function gets the wavelength of a stack band
---- stack:  stack
+/** This function gets the wavelength of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: wavelength
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float get_stack_wavelength(stack_t *stack, int b){
+float get_brick_wavelength(brick_t *brick, int b){
   
-  return stack->wavelength[b];
+  return brick->wavelength[b];
 }
 
 
-/** This function sets the unit of a stack band
---- stack:  stack
+/** This function sets the unit of a brick band
+--- brick:  brick
 --- b:      band
 --- unit:   unit
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_unit(stack_t *stack, int b, const char *unit){
+void set_brick_unit(brick_t *brick, int b, const char *unit){
 
 
-  copy_string(stack->unit[b], NPOW_04, unit);
+  copy_string(brick->unit[b], NPOW_04, unit);
 
   return;
 }
 
 
-/** This function gets the unit of a stack band
---- stack:  stack
+/** This function gets the unit of a brick band
+--- brick:  brick
 --- b:      band
 --- unit:   unit (modified)
 --- size:   length of the buffer for unit
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_unit(stack_t *stack, int b, char unit[], size_t size){
+void get_brick_unit(brick_t *brick, int b, char unit[], size_t size){
 
 
-  copy_string(unit, size, stack->unit[b]);
+  copy_string(unit, size, brick->unit[b]);
 
   return;
 }
 
 
-/** This function sets the domain of a stack band
---- stack:  stack
+/** This function sets the domain of a brick band
+--- brick:  brick
 --- b:      band
 --- domain: domain
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_domain(stack_t *stack, int b, const char *domain){
+void set_brick_domain(brick_t *brick, int b, const char *domain){
 
 
-  copy_string(stack->domain[b], NPOW_10, domain);
+  copy_string(brick->domain[b], NPOW_10, domain);
 
   return;
 }
 
 
-/** This function gets the domain of a stack band
---- stack:  stack
+/** This function gets the domain of a brick band
+--- brick:  brick
 --- b:      band
 --- domain: domain (modified)
 --- size:   length of the buffer for domain
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_domain(stack_t *stack, int b, char domain[], size_t size){
+void get_brick_domain(brick_t *brick, int b, char domain[], size_t size){
 
 
-  copy_string(domain, size, stack->domain[b]);
+  copy_string(domain, size, brick->domain[b]);
 
   return;
 }
 
 
-/** This function sets the bandname of a stack band
---- stack:    stack
+/** This function sets the bandname of a brick band
+--- brick:    brick
 --- b:        band
 --- bandname: bandname
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_bandname(stack_t *stack, int b, const char *bandname){
+void set_brick_bandname(brick_t *brick, int b, const char *bandname){
 
 
-  copy_string(stack->bandname[b], NPOW_10, bandname);
+  copy_string(brick->bandname[b], NPOW_10, bandname);
 
   return;
 }
 
 
-/** This function gets the bandname of a stack band
---- stack:    stack
+/** This function gets the bandname of a brick band
+--- brick:    brick
 --- b:        band
 --- bandname: bandname (modified)
 --- size:     length of the buffer for bandname
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_bandname(stack_t *stack, int b, char bandname[], size_t size){
+void get_brick_bandname(brick_t *brick, int b, char bandname[], size_t size){
 
   
-  copy_string(bandname, size, stack->bandname[b]);
+  copy_string(bandname, size, brick->bandname[b]);
 
   return;
 }
 
 
-/** This function sets the sensor of a stack band
---- stack:  stack
+/** This function sets the sensor of a brick band
+--- brick:  brick
 --- b:      band
 --- sensor: sensor
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_sensor(stack_t *stack, int b, const char *sensor){
+void set_brick_sensor(brick_t *brick, int b, const char *sensor){
 
 
-  copy_string(stack->sensor[b], NPOW_04, sensor);
+  copy_string(brick->sensor[b], NPOW_04, sensor);
 
   return;
 }
 
 
-/** This function gets the sensor of a stack band
---- stack:  stack
+/** This function gets the sensor of a brick band
+--- brick:  brick
 --- b:      band
 --- sensor: sensor (modified)
 --- size:   length of the buffer for sensor
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_sensor(stack_t *stack, int b, char sensor[], size_t size){
+void get_brick_sensor(brick_t *brick, int b, char sensor[], size_t size){
 
 
-  copy_string(sensor, size, stack->sensor[b]);
+  copy_string(sensor, size, brick->sensor[b]);
 
   return;
 }
 
 
-/** This function sets the date of a stack band
---- stack:  stack
+/** This function sets the date of a brick band
+--- brick:  brick
 --- b:      band
 --- date:   date
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_date(stack_t *stack, int b, date_t date){
+void set_brick_date(brick_t *brick, int b, date_t date){
 
-  copy_date(&date, &stack->date[b]);
+  copy_date(&date, &brick->date[b]);
 
   return;
 }
 
 
-/** This function gets the date of a stack band
---- stack:  stack
+/** This function gets the date of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: date
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-date_t get_stack_date(stack_t *stack, int b){
+date_t get_brick_date(brick_t *brick, int b){
   
-  return stack->date[b];
+  return brick->date[b];
 }
 
 
-/** This function sets the days since current era of a stack band
---- stack:  stack
+/** This function sets the days since current era of a brick band
+--- brick:  brick
 --- b:      band
 --- ce:     days since current era
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_ce(stack_t *stack, int b, int ce){
+void set_brick_ce(brick_t *brick, int b, int ce){
   
-  stack->date[b].ce = ce;
+  brick->date[b].ce = ce;
   
   return;
 }
 
 
-/** This function gets the days since current era of a stack band
---- stack:  stack
+/** This function gets the days since current era of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: days since current era
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_ce(stack_t *stack, int b){
+int get_brick_ce(brick_t *brick, int b){
   
-  return stack->date[b].ce;
+  return brick->date[b].ce;
 }
 
 
-/** This function sets the day of a stack band band
---- stack:  stack
+/** This function sets the day of a brick band band
+--- brick:  brick
 --- day:    day
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_day(stack_t *stack, int b, int day){
+void set_brick_day(brick_t *brick, int b, int day){
   
-  stack->date[b].day = day;
+  brick->date[b].day = day;
   
   return;
 }
 
 
-/** This function gets the day of a stack band
---- stack:  stack
+/** This function gets the day of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: day
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_day(stack_t *stack, int b){
+int get_brick_day(brick_t *brick, int b){
   
-  return stack->date[b].day;
+  return brick->date[b].day;
 }
 
 
-/** This function sets the doy of a stack band
---- stack:  stack
+/** This function sets the doy of a brick band
+--- brick:  brick
 --- doy:    doy
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_doy(stack_t *stack, int b, int doy){
+void set_brick_doy(brick_t *brick, int b, int doy){
   
-  stack->date[b].doy = doy;
+  brick->date[b].doy = doy;
   
   return;
 }
 
 
-/** This function gets the doy of a stack band
---- stack:  stack
+/** This function gets the doy of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: doy
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_doy(stack_t *stack, int b){
+int get_brick_doy(brick_t *brick, int b){
   
-  return stack->date[b].doy;
+  return brick->date[b].doy;
 }
 
 
-/** This function sets the week of a stack band
---- stack:  stack
+/** This function sets the week of a brick band
+--- brick:  brick
 --- b:      band
 --- week:   week
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_week(stack_t *stack, int b, int week){
+void set_brick_week(brick_t *brick, int b, int week){
   
-  stack->date[b].week = week;
+  brick->date[b].week = week;
   
   return;
 }
 
 
-/** This function gets the week of a stack band
---- stack:  stack
+/** This function gets the week of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: week
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_week(stack_t *stack, int b){
+int get_brick_week(brick_t *brick, int b){
   
-  return stack->date[b].week;
+  return brick->date[b].week;
 }
 
 
-/** This function sets the month of a stack band
---- stack:  stack
+/** This function sets the month of a brick band
+--- brick:  brick
 --- b:      band
 --- month:  month
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_month(stack_t *stack, int b, int month){
+void set_brick_month(brick_t *brick, int b, int month){
   
-  stack->date[b].month = month;
+  brick->date[b].month = month;
   
   return;
 }
 
 
-/** This function gets the month of a stack band
---- stack:  stack
+/** This function gets the month of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: month
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_month(stack_t *stack, int b){
+int get_brick_month(brick_t *brick, int b){
   
-  return stack->date[b].month;
+  return brick->date[b].month;
 }
 
 
-/** This function sets the year of a stack band
---- stack:  stack
+/** This function sets the year of a brick band
+--- brick:  brick
 --- b:      band
 --- year:   year
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_year(stack_t *stack, int b, int year){
+void set_brick_year(brick_t *brick, int b, int year){
   
-  stack->date[b].year = year;
+  brick->date[b].year = year;
   
   return;
 }
 
 
-/** This function gets the year of a stack band
---- stack:  stack
+/** This function gets the year of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: year
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_year(stack_t *stack, int b){
+int get_brick_year(brick_t *brick, int b){
   
-  return stack->date[b].year;
+  return brick->date[b].year;
 }
 
 
-/** This function sets the hour of a stack band
---- stack:  stack
+/** This function sets the hour of a brick band
+--- brick:  brick
 --- b:      band
 --- hour:   hour
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_hour(stack_t *stack, int b, int hour){
+void set_brick_hour(brick_t *brick, int b, int hour){
   
-  stack->date[b].hh = hour;
+  brick->date[b].hh = hour;
   
   return;
 }
 
 
-/** This function gets the hour of a stack band
---- stack:  stack
+/** This function gets the hour of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: hour
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_hour(stack_t *stack, int b){
+int get_brick_hour(brick_t *brick, int b){
   
-  return stack->date[b].hh;
+  return brick->date[b].hh;
 }
 
 
-/** This function sets the minute of a stack band
---- stack:  stack
+/** This function sets the minute of a brick band
+--- brick:  brick
 --- b:      band
 --- minute: minute
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_minute(stack_t *stack, int b, int minute){
+void set_brick_minute(brick_t *brick, int b, int minute){
   
-  stack->date[b].mm = minute;
+  brick->date[b].mm = minute;
   
   return;
 }
 
 
-/** This function gets the minute of a stack band
---- stack:  stack
+/** This function gets the minute of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: minute
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_minute(stack_t *stack, int b){
+int get_brick_minute(brick_t *brick, int b){
   
-  return stack->date[b].mm;
+  return brick->date[b].mm;
 }
 
 
-/** This function sets the second of a stack band
---- stack:  stack
+/** This function sets the second of a brick band
+--- brick:  brick
 --- b:      band
 --- second: second
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_second(stack_t *stack, int b, int second){
+void set_brick_second(brick_t *brick, int b, int second){
   
-  stack->date[b].ss = second;
+  brick->date[b].ss = second;
   
   return;
 }
 
 
-/** This function gets the second of a stack band
---- stack:  stack
+/** This function gets the second of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: second
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_second(stack_t *stack, int b){
+int get_brick_second(brick_t *brick, int b){
   
-  return stack->date[b].ss;
+  return brick->date[b].ss;
 }
 
 
-/** This function sets the timezone of a stack band
---- stack:    stack
+/** This function sets the timezone of a brick band
+--- brick:    brick
 --- b:        band
 --- timezone: timezone
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack_timezone(stack_t *stack, int b, int timezone){
+void set_brick_timezone(brick_t *brick, int b, int timezone){
   
-  stack->date[b].tz = timezone;
+  brick->date[b].tz = timezone;
   
   return;
 }
 
 
-/** This function gets the timezone of a stack band
---- stack:  stack
+/** This function gets the timezone of a brick band
+--- brick:  brick
 --- b:      band
 +++ Return: timezone
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_stack_timezone(stack_t *stack, int b){
+int get_brick_timezone(brick_t *brick, int b){
   
-  return stack->date[b].tz;
+  return brick->date[b].tz;
 }
 
 
-/** This function gets a formatted date of a stack band
---- stack:     stack
+/** This function gets a formatted date of a brick band
+--- brick:     brick
 --- b:         band
 --- formatted: formatted date (modified)
 --- size:      length of the buffer for formatted
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_compactdate(stack_t *stack, int b, char formatted[], size_t size){
+void get_brick_compactdate(brick_t *brick, int b, char formatted[], size_t size){
 
-  compact_date(stack->date[b].year, stack->date[b].month, stack->date[b].day, formatted, size);
+  compact_date(brick->date[b].year, brick->date[b].month, brick->date[b].day, formatted, size);
 
   return;
 }
 
 
-/** This function gets a formatted date of a stack band
---- stack:     stack
+/** This function gets a formatted date of a brick band
+--- brick:     brick
 --- b:         band
 --- formatted: formatted date (modified)
 --- size:      length of the buffer for formatted
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_longdate(stack_t *stack, int b, char formatted[], size_t size){
+void get_brick_longdate(brick_t *brick, int b, char formatted[], size_t size){
 
-  long_date(stack->date[b].year, stack->date[b].month, stack->date[b].day,
-    stack->date[b].hh, stack->date[b].mm, stack->date[b].ss, stack->date[b].tz, 
+  long_date(brick->date[b].year, brick->date[b].month, brick->date[b].day,
+    brick->date[b].hh, brick->date[b].mm, brick->date[b].ss, brick->date[b].tz, 
     formatted, size);
 
   return;
@@ -3198,32 +3198,32 @@ void get_stack_longdate(stack_t *stack, int b, char formatted[], size_t size){
 /** This function sets an image value. This is slower than direct access
 +++ to the memory, but probably more convenient as the correct datatype
 +++ etc is chosen
---- stack:  stack
+--- brick:  brick
 --- b:      band
 --- p:      pixel
 --- val:    value
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_stack(stack_t *stack, int b, int p, float val){
+void set_brick(brick_t *brick, int b, int p, float val){
 
-  switch (stack->datatype){
+  switch (brick->datatype){
     case _DT_SHORT_:
-      stack->vshort[b][p] = (short)val;
+      brick->vshort[b][p] = (short)val;
       break;
     case _DT_SMALL_:
-      stack->vsmall[b][p] = (small)val;
+      brick->vsmall[b][p] = (small)val;
       break;
     case _DT_FLOAT_:
-      stack->vfloat[b][p] = (float)val;
+      brick->vfloat[b][p] = (float)val;
       break;
     case _DT_INT_:
-      stack->vint[b][p] = (int)val;
+      brick->vint[b][p] = (int)val;
       break;
     case _DT_USHORT_:
-      stack->vushort[b][p] = (ushort)val;
+      brick->vushort[b][p] = (ushort)val;
       break;
     default:
-      printf("unknown datatype %d, (no value was set)\n", stack->datatype);
+      printf("unknown datatype %d, (no value was set)\n", brick->datatype);
       return;
   }
 
@@ -3233,28 +3233,28 @@ void set_stack(stack_t *stack, int b, int p, float val){
 /** This function gets an image value. This is slower than direct access
 +++ to the memory, but probably more convenient as the correct datatype
 +++ etc is chosen
---- stack:  stack
+--- brick:  brick
 --- b:      band
 --- p:      pixel
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float get_stack(stack_t *stack, int b, int p){
+float get_brick(brick_t *brick, int b, int p){
 
-  switch (stack->datatype){
+  switch (brick->datatype){
     case _DT_SHORT_:
-      return (float)stack->vshort[b][p];
+      return (float)brick->vshort[b][p];
       break;
     case _DT_SMALL_:
-      return (float)stack->vsmall[b][p];
+      return (float)brick->vsmall[b][p];
       break;
     case _DT_FLOAT_:
-      return (float)stack->vfloat[b][p];
+      return (float)brick->vfloat[b][p];
       break;
     case _DT_INT_:
-      return (float)stack->vint[b][p];
+      return (float)brick->vint[b][p];
       break;
     case _DT_USHORT_:
-      return (float)stack->vushort[b][p];
+      return (float)brick->vushort[b][p];
       break;
     default:
       printf("unknown datatype (return 0)");
@@ -3265,237 +3265,237 @@ float get_stack(stack_t *stack, int b, int p){
 
 
 /** This function returns a pointer to the short image bands
---- stack:  stack
+--- brick:  brick
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short **get_bands_short(stack_t *stack){
+short **get_bands_short(brick_t *brick){
 
-  if (stack->vshort == NULL){
+  if (brick->vshort == NULL){
     printf("SHORT memory not available.\n"); return NULL;}
 
-  return stack->vshort;
+  return brick->vshort;
 }
 
 
 /** This function returns a pointer to the byte image bands
---- stack:  stack
+--- brick:  brick
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-small **get_bands_small(stack_t *stack){
+small **get_bands_small(brick_t *brick){
 
-  if (stack->vsmall == NULL){
+  if (brick->vsmall == NULL){
     printf("SMALL memory not available.\n"); return NULL;}
 
-  return stack->vsmall;
+  return brick->vsmall;
 }
 
 
 /** This function returns a pointer to the float image bands
---- stack:  stack
+--- brick:  brick
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float **get_bands_float(stack_t *stack){
+float **get_bands_float(brick_t *brick){
 
-  if (stack->vfloat == NULL){
+  if (brick->vfloat == NULL){
     printf("FLOAT memory not available.\n"); return NULL;}
 
-  return stack->vfloat;
+  return brick->vfloat;
 }
 
 
 /** This function returns a pointer to the integer image bands
---- stack:  stack
+--- brick:  brick
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int **get_bands_int(stack_t *stack){
+int **get_bands_int(brick_t *brick){
 
-  if (stack->vint == NULL){
+  if (brick->vint == NULL){
     printf("INT memory not available.\n"); return NULL;}
 
-  return stack->vint;
+  return brick->vint;
 }
 
 
 /** This function returns a pointer to the unsigned short image bands
---- stack:  stack
+--- brick:  brick
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ushort **get_bands_ushort(stack_t *stack){
+ushort **get_bands_ushort(brick_t *brick){
 
-  if (stack->vushort == NULL){
+  if (brick->vushort == NULL){
     printf("USHORT memory not available.\n"); return NULL;}
 
-  return stack->vushort;
+  return brick->vushort;
 }
 
 
 /** This function returns a pointer to a short image band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *get_band_short(stack_t *stack, int b){
+short *get_band_short(brick_t *brick, int b){
 
-  if (stack->vshort == NULL){
+  if (brick->vshort == NULL){
     printf("SHORT memory not available.\n"); return NULL;}
   
-  return stack->vshort[b];
+  return brick->vshort[b];
 }
 
 
 /** This function returns a pointer to a byte image band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-small *get_band_small(stack_t *stack, int b){
+small *get_band_small(brick_t *brick, int b){
 
-  if (stack->vsmall == NULL){
+  if (brick->vsmall == NULL){
     printf("SMALL memory not available.\n"); return NULL;}
   
-  return stack->vsmall[b];
+  return brick->vsmall[b];
 }
 
 
 /** This function returns a pointer to a float image band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float *get_band_float(stack_t *stack, int b){
+float *get_band_float(brick_t *brick, int b){
 
-  if (stack->vfloat == NULL){
+  if (brick->vfloat == NULL){
     printf("FLOAT memory not available.\n"); return NULL;}
   
-  return stack->vfloat[b];
+  return brick->vfloat[b];
 }
 
 
 /** This function returns a pointer to an integer image band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int *get_band_int(stack_t *stack, int b){
+int *get_band_int(brick_t *brick, int b){
 
-  if (stack->vint == NULL){
+  if (brick->vint == NULL){
     printf("INT memory not available.\n"); return NULL;}
   
-  return stack->vint[b];
+  return brick->vint[b];
 }
 
 
 /** This function returns a pointer to an unsigned short image band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ushort *get_band_ushort(stack_t *stack, int b){
+ushort *get_band_ushort(brick_t *brick, int b){
   
-  if (stack->vushort == NULL){
+  if (brick->vushort == NULL){
     printf("USHORT memory not available.\n"); return NULL;}
   
-  return stack->vushort[b];
+  return brick->vushort[b];
 }
 
 
 /** This function returns a pointer to a short image band
---- stack:  stack
+--- brick:  brick
 --- domain: domain of the band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *get_domain_short(stack_t *stack, const char *domain){
+short *get_domain_short(brick_t *brick, const char *domain){
 int b;
 
-  if (stack->vshort == NULL){
+  if (brick->vshort == NULL){
     printf("SHORT memory not available.\n"); return NULL;}
 
-  if ((b = find_domain(stack, domain)) < 0) return NULL;
+  if ((b = find_domain(brick, domain)) < 0) return NULL;
   
-  return stack->vshort[b];
+  return brick->vshort[b];
 }
 
 
 /** This function returns a pointer to a byte image band
---- stack:  stack
+--- brick:  brick
 --- domain: domain of the band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-small *get_domain_small(stack_t *stack, const char *domain){
+small *get_domain_small(brick_t *brick, const char *domain){
 int b;
 
-  if (stack->vsmall == NULL){
+  if (brick->vsmall == NULL){
     printf("SMALL memory not available.\n"); return NULL;}
 
-  if ((b = find_domain(stack, domain)) < 0) return NULL;
+  if ((b = find_domain(brick, domain)) < 0) return NULL;
 
-  return stack->vsmall[b];
+  return brick->vsmall[b];
 }
 
 
 /** This function returns a pointer to a float image band
---- stack:  stack
+--- brick:  brick
 --- domain: domain of the band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float *get_domain_float(stack_t *stack, const char *domain){
+float *get_domain_float(brick_t *brick, const char *domain){
 int b;
 
-  if (stack->vfloat == NULL){
+  if (brick->vfloat == NULL){
     printf("FLOAT memory not available.\n"); return NULL;}
 
-    if ((b = find_domain(stack, domain)) < 0) return NULL;
+    if ((b = find_domain(brick, domain)) < 0) return NULL;
 
-  return stack->vfloat[b];
+  return brick->vfloat[b];
 }
 
 
 /** This function returns a pointer to an integer image band
---- stack:  stack
+--- brick:  brick
 --- domain: domain of the band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int *get_domain_int(stack_t *stack, const char *domain){
+int *get_domain_int(brick_t *brick, const char *domain){
 int b;
 
-  if (stack->vint == NULL){
+  if (brick->vint == NULL){
     printf("INT memory not available.\n"); return NULL;}
 
-  if ((b = find_domain(stack, domain)) < 0) return NULL;
+  if ((b = find_domain(brick, domain)) < 0) return NULL;
 
-  return stack->vint[b];
+  return brick->vint[b];
 }
 
 
 /** This function returns a pointer to an unsigned short image band
---- stack:  stack
+--- brick:  brick
 --- domain: domain of the band
 +++ Return: value
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ushort *get_domain_ushort(stack_t *stack, const char *domain){
+ushort *get_domain_ushort(brick_t *brick, const char *domain){
 int b;
 
-  if (stack->vushort == NULL){
+  if (brick->vushort == NULL){
     printf("USHORT memory not available.\n"); return NULL;}
 
-  if ((b = find_domain(stack, domain)) < 0) return NULL;
+  if ((b = find_domain(brick, domain)) < 0) return NULL;
 
-  return stack->vushort[b];
+  return brick->vushort[b];
 }
 
 
 /** This function returns the minimum value of a band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: minimum
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float get_stack_min(stack_t *stack, int b){
+float get_brick_min(brick_t *brick, int b){
 int p;
 float tmp, min = LONG_MAX;
 
-   for (p=0; p<stack->nc; p++){
-     if (is_stack_nodata(stack, b, p)) continue;
-     if ((tmp = get_stack(stack, b, p)) < min) min = tmp;
+   for (p=0; p<brick->nc; p++){
+     if (is_brick_nodata(brick, b, p)) continue;
+     if ((tmp = get_brick(brick, b, p)) < min) min = tmp;
    }
 
    return min;
@@ -3503,17 +3503,17 @@ float tmp, min = LONG_MAX;
 
 
 /** This function returns the maximum value of a band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 +++ Return: maximum
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float get_stack_max(stack_t *stack, int b){
+float get_brick_max(brick_t *brick, int b){
 int p;
 float tmp, max = LONG_MIN;
 
-   for (p=0; p<stack->nc; p++){
-     if (is_stack_nodata(stack, b, p)) continue;
-     if ((tmp = get_stack(stack, b, p)) > max) max = tmp;
+   for (p=0; p<brick->nc; p++){
+     if (is_brick_nodata(brick, b, p)) continue;
+     if ((tmp = get_brick(brick, b, p)) > max) max = tmp;
    }
    
    return max;
@@ -3521,19 +3521,19 @@ float tmp, max = LONG_MIN;
 
 
 /** This function returns the minimum/maximum value of a band
---- stack:  stack
+--- brick:  brick
 --- b:      band
 --- min:    minimum
 --- max:    maximum
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_stack_range(stack_t *stack, int b, float *min, float *max){
+void get_brick_range(brick_t *brick, int b, float *min, float *max){
 int p;
 float tmp, mx = LONG_MIN, mn = LONG_MAX;
 
-   for (p=0; p<stack->nc; p++){
-     if (is_stack_nodata(stack, b, p)) continue;
-     tmp = get_stack(stack, b, p);
+   for (p=0; p<brick->nc; p++){
+     if (is_brick_nodata(brick, b, p)) continue;
+     tmp = get_brick(brick, b, p);
      if (tmp < mn) mn = tmp;
      if (tmp > mx) mx = tmp;
    }

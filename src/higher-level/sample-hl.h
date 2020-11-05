@@ -47,7 +47,7 @@ typedef struct {
   int nr;        // number of response variables
 } aux_smp_t;
 
-stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct);
+brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

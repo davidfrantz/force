@@ -37,7 +37,7 @@ This file contains functions forcomputing sun/view geometry
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int sun_target_view(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, stack_t *QAI){
+int sun_target_view(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, brick_t *QAI){
 double lat, lon;
 float zen, azi;
 int e, f, g, p;
@@ -50,9 +50,9 @@ float *xy_szen = NULL;
   #endif
 
 
-  nf  = get_stack_ncols(atc->xy_sun);
-  ne  = get_stack_nrows(atc->xy_sun);
-  nc  = get_stack_ncells(QAI);
+  nf  = get_brick_ncols(atc->xy_sun);
+  ne  = get_brick_nrows(atc->xy_sun);
+  nc  = get_brick_ncells(QAI);
 
   // average satellite height (m)
   if (mission == LANDSAT){
@@ -73,23 +73,23 @@ float *xy_szen = NULL;
   for (f=0; f<nf; f++, g++){
 
     // geo coordinate
-    get_stack_geo(atc->xy_sun, f, e, &lon, &lat);
+    get_brick_geo(atc->xy_sun, f, e, &lon, &lat);
 
     // calculate sun angles
-    sunpos(lat, lon, get_stack_date(atc->xy_sun, 0), &zen, &azi);
+    sunpos(lat, lon, get_brick_date(atc->xy_sun, 0), &zen, &azi);
 
     // degree to radians
     zen *= _D2R_CONV_;
     azi *= _D2R_CONV_;
 
-    set_stack(atc->xy_sun,  ZEN, g, zen);
-    set_stack(atc->xy_sun,  AZI, g, azi);
-    set_stack(atc->xy_sun, cZEN, g, cos(zen));
-    set_stack(atc->xy_sun, cAZI, g, cos(azi));
-    set_stack(atc->xy_sun, sZEN, g, sin(zen));
-    set_stack(atc->xy_sun, sAZI, g, sin(azi));
-    set_stack(atc->xy_sun, tZEN, g, tan(zen));
-    set_stack(atc->xy_sun, tAZI, g, tan(azi));
+    set_brick(atc->xy_sun,  ZEN, g, zen);
+    set_brick(atc->xy_sun,  AZI, g, azi);
+    set_brick(atc->xy_sun, cZEN, g, cos(zen));
+    set_brick(atc->xy_sun, cAZI, g, cos(azi));
+    set_brick(atc->xy_sun, sZEN, g, sin(zen));
+    set_brick(atc->xy_sun, sAZI, g, sin(azi));
+    set_brick(atc->xy_sun, tZEN, g, tan(zen));
+    set_brick(atc->xy_sun, tAZI, g, tan(azi));
 
     // satellite view geometry
     if (view_angle(meta, mission, atc, QAI, f, e, g) == FAILURE){
@@ -99,8 +99,8 @@ float *xy_szen = NULL;
   }
 
   // min/max of cos(szen) & cos(vzen)
-  get_stack_range(atc->xy_sun,  cZEN, &atc->cosszen[0], &atc->cosszen[1]);
-  get_stack_range(atc->xy_view, cZEN, &atc->cosvzen[0], &atc->cosvzen[1]);
+  get_brick_range(atc->xy_sun,  cZEN, &atc->cosszen[0], &atc->cosszen[1]);
+  get_brick_range(atc->xy_view, cZEN, &atc->cosvzen[0], &atc->cosvzen[1]);
 
 
   if ((xy_szen = get_band_float(atc->xy_sun, ZEN)) == NULL) return FAILURE;
@@ -112,15 +112,15 @@ float *xy_szen = NULL;
     #pragma omp for schedule(guided)
     for (p=0; p<nc; p++){
       if (get_off(QAI, p)) continue;
-      g = convert_stack_p2p(QAI, atc->xy_sun, p);
+      g = convert_brick_p2p(QAI, atc->xy_sun, p);
       if (xy_szen[g] > 1.308997) set_lowsun(QAI, p, true);
     }
   }
 
 
   #ifdef FORCE_DEBUG
-  print_stack_info(atc->xy_sun);  set_stack_open(atc->xy_sun,  OPEN_CREATE); write_stack(atc->xy_sun);
-  print_stack_info(atc->xy_view); set_stack_open(atc->xy_view, OPEN_CREATE); write_stack(atc->xy_view);
+  print_brick_info(atc->xy_sun);  set_brick_open(atc->xy_sun,  OPEN_CREATE); write_brick(atc->xy_sun);
+  print_brick_info(atc->xy_view); set_brick_open(atc->xy_view, OPEN_CREATE); write_brick(atc->xy_view);
   printf("min/max cosszen: %.2f/%.2f\n", atc->cosszen[0], atc->cosszen[1]);
   printf("min/max cosvzen: %.2f/%.2f\n", atc->cosvzen[0], atc->cosvzen[1]);
   #endif
@@ -140,7 +140,7 @@ float *xy_szen = NULL;
 --- atc:    atmospheric correction factors
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int viewgeo(par_ll_t *pl2, stack_t *QAI, atc_t *atc){
+int viewgeo(par_ll_t *pl2, brick_t *QAI, atc_t *atc){
 int i, j, p, nx, ny;
 int uly, ury, lly, lry;
 int ulx, urx, llx, lrx;
@@ -152,11 +152,11 @@ double dx, dy;
 
 
   uly = -1; lry = -1; urx = -1;
-  llx = get_stack_ncells(QAI);
+  llx = get_brick_ncells(QAI);
   lrx = lly = ury = ulx = 0;
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
 
   // find corners of image
   for (i=0, p=0; i<ny; i++){
@@ -183,12 +183,12 @@ double dx, dy;
 
 
   // geo coordinate
-  get_stack_geo(QAI, ulx, uly, &gulx, &guly);
-  get_stack_geo(QAI, ux,  uy,  &gux,  &guy);
-  get_stack_geo(QAI, urx, ury, &gurx, &gury);
-  get_stack_geo(QAI, llx, lly, &gllx, &glly);
-  get_stack_geo(QAI, lx,  ly,  &glx,  &gly);
-  get_stack_geo(QAI, lrx, lry, &glrx, &glry);
+  get_brick_geo(QAI, ulx, uly, &gulx, &guly);
+  get_brick_geo(QAI, ux,  uy,  &gux,  &guy);
+  get_brick_geo(QAI, urx, ury, &gurx, &gury);
+  get_brick_geo(QAI, llx, lly, &gllx, &glly);
+  get_brick_geo(QAI, lx,  ly,  &glx,  &gly);
+  get_brick_geo(QAI, lrx, lry, &glrx, &glry);
 
   // difference from top to bottom
   dx = gux-glx; dy = gly-guy;
@@ -237,16 +237,16 @@ double dx, dy;
 --- g:      cell in coarse grid
 +++ Return: SUCCESS/FAILURE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int view_angle(meta_t *meta, int mission, atc_t *atc, stack_t *QAI, int f, int e, int g){
+int view_angle(meta_t *meta, int mission, atc_t *atc, brick_t *QAI, int f, int e, int g){
 int i, j, p, nx, ny;
 float dist, res, cres, rres, zen = 0, azi = 0;
 
 
-  nx = get_stack_ncols(QAI);
-  ny = get_stack_nrows(QAI);
+  nx = get_brick_ncols(QAI);
+  ny = get_brick_nrows(QAI);
 
-  res  = get_stack_res(QAI);
-  cres = get_stack_res(atc->xy_view);
+  res  = get_brick_res(QAI);
+  cres = get_brick_res(atc->xy_view);
   rres = res/cres;
 
 
@@ -294,23 +294,23 @@ float dist, res, cres, rres, zen = 0, azi = 0;
   }
 
   if (fequal(zen, atc->nodata)){
-    set_stack(atc->xy_view,  ZEN, g, atc->nodata);
-    set_stack(atc->xy_view,  AZI, g, atc->nodata);
-    set_stack(atc->xy_view, cZEN, g, atc->nodata);
-    set_stack(atc->xy_view, cAZI, g, atc->nodata);
-    set_stack(atc->xy_view, sZEN, g, atc->nodata);
-    set_stack(atc->xy_view, sAZI, g, atc->nodata);
-    set_stack(atc->xy_view, tZEN, g, atc->nodata);
-    set_stack(atc->xy_view, tAZI, g, atc->nodata);
+    set_brick(atc->xy_view,  ZEN, g, atc->nodata);
+    set_brick(atc->xy_view,  AZI, g, atc->nodata);
+    set_brick(atc->xy_view, cZEN, g, atc->nodata);
+    set_brick(atc->xy_view, cAZI, g, atc->nodata);
+    set_brick(atc->xy_view, sZEN, g, atc->nodata);
+    set_brick(atc->xy_view, sAZI, g, atc->nodata);
+    set_brick(atc->xy_view, tZEN, g, atc->nodata);
+    set_brick(atc->xy_view, tAZI, g, atc->nodata);
   } else {
-    set_stack(atc->xy_view,  ZEN, g, zen);
-    set_stack(atc->xy_view,  AZI, g, azi);
-    set_stack(atc->xy_view, cZEN, g, cos(zen));
-    set_stack(atc->xy_view, cAZI, g, cos(azi));
-    set_stack(atc->xy_view, sZEN, g, sin(zen));
-    set_stack(atc->xy_view, sAZI, g, sin(azi));
-    set_stack(atc->xy_view, tZEN, g, tan(zen));
-    set_stack(atc->xy_view, tAZI, g, tan(azi));
+    set_brick(atc->xy_view,  ZEN, g, zen);
+    set_brick(atc->xy_view,  AZI, g, azi);
+    set_brick(atc->xy_view, cZEN, g, cos(zen));
+    set_brick(atc->xy_view, cAZI, g, cos(azi));
+    set_brick(atc->xy_view, sZEN, g, sin(zen));
+    set_brick(atc->xy_view, sAZI, g, sin(azi));
+    set_brick(atc->xy_view, tZEN, g, tan(zen));
+    set_brick(atc->xy_view, tAZI, g, tan(azi));
   }
   
 

@@ -42,7 +42,7 @@ This program is for testing small things. Needs to be compiled on demand
 #include "cross-level/dir-cl.h"
 #include "cross-level/const-cl.h"
 #include "cross-level/stats-cl.h"
-#include "cross-level/stack-cl.h"
+#include "cross-level/brick-cl.h"
 #include "cross-level/warp-cl.h"
 
 #include "higher-level/read-ard-hl.h"

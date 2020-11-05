@@ -249,6 +249,9 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
 
+  // python plugin parameters
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.opyp);
 
   return;
 }
@@ -1519,8 +1522,15 @@ double tol = 5e-3;
         printf("Polarmetrics require INTERPOLATE != NONE\n"); return FAILURE;}
 
     }
- 
 
+
+    if (phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
+      phl->tsa.pyp.opyp = false;
+      printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
+
+    if (!phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
+      copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
 
   }
 
