@@ -384,6 +384,19 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_TSI = FALSE``
 
+* **Python plug-in parameters**
+
+  * This file specifies the file holding user-provided python code. 
+    You can skip this by setting ``FILE_PYTHON = NULL``, but this requires ``OUTPUT_PYP = FALSE``.
+
+    | *Type:* full file path
+    | ``FILE_PYTHON = NULL``
+
+  * Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_PYP = FALSE``
+
 * **Spectral temporal metrics**
 
   * Output Spectral Temporal Metrics? The remaining parameters in this block are only evaluated if TRUE

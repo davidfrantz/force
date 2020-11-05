@@ -1398,6 +1398,35 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
++++ level interpolation pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_pyp(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# PYTHON-PLUGIN PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){  
+    fprintf(fp, "# This file specifies the file holding user-provided python code. You can skip this\n");
+    fprintf(fp, "# by setting FILE_PYTHON = NULL, but this requires OUTPUT_PYP = FALSE.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_PYTHON = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_PYP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
 +++ level STM pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?

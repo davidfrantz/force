@@ -6,6 +6,11 @@ Develop version
 FORCE-dev
 ---------
 
+* **General changes**
+
+  * :ref:`depend` have changed.
+    Instead of python, python3 is now specifically required.
+
 * **FORCE L2PS**
 
   * Changed the behaviour of the cloud shadow flag.
@@ -37,6 +42,19 @@ FORCE-dev
 
   * force-higher-level is aware of the newly added MODIS sensors, i.e. MOD01 and MOD02 can be specified in the sensor list (``SENSORS``).
     A new spectral band is available as ``INDEX = SWIR0``, which represents MODIS band 5 (1230 - 1250).
+
+  * in force-higher-level, TSA sub-module: 
+    There is a new functionality, which enables users to plug-in their own python code in a very easy and user-friendly way.
+    Thus, FORCE can now be complemented by custom user functionality without changing or recompling the C code.
+    Two new parameters are now needed in the TSA parameterfile: 
+
+    1) ``FILE_PYTHON`` points to a python file
+    2) ``OUTPUT_PYP = TRUE/FALSE`` defines whether to use the script and output the corresponding data
+
+    An example python script can be found in ``force/example/tsi-plugin.py``.
+    Do not modify the function names and function arguments.
+
+    A tutorial is planned to showcase the usage.
 
 
 Master release: TBA
