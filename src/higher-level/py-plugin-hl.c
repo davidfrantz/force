@@ -21,7 +21,9 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-This file contains functions for spectral temporal metrics
+This file contains functions for plugging-in python into the TSA submodule
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Copyright (C) 2020 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
@@ -31,11 +33,17 @@ This file contains functions for spectral temporal metrics
 #include <numpy/ndarrayobject.h>
 #include <numpy/ndarraytypes.h>
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
+
+/** This function initializes the python interpreter, and defines a 
++++ function for python multi-processing on the block level
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_python(par_hl_t *phl){
 
 
@@ -67,6 +75,9 @@ void register_python(par_hl_t *phl){
 }
 
 
+/** This function cleans up the python interpreter
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void deregister_python(){
 
 
@@ -76,31 +87,35 @@ void deregister_python(){
 }
 
 
-
+/** This function loads the provided python function and makes some 
++++ tests with dummy data
+--- pyp:    python-plugin parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_python_tsa(par_pyp_t *pyp){
-PyObject *main_module = NULL;
-PyObject *main_dict = NULL;
-PyObject *py_fun = NULL;
-PyObject *py_register = NULL;
-FILE *fpy = NULL;
+FILE *fpy                = NULL;
+PyObject *main_module    = NULL;
+PyObject *main_dict      = NULL;
+PyObject *py_fun         = NULL;
+PyObject *py_register    = NULL;
+PyObject *py_nodata      = NULL;
+PyObject *py_nproc       = NULL;
+PyArrayObject* py_tsi    = NULL;
+PyArrayObject* py_ce     = NULL;
+PyArrayObject* py_year   = NULL;
+PyArrayObject* py_month  = NULL;
+PyArrayObject* py_day    = NULL;
+PyArrayObject *py_return = NULL;
+npy_intp *dim            = NULL;
 int ni = 5, nc = 10, ndim;
 npy_intp dim_2d[2] = { ni, nc };
 npy_intp dim_1d[1] = { ni };
 int t, p;
-PyObject *py_nodata = NULL;
-PyObject *py_nproc = NULL;
-PyArrayObject* py_tsi = NULL;
-PyArrayObject* py_ce = NULL;
-PyArrayObject* py_year = NULL;
-PyArrayObject* py_month = NULL;
-PyArrayObject* py_day = NULL;
-PyArrayObject *py_return = NULL;
 short* tsi_ = NULL;
-int* ce_ = NULL;
-int* year_ = NULL;
+int* ce_    = NULL;
+int* year_  = NULL;
 int* month_ = NULL;
-int* day_ = NULL;
-npy_intp *dim = NULL;
+int* day_   = NULL;
 
 
   if (!pyp->opyp){
@@ -111,6 +126,7 @@ npy_intp *dim = NULL;
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
+  // parse the provided python function
   fpy = fopen(pyp->f_code, "r");
   PyRun_SimpleFile(fpy, pyp->f_code);
 
@@ -133,6 +149,7 @@ npy_intp *dim = NULL;
     exit(FAILURE);}
 
 
+  // test the provided python function with dummy data
   py_nodata = PyLong_FromLong(-9999);
   py_nproc = PyLong_FromLong(2);
 
@@ -159,7 +176,7 @@ npy_intp *dim = NULL;
 
   py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(py_fun, py_tsi, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
   if (py_return == NULL){
-    printf("Oops. Testing %s failed. "
+    printf("Oops. Testing %s failed with dummy data. "
            "NULL returned from python. "
            "Clean up the python plugin code!\n", "forcepy_tsi");
     exit(FAILURE);}
@@ -168,20 +185,20 @@ npy_intp *dim = NULL;
   dim  = PyArray_DIMS(py_return);
 
   if (ndim != 2){
-    printf("Oops. Testing %s failed. "
+    printf("Oops. Testing %s failed with dummy data. "
            "Returned dimensions are incorrect: %d. "
            "Clean up the python plugin code!\n", "forcepy_tsi", ndim);
     exit(FAILURE);}
 
   if (dim[0] != pyp->nb){
-    printf("Oops. Testing %s failed. "
+    printf("Oops. Testing %s failed with dummy data. "
            "Returned array size is incorrect. "
            "Expected %d elements in 1st dimension, received %d. "
            "Clean up the python plugin code!\n", "forcepy_tsi", pyp->nb, (int)dim[0]);
     exit(FAILURE);}
 
   if (dim[1] != nc){
-    printf("Oops. Testing %s failed. "
+    printf("Oops. Testing %s failed with dummy data. "
            "Returned array size is incorrect. "
            "Expected %d elements in 2nd dimension (not all pixels returned), received %d. "
            "Clean up the python plugin code!\n", "forcepy_tsi", nc, (int)dim[1]);
@@ -224,7 +241,6 @@ PyObject *main_module = NULL;
 PyObject *main_dict = NULL;
 PyObject *py_fun = NULL;
 
-//PyObject *py_val = NULL;
 PyObject *py_nodata = NULL;
 PyObject *py_nproc = NULL;
 PyArrayObject* py_tsi = NULL;
@@ -271,6 +287,7 @@ int* day_ = NULL;
   day_   = (int*)PyArray_DATA(py_day);
 
 
+  // copy C data to python objects
   for (t=0; t<ni; t++){
     memcpy(tsi_, ts->tsi_[t], sizeof(short)*nc);
     tsi_ += nc;
@@ -280,16 +297,15 @@ int* day_ = NULL;
     day_[t]   = ts->d_tsi[t].day;
   }
 
-
-  //printf("tsi:   [%d", ts->tsi_[0][0]);   for (t=0; t<ni; t++) printf(" %d", ts->tsi_[t][0]);   printf("]\n");
-  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(py_fun, py_tsi, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
-
+  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
+    py_fun, py_tsi, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
 
   if (py_return == NULL){
     printf("Oops. NULL returned from python. Clean up the python plugin code!\n");
     exit(FAILURE);}
 
 
+  // copy to output brick
   return_ = (short*)PyArray_DATA(py_return);
   for (b=0; b<phl->tsa.pyp.nb; b++){
     memcpy(ts->pyp_[b], return_, sizeof(short)*nc);
@@ -297,6 +313,7 @@ int* day_ = NULL;
   }
 
 
+  // clean
   Py_DECREF(py_return);
   Py_DECREF(py_tsi);
   Py_DECREF(py_ce);
@@ -312,134 +329,4 @@ int* day_ = NULL;
 
   return SUCCESS;
 }
-
-/**int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_pyp_t *pyp){
-int b, t, p;
-
-FILE *fpy = NULL;
-
-npy_intp n = ni;
-
-PyObject *main_module = NULL;
-PyObject *main_dict = NULL;
-PyObject *py_fun = NULL;
-PyObject *py_return = NULL;
-
-PyObject *py_val = NULL;
-PyArrayObject* py_tsi = NULL;
-PyArrayObject* py_ce = NULL;
-PyArrayObject* py_year = NULL;
-PyArrayObject* py_month = NULL;
-PyArrayObject* py_day = NULL;
-int* tsi_ = NULL;
-int* ce_ = NULL;
-int* year_ = NULL;
-int* month_ = NULL;
-int* day_ = NULL;
-
-
-  if (ts->pyp_ == NULL) return CANCEL;
-
-  //Py_Initialize();
-  //import_array();
-
-  main_module = PyImport_AddModule("__main__");
-  main_dict   = PyModule_GetDict(main_module);
-
-
-  //This is automatically checked in the function import_array. Thus remove again
-  //printf("Version: %d\n", NPY_VERSION);
-  //printf("Version: %u\n", PyArray_GetNDArrayCVersion());
-  //printf("Version: %d\n", NPY_FEATURE_VERSION);
-  //printf("Version: %u\n", PyArray_GetNDArrayCFeatureVersion());
-
-
-  fpy = fopen(pyp->f_code, "r");
-  PyRun_SimpleFile(fpy, pyp->f_code);
-
-  py_fun = PyDict_GetItemString(main_dict, "force_hl_tsa_tsi");
-
-//  #pragma omp parallel private(py_tsi,py_ce,py_year,py_month,py_day,tsi_,ce_,year_,month_,day_,t,b,py_return,py_val) shared(mask_,ts,nc,ni,nodata,pyp,py_fun,n,main_module) default(shared)
-  {
-    
- //   PyGILState_STATE gstate;
- //   gstate = PyGILState_Ensure();
-
-    py_tsi   = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
-    py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
-    py_year  = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
-    py_month = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
-    py_day   = (PyArrayObject *) PyArray_SimpleNew(1, &n, NPY_INT);
-    
-    tsi_   = (int*)py_tsi->data;
-    ce_    = (int*)py_ce->data;
-    year_  = (int*)py_year->data;
-    month_ = (int*)py_month->data;
-    day_   = (int*)py_day->data;
-
-
-   // #pragma omp for
-    for (p=0; p<nc; p++){
-
-      if (mask_ != NULL && !mask_[p]){
-        for (b=0; b<pyp->nb; b++) ts->pyp_[b][p] = nodata;
-        continue;
-      }
-
-
-      for (t=0; t<ni; t++){
-        tsi_[t]   = ts->tsi_[t][p];
-        ce_[t]    = ts->d_tsi[t].ce;
-        year_[t]  = ts->d_tsi[t].year;
-        month_[t] = ts->d_tsi[t].month;
-        day_[t]   = ts->d_tsi[t].day;
-      }
-
-      //PyObject *py_return = PyObject_CallFunctionObjArgs(py_fun, py_tsi, NULL);
-      py_return = PyObject_CallFunctionObjArgs(py_fun, py_tsi, py_ce, py_year, py_month, py_day, NULL);
-      
-      if (py_return == NULL){
-        printf("NULL returned from python. Clean up the python plugin code!\n");
-        printf("Your code failed with this data:\n");
-        printf("tsi:   [%d", tsi_[0]);   for (t=0; t<ni; t++) printf(" %d", tsi_[t]);   printf("]\n");
-        printf("ce:    [%d", ce_[0]);    for (t=0; t<ni; t++) printf(" %d", ce_[t]);    printf("]\n");
-        printf("year:  [%d", year_[0]);  for (t=0; t<ni; t++) printf(" %d", year_[t]);  printf("]\n");
-        printf("month: [%d", month_[0]); for (t=0; t<ni; t++) printf(" %d", month_[t]); printf("]\n");
-        printf("day:   [%d", day_[0]);   for (t=0; t<ni; t++) printf(" %d", day_[t]);   printf("]\n");
-        exit(FAILURE);}
-      
-      #ifdef FORCE_DEBUG
-      if ((int)Py_SIZE(py_return) != pyp->nb){
-        printf("wrong number of values received from python. Got %d, expected %d\n", 
-          (int)Py_SIZE(py_return), pyp->nb); 
-        exit(FAILURE);}
-      #endif
-      //printf("%d values received from python\n", (int)Py_SIZE(py_return));
-
-      for (b=0; b<pyp->nb; b++){
-        py_val = PyList_GetItem(py_return, b);
-        ts->pyp_[b][p] = (short)PyLong_AsLong(py_val);
-      }
-
-      Py_DECREF(py_return);
-
-    }
-
-    Py_DECREF(py_tsi);
-    Py_DECREF(py_ce);
-    Py_DECREF(py_year);
-    Py_DECREF(py_month);
-    Py_DECREF(py_day);
-
-  // PyGILState_Release(gstate);
-
-  }
-
-  fclose(fpy);
-  //Py_Finalize();
-
-  //for (p=0; p<15; p++) printf("\n");
-
-  return SUCCESS;
-}**/
 
