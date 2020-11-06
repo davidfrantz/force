@@ -31,7 +31,8 @@ GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
 GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
-PYTHON != python3-config --includes
+PYTHON != python3-config --includes 
+PYTHON2 != python3-config --ldflags
 #SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
 
 # Linked libs
@@ -353,7 +354,7 @@ force-l2ps: temp cross lower $(DL)/_level2.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-l2ps $(DL)/_level2.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 force-higher-level: temp cross higher $(DH)/_higher-level.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON)
 
 force-lut-modis: temp cross lower $(DL)/_lut-modis.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-lut-modis $(DL)/_lut-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)

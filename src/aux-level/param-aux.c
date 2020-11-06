@@ -385,6 +385,14 @@ void write_par_ll_cloud(FILE *fp, bool verbose){
   fprintf(fp, "MAX_CLOUD_COVER_TILE  = 75\n");
 
   if (verbose){
+    fprintf(fp, "# Buffer sizes (radius in meters) for cloud, cloud shadow and snow masks.\n");
+    fprintf(fp, "# Type: Float. Valid range: [0,10000]\n");
+  }
+  fprintf(fp, "CLOUD_BUFFER  = 300\n");
+  fprintf(fp, "SHADOW_BUFFER = 90\n");
+  fprintf(fp, "SNOW_BUFFER   = 30\n");
+
+  if (verbose){
     fprintf(fp, "# These are the main thresholds of the Fmask algorithm.\n");
     fprintf(fp, "# Type: Float. Valid range: [0,1]\n");
   }
