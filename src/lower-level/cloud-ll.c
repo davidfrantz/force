@@ -37,8 +37,8 @@ This file contains functions for cloud and cloud shadow identification
 #include <omp.h> // multi-platform shared memory multiprocessing
 
 
-float finalize_cloud(int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_);
-int potential_cloud(int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR);
+float finalize_cloud(par_ll_t *pl2, int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_);
+int potential_cloud(par_ll_t *pl2, int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR);
 float land_probability(int nc, int nclear, int nland, int npix, float cldprob, float *lowt, float *hight, small *lnd_, small *clr_, short *temp_, short *var_, brick_t *QAI, float **PROB);
 float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short *sw2_, brick_t *QAI, float **PROB);
 int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
@@ -46,88 +46,6 @@ int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t
 int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
 int shadow_position(float h, int x, int y, float res, int g, float **sun, float **view, int *newx, int *newy);
 int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *EXP, small *cld_, short *spr_, small **SHD);
-
-
-/** This function builds the final cloud and cloud shadow classification.
-+++ Deprecated function
---- npix:   number of valid image pixels
---- TOA:    TOA reflectance
---- QAI:    Quality Assurance Information (modified)
---- fcld_:  cloud mask
---- fshd_:  shadow mask
-+++ Return: total cloud cover in %
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-#ifdef EXCLUSIVE_QAI
-float finalize_cloud(int npix, brick_t *TOA, brick_t *QAI, small *fcld_, small *fshd_){
-int p, nx, ny, nc, k = 0;
-float res, pct;
-short *blue_   = NULL;
-short *cirrus_ = NULL;
-
-
-  #ifdef FORCE_CLOCK
-  time_t TIME; time(&TIME);
-  #endif
-
-
-  nx = get_brick_ncols(QAI);
-  ny = get_brick_nrows(QAI);
-  nc  = get_brick_ncells(QAI);
-  res = get_brick_res(QAI);
-
-  if ((blue_  = get_domain_short(TOA, "BLUE")) == NULL) return FAILURE;
-  cirrus_     = get_domain_short(TOA, "CIRRUS");
-
-  /** set confident cloud **/
-
-  #pragma omp parallel shared(nc, QAI, fcld_) default(none)
-  {
-
-    #pragma omp for
-    for (p=0; p<nc; p++){
-      if (get_off(QAI, p)) continue;
-      if (get_snow(QAI, p)){
-        fcld_[p] = false;
-      } else if (fcld_[p]){
-        set_cloud(QAI, p, 2);
-      }
-    }
-  }
-
-  /** set 300m around cloud to less confident cloud **/
-  buffer_(fcld_, nx, ny, 300/res);
-
-  #pragma omp parallel shared(nc, QAI, fcld_, fshd_, cirrus_, blue_) reduction(+: k) default(none)
-  {
-
-    #pragma omp for
-    for (p=0; p<nc; p++){
-      if (get_off(QAI, p)) continue;
-      if (get_snow(QAI, p)){
-        fcld_[p] = fshd_[p] = false;
-      } else if (fcld_[p]){
-        if (get_cloud(QAI, p) == 0) set_cloud(QAI, p, 1);
-      } else if (cirrus_  != NULL && cirrus_[p] > 100 && blue_[p] < 1000){
-        set_cloud(QAI, p, 3);
-      } else if (fshd_[p]){
-        set_shadow(QAI, p, true);
-      }
-      if (get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) k++;
-    }
-    
-  }
-
-  /** total cloud / cloud shadow cover in % **/
-  pct = 100.0*k/(float)npix;
-  
- 
-  #ifdef FORCE_CLOCK
-  proctime_print("finalized cloud mask", TIME);
-  #endif
-
-  return pct;
-}
-#endif
 
 
 /** This function builds the final cloud and cloud shadow classification.
@@ -140,7 +58,7 @@ short *cirrus_ = NULL;
 --- fshd_:  shadow mask
 +++ Return: total cloud cover in %
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float finalize_cloud(int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_){
+float finalize_cloud(par_ll_t *pl2, int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_){
 int p, nx, ny, nc, k = 0;
 float res, pct;
 float z, cir_thr;
@@ -179,15 +97,15 @@ int cld_buf, shd_buf;
     }
   }
 
-  /** set 300m around cloud to less confident cloud **/
-  cld_buf = 300/res;
+  /** buffer clouds **/
+  cld_buf = pl2->cldbuf/res;
   #ifdef CMIX_FAS_2
   cld_buf = 80/res;
   #endif
   buffer_(fcld_, nx, ny, cld_buf);
 
-  /** buffer shadows by 3px **/
-  shd_buf = 3;
+  /** buffer shadows **/
+  shd_buf = pl2->shdbuf/res;
   #ifdef CMIX_FAS_2
   shd_buf = 40/res;
   #endif
@@ -279,7 +197,7 @@ int cld_buf, shd_buf;
 --- VAR:    Variability probability (returned)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int potential_cloud(int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR){
+int potential_cloud(par_ll_t *pl2, int *npix, int *nclear, int *nland, brick_t *TOA, brick_t *QAI, brick_t *EXP, small **PCP, small **CLR, small **LND, small **BRT, short **VAR){
 int p, nx, ny, nc;
 int non = 0, nsnw = 0, nwtr = 0, nclr = 0, nlnd = 0;
 float ndvi, ndsi, hot, vis, white, tmp, r45, vprob;
@@ -399,8 +317,8 @@ int snw_buf;
 
   } 
 
-  // Zhu et al., 2015 update, buffer snow layer by 1px
-  snw_buf = 1;
+  // buffer snow layer
+  snw_buf = pl2->snwbuf/get_brick_res(QAI);
   #ifdef CMIX_FAS_2
   snw_buf = 20/get_brick_res(QAI);
   #endif
@@ -1812,7 +1730,7 @@ small *shd_   = NULL;
 
 
   /** Potential Cloud Pixels **/
-  if (potential_cloud(&npix, &nclear, &nland, 
+  if (potential_cloud(pl2, &npix, &nclear, &nland, 
         TOA, QAI, EXP, &pcp_, &clr_, &lnd_, &brt_, &var_) == FAILURE){
     printf("error in PCP module.\n"); return FAILURE;}
 
@@ -1852,7 +1770,7 @@ small *shd_   = NULL;
       }
 
       // create the cloud/shadow mask and calculate distance
-      atc->cc = finalize_cloud(npix, atc, TOA, QAI, DEM, cld_, shd_);
+      atc->cc = finalize_cloud(pl2, npix, atc, TOA, QAI, DEM, cld_, shd_);
 
     // more than 80% of max. allowable cloud cover? -> everything is cloud or shadow
     } else {
@@ -1862,7 +1780,7 @@ small *shd_   = NULL;
 
       for (p=0; p<nc; p++) shd_[p] = true;
 
-      atc->cc = finalize_cloud(npix, atc, TOA, QAI, DEM, cld_, shd_);
+      atc->cc = finalize_cloud(pl2, npix, atc, TOA, QAI, DEM, cld_, shd_);
       atc->cc = 100;
 
     }
@@ -1877,7 +1795,7 @@ small *shd_   = NULL;
     for (p=0; p<nc; p++){ cld_[p] = pcp_[p]; shd_[p] = true;}
     free((void*)pcp_); free((void*)clr_); free((void*)brt_); free((void*)var_);
 
-    atc->cc = finalize_cloud(npix, atc, TOA, QAI, DEM, cld_, shd_);
+    atc->cc = finalize_cloud(pl2, npix, atc, TOA, QAI, DEM, cld_, shd_);
     atc->cc = 100;
 
   }

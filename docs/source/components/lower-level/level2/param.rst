@@ -231,12 +231,19 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Integer. Valid range: ]0,100]
     | ``MAX_CLOUD_COVER_TILE  = 75``
     
+  * Buffer sizes (radius in meters) for cloud, cloud shadow and snow masks.
+
+    | *Type:* Float. Valid range: [0,10000]
+    | ``CLOUD_BUFFER  = 300``
+    | ``SHADOW_BUFFER = 90``
+    | ``SNOW_BUFFER   = 30``
+
   * These are the main thresholds of the Fmask algorithm.
     
     | *Type:* Float. Valid range: [0,1]
     | ``CLOUD_THRESHOLD  = 0.225``
     | ``SHADOW_THRESHOLD = 0.02``
-    
+
 * **Resolution merging**
     
   * This parameter defines the method used for improving the spatial resolution of Sentinel-2’s 20 m bands to 10 m.

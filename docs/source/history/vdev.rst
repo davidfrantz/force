@@ -28,6 +28,11 @@ FORCE-dev
     Note that this happens because the assumptions for estimating **surface** reflectance are not valid over clouds.
     Thanks to Philip Frost for reporting this issue.
 
+  * Some users noted that the cloud buffer is too large for their application.
+    This release hands control of the buffer widths to the user.
+    New parameters were added to the parameterfile: ``CLOUD_BUFFER``, ``SHADOW_BUFFER``, ``SNOW_BUFFER``.
+    The size corresponds to the buffer radius in meters.
+
 * **FORCE Import**
 
   * new program added: force-import-modis

@@ -156,6 +156,8 @@ int nc = nx*ny;
 small *tmp = NULL;
 
 
+  if (r <= 0) return SUCCESS;
+
   alloc((void**)&tmp, nc, sizeof(small));
 
   // do for every pixel, except boundary
