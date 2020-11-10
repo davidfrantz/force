@@ -178,9 +178,9 @@ if [ $UPDATE -eq 1 ]; then
     show_help "$(printf "%s\n       " "Metadata directory not specified")"
   elif [ $# -gt 1 ]; then
     show_help "$(printf "%s\n       " "Too many arguments." "Only specify the metadata directory when using the update option (-u)." "The only allowed optional argument is -s. Use it if you would like to only" "update either the Landsat or Sentinel-2 metadata catalogue.")"
-  elif ! [ -w $METADIR ]; then
+  elif ! [ -w "$METADIR" ]; then
     show_help "$(printf "%s\n       " "Metadata directory does not exist, exiting")"
-  elif ! [ -w $METADIR ]; then
+  elif ! [ -w "$METADIR" ]; then
     show_help "$(printf "%s\n       " "Can not write to metadata directory, exiting")"
   else
     which_satellite
@@ -335,7 +335,7 @@ get_data() {
 
   # ============================================================
   # Check if metadata catalogue exists and is up to date
-  METACAT=$METADIR"/metadata_$SATELLITE.csv"
+  METACAT="$METADIR/metadata_$SATELLITE.csv"
   if ! [ -f $METACAT ]; then
     printf "%s\n" "" "Error: $METACAT: Metadata catalogue does not exist." "Use the -u option to download / update the metadata catalogue" ""
     exit 1
@@ -348,17 +348,22 @@ get_data() {
 
   if [ "$AOITYPE" -eq 1 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
-    AOINE=$(echo $(basename "$AOI") | rev | cut -d"." -f 2- | rev)
-    BBOX=$(ogrinfo -so $AOI $AOINE | grep "Extent: " | sed 's/Extent: //; s/(//g; s/)//g; s/, /,/g; s/ - /,/')
+    # get first layer of vector file and reproject to epsg4326
+    AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
+    AOIREPRO="$POOL"/aoi_reprojected.gpkg
+    ogr2ogr -t_srs EPSG:4326 -f GPKG "$AOIREPRO" "$AOI"
+    # get ls/s2 tiles intersecting with bounding box of AOI
+    BBOX=$(ogrinfo -so "$AOIREPRO" "$AOILAYER" | grep "Extent: " | sed 's/Extent: //; s/(//g; s/)//g; s/, /,/g; s/ - /,/')
     WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetCapabilities&typename="$SATELLITE"&bbox="$BBOX
-
-    ogr2ogr -f "GPKG" merged.gpkg WFS:"$WFSURL" -append -update
-    ogr2ogr -f "GPKG" merged.gpkg $AOI -append -update
-
+    
+    MERGEDGPKG="$POOL"/merged_$(date +%FT%H-%M-%S).gpkg
+    ogr2ogr -f "GPKG" "$MERGEDGPKG" WFS:"$WFSURL" -append -update
+    ogr2ogr -f "GPKG" "$MERGEDGPKG" $AOI -append -update
+    
     # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs | 
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOINE WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOINE.geom, 4326))" merged.gpkg | xargs -n 1 | sort -u | xargs)
-    rm merged.gpkg
-    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOILAYER WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOILAYER.geom, 4326))" "$MERGEDGPKG" | xargs -n 1 | sort -u | xargs | sed 's/PRFID,//')
+    rm "$MERGEDGPKG"
+    TILES="_"$(echo $TILERAW | sed 's/ /_|_/g')"_"
     
   elif [ "$AOITYPE" -eq 2 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
@@ -398,7 +403,7 @@ get_data() {
     LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh' | sort -t"," -k 5)
   fi
 
-  METAFNAME=$POOL/csd_metadata_$(date +%FT%H-%M-%S).txt
+  METAFNAME="$POOL"/csd_metadata_$(date +%FT%H-%M-%S).txt
   printf "%s" "$LINKS" > $METAFNAME
   case $SATELLITE in
     sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
@@ -444,7 +449,7 @@ get_data() {
   SIZEDONE=0
   if [[ $DRYRUN -eq 0 && ! -z $LINKS ]]; then
 
-    POOL=$(cd $POOL; pwd)
+    POOL=$(cd "$POOL"; pwd)
     printf "%s\n" "" "Starting to download "$NSCENES" "$PRINTNAME" Level 1 scenes" "" "" "" "" ""
     
     ITER=1
@@ -465,17 +470,17 @@ get_data() {
       
       show_progress
       
-      TILEPATH=$POOL/$TILE    
-      SCENEPATH=$TILEPATH/$SCENEID
+      TILEPATH="$POOL"/$TILE    
+      SCENEPATH="$TILEPATH"/$SCENEID
       if [ $SATELLITE = "sentinel2" ]; then
         if [[ $SCENEID == *"_OPER_"* ]]; then
           SCENEID=$(echo $URL | rev | cut -d"/" -f1 | rev | cut -d"." -f1)
         fi
-        SCENEPATH=$TILEPATH/$SCENEID".SAFE"
+        SCENEPATH="$TILEPATH"/$SCENEID".SAFE"
       fi
       # Check if scene already exists, download anyway if gsutil temp files are present
-      if [ -d $SCENEPATH ]; then
-        if ! ls -R $SCENEPATH | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
+      if [ -d "$SCENEPATH" ]; then
+        if ! ls -R "$SCENEPATH" | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
           printf "\e[500D\e[4A\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
           
           ((ITER++))
@@ -484,16 +489,16 @@ get_data() {
       fi
       
       # create target directory if it doesn't exist
-      if [ ! -w $TILEPATH ]; then
-        mkdir $TILEPATH
-        if [ ! -w $TILEPATH ]; then
+      if [ ! -w "$TILEPATH" ]; then
+        mkdir "$TILEPATH"
+        if [ ! -w "$TILEPATH" ]; then
           printf "%s\n" "" "$TILEPATH: Creating directory failed." ""
           exit 1
         fi
       fi
 
       printf "\e[500D\e[2A\e[2KDownloading "$SCENEID"("$ITER" of "$NSCENES")...\e[2B"
-      gsutil -m -q cp -R $URL $TILEPATH
+      gsutil -m -q cp -R $URL "$TILEPATH"
 
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
