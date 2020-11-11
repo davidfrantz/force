@@ -22,18 +22,65 @@
 # 
 ##########################################################################
 
+# functions/definitions ------------------------------------------------------------------
+PROG=`basename $0`;
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-EXPECTED_ARGS=1
+PARALLEL_EXE="parallel"
+PYRAMID_EXE="gdaladdo"
 
-# if wrong number of input args, stop
-if [ $# -lt $EXPECTED_ARGS ]; then
-  echo "Usage: `basename $0` file"
-  echo ""
-  exit
+MANDATORY_ARGS=1
+
+echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
+
+cmd_not_found() {      # check required external commands
+  for cmd in "$@"; do
+    stat=`which $cmd`
+    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
+  done
+}
+
+help () {
+cat <<HELP
+
+Usage: $PROG [-h] file [file]*
+
+  -h  = show his help
+
+$PROG:  compute image pyramids
+        see https://force-eo.readthedocs.io/en/latest/components/auxilliary/pyramid.html
+
+HELP
+exit 1
+}
+
+cmd_not_found "$PARALLEL_EXE";    # important, check required commands !!! dies on missing
+cmd_not_found "$PYRAMID_EXE";    # important, check required commands !!! dies on missing
+
+# now get the options --------------------------------------------------------------------
+ARGS=`getopt -o h: --long help: -n "$0" -- "$@"`
+if [ $? != 0 ] ; then help; fi
+eval set -- "$ARGS"
+
+while :; do
+  case "$1" in
+    -h|--help) help ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+  shift
+done
+
+if [ $# -lt $MANDATORY_ARGS ] ; then 
+  echoerr "Mandatory argument is missing."; help
 fi
 
+pyramid(){
 
-for i in "$@"; do
+  FINP=$(readlink -f $1) # absolute file path
+  BINP=$(basename $FINP) # basename
+  CINP=${BINP%%.*}       # corename (without extension)
+  DINP=$(dirname  $FINP) # directory name
 
   INP=$(readlink -f $i)
   #echo $INP
@@ -54,6 +101,12 @@ for i in "$@"; do
   fi
 
   echo "computing pyramids for $BASE"
-  gdaladdo -ro --config COMPRESS_OVERVIEW DEFLATE --config BIGTIFF_OVERVIEW YES -r nearest $INP 2 4 8 16
+  $PYRAMID_EXE -ro --config COMPRESS_OVERVIEW DEFLATE --config BIGTIFF_OVERVIEW YES -r nearest $INP 2 4 8 16
+
+}
+
+export -f pyramid()
+
+for i in "$@"; do
 
 done
