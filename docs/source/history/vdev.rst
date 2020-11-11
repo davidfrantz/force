@@ -61,6 +61,9 @@ FORCE-dev
 
     A tutorial is planned to showcase the usage.
 
+* **FORCE AUX**
+
+  * force-pyramid uses multiprocessing to speed up computation (when multiple input images are given).
 
 Master release: TBA
 
