@@ -351,14 +351,14 @@ get_data() {
     # get first layer of vector file and reproject to epsg4326
     AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
     AOIREPRO="$POOL"/aoi_reprojected.gpkg
-    ogr2ogr -t_srs EPSG:4326 -f GPKG "$AOIREPRO" "$AOI"
+    ogr2ogr -t_srs EPSG:4326 -f GPKG "$AOIREPRO" "$AOI" -lco GEOMETRY_NAME=geom
     # get ls/s2 tiles intersecting with bounding box of AOI
     BBOX=$(ogrinfo -so "$AOIREPRO" "$AOILAYER" | grep "Extent: " | sed 's/Extent: //; s/(//g; s/)//g; s/, /,/g; s/ - /,/')
     WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetCapabilities&typename="$SATELLITE"&bbox="$BBOX
     
     MERGEDGPKG="$POOL"/merged_$(date +%FT%H-%M-%S).gpkg
-    ogr2ogr -f "GPKG" "$MERGEDGPKG" WFS:"$WFSURL" -append -update
-    ogr2ogr -f "GPKG" "$MERGEDGPKG" $AOI -append -update
+    ogr2ogr -f "GPKG" "$MERGEDGPKG" WFS:"$WFSURL" -append -update -lco GEOMETRY_NAME=geom
+    ogr2ogr -f "GPKG" "$MERGEDGPKG" $AOI -append -update -lco GEOMETRY_NAME=geom
     
     # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs | 
     TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, $AOILAYER WHERE ST_Intersects($SATELLITE.geom, ST_Transform($AOILAYER.geom, 4326))" "$MERGEDGPKG" | xargs -n 1 | sort -u | xargs | sed 's/PRFID,//')
