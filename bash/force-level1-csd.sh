@@ -341,7 +341,7 @@ get_data() {
     exit 1
   fi
 
-  METADATE=$(date -d $(stat $METACAT | grep "Change: " | cut -d" " -f2) +%s)
+  METADATE=$(date -r "$METACAT" +%s)
   if [ $(date -d $DATEMAX +%s) -gt $METADATE ]; then
     printf "%s\n" "" "WARNING: The selected time window exceeds the last update of the $PRINTNAME metadata catalogue." "Results may be incomplete, please consider updating the metadata catalogue using the -u option."
   fi
