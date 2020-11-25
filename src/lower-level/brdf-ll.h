@@ -34,6 +34,7 @@ BRDF header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick-cl.h"
+#include "../lower-level/sunview-ll.h"
 
 
 #ifdef __cplusplus

@@ -136,7 +136,14 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Roy, D., Li, Z., & Zhang, H. (2017). Adjustment of Sentinel-2 Multi-"
     "Spectral Instrument (MSI) Red-Edge Band Reflectance to Nadir BRDF "
     "Adjusted Reflectance (NBAR) and Quantification of Red-Edge Band "
-    "BRDF Effects. Remote Sensing, 9, 1325",
+    "BRDF Effects. Remote Sensing, 9, 1325\n"
+    "Zhang, H. K., Roy, D. P., & Kovalskyy, V. (2015). Optimal solar geometry "
+    "definition for global long-term Landsat time-series bidirectional "
+    "reflectance normalization. IEEE Transactions on Geoscience and Remote Sensing, "
+    "54(3), 1410-1418\n"
+    "Li, Z., Zhang, H. K., & Roy, D. P. (2019). Investigation of Sentinel-2 "
+    "bidirectional reflectance hot-spot sensing conditions. IEEE Transactions "
+    "on Geoscience and Remote Sensing, 57(6), 3591-3598",
     false },
   { "Co-Registration Sentinel-2 -> Landsat", 
     "Yan, L., Roy, D.P., Zhang, H., Li, J., & Huang, H. (2016). An "

@@ -68,7 +68,9 @@ This file contains functions for BRDF forward modelling
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int brdf_factor(brick_t *sun, brick_t *view, brick_t *cor, int g){
-float szen, sazi, vzen, vazi;
+int e, f;
+double lon, lat;
+float szen, sazi, vzen, vazi, standard_szen;
 float brdf_correction;
 int b,  nb; // band ID of actual bands
 int b_, nb_ = 10; // band ID and number of bands for which we have parameters
@@ -87,6 +89,9 @@ char domain[10][NPOW_10] = { "BLUE", "GREEN", "RED",
   sazi = get_brick(sun,  AZI, g);
   vazi = get_brick(view, AZI, g);
 
+  convert_brick_p2ji(sun, sun, g, &e, &f);
+  get_brick_geo(sun, f, e, &lon, &lat);
+
   // initialize
   for (b=0; b<nb; b++) set_brick(cor, b, g, 1.0);
 
@@ -94,12 +99,22 @@ char domain[10][NPOW_10] = { "BLUE", "GREEN", "RED",
   printf("BRDF: ");
   #endif
 
+
+  standard_szen = standard_sunzenith(sun->date, lat, lon);
+  standard_szen *= _D2R_CONV_;
+
+  #ifdef FORCE_DEBUG
+  printf("actual sun zenith: %.2f, azimuth: %.2f\n", 
+    szen*_R2D_CONV_, sazi*_R2D_CONV_);
+  #endif
+
   for (b_=0; b_<nb_; b_++){
 
     if ((b = find_domain(cor, domain[b_])) < 0) continue;
 
     brdf_correction = 
-      brdf_forward(45*_D2R_CONV_, 0, 0,   iso[b_], vol[b_], geo[b_]) / 
+      brdf_forward(standard_szen, 0, 0,   iso[b_], vol[b_], geo[b_]) / 
+      //brdf_forward(45*_D2R_CONV_, 0, 0,   iso[b_], vol[b_], geo[b_]) / 
       brdf_forward(szen, vzen, sazi-vazi, iso[b_], vol[b_], geo[b_]);
 
     set_brick(cor, b, g, brdf_correction);
