@@ -28,6 +28,108 @@ This file contains functions forcomputing sun/view geometry
 #include "sunview-ll.h"
 
 
+date_t localtime2gmt(date_t *dmeta, double localtime, double lon);
+
+
+/** Convert local overpass time to GMT time
++++ This function was adopted from code kindly provided by Hakui Zhang.
+--- dmeta      date of the metadata
+--- localtime: local time in decimal hours
+--- lon:       longitude
++++ Return:    GMT date
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+date_t localtime2gmt(date_t *dmeta, double localtime, double lon){
+int doy, hh, mm, ss;
+double gmttime, left_mm, left_ss;;
+date_t dgmt;
+
+
+  gmttime = localtime-lon/15.0;
+
+  doy = dmeta->doy;
+
+  if (gmttime > 24){
+    doy++;
+    gmttime -= 24.0;
+    if (doy > 365) doy = 365;
+  }
+
+  if (gmttime < 0){
+    doy--;
+    gmttime += 24.0;
+    if (doy<1) doy = 1;
+  }
+
+
+  copy_date(dmeta, &dgmt);
+  set_date_doy(&dgmt, doy);
+
+  hh = (int)gmttime;
+  left_mm = (gmttime-hh)*60.0;
+  mm = (int)left_mm;
+  left_ss = (left_mm-mm)*60.0;
+  ss = (int)left_ss;
+
+  set_time(&dgmt, hh, mm, ss);
+
+  return dgmt;
+}
+
+
+/** Compute a standardized sun zenith for a given latitude to be used for
++++ a sun angle harmonization between Landsat and Sentinel-2 in the BRDF
++++ correction. The average sun zenith between a standard, latitude-depen-
++++ dent sun zenith of Landsat 8 and Sentinel-2 is computed.
++++ This function was adopted from code kindly provided by Hakui Zhang.
+--- dmeta      date of the metadata
+--- lat:       latitude
+--- lon:       longitude
++++ Return:    sun zenith (in degrees)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+double standard_sunzenith(date_t *dmeta, double lat, double lon){
+double inclination[_MISSION_LENGTH_];
+double localtime_equator[_MISSION_LENGTH_];
+double localtime = 0;
+date_t dgmt;
+double rlat = lat * _D2R_CONV_;
+float szen, sazi;
+
+
+  // orbital parameters 
+
+  inclination[LANDSAT] = 98.2 * _D2R_CONV_;
+  localtime_equator[LANDSAT] = 10.18333333333;
+
+  inclination[SENTINEL2] = 98.62 * _D2R_CONV_;
+  localtime_equator[SENTINEL2] = 10.5;
+
+
+  // compute localtime using astronomical model
+
+  localtime += localtime_equator[LANDSAT] - 
+    asin(tan(rlat)/tan(inclination[LANDSAT])) * _R2D_CONV_ / 15.0;
+
+  localtime += localtime_equator[SENTINEL2] - 
+    asin(tan(rlat)/tan(inclination[SENTINEL2])) * _R2D_CONV_ / 15.0;
+
+  localtime /= 2.0;
+
+  dgmt = localtime2gmt(dmeta, localtime, lon);
+
+  sunpos(lat, lon, dgmt, &szen, &sazi);
+
+  #ifdef FORCE_DEBUG
+  print_date(dmeta);
+  printf("lat: %.2f, lon: %.2f\n", lat, lon);
+  printf("localtime: %.2f\n", localtime);
+  print_date(&dgmt);
+  printf("standardized sun zenith: %.2f, azimuth: %.2f\n", szen, sazi);
+  #endif
+
+  return szen;
+}
+
+
 /** Compute sun positions and view geometry
 +++ This function computes sun positions (+cos/sin/tan), and view angles
 --- pl2:    L2 parameters

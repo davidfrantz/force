@@ -243,7 +243,7 @@ enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_,
        _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_LENGTH_ };
 
 // satellite mission
-enum { LANDSAT, SENTINEL2 };
+enum { LANDSAT, SENTINEL2, _MISSION_LENGTH_ };
 
 // sun/view angles
 enum { ZEN, AZI, cZEN, cAZI, sZEN, sAZI, tZEN, tAZI };
