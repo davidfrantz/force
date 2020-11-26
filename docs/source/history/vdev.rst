@@ -13,6 +13,14 @@ FORCE-dev
 
 * **FORCE L2PS**
 
+  * Changed the BRDF correction strategy.
+    Before, the reflectance was fixed to a sun zenith of 45° as suggested by Flood et al. 2013.
+    Zhang et al. 2016 demonstrated that this strategy results in global mean absolute differences of the sun zenith greater than the maximum Landsat viewing zenith angle (7.5°).
+    Now, the sun zenith is fixed to the latitude-varying local time, which only results in differences of 0.26°.
+    We are using the mean local time of Landsat 8 and Sentinel-2 overpass.
+    Note that the same change was implemented in the HLS dataset.
+    Thanks for David Roy and Hankui Zhang for discussion and guidance on this topic.
+
   * Changed the behaviour of the cloud shadow flag.
     Before, the cloud shadow flag was not set if the cloud flag (any state) was set.
     Thus, when users wanted to use confident clouds only, i.e. not the buffered clouds, 
