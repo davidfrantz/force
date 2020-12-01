@@ -47,6 +47,13 @@ This file contains functions for spectral adjustment
 const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
   "LND04", "LND05", "LND07", "LND08", "MOD01", "MOD02" };
 
+const char _SPECHOMO_SRC_DOMAIN_[_SPECHOMO_N_SRC_][NPOW_10] = {
+  "BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"};
+
+const char _SPECHOMO_DST_DOMAIN_[_SPECHOMO_N_DST_][NPOW_10] = {
+  "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
+  "REDEDGE3", "BROADNIR", "NIR", "SWIR1", "SWIR2"};
+
 const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_] = {
   {
     { 1000, 1260, 480, 6810, 1072, 693, 308, 1381, 3436, 442, 554, 444, 7408, 3845, 640, 215, 677, 348, 556, 7855, 1567, 1454, 423, 2147, 288, 418, 2077, 914, 1254, 723, 373, 405, 939, 549, 655, 1555, 469, 1258, 489, 5768, 735, 1322, 841, 1809, 2173, 7194, 568, 665, 765, 605, 749 },
@@ -654,13 +661,49 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 };
 
 
+int cluster_map(ard_t ard, small **cluster_, small *mask_, int nc, int sid){
+int b, p, nb;
+
+
+  if ((nb = get_brick_nbands(ard.DAT)) != _SPECHOMO_N_SRC_){
+    printf("spectral adjustment received unexpected nuber of bands. "); 
+    return FAILURE;}
+
+  // parallel this here
+  for (p=0; p<nc; p++){
+
+    if (mask_ != NULL && !mask_[p]) continue;
+    if (!ard.msk[p]) continue;
+
+    // SAM to each cluster center
+    _SPECHOMO_CENTER_[sid];
+
+  }
+
+
+  return SUCCESS;
+};
+
+
 int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
-int t, s;
+int t, s, nc;
 char sensor[NPOW_04];
 bool adjust = false;
+int ncluster = 5;
+small **cluster = NULL;
+small *mask_ = NULL;
 
 
   if (!phl->sen.spec_adjust) return CANCEL;
+
+  // import mask (if available)
+  if (mask != NULL){
+    if ((mask_ = get_band_small(mask, 0)) == NULL){
+      printf("Error getting processing mask."); return NULL;}
+  }
+
+  nc = get_brick_chunkncells(ard[0].DAT);
+  alloc_2D((void***)&cluster, ncluster, nc, sizeof(small));
 
 
   for (t=0; t<nt; t++){
@@ -677,9 +720,13 @@ bool adjust = false;
 
     if (!adjust) continue;
 
-    
+    if (cluster_map(ard[t], cluster, mask_, nc, s) == FAILURE){
+      printf("failed to compute cluster map. "); return FAILURE;}
 
   }
+
+  free_2D((void**)cluster, ncluster);
+
 
   return SUCCESS;
 }
