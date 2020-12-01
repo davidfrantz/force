@@ -1,13 +1,34 @@
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_SEN2A_, 
-       _SEN_SEN2B_, _SEN_sen2a_, _SEN_sen2b_, _SEN_LNDLG_, _SEN_SEN2L_, 
-       _SEN_SEN2H_, _SEN_RGB_,   _SEN_S1AIA_, _SEN_S1AID_, _SEN_S1BIA_,
-       _SEN_S1BID_, _SEN_VVVHP_, _SEN_MOD01_, _SEN_MOD02_, _SEN_MODIS_,
-       _SEN_LENGTH_ };
+This file is part of FORCE - Framework for Operational Radiometric 
+Correction for Environmental monitoring.
+
+Copyright (C) 2013-2020 David Frantz
+
+FORCE is free software_: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FORCE is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FORCE.  If not, see <http_://www.gnu.org/licenses/>.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+This file contains functions for spectral adjustment
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
+#include "spec-adjust-hl.h"
 
-input_domain[6]
+
+//input_domain[6]
 
 //.h
 
@@ -15,18 +36,16 @@ input_domain[6]
 #define _SPECHOMO_N_CLS_ 51
 #define _SPECHOMO_N_SRC_  6
 #define _SPECHOMO_N_DST_ 10
-#define _SPECHOMO_N_COE_  7
+#define _SPECHOMO_N_COF_  7
 
-extern const int _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_];
-extern const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_];
-extern const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_DST_][_SPECHOMO_N_CLS_];
+//extern const int _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_];
+//extern const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_];
+//extern const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_DST_][_SPECHOMO_N_CLS_];
 
 //.c
 
-const int _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_] = {
-  _SEN_LND04_, _SEN_LND05_, 
-  _SEN_LND07_, _SEN_LND08_, 
-  _SEN_MOD01_, _SEN_MOD02_ };
+const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
+  "LND04", "LND05", "LND07", "LND08", "MOD01", "MOD02" };
 
 const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_] = {
   {
@@ -79,7 +98,7 @@ const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CL
   }
 };
 
-const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_COE_][_SPECHOMO_N_CLS_] = {
+const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_COF_][_SPECHOMO_N_CLS_] = {
   {
     {
       { 0.954152762889862, 0.94907933473587, 0.922274708747864, 0.97670990228653, 1.00875294208527, 0.98089987039566, 0.953009605407715, 0.993607223033905, 0.564308047294617, 0.955916047096252, 0.986152172088623, 0.945890545845032, 0.94731730222702, 0.896374106407166, 0.985254168510437, 0.936255276203156, 0.92149692773819, 0.944583117961884, 0.959907233715057, 0.96592766046524, 0.883292019367218, 0.899154901504517, 0.957743883132935, 0.980517685413361, 0.944049179553986, 0.934145569801331, 0.986884355545044, 0.969458639621735, 0.960440099239349, 0.991686463356018, 0.961585998535156, 0.94071364402771, 0.938427269458771, 0.970795691013336, 1.01875901222229, 0.92786055803299, 0.946386873722076, 0.974800050258636, 0.926619291305542, 0.975853562355042, 0.948089420795441, 0.994568169116974, 0.932363510131836, 0.87620621919632, 0.886674404144287, 0.963523328304291, 0.959991335868835, 0.986239194869995, 0.962845623493195, 0.970291554927826, 0.960189998149872 },
@@ -635,4 +654,33 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 };
 
 
+int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
+int t, s;
+char sensor[NPOW_04];
+bool adjust = false;
+
+
+  if (!phl->sen.spec_adjust) return CANCEL;
+
+
+  for (t=0; t<nt; t++){
+
+    get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+
+    for (s=0, adjust=false; s<_SPECHOMO_N_SEN_; s++){
+      if (strcmp(sensor, _SPECHOMO_SENSOR_[s]) == 0) adjust = true;
+    }
+
+    #ifdef FORCE_DEBUG
+    printf("adjusting %s: %d\n", sensor, adjust);
+    #endif
+
+    if (!adjust) continue;
+
+    
+
+  }
+
+  return SUCCESS;
+}
 

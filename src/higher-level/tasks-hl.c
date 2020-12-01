@@ -140,13 +140,13 @@ int mask_status;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void compute_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, brick_t ***OUTPUT, int *nprod){
 bool error = false;
-  
-  
+
+
   if (!compute_this_chunk(pro)) return;
-  
+
   OUTPUT[pro->pu] = NULL;
   nprod[pro->pu]  = 0;
-  
+
 
   measure_progress(pro, _TASK_COMPUTE_, _CLOCK_TICK_);
 
@@ -161,12 +161,17 @@ bool error = false;
   } else {
     error = true;
   }
-    
+
   if (nt2[pro->pu] > 0){
     if (screen_qai(ARD2[pro->pu],   nt2[pro->pu], &phl->qai, phl->input_level2) != SUCCESS) error = true;
     if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
       if (screen_noise(ARD2[pro->pu], nt2[pro->pu], &phl->qai) == FAILURE) error = true;
     }
+  }
+
+
+  if (!error && phl->input_level1 == _INP_ARD_){
+    if (spectral_adjust(ARD1[pro->pu], MASK[pro->pu], nt1[pro->pu], phl) != SUCCESS) error = true;
   }
 
 
