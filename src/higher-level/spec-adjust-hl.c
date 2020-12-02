@@ -37,6 +37,8 @@ This file contains functions for spectral adjustment
 #define _SPECHOMO_N_SRC_  6
 #define _SPECHOMO_N_DST_ 10
 #define _SPECHOMO_N_COF_  7
+#define _SPECHOMO_N_SIM_  5
+#define _SPECHOMO_T_SIM_ 1 - 0.0698132
 
 //extern const int _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_];
 //extern const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_];
@@ -661,13 +663,21 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 };
 
 
-int cluster_map(ard_t ard, small **cluster_, small *mask_, int nc, int sid){
-int b, p, nb;
+int spectral_predict(ard_t ard, small **cluster_, small *mask_, int nc, int sid){
+int b, p;
+int b_src[_SPECHOMO_N_SRC_];
+float weight[_SPECHOMO_N_CLS_], max_weight;
+int cluster[_SPECHOMO_N_SIM_];
 
 
-  if ((nb = get_brick_nbands(ard.DAT)) != _SPECHOMO_N_SRC_){
-    printf("spectral adjustment received unexpected nuber of bands. "); 
-    return FAILURE;}
+  // get the correct source bands from brick
+  for (b=0; b<_SPECHOMO_N_SRC_; b++){
+    if ((b_src[b] = find_domain(ard.DAT, _SPECHOMO_SRC_DOMAIN_[b])) < 0){ 
+      printf("Couldn't find source domain %s. ", _SPECHOMO_SRC_DOMAIN_[b]);
+      return FAILURE;
+    }
+  }
+
 
   // parallel this here
   for (p=0; p<nc; p++){
@@ -675,8 +685,46 @@ int b, p, nb;
     if (mask_ != NULL && !mask_[p]) continue;
     if (!ard.msk[p]) continue;
 
-    // SAM to each cluster center
-    _SPECHOMO_CENTER_[sid];
+    memset(weight,  0, _SPECHOMO_N_CLS_*sizeof(float));
+    memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
+    max_weight    = 0.0;
+
+    for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
+
+      // SAM to each cluster center
+      xy = xx = yy = 0.0;
+
+      for (b=0; b<_SPECHOMO_N_SRC_; b++){
+        xy += ard.dat[b][p]                * _SPECHOMO_CENTER_[sid][b][s];
+        xx += ard.dat[b][p]                * ard.dat[b][p];
+        yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
+      }
+
+      if (xx > 0 && yy > 0){
+        sam = acos(xy / sqrt(xx*yy));
+      } else {
+        sam = 1.0;
+      }
+
+      weight[s] = 1.0 - sam; // not exactly as in the paper
+      if (weight[s] > max_weight){
+        max_weight  = weight[s];
+        cluster[0]  = s;
+      }
+
+    }
+
+    if (max_weight < _SPECHOMO_T_SIM_){
+
+      // use global
+      s = _SPECHOMO_N_CLS_-1;
+
+    } else {
+
+      // weighted prediction
+
+    }
+
 
   }
 
@@ -720,8 +768,8 @@ small *mask_ = NULL;
 
     if (!adjust) continue;
 
-    if (cluster_map(ard[t], cluster, mask_, nc, s) == FAILURE){
-      printf("failed to compute cluster map. "); return FAILURE;}
+    if (spectral_predict(ard[t], cluster, mask_, nc, s) == FAILURE){
+      printf("failed to compute spectral prediction. "); return FAILURE;}
 
   }
 
