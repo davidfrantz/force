@@ -667,7 +667,7 @@ int spectral_predict(ard_t ard, small **cluster_, small *mask_, int nc, int sid)
 int b, p;
 int b_src[_SPECHOMO_N_SRC_];
 float weight[_SPECHOMO_N_CLS_], max_weight;
-int cluster[_SPECHOMO_N_SIM_];
+int cluster[_SPECHOMO_N_SIM_], n_cls;
 
 
   // get the correct source bands from brick
@@ -722,6 +722,33 @@ int cluster[_SPECHOMO_N_SIM_];
     } else {
 
       // weighted prediction
+      n_cls = 1;
+      
+      // find the remaining closest clusters
+      for (c=1; c<_SPECHOMO_N_SIM_; c++){
+
+        max_weight    = 0.0;
+
+        for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
+          if (weight[s] >= _SPECHOMO_T_SIM_ && 
+              weight[s] <  weight[cluster[c-1]]){
+            max_weight  = weight[s];
+            cluster[c]  = s;
+          }
+        }
+
+        // no more close cluster available
+        if (max_weight < _SPECHOMO_T_SIM_){
+          break;
+        } else {
+          n_cls++;
+        }
+
+      }
+
+      for (c=0; c<n_cls; c++){
+        weight[cluster[c]]
+      }
 
     }
 
