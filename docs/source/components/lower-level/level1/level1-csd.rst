@@ -20,7 +20,7 @@ Usage
 
     Before you start:
     The metadata catalogues need to be downloaded prior to the first run and downloading Sentinel-2 data requires authentication.
-    See the `tutorial <https://davidfrantz.github.io/tutorials/force-level1-csd>`_ for more information on properly setting up ``force-level1-csd``.
+    See the :ref:`tut-l1csd` tutorial for more information on properly setting up ``force-level1-csd``.
 
 
 ``force-level1-csd`` requires four mandatory arguments to be specified.

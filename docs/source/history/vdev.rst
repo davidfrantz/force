@@ -11,6 +11,16 @@ FORCE-dev
   * :ref:`depend` have changed.
     Instead of python, python3 is now specifically required.
 
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+    Stefan Ernst fixed some issues in force-csd.
+
+  * Reworked how AOIs in the form of vector files are handled.
+    Geopackages are no longer used as database for intersecting user-defined AOIs with the tiles/footprints of Sentinel-2 and Landsat, as the GDAL GPKG driver and SQLite caused issues with certains setups / installations. The geopackage format is still supported as AOI input though.
+
+  * Several small fixes
+    Fixes target the reprojection of AOIs, handling of negative values for AOI bounding boxes, command line option parsing, etc.
+
 * **FORCE L2PS**
 
   * Changed the BRDF correction strategy.
