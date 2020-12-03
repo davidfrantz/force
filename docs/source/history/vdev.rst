@@ -13,13 +13,15 @@ FORCE-dev
 
 * **FORCE LEVEL 1 ARCHIVING SYSTEM**
 
-    Stefan Ernst fixed some issues in force-csd.
+  * Stefan Ernst fixed some issues in force-csd:
 
-  * Reworked how AOIs in the form of vector files are handled.
-    Geopackages are no longer used as database for intersecting user-defined AOIs with the tiles/footprints of Sentinel-2 and Landsat, as the GDAL GPKG driver and SQLite caused issues with certains setups / installations. The geopackage format is still supported as AOI input though.
+    * Reworked how AOIs in the form of vector files are handled.
+      Geopackages are no longer used as database for intersecting user-defined AOIs with the tiles/footprints of Sentinel-2 and Landsat, 
+      as the GDAL GPKG driver and SQLite caused issues with certains setups / installations. 
+      The geopackage format is still supported as AOI input though.
 
-  * Several small fixes
-    Fixes target the reprojection of AOIs, handling of negative values for AOI bounding boxes, command line option parsing, etc.
+    * Several small fixes
+      Fixes target the reprojection of AOIs, handling of negative values for AOI bounding boxes, command line option parsing, etc.
 
 * **FORCE L2PS**
 
@@ -78,6 +80,9 @@ FORCE-dev
     Do not modify the function names and function arguments.
 
     A tutorial is planned to showcase the usage.
+
+  * in force-higher-level, TSA sub-module, CAT analysis: 
+    Fixed an arithmetic expression bug that occured when computing loss when the regression intercept was 0.
 
 * **FORCE AUX**
 
