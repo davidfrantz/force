@@ -692,6 +692,8 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
   // parallel this here
   for (p=0; p<nc; p++){
+    
+//if (p != 0) continue;
 
     if (mask_ != NULL && !mask_[p]) continue;
     if (!ard.msk[p]) continue;
@@ -709,6 +711,8 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
         xy += ard.dat[b_src[b]][p]         * _SPECHOMO_CENTER_[sid][b][s];
         xx += ard.dat[b_src[b]][p]         * ard.dat[b_src[b]][p];
         yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
+        //printf("cluster %d, band %d, ard %d, center %d, xy/xx/yy %.3f %.3f %.3f\n",
+        //  s, b, ard.dat[b_src[b]][p], _SPECHOMO_CENTER_[sid][b][s], xy, xx, yy);
       }
 
       if (xx > 0 && yy > 0){
@@ -723,6 +727,8 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
         cluster[0] = s;
       }
 
+//      printf("cluster %d, sam %.3f, weight %.3f, max_weight in cluster %d: %.3f\n", s, sam, weight[s], cluster[0], max_weight);
+
     }
 
 
@@ -732,8 +738,12 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
       cluster[0] = _SPECHOMO_N_CLS_-1;
       weight[cluster[0]] = 1.0;
       n_cls = 1;
+      
+//      printf("use global regressor\n");
 
     } else {
+
+//      printf("use a couple of material-specific regressors\n");
 
       // use a couple of material-specific regressors
       n_cls = 1;
@@ -763,6 +773,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
     }
 
+//    printf("using %d regressors\n", n_cls);
 
     memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
     wsum = 0.0;
@@ -786,7 +797,10 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
     }
 
-    for (b=0;  b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
+    //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
+    for (b=0; b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
+    //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
+    
 
   }
 
@@ -821,7 +835,10 @@ small *mask_ = NULL;
     get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
 
     for (s=0, adjust=false; s<_SPECHOMO_N_SEN_; s++){
-      if (strcmp(sensor, _SPECHOMO_SENSOR_[s]) == 0) adjust = true;
+      if (strcmp(sensor, _SPECHOMO_SENSOR_[s]) == 0){ 
+        adjust = true; 
+        break;
+      }
     }
 
     #ifdef FORCE_DEBUG
