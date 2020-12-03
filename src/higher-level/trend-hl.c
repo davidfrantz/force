@@ -413,9 +413,14 @@ double mae, rmse;
       }
 
       // loss, i.e. change relative to total offset
-      cat_[_CAT_LOSS_][p] = (short)(cat_[_CAT_CHANGE_][p]/
-                                    cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
-                                    1000);
+      if (cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p] > 0){
+        cat_[_CAT_LOSS_][p] = (short)(cat_[_CAT_CHANGE_][p]/
+                                      cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
+                                      1000);
+      } else {
+        cat_[_CAT_LOSS_][p] = 0;
+      }
+
 
     }
 
