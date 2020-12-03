@@ -664,16 +664,27 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 
 
 int spectral_predict(ard_t ard, small **cluster_, small *mask_, int nc, int sid){
-int b, p;
+int b, b_, p, s, c;
 int b_src[_SPECHOMO_N_SRC_];
+int b_dst[_SPECHOMO_N_DST_];
+float xy, xx, yy, sam;
 float weight[_SPECHOMO_N_CLS_], max_weight;
 int cluster[_SPECHOMO_N_SIM_], n_cls;
+float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
 
   // get the correct source bands from brick
   for (b=0; b<_SPECHOMO_N_SRC_; b++){
     if ((b_src[b] = find_domain(ard.DAT, _SPECHOMO_SRC_DOMAIN_[b])) < 0){ 
       printf("Couldn't find source domain %s. ", _SPECHOMO_SRC_DOMAIN_[b]);
+      return FAILURE;
+    }
+  }
+
+  // get the correct destination bands from brick
+  for (b=0; b<_SPECHOMO_N_DST_; b++){
+    if ((b_dst[b] = find_domain(ard.DAT, _SPECHOMO_DST_DOMAIN_[b])) < 0){ 
+      printf("Couldn't find target domain %s. ", _SPECHOMO_DST_DOMAIN_[b]);
       return FAILURE;
     }
   }
@@ -695,8 +706,8 @@ int cluster[_SPECHOMO_N_SIM_], n_cls;
       xy = xx = yy = 0.0;
 
       for (b=0; b<_SPECHOMO_N_SRC_; b++){
-        xy += ard.dat[b][p]                * _SPECHOMO_CENTER_[sid][b][s];
-        xx += ard.dat[b][p]                * ard.dat[b][p];
+        xy += ard.dat[b_src[b]][p]         * _SPECHOMO_CENTER_[sid][b][s];
+        xx += ard.dat[b_src[b]][p]         * ard.dat[b_src[b]][p];
         yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
       }
 
@@ -708,26 +719,30 @@ int cluster[_SPECHOMO_N_SIM_], n_cls;
 
       weight[s] = 1.0 - sam; // not exactly as in the paper
       if (weight[s] > max_weight){
-        max_weight  = weight[s];
-        cluster[0]  = s;
+        max_weight = weight[s];
+        cluster[0] = s;
       }
 
     }
 
+
     if (max_weight < _SPECHOMO_T_SIM_){
 
-      // use global
-      s = _SPECHOMO_N_CLS_-1;
+      // use global regressor
+      cluster[0] = _SPECHOMO_N_CLS_-1;
+      weight[cluster[0]] = 1.0;
+      n_cls = 1;
 
     } else {
 
-      // weighted prediction
+      // use a couple of material-specific regressors
       n_cls = 1;
-      
-      // find the remaining closest clusters
+
+      // we already found the closest cluster, 
+      // now find the remaining closest clusters
       for (c=1; c<_SPECHOMO_N_SIM_; c++){
 
-        max_weight    = 0.0;
+        max_weight = 0.0;
 
         for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
           if (weight[s] >= _SPECHOMO_T_SIM_ && 
@@ -746,12 +761,32 @@ int cluster[_SPECHOMO_N_SIM_], n_cls;
 
       }
 
-      for (c=0; c<n_cls; c++){
-        weight[cluster[c]]
+    }
+
+
+    memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
+    wsum = 0.0;
+
+    for (c=0; c<n_cls; c++){
+
+      s = cluster[c];
+
+      for (b=0;  b <_SPECHOMO_N_DST_; b++){
+
+        for (b_=0, pred=0; b_<_SPECHOMO_N_SRC_; b_++){
+          pred += _SPECHOMO_COEFS_[sid][b][b_][s] * ard.dat[b_src[b_]][p];
+        }
+        pred += _SPECHOMO_COEFS_[sid][b][b_][s];
+
+        wpred[b] += weight[s]*pred;
+
       }
+
+      wsum += weight[s];
 
     }
 
+    for (b=0;  b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
 
   }
 
@@ -774,7 +809,7 @@ small *mask_ = NULL;
   // import mask (if available)
   if (mask != NULL){
     if ((mask_ = get_band_small(mask, 0)) == NULL){
-      printf("Error getting processing mask."); return NULL;}
+      printf("Error getting processing mask."); return FAILURE;}
   }
 
   nc = get_brick_chunkncells(ard[0].DAT);

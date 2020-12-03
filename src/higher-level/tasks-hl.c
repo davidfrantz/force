@@ -171,7 +171,7 @@ bool error = false;
 
 
   if (!error && phl->input_level1 == _INP_ARD_){
-    if (spectral_adjust(ARD1[pro->pu], MASK[pro->pu], nt1[pro->pu], phl) != SUCCESS) error = true;
+    if (spectral_adjust(ARD1[pro->pu], MASK[pro->pu], nt1[pro->pu], phl) == FAILURE) error = true;
   }
 
 

@@ -1180,6 +1180,7 @@ double tol = 5e-3;
     if (ard_type == _ARD_REF_){
       if ((b_disc = sen->band[sid][b])  < 0) continue;
       if ((b_disc = sen->band[sid][b]) == 0){
+        set_brick_domain(brick, b_brick, sen->domain[b]);
         b_brick++;
         continue;
       }
