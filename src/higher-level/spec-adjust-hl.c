@@ -690,120 +690,124 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
   }
 
 
-  // parallel this here
-  for (p=0; p<nc; p++){
-    
-//if (p != 0) continue;
+  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) default(none)
+  {
 
-    if (mask_ != NULL && !mask_[p]) continue;
-    if (!ard.msk[p]) continue;
-
-    memset(weight,  0, _SPECHOMO_N_CLS_*sizeof(float));
-    memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
-    max_weight    = 0.0;
-
-    for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
-
-      // SAM to each cluster center
-      xy = xx = yy = 0.0;
-
-      for (b=0; b<_SPECHOMO_N_SRC_; b++){
-        xy += ard.dat[b_src[b]][p]         * _SPECHOMO_CENTER_[sid][b][s];
-        xx += ard.dat[b_src[b]][p]         * ard.dat[b_src[b]][p];
-        yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
-        //printf("cluster %d, band %d, ard %d, center %d, xy/xx/yy %.3f %.3f %.3f\n",
-        //  s, b, ard.dat[b_src[b]][p], _SPECHOMO_CENTER_[sid][b][s], xy, xx, yy);
-      }
-
-      if (xx > 0 && yy > 0){
-        sam = acos(xy / sqrt(xx*yy));
-      } else {
-        sam = 1.0;
-      }
-
-      weight[s] = 1.0 - sam; // not exactly as in the paper
-      if (weight[s] > max_weight){
-        max_weight = weight[s];
-        cluster[0] = s;
-      }
-
-//      printf("cluster %d, sam %.3f, weight %.3f, max_weight in cluster %d: %.3f\n", s, sam, weight[s], cluster[0], max_weight);
-
-    }
-
-
-    if (max_weight < _SPECHOMO_T_SIM_){
-
-      // use global regressor
-      cluster[0] = _SPECHOMO_N_CLS_-1;
-      weight[cluster[0]] = 1.0;
-      n_cls = 1;
+    #pragma omp for
+    for (p=0; p<nc; p++){
       
-//      printf("use global regressor\n");
+  //if (p != 0) continue;
 
-    } else {
+      if (mask_ != NULL && !mask_[p]) continue;
+      if (!ard.msk[p]) continue;
 
-//      printf("use a couple of material-specific regressors\n");
+      memset(weight,  0, _SPECHOMO_N_CLS_*sizeof(float));
+      memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
+      max_weight    = 0.0;
 
-      // use a couple of material-specific regressors
-      n_cls = 1;
+      for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
 
-      // we already found the closest cluster, 
-      // now find the remaining closest clusters
-      for (c=1; c<_SPECHOMO_N_SIM_; c++){
+        // SAM to each cluster center
+        xy = xx = yy = 0.0;
 
-        max_weight = 0.0;
-
-        for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
-          if (weight[s] >= _SPECHOMO_T_SIM_ && 
-              weight[s] <  weight[cluster[c-1]]){
-            max_weight  = weight[s];
-            cluster[c]  = s;
-          }
+        for (b=0; b<_SPECHOMO_N_SRC_; b++){
+          xy += ard.dat[b_src[b]][p]         * _SPECHOMO_CENTER_[sid][b][s];
+          xx += ard.dat[b_src[b]][p]         * ard.dat[b_src[b]][p];
+          yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
+          //printf("cluster %d, band %d, ard %d, center %d, xy/xx/yy %.3f %.3f %.3f\n",
+          //  s, b, ard.dat[b_src[b]][p], _SPECHOMO_CENTER_[sid][b][s], xy, xx, yy);
         }
 
-        // no more close cluster available
-        if (max_weight < _SPECHOMO_T_SIM_){
-          break;
+        if (xx > 0 && yy > 0){
+          sam = acos(xy / sqrt(xx*yy));
         } else {
-          n_cls++;
+          sam = 1.0;
+        }
+
+        weight[s] = 1.0 - sam; // not exactly as in the paper
+        if (weight[s] > max_weight){
+          max_weight = weight[s];
+          cluster[0] = s;
+        }
+
+  //      printf("cluster %d, sam %.3f, weight %.3f, max_weight in cluster %d: %.3f\n", s, sam, weight[s], cluster[0], max_weight);
+
+      }
+
+
+      if (max_weight < _SPECHOMO_T_SIM_){
+
+        // use global regressor
+        cluster[0] = _SPECHOMO_N_CLS_-1;
+        weight[cluster[0]] = 1.0;
+        n_cls = 1;
+        
+  //      printf("use global regressor\n");
+
+      } else {
+
+  //      printf("use a couple of material-specific regressors\n");
+
+        // use a couple of material-specific regressors
+        n_cls = 1;
+
+        // we already found the closest cluster, 
+        // now find the remaining closest clusters
+        for (c=1; c<_SPECHOMO_N_SIM_; c++){
+
+          max_weight = 0.0;
+
+          for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
+            if (weight[s] >= _SPECHOMO_T_SIM_ && 
+                weight[s] <  weight[cluster[c-1]]){
+              max_weight  = weight[s];
+              cluster[c]  = s;
+            }
+          }
+
+          // no more close cluster available
+          if (max_weight < _SPECHOMO_T_SIM_){
+            break;
+          } else {
+            n_cls++;
+          }
+
         }
 
       }
 
-    }
+  //    printf("using %d regressors\n", n_cls);
 
-//    printf("using %d regressors\n", n_cls);
+      memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
+      wsum = 0.0;
 
-    memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
-    wsum = 0.0;
+      for (c=0; c<n_cls; c++){
 
-    for (c=0; c<n_cls; c++){
+        s = cluster[c];
 
-      s = cluster[c];
+        for (b=0;  b <_SPECHOMO_N_DST_; b++){
 
-      for (b=0;  b <_SPECHOMO_N_DST_; b++){
+          for (b_=0, pred=0; b_<_SPECHOMO_N_SRC_; b_++){
+            pred += _SPECHOMO_COEFS_[sid][b][b_][s] * ard.dat[b_src[b_]][p];
+          }
+          pred += _SPECHOMO_COEFS_[sid][b][b_][s];
 
-        for (b_=0, pred=0; b_<_SPECHOMO_N_SRC_; b_++){
-          pred += _SPECHOMO_COEFS_[sid][b][b_][s] * ard.dat[b_src[b_]][p];
+          wpred[b] += weight[s]*pred;
+
         }
-        pred += _SPECHOMO_COEFS_[sid][b][b_][s];
 
-        wpred[b] += weight[s]*pred;
+        wsum += weight[s];
 
       }
 
-      wsum += weight[s];
+      //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
+      for (b=0; b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
+      //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
+  ard.dat[0][p] = n_cls;
 
     }
-
-    //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
-    for (b=0; b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
-    //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
-    
 
   }
-
 
   return SUCCESS;
 };
