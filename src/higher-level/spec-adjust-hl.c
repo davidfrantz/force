@@ -28,9 +28,7 @@ This file contains functions for spectral adjustment
 #include "spec-adjust-hl.h"
 
 
-//input_domain[6]
-
-//.h
+int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 
 #define _SPECHOMO_N_SEN_  6
 #define _SPECHOMO_N_CLS_ 51
@@ -39,12 +37,6 @@ This file contains functions for spectral adjustment
 #define _SPECHOMO_N_COF_  7
 #define _SPECHOMO_N_SIM_  5
 #define _SPECHOMO_T_SIM_ 1 - 0.0698132
-
-//extern const int _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_];
-//extern const short _SPECHOMO_CENTER_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_CLS_];
-//extern const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_SRC_][_SPECHOMO_N_DST_][_SPECHOMO_N_CLS_];
-
-//.c
 
 const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
   "LND04", "LND05", "LND07", "LND08", "MOD01", "MOD02" };
@@ -663,7 +655,7 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 };
 
 
-int spectral_predict(ard_t ard, small **cluster_, small *mask_, int nc, int sid){
+int spectral_predict(ard_t ard, small *mask_, int nc, int sid){
 int b, b_, p, s, c;
 int b_src[_SPECHOMO_N_SRC_];
 int b_dst[_SPECHOMO_N_DST_];
@@ -819,8 +811,6 @@ int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
 int t, s, nc;
 char sensor[NPOW_04];
 bool adjust = false;
-int ncluster = 5;
-small **cluster = NULL;
 small *mask_ = NULL;
 
 
@@ -836,8 +826,6 @@ small *mask_ = NULL;
   }
 
   nc = get_brick_chunkncells(ard[0].DAT);
-  alloc_2D((void***)&cluster, ncluster, nc, sizeof(small));
-
 
   for (t=0; t<nt; t++){
 
@@ -856,12 +844,10 @@ small *mask_ = NULL;
 
     if (!adjust) continue;
 
-    if (spectral_predict(ard[t], cluster, mask_, nc, s) == FAILURE){
+    if (spectral_predict(ard[t], mask_, nc, s) == FAILURE){
       printf("failed to compute spectral prediction. "); return FAILURE;}
 
   }
-
-  free_2D((void**)cluster, ncluster);
 
 
   return SUCCESS;
