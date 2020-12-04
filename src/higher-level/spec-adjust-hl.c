@@ -695,8 +695,6 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
     #pragma omp for
     for (p=0; p<nc; p++){
-      
-  //if (p != 0) continue;
 
       if (mask_ != NULL && !mask_[p]) continue;
       if (!ard.msk[p]) continue;
@@ -705,6 +703,8 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
       memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
       max_weight    = 0.0;
 
+      // compute SAM and weight for each cluster,
+      // find closest cluster (highest weight)
       for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
 
         // SAM to each cluster center
@@ -714,8 +714,6 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           xy += ard.dat[b_src[b]][p]         * _SPECHOMO_CENTER_[sid][b][s];
           xx += ard.dat[b_src[b]][p]         * ard.dat[b_src[b]][p];
           yy += _SPECHOMO_CENTER_[sid][b][s] * _SPECHOMO_CENTER_[sid][b][s];
-          //printf("cluster %d, band %d, ard %d, center %d, xy/xx/yy %.3f %.3f %.3f\n",
-          //  s, b, ard.dat[b_src[b]][p], _SPECHOMO_CENTER_[sid][b][s], xy, xx, yy);
         }
 
         if (xx > 0 && yy > 0){
@@ -730,23 +728,18 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           cluster[0] = s;
         }
 
-  //      printf("cluster %d, sam %.3f, weight %.3f, max_weight in cluster %d: %.3f\n", s, sam, weight[s], cluster[0], max_weight);
-
       }
 
 
+      // get the n_cls closest clusters 
       if (max_weight < _SPECHOMO_T_SIM_){
 
         // use global regressor
         cluster[0] = _SPECHOMO_N_CLS_-1;
         weight[cluster[0]] = 1.0;
         n_cls = 1;
-        
-  //      printf("use global regressor\n");
 
       } else {
-
-  //      printf("use a couple of material-specific regressors\n");
 
         // use a couple of material-specific regressors
         n_cls = 1;
@@ -776,11 +769,12 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
       }
 
-  //    printf("using %d regressors\n", n_cls);
 
       memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
       wsum = 0.0;
 
+      // predict the target reflectance by using a weighted average of 
+      // all close regressors
       for (c=0; c<n_cls; c++){
 
         s = cluster[c];
@@ -790,7 +784,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           for (b_=0, pred=0; b_<_SPECHOMO_N_SRC_; b_++){
             pred += _SPECHOMO_COEFS_[sid][b][b_][s] * ard.dat[b_src[b_]][p];
           }
-          pred += _SPECHOMO_COEFS_[sid][b][b_][s];
+          pred += _SPECHOMO_COEFS_[sid][b][b_][s]; // offset
 
           wpred[b] += weight[s]*pred;
 
@@ -799,11 +793,19 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
         wsum += weight[s];
 
       }
+      
+      #ifdef FORCE_DEBUG
+      if (p==0){
+        printf("using %d regressors\n", n_cls);
+        for (b=0; b<_SPECHOMO_N_DST_; b++) printf("reflectance before: %04d ", 
+          ard.dat[b_dst[b]][p]); printf("\n");
+        for (b=0; b<_SPECHOMO_N_DST_; b++) printf("reflectance after:  %04d ", 
+          wpred[b] / wsum;); printf("\n");
+      }
+      //ard.dat[0][p] = n_cls;
+      #endif
 
-      //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
       for (b=0; b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
-      //for (b=0; b<_SPECHOMO_N_DST_; b++) printf("%04d ", ard.dat[b_dst[b]][p]); printf("\n");
-  ard.dat[0][p] = n_cls;
 
     }
 
@@ -823,6 +825,9 @@ small *mask_ = NULL;
 
 
   if (!phl->sen.spec_adjust) return CANCEL;
+
+  cite_me(_CITE_SPECADJUST_);
+
 
   // import mask (if available)
   if (mask != NULL){

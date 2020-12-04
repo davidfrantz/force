@@ -312,7 +312,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Brooks, B., Lee, D., Pomara, L., Hargrove, W. (2020). Monitoring Broadscale "
     "Vegetational Diversity and Change across North American Landscapes Using Land "
     "Surface Phenology. Forests 11(6), 606",
-    false }
+    false },
+  { "Spectral band adjustment and band prediction",
+    "Scheffler, D., Frantz, D., & Segl, K. (2020). Spectral harmonization and "
+    "red edge prediction of Landsat-8 to Sentinel-2 using land cover optimized "
+    "multivariate regressors. Remote Sensing of Environment, 241, 111723.",
+    false },
 };
 
 
