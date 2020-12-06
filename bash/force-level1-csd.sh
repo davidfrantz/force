@@ -422,7 +422,6 @@ get_data() {
     sed -i "1 s/^/$(head -n 1 $METACAT)\n/" $METAFNAME
     mv $METAFNAME "${METAFNAME/_metadata_/_metadata_"$SATELLITE"_}"
   fi
-  exit
 
 
   # ============================================================
