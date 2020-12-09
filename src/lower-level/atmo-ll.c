@@ -351,8 +351,9 @@ float **xyz_tsd_sw2 = NULL;
       if (ref < 0.0) set_subzero(QAI,    p, true);
       if (ref > 1.0) set_saturation(QAI, p, true);
 
-
-      if (ref < -1.0){
+      if (pl2->erase_cloud && get_cloud(QAI, p) == 2){
+        boa_[p] = nodata;
+      } else if (ref < -1.0){
         boa_[p] = nodata;
         set_off(QAI, p, true);
       } else if (ref*10000.0 > SHRT_MAX){
