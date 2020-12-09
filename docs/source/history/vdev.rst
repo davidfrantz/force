@@ -48,6 +48,13 @@ FORCE-dev
     Note that this happens because the assumptions for estimating **surface** reflectance are not valid over clouds.
     Thanks to Philip Frost for reporting this issue.
 
+  * Added a new parameter ``ERASE_CLOUDS``. 
+    If this parameter is enabled, confident cloud detections will be erased in the reflectance product, 
+    i.e. pixels are set to nodata. 
+    The cloud flag in the QAI product will still mark these pixels as clouds. 
+    This option may be usefule when disk space is of concern: 
+    removing the clouds(when used with compressed output options) will result in smaller file sizes.
+
   * Some users noted that the cloud buffer is too large for their application.
     This release hands control of the buffer widths to the user.
     New parameters were added to the parameterfile: ``CLOUD_BUFFER``, ``SHADOW_BUFFER``, ``SNOW_BUFFER``.
