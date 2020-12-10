@@ -41,9 +41,9 @@ V_README=README.md
 V_DOCS=docs/source/index.rst
 V_CODE=src/cross-level/_version-cl.h
 
-sed -i -e "s/\(Version\) [0-9.]*/\1 $VERSION/" $V_README
-sed -i -e "s/\(Version\) [0-9.]*/\1 $VERSION/" $V_DOCS
-sed -i -e "s/\(#define _VERSION_\) \"[0-9.]*\"/\1 \"$VERSION\"/" $V_CODE
+sed -i -e "s/\(\*\*Version\) .*\(\*\*\)/\1 $VERSION\2/" $V_README
+sed -i -e "s/\(\*\*Version\) .*\(\*\*\)/\1 $VERSION\2/" $V_DOCS
+sed -i -e "s/\(#define _VERSION_ \"\).*\(\"\)/\1$VERSION\2/" $V_CODE
 
 exit 0
 
