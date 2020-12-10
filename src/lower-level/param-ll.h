@@ -105,6 +105,8 @@ typedef struct {
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile
   float wvp;              // water vapor dummy value
   float cldprob, shdprob; // Fmask thresholds
+  float cldbuf, shdbuf, snwbuf; // buffer sizes
+  int erase_cloud;        // erase the clouds?
   int tier;               // tier level
 
   /** parallel processing **/

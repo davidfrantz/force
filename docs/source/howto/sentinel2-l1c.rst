@@ -3,7 +3,7 @@
 Sentinel-2 Level 1C
 ===================
 
-**Download and manage Sentinel-2 Level 1C data**
+**How to download and manage Sentinel-2 Level 1C data from the ESA hub**
 
 This tutorial explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS) to download, organize, and maintain a clean and consistent Sentinel-2 Level 1 data pool, as well as corresponding data queues needed for the Level 2 processing.
 
@@ -22,7 +22,7 @@ If a new file is sitting on ESA's end, the missing image is downloaded.
 A file queue is generated and updated accordingly - which is the main input to the FORCE Level 2 Processing System.
 
 
-.. figure:: img/tutorial-l1sen2.png" width="750
+.. figure:: img/tutorial-l1sen2.png
 
    *Sentinel-2 downloader in the **FORCE Level 1 Archiving Suite***
 
@@ -50,7 +50,7 @@ After setting up your account, you should be able to download Sentinel-2 data vi
 As with any other FORCE program, you can display short usage instructions by executing the program without any parameters.
 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-level1-sentinel2
 
@@ -64,15 +64,12 @@ As with any other FORCE program, you can display short usage instructions by exe
     
       queue
       Downloaded files are appended to a file queue, which is needed for
-      the Level 2 processing.
-The file doesn't need to exist.
-If it exists,
-      new lines will be appended on successful ingestion
+      the Level 2 processing. The file doesn't need to exist.
+      If it exists, new lines will be appended on successful ingestion
     
       Boundingbox
       The coordinates of your study area: "X1/Y1,X2/Y2,X3/Y3,...,X1/Y1"
-      The box must be closed (first X/Y = last X/Y).
-X/Y must be given as
+      The box must be closed (first X/Y = last X/Y). X/Y must be given as
       decimal degrees with negative values for West and South coordinates.
       Note that the box doesn't have to be square, you can specify a polygon
     
@@ -82,8 +79,9 @@ X/Y must be given as
       min-cc max-cc
       The cloud cover range must be given in %
     
-      dry will trigger a dry run that will only return the number of images
-      and their total data volume
+      dry
+      will trigger a dry run that will only return the number of images and
+      their total data volume
     
       Your ESA credentials must be placed in /home/frantzda/.scihub
         First line: User name
@@ -106,7 +104,7 @@ If you don't receive any data for your study area, or end up somewhere else enti
 - Y = Latitude
 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,25.94/-12.46,25.94/-11.98,25.39/-11.99,25.43/-12.46" 2019-07-01 2019-07-31 0 50 dry
 
@@ -132,7 +130,7 @@ Thus, FORCE iterates through the pages until no more image can be retrieved.
 Please note that download speed varies considerably.. 
 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,25.94/-12.46,25.94/-11.98,25.39/-11.99,25.43/-12.46" 2019-07-01 2019-07-31 0 50
 
@@ -236,7 +234,7 @@ Thus, you can e.g. change the boundingbox, time frame or cloud coverage, and onl
 In the following example, the Eastern X-Coordinates were increased by 1 degree.
 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,26.94/-12.46,26.94/-11.98,25.39/-11.99,25.43/-12.46" 2019-07-01 2019-07-31 0 50
 
@@ -347,10 +345,10 @@ Following line will start the download at 3:00 AM each day.
 *Replace YOURNAME with your user name.*
 
 
-.. code-block:: bash
+.. code-block:: none
 
    PATH=/home/YOURNAME/bin:/usr/bin:/bin:/usr/local/bin
-0 3 * * * force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,26.94/-12.46,26.94/-11.98,25.39/-11.99,25.43/-12.46" 2018-07-01 2018-07-31 0 50
+   0 3 * * * force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,26.94/-12.46,26.94/-11.98,25.39/-11.99,25.43/-12.46" 2018-07-01 2018-07-31 0 50
 
 
 ----------
@@ -375,7 +373,7 @@ FORCE L1AS needs to be run again to retrieve the restored data.
 To this end, it comes in handy to set up a download scheduler as desribed above.
 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-level1-sentinel2 /data/Dagobah/S2L1C /data/Dagobah/S2L1C/zambia.txt "25.43/-12.46,25.94/-12.46,25.94/-11.98,25.39/-11.99,25.43/-12.46" 2018-07-01 2018-07-31 0 50
 
@@ -383,47 +381,47 @@ To this end, it comes in handy to set up a download scheduler as desribed above.
     2020-02-15_15:49:18 - Found 12 S2A/B files.
     2020-02-15_15:49:18 - Found 12 S2A/B files on this page.
     S2B_MSIL1C_20180730T081559_N0206_R121_T35LLG_20180730T141111.SAFE: Pulling from Long Term Archive.
-Success.
-Rerun this program after a while
+    Success.
+    Rerun this program after a while
     S2B_MSIL1C_20180727T080609_N0206_R078_T35LLG_20180727T121446.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2A_MSIL1C_20180725T081601_N0206_R121_T35LLG_20180725T121615.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2A_MSIL1C_20180722T080611_N0206_R078_T35LLG_20180722T115605.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2B_MSIL1C_20180720T081559_N0206_R121_T35LLG_20180720T121127.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2B_MSIL1C_20180717T080609_N0206_R078_T35LLG_20180717T120239.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2A_MSIL1C_20180715T081601_N0206_R121_T35LLG_20180715T103432.SAFE: Pulling from Long Term Archive.
-Failed.
-You have exhausted your user quota.
-Rerun this program after a while
+    Failed.
+    You have exhausted your user quota.
+    Rerun this program after a while
     S2A_MSIL1C_20180712T080611_N0206_R078_T35LLG_20180712T102334.SAFE: Pulling from Long Term Archive.
-Failed.
-Too Many Requests
+    Failed.
+    Too Many Requests
     S2B_MSIL1C_20180710T081559_N0206_R121_T35LLG_20180710T120813.SAFE: Pulling from Long Term Archive.
-Failed.
-Too Many Requests
+    Failed.
+    Too Many Requests
     S2B_MSIL1C_20180707T080609_N0206_R078_T35LLG_20180707T115209.SAFE: Pulling from Long Term Archive.
-Failed.
-Too Many Requests
+    Failed.
+    Too Many Requests
     S2A_MSIL1C_20180705T081601_N0206_R121_T35LLG_20180705T103349.SAFE: Pulling from Long Term Archive.
-Failed.
-Too Many Requests
+    Failed.
+    Too Many Requests
     S2A_MSIL1C_20180702T080611_N0206_R078_T35LLG_20180702T115230.SAFE: Pulling from Long Term Archive.
-Failed.
-Too Many Requests
+    Failed.
+    Too Many Requests
 
 
 ------------

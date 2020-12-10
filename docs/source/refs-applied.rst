@@ -6,10 +6,22 @@ Applied Publications
 This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
+* **2021**
+
+  | D. Frantz, F. Schug, A. Okujeni, C. Navacchi, W. Wagner, S. van der Linden, and P. Hostert (2021): National-scale mapping of building height using Sentinel-1 and Sentinel-2 time series. Remote Sensing of Environment 252, 112128.
+  | https://doi.org/10.1016/j.rse.2020.112128
+
+
 * **2020**
 
   | H. Bendini, L. Fonseca, M. Schwieder, P. Rufin, T. Korting, A. Koumrouyan, and P. Hostert(2020): Combining Environmental and Landsat Analysis Ready Data for Vegetation Mapping: A Case Study in the Brazilian Savanna Biome. The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences, Volume XLIII-B3-2020.
   | https://doi.org/10.5194/isprs-archives-XLIII-B3-2020-953-2020
+
+  | P. Brun, A. Psomas, C. Ginzler, W. Thuiller, M. Zappa, and N. Zimmermann (2020): Large-scale early-wilting response of Central European forests to the 2018 extreme drought. Global Change Biology.
+  | https://doi.org/10.1111/gcb.15360
+
+  | S. Cooper, A. Okujeni, C. Jänicke, M.w Clark, S. van der Linden, and P. Hostert (2020): Disentangling fractional vegetation cover: Regression-based unmixing of simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment 246, 111856.
+  | https://doi.org/10.1016/j.rse.2020.111856
 
   | B. Jakimow, S. van der Linden, F. Thiel, D. Frantz, and Patrick Hostert (2020): Visualizing and labeling dense multi-sensor earth observation time series: The EO Time Series Viewer. Environmental Modelling & Software 125, 104631.
   | https://doi.org/10.1016/j.envsoft.2020.104631

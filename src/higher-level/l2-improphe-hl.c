@@ -28,11 +28,11 @@ This file contains functions for Level 2 ImproPhing
 #include "l2-improphe-hl.h"
 
 
-stack_t **compile_l2i(ard_t *ard, l2i_t *l2i, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
-stack_t *compile_l2i_stack(stack_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
+brick_t **compile_l2i(ard_t *ard, l2i_t *l2i, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t *compile_l2i_brick(brick_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
 
-/** This function compiles the stacks, in which L2I results are stored. 
+/** This function compiles the bricks, in which L2I results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
 +++ arrays.
 --- ard:      ARD
@@ -40,11 +40,11 @@ stack_t *compile_l2i_stack(stack_t *ard, int nb, bool write, char *prodname, par
 --- nt:       number of ARD products over time
 --- phl:      HL parameters
 --- cube:     datacube definition
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for L2I results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for L2I results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_l2i(ard_t *ard, l2i_t *l2i, int nt, par_hl_t *phl, cube_t *cube, int *nproduct){
-stack_t **L2I = NULL;
+brick_t **compile_l2i(ard_t *ard, l2i_t *l2i, int nt, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **L2I = NULL;
 int o, nprod = nt;
 int error = 0;
 int prodlen;
@@ -57,13 +57,13 @@ short ****ptr = NULL;
   for (o=0; o<nprod; o++) ptr[o] = &l2i->imp_[o];
 
 
-  alloc((void**)&L2I, nprod, sizeof(stack_t*));
-  prodlen = get_stack_nbands(ard[0].DAT);
+  alloc((void**)&L2I, nprod, sizeof(brick_t*));
+  prodlen = get_brick_nbands(ard[0].DAT);
   
 
   for (o=0; o<nprod; o++){
 
-    if ((L2I[o] = compile_l2i_stack(ard[o].DAT, prodlen, true, prodname, phl)) == NULL || (*ptr[o] = get_bands_short(L2I[o])) == NULL){
+    if ((L2I[o] = compile_l2i_brick(ard[o].DAT, prodlen, true, prodname, phl)) == NULL || (*ptr[o] = get_bands_short(L2I[o])) == NULL){
       printf("Error compiling %s product. ", prodname); error++;
     }
 
@@ -73,7 +73,7 @@ short ****ptr = NULL;
 
   if (error > 0){
     printf("%d compiling L2I product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(L2I[o]);
+    for (o=0; o<nprod; o++) free_brick(L2I[o]);
     free((void*)L2I);
     free((void*)l2i->imp_);
     return NULL;
@@ -84,17 +84,17 @@ short ****ptr = NULL;
 }
 
 
-/** This function compiles a L2I stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
---- write:     should this stack be written, or only used internally?
+/** This function compiles a L2I brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for L2I result
++++ Return:    brick for L2I result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_l2i_stack(stack_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
+brick_t *compile_l2i_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 char sensor[NPOW_04];
 char date[NPOW_04];
 char fname[NPOW_10];
@@ -102,40 +102,40 @@ char dname[NPOW_10];
 int nchar;
 
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Texture");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Texture");
+  set_brick_product(brick, prodname);
 
-  get_stack_compactdate(from, 0, date, NPOW_04);
-  get_stack_sensor(from, 0, sensor, NPOW_04);
+  get_brick_compactdate(from, 0, date, NPOW_04);
+  get_brick_sensor(from, 0, sensor, NPOW_04);
 
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
 
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else {
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
+    set_brick_save(brick, b, true);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -151,12 +151,12 @@ int nchar;
 --- nt_mr:     number of medium resolution ARD products over time
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with L2I results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with L2I results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **level2_improphe(ard_t *ard_hr, ard_t *ard_mr, stack_t *mask, int nt_hr, int nt_mr, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **level2_improphe(ard_t *ard_hr, ard_t *ard_mr, brick_t *mask, int nt_hr, int nt_mr, par_hl_t *phl, cube_t *cube, int *nproduct){
 l2i_t l2i;
-stack_t **L2I;
+brick_t **L2I;
 small *mask_ = NULL;
 float **hr_ = NULL;
 float **mr_ = NULL;
@@ -178,14 +178,14 @@ bool is_empty;
     return NULL;
   }
 
-  // import stacks
-  nx = get_stack_chunkncols(ard_hr[0].DAT);
-  ny = get_stack_chunknrows(ard_hr[0].DAT);
-  nc = get_stack_chunkncells(ard_hr[0].DAT);
-  nodata = get_stack_nodata(ard_hr[0].DAT, 0);
+  // import bricks
+  nx = get_brick_chunkncols(ard_hr[0].DAT);
+  ny = get_brick_chunknrows(ard_hr[0].DAT);
+  nc = get_brick_chunkncells(ard_hr[0].DAT);
+  nodata = get_brick_nodata(ard_hr[0].DAT, 0);
 
-  nb_hr = get_stack_nbands(ard_hr[0].DAT);
-  nb_mr = get_stack_nbands(ard_mr[0].DAT);
+  nb_hr = get_brick_nbands(ard_hr[0].DAT);
+  nb_mr = get_brick_nbands(ard_mr[0].DAT);
 
   
   // import mask (if available)
@@ -197,7 +197,7 @@ bool is_empty;
   }
 
 
-  // compile products + stacks
+  // compile products + bricks
   if ((L2I = compile_l2i(ard_mr, &l2i, nt_mr, phl, cube, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile L2I products!\n"); 
     *nproduct = 0;

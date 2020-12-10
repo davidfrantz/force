@@ -300,7 +300,7 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
-  if (endmember->nb != get_stack_nbands(ard[0].DAT)){
+  if (endmember->nb != get_brick_nbands(ard[0].DAT)){
     printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
     
 
@@ -666,6 +666,9 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
       break;
     case _IDX_NIR_:
       index_band(ard, mask_, ts, sen->nir, nc, nt, nodata);
+      break;
+    case _IDX_SW0_:
+      index_band(ard, mask_, ts, sen->swir0, nc, nt, nodata);
       break;
     case _IDX_SW1_:
       index_band(ard, mask_, ts, sen->swir1, nc, nt, nodata);

@@ -62,12 +62,12 @@ typedef struct {
 } starfm_candidate_t;
 
 
-int resolution_merge_1(stack_t *TOA, stack_t *QAI);
-int resolution_merge_2(stack_t *TOA, stack_t *QAI);
-int resolution_merge_3(stack_t *TOA, stack_t *QAI);
+int resolution_merge_1(brick_t *TOA, brick_t *QAI);
+int resolution_merge_2(brick_t *TOA, brick_t *QAI);
+int resolution_merge_3(brick_t *TOA, brick_t *QAI);
 double rescale_weight(double weight, double minweight, double maxweight);
-short **improphe(int nx, int ny, stack_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink);
-float *starfm(int nx, int ny, stack_t *QAI, float **coarse, float **fine, int r);
+short **improphe(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink);
+float *starfm(int nx, int ny, brick_t *QAI, float **coarse, float **fine, int r);
 
 
 /** Sentinel-2 resolution merge option 1
@@ -88,7 +88,7 @@ float *starfm(int nx, int ny, stack_t *QAI, float **coarse, float **fine, int r)
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int resolution_merge_1(stack_t *TOA, stack_t *QAI){
+int resolution_merge_1(brick_t *TOA, brick_t *QAI){
 int b = 0, nb = 6, bands[6], green, red, bnir;
 int i, j, p, ii, jj, ni, nj, np, nx, ny;
 int r = 2, w, nw, k, nv = 4;
@@ -104,8 +104,8 @@ short **toa_ = NULL;
   #endif
 
   
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
 
   if ((toa_ = get_bands_short(TOA)) == NULL) return FAILURE;
 
@@ -210,8 +210,8 @@ short **toa_ = NULL;
 
 
   #ifdef FORCE_DEBUG
-  set_stack_filename(TOA, "TOA-RESMERGED");
-  print_stack_info(TOA); set_stack_open(TOA, OPEN_CREATE); write_stack(TOA);
+  set_brick_filename(TOA, "TOA-RESMERGED");
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
   #endif
 
 
@@ -244,7 +244,7 @@ short **toa_ = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int resolution_merge_2(stack_t *TOA, stack_t *QAI){
+int resolution_merge_2(brick_t *TOA, brick_t *QAI){
 int mb = 0, cb = 0, nb_m = 3, nb_c = 6;
 int bands_m[3], bands_c[6];
 int p, nx, ny, nc;
@@ -258,9 +258,9 @@ short **pred_ = NULL;
   #endif
 
   
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
 
   if ((toa_ = get_bands_short(TOA)) == NULL) return FAILURE;
   
@@ -300,8 +300,8 @@ short **pred_ = NULL;
   }
 
   #ifdef FORCE_DEBUG
-  set_stack_filename(TOA, "TOA-RESMERGED");
-  print_stack_info(TOA); set_stack_open(TOA, OPEN_CREATE); write_stack(TOA);
+  set_brick_filename(TOA, "TOA-RESMERGED");
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
   #endif
 
 
@@ -328,7 +328,7 @@ short **pred_ = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int resolution_merge_3(stack_t *TOA, stack_t *QAI){
+int resolution_merge_3(brick_t *TOA, brick_t *QAI){
 int b = 0, b_, nb = 6, bands[6], green, red, bnir;
 int i, j, p, ii, jj, ni, nj, np, nx, ny, nc;
 int nk = 5;
@@ -345,9 +345,9 @@ short **toa_ = NULL;
   #endif
 
   
-  nx  = get_stack_ncols(QAI);
-  ny  = get_stack_nrows(QAI);
-  nc  = get_stack_ncells(QAI);
+  nx  = get_brick_ncols(QAI);
+  ny  = get_brick_nrows(QAI);
+  nc  = get_brick_ncells(QAI);
 
   if ((toa_ = get_bands_short(TOA)) == NULL) return FAILURE;
   
@@ -484,8 +484,8 @@ short **toa_ = NULL;
   }
 
   #ifdef FORCE_DEBUG
-  set_stack_filename(TOA, "TOA-RESMERGED");
-  print_stack_info(TOA); set_stack_open(TOA, OPEN_CREATE); write_stack(TOA);
+  set_brick_filename(TOA, "TOA-RESMERGED");
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
   #endif
 
   free_2D((void**)coarse, 3);
@@ -542,7 +542,7 @@ double normweight;
 --- mink:    minimum number of pixels for good prediction
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short **improphe(int nx, int ny, stack_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink){
+short **improphe(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink){
 int i, j, p;
 int ki, kj; // iterator for KDIST
 int ii, jj; // iterator for kernel relative to center
@@ -705,7 +705,7 @@ short **pred_ = NULL;
 --- r:      prediction radius in pixels
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float *starfm(int nx, int ny, stack_t *QAI, float **coarse, float **fine, int r){
+float *starfm(int nx, int ny, brick_t *QAI, float **coarse, float **fine, int r){
 int i, j, p, ii, jj, ni, nj, np, c, ncan;
 float diff;
 float d, D;     // spatial distance, relative spatial distance
@@ -951,7 +951,7 @@ float slice_value[2], std, nclass = 40;
 --- QAI:      Quality Assurance Information
 +++ Return:   SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int resolution_merge(int mission, int resmerge, stack_t *TOA, stack_t *QAI){
+int resolution_merge(int mission, int resmerge, brick_t *TOA, brick_t *QAI){
 
 
   #ifdef FORCE_CLOCK

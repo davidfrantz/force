@@ -194,6 +194,7 @@ bool verbose;
     write_par_hl_index(fp, verbose);
     write_par_hl_sma(fp, verbose);
     write_par_hl_tsi(fp, verbose);
+    write_par_hl_pyp(fp, verbose);
     write_par_hl_stm(fp, verbose);
     write_par_hl_fold(fp, verbose);
     write_par_hl_lsp(fp, verbose);

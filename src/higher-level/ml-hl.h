@@ -35,7 +35,7 @@ Machine learning header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
@@ -59,7 +59,7 @@ typedef struct {
   short **rfm_;
 } ml_t;
 
-stack_t **machine_learning(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_ml_t *mod, cube_t *cube, int *nproduct);
+brick_t **machine_learning(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_ml_t *mod, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

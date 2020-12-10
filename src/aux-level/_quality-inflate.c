@@ -46,8 +46,8 @@ char *pch   = NULL;
 char oname[NPOW_10];
 const char *proj;
 GDALDatasetH fp;
-stack_t *QAI = NULL;
-stack_t *QIM = NULL;
+brick_t *QAI = NULL;
+brick_t *QIM = NULL;
 small **qim_ = NULL;
 int b, p;
 cube_t *cube = NULL;
@@ -90,7 +90,7 @@ cube_t *cube = NULL;
       printf("Error reading QAI product %s\n", iname); return FAILURE;}
 
 
-  QIM  = copy_stack(QAI, _QAI_FLAG_LENGTH_, _DT_SMALL_);
+  QIM  = copy_brick(QAI, _QAI_FLAG_LENGTH_, _DT_SMALL_);
   if ((qim_ = get_bands_small(QIM)) == NULL){
     printf("Error getting QIM bands\n"); return FAILURE;}
 
@@ -102,23 +102,23 @@ cube_t *cube = NULL;
     printf("Wrong product given. Give QAI or INF product\n"); return FAILURE;}
   strncpy(pch, "_QIM", 4);
   
-  set_stack_dirname(QIM, d_out);
-  set_stack_filename(QIM, oname);
-  set_stack_open(QIM, OPEN_CREATE);
-  for (b=0; b<_QAI_FLAG_LENGTH_; b++) set_stack_save(QIM, b, true);
+  set_brick_dirname(QIM, d_out);
+  set_brick_filename(QIM, oname);
+  set_brick_open(QIM, OPEN_CREATE);
+  for (b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_save(QIM, b, true);
 
-  set_stack_bandname(QIM, _QAI_FLAG_OFF_, "valid data");           
-  set_stack_bandname(QIM, _QAI_FLAG_CLD_, "Cloud state");
-  set_stack_bandname(QIM, _QAI_FLAG_SHD_, "Cloud shadow flag");    
-  set_stack_bandname(QIM, _QAI_FLAG_SNW_, "Snow flag");
-  set_stack_bandname(QIM, _QAI_FLAG_WTR_, "Water flag");           
-  set_stack_bandname(QIM, _QAI_FLAG_AOD_, "Aerosol state");
-  set_stack_bandname(QIM, _QAI_FLAG_SUB_, "Subzero flag");         
-  set_stack_bandname(QIM, _QAI_FLAG_SAT_, "Saturation flag");
-  set_stack_bandname(QIM, _QAI_FLAG_SUN_, "High sun zenith flag"); 
-  set_stack_bandname(QIM, _QAI_FLAG_ILL_, "Illumination state");
-  set_stack_bandname(QIM, _QAI_FLAG_SLP_, "Slope flag");           
-  set_stack_bandname(QIM, _QAI_FLAG_WVP_, "Water vapor flag");
+  set_brick_bandname(QIM, _QAI_FLAG_OFF_, "valid data");           
+  set_brick_bandname(QIM, _QAI_FLAG_CLD_, "Cloud state");
+  set_brick_bandname(QIM, _QAI_FLAG_SHD_, "Cloud shadow flag");    
+  set_brick_bandname(QIM, _QAI_FLAG_SNW_, "Snow flag");
+  set_brick_bandname(QIM, _QAI_FLAG_WTR_, "Water flag");           
+  set_brick_bandname(QIM, _QAI_FLAG_AOD_, "Aerosol state");
+  set_brick_bandname(QIM, _QAI_FLAG_SUB_, "Subzero flag");         
+  set_brick_bandname(QIM, _QAI_FLAG_SAT_, "Saturation flag");
+  set_brick_bandname(QIM, _QAI_FLAG_SUN_, "High sun zenith flag"); 
+  set_brick_bandname(QIM, _QAI_FLAG_ILL_, "Illumination state");
+  set_brick_bandname(QIM, _QAI_FLAG_SLP_, "Slope flag");           
+  set_brick_bandname(QIM, _QAI_FLAG_WVP_, "Water vapor flag");
   
   #ifdef FORCE_DEBUG
   printf("valid data %d %d\n",           _QAI_FLAG_OFF_,  _QAI_BIT_OFF_);
@@ -158,10 +158,10 @@ cube_t *cube = NULL;
   }
 
 
-  write_stack(QIM);
+  write_brick(QIM);
 
-  free_stack(QAI);
-  free_stack(QIM);
+  free_brick(QAI);
+  free_brick(QIM);
   free_datacube(cube);
 
 

@@ -32,22 +32,22 @@ This file contains functions for computing texture
 using namespace cv;
 
 
-stack_t **compile_txt(ard_t *features, txt_t *txt, par_hl_t *phl, cube_t *cube, int *nproduct);
-stack_t *compile_txt_stack(stack_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
+brick_t **compile_txt(ard_t *features, txt_t *txt, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t *compile_txt_brick(brick_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
 
-/** This function compiles the stacks, in which TXT results are stored. 
+/** This function compiles the bricks, in which TXT results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
 +++ arrays.
 --- features: input features
 --- txt:      pointer to instantly useable TXT image arrays
 --- phl:      HL parameters
 --- cube:     datacube definition
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for TXT results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for TXT results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_txt(ard_t *features, txt_t *txt, par_hl_t *phl, cube_t *cube, int *nproduct){
-stack_t **TXT = NULL;
+brick_t **compile_txt(ard_t *features, txt_t *txt, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **TXT = NULL;
 int b, o, nprod = 7;
 int error = 0;
 int nchar;
@@ -68,11 +68,11 @@ bool write[7]  = { phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls,
 short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, &txt->tht_, &txt->bht_ };
 
 
-  alloc((void**)&TXT, nprod, sizeof(stack_t*));
+  alloc((void**)&TXT, nprod, sizeof(brick_t*));
 
   for (o=0; o<nprod; o++){
     if (enable[o]){
-      if ((TXT[o] = compile_txt_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(TXT[o])) == NULL){
+      if ((TXT[o] = compile_txt_brick(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(TXT[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
@@ -86,8 +86,8 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
             if (nchar < 0 || nchar >= NPOW_10){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           }
-          set_stack_domain(TXT[o],   b, domain);
-          set_stack_bandname(TXT[o], b, domain);
+          set_brick_domain(TXT[o],   b, domain);
+          set_brick_bandname(TXT[o], b, domain);
         }
       }
     } else {
@@ -99,7 +99,7 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
 
   if (error > 0){
     printf("%d compiling TXT product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(TXT[o]);
+    for (o=0; o<nprod; o++) free_brick(TXT[o]);
     free((void*)TXT);
     return NULL;
   }
@@ -109,54 +109,54 @@ short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, 
 }
 
 
-/** This function compiles a TXT stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
---- write:     should this stack be written, or only used internally?
+/** This function compiles a TXT brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for TXT result
++++ Return:    brick for TXT result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_txt_stack(stack_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
+brick_t *compile_txt_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
 int nchar;
 
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Texture");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Texture");
+  set_brick_product(brick, prodname);
 
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%s_HL_TXT_%s", phl->txt.base, prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
   
   
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else {
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
+    set_brick_save(brick, b, true);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -170,22 +170,22 @@ int nchar;
 --- nf:        number of features
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with TXT results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with TXT results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **texture(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **texture(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct){
 txt_t txt;
-stack_t **TXT;
+brick_t **TXT;
 small *mask_ = NULL;
 int nprod = 0;
 int f, i, j, p, nx, ny;
 short nodata;
 
 
-  // import stacks
-  nx = get_stack_chunkncols(features[0].DAT);
-  ny = get_stack_chunknrows(features[0].DAT);
-  nodata = get_stack_nodata(features[0].DAT, 0);
+  // import bricks
+  nx = get_brick_chunkncols(features[0].DAT);
+  ny = get_brick_chunknrows(features[0].DAT);
+  nodata = get_brick_nodata(features[0].DAT, 0);
 
   // import mask (if available)
   if (mask != NULL){
@@ -196,7 +196,7 @@ short nodata;
   }
   
 
-  // compile products + stacks
+  // compile products + bricks
   if ((TXT = compile_txt(features, &txt, phl, cube, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile TXT products!\n"); 
     *nproduct = 0;

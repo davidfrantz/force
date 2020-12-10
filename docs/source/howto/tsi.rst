@@ -16,25 +16,15 @@ This tutorial introduces the Time Series Analysis (TSA) submodule of the FORCE H
 Why interpolation?**
 
 Despite regular observations, EO time series are generally not equidistant.
-
 Nominal equidistance is only given for areas that are not covered by orbital overlaps (16 days revisit at nadir for a single Landsat).
-
 For areas in lateral overlaps, we have alternating revisits of 1 and 7 days.
-
-If we are getting closer to the poles, we even get triple, quadruple etc.
-overlaps, which complicates this alternating pattern.
-
+If we are getting closer to the poles, we even get triple, quadruple etc. overlaps, which complicates this alternating pattern.
 The same applies if we consider multiple sensors, e.g. two Landsat and two Sentinel-2 satellites.
 And of course, nominal revisit != actual revisit.
-
 We cannot see through clouds (unless we are talking radar).
-
 Probably, you want to remove snow observations.
-
 There might have been some sensor or ground segment outages, or the data couldn't have been processed to our quality requirements (e.g. tier 2 data).
-
-The sensor might not have looked on Earth as the satellite took a detour to avoid space debris etc.
-etc.. 
+The sensor might not have looked on Earth as the satellite took a detour to avoid space debris etc. etc.. 
 
 Interpolation might simply be used to close these gaps.
 It smoothes the time series, and thus effectively reduces noise.

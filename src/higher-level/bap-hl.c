@@ -215,7 +215,7 @@ int lsp_yr;
 float *lsp_;
 
 
-  ny = get_stack_nbands(lsp[0].DAT);
+  ny = get_brick_nbands(lsp[0].DAT);
 
   alloc((void**)&target, bap->Yn, sizeof(target_t));
   alloc((void**)&lsp_,   ny,      sizeof(float));
@@ -464,7 +464,7 @@ float scale;
     return FAILURE;
   }
   
-  scale = get_stack_scale(ard[0].DAT, 0);
+  scale = get_brick_scale(ard[0].DAT, 0);
   
   for (t=0; t<nt; t++){
     
@@ -512,7 +512,7 @@ float vz;
     if (!ard[t].msk[p]) continue;
 
     // get date in continuous time
-    ce = get_stack_ce(ard[t].DAT, 0);
+    ce = get_brick_ce(ard[t].DAT, 0);
 
     // get closest year
     ce_dist = INT_MAX; y = 0;
@@ -527,7 +527,7 @@ float vz;
         target[y].ce[2] < 1900*365) continue;
 
     // difference between acquisition and target year
-    dy = abs(get_stack_year(ard[t].DAT, 0) - bap->Yt);
+    dy = abs(get_brick_year(ard[t].DAT, 0) - bap->Yt);
 
 
     /** Seasonal suitability: DOY score
@@ -736,10 +736,10 @@ float max_score = -1;
     if (l3->inf != NULL){
       l3->inf[_INF_QAI_][p]  = ard[max_t].qai[p];
       l3->inf[_INF_NUM_][p]  = n;
-      l3->inf[_INF_DOY_][p]  = get_stack_doy(ard[max_t].DAT, 0);
-      l3->inf[_INF_YEAR_][p] = get_stack_year(ard[max_t].DAT, 0);
+      l3->inf[_INF_DOY_][p]  = get_brick_doy(ard[max_t].DAT, 0);
+      l3->inf[_INF_YEAR_][p] = get_brick_year(ard[max_t].DAT, 0);
       l3->inf[_INF_DIFF_][p] = tdist[max_t];
-      l3->inf[_INF_SEN_][p]  = get_stack_sensorid(ard[max_t].DAT)+1;
+      l3->inf[_INF_SEN_][p]  = get_brick_sensorid(ard[max_t].DAT)+1;
     }
 
     // best available pixel composite

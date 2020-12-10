@@ -45,7 +45,7 @@ This file contains functions for higher level tasks
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void read_higher_level (progress_t *pro, stack_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl){
+void read_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl){
 int mask_status;
 
 
@@ -134,11 +134,11 @@ int mask_status;
 --- cube:     datacube definition
 --- phl:      HL parameters
 --- aux:      auxilliary data
---- OUTPUT:   OUTPUT stacks
---- nproduct: number of output stacks
+--- OUTPUT:   OUTPUT bricks
+--- nproduct: number of output bricks
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void compute_higher_level (progress_t *pro, stack_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, stack_t ***OUTPUT, int *nprod){
+void compute_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, brick_t ***OUTPUT, int *nprod){
 bool error = false;
   
   
@@ -223,7 +223,7 @@ bool error = false;
   
   free_ard(ARD1[pro->pu], nt1[pro->pu]);
   free_ard(ARD2[pro->pu], nt2[pro->pu]);
-  free_stack(MASK[pro->pu]);
+  free_brick(MASK[pro->pu]);
 
   measure_progress(pro, _TASK_COMPUTE_, _CLOCK_TOCK_);
 
@@ -233,12 +233,12 @@ bool error = false;
 
 /** This function handles the output tasks
 --- pro:      progress handle
---- OUTPUT:   OUTPUT stacks
---- nproduct: number of output stacks
+--- OUTPUT:   OUTPUT bricks
+--- nproduct: number of output bricks
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void output_higher_level (progress_t *pro, stack_t ***OUTPUT, int *nprod, par_hl_t *phl){
+void output_higher_level (progress_t *pro, brick_t ***OUTPUT, int *nprod, par_hl_t *phl){
 char dname[NPOW_10]; 
 int nchar;
 char *lock = NULL;
@@ -277,9 +277,9 @@ int o;
 
       #pragma omp for schedule(dynamic,1)
       for (o=0; o<nprod[pro->pu_prev]; o++){
-        if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_stack(
+        if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_brick(
           OUTPUT[pro->pu_prev][o], phl->radius);
-        write_stack(OUTPUT[pro->pu_prev][o]);
+        write_brick(OUTPUT[pro->pu_prev][o]);
       }
 
       CPLPopErrorHandler();
@@ -290,7 +290,7 @@ int o;
 
   }
 
-  for (o=0; o<nprod[pro->pu_prev]; o++) free_stack(OUTPUT[pro->pu_prev][o]);
+  for (o=0; o<nprod[pro->pu_prev]; o++) free_brick(OUTPUT[pro->pu_prev][o]);
   free((void*)OUTPUT[pro->pu_prev]);
   OUTPUT[pro->pu_prev] = NULL;
 

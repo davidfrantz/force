@@ -5,7 +5,7 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.5.2**
+**Version 3.5.2-dev**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
@@ -45,7 +45,7 @@ Related Links
 
 **Get the source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
-**Learn how to use FORCE**. Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
+**Learn how to use FORCE**. Have a look at the :ref:`howto`. Check regularly for new content.
 
 **Get help**, and help others in the FORCE self-help `Google group <https://groups.google.com/d/forum/force_eo>`_
 
