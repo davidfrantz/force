@@ -105,7 +105,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
     sudo apt install software-properties-common
     sudo add-apt-repository ppa:deadsnakes/ppa
-    sudo apt-get install python3.8 python3-pip
+    sudo apt-get install python3.8 python3-pip python3-dev
     echo 'alias python=python3' >> ~/.bashrc
     echo 'alias pip=pip3' >> ~/.bashrc
 

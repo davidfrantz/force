@@ -10,6 +10,14 @@ FORCE-dev
 
   * :ref:`depend` have changed.
     Instead of python, python3 is now specifically required.
+    Also, added python3-dev as dependency (thanks to Willi Weber for the hint).
+
+  * On some systems, FORCE failed to compile due to multiple definitions of _WVLUT_.
+    Thanks to Ansgar Lößer for suggesting a fix for this.
+
+  * Fixed the inconsistent use of the synonyms BLOCK_SIZE and CHUNK_SIZE. 
+    It is BLOCK_SIZE from now on.
+    Thanks to Jonas Ardo for the hint.
 
 * **FORCE LEVEL 1 ARCHIVING SYSTEM**
 
@@ -22,6 +30,7 @@ FORCE-dev
 
     * Several small fixes
       Fixes target the reprojection of AOIs, handling of negative values for AOI bounding boxes, command line option parsing, etc.
+      Only the Landsat product with the latest processing datestamp is downloaded if there are several products for one WRS-2 footprint on the same day.
 
 * **FORCE L2PS**
 

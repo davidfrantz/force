@@ -31,6 +31,9 @@ This file contains functions for handling Atmospheric Gas
 #include <gsl/gsl_multimin.h>          // minimization functions 
 
 
+wvp_lut_t _WVLUT_;
+
+
 /** This function computes a water vapor transmittace look-up-table, which
 +++ is used for fast estimation of Sentinel-2 water vapor. The function 
 +++ will exit successfully if atmospheric correction is disabled or if not
@@ -549,6 +552,17 @@ float *xy_Tvo = NULL;
   #endif
 
   return Tg_;
+}
+
+
+/** This function frees the WV LUT global variable
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void free_wvlut(){
+
+  free_3D((void***)_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw);
+  
+  return;
 }
 
 

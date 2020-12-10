@@ -199,12 +199,12 @@ int nchar;
       return NULL;
     }
     if (fmod(cube->chunksize, cube->res) > tol){
-      printf("CHUNK_SIZE must be a multiple of RESOLUTION. ");
+      printf("BLOCK_SIZE must be a multiple of RESOLUTION. ");
       free_multicube(multicube);
       return NULL;
     }
     if (fmod(cube->tilesize, cube->chunksize) > tol){
-      printf("TILE_SIZE must be a multiple of CHUNK_SIZE. ");
+      printf("TILE_SIZE must be a multiple of BLOCK_SIZE. ");
       free_multicube(multicube);
       return NULL;
     }

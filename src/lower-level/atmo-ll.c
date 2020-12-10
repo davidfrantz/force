@@ -2052,9 +2052,9 @@ brick_t **L2 = NULL;
 
   /** clean
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  free_3D((void***)_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw);
+  free_wvlut();
 
-    
+
   #ifdef FORCE_DEBUG
   int prod;
   for (prod=0; prod<(*nprod); prod++){ print_brick_info(L2[prod]); write_brick(L2[prod]);}
