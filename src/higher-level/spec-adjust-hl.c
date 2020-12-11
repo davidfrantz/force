@@ -36,7 +36,9 @@ int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 #define _SPECHOMO_N_DST_ 10
 #define _SPECHOMO_N_COF_  7
 #define _SPECHOMO_N_SIM_  5
-#define _SPECHOMO_T_SIM_ 1 - 0.0698132
+#define _SPECHOMO_GOOD_SAM_ 0.0698132
+#define _SPECHOMO_POOR_SAM_ 0.2617995
+#define _SPECHOMO_MIN_WEIGHT_ 1.0 - _SPECHOMO_GOOD_SAM_/_SPECHOMO_POOR_SAM_
 
 const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
   "LND04", "LND05", "LND07", "LND08", "MOD01", "MOD02" };
@@ -693,7 +695,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
       memset(weight,  0, _SPECHOMO_N_CLS_*sizeof(float));
       memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
-      max_weight    = 0.0;
+      max_weight = -1.0;
 
       // compute SAM and weight for each cluster,
       // find closest cluster (highest weight)
@@ -714,8 +716,8 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           sam = 1.0;
         }
 
-        weight[s] = 1.0 - sam; // not exactly as in the paper
-        if (weight[s] > max_weight){
+        weight[s] = 1.0 - sam/_SPECHOMO_POOR_SAM_; // not exactly as in the paper
+        if (weight[s] >= _SPECHOMO_MIN_WEIGHT_){
           max_weight = weight[s];
           cluster[0] = s;
         }
@@ -724,7 +726,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
 
       // get the n_cls closest clusters 
-      if (max_weight < _SPECHOMO_T_SIM_){
+      if (max_weight < 0){
 
         // use global regressor
         cluster[0] = _SPECHOMO_N_CLS_-1;
@@ -743,7 +745,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           max_weight = 0.0;
 
           for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
-            if (weight[s] >= _SPECHOMO_T_SIM_ && 
+            if (weight[s] >= _SPECHOMO_MIN_WEIGHT_ && 
                 weight[s] <  weight[cluster[c-1]]){
               max_weight  = weight[s];
               cluster[c]  = s;
@@ -751,7 +753,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           }
 
           // no more close cluster available
-          if (max_weight < _SPECHOMO_T_SIM_){
+          if (max_weight < _SPECHOMO_MIN_WEIGHT_){
             break;
           } else {
             n_cls++;
