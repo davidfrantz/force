@@ -10,7 +10,6 @@ env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
   IMAGE_NAME: force
-  IMAGE_ID: $DOCKER_USER/$IMAGE_NAME
   VERSION: latest
 
 jobs:
@@ -26,5 +25,5 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
       - name: Push image
         run: |
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $DOCKER_USER/$IMAGE_NAME:$VERSION
+          docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
