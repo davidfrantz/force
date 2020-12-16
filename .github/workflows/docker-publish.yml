@@ -1,0 +1,29 @@
+name: Docker
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  IMAGE_NAME: force
+  VERSION: latest
+
+jobs:
+  push:
+    name: Push image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Docker login
+        run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      - name: Push image
+        run: |
+          docker tag $IMAGE_NAME $DOCKER_USER/$IMAGE_NAME:$VERSION
+          docker push $DOCKER_USER/$IMAGE_NAME:$VERSION

@@ -91,8 +91,8 @@ fi
 
 TODO=$IMAGE
 
-# extract Landsat image
-if [[ $IMAGE == *".tar.gz"* ]]; then
+# extract Landsat image (C1 tar.gz)
+if [[ $IMAGE == *".tar.gz" ]]; then
 
   BASE_=$(echo $BASE | sed 's/.tar.gz//')
   TODO=$TEMPDIR/$BASE_
@@ -111,8 +111,28 @@ if [[ $IMAGE == *".tar.gz"* ]]; then
 
 fi
 
+# extract Landsat image (C2 tar)
+if [[ $IMAGE == *".tar" ]]; then
+
+  BASE_=$(echo $BASE | sed 's/.tar//')
+  TODO=$TEMPDIR/$BASE_
+
+  mkdir -p $TODO
+  if [ ! -d $TODO ]; then
+    echo "$IMAGE: creating temp directory failed" > $LOGFILE
+    exit 1
+  fi
+
+  timeout -k $TIMEOUT_ZIP 10m tar --ignore-command-error -xf $IMAGE --exclude gap_mask --exclude='*GCP.txt' --exclude='*VER.jpg' --exclude='*VER.txt' --exclude='*BQA.TIF' --exclude='*.GTF' --exclude='LE07*B8.TIF' --exclude='LE07*B6_VCID_2.TIF' --exclude='LC08*B11.TIF' --exclude='LC08*B8.TIF' -C $TODO &> /dev/null
+  if [ ! $? -eq 0 ]; then
+    echo "$IMAGE: tar container is corrupt, connection stalled or similar." > $LOGFILE
+    exit 1
+  fi
+
+fi
+
 # extract Sentinel-2 image 
-if [[ $IMAGE == *".zip"* ]]; then
+if [[ $IMAGE == *".zip" ]]; then
 
    timeout -k $TIMEOUT_ZIP 10m unzip -qq -d $TEMPDIR $IMAGE &>/dev/null
    if [ ! $? -eq 0 ]; then
@@ -144,12 +164,17 @@ $EXE $TODO $PRM >> $LOGFILE
 #fi
 
 # clean up if Landsat was extracted
-if [[ $IMAGE == *".tar.gz"* ]]; then
+if [[ $IMAGE == *".tar.gz" ]]; then
+  rm -r $TODO
+fi
+
+# clean up if Landsat was extracted
+if [[ $IMAGE == *".tar" ]]; then
   rm -r $TODO
 fi
 
 # clean up if Sentinel-2 was extracted
-if [[ $IMAGE == *".zip"* ]]; then
+if [[ $IMAGE == *".zip" ]]; then
   rm -r $TEMPDIR/$BASE_
 fi
 
