@@ -22,6 +22,12 @@ Release: 10.12.2020
 
 * **General changes**
 
+  * Docker dissemination has changed.
+    A GitHub action was implemented, which automatically builds and publishes a Docker image once the main branch was updated.
+    Thus, the docker image has changed to **davidfrantz/force**.
+    Please use this image from now on.
+    A special thank goes to Fegyi, who has initiated the FORCE Docker image and who hosted the image on his account up to this point!
+
   * :ref:`depend` have changed.
     Instead of python, python3 is now specifically required.
     Also, added python3-dev as dependency (thanks to Willi Weber for the hint).
