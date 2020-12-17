@@ -1,5 +1,20 @@
 .. _v3:
 
+FORCE v. 3.6.1
+--------------
+
+Release: 16.12.2020
+
+* **FORCE L2PS**
+
+ * USGS has sligtly changed the file format of Collection 2 data.
+
+   - Collection 1: *.tar.gz containers
+   - Collection 1: *.tar containers
+   
+   force-level2 now works with containers in tar.gz, tar, and zip format.
+
+
 FORCE v. 3.6.0
 --------------
 
