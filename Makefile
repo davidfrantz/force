@@ -41,7 +41,7 @@ LDGSL=-lgsl -lgslcblas
 #LDSPLITS=-lsplits -larmadillo
 LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
 LDCURL=-lcurl
-LDPYTHON != python3-config --libs --embed
+LDPYTHON != (python3-config --libs --embed || python3-config --libs) | tail -n 1
 
 # NO! changes below this line (unless you know what to do, then go ahead)
 ##########################################################################
