@@ -6,6 +6,12 @@ Publications
 This list summarizes all scientific publications that describe FORCE, functionality, validation etc. 
 
 
+* **2021**
+
+  | V. Zekoll, M. Main-Knorn, J. Louis, D. Frantz, R. Richter, and B. Pflug (2021): Comparison of Masking Algorithms for Sentinel-2 Imagery. Remote Sensing.
+  | https://dx.doi.org/10.3390/rs0010005
+
+
 * **2020**
 
   | P. Rufin, D. Frantz, L. Yan, and P. Hostert (2020): Operational Coregistration of the Sentinel-2A/B Image Archive Using Multitemporal Landsat Spectral Averages. IEEE Geoscience and Remote Sensing Letters (early access).
