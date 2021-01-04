@@ -1,5 +1,16 @@
 .. _v3:
 
+FORCE v. 3.6.2
+--------------
+
+Release: 04.01.2021
+
+* **General changes**
+
+ * Fixed a linking problem when using python3.8.
+   Thanks to Vincent Schut for suggesting a fix.
+
+
 FORCE v. 3.6.1
 --------------
 
