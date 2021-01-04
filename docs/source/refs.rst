@@ -8,8 +8,8 @@ This list summarizes all scientific publications that describe FORCE, functional
 
 * **2021**
 
-  | V. Zekoll, M. Main-Knorn, J. Louis, D. Frantz, R. Richter, and B. Pflug (2021): Comparison of Masking Algorithms for Sentinel-2 Imagery. Remote Sensing.
-  | https://dx.doi.org/10.3390/rs0010005
+  | V. Zekoll, M. Main-Knorn, J. Louis, D. Frantz, R. Richter, and B. Pflug (2021): Comparison of Masking Algorithms for Sentinel-2 Imagery. Remote Sensing 13.
+  | https://doi.org/10.3390/rs13010137
 
 
 * **2020**
