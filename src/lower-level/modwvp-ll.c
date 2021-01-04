@@ -527,7 +527,7 @@ int y, yc, yct, x, xc, xct, pos, posc;
 int try__;
 GDALDatasetH hdfDS, subDS;
 GDALRasterBandH band;
-char **sds = NULL, **metadata = NULL;
+char **sds = NULL, **metadata = NULL, **sdsopenoptions = NULL;
 char KeyName[NPOW_10];
 char *sdsname = NULL;
 int nx, ny, nxc, nyc;
@@ -698,7 +698,8 @@ const char *separator = ",";
       if (!fileexist(fullname)) continue;
 
       // open input dataset
-      if ((hdfDS = GDALOpen(fullname, GA_ReadOnly)) == NULL){
+      sdsopenoptions = CSLSetNameValue( sdsopenoptions, "LIST_SDS", "YES" );
+      if ((hdfDS = GDALOpenEx(fullname, GA_ReadOnly, NULL, sdsopenoptions, NULL)) == NULL){
         printf("unable to open image\n"); exit(1);
       } else {
         //free((void*)hdfname); hdfname = NULL;
@@ -789,6 +790,7 @@ const char *separator = ",";
 
       //CSLDestroy(sds);
       GDALClose(hdfDS);
+      CSLDestroy( sdsopenoptions );
 
 
       // sum up precipitable water for mean
