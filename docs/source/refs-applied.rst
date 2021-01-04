@@ -14,8 +14,11 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2020**
 
-  | H. Bendini, L. Fonseca, M. Schwieder, P. Rufin, T. Korting, A. Koumrouyan, and P. Hostert(2020): Combining Environmental and Landsat Analysis Ready Data for Vegetation Mapping: A Case Study in the Brazilian Savanna Biome. The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences, Volume XLIII-B3-2020.
+  | H. Bendini, L. Fonseca, M. Schwieder, P. Rufin, T. Korting, A. Koumrouyan, and P. Hostert (2020): Combining Environmental and Landsat Analysis Ready Data for Vegetation Mapping: A Case Study in the Brazilian Savanna Biome. The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences, Volume XLIII-B3-2020.
   | https://doi.org/10.5194/isprs-archives-XLIII-B3-2020-953-2020
+
+  | J. Borges, T. Higginbottom, E. Symeonakis, and M. Jones (2020). Sentinel-1 and Sentinel-2 Data for Savannah Land Cover Mapping: Optimising the Combination of Sensors and Seasons. Remote Sensing 12, 3862. 
+  | https://doi.org/10.3390/rs12233862
 
   | P. Brun, A. Psomas, C. Ginzler, W. Thuiller, M. Zappa, and N. Zimmermann (2020): Large-scale early-wilting response of Central European forests to the 2018 extreme drought. Global Change Biology.
   | https://doi.org/10.1111/gcb.15360
