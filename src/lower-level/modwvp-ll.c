@@ -530,6 +530,7 @@ GDALRasterBandH band;
 char **sds = NULL, **metadata = NULL;
 char KeyName[NPOW_10];
 char *sdsname = NULL;
+char **sdsopenoptions = NULL;
 int nx, ny, nxc, nyc;
 int yoff, xoff;
 float voff, vscl, val;
@@ -545,7 +546,6 @@ double sumwvp, ctrwvp, *average = NULL, *ctrall = NULL;
 float wlon, elon, nlat, slat;
 bool ok;
 const char *separator = ",";
-
 
   // allocate and initialize wvp averages and pixel counts
   alloc((void**)&average, nc, sizeof(double));
@@ -564,6 +564,7 @@ const char *separator = ",";
 
 
   GDALAllRegister();
+  sdsopenoptions = CSLSetNameValue(sdsopenoptions, "LIST_SDS", "YES");
 
   // read the geometa table
   if (read_modis_geometa(geoname, &id, &gr, &v, &nl, &nv) != SUCCESS){
@@ -698,10 +699,11 @@ const char *separator = ",";
       if (!fileexist(fullname)) continue;
 
       // open input dataset
-      char **sdsopenoptions = NULL;
-      sdsopenoptions = CSLSetNameValue( sdsopenoptions, "LIST_SDS", "YES" );
-      if ((hdfDS = GDALOpenEx(fullname, GA_ReadOnly, NULL, sdsopenoptions, NULL)) == NULL){
-        printf("unable to open image\n"); exit(1);
+      if ((hdfDS = GDALOpenEx(fullname, GA_ReadOnly, 
+                              NULL, 
+                              (const char *const *)sdsopenoptions, 
+                              NULL)) == NULL){
+        printf("unable to open image %s\n", fullname); exit(1);
       } else {
         //free((void*)hdfname); hdfname = NULL;
       }
@@ -791,7 +793,6 @@ const char *separator = ",";
 
       //CSLDestroy(sds);
       GDALClose(hdfDS);
-      CSLDestroy(sdsopenoptions);
 
 
       // sum up precipitable water for mean
@@ -842,8 +843,11 @@ const char *separator = ",";
   free_2D((void**)id, NPOW_10);
   free((void*)v);
 
+  CSLDestroy(sdsopenoptions);
+
   *avg   = average;
   *count = ctrall;
+  
   
   return;
 }
