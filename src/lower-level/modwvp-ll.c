@@ -790,7 +790,6 @@ const char *separator = ",";
 
       //CSLDestroy(sds);
       GDALClose(hdfDS);
-      CSLDestroy( sdsopenoptions );
 
 
       // sum up precipitable water for mean
