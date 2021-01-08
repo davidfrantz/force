@@ -53,7 +53,12 @@ jobs:
           cd splits-1.9
           ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive
           make
-          make install
+          sudo make install
           make clean
       - name: make
-        run: make -j
+        run: |
+          make -j
+          sudo make install
+          make clean
+      - name: test
+        run: force
