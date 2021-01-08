@@ -18,17 +18,16 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: Version
-        run : |
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          [ "$VERSION" == "master" ] && VERSION=latest
-          echo VERSION=$VERSION
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
       - name: Push image
         run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo VERSION=$VERSION
+          echo DOCKER=$DOCKER_USER/$IMAGE_NAME:$VERSION
           docker tag $IMAGE_NAME $DOCKER_USER/$IMAGE_NAME:$VERSION
           docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
