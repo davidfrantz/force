@@ -20,6 +20,7 @@ jobs:
           sudo apt-get install unzip
           sudo apt-get install lockfile-progs
           sudo apt-get install rename
+          sudo apt-get install cmake
       - name: Install python
         run: |
           sudo apt-get install software-properties-common
