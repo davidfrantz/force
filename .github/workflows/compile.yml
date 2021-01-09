@@ -31,30 +31,29 @@ jobs:
           pip install numpy gsutil
       - name: Install OpenCV
         run: |
-          mkdir -p ~/src/opencv
-          cd ~/src/opencv
+          DIR=$PWD
+          mkdir -p opencv && cd opencv
           wget https://github.com/opencv/opencv/archive/4.1.0.zip
-          unzip 4.1.0.zip
-          cd opencv-4.1.0
-          mkdir build
-          cd build
+          unzip 4.1.0.zip && cd opencv-4.1.0
+          mkdir build && cd build
           cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
           make -j
           sudo make install
           make clean
+          cd $PWD
       - name: Install SPLITS
         run: |
+          DIR=$PWD
           sudo apt-get install libarmadillo-dev
           sudo apt-get install libfltk1.3-dev
-          mkdir -p ~/src/splits
-          cd ~/src/splits
+          mkdir -p splits && cd splits
           wget http://sebastian-mader.net/wp-content/uploads/2017/11/splits-1.9.tar.gz
-          tar -xzf splits-1.9.tar.gz
-          cd splits-1.9
+          tar -xzf splits-1.9.tar.gz && cd splits-1.9
           ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive
-          make
+          make -j
           sudo make install
           make clean
+          cd $PWD
       - name: make
         run: |
           make -j
