@@ -56,7 +56,7 @@ jobs:
           cd $PWD
       - name: make
         run: |
-          sudo make /develop
+          sed -i 's+/develop+/usr/local/bin+' Makefile
           ./install.sh
       - name: test
         run: |
