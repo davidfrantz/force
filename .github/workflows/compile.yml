@@ -29,18 +29,6 @@ jobs:
           echo 'alias python=python3' >> ~/.bashrc
           echo 'alias pip=pip3' >> ~/.bashrc
           pip install numpy gsutil
-      - name: Install OpenCV
-        run: |
-          DIR=$PWD
-          mkdir -p opencv && cd opencv
-          wget https://github.com/opencv/opencv/archive/4.1.0.zip
-          unzip 4.1.0.zip && cd opencv-4.1.0
-          mkdir build && cd build
-          cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
-          make -j
-          sudo make install
-          make clean
-          cd $PWD
       - name: Install SPLITS
         run: |
           DIR=$PWD
@@ -54,10 +42,25 @@ jobs:
           sudo make install
           make clean
           cd $PWD
-      - name: make
+      - name: Install OpenCV
         run: |
+          DIR=$PWD
+          mkdir -p opencv && cd opencv
+          wget https://github.com/opencv/opencv/archive/4.1.0.zip
+          unzip 4.1.0.zip && cd opencv-4.1.0
+          mkdir build && cd build
+          cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
           make -j
           sudo make install
           make clean
+          cd $PWD
+      - name: make
+        run: |
+          ./install.sh
+          #./debug.sh disable
+          #./splits.sh enable
+          #make -j
+          #sudo make install
+          #make clean
       - name: test
         run: force
