@@ -50,7 +50,7 @@ jobs:
           unzip 4.1.0.zip && cd opencv-4.1.0
           mkdir build && cd build
           cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
-          make -j
+          make VERBOSE=1
           sudo make install
           make clean
           cd $PWD
