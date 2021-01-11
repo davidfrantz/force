@@ -28,7 +28,7 @@ jobs:
           sudo apt-get install python3.8 python3-pip python3-dev
           echo 'alias python=python3' >> ~/.bashrc
           echo 'alias pip=pip3' >> ~/.bashrc
-          source ~/.bashrc
+          . ~/.bashrc
           pip install numpy gsutil
       - name: Install SPLITS
         run: |
