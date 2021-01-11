@@ -62,26 +62,3 @@ jobs:
       - name: test
         run: |
           force
-          force-cube
-          force-higher-level
-          force-import-modis
-          force-l2ps
-          force-l2ps_
-          force-level1-csd
-          force-level1-landsat
-          force-level1-sentinel2
-          force-level2
-          force-lut-modis
-          force-magic-parameters
-          force-mdcp
-          force-mosaic
-          force-parameter
-          force-procmask
-          force-pyramid
-          force-qai-inflate
-          force-stack
-          force-synthmix
-          force-tabulate-grid
-          force-tile-extent
-          force-tile-finder
-          force-train
