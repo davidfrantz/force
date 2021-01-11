@@ -86,7 +86,8 @@ RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enab
   # if on develop branch
   sed -i 's+BINDIR=/develop+BINDIR=/usr/local/bin+' Makefile && \
   # Compile, install, check and clean
-  ./install.sh
+  make -j && \
+  make install
 
 # Cleanup after successfull builds
 RUN rm -rf $INSTALL_DIR
