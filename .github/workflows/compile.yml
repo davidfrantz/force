@@ -1,0 +1,64 @@
+name: Compile
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Test if compiling works
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Install apt-get dependencies
+        run: |
+          sudo apt-get install parallel 
+          sudo apt-get install libgdal-dev gdal-bin python-gdal
+          sudo apt-get install libgsl0-dev
+          sudo apt-get install curl
+          sudo apt-get install unzip
+          sudo apt-get install lockfile-progs
+          sudo apt-get install rename
+          sudo apt-get install cmake
+      - name: Install python
+        run: |
+          sudo apt-get install software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get install python3.8 python3-pip python3-dev
+          echo 'alias python=python3' >> ~/.bashrc
+          echo 'alias pip=pip3' >> ~/.bashrc
+          . ~/.bashrc
+          pip install numpy gsutil
+      - name: Install SPLITS
+        run: |
+          DIR=$PWD
+          sudo apt-get install libarmadillo-dev
+          sudo apt-get install libfltk1.3-dev
+          mkdir -p splits && cd splits
+          wget http://sebastian-mader.net/wp-content/uploads/2017/11/splits-1.9.tar.gz
+          tar -xzf splits-1.9.tar.gz && cd splits-1.9
+          ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive
+          make
+          sudo make install
+          make clean
+          cd $PWD
+      - name: Install OpenCV
+        run: |
+          DIR=$PWD
+          mkdir -p opencv && cd opencv
+          wget https://github.com/opencv/opencv/archive/4.1.0.zip
+          unzip 4.1.0.zip && cd opencv-4.1.0
+          mkdir build && cd build
+          cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
+          make
+          sudo make install
+          make clean
+          cd $PWD
+      - name: make
+        run: |
+          sed -i 's+/develop+/usr/local/bin+' Makefile
+          ./install.sh
+      - name: test
+        run: |
+          force
