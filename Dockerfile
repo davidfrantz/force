@@ -95,8 +95,7 @@ RUN apt-get purge -y --auto-remove apt-utils cmake git build-essential software-
 # Create a dedicated 'docker' group and user for running FORCE commands
 RUN groupadd docker && \
   useradd -m docker -g docker -p docker && \
-  chgrp docker /usr/local/bin/ && \
-  chgrp docker /develop
+  chgrp docker /usr/local/bin
 # Use this user by default
 USER docker
 
