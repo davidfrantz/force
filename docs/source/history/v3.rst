@@ -1,5 +1,25 @@
 .. _v3:
 
+FORCE v. 3.6.3
+--------------
+
+Release: 11.01.2021
+
+* **General changes**
+
+  * Versioned Docker images are now available again.
+    Thanks to Fegyi for the hint.
+
+  * A github action was implemented to test whether pushed code compiles and installs successfully.
+
+* **FORCE WVDB**
+
+  * Updated force-lut-modis to work with GDAL 3.2.
+    Some subdatasets are not visible anymore since this GDAL version.
+    Added some code to make this work again.  
+    Thanks to Vincent Schut for suggesting a fix.
+
+
 FORCE v. 3.6.2
 --------------
 
