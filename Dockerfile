@@ -74,9 +74,7 @@ RUN ./configure CPPFLAGS="-I /usr/include/gdal" CXXFLAGS=-fpermissive \
   && make clean
 
 # Build FORCE from source
-RUN mkdir -p $INSTALL_DIR/force && \
-  # This is needed in case of develop branch
-  mkdir -p /develop
+RUN mkdir -p $INSTALL_DIR/force
 WORKDIR $INSTALL_DIR/force
 COPY . . 
 ARG splits=true 
@@ -85,11 +83,10 @@ ARG debug=false
 RUN if [ "$splits" = "false" ] ; then ./splits.sh disable; else ./splits.sh enable; fi && \
   # Conditionally enable DEBUG mode
   if [ "$debug" = "true" ] ; then ./debug.sh enable; else ./debug.sh disable; fi && \
-  # Compile FORCE
+  # if on develop branch
   sed -i 's+BINDIR=/develop+BINDIR=/usr/local/bin+' Makefile && \
-  make -j7 \
-  && make install \
-  && make clean
+  # Compile, install, check and clean
+  ./install.sh
 
 # Cleanup after successfull builds
 RUN rm -rf $INSTALL_DIR
