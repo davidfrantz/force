@@ -5,7 +5,7 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.6.2**
+**Version 3.6.3**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
