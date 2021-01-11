@@ -44,7 +44,8 @@ RUN apt-get -y install wget unzip curl git build-essential libgdal-dev gdal-bin 
 
 # Set python aliases for Python 3.x
 RUN echo 'alias python=python3' >> ~/.bashrc \
-  && echo 'alias pip=pip3' >> ~/.bashrc
+  && echo 'alias pip=pip3' >> ~/.bashrc \
+  && source ~/.bashrc
 # NumPy is needed for OpenCV, gsutil for Google downloads
 RUN pip3 install numpy==1.18.1 gsutil
 
