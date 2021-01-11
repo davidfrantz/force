@@ -29,7 +29,7 @@ jobs:
           echo 'alias python=python3' >> ~/.bashrc
           echo 'alias pip=pip3' >> ~/.bashrc
           . ~/.bashrc
-          pip install numpy gsutil
+          pip3 install numpy gsutil
       - name: Install SPLITS
         run: |
           DIR=$PWD

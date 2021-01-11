@@ -56,7 +56,7 @@ EXECUTABLES = gcc g++ \
               ogrinfo ogr2ogr \
               gsl-config curl-config \
               unzip tar lockfile-create lockfile-remove rename \
-              python python3 pip pip3 \
+              python3 pip3 \
               opencv_version 
 OK := $(foreach exec,$(EXECUTABLES),\
         $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
