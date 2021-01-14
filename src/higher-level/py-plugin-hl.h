@@ -32,6 +32,7 @@ Python plugin header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../higher-level/tsa-hl.h"
+#include "../higher-level/plugin-hl.h"
 
 
 #ifdef __cplusplus
@@ -39,8 +40,9 @@ extern "C" {
 #endif
 
 void register_python(par_hl_t *phl);
-void deregister_python();
-void register_python_tsa(par_pyp_t *pyp);
+void deregister_python(par_hl_t *phl);
+void init_pyp(par_pyp_t *pyp);
+void test_pyp(par_pyp_t *pyp);
 int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus

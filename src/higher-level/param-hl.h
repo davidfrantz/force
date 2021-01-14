@@ -238,6 +238,13 @@ typedef struct {
   int   nb;
 } par_pyp_t;
 
+// R plugin
+typedef struct {
+  char *f_code;
+  int   orpp;
+  int   nb;
+} par_rpp_t;
+
 // aggregation statistics
 typedef struct {
   int *metrics, nmetrics;
@@ -382,6 +389,12 @@ typedef struct {
   char  *base;
 } par_lib_t;
 
+// script plugin
+typedef struct {
+  par_pyp_t pyp;
+  par_rpp_t rpp;
+} par_plg_t;
+
 // improphe core
 typedef struct {
   int *dwin;
@@ -481,6 +494,7 @@ typedef struct {
   par_txt_t txt;
   par_lsm_t lsm;
   par_lib_t lib;
+  par_plg_t plg;
 
 } par_hl_t;
 

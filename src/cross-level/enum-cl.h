@@ -57,9 +57,9 @@ enum { _X_, _Y_, _Z_ };
 enum { _MIN_, _MAX_ };
 
 // modules
-enum { _LL_LEVEL2_, _HL_BAP_,    _HL_TSA_, _HL_CSO_, _HL_CFI_, 
-       _HL_L2I_,    _HL_ML_,     _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _HL_LIB_,    _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
+       _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
+       _HL_LIB_,    _HL_PLG_, _AUX_TRAIN_, _AUX_SYNTHMIX_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };

@@ -440,6 +440,25 @@ void register_lib(params_t *params, par_hl_t *phl){
 }
 
 
+/** This function registers script plugin parameters
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_plg(params_t *params, par_hl_t *phl){
+
+  // python plugin parameters
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.pyp.f_code);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.opyp);
+
+  // R plugin parameters
+  register_char_par(params,    "FILE_R",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rpp.f_code);
+  register_bool_par(params,    "OUTPUT_RPP",    &phl->plg.rpp.orpp);
+
+  return;
+}
+
+
 /** This function checks that each index can be computed with the given
 +++ set of sensors. It also kicks out unused bands to remove I/O
 --- tsa:    TSA parameters
@@ -1203,6 +1222,10 @@ double tol = 5e-3;
     phl->type = _HL_LIB_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
+  } else if (strcmp(buffer, "++PARAM_PLG_START++") == 0){
+    phl->type = _HL_PLG_;
+    phl->input_level1 = _INP_ARD_;
+    phl->input_level2 = _INP_NONE_;
   } else {
     printf("No valid parameter file!\n"); return FAILURE;
   }
@@ -1263,6 +1286,9 @@ double tol = 5e-3;
       break;
     case _HL_LIB_:
       register_lib(phl->params, phl);
+      break;
+    case _HL_PLG_:
+      register_plg(phl->params, phl);
       break;
     default:
       printf("Unknown module!\n"); return FAILURE;

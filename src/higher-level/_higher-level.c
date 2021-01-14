@@ -162,7 +162,7 @@ progress_t  pro;
   free_aux(phl, aux);
   free_param_higher(phl);
 
-  deregister_python();
+  deregister_python(phl);
 
   CPLPopErrorHandler();
 
