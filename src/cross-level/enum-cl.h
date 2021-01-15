@@ -267,6 +267,9 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 // clock type
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 
+// user-defined function type
+enum { _UDF_PROCESS_, _UDF_THREAD_, _UDF_BLOCK_, _UDF_LENGTH_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
@@ -291,6 +294,7 @@ extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 
 #ifdef __cplusplus
 }

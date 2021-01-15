@@ -251,7 +251,8 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
   // python plugin parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
-  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.opyp);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.out);
 
   return;
 }
@@ -449,11 +450,13 @@ void register_plg(params_t *params, par_hl_t *phl){
 
   // python plugin parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.pyp.f_code);
-  register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.opyp);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.out);
 
   // R plugin parameters
-  register_char_par(params,    "FILE_R",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rpp.f_code);
-  register_bool_par(params,    "OUTPUT_RPP",    &phl->plg.rpp.orpp);
+  register_char_par(params,    "FILE_R",       _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rpp.f_code);
+  register_enum_par(params,    "R_TYPE",       _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.rpp.type);
+  register_bool_par(params,    "OUTPUT_RPP",   &phl->plg.rpp.out);
 
   return;
 }
@@ -1550,13 +1553,33 @@ double tol = 5e-3;
     }
 
 
-    if (phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
-      phl->tsa.pyp.opyp = false;
+    if (phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
+      phl->tsa.pyp.out = false;
       printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
 
-    if (!phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
+    if (!phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
       copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
       printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+
+  }
+
+  if (phl->type == _HL_PLG_){
+
+    if (phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") == 0){
+      phl->plg.pyp.out = false;
+      printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
+
+    if (!phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") != 0){
+      copy_string(phl->plg.pyp.f_code, NPOW_10, "NULL");
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+
+    if (phl->plg.rpp.out && strcmp(phl->plg.rpp.f_code, "NULL") == 0){
+      phl->plg.rpp.out = false;
+      printf("Warning: no R code provided. OUTPUT_RPP ignored. Proceed.\n");}
+
+    if (!phl->plg.rpp.out && strcmp(phl->plg.rpp.f_code, "NULL") != 0){
+      copy_string(phl->plg.rpp.f_code, NPOW_10, "NULL");
+      printf("Warning: R code provided, but OUTPUT_RPP = FALSE. Ignore R plugin. Proceed.\n");}
 
   }
 

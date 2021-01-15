@@ -349,8 +349,8 @@ int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
   info[o].prodlen  = phl->tsa.pyp.nb;
   strncpy(info[o].prodname, "PYP", 3); info[o].prodname[3] = '\0';
   info[o].prodtype = _pyp_;
-  info[o].enable   = phl->tsa.pyp.opyp;
-  info[o].write    = phl->tsa.pyp.opyp;
+  info[o].enable   = phl->tsa.pyp.out;
+  info[o].write    = phl->tsa.pyp.out;
   info[o].ptr      = &ts->pyp_;
 
   return o+1;

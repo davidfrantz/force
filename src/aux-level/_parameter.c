@@ -45,6 +45,7 @@ void usage(char *prog){
   printf("    LEVEL3:   Level 3 Processing System\n");
   printf("    TSA:      Time Series Analysis\n");
   printf("    CSO:      Clear-Sky Observations\n");
+  printf("    PLG:      Plug-In User Defined Functions\n");
   printf("    L2IMP:    Level 2 ImproPhe\n");
   printf("    CFIMP:    Continuous Field ImproPhe\n");
   printf("    SMP:      Sampling\n");
@@ -99,6 +100,10 @@ bool verbose;
     level = _HIGHER_LEVEL_;
     input_level = _INP_QAI_;
     type = _HL_CSO_;
+  } else if (strcmp(ctype, "PLG") == 0){
+    level = _HIGHER_LEVEL_;
+    input_level = _INP_ARD_;
+    type = _HL_PLG_;
   } else if (strcmp(ctype, "CFIMP") == 0){
     level = _HIGHER_LEVEL_;
     input_level = _INP_ARD_;
@@ -204,6 +209,11 @@ bool verbose;
 
   if (type == _HL_CSO_){
     write_par_hl_cso(fp, verbose);
+  }
+
+  if (type == _HL_PLG_){
+    write_par_hl_pyp(fp, verbose);
+    write_par_hl_rpp(fp, verbose);
   }
 
   if (type == _HL_CFI_){

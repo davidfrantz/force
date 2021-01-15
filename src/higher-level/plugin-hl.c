@@ -49,8 +49,8 @@ int info_plg_pyp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
   info[o].prodlen  = phl->plg.pyp.nb;
   strncpy(info[o].prodname, "PYP", 3); info[o].prodname[3] = '\0';
   info[o].prodtype = _pyp_;
-  info[o].enable   = phl->plg.pyp.opyp;
-  info[o].write    = phl->plg.pyp.opyp;
+  info[o].enable   = phl->plg.pyp.out;
+  info[o].write    = phl->plg.pyp.out;
   info[o].ptr      = &plg->pyp_;
 
   return o+1;
@@ -62,8 +62,8 @@ int info_plg_rpp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
   info[o].prodlen  = phl->plg.rpp.nb;
   strncpy(info[o].prodname, "RPP", 3); info[o].prodname[3] = '\0';
   info[o].prodtype = _rpp_;
-  info[o].enable   = phl->plg.rpp.orpp;
-  info[o].write    = phl->plg.rpp.orpp;
+  info[o].enable   = phl->plg.rpp.out;
+  info[o].write    = phl->plg.rpp.out;
   info[o].ptr      = &plg->rpp_;
 
   return o+1;
@@ -250,7 +250,7 @@ short nodata;
   }
 
 
-  ard_python_plugin(ard, &plg, mask_, nt, nb, nc, nodata, phl);
+  ard_python_plugin(ard, &plg, mask_, nc, nb, nt, nodata, phl);
   //ard_r_plugin(&plg, mask_, nc, nt, nodata, phl);
 
 

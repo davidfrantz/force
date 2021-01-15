@@ -41,9 +41,10 @@ extern "C" {
 
 void register_python(par_hl_t *phl);
 void deregister_python(par_hl_t *phl);
-void init_pyp(par_pyp_t *pyp);
-void test_pyp(par_pyp_t *pyp);
-int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
+void init_pyp(par_udf_t *udf);
+void test_pyp(par_udf_t *udf);
+int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int nt, short nodata, par_hl_t *phl);
+int ard_python_plugin(ard_t *ard, plg_t *plg, small *mask_, int nc, int nb, int nt, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

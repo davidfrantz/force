@@ -46,7 +46,7 @@ typedef struct {
   short **rpp_;
 } plg_t;
 
-//#include "../higher-level/py-plugin-hl.h"
+#include "../higher-level/py-plugin-hl.h"
 
 brick_t **script_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
 

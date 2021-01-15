@@ -45,9 +45,17 @@ Copyright (C) 2020 David Frantz, Andreas Rabe
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_python(par_hl_t *phl){
+par_udf_t *udf;
 
 
-  if (!phl->tsa.pyp.opyp && !phl->plg.pyp.opyp) return;
+  if (phl->tsa.pyp.out){
+    udf = &phl->tsa.pyp;
+  } else if (phl->plg.pyp.out){
+    udf = &phl->plg.pyp;
+  } else {
+    return;
+  }
+
 
   Py_Initialize();
 
@@ -56,29 +64,72 @@ void register_python(par_hl_t *phl){
   PyRun_SimpleString("import numpy as np");
   PyRun_SimpleString("from datetime import date as Date");
 
-  PyRun_SimpleString("def forcepy_(iblock, ce, year, month, day, nodata, nproc):             \n"
-                     "   pool = Pool(nproc)                                                  \n"
-                     "   date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
-                     "   argss = list()                                                      \n"
-                     "   for ts in iblock.T:                                                 \n"
-                     "       args = (ts, date, nodata)                                       \n"
-                     "       argss.append(args)                                              \n"
-                     "   res = pool.map(func=forcepy, iterable=argss)                        \n"
-                     "   pool.close()                                                        \n"
-                     "   del pool                                                            \n"
-                     "   oblock = np.array(res, dtype=np.int16).T                            \n"
-                     "   return oblock.copy()                                                \n");
-
-  if (phl->tsa.pyp.opyp){
-    init_pyp(&phl->tsa.pyp);
-    //test_pyp(&phl->tsa.pyp);
-  } else if (phl->plg.pyp.opyp){
-    init_pyp(&phl->plg.pyp);
-    //test_pyp(&phl->plg.pyp);
+  if (udf->type == _UDF_PROCESS_){
+    PyRun_SimpleString("def forcepy_(iblock, year, month, day, nodata, nband, nproc):           \n"
+                       "    print(iblock.shape)                                                 \n"
+                       "    if iblock.shape[1] == 1:                                            \n"
+                       "        iblock = iblock[:,0,:]                                          \n"
+                       "    pool = Pool(nproc)                                                  \n"
+                       "    date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
+                       "    argss = list()                                                      \n"
+                       "    for ts in iblock.T:                                                 \n"
+                       "        args = (ts, date, nodata)                                       \n"
+                       "        argss.append(args)                                              \n"
+                       "    res = pool.map(func=forcepy, iterable=argss)                        \n"
+                       "    pool.close()                                                        \n"
+                       "    del pool                                                            \n"
+                       "    try:                                                                \n"
+                       "        oblock = np.array(res, dtype=np.int16).T                        \n"
+                       "    except Exception as error:                                          \n"
+                       "        print(f'could not cast to numpy array: {str(error)}')           \n"
+                       "        raise ValueError()                                              \n"
+                       "    if oblock.shape != (nband,iblock.shape[-1]):                        \n"
+                       "        print(f'shape mismatch, delivered {oblock.shape[0]} bands, '    \n"
+                       "              f'expected {nband}.')                                     \n"
+                       "        raise ValueError()                                              \n"
+                       "    return oblock.copy()                                                \n");
+  } else if (udf->type == _UDF_THREAD_){
+    PyRun_SimpleString("print('to be implemented')");
+  } else if (udf->type == _UDF_BLOCK_){
+    PyRun_SimpleString("def forcepy_(iblock, year, month, day, nodata, nband, nproc):           \n"
+                       "    print(iblock.shape)                                                 \n"
+                       "    reduced = iblock.shape[1] == 1                                      \n"
+                       "    if reduced:                                                         \n"
+                       "        iblock = iblock[:,0,:]                                          \n"
+                       "    date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
+                       "    oblock = forcepy((iblock, date, nodata))                            \n"
+                       "    if isinstance(oblock, (list,tuple)):                                \n"
+                       "        try:                                                            \n"
+                       "            oblock = np.array(oblock, dtype=np.int16)                   \n"
+                       "        except Exception as error:                                      \n"
+                       "            print(f'could not cast to numpy array: {str(error)}')       \n"
+                       "            raise ValueError()                                          \n"
+                       "    if not isinstance(oblock, np.ndarray):                              \n"
+                       "        print('no array, list or tuple returned. ')                     \n"
+                       "        raise ValueError()                                              \n"
+                       "    if oblock.ndim != 2:                                                \n"
+                       "        print(f'shape mismatch, delivered shape: {oblock.shape} , '     \n"
+                       "              f'expected {nband, *iblock.shape[-1:]}.')                 \n"
+                       "        raise ValueError()                                              \n"
+                       "    if oblock.shape[0] != nband:                                        \n"
+                       "        print(f'shape mismatch, delivered {oblock.shape[0]} bands, '    \n"
+                       "              f'expected {nband} bands.')                               \n"
+                       "        raise ValueError()                                              \n"
+                       "    if oblock.shape[-1:] != iblock.shape[-1:]:                          \n"
+                       "        print(f'shape mismatch, delivered {oblock.shape[-1:]} pixels, ' \n"
+                       "              f'expected {iblock.shape[-1:]} pixels.')                  \n"
+                       "        raise ValueError()                                              \n"
+                       "    if oblock.dtype != np.int16:                                        \n"
+                       "        oblock = oblock.astype(np.int16)                                \n"
+                       "    return oblock                                                       \n");
   } else {
-    printf("unknown python entry point.\n"); 
+    printf("unknown UDF type.\n"); 
     exit(FAILURE);
   }
+//T B Y X
+
+  init_pyp(udf);
+  //test_pyp(udf);
 
   return;
 }
@@ -89,17 +140,17 @@ void register_python(par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void deregister_python(par_hl_t *phl){
 
-  if (phl->tsa.pyp.opyp || phl->plg.pyp.opyp) Py_Finalize();
+  if (phl->tsa.pyp.out || phl->plg.pyp.out) Py_Finalize();
 
   return;
 }
 
 
 /** This function initializes the output provided python function
---- pyp:    python-plugin parameters
+--- udf:    user-defined code parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_pyp(par_pyp_t *pyp){
+void init_pyp(par_udf_t *udf){
 FILE *fpy                = NULL;
 PyObject *main_module    = NULL;
 PyObject *main_dict      = NULL;
@@ -107,8 +158,8 @@ PyObject *py_fun         = NULL;
 PyObject *py_register    = NULL;
 
 
-  if (!pyp->opyp){
-    pyp->nb = 1;
+  if (!udf->out){
+    udf->nb = 1;
     return;
   }
 
@@ -116,8 +167,8 @@ PyObject *py_register    = NULL;
   main_dict   = PyModule_GetDict(main_module);
 
   // parse the provided python function
-  fpy = fopen(pyp->f_code, "r");
-  PyRun_SimpleFile(fpy, pyp->f_code);
+  fpy = fopen(udf->f_code, "r");
+  PyRun_SimpleFile(fpy, udf->f_code);
 
   py_fun = PyDict_GetItemString(main_dict, "forcepy_init");
   if (py_fun == NULL){
@@ -126,7 +177,7 @@ PyObject *py_register    = NULL;
 
   py_register = PyObject_CallFunctionObjArgs(py_fun, NULL);
 
-  pyp->nb = (int)Py_SIZE(py_register);
+  udf->nb = (int)Py_SIZE(py_register);
   Py_DECREF(py_register);
 
   fclose(fpy);
@@ -137,10 +188,10 @@ PyObject *py_register    = NULL;
 
 /** This function loads the provided python function and makes some 
 +++ tests with dummy data
---- pyp:    python-plugin parameters
+--- udf:    user-defined code parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void test_pyp(par_pyp_t *pyp){
+void test_pyp(par_udf_t *udf){
 FILE *fpy                = NULL;
 PyObject *main_module    = NULL;
 PyObject *main_dict      = NULL;
@@ -148,7 +199,6 @@ PyObject *py_fun         = NULL;
 PyObject *py_nodata      = NULL;
 PyObject *py_nproc       = NULL;
 PyArrayObject* py_data   = NULL;
-PyArrayObject* py_ce     = NULL;
 PyArrayObject* py_year   = NULL;
 PyArrayObject* py_month  = NULL;
 PyArrayObject* py_day    = NULL;
@@ -159,14 +209,13 @@ npy_intp dim_3d[3] = { nt, nb, nc };
 npy_intp dim_1d[1] = { nt };
 int b, t, p, k;
 short *data_  = NULL;
-int   *ce_    = NULL;
 int   *year_  = NULL;
 int   *month_ = NULL;
 int   *day_   = NULL;
 
 
-  if (!pyp->opyp){
-    pyp->nb = 1;
+  if (!udf->out){
+    udf->nb = 1;
     return;
   }
 
@@ -174,8 +223,8 @@ int   *day_   = NULL;
   main_dict   = PyModule_GetDict(main_module);
 
   // parse the provided python function
-  fpy = fopen(pyp->f_code, "r");
-  PyRun_SimpleFile(fpy, pyp->f_code);
+  fpy = fopen(udf->f_code, "r");
+  PyRun_SimpleFile(fpy, udf->f_code);
 
   py_fun = PyDict_GetItemString(main_dict, "forcepy_");
   if (py_fun == NULL){
@@ -188,13 +237,11 @@ int   *day_   = NULL;
   py_nproc  = PyLong_FromLong(2);
 
   py_data  = (PyArrayObject *) PyArray_SimpleNew(3, dim_3d, NPY_INT16);
-  py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
 
   data_  = (short*)PyArray_DATA(py_data);
-  ce_    = (int*)PyArray_DATA(py_ce);
   year_  = (int*)PyArray_DATA(py_year);
   month_ = (int*)PyArray_DATA(py_month);
   day_   = (int*)PyArray_DATA(py_day);
@@ -207,10 +254,9 @@ int   *day_   = NULL;
     year_[t]  = 2020;
     month_[t] = t+1;
     day_[t]   = 15;
-    ce_[t]    = date2ce(year_[t], month_[t], day_[t]);
   }
 
-  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(py_fun, py_data, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
+  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(py_fun, py_data, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
   if (py_return == NULL){
     printf("Oops. Testing %s failed with dummy data. "
            "NULL returned from python. "
@@ -226,11 +272,11 @@ int   *day_   = NULL;
            "Clean up the python plugin code!\n", "forcepy_tsi", ndim);
     exit(FAILURE);}
 
-  if (dim[0] != pyp->nb){
+  if (dim[0] != udf->nb){
     printf("Oops. Testing %s failed with dummy data. "
            "Returned array size is incorrect. "
            "Expected %d elements in 1st dimension, received %d. "
-           "Clean up the python plugin code!\n", "forcepy_tsi", pyp->nb, (int)dim[0]);
+           "Clean up the python plugin code!\n", "forcepy_tsi", udf->nb, (int)dim[0]);
     exit(FAILURE);}
 
   if (dim[1] != nc){
@@ -243,7 +289,6 @@ int   *day_   = NULL;
 
   Py_DECREF(py_return);
   Py_DECREF(py_data);
-  Py_DECREF(py_ce);
   Py_DECREF(py_year);
   Py_DECREF(py_month);
   Py_DECREF(py_day);
@@ -259,7 +304,8 @@ int   *day_   = NULL;
 /** This function connects the TSA module to plug'n'play python code
 --- ts:     pointer to instantly useable TSA image arrays
 --- mask:   mask image
---- nc:     number of cells
+--- nx:     number of cols
+--- ny:     number of rows
 --- nt:     number of time steps
 --- nodata: nodata value
 --- phl:    HL parameters
@@ -279,15 +325,14 @@ PyObject *py_fun = NULL;
 
 PyObject *py_nodata = NULL;
 PyObject *py_nproc = NULL;
+PyObject *py_nband = NULL;
 PyArrayObject* py_data = NULL;
-PyArrayObject* py_ce = NULL;
 PyArrayObject* py_year = NULL;
 PyArrayObject* py_month = NULL;
 PyArrayObject* py_day = NULL;
 PyArrayObject *py_return = NULL;
 short* data_ = NULL;
 short* return_ = NULL;
-int* ce_ = NULL;
 int* year_ = NULL;
 int* month_ = NULL;
 int* day_ = NULL;
@@ -309,15 +354,14 @@ int* day_ = NULL;
 
   py_nodata = PyLong_FromLong(nodata);
   py_nproc = PyLong_FromLong(phl->cthread);
+  py_nband = PyLong_FromLong(phl->tsa.pyp.nb);
 
   py_data  = (PyArrayObject *) PyArray_SimpleNew(3, dim_3d, NPY_INT16);
-  py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
 
   data_  = (short*)PyArray_DATA(py_data);
-  ce_    = (int*)PyArray_DATA(py_ce);
   year_  = (int*)PyArray_DATA(py_year);
   month_ = (int*)PyArray_DATA(py_month);
   day_   = (int*)PyArray_DATA(py_day);
@@ -327,14 +371,13 @@ int* day_ = NULL;
   for (t=0; t<nt; t++){
     memcpy(data_, ts->tsi_[t], sizeof(short)*nc);
     data_ += nc;
-    ce_[t]    = ts->d_tsi[t].ce;
     year_[t]  = ts->d_tsi[t].year;
     month_[t] = ts->d_tsi[t].month;
     day_[t]   = ts->d_tsi[t].day;
   }
 
   py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
-    py_fun, py_data, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
+    py_fun, py_data, py_year, py_month, py_day, py_nodata, py_nband, py_nproc, NULL);
 
   if (py_return == NULL){
     printf("Oops. NULL returned from python. Clean up the python plugin code!\n");
@@ -352,11 +395,11 @@ int* day_ = NULL;
   // clean
   Py_DECREF(py_return);
   Py_DECREF(py_data);
-  Py_DECREF(py_ce);
   Py_DECREF(py_year);
   Py_DECREF(py_month);
   Py_DECREF(py_day);
   Py_DECREF(py_nodata);
+  Py_DECREF(py_nband);
   Py_DECREF(py_nproc);
 
 
@@ -367,7 +410,7 @@ int* day_ = NULL;
 }
 
 
-int ard_python_plugin(ard_t *ard, plg_t *plg, small *mask_, int nt, int nb, int nc, short nodata, par_hl_t *phl){
+int ard_python_plugin(ard_t *ard, plg_t *plg, small *mask_, int nc, int nb, int nt, short nodata, par_hl_t *phl){
 int b, t;
 
 FILE *fpy = NULL;
@@ -381,15 +424,14 @@ PyObject *py_fun = NULL;
 
 PyObject *py_nodata = NULL;
 PyObject *py_nproc = NULL;
+PyObject *py_nband = NULL;
 PyArrayObject* py_data = NULL;
-PyArrayObject* py_ce = NULL;
 PyArrayObject* py_year = NULL;
 PyArrayObject* py_month = NULL;
 PyArrayObject* py_day = NULL;
 PyArrayObject *py_return = NULL;
 short* data_ = NULL;
 short* return_ = NULL;
-int* ce_ = NULL;
 int* year_ = NULL;
 int* month_ = NULL;
 int* day_ = NULL;
@@ -412,15 +454,14 @@ date_t date;
 
   py_nodata = PyLong_FromLong(nodata);
   py_nproc = PyLong_FromLong(phl->cthread);
+  py_nband = PyLong_FromLong(phl->plg.pyp.nb);
 
   py_data  = (PyArrayObject *) PyArray_SimpleNew(3, dim_3d, NPY_INT16);
-  py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
   py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
 
   data_  = (short*)PyArray_DATA(py_data);
-  ce_    = (int*)PyArray_DATA(py_ce);
   year_  = (int*)PyArray_DATA(py_year);
   month_ = (int*)PyArray_DATA(py_month);
   day_   = (int*)PyArray_DATA(py_day);
@@ -433,14 +474,13 @@ date_t date;
       data_ += nc;
     }
     date = get_brick_date(ard[t].DAT, 0);
-    ce_[t]    = date.ce;
     year_[t]  = date.year;
     month_[t] = date.month;
     day_[t]   = date.day;
   }
 
   py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
-    py_fun, py_data, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
+    py_fun, py_data, py_year, py_month, py_day, py_nodata, py_nband, py_nproc, NULL);
 
   if (py_return == NULL){
     printf("Oops. NULL returned from python. Clean up the python plugin code!\n");
@@ -458,11 +498,11 @@ date_t date;
   // clean
   Py_DECREF(py_return);
   Py_DECREF(py_data);
-  Py_DECREF(py_ce);
   Py_DECREF(py_year);
   Py_DECREF(py_month);
   Py_DECREF(py_day);
   Py_DECREF(py_nodata);
+  Py_DECREF(py_nband);
   Py_DECREF(py_nproc);
 
 

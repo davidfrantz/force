@@ -1434,10 +1434,57 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
   fprintf(fp, "FILE_PYTHON = NULL\n");
 
   if (verbose){
+    fprintf(fp, "# Type of user-defined function. MULTIPROCESS will spawn a python multi-\n");
+    fprintf(fp, "# processing pool; the UDF will receive the time series of a single pixel. \n");
+    fprintf(fp, "# MULTITHREAD will use numba just-in-time compilation with multithreading; \n");
+    fprintf(fp, "# the UDF will receive the time series of a single pixel. This is similar to \n");
+    fprintf(fp, "# MULTIPROCESS but the UDF needs to be restricted to numba functionality. \n");
+    fprintf(fp, "# BLOCK will not use any parallelization; the UDF will receive the full \n");
+    fprintf(fp, "# processing block.\n");
+    fprintf(fp, "# Type: Character. Valid values: {MULTIPROCESS,MULTITHREAD,BLOCK}\n");
+  }
+  fprintf(fp, "PYTHON_TYPE = MULTIPROCESS\n");
+
+  if (verbose){
     fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_PYP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level interpolation pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_rpp(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# R-PLUGIN PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This file specifies the file holding user-provided R code. You can skip this\n");
+    fprintf(fp, "# by setting FILE_R = NULL, but this requires OUTPUT_RPP = FALSE.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_R = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# TBD\n");
+    fprintf(fp, "# Type: Character. Valid values: {MULTIPROCESS,MULTITHREAD,BLOCK}\n");
+  }
+  fprintf(fp, "R_TYPE = MULTIPROCESS\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the R-plugin? If TRUE, FILE_R must exist.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RPP = FALSE\n");
 
   return;
 }
