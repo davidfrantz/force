@@ -595,6 +595,10 @@ int b;
   printf("active chunk: %d, tile X%04d_Y%04d\n", brick->chunk, brick->tx, brick->ty);
   printf("ulx: %.3f, uly: %.3f\n", 
     brick->geotran[0], brick->geotran[3]);
+  printf("geotran: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n", 
+    brick->geotran[0], brick->geotran[1],
+    brick->geotran[2], brick->geotran[3],
+    brick->geotran[4], brick->geotran[5]);
   printf("proj: %s\n", brick->proj);
   printf("par: %s\n", brick->par);
 
