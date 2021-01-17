@@ -73,7 +73,13 @@ par_udf_t *udf;
                        "    date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
                        "    argss = list()                                                      \n"
                        "    for ts in iblock.T:                                                 \n"
-                       "        args = (ts, date, nodata)                                       \n"
+                       
+                       "        ts2 = ts                                                        \n"
+                       "        if ts.ndim == 2:                                                \n"
+                       "            ts2 = ts.T                                                   \n"
+                       "        args = (ts2, date, nodata)                                      \n"
+                       
+//                       "        args = (ts2, date, nodata)                                      \n"
                        "        argss.append(args)                                              \n"
                        "    res = pool.map(func=forcepy, iterable=argss)                        \n"
                        "    pool.close()                                                        \n"
