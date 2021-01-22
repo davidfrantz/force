@@ -880,7 +880,9 @@ int i;
     } else if (lsm->metrics[i] == _LSM_GEO_){
       lsm->ogeo = true;
     } else if (lsm->metrics[i] == _LSM_MAX_){
-      lsm->omax = true;
+      lsm->omax = true;    
+    } else if (lsm->metrics[i] == _LSM_AREA_){
+      lsm->oarea = true;
     } else {
       printf("warning: unknown lsm.\n");
     }

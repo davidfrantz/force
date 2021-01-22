@@ -32,7 +32,7 @@ Version number
 extern "C" {
 #endif
 
-#define _VERSION_ "3.6.3-dev"
+#define _VERSION_ "3.6.3"
 
 #ifdef __cplusplus
 }
