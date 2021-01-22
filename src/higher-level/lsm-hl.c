@@ -436,7 +436,7 @@ float unit_perim = 0;
       
         }
         
-        if (phl->lsm.ompa){
+        if (phl->lsm.ompa){ //
           if (sumshare > 0){
                 lsm.mpa_[f][p] = (short)(sumarea/sumshare*10000);
           } else lsm.mpa_[f][p] = 0;
