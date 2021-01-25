@@ -368,7 +368,7 @@ typedef struct {
   int ostd;
   int ogeo;
   int omax;
-  int oarea;
+  int oare;
   char *base;
   int kernel;
 } par_lsm_t;

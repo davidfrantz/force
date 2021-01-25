@@ -60,7 +60,7 @@ typedef struct {
   short **std_;
   short **geo_;
   short **max_;
-  short **area_;
+  short **are_;
 } lsm_t;
 
 brick_t **landscape_metrics(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);

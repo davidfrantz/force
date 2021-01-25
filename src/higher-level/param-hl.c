@@ -881,8 +881,8 @@ int i;
       lsm->ogeo = true;
     } else if (lsm->metrics[i] == _LSM_MAX_){
       lsm->omax = true;
-    } else if (lsm->metrics[i] == _LSM_AREA_){
-      lsm->oarea = true;
+    } else if (lsm->metrics[i] == _LSM_ARE_){
+      lsm->oare = true;
     } else {
       printf("warning: unknown lsm.\n");
     }

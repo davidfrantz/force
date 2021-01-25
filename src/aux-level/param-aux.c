@@ -2111,9 +2111,9 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# effective mesh size.\n");
     fprintf(fp, "# Additionally, arithmetic mean, geometric mean, standard deviation, maximum value\n");
     fprintf(fp, "# and the area of the foreground class within the kernel are available.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,AREA}\n");
+    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE}\n");
   }
-  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX AREA\n");
+  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE\n");
 
   if (verbose){
     fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");

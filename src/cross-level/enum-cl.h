@@ -240,7 +240,7 @@ enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_,
        
 // landscape metrics
 enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_, 
-       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_AREA_, _LSM_LENGTH_ };
+       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_ARE_, _LSM_LENGTH_ };
 
 // satellite mission
 enum { LANDSAT, SENTINEL2, _MISSION_LENGTH_ };

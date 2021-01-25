@@ -164,8 +164,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     Currently available metrics are unique patch ID, weighted mean patch area, weighted mean fractal dimension index, edge density, number of patches and effective mesh size.
     Additionally, arithmetic mean, geometric mean, standard deviation, maximum value and the area of the foreground class within the kernel are available.
     
-    | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX,AREA}
-    | ``LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX AREA``
+    | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX,ARE}
+    | ``LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX ARE``
 
   * This parameter defines the basename for the output files. 
     The basename will be appended by Module ID, product ID, and the file extension.
