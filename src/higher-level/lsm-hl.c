@@ -351,7 +351,7 @@ float unit_perim = 0;
           if (!features[f].msk[np] && phl->ftr.exclude) continue;
 
           // if inactive pixel
-          if (!newFeatures[np] && !phl->lsm.allpx) continue;
+          if (!newFeatures[np]) continue;
 
           //do not incorporate nodata values in sum
           if (features[f].dat[0][np] != nodata){
