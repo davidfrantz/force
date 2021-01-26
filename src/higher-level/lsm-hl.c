@@ -423,11 +423,10 @@ float unit_perim = 0;
         if (phl->lsm.oavg) lsm.avg_[f][p] = mx;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = exp(logSum / (float)logCounter);
         if (phl->lsm.omax) lsm.max_[f][p] = maxVal;
-        if (phl->lsm.oare) {
+        if (phl->lsm.oare){
             if (validDataPixels <= SHRT_MAX) {
                 lsm.are_[f][p] = validDataPixels;
-            }                
-            else {
+            } else {
                 lsm.are_[f][p] = SHRT_MAX;
             }
             
