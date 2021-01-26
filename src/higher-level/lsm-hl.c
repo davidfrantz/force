@@ -49,24 +49,24 @@ int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct){
 brick_t **LSM = NULL;
-int b, o, nprod = 10;
+int b, o, nprod = 11;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
 char domain[NPOW_10];
-enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
-int prodlen[10] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
+enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
+int prodlen[11] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
+char prodname[11][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE" };
 
-int prodtype[10] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
+int prodtype[11] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
 
-bool enable[10] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
+bool enable[11] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
 
-bool write[10]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
+bool write[11]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
 
-short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_};
+short ***ptr[11] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_, &lsm->are_};
 
 
   alloc((void**)&LSM, nprod, sizeof(brick_t*));
@@ -267,7 +267,8 @@ float unit_perim = 0;
         if (phl->lsm.ostd) lsm.std_[f][p] = nodata;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = nodata;
         if (phl->lsm.omax) lsm.max_[f][p] = nodata;
-
+        if (phl->lsm.oare) lsm.are_[f][p] = nodata;
+        
         if (mask_ != NULL && !mask_[p]) continue;
         if (!features[f].msk[p] && phl->ftr.exclude) continue;
 
@@ -350,7 +351,7 @@ float unit_perim = 0;
           if (!features[f].msk[np] && phl->ftr.exclude) continue;
 
           // if inactive pixel
-          if (!newFeatures[np] && !phl->lsm.allpx) continue;
+          if (!newFeatures[np]) continue;
 
           //do not incorporate nodata values in sum
           if (features[f].dat[0][np] != nodata){
@@ -422,6 +423,14 @@ float unit_perim = 0;
         if (phl->lsm.oavg) lsm.avg_[f][p] = mx;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = exp(logSum / (float)logCounter);
         if (phl->lsm.omax) lsm.max_[f][p] = maxVal;
+        if (phl->lsm.oare){
+            if (validDataPixels <= SHRT_MAX) {
+                lsm.are_[f][p] = validDataPixels;
+            } else {
+                lsm.are_[f][p] = SHRT_MAX;
+            }
+            
+        }
         if (phl->lsm.ostd) lsm.std_[f][p] = standdev(vx, validDataPixels);
 
 
