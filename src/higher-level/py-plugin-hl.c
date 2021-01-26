@@ -79,7 +79,7 @@ par_udf_t *udf;
                        "            ts2 = ts.T                                                   \n"
                        "        args = (ts2, date, nodata)                                      \n"
                        
-//                       "        args = (ts2, date, nodata)                                      \n"
+//                       "        args = (ts, date, nodata)                                      \n"
                        "        argss.append(args)                                              \n"
                        "    res = pool.map(func=forcepy, iterable=argss)                        \n"
                        "    pool.close()                                                        \n"
