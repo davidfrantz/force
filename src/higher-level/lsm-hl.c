@@ -208,7 +208,6 @@ double mx, vx;
 float kfraction, sqkfraction;
 float unit_area = 0;
 float unit_perim = 0;
-short SHRT_MAX = 32767;
 
   cite_me(_CITE_LSM_);
 
@@ -295,7 +294,7 @@ short SHRT_MAX = 32767;
     if (nobj < 1) continue;
 
 
-    #pragma omp parallel firstprivate(kernelSize,numberOfuniquePatches) private(p,u,uniquePatches,ccl,SHRT_MAX,patchperimeters,patchAreas,totalClassArea,totaledgelength,sumFractalDims,mx,vx,validDataPixels,maxVal,logSum,logCounter,ii,jj,ni,nj,np,exists,t,share,kj,ki,sumarea,sumshare,unit_area,unit_perim) shared(ny,nx,nobj,f,nodata,lsm,mask_,CCL,features,phl,newFeatures,KDIST,kfraction,sqkfraction) default(none)
+    #pragma omp parallel firstprivate(kernelSize,numberOfuniquePatches) private(p,u,uniquePatches,ccl,patchperimeters,patchAreas,totalClassArea,totaledgelength,sumFractalDims,mx,vx,validDataPixels,maxVal,logSum,logCounter,ii,jj,ni,nj,np,exists,t,share,kj,ki,sumarea,sumshare,unit_area,unit_perim) shared(ny,nx,nobj,f,nodata,lsm,mask_,CCL,features,phl,newFeatures,KDIST,kfraction,sqkfraction) default(none)
     {
 
       alloc((void**)&uniquePatches, kernelSize, sizeof(int));
@@ -425,8 +424,13 @@ short SHRT_MAX = 32767;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = exp(logSum / (float)logCounter);
         if (phl->lsm.omax) lsm.max_[f][p] = maxVal;
         if (phl->lsm.oare) {
-            if (validDataPixels <= SHRT_MAX) lsm.are_[f][p] = validDataPixels;
-            else validDataPixels = SHRT_MAX;
+            if (validDataPixels <= SHRT_MAX) {
+                lsm.are_[f][p] = validDataPixels;
+            }                
+            else {
+                lsm.are_[f][p] = SHRT_MAX;
+            }
+            
         }
         if (phl->lsm.ostd) lsm.std_[f][p] = standdev(vx, validDataPixels);
 
