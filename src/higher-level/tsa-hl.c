@@ -28,11 +28,9 @@ This file contains functions for Level 3 processing
 #include "tsa-hl.h"
 
 
-brick_t *compile_tsa_brick(brick_t *ard, int nb, int idx, int write, char *prodname, par_hl_t *phl);
-brick_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
-
 typedef struct {
   int  prodlen;
+  char **bandname;
   char prodname[NPOW_03];
   int  prodtype;
   int  enable;
@@ -42,11 +40,15 @@ typedef struct {
 
 enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _pyp_ };
 
+brick_t *compile_tsa_brick(brick_t *ard, int idx, brick_compile_info_t *info, par_hl_t *phl);
+brick_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
+
 
 int info_tss(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
 
+  copy_string(info[o].prodname, NPOW_02, "TSS");
   info[o].prodlen  = nt;
-  strncpy(info[o].prodname, "TSS", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = NULL;
   info[o].prodtype = _full_;
   info[o].enable   = true;
   info[o].write    = phl->tsa.otss;
@@ -58,8 +60,9 @@ int info_tss(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl
 int info_tsi(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "TSI");
   info[o].prodlen  = ni;
-  strncpy(info[o].prodname, "TSI", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = NULL;
   info[o].prodtype = _inter_;
   info[o].enable   = true;
   info[o].write    = phl->tsa.tsi.otsi;
@@ -71,8 +74,9 @@ int info_tsi(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl
 int info_stm(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "STM");
   info[o].prodlen  = phl->tsa.stm.sta.nmetrics;
-  strncpy(info[o].prodname, "STM", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = NULL;
   info[o].prodtype = _stats_;
   info[o].enable   = phl->tsa.stm.ostm;
   info[o].write    = phl->tsa.stm.ostm;
@@ -84,8 +88,9 @@ int info_stm(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int info_rms(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "RMS");
   info[o].prodlen  = nt;
-  strncpy(info[o].prodname, "RMS", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = NULL;
   info[o].prodtype = _full_;
   info[o].enable   = phl->tsa.sma.orms;
   info[o].write    = phl->tsa.sma.orms;
@@ -97,8 +102,9 @@ int info_rms(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl
 int info_spl(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "SPL");
   info[o].prodlen  = ni;
-  strncpy(info[o].prodname, "SPL", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = NULL;
   info[o].prodtype = _inter_;
   info[o].enable   = phl->tsa.lsp.ospl;
   info[o].write    = phl->tsa.lsp.ospl;
@@ -111,22 +117,25 @@ int info_fby(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
+  copy_string(info[p].prodname, NPOW_02, "FBY");
   info[p].prodlen  = phl->ny;
-  strncpy(info[p].prodname, "FBY", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _year_;
   info[p].enable   = phl->tsa.fld.ofby+phl->tsa.fld.otry;
   info[p].write    = phl->tsa.fld.ofby;
   info[p++].ptr    = &ts->fby_;
 
+  copy_string(info[p].prodname, NPOW_02, "TRY");
   info[p].prodlen  = _TRD_LENGTH_;
-  strncpy(info[p].prodname, "TRY", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _trd_;
   info[p].enable   = phl->tsa.fld.otry;
   info[p].write    = phl->tsa.fld.otry;
   info[p++].ptr    = &ts->try_;
 
+  copy_string(info[p].prodname, NPOW_02, "CAY");
   info[p].prodlen  = _CAT_LENGTH_;
-  strncpy(info[p].prodname, "CAY", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _cat_;
   info[p].enable   = phl->tsa.fld.ocay;
   info[p].write    = phl->tsa.fld.ocay;
@@ -139,22 +148,25 @@ int info_fbq(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
+  copy_string(info[p].prodname, NPOW_02, "FBQ");
   info[p].prodlen  = phl->nq;
-  strncpy(info[p].prodname, "FBQ", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _quarter_;
   info[p].enable   = phl->tsa.fld.ofbq+phl->tsa.fld.otrq;
   info[p].write    = phl->tsa.fld.ofbq;
   info[p++].ptr    = &ts->fbq_;
 
+  copy_string(info[p].prodname, NPOW_02, "TRQ");
   info[p].prodlen  = _TRD_LENGTH_;
-  strncpy(info[p].prodname, "TRQ", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _trd_;
   info[p].enable   = phl->tsa.fld.otrq;
   info[p].write    = phl->tsa.fld.otrq;
   info[p++].ptr    = &ts->trq_;
 
+  copy_string(info[p].prodname, NPOW_02, "CAQ");
   info[p].prodlen  = _CAT_LENGTH_;
-  strncpy(info[p].prodname, "CAQ", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _cat_;
   info[p].enable   = phl->tsa.fld.ocaq;
   info[p].write    = phl->tsa.fld.ocaq;
@@ -167,22 +179,25 @@ int info_fbm(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
+  copy_string(info[p].prodname, NPOW_02, "FBM");
   info[p].prodlen  = phl->nm;
-  strncpy(info[p].prodname, "FBM", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _month_;
   info[p].enable   = phl->tsa.fld.ofbm+phl->tsa.fld.otrm;
   info[p].write    = phl->tsa.fld.ofbm;
   info[p++].ptr    = &ts->fbm_;
 
+  copy_string(info[p].prodname, NPOW_02, "TRM");
   info[p].prodlen  = _TRD_LENGTH_;
-  strncpy(info[p].prodname, "TRM", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _trd_;
   info[p].enable   = phl->tsa.fld.otrm;
   info[p].write    = phl->tsa.fld.otrm;
   info[p++].ptr    = &ts->trm_;
 
+  copy_string(info[p].prodname, NPOW_02, "CAM");
   info[p].prodlen  = _CAT_LENGTH_;
-  strncpy(info[p].prodname, "CAM", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _cat_;
   info[p].enable   = phl->tsa.fld.ocam;
   info[p].write    = phl->tsa.fld.ocam;
@@ -195,22 +210,25 @@ int info_fbw(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
+  copy_string(info[p].prodname, NPOW_02, "FBW");
   info[p].prodlen  = phl->nw;
-  strncpy(info[p].prodname, "FBW", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _week_;
   info[p].enable   = phl->tsa.fld.ofbw+phl->tsa.fld.otrw;
   info[p].write    = phl->tsa.fld.ofbw;
   info[p++].ptr    = &ts->fbw_;
 
+  copy_string(info[p].prodname, NPOW_02, "TRW");
   info[p].prodlen  = _TRD_LENGTH_;
-  strncpy(info[p].prodname, "TRW", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _trd_;
   info[p].enable   = phl->tsa.fld.otrw;
   info[p].write    = phl->tsa.fld.otrw;
   info[p++].ptr    = &ts->trw_;
 
+  copy_string(info[p].prodname, NPOW_02, "CAW");
   info[p].prodlen  = _CAT_LENGTH_;
-  strncpy(info[p].prodname, "CAW", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _cat_;
   info[p].enable   = phl->tsa.fld.ocaw;
   info[p].write    = phl->tsa.fld.ocaw;
@@ -223,22 +241,25 @@ int info_fbd(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int p = o;
 
 
+  copy_string(info[p].prodname, NPOW_02, "FBD");
   info[p].prodlen  = phl->nd;
-  strncpy(info[p].prodname, "FBD", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _day_;
   info[p].enable   = phl->tsa.fld.ofbd+phl->tsa.fld.otrd;
   info[p].write    = phl->tsa.fld.ofbd;
   info[p++].ptr    = &ts->fbd_;
 
+  copy_string(info[p].prodname, NPOW_02, "TRD");
   info[p].prodlen  = _TRD_LENGTH_;
-  strncpy(info[p].prodname, "TRD", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _trd_;
   info[p].enable   = phl->tsa.fld.otrd;
   info[p].write    = phl->tsa.fld.otrd;
   info[p++].ptr    = &ts->trd_;
 
+  copy_string(info[p].prodname, NPOW_02, "CAD");
   info[p].prodlen  = _CAT_LENGTH_;
-  strncpy(info[p].prodname, "CAD", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _cat_;
   info[p].enable   = phl->tsa.fld.ocad;
   info[p].write    = phl->tsa.fld.ocad;
@@ -254,6 +275,7 @@ int nchar;
 
   for (l=0; l<_LSP_LENGTH_; l++, p++){
     info[p].prodlen  = phl->tsa.lsp.ny;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-LSP", _TAGGED_ENUM_LSP_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -265,6 +287,7 @@ int nchar;
 
   for (l=0; l<_LSP_LENGTH_; l++, p++){
     info[p].prodlen  =_TRD_LENGTH_;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-TRP", _TAGGED_ENUM_LSP_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -276,6 +299,7 @@ int nchar;
 
   for (l=0; l<_LSP_LENGTH_; l++, p++){
     info[p].prodlen  = _CAT_LENGTH_;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-CAP", _TAGGED_ENUM_LSP_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -292,15 +316,17 @@ int info_pol(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl
 int l, p = o;
 int nchar;
 
+  copy_string(info[p].prodname, NPOW_02, "PCX");
   info[p].prodlen  = ni;
-  strncpy(info[p].prodname, "PCX", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _inter_;
   info[p].enable   = phl->tsa.pol.opct;
   info[p].write    = phl->tsa.pol.opct;
   info[p++].ptr    = &ts->pcx_;
 
+  copy_string(info[p].prodname, NPOW_02, "PCY");
   info[p].prodlen  = ni;
-  strncpy(info[p].prodname, "PCY", 3); info[p].prodname[3] = '\0';
+  info[p].bandname = NULL;
   info[p].prodtype = _inter_;
   info[p].enable   = phl->tsa.pol.opct;
   info[p].write    = phl->tsa.pol.opct;
@@ -308,6 +334,7 @@ int nchar;
 
   for (l=0; l<_POL_LENGTH_; l++, p++){
     info[p].prodlen  = phl->tsa.pol.ny;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-POL", _TAGGED_ENUM_POL_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -319,6 +346,7 @@ int nchar;
 
   for (l=0; l<_POL_LENGTH_; l++, p++){
     info[p].prodlen  =_TRD_LENGTH_;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-TRO", _TAGGED_ENUM_POL_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -330,6 +358,7 @@ int nchar;
 
   for (l=0; l<_POL_LENGTH_; l++, p++){
     info[p].prodlen  = _CAT_LENGTH_;
+    info[p].bandname = NULL;
     nchar = snprintf(info[p].prodname, NPOW_03, "%s-CAO", _TAGGED_ENUM_POL_[l].tag);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); exit(1);}
@@ -346,8 +375,9 @@ int nchar;
 int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "PYP");
   info[o].prodlen  = phl->tsa.pyp.nb;
-  strncpy(info[o].prodname, "PYP", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = phl->tsa.pyp.bandname;
   info[o].prodtype = _pyp_;
   info[o].enable   = phl->tsa.pyp.out;
   info[o].write    = phl->tsa.pyp.out;
@@ -444,7 +474,7 @@ brick_compile_info_t *info = NULL;
       
       //printf("Yes\n");
       
-      if ((TSA[o] = compile_tsa_brick(ard[0].DAT, info[o].prodlen, idx, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
+      if ((TSA[o] = compile_tsa_brick(ard[0].DAT, idx, &info[o], phl)) == NULL || (  *info[o].ptr = get_bands_short(TSA[o])) == NULL){
         printf("Error compiling %s product. ", info[o].prodname); error++;
       } else {
 
@@ -579,7 +609,6 @@ brick_compile_info_t *info = NULL;
               break;
             case _pyp_:
               set_brick_sensor(TSA[o], t, "BLEND");
-              set_brick_bandname(TSA[o], t, "unknown");  // needs to become flexible
               break;
             default:
               printf("unknown tsa type.\n"); error++;
@@ -663,7 +692,7 @@ brick_compile_info_t *info = NULL;
 --- phl:       HL parameters
 +++ Return:    brick for TSA result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_tsa_brick(brick_t *from, int nb, int idx, int write, char *prodname, par_hl_t *phl){
+brick_t *compile_tsa_brick(brick_t *from, int idx, brick_compile_info_t *info, par_hl_t *phl){
 int b;
 brick_t *brick = NULL;
 date_t date;
@@ -673,10 +702,10 @@ char domain[NPOW_10];
 int nchar;
 
 
-  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, info->prodlen, _DT_SHORT_)) == NULL) return NULL;
 
   set_brick_name(brick, "FORCE Time Series Analysis");
-  set_brick_product(brick, prodname);
+  set_brick_product(brick, info->prodname);
 
   //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
@@ -688,12 +717,12 @@ int nchar;
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_TSA_%s_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
     phl->doy_range[_MIN_], phl->doy_range[_MAX_], 
-    phl->sen.target, phl->tsa.index_name[idx], prodname);
+    phl->sen.target, phl->tsa.index_name[idx], info->prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
   
-  if (write){
+  if (info->write){
     set_brick_open(brick, OPEN_BLOCK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
@@ -702,11 +731,12 @@ int nchar;
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 
-  sprintf(domain, "%s_%s", phl->tsa.index_name[idx], prodname);
+  sprintf(domain, "%s_%s", phl->tsa.index_name[idx], info->prodname);
 
-  for (b=0; b<nb; b++){
+  for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
     set_brick_date(brick, b, date);
+    if (info->bandname != NULL) set_brick_bandname(brick, b, info->bandname);
     set_brick_domain(brick, b, domain);
   }
 
@@ -735,12 +765,14 @@ brick_t **PTR;
 small *mask_ = NULL;
 int idx;
 int o, k, nprod = 0;
-int nc;
+int nx, ny, nc;
 int ni;
 short nodata;
 
 
   // import bricks
+  nx = get_brick_chunkncols(ard[0].DAT);
+  ny = get_brick_chunknrows(ard[0].DAT);
   nc = get_brick_chunkncells(ard[0].DAT);
   nodata = get_brick_nodata(ard[0].DAT, 0);
 
@@ -776,9 +808,9 @@ short nodata;
     tsa_spectral_index(ard, &ts, mask_, nc, nt, idx, nodata, &phl->tsa, &phl->sen, endmember);
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
-    
-    tsa_python_plugin(&ts, mask_, nc, ni, nodata, phl);
-    
+
+    python_plugin(NULL, &ts, NULL, mask_, nx, ny, nc, 1, ni, nodata, phl);
+
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     
     tsa_fold(&ts, mask_, nc, ni, nodata, phl);

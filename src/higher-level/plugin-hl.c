@@ -28,11 +28,9 @@ This file contains functions for Level 3 processing
 #include "plugin-hl.h"
 
 
-brick_t *compile_plg_brick(brick_t *ard, int nb, int write, char *prodname, par_hl_t *phl);
-brick_t **compile_plg(ard_t *ard, plg_t *plg, par_hl_t *phl, cube_t *cube, int nt, int *nproduct);
-
 typedef struct {
   int  prodlen;
+  char **bandname;
   char prodname[NPOW_03];
   int  prodtype;
   int  enable;
@@ -42,12 +40,16 @@ typedef struct {
 
 enum { _pyp_, _rpp_ };
 
+brick_t *compile_plg_brick(brick_t *ard, brick_compile_info_t *info, par_hl_t *phl);
+brick_t **compile_plg(ard_t *ard, plg_t *plg, par_hl_t *phl, cube_t *cube, int nt, int *nproduct);
+
 
 int info_plg_pyp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "PYP");
   info[o].prodlen  = phl->plg.pyp.nb;
-  strncpy(info[o].prodname, "PYP", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = phl->plg.pyp.bandname;
   info[o].prodtype = _pyp_;
   info[o].enable   = phl->plg.pyp.out;
   info[o].write    = phl->plg.pyp.out;
@@ -59,8 +61,9 @@ int info_plg_pyp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
 int info_plg_rpp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
 
 
+  copy_string(info[o].prodname, NPOW_02, "RPP");
   info[o].prodlen  = phl->plg.rpp.nb;
-  strncpy(info[o].prodname, "RPP", 3); info[o].prodname[3] = '\0';
+  info[o].bandname = phl->plg.rpp.bandname;
   info[o].prodtype = _rpp_;
   info[o].enable   = phl->plg.rpp.out;
   info[o].write    = phl->plg.rpp.out;
@@ -112,7 +115,7 @@ brick_compile_info_t *info = NULL;
 
     if (info[o].enable){
 
-      if ((PLG[o] = compile_plg_brick(ard[0].DAT, info[o].prodlen, info[o].write, info[o].prodname, phl)) == NULL || (  *info[o].ptr = get_bands_short(PLG[o])) == NULL){
+      if ((PLG[o] = compile_plg_brick(ard[0].DAT, &info[o], phl)) == NULL || (  *info[o].ptr = get_bands_short(PLG[o])) == NULL){
         printf("Error compiling %s product. ", info[o].prodname); error++;
       } else {
 
@@ -121,10 +124,10 @@ brick_compile_info_t *info = NULL;
 
         for (b=0; b<info[o].prodlen; b++){
           set_brick_sensor(PLG[o],   b, "BLEND");
-          set_brick_bandname(PLG[o], b, "unknown");  // needs to become flexible
-          set_brick_domain(PLG[o], b, "unknown");  // needs to become flexible
           set_brick_date(PLG[o], b, date);
         }
+
+        print_brick_info(PLG[o]);
 
       }
 
@@ -160,7 +163,7 @@ brick_compile_info_t *info = NULL;
 --- phl:       HL parameters
 +++ Return:    brick for PLG result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_plg_brick(brick_t *from, int nb, int write, char *prodname, par_hl_t *phl){
+brick_t *compile_plg_brick(brick_t *from, brick_compile_info_t *info, par_hl_t *phl){
 int b;
 brick_t *brick = NULL;
 date_t date;
@@ -169,10 +172,10 @@ char dname[NPOW_10];
 int nchar;
 
 
-  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, info->prodlen, _DT_SHORT_)) == NULL) return NULL;
 
   set_brick_name(brick, "FORCE Script Plugin");
-  set_brick_product(brick, prodname);
+  set_brick_product(brick, info->prodname);
 
   //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
@@ -184,12 +187,12 @@ int nchar;
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_PLG_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
     phl->doy_range[_MIN_], phl->doy_range[_MAX_], 
-    phl->sen.target, prodname);
+    phl->sen.target, info->prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
   
-  if (write){
+  if (info->write){
     set_brick_open(brick, OPEN_BLOCK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
@@ -198,9 +201,11 @@ int nchar;
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 
-  for (b=0; b<nb; b++){
+  for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
     set_brick_date(brick, b, date);
+    set_brick_bandname(brick, b, info->bandname[b]);
+    set_brick_domain(brick, b, info->bandname[b]);
   }
 
   return brick;
@@ -225,11 +230,13 @@ plg_t plg;
 brick_t **PLG;
 small *mask_ = NULL;
 int nprod = 0;
-int nb, nc;
+int nb, nx, ny, nc;
 short nodata;
 
 
   // import bricks
+  nx = get_brick_chunkncols(ard[0].DAT);
+  ny = get_brick_chunknrows(ard[0].DAT);
   nc = get_brick_chunkncells(ard[0].DAT);
   nb = get_brick_nbands(ard[0].DAT);
   nodata = get_brick_nodata(ard[0].DAT, 0);
@@ -250,9 +257,9 @@ short nodata;
   }
 
 
-  ard_python_plugin(ard, &plg, mask_, nc, nb, nt, nodata, phl);
-  //ard_r_plugin(&plg, mask_, nc, nt, nodata, phl);
 
+  python_plugin(ard, NULL, &plg, mask_, nx, ny, nc, nb, nt, nodata, phl);
+  //rstats_plugin(ard, NULL, &plg, mask_, nx, ny, nc, nb, nt, nodata, phl);
 
 
   *nproduct = nprod;
