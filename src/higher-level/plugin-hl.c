@@ -38,7 +38,7 @@ typedef struct {
   short ***ptr;
 } brick_compile_info_t;
 
-enum { _pyp_, _rpp_ };
+enum { _pyp_, _rsp_ };
 
 brick_t *compile_plg_brick(brick_t *ard, brick_compile_info_t *info, par_hl_t *phl);
 brick_t **compile_plg(ard_t *ard, plg_t *plg, par_hl_t *phl, cube_t *cube, int nt, int *nproduct);
@@ -58,16 +58,16 @@ int info_plg_pyp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
   return o+1;
 }
 
-int info_plg_rpp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
+int info_plg_rsp(brick_compile_info_t *info, int o, plg_t *plg, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "RPP");
-  info[o].prodlen  = phl->plg.rpp.nb;
-  info[o].bandname = phl->plg.rpp.bandname;
-  info[o].prodtype = _rpp_;
-  info[o].enable   = phl->plg.rpp.out;
-  info[o].write    = phl->plg.rpp.out;
-  info[o].ptr      = &plg->rpp_;
+  copy_string(info[o].prodname, NPOW_02, "RSP");
+  info[o].prodlen  = phl->plg.rsp.nb;
+  info[o].bandname = phl->plg.rsp.bandname;
+  info[o].prodtype = _rsp_;
+  info[o].enable   = phl->plg.rsp.out;
+  info[o].write    = phl->plg.rsp.out;
+  info[o].ptr      = &plg->rsp_;
 
   return o+1;
 }
@@ -103,7 +103,7 @@ brick_compile_info_t *info = NULL;
   alloc((void**)&info, nprod, sizeof(brick_compile_info_t));
 
   o = info_plg_pyp(info, o, plg, phl);
-  o = info_plg_rpp(info, o, plg, phl);
+  o = info_plg_rsp(info, o, plg, phl);
 
 
   alloc((void**)&PLG, nprod, sizeof(brick_t*));

@@ -387,7 +387,7 @@ typedef struct {
 // script plugin
 typedef struct {
   par_udf_t pyp;
-  par_udf_t rpp;
+  par_udf_t rsp;
 } par_plg_t;
 
 // improphe core

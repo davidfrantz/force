@@ -43,7 +43,7 @@ extern "C" {
 
 typedef struct {
   short **pyp_;
-  short **rpp_;
+  short **rsp_;
 } plg_t;
 
 #include "../higher-level/py-plugin-hl.h"

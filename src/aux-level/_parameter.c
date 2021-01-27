@@ -213,7 +213,7 @@ bool verbose;
 
   if (type == _HL_PLG_){
     write_par_hl_pyp(fp, verbose);
-    write_par_hl_rpp(fp, verbose);
+    write_par_hl_rsp(fp, verbose);
   }
 
   if (type == _HL_CFI_){

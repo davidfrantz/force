@@ -1461,7 +1461,7 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_par_hl_rpp(FILE *fp, bool verbose){
+void write_par_hl_rsp(FILE *fp, bool verbose){
 
 
   fprintf(fp, "\n# R-PLUGIN PARAMETERS\n");
@@ -1469,22 +1469,22 @@ void write_par_hl_rpp(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This file specifies the file holding user-provided R code. You can skip this\n");
-    fprintf(fp, "# by setting FILE_R = NULL, but this requires OUTPUT_RPP = FALSE.\n");
+    fprintf(fp, "# by setting FILE_RSTATS = NULL, but this requires OUTPUT_RSP = FALSE.\n");
     fprintf(fp, "# Type: full file path\n");
   }
-  fprintf(fp, "FILE_R = NULL\n");
+  fprintf(fp, "FILE_RSTATS = NULL\n");
 
   if (verbose){
     fprintf(fp, "# TBD\n");
     fprintf(fp, "# Type: Character. Valid values: {MULTIPROCESS,MULTITHREAD,BLOCK}\n");
   }
-  fprintf(fp, "R_TYPE = MULTIPROCESS\n");
+  fprintf(fp, "RSTATS_TYPE = MULTIPROCESS\n");
 
   if (verbose){
-    fprintf(fp, "# Output the results provided by the R-plugin? If TRUE, FILE_R must exist.\n");
+    fprintf(fp, "# Output the results provided by the R-plugin? If TRUE, FILE_RSTATS must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_RPP = FALSE\n");
+  fprintf(fp, "OUTPUT_RSP = FALSE\n");
 
   return;
 }
