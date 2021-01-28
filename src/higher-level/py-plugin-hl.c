@@ -21,7 +21,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-This file contains functions for plugging-in python into the TSA submodule
+This file contains functions for plugging-in python into FORCE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Copyright (C) 2020 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
