@@ -69,93 +69,59 @@ par_udf_t *udf;
   PyRun_SimpleString("def init(): np.seterr(all='ignore')");
   PyRun_SimpleString("init()");
 
-  if (udf->type == _UDF_PROCESS_){
-    PyRun_SimpleString("def forcepy_(iblock, year, month, day, nodata, nband, nproc, multi):        \n"
-                       "    try:                                                                    \n"
-                       "        print(iblock.shape)                                                 \n"
-                       "        if iblock.shape[1] == 1:                                            \n"
-                       "            iblock = iblock[:,0,:]                                          \n"
-                       "        pool = Pool(nproc, initializer=init)                                \n"
-                       "        date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
-                       "        argss = list()                                                      \n"
-                       "        for ts in iblock.T:                                                 \n"
+  PyRun_SimpleString(
+    "def forcepy_wrapper(args):                                                \n"
+    "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata = args    \n"
+    "    outarray = np.full(shape=(nband,), fill_value=nodata, dtype=np.int16) \n"
+    "    forcepy_udf(inarray, outarray, date, sensor, bandname, nodata)        \n"
+    "    return outarray                                                       \n");
 
-//Time
-//Bband
-//Space
-//
-//space
-//
-//band
-//time
-
-
-                       "            ts2 = ts                                                        \n"
-                       "            if ts.ndim == 2:                                                \n"
-                       "                ts2 = ts.T                                                  \n"
-                       "            args = (ts2[0], date, nodata)                                      \n"
-
-//                       "            args = (ts, date, nodata)                                      \n"
-                       "            argss.append(args)                                              \n"
-                       "        res = pool.map(func=forcepy, iterable=argss)                        \n"
-                       "        pool.close()                                                        \n"
-                       "        del pool                                                            \n"
-                       "        try:                                                                \n"
-                       "            oblock = np.array(res, dtype=np.int16).T                        \n"
-                       "        except Exception as error:                                          \n"
-                       "            print(f'could not cast to numpy array: {str(error)}')           \n"
-                       "            raise ValueError()                                              \n"
-                       "        if oblock.shape != (nband,iblock.shape[-1]):                        \n"
-                       "            print(f'shape mismatch, delivered {oblock.shape[0]} bands, '    \n"
-                       "                  f'expected {nband}.')                                     \n"
-                       "            raise ValueError()                                              \n"
-                       "        return oblock.copy()                                                \n"
-                       "    except Exception as error:                                              \n"
-                       "        print(traceback.format_exc())                                       \n"
-                       "        return None                                                         \n");
-  } else if (udf->type == _UDF_THREAD_){
-    PyRun_SimpleString("print('to be implemented')");
+  if (udf->type == _UDF_PIXEL_){
+    PyRun_SimpleString(
+      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
+      "    try:                                                                               \n"
+      "        print('iblock', iblock.shape)                                                  \n"
+      "        nDates, nBands, nY, nX = iblock.shape                                          \n"
+      "        pool = Pool(nproc, initializer=init)                                           \n"
+      "        date = np.array([Date(y, m, d) for y, m, d in zip(year, month, day)])          \n"
+      "        argss = list()                                                                 \n"
+      "        for yi in range(nY):                                                           \n"
+      "            for xi in range(nX):                                                       \n"
+      "                inarray = iblock[:, :, yi, xi]                                         \n"
+      "                args = (forcepy_pixel, inarray, nband, date, sensor, bandname, nodata) \n"
+      "                argss.append(args)                                                     \n"
+      "        res = pool.map(func=forcepy_wrapper, iterable=argss)                           \n"
+      "        pool.close()                                                                   \n"
+      "        del pool                                                                       \n"
+      "        # reshape space dimensions                                                     \n"
+      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
+      "        i = 0                                                                          \n"
+      "        for yi in range(nY):                                                           \n"
+      "            for xi in range(nX):                                                       \n"
+      "                oblock[:, yi, xi] = res[i]                                             \n"
+      "                i += 1                                                                 \n"
+      "        return oblock                                                                  \n"
+      "    except:                                                                            \n"
+      "        print(traceback.format_exc())                                                  \n"
+      "        return None                                                                    \n");
   } else if (udf->type == _UDF_BLOCK_){
-    PyRun_SimpleString("def forcepy_(iblock, year, month, day, nodata, nband, nproc, multi):        \n"
-                       "    try:                                                                    \n"
-                       "        print(iblock.shape)                                                 \n"
-                       "        reduced = iblock.shape[1] == 1                                      \n"
-                       "        if reduced:                                                         \n"
-                       "            iblock = iblock[:,0,:]                                          \n"
-                       "        date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
-                       "        oblock = forcepy((iblock, date, nodata))                            \n"
-                       "        if isinstance(oblock, (list,tuple)):                                \n"
-                       "            try:                                                            \n"
-                       "                oblock = np.array(oblock, dtype=np.int16)                   \n"
-                       "            except Exception as error:                                      \n"
-                       "                print(f'could not cast to numpy array: {str(error)}')       \n"
-                       "                raise ValueError()                                          \n"
-                       "        if not isinstance(oblock, np.ndarray):                              \n"
-                       "            print('no array, list or tuple returned. ')                     \n"
-                       "            raise ValueError()                                              \n"
-                       "        if oblock.ndim != 2:                                                \n"
-                       "            print(f'shape mismatch, delivered shape: {oblock.shape} , '     \n"
-                       "                  f'expected {nband, *iblock.shape[-1:]}.')                 \n"
-                       "            raise ValueError()                                              \n"
-                       "        if oblock.shape[0] != nband:                                        \n"
-                       "            print(f'shape mismatch, delivered {oblock.shape[0]} bands, '    \n"
-                       "                  f'expected {nband} bands.')                               \n"
-                       "            raise ValueError()                                              \n"
-                       "        if oblock.shape[-1:] != iblock.shape[-1:]:                          \n"
-                       "            print(f'shape mismatch, delivered {oblock.shape[-1:]} pixels, ' \n"
-                       "                  f'expected {iblock.shape[-1:]} pixels.')                  \n"
-                       "            raise ValueError()                                              \n"
-                       "        if oblock.dtype != np.int16:                                        \n"
-                       "            oblock = oblock.astype(np.int16)                                \n"
-                       "        return oblock                                                       \n"
-                       "    except Exception as error:                                              \n"
-                       "        print(traceback.format_exc())                                       \n"
-                       "        return None                                                         \n");
+    PyRun_SimpleString(
+      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
+      "    try:                                                                               \n"
+      "        print('iblock', iblock.shape)                                                  \n"
+      "        nDates, nBands, nY, nX = iblock.shape                                          \n"
+      "        date = np.array([Date(y, m, d) for y, m, d in zip(year, month, day)])          \n"
+      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
+      "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata)                  \n"
+      "        return oblock                                                                  \n"
+      "    except:                                                                            \n"
+      "        print(traceback.format_exc())                                                  \n"
+      "        return None                                                                    \n");
   } else {
     printf("unknown UDF type.\n"); 
     exit(FAILURE);
   }
-//T B Y X
+
 
   init_pyp(udf);
 
@@ -271,42 +237,54 @@ int b;
 --- nt:     number of time steps
 --- nodata: nodata value
 --- phl:    HL parameters
+
+
+
+
+
+
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int python_plugin(ard_t *ard, tsa_t *ts, plg_t *plg, small *mask_, int nx, int ny, int nc, int nb, int nt, short nodata, par_hl_t *phl){
-int b, t, multiband, submodule;
-npy_intp dim_4d[4] = { nt, nb, ny, nx };
-npy_intp dim_1d[1] = { nt };
-FILE     *fpy            = NULL;
-PyObject *main_module    = NULL;
-PyObject *main_dict      = NULL;
-PyObject *py_fun         = NULL;
-PyObject *py_nodata      = NULL;
-PyObject *py_nproc       = NULL;
-PyObject *py_multi       = NULL;
-PyObject *py_nband       = NULL;
-PyArrayObject* py_data   = NULL;
-PyArrayObject* py_year   = NULL;
-PyArrayObject* py_month  = NULL;
-PyArrayObject* py_day    = NULL;
-PyArrayObject *py_return = NULL;
-short* data_   = NULL;
-short* return_ = NULL;
-int* year_     = NULL;
-int* month_    = NULL;
-int* day_      = NULL;
+int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int nx, int ny, int nc, int nb, int idx, int nt, short nodata, par_hl_t *phl){
+int b, t,  submodule;
+npy_intp dim_data[4] = { nt, nb, ny, nx };
+npy_intp dim_nt[1] = { nt };
+npy_intp dim_nb[1] = { nb };
+FILE     *fpy         = NULL;
+PyObject *main_module = NULL;
+PyObject *main_dict   = NULL;
+PyObject *py_fun      = NULL;
+PyObject *py_nodata   = NULL;
+PyObject *py_nproc    = NULL;
+PyObject *py_nband    = NULL;
+PyArrayObject* py_data     = NULL;
+PyArrayObject* py_year     = NULL;
+PyArrayObject* py_month    = NULL;
+PyArrayObject* py_day      = NULL;
+PyArrayObject* py_sensor   = NULL;
+PyArrayObject* py_bandname = NULL;
+PyArrayObject *py_return   = NULL;
+PyArray_Descr *py_desc_sensor   = NULL;
+PyArray_Descr *py_desc_bandname = NULL;
+short* data_    = NULL;
+short* return_  = NULL;
+int* year_      = NULL;
+int* month_     = NULL;
+int* day_       = NULL;
+char *sensor_   = NULL;
+char *bandname_ = NULL;
 date_t date;
+char sensor[NPOW_04];
+char bandname[NPOW_10];
 par_udf_t *udf;
 
 
   if (phl->plg.pyp.out){
     udf = &phl->plg.pyp;
-    multiband = true;
     submodule = _HL_PLG_;
     if (plg->pyp_ == NULL) return CANCEL;
   } else if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
-    multiband = false;
     submodule = _HL_TSA_;
     if (ts->pyp_ == NULL) return CANCEL;
   } else {
@@ -329,18 +307,27 @@ par_udf_t *udf;
 
   py_nodata = PyLong_FromLong(nodata);
   py_nproc = PyLong_FromLong(phl->cthread);
-  py_multi = PyBool_FromLong(multiband);
   py_nband = PyLong_FromLong(udf->nb);
 
-  py_data  = (PyArrayObject *) PyArray_SimpleNew(4, dim_4d, NPY_INT16);
-  py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
+  py_data     = (PyArrayObject *) PyArray_SimpleNew(4, dim_data, NPY_INT16);
+  py_year     = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
+  py_month    = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
+  py_day      = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
 
-  data_  = (short*)PyArray_DATA(py_data);
-  year_  = (int*)PyArray_DATA(py_year);
-  month_ = (int*)PyArray_DATA(py_month);
-  day_   = (int*)PyArray_DATA(py_day);
+  py_desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
+  py_desc_sensor->elsize = NPOW_04;
+  py_sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, dim_nt, py_desc_sensor);
+
+  py_desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
+  py_desc_bandname->elsize = NPOW_10;
+  py_bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, dim_nb, py_desc_bandname);
+
+  data_     = (short*)PyArray_DATA(py_data);
+  year_     = (int*)PyArray_DATA(py_year);
+  month_    = (int*)PyArray_DATA(py_month);
+  day_      = (int*)PyArray_DATA(py_day);
+  sensor_   = (char*)PyArray_DATA(py_sensor);
+  bandname_ = (char*)PyArray_DATA(py_bandname);
 
 
   // copy C data to python objects
@@ -356,8 +343,17 @@ par_udf_t *udf;
       year_[t]  = date.year;
       month_[t] = date.month;
       day_[t]   = date.day;
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+      copy_string(sensor_, NPOW_04, sensor);
+      sensor_ += NPOW_04;
     }
-  
+
+    for (b=0; b<nb; b++){
+      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+      copy_string(bandname_, NPOW_10, bandname);
+      bandname_ += NPOW_10;
+    }
+
   } else if (submodule == _HL_TSA_){
 
     for (t=0; t<nt; t++){
@@ -366,7 +362,12 @@ par_udf_t *udf;
       year_[t]  = ts->d_tsi[t].year;
       month_[t] = ts->d_tsi[t].month;
       day_[t]   = ts->d_tsi[t].day;
+      copy_string(sensor_, NPOW_04, "BLEND");
+      sensor_ += NPOW_04;
     }
+
+    copy_string(bandname_, NPOW_10, phl->tsa.index_name[idx]);
+    bandname_ += NPOW_10;
 
   } else {
     printf("unknown submodule. ");
@@ -374,8 +375,17 @@ par_udf_t *udf;
   }
 
 
+  // fire up python
   py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
-    py_fun, py_data, py_year, py_month, py_day, py_nodata, py_nband, py_nproc, py_multi, NULL);
+    py_fun, 
+    py_data, 
+    py_year, py_month, py_day, 
+    py_sensor, 
+    py_bandname, 
+    py_nodata, 
+    py_nband, 
+    py_nproc, 
+    NULL);
 
   if (py_return == NULL){
     printf("NULL returned from python. Clean up the python plugin code!\n");
@@ -394,7 +404,7 @@ par_udf_t *udf;
 
   } else if (submodule == _HL_TSA_){
 
-    for (b=0; b<phl->tsa.pyp.nb; b++){
+    for (b=0; b<udf->nb; b++){
       memcpy(ts->pyp_[b], return_, sizeof(short)*nc);
       return_ += nc;
     }
@@ -412,10 +422,11 @@ par_udf_t *udf;
   Py_DECREF(py_year);
   Py_DECREF(py_month);
   Py_DECREF(py_day);
+  Py_DECREF(py_bandname);
+  Py_DECREF(py_sensor);
   Py_DECREF(py_nodata);
   Py_DECREF(py_nband);
   Py_DECREF(py_nproc);
-  Py_DECREF(py_multi);
 
 
   fclose(fpy);

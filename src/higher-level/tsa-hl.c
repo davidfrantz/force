@@ -619,6 +619,8 @@ brick_compile_info_t *info = NULL;
 
         }
 
+        //print_brick_info(TSA[o]);
+
       }
 
     } else {
@@ -736,7 +738,7 @@ int nchar;
   for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
     set_brick_date(brick, b, date);
-    if (info->bandname != NULL) set_brick_bandname(brick, b, info->bandname);
+    if (info->bandname != NULL) set_brick_bandname(brick, b, info->bandname[b]);
     set_brick_domain(brick, b, domain);
   }
 
@@ -809,7 +811,7 @@ short nodata;
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
 
-    python_plugin(NULL, &ts, NULL, mask_, nx, ny, nc, 1, ni, nodata, phl);
+    python_plugin(TSA[idx], NULL, &ts, mask_, nx, ny, nc, 1, idx, ni, nodata, phl);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     

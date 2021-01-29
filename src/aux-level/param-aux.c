@@ -1427,23 +1427,30 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
-    fprintf(fp, "# This file specifies the file holding user-provided python code. You can skip this\n");
+    fprintf(fp, "# This file specifies the file holding user-defined python code. You can skip this\n");
     fprintf(fp, "# by setting FILE_PYTHON = NULL, but this requires OUTPUT_PYP = FALSE.\n");
+    fprintf(fp, "# Two functions are required to communicate with FORCE:\n");
+    fprintf(fp, "# 0) The global space can be used to import modules etc.\n");
+    fprintf(fp, "# 1) An initialization function that defines the number and names of output bands:\n");
+    fprintf(fp, "#    ``def forcepy_init():``\n");
+    fprintf(fp, "# 2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_PYTHON = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# Type of user-defined function. MULTIPROCESS will spawn a python multi-\n");
-    fprintf(fp, "# processing pool; the UDF will receive the time series of a single pixel. \n");
-    fprintf(fp, "# MULTITHREAD will use numba just-in-time compilation with multithreading; \n");
-    fprintf(fp, "# the UDF will receive the time series of a single pixel. This is similar to \n");
-    fprintf(fp, "# MULTIPROCESS but the UDF needs to be restricted to numba functionality. \n");
-    fprintf(fp, "# BLOCK will not use any parallelization; the UDF will receive the full \n");
-    fprintf(fp, "# processing block.\n");
-    fprintf(fp, "# Type: Character. Valid values: {MULTIPROCESS,MULTITHREAD,BLOCK}\n");
+    fprintf(fp, "# Type of user-defined function. \n");
+    fprintf(fp, "# 1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel\n");
+    fprintf(fp, "# as 2D-nd.array [time,bands]. A multi-processing pool is spawned to parallely execute \n");
+    fprintf(fp, "# this function with ``NTHREAD_COMPUTE`` workers.\n");
+    fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, nodata):``\n");
+    fprintf(fp, "# 2) ``BLOCK`` expects a pixel-function that receives the time series of a complete \n");
+    fprintf(fp, "# processing unit as 4D-nd.array [time,bands,rows,cols]. No parallelization is done on \n");
+    fprintf(fp, "# FORCE's end. \n");
+    fprintf(fp, "#     ``def forcepy_block(inarray, outarray, dates, nodata):``\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
   }
-  fprintf(fp, "PYTHON_TYPE = MULTIPROCESS\n");
+  fprintf(fp, "PYTHON_TYPE = PIXEL\n");
 
   if (verbose){
     fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
@@ -1476,9 +1483,9 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# TBD\n");
-    fprintf(fp, "# Type: Character. Valid values: {MULTIPROCESS,MULTITHREAD,BLOCK}\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
   }
-  fprintf(fp, "RSTATS_TYPE = MULTIPROCESS\n");
+  fprintf(fp, "RSTATS_TYPE = PIXEL\n");
 
   if (verbose){
     fprintf(fp, "# Output the results provided by the R-plugin? If TRUE, FILE_RSTATS must exist.\n");

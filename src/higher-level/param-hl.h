@@ -272,7 +272,7 @@ typedef struct {
 
 // general TSA
 typedef struct {
-  int n;                      // number of indices
+  int n;                 // number of indices
   int  *index;           // index type
   char **index_name;     // short name index type
   int otss;           // flag: output time series brick

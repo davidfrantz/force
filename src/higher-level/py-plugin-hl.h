@@ -42,7 +42,7 @@ extern "C" {
 void register_python(par_hl_t *phl);
 void deregister_python(par_hl_t *phl);
 void init_pyp(par_udf_t *udf);
-int python_plugin(ard_t *ard, tsa_t *ts, plg_t *plg, small *mask_, int nx, int ny, int nc, int nb, int nt, short nodata, par_hl_t *phl);
+int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int nx, int ny, int nc, int nb, int idx, int nt, short nodata, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

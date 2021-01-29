@@ -127,7 +127,7 @@ brick_compile_info_t *info = NULL;
           set_brick_date(PLG[o], b, date);
         }
 
-        print_brick_info(PLG[o]);
+        //print_brick_info(PLG[o]);
 
       }
 
@@ -258,7 +258,7 @@ short nodata;
 
 
 
-  python_plugin(ard, NULL, &plg, mask_, nx, ny, nc, nb, nt, nodata, phl);
+  python_plugin(ard, &plg, NULL, mask_, nx, ny, nc, nb, 0, nt, nodata, phl);
   //rstats_plugin(ard, NULL, &plg, mask_, nx, ny, nc, nb, nt, nodata, phl);
 
 

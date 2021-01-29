@@ -196,5 +196,5 @@ const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
   { _RGB_R_,  "RED" }, { _RGB_G_,  "GREEN" }, { _RGB_B_,  "BLUE" }};
 
 const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_] = {
-  { _UDF_PROCESS_,  "MULTIPROCESS" }, { _UDF_THREAD_,  "MULTITHREAD" }, { _UDF_BLOCK_,  "BLOCK" }};
+  { _UDF_PIXEL_,  "PIXEL" }, { _UDF_BLOCK_,  "BLOCK" }};
 
