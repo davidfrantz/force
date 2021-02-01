@@ -63,6 +63,7 @@ par_udf_t *udf;
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
+  PyRun_SimpleString("from numba import jit, prange, set_num_threads");
   PyRun_SimpleString("from datetime import date as Date");
   PyRun_SimpleString("import traceback");
 
@@ -70,49 +71,72 @@ par_udf_t *udf;
   PyRun_SimpleString("init()");
 
   PyRun_SimpleString(
-    "def forcepy_wrapper(args):                                                \n"
-    "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata = args    \n"
-    "    outarray = np.full(shape=(nband,), fill_value=nodata, dtype=np.int16) \n"
-    "    forcepy_udf(inarray, outarray, date, sensor, bandname, nodata)        \n"
-    "    return outarray                                                       \n");
+    "def forcepy_wrapper(args):                                                    \n"
+    "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata, nproc = args \n"
+    "    outarray = np.full(shape=(nband,), fill_value=nodata, dtype=np.int16)     \n"
+    "    forcepy_udf(inarray, outarray, date, sensor, bandname, nodata, nproc)     \n"
+    "    return outarray                                                           \n");
 
-  if (udf->type == _UDF_PIXEL_){
+  if (udf->type == _UDF_PIXEL_ && !udf->justintime){
     PyRun_SimpleString(
+      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):           \n"
+      "    try:                                                                                  \n"
+      "        print('iblock', iblock.shape)                                                     \n"
+      "        nDates, nBands, nY, nX = iblock.shape                                             \n"
+      "        pool = Pool(nproc, initializer=init)                                              \n"
+      "        date = np.array(                                                                  \n"
+      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')      \n"
+      "             for y, m, d in zip(year, month, day)])                                       \n"
+      "        argss = list()                                                                    \n"
+      "        for yi in range(nY):                                                              \n"
+      "            for xi in range(nX):                                                          \n"
+      "                inarray = iblock[:, :, yi, xi]                                            \n"
+      "                args = (forcepy_pixel, inarray, nband, date, sensor, bandname, nodata, 1) \n"
+      "                argss.append(args)                                                        \n"
+      "        res = pool.map(func=forcepy_wrapper, iterable=argss)                              \n"
+      "        pool.close()                                                                      \n"
+      "        del pool                                                                          \n"
+      "        # reshape space dimensions                                                        \n"
+      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)        \n"
+      "        i = 0                                                                             \n"
+      "        for yi in range(nY):                                                              \n"
+      "            for xi in range(nX):                                                          \n"
+      "                oblock[:, yi, xi] = res[i]                                                \n"
+      "                i += 1                                                                    \n"
+      "        return oblock                                                                     \n"
+      "    except:                                                                               \n"
+      "        print(traceback.format_exc())                                                     \n"
+      "        return None                                                                       \n");
+  } else if (udf->type == _UDF_PIXEL_ && udf->justintime){
+    PyRun_SimpleString(
+      "@jit(nopython=True, nogil=True, parallel=True)                                         \n"
       "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
-      "    try:                                                                               \n"
-      "        print('iblock', iblock.shape)                                                  \n"
-      "        nDates, nBands, nY, nX = iblock.shape                                          \n"
-      "        pool = Pool(nproc, initializer=init)                                           \n"
-      "        date = np.array([Date(y, m, d) for y, m, d in zip(year, month, day)])          \n"
-      "        argss = list()                                                                 \n"
-      "        for yi in range(nY):                                                           \n"
-      "            for xi in range(nX):                                                       \n"
-      "                inarray = iblock[:, :, yi, xi]                                         \n"
-      "                args = (forcepy_pixel, inarray, nband, date, sensor, bandname, nodata) \n"
-      "                argss.append(args)                                                     \n"
-      "        res = pool.map(func=forcepy_wrapper, iterable=argss)                           \n"
-      "        pool.close()                                                                   \n"
-      "        del pool                                                                       \n"
-      "        # reshape space dimensions                                                     \n"
-      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
-      "        i = 0                                                                          \n"
-      "        for yi in range(nY):                                                           \n"
-      "            for xi in range(nX):                                                       \n"
-      "                oblock[:, yi, xi] = res[i]                                             \n"
-      "                i += 1                                                                 \n"
-      "        return oblock                                                                  \n"
-      "    except:                                                                            \n"
-      "        print(traceback.format_exc())                                                  \n"
-      "        return None                                                                    \n");
+      "    set_num_threads(nproc)                                                             \n"
+      "        date = np.array(                                                               \n"
+      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')   \n"
+      "             for y, m, d in zip(year, month, day)])                                    \n"
+      "    buffer = [0, 0, 0, 0]  # todo pass buffer as argument                              \n"
+      "    xBufMin, xBufMax, yBufMin, yBufMax = buffer                                        \n"
+      "    nDates, nBands, nY, nX = iblock.shape                                              \n"
+      "    outblock = np.full(shape=(nband, nY, nX), fill_value=nodata)                       \n"
+      "    for iYX in prange(nY * nX):                                                        \n"
+      "        iX = iYX % nX                                                                  \n"
+      "        iY = iYX // nX                                                                 \n"
+      "        inarray = iblock[:, :, iY-yBufMin: iY+yBufMax+1, iX-xBufMin: iX+xBufMax+1]     \n"
+      "        outarray = outblock[:, iY, iX]                                                 \n"
+      "        forcepy_pixel(inarray, outarray, date, sensor, bandname, nodata, 1)            \n"
+      "    return outblock                                                                    \n");
   } else if (udf->type == _UDF_BLOCK_){
     PyRun_SimpleString(
       "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
       "    try:                                                                               \n"
       "        print('iblock', iblock.shape)                                                  \n"
       "        nDates, nBands, nY, nX = iblock.shape                                          \n"
-      "        date = np.array([Date(y, m, d) for y, m, d in zip(year, month, day)])          \n"
+      "        date = np.array(                                                               \n"
+      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')   \n"
+      "             for y, m, d in zip(year, month, day)])                                    \n"
       "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
-      "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata)                  \n"
+      "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata, nproc)           \n"
       "        return oblock                                                                  \n"
       "    except:                                                                            \n"
       "        print(traceback.format_exc())                                                  \n"

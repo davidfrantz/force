@@ -1453,6 +1453,15 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
   fprintf(fp, "PYTHON_TYPE = PIXEL\n");
 
   if (verbose){
+    fprintf(fp, "# Use Numba just-in-time compilation to speed up the UDF?\n");
+    fprintf(fp, "# This only has an effect when used with ``PYTHON_TYPE = PIXEL``. If used, your UDF needs \n");
+    fprintf(fp, "# to conform to Numba specifications.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_PYP = FALSE\n");
+
+
+  if (verbose){
     fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
