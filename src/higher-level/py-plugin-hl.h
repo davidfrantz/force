@@ -41,8 +41,9 @@ extern "C" {
 
 void register_python(par_hl_t *phl);
 void deregister_python(par_hl_t *phl);
-void init_pyp(par_udf_t *udf);
-int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int nx, int ny, int nc, int nb, int idx, int nt, short nodata, par_hl_t *phl);
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void term_pyp(par_udf_t *udf);
+int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread);
 
 #ifdef __cplusplus
 }

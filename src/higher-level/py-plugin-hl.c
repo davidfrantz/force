@@ -35,6 +35,23 @@ Copyright (C) 2020 David Frantz, Andreas Rabe
 
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
+
+typedef struct {
+  npy_intp dim_nt[1];
+  npy_intp dim_nb[1];
+  PyArrayObject* year;
+  PyArrayObject* month;
+  PyArrayObject* day;
+  PyArrayObject* sensor;
+  PyArrayObject* bandname;
+  PyArray_Descr *desc_sensor;
+  PyArray_Descr *desc_bandname;
+} py_dimlab_t;
+
+
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+
+
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -76,6 +93,14 @@ par_udf_t *udf;
     "    outarray = np.full(shape=(nband,), fill_value=nodata, dtype=np.int16)     \n"
     "    forcepy_udf(inarray, outarray, date, sensor, bandname, nodata, nproc)     \n"
     "    return outarray                                                           \n");
+
+  PyRun_SimpleString(
+    "def forcepy_init_(year, month, day, sensor, bandname):                           \n"
+    "    date = np.array(                                                             \n"
+    "        [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}') \n"
+    "         for y, m, d in zip(year, month, day)])                                  \n"
+    "    res = forcepy_init(date, sensor, bandname)                                   \n"
+    "    return res                                                                   \n");
 
   if (udf->type == _UDF_PIXEL_ && !udf->justintime){
     PyRun_SimpleString(
@@ -147,9 +172,6 @@ par_udf_t *udf;
   }
 
 
-  init_pyp(udf);
-
-
   return;
 }
 
@@ -171,21 +193,17 @@ par_udf_t *udf;
 
   if (udf->out) Py_Finalize();
 
-  if (udf->bandname != NULL){
-    free_2D((void**)udf->bandname, udf->nb); 
-    udf->bandname = NULL;
-  }
-
   return;
 }
 
 
-/** This function initializes the output provided python function
+/** This function initializes the python udf
 --- udf:    user-defined code parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_pyp(par_udf_t *udf){
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
 FILE *fpy             = NULL;
+py_dimlab_t pylab;
 PyObject *main_module = NULL;
 PyObject *main_dict   = NULL;
 PyObject *py_fun      = NULL;
@@ -208,16 +226,23 @@ int b;
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+
   // parse the provided python function
   fpy = fopen(udf->f_code, "r");
   PyRun_SimpleFile(fpy, udf->f_code);
 
-  py_fun = PyDict_GetItemString(main_dict, "forcepy_init");
+  py_fun = PyDict_GetItemString(main_dict, "forcepy_init_");
   if (py_fun == NULL){
     printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_init");
     exit(FAILURE);}
 
-  py_return = PyObject_CallFunctionObjArgs(py_fun, NULL);
+  py_return = PyObject_CallFunctionObjArgs(
+    py_fun, 
+    pylab.year, pylab.month, pylab.day, 
+    pylab.sensor, 
+    pylab.bandname, 
+    NULL);
 
   if (py_return == NULL){
     printf("NULL returned from forcepy_init. Clean up the python plugin code!\n");
@@ -244,12 +269,114 @@ int b;
   }
 
 
+  Py_DECREF(pylab.year);
+  Py_DECREF(pylab.month);
+  Py_DECREF(pylab.day);
+  Py_DECREF(pylab.bandname);
+  Py_DECREF(pylab.sensor);
   Py_DECREF(py_return);
-
+  
   fclose(fpy);
 
   return;
 }
+
+
+/** This function terminates the python udf
+--- udf:    user-defined code parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void term_pyp(par_udf_t *udf){
+
+
+  if (udf->bandname != NULL){
+    free_2D((void**)udf->bandname, udf->nb); 
+    udf->bandname = NULL;
+  }
+
+  return;
+}
+
+
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+py_dimlab_t pylab;
+int b, t;
+int* year_      = NULL;
+int* month_     = NULL;
+int* day_       = NULL;
+char *sensor_   = NULL;
+char *bandname_ = NULL;
+date_t date;
+char sensor[NPOW_04];
+char bandname[NPOW_10];
+
+
+  pylab.dim_nt[0] = nt;
+  pylab.dim_nb[0] = nb;
+
+  pylab.year     = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+  pylab.month    = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+  pylab.day      = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+
+  pylab.desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
+  pylab.desc_sensor->elsize = NPOW_04;
+  pylab.sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nt, pylab.desc_sensor);
+
+  pylab.desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
+  pylab.desc_bandname->elsize = NPOW_10;
+  pylab.bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nb, pylab.desc_bandname);
+
+  year_     = (int*)PyArray_DATA(pylab.year);
+  month_    = (int*)PyArray_DATA(pylab.month);
+  day_      = (int*)PyArray_DATA(pylab.day);
+  sensor_   = (char*)PyArray_DATA(pylab.sensor);
+  bandname_ = (char*)PyArray_DATA(pylab.bandname);
+
+
+  // copy C data to python objects
+  
+  if (submodule == _HL_PLG_){
+
+    for (t=0; t<nt; t++){
+      date = get_brick_date(ard[t].DAT, 0);
+      year_[t]  = date.year;
+      month_[t] = date.month;
+      day_[t]   = date.day;
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+      copy_string(sensor_, NPOW_04, sensor);
+      sensor_ += NPOW_04;
+    }
+
+    for (b=0; b<nb; b++){
+      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+      copy_string(bandname_, NPOW_10, bandname);
+      bandname_ += NPOW_10;
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (t=0; t<nt; t++){
+      year_[t]  = ts->d_tsi[t].year;
+      month_[t] = ts->d_tsi[t].month;
+      day_[t]   = ts->d_tsi[t].day;
+      copy_string(sensor_, NPOW_04, "BLEND");
+      sensor_ += NPOW_04;
+    }
+
+    copy_string(bandname_, NPOW_10, idx_name);
+    bandname_ += NPOW_10;
+
+  } else {
+    printf("unknown submodule. ");
+    exit(FAILURE);
+  }
+
+
+  return pylab;
+}
+
+
+
 
 
 
@@ -269,11 +396,10 @@ int b;
 
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int nx, int ny, int nc, int nb, int idx, int nt, short nodata, par_hl_t *phl){
-int b, t,  submodule;
+int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
+int b, t;
+py_dimlab_t pylab;
 npy_intp dim_data[4] = { nt, nb, ny, nx };
-npy_intp dim_nt[1] = { nt };
-npy_intp dim_nb[1] = { nb };
 FILE     *fpy         = NULL;
 PyObject *main_module = NULL;
 PyObject *main_dict   = NULL;
@@ -282,44 +408,19 @@ PyObject *py_nodata   = NULL;
 PyObject *py_nproc    = NULL;
 PyObject *py_nband    = NULL;
 PyArrayObject* py_data     = NULL;
-PyArrayObject* py_year     = NULL;
-PyArrayObject* py_month    = NULL;
-PyArrayObject* py_day      = NULL;
-PyArrayObject* py_sensor   = NULL;
-PyArrayObject* py_bandname = NULL;
 PyArrayObject *py_return   = NULL;
-PyArray_Descr *py_desc_sensor   = NULL;
-PyArray_Descr *py_desc_bandname = NULL;
 short* data_    = NULL;
 short* return_  = NULL;
-int* year_      = NULL;
-int* month_     = NULL;
-int* day_       = NULL;
-char *sensor_   = NULL;
-char *bandname_ = NULL;
-date_t date;
-char sensor[NPOW_04];
-char bandname[NPOW_10];
-par_udf_t *udf;
 
 
-  if (phl->plg.pyp.out){
-    udf = &phl->plg.pyp;
-    submodule = _HL_PLG_;
-    if (plg->pyp_ == NULL) return CANCEL;
-  } else if (phl->tsa.pyp.out){
-    udf = &phl->tsa.pyp;
-    submodule = _HL_TSA_;
-    if (ts->pyp_ == NULL) return CANCEL;
-  } else {
-    exit(FAILURE);
-  }
-
+  if (submodule == _HL_PLG_ && plg->pyp_ == NULL) return CANCEL;
+  if (submodule == _HL_TSA_ &&  ts->pyp_ == NULL) return CANCEL;
 
 
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
 
   fpy = fopen(udf->f_code, "r");
   PyRun_SimpleFile(fpy, udf->f_code);
@@ -330,28 +431,11 @@ par_udf_t *udf;
     exit(FAILURE);}
 
   py_nodata = PyLong_FromLong(nodata);
-  py_nproc = PyLong_FromLong(phl->cthread);
+  py_nproc = PyLong_FromLong(cthread);
   py_nband = PyLong_FromLong(udf->nb);
 
   py_data     = (PyArrayObject *) PyArray_SimpleNew(4, dim_data, NPY_INT16);
-  py_year     = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
-  py_month    = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
-  py_day      = (PyArrayObject *) PyArray_SimpleNew(1, dim_nt, NPY_INT);
-
-  py_desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
-  py_desc_sensor->elsize = NPOW_04;
-  py_sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, dim_nt, py_desc_sensor);
-
-  py_desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
-  py_desc_bandname->elsize = NPOW_10;
-  py_bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, dim_nb, py_desc_bandname);
-
   data_     = (short*)PyArray_DATA(py_data);
-  year_     = (int*)PyArray_DATA(py_year);
-  month_    = (int*)PyArray_DATA(py_month);
-  day_      = (int*)PyArray_DATA(py_day);
-  sensor_   = (char*)PyArray_DATA(py_sensor);
-  bandname_ = (char*)PyArray_DATA(py_bandname);
 
 
   // copy C data to python objects
@@ -363,19 +447,6 @@ par_udf_t *udf;
         memcpy(data_, ard[t].dat[b], sizeof(short)*nc);
         data_ += nc;
       }
-      date = get_brick_date(ard[t].DAT, 0);
-      year_[t]  = date.year;
-      month_[t] = date.month;
-      day_[t]   = date.day;
-      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
-      copy_string(sensor_, NPOW_04, sensor);
-      sensor_ += NPOW_04;
-    }
-
-    for (b=0; b<nb; b++){
-      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
-      copy_string(bandname_, NPOW_10, bandname);
-      bandname_ += NPOW_10;
     }
 
   } else if (submodule == _HL_TSA_){
@@ -383,15 +454,7 @@ par_udf_t *udf;
     for (t=0; t<nt; t++){
       memcpy(data_, ts->tsi_[t], sizeof(short)*nc);
       data_ += nc;
-      year_[t]  = ts->d_tsi[t].year;
-      month_[t] = ts->d_tsi[t].month;
-      day_[t]   = ts->d_tsi[t].day;
-      copy_string(sensor_, NPOW_04, "BLEND");
-      sensor_ += NPOW_04;
     }
-
-    copy_string(bandname_, NPOW_10, phl->tsa.index_name[idx]);
-    bandname_ += NPOW_10;
 
   } else {
     printf("unknown submodule. ");
@@ -403,9 +466,9 @@ par_udf_t *udf;
   py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
     py_fun, 
     py_data, 
-    py_year, py_month, py_day, 
-    py_sensor, 
-    py_bandname, 
+    pylab.year, pylab.month, pylab.day, 
+    pylab.sensor, 
+    pylab.bandname, 
     py_nodata, 
     py_nband, 
     py_nproc, 
@@ -443,14 +506,14 @@ par_udf_t *udf;
   // clean
   Py_DECREF(py_return);
   Py_DECREF(py_data);
-  Py_DECREF(py_year);
-  Py_DECREF(py_month);
-  Py_DECREF(py_day);
-  Py_DECREF(py_bandname);
-  Py_DECREF(py_sensor);
   Py_DECREF(py_nodata);
   Py_DECREF(py_nband);
   Py_DECREF(py_nproc);
+  Py_DECREF(pylab.year);
+  Py_DECREF(pylab.month);
+  Py_DECREF(pylab.day);
+  Py_DECREF(pylab.bandname);
+  Py_DECREF(pylab.sensor);
 
 
   fclose(fpy);

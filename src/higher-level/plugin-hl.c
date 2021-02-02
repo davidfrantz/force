@@ -247,6 +247,8 @@ short nodata;
       printf("Error getting processing mask."); return NULL;}
   }
 
+  // initialize python udf
+  init_pyp(ard, NULL, _HL_PLG_, NULL, nb, nt, &phl->plg.pyp);
 
   // compile products + bricks
   if ((PLG = compile_plg(ard, &plg, phl, cube, nt, &nprod)) == NULL || nprod == 0){
@@ -258,8 +260,13 @@ short nodata;
 
 
 
-  python_plugin(ard, &plg, NULL, mask_, nx, ny, nc, nb, 0, nt, nodata, phl);
+  python_plugin(ard, &plg, NULL, mask_, _HL_PLG_, NULL, 
+    nx, ny, nc, nb, nt, nodata, &phl->plg.pyp, phl->cthread);
   //rstats_plugin(ard, NULL, &plg, mask_, nx, ny, nc, nb, nt, nodata, phl);
+
+
+  // terminate python udf
+  term_pyp(&phl->plg.pyp);
 
 
   *nproduct = nprod;

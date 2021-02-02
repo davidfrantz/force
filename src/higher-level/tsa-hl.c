@@ -798,6 +798,9 @@ short nodata;
   
   for (idx=0; idx<phl->tsa.n; idx++){
 
+    // initialize python udf
+    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
+
     // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, ni, idx, &nprod)) == NULL || nprod == 0){
       printf("Unable to compile TSA products!\n"); 
@@ -811,7 +814,8 @@ short nodata;
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
 
-    python_plugin(TSA[idx], NULL, &ts, mask_, nx, ny, nc, 1, idx, ni, nodata, phl);
+    python_plugin(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+      nx, ny, nc, 1, ni, nodata, &phl->tsa.pyp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     
@@ -838,6 +842,9 @@ short nodata;
     if (ts.d_fbd != NULL){ free((void*)ts.d_fbd); ts.d_fbd = NULL;}
     if (ts.d_lsp != NULL){ free((void*)ts.d_lsp); ts.d_lsp = NULL;}
     if (ts.d_pol != NULL){ free((void*)ts.d_pol); ts.d_pol = NULL;}
+
+    // terminate python udf
+    term_pyp(&phl->tsa.pyp);
 
   }
   
