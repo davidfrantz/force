@@ -95,12 +95,18 @@ par_udf_t *udf;
     "    return outarray                                                           \n");
 
   PyRun_SimpleString(
-    "def forcepy_init_(year, month, day, sensor, bandname):                           \n"
-    "    date = np.array(                                                             \n"
-    "        [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}') \n"
-    "         for y, m, d in zip(year, month, day)])                                  \n"
-    "    res = forcepy_init(date, sensor, bandname)                                   \n"
-    "    return res                                                                   \n");
+    "def forcepy_date2epoch(year, month, day):                                                  \n"
+    "    dates = np.array(                                                                      \n"
+    "        [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')           \n"
+    "         for y, m, d in zip(year, month, day)])                                            \n"
+    "    epoch = np.array([(date - np.datetime64('1970-01-01')).item().days for date in dates]) \n"
+    "    return epoch                                                                           \n");
+
+  PyRun_SimpleString(
+    "def forcepy_init_(year, month, day, sensor, bandname):   \n"
+    "    date = forcepy_date2epoch(year, month, day)          \n"
+    "    out_bandnames = forcepy_init(date, sensor, bandname) \n"
+    "    return out_bandnames                                 \n");
 
   if (udf->type == _UDF_PIXEL_ && !udf->justintime){
     PyRun_SimpleString(
@@ -109,13 +115,11 @@ par_udf_t *udf;
       "        print('iblock', iblock.shape)                                                     \n"
       "        nDates, nBands, nY, nX = iblock.shape                                             \n"
       "        pool = Pool(nproc, initializer=init)                                              \n"
-      "        date = np.array(                                                                  \n"
-      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')      \n"
-      "             for y, m, d in zip(year, month, day)])                                       \n"
+      "        date = forcepy_date2epoch(year, month, day)                                       \n"
       "        argss = list()                                                                    \n"
       "        for yi in range(nY):                                                              \n"
       "            for xi in range(nX):                                                          \n"
-      "                inarray = iblock[:, :, yi, xi]                                            \n"
+      "                inarray = iblock[:, :, yi:yi+1, xi:xi+1]                                  \n"
       "                args = (forcepy_pixel, inarray, nband, date, sensor, bandname, nodata, 1) \n"
       "                argss.append(args)                                                        \n"
       "        res = pool.map(func=forcepy_wrapper, iterable=argss)                              \n"
@@ -137,9 +141,7 @@ par_udf_t *udf;
       "@jit(nopython=True, nogil=True, parallel=True)                                         \n"
       "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
       "    set_num_threads(nproc)                                                             \n"
-      "        date = np.array(                                                               \n"
-      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')   \n"
-      "             for y, m, d in zip(year, month, day)])                                    \n"
+      "    date = forcepy_date2epoch(year, month, day)                                        \n"
       "    buffer = [0, 0, 0, 0]  # todo pass buffer as argument                              \n"
       "    xBufMin, xBufMax, yBufMin, yBufMax = buffer                                        \n"
       "    nDates, nBands, nY, nX = iblock.shape                                              \n"
@@ -157,9 +159,7 @@ par_udf_t *udf;
       "    try:                                                                               \n"
       "        print('iblock', iblock.shape)                                                  \n"
       "        nDates, nBands, nY, nX = iblock.shape                                          \n"
-      "        date = np.array(                                                               \n"
-      "            [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')   \n"
-      "             for y, m, d in zip(year, month, day)])                                    \n"
+      "        date = forcepy_date2epoch(year, month, day)                                    \n"
       "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
       "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata, nproc)           \n"
       "        return oblock                                                                  \n"
