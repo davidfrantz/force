@@ -170,6 +170,8 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +--------+-----------------+
 
 
+.. _tsa-lsp_products:
+
 **Table 3:** Phenology name tags
 
 +-----+---------------------------------------------------+-------+--------+
