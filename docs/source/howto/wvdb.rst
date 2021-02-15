@@ -150,9 +150,9 @@ We generally use a WVDB generated from MODIS water vapor products (`MOD05 and MY
 Download the ready-to-go global WVDB
 """"""""""""""""""""""""""""""""""""
 
-You should start by downloading the pre-compiled WVDB with global coverage from `here <https://doi.pangaea.de/10.1594/PANGAEA.893109>`_.
+You should start by downloading the pre-compiled WVDB with global coverage from `here <https://doi.org/10.5281/zenodo.4468700>`_.
 This saves you a lot of processing.
-This freely available dataset was generated with the FORCE WVDB component, and is comprised of daily global water vapor data for February 2000 to July 2018 for each land-intersecting WRS-2 scene (13281 coordinates), as well as a monthly climatology that can be used if no daily value is available.
+This freely available dataset was generated with the FORCE WVDB component, and is comprised of daily global water vapor data for February 2000 to December 2020 for each land-intersecting WRS-2 scene (13281 coordinates), as well as a monthly climatology that can be used if no daily value is available.
 
 
 Generate the WVDB on your own
@@ -167,7 +167,7 @@ However, if you are in need of more up-to-date data, you can use the FORCE WVDB 
 
 
 FORCE WVDB needs a table with input coordinates (center coordinates of WRS-2 frames).
-The `pre-compiled dataset <https://doi.pangaea.de/10.1594/PANGAEA.893109>`_ includes such a table.
+The `pre-compiled dataset <https://doi.org/10.5281/zenodo.4468700>`_ includes such a table.
 If you are not interested in global coverage, you can subset this file.
 The file should contain two columns separated by white space, and no header.
 The first column should give the longitude (X), the second column the latitude (Y) with coordinates in decimal degree (negative values for West/South).

@@ -8,6 +8,9 @@ This list summarizes all scientific publications that describe FORCE, functional
 
 * **2021**
 
+  | Frantz, D., Stellmes, M., and Ernst, S. (2021). Water vapor database for atmospheric correction of Landsat imagery.  Zenodo. Dataset available online:
+  | https://doi.org/10.5281/zenodo.4468700
+
   | V. Zekoll, M. Main-Knorn, J. Louis, D. Frantz, R. Richter, and B. Pflug (2021): Comparison of Masking Algorithms for Sentinel-2 Imagery. Remote Sensing 13.
   | https://doi.org/10.3390/rs13010137
 
