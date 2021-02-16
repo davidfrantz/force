@@ -26,7 +26,7 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest
+FROM davidfrantz/base:latest as force_builder
 
 # Environment variables
 ENV HOME /home/docker
@@ -50,6 +50,12 @@ RUN echo "building FORCE" && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
   force
+
+FROM davidfrantz/base:latest as force
+
+ENV PATH "$PATH:/home/docker/bin"
+
+COPY --from=force_builder /home/docker/bin /home/docker/bin
 
 WORKDIR /home/docker
 
