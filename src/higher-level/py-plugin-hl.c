@@ -23,7 +23,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 This file contains functions for plugging-in python into FORCE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Copyright (C) 2020 David Frantz, Andreas Rabe
+Copyright (C) 2020-2021 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
@@ -234,7 +234,7 @@ int b;
 
   py_fun = PyDict_GetItemString(main_dict, "forcepy_init_");
   if (py_fun == NULL){
-    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_init");
+    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_init_");
     exit(FAILURE);}
 
   py_return = PyObject_CallFunctionObjArgs(
@@ -245,11 +245,11 @@ int b;
     NULL);
 
   if (py_return == NULL){
-    printf("NULL returned from forcepy_init. Clean up the python plugin code!\n");
+    printf("NULL returned from forcepy_init_. Check the python plugin code!\n");
     exit(FAILURE);}
 
   if (!PyList_Check(py_return)){
-    printf("forcepy_init did not return a list. Clean up the python plugin code!\n");
+    printf("forcepy_init_ did not return a list. Check the python plugin code!\n");
     exit(FAILURE);}
 
 
@@ -261,7 +261,7 @@ int b;
     py_bandname = PyList_GetItem(py_return, b);
     py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
     if ((bandname = PyBytes_AsString(py_encoded)) == NULL){
-      printf("forcepy_init did not return a list of strings. Clean up the python plugin code!\n");
+      printf("forcepy_init_ did not return a list of strings. Check the python plugin code!\n");
       exit(FAILURE);}
     Py_DECREF(py_encoded);
     copy_string(udf->bandname[b], NPOW_10, bandname);
@@ -475,7 +475,7 @@ short* return_  = NULL;
     NULL);
 
   if (py_return == NULL){
-    printf("NULL returned from python. Clean up the python plugin code!\n");
+    printf("NULL returned from python. Check the python plugin code!\n");
     exit(FAILURE);}
 
 
