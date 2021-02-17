@@ -153,6 +153,9 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +----------------+---------+---------------------------------------------------------+
 
 
+Folding
+"""""""
+
 **Table 2:** Folding tags
 
 +--------+-----------------+
@@ -171,6 +174,9 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 
 
 .. _tsa-lsp_products:
+
+Phenology
+"""""""""
 
 **Table 3:** Phenology name tags
 
