@@ -22,20 +22,19 @@
 
 # Copyright (C) 2020-2021 Gergely Padányi-Gulyás (github user fegyi001),
 #                         David Frantz
+#                         Fabian Lehmann
 
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest
+FROM davidfrantz/base:latest as force_builder
 
 # Environment variables
-ENV HOME /home/docker
 ENV SOURCE_DIR $HOME/src/force
 ENV INSTALL_DIR $HOME/bin
-ENV PATH "$PATH:$INSTALL_DIR"
 
 # Copy src to SOURCE_DIR
-RUN mkdir -p $INSTALL_DIR $SOURCE_DIR
+RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
 COPY --chown=docker:docker . .
 
@@ -50,6 +49,10 @@ RUN echo "building FORCE" && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
   force
+
+FROM davidfrantz/base:latest as force
+
+COPY --from=force_builder $HOME/bin $HOME/bin
 
 WORKDIR /home/docker
 
