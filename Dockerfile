@@ -32,10 +32,9 @@ FROM davidfrantz/base:latest as force_builder
 # Environment variables
 ENV SOURCE_DIR $HOME/src/force
 ENV INSTALL_DIR $HOME/bin
-ENV PATH "$PATH:$INSTALL_DIR"
 
 # Copy src to SOURCE_DIR
-RUN mkdir -p $INSTALL_DIR $SOURCE_DIR
+RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
 COPY --chown=docker:docker . .
 
