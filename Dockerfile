@@ -52,7 +52,7 @@ RUN echo "building FORCE" && \
 
 FROM davidfrantz/base:latest as force
 
-COPY --from=force_builder /home/docker/bin /home/docker/bin
+COPY --from=force_builder $HOME/bin $HOME/bin
 
 WORKDIR /home/docker
 
