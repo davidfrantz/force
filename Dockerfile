@@ -22,6 +22,7 @@
 
 # Copyright (C) 2020-2021 Gergely Padányi-Gulyás (github user fegyi001),
 #                         David Frantz
+#                         Fabian Lehmann
 
 
 # base installation to speed up build process
@@ -29,7 +30,6 @@
 FROM davidfrantz/base:latest as force_builder
 
 # Environment variables
-ENV HOME /home/docker
 ENV SOURCE_DIR $HOME/src/force
 ENV INSTALL_DIR $HOME/bin
 ENV PATH "$PATH:$INSTALL_DIR"
@@ -52,8 +52,6 @@ RUN echo "building FORCE" && \
   force
 
 FROM davidfrantz/base:latest as force
-
-ENV PATH "$PATH:/home/docker/bin"
 
 COPY --from=force_builder /home/docker/bin /home/docker/bin
 
