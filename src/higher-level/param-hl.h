@@ -238,7 +238,6 @@ typedef struct {
   int    nb;
   char **bandname;
   int    type;
-  int    justintime;
 } par_udf_t;
 
 // aggregation statistics

@@ -103,15 +103,30 @@ par_udf_t *udf;
     "    return epoch                                                                           \n");
 
   PyRun_SimpleString(
-    "def forcepy_init_(year, month, day, sensor, bandname):   \n"
-    "    date = forcepy_date2epoch(year, month, day)          \n"
-    "    out_bandnames = forcepy_init(date, sensor, bandname) \n"
-    "    return out_bandnames                                 \n");
+    "def forcepy_init_(year, month, day, sensor, bandname):        \n"
+    "    try:                                                      \n"
+    "        if 'forcepy_init' not in globals():                   \n"
+    "            print('forcepy_init not found.')                  \n"
+    "            return None                                       \n"
+    "        date = forcepy_date2epoch(year, month, day)           \n"
+    "        out_bandnames_ = forcepy_init(date, sensor, bandname) \n"
+    "        out_bandnames = list()                                \n"
+    "        for s in out_bandnames_:                              \n"
+    "            try: s = s.decode()                               \n"
+    "            except: pass                                      \n"
+    "            out_bandnames.append(str(s))                      \n"
+    "        return out_bandnames                                  \n"
+    "    except:                                                   \n"
+    "        print(traceback.format_exc())                         \n"
+    "        return None                                           \n");
 
-  if (udf->type == _UDF_PIXEL_ && !udf->justintime){
+  if (udf->type == _UDF_PIXEL_){
     PyRun_SimpleString(
       "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):           \n"
       "    try:                                                                                  \n"
+      "        if 'forcepy_pixel' not in globals():                                              \n"
+      "            print('forcepy_pixel not found.')                                             \n"
+      "            return None                                                                   \n"
       "        print('iblock', iblock.shape)                                                     \n"
       "        nDates, nBands, nY, nX = iblock.shape                                             \n"
       "        pool = Pool(nproc, initializer=init)                                              \n"
@@ -136,27 +151,13 @@ par_udf_t *udf;
       "    except:                                                                               \n"
       "        print(traceback.format_exc())                                                     \n"
       "        return None                                                                       \n");
-  } else if (udf->type == _UDF_PIXEL_ && udf->justintime){
-    PyRun_SimpleString(
-      "@jit(nopython=True, nogil=True, parallel=True)                                         \n"
-      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
-      "    set_num_threads(nproc)                                                             \n"
-      "    date = forcepy_date2epoch(year, month, day)                                        \n"
-      "    buffer = [0, 0, 0, 0]  # todo pass buffer as argument                              \n"
-      "    xBufMin, xBufMax, yBufMin, yBufMax = buffer                                        \n"
-      "    nDates, nBands, nY, nX = iblock.shape                                              \n"
-      "    outblock = np.full(shape=(nband, nY, nX), fill_value=nodata)                       \n"
-      "    for iYX in prange(nY * nX):                                                        \n"
-      "        iX = iYX % nX                                                                  \n"
-      "        iY = iYX // nX                                                                 \n"
-      "        inarray = iblock[:, :, iY-yBufMin: iY+yBufMax+1, iX-xBufMin: iX+xBufMax+1]     \n"
-      "        outarray = outblock[:, iY, iX]                                                 \n"
-      "        forcepy_pixel(inarray, outarray, date, sensor, bandname, nodata, 1)            \n"
-      "    return outblock                                                                    \n");
   } else if (udf->type == _UDF_BLOCK_){
     PyRun_SimpleString(
       "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
       "    try:                                                                               \n"
+      "        if 'forcepy_block' not in globals():                                           \n"
+      "            print('forcepy_block not found.')                                          \n"
+      "            return None                                                                \n"
       "        print('iblock', iblock.shape)                                                  \n"
       "        nDates, nBands, nY, nX = iblock.shape                                          \n"
       "        date = forcepy_date2epoch(year, month, day)                                    \n"
@@ -234,7 +235,7 @@ int b;
 
   py_fun = PyDict_GetItemString(main_dict, "forcepy_init_");
   if (py_fun == NULL){
-    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_init_");
+    printf("Python error!\n");
     exit(FAILURE);}
 
   py_return = PyObject_CallFunctionObjArgs(
@@ -244,8 +245,8 @@ int b;
     pylab.bandname, 
     NULL);
 
-  if (py_return == NULL){
-    printf("NULL returned from forcepy_init_. Check the python plugin code!\n");
+  if (py_return == Py_None){
+    printf("None returned from forcepy_init_. Check the python plugin code!\n");
     exit(FAILURE);}
 
   if (!PyList_Check(py_return)){
@@ -427,7 +428,7 @@ short* return_  = NULL;
 
   py_fun = PyDict_GetItemString(main_dict, "forcepy_");
   if (py_fun == NULL){
-    printf("Python function \"%s\" was not found.\n", "forcepy_");
+    printf("Python error!\n");
     exit(FAILURE);}
 
   py_nodata = PyLong_FromLong(nodata);
@@ -474,8 +475,8 @@ short* return_  = NULL;
     py_nproc, 
     NULL);
 
-  if (py_return == NULL){
-    printf("NULL returned from python. Check the python plugin code!\n");
+  if (py_return == Py_None){
+    printf("None returned from python. Check the python plugin code!\n");
     exit(FAILURE);}
 
 
