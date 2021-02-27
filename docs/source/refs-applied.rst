@@ -8,8 +8,14 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2021**
 
+  | S. Cooper, A. Okujeni, D. Pflugmacher, S. van der Linden, and Hostert, P. (2021): Combining simulated hyperspectral EnMAP and Landsat time series for forest aboveground biomass mapping. International Journal of Applied Earth Observation and Geoinformation, 98, 102307. 
+  | https://doi.org/10.1016/j.jag.2021.102307
+
   | D. Frantz, F. Schug, A. Okujeni, C. Navacchi, W. Wagner, S. van der Linden, and P. Hostert (2021): National-scale mapping of building height using Sentinel-1 and Sentinel-2 time series. Remote Sensing of Environment 252, 112128.
   | https://doi.org/10.1016/j.rse.2020.112128
+
+  | H. Haberl, D. Wiedenhofer, F. Schug, D. Frantz, D. Virág, C. Plutzar, K. Gruhler, J. Lederer, G. Schiller, T. Fishman, M. Lanau, A. Gattringer, T. Kemper, G. Liu, H. Tanikawa, S. van der Linden, and P. Hostert (2021): High-Resolution Maps of Material Stocks in Buildings and Infrastructures in Austria and Germany. Environmental Science & Technology.
+  | https://doi.org/10.1021/acs.est.0c05642
 
 
 * **2020**
