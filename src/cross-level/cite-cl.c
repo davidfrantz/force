@@ -312,6 +312,13 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Brooks, B., Lee, D., Pomara, L., Hargrove, W. (2020). Monitoring Broadscale "
     "Vegetational Diversity and Change across North American Landscapes Using Land "
     "Surface Phenology. Forests 11(6), 606",
+    false },
+  { "kNDVI",
+    "Camps-Valls, G., Campos-Taberner, M., Moreno-Martínez, Á., Walther, S., "
+    "Duveiller, G., Cescatti, A., Mahecha, M.D., Muñoz-Marí, J., García-Haro, F.J., "
+    "Guanter, L., Jung, M., Gamon, J.A., Reichstein, M., & Running, S.W. (2021). "
+    "A unified vegetation index for quantifying the terrestrial biosphere. "
+    "Science Advances, 7, eabc7447.",
     false }
 };
 
