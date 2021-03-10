@@ -19,6 +19,11 @@ Master release: TBA
     This is now fixed.
     Thanks for Janos Steiner for reporting this issue.
 
+  * in force-higher-level, TSA sub-module:
+    Implemented the new kNDVI following Camps-Valls et al. 2021.
+    Use with ``INDEX = kNDVI``.
+    Sigma is fixed to 0.5*(NIR+RED).
+
 * **FORCE WVDB**
 
   * We updated the ready-to-use, global water vapor database. 
