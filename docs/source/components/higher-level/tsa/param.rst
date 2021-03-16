@@ -290,6 +290,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +           +                                            + Fraction F is retrieved using least-squares optimization                                 +                          +
     +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                        +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + kNDVI     + Kernel NDVI                                + (1 - k) / (1 + k)                                                                        + Camps-Valls et al. 2021  +         +
+    +           +                                            + with k = exp( -(NIR - RED)^2 / (2 * sigma^2) )                                           +                          +
+    +           +                                            + with sigma = 0.5 * (NIR + RED)                                                           +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     
   * Standardize the TSS time series with pixel mean and/or standard deviation?
