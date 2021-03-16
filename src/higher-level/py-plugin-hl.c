@@ -80,13 +80,28 @@ par_udf_t *udf;
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
-  PyRun_SimpleString("from numba import jit, prange, set_num_threads");
   PyRun_SimpleString("from datetime import date as Date");
   PyRun_SimpleString("import traceback");
 
   PyRun_SimpleString("def init(): np.seterr(all='ignore')");
   PyRun_SimpleString("init()");
 
+  PyRun_SimpleString(
+    "print('safety')\n"
+    "from numba import jit, prange, set_num_threads\n"
+    "@jit(nopython=True, nogil=True, parallel=True)\n"
+    "def test(input, nproc):\n"
+    "    set_num_threads(nproc)\n"
+    "    return input\n"
+
+    "input = np.zeros((10,10))\n"
+    "a = test(input, 32)\n"
+    "print(a)\n"
+    "b = test(1, 32)\n"
+    "print(b)\n"
+
+  );
+//exit(0);
   PyRun_SimpleString(
     "def forcepy_wrapper(args):                                                    \n"
     "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata, nproc = args \n"
@@ -163,6 +178,9 @@ par_udf_t *udf;
       "        date = forcepy_date2epoch(year, month, day)                                    \n"
       "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
       "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata, nproc)           \n"
+      //"        input = np.zeros((10,10))\n"
+      //"        forcepy_block(input)           \n"
+      "        print('got it')\n"
       "        return oblock                                                                  \n"
       "    except:                                                                            \n"
       "        print(traceback.format_exc())                                                  \n"
