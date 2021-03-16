@@ -217,7 +217,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI}
     | ``INDEX = NDVI EVI NBR``
 
 
@@ -290,7 +290,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +           +                                            + Fraction F is retrieved using least-squares optimization                                 +                          +
     +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                        +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-    + kNDVI     + Kernel NDVI                                + (1 - k) / (1 + k)                                                                        + Camps-Valls et al. 2021  +         +
+    + kNDVI     + Kernel NDVI                                + (1 - k) / (1 + k)                                                                        + Camps-Valls et al. 2021  +
     +           +                                            + with k = exp( -(NIR - RED)^2 / (2 * sigma^2) )                                           +                          +
     +           +                                            + with sigma = 0.5 * (NIR + RED)                                                           +                          +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
