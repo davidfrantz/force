@@ -29,7 +29,7 @@ EXPECTED_ARGS=6
 
 # if wrong number of input args, stop
 if [ $# -ne $EXPECTED_ARGS ]; then
-  echo "Usage: `basename $0` image parfile bindir logdir tempdir timeout_zip"
+  echo "Usage: `basename $0` image parfile logdir tempdir timeout_zip"
   echo ""
   exit 1
 fi
@@ -37,10 +37,11 @@ fi
 
 IMAGE=$1
 PRM=$2
-BINDIR=$3
-LOGDIR=$4
-TEMPDIR=$5
-TIMEOUT_ZIP=$6
+LOGDIR=$3
+TEMPDIR=$4
+TIMEOUT_ZIP=$5
+
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 BASE=$(basename $IMAGE)
 LOGFILE=$LOGDIR/$BASE.log
