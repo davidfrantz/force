@@ -71,7 +71,8 @@ const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
   { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"     },
   { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"     },
   { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       },
-  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    }};
+  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    },
+  { _IDX_KNV_, "kNDVI"  }};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
   { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },
@@ -178,7 +179,7 @@ const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
   { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
   { _LSM_EDD_, "EDD" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
   { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
-  { _LSM_MAX_, "MAX" }};
+  { _LSM_MAX_, "MAX" }, { _LSM_ARE_, "ARE" }};
 
 const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_] = {
   { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};

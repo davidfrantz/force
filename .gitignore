@@ -3,3 +3,5 @@ docs/build
 .idea
 python/test*
 *.pyc
+.vscode
+

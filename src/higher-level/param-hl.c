@@ -527,7 +527,7 @@ int *band_ptr[_WVL_LENGTH_] = {
         copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
         break;
       case _IDX_SAV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
+        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
         break;
       case _IDX_SRV_:
@@ -881,6 +881,8 @@ int i;
       lsm->ogeo = true;
     } else if (lsm->metrics[i] == _LSM_MAX_){
       lsm->omax = true;
+    } else if (lsm->metrics[i] == _LSM_ARE_){
+      lsm->oare = true;
     } else {
       printf("warning: unknown lsm.\n");
     }

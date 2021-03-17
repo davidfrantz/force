@@ -36,6 +36,8 @@ enum { TCB, TCG, TCW, TCD};
 
 void index_band(ard_t *ard, small *mask_, tsa_t *ts, int b, int nc, int nt, short nodata);
 void index_differenced(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
+void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
+void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
 void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember);
 
@@ -123,6 +125,57 @@ float tmp, ind, scale = 10000.0;
           } else {
             ts->tss_[t][p] = (short)(ind*scale);
           }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
+/** This function computes a spectral index time series, with kernelized
++++ Normalized differenced method, e.g. NDVI: (b1-b2/(b1+b2)
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float sigma, diff, tmp, ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,sigma,diff,tmp,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+      
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p] || 
+             ard[t].dat[b1][p] <= 0 || 
+             ard[t].dat[b2][p] <= 0){
+          ts->tss_[t][p] = nodata;
+        } else {
+          sigma = 0.5 * (ard[t].dat[b1][p] + ard[t].dat[b2][p]);
+          diff  = ard[t].dat[b1][p] - ard[t].dat[b2][p];
+          tmp   = exp(-(diff*diff) / (2*sigma*sigma));
+          ind   = (1-tmp) / (1+tmp);
+          ts->tss_[t][p] = (short)(ind*scale);
         }
 
       }
@@ -769,6 +822,10 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_NDM_:
       cite_me(_CITE_NDMI_);
       index_differenced(ard, mask_, ts, sen->nir, sen->swir1, nc, nt, nodata);
+      break;
+    case _IDX_KNV_:
+      cite_me(_CITE_KNDVI_);
+      index_kernelized(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
       break;
     default:
       printf("unknown INDEX\n");

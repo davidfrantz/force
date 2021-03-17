@@ -60,7 +60,7 @@ if [ $# -ne $EXPECTED_ARGS ]; then
 fi
 
 PRM=$1
-BINDIR=???
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 
 # if parameter file doesn't exist, stop
@@ -205,9 +205,7 @@ echo $CPU > $CPUFILE
 
 EXE=$BINDIR/force-l2ps_
 
-#echo $QUEUE | parallel -d ' ' -j$CPUFILE --delay $DELAY --eta L2PS {} $PRM $BINDIR $TEMPDIR $IFILE > $OD/FORCE-L2PS_$TIME.log
-echo $QUEUE | parallel -d ' ' -j$CPUFILE --delay $DELAY --eta "$EXE {} $PRM $BINDIR $LOGDIR $TEMPDIR $TIMEOUT_ZIP; update_queue {} $IFILE"
-# > $OD/FORCE-L2PS_$TIME.log
+echo $QUEUE | parallel -d ' ' -j$CPUFILE --delay $DELAY --eta "$EXE {} $PRM $LOGDIR $TEMPDIR $TIMEOUT_ZIP; update_queue {} $IFILE"
 
 rm $CPUFILE
 
