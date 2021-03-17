@@ -2,7 +2,7 @@
 
 **Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.6.4-dev**
+**Version 3.6.4**
 
 ![FORCE Logo](/images/force.png)
 
