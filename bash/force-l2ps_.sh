@@ -25,7 +25,7 @@
 # this script is a wrapper, and acts as bridge between a batch interface, and the core FORCE Level-2 processing system
 
 
-EXPECTED_ARGS=6
+EXPECTED_ARGS=5
 
 # if wrong number of input args, stop
 if [ $# -ne $EXPECTED_ARGS ]; then
