@@ -49,7 +49,7 @@ export -f cmd_not_found
 help () {
 cat <<HELP
 
-Usage: $PROG [-h] image [image]*
+Usage: $PROG [-hjrl] image [image]*
 
   -h  = show his help
   -j  = number of jobs
