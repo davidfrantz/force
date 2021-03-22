@@ -54,6 +54,10 @@ Usage: $PROG [-h] image [image]*
   -h  = show his help
   -j  = number of jobs
         defaults to 'as many as possible'
+  -r  = resampling option
+        default: nearest
+  -l  = levels, comma-separated
+        default: 2 4 8 16
 
 $PROG:  compute image pyramids
         see https://force-eo.readthedocs.io/en/latest/components/auxilliary/pyramid.html
@@ -67,22 +71,32 @@ cmd_not_found "$PARALLEL_EXE"; # important, check required commands !!! dies on 
 cmd_not_found "$PYRAMID_EXE";  # important, check required commands !!! dies on missing
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hj: --long help,jobs: -n "$0" -- "$@"`
+ARGS=`getopt -o hj:r:l: --long help,jobs:,resample:,levels: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
+# default options
 NJOB=0
+LEVELS="2,4,8,16"
+RESAMPLE="nearest"
+
 while :; do
   case "$1" in
     -h|--help) help ;;
     -j|--jobs) NJOB="$2"; shift ;;
+    -r|--resample) RESAMPLE="$2"; shift ;;
+    -l|--levels) LEVELS="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
   shift
 done
 
+export LEVELS=$(echo $LEVELS | sed 's/,/ /g')
+export RESAMPLE
 debug "jobs: $NJOB"
+debug "levels: $LEVELS"
+debug "resample: $RESAMPLE"
 
 if [ $# -lt $MANDATORY_ARGS ] ; then 
   echoerr "Mandatory argument is missing."; help
@@ -113,7 +127,7 @@ pyramid(){
   fi
 
   echo "computing pyramids for $BINP"
-  $PYRAMID_EXE -ro --config COMPRESS_OVERVIEW DEFLATE --config BIGTIFF_OVERVIEW YES -r nearest $FINP 2 4 8 16
+  $PYRAMID_EXE -ro --config COMPRESS_OVERVIEW DEFLATE --config BIGTIFF_OVERVIEW YES -r $RESAMPLE $FINP $LEVELS
 
 }
 export -f pyramid
