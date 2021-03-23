@@ -353,7 +353,7 @@ get_data() {
 
   if [ "$AOITYPE" -eq 1 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
-    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S)
+    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S-%N)
     mkdir "$OGRTEMP"
     # get first layer of vector file and reproject to epsg4326
     AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
