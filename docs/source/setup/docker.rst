@@ -1,12 +1,14 @@
 .. _docker:
 
-Docker support
-==============
+Docker / Singularity support
+============================
 
 If you wish to use FORCE with docker you can do it in two ways: 
 
 * download a **prebuilt image** from Docker hub
 * create a **local build** with Dockerfile
+
+If you wish to use FORCE with Singularity, please see the instructions :ref:`below <singularity>`. 
 
 
 Ready-to-go: Pull a pre-built image
@@ -103,3 +105,32 @@ This sounds complicated, but it really isn't:
     # is should result this:
     # FORCE_CREDENTIALS=/app/credentials
     docker run --env FORCE_CREDENTIALS=/app/credentials -v /path/to/credentials/folder/on/your/machine:/app/credentials davidfrantz/force env | grep FORCE_CREDENTIALS
+
+
+.. _singularity:
+
+Singularity
+-----------
+
+The FORCE Docker images can be simply run using Singularity.
+
+The simplest way is to directly run the Docker image:
+
+ .. code-block:: bash
+
+    singularity exec docker://davidfrantz/force:latest force
+
+This will automatically pull the Docker image from Docker Hub, and convert it to a Singularity image.
+The image can be updated by regularly doing:
+
+.. code-block:: bash
+
+    singularity pull -F docker://davidfrantz/force:latest
+
+You can also create a local copy of the image by explicitly doing the conversion:
+
+.. code-block:: bash
+
+    singularity build force.sif docker://davidfrantz/force:latest
+
+    singularity exec force.sif force
