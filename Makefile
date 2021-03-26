@@ -57,6 +57,7 @@ EXECUTABLES = gcc g++ \
               gsl-config curl-config \
               unzip tar lockfile-create lockfile-remove rename \
               python3 pip3 \
+			  R \
               opencv_version 
 OK := $(foreach exec,$(EXECUTABLES),\
         $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
@@ -75,6 +76,7 @@ CFLAGS=-O3 -Wall -fopenmp
 
 DB=bash
 DP=python
+DR=rstats
 DC=src/cross-level
 DL=src/lower-level
 DH=src/higher-level
@@ -102,7 +104,8 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-magic-parameters force-mdcp force-mosaic force-parameter \
             force-procmask force-pyramid force-qai-inflate force-stack \
             force-synthmix force-tabulate-grid force-tile-extent \
-            force-tile-finder force-train
+            force-tile-finder force-train force-level2-report \
+			.force-level2-report.Rmd
 
 ### TEMP
 
@@ -399,7 +402,7 @@ dummy: temp cross aux higher src/dummy.c
 
 install_:
 	chmod 0755 $(TB)/*
-	cp $(TB)/* $(BINDIR)
+	cp -a $(TB)/. $(BINDIR)
 
 clean:
 	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA) 
@@ -420,11 +423,15 @@ bash: temp
 	cp $(DB)/force-procmask.sh $(TB)/force-procmask
 	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
 	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
+	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
 
 python: temp
 	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
 
-install: bash python install_ clean check
+rstats: temp
+	cp $(DR)/force-level2-report.Rmd $(TB)/.force-level2-report.Rmd
+
+install: bash python rstats install_ clean check
 
 build:
 	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
