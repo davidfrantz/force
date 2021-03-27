@@ -62,6 +62,20 @@ EXECUTABLES = gcc g++ \
 OK := $(foreach exec,$(EXECUTABLES),\
         $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
 
+
+### EXECUTABLES AND MISC FILES TO BE CHECKED
+
+FORCE_EXE = force force-cube force-higher-level force-import-modis \
+            force-l2ps force-l2ps_ force-level1-csd force-level1-landsat \
+            force-level1-sentinel2 force-level2 force-lut-modis \
+            force-magic-parameters force-mdcp force-mosaic force-parameter \
+            force-procmask force-pyramid force-qai-inflate force-stack \
+            force-synthmix force-tabulate-grid force-tile-extent \
+            force-tile-finder force-train force-level2-report
+
+FORCE_MISC = force-level2-report.Rmd
+
+
 ### COMPILER
 
 GCC=gcc
@@ -82,6 +96,7 @@ DL=src/lower-level
 DH=src/higher-level
 DA=src/aux-level
 TB=temp-bin
+TM=$(TB)/force-misc
 TC=temp-cross
 TL=temp-lower
 TH=temp-higher
@@ -98,19 +113,10 @@ aux: param_aux param_train_aux train_aux
 exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis
 .PHONY: temp all install install_ bash python clean build check
 
-FORCE_EXE = force force-cube force-higher-level force-import-modis \
-            force-l2ps force-l2ps_ force-level1-csd force-level1-landsat \
-            force-level1-sentinel2 force-level2 force-lut-modis \
-            force-magic-parameters force-mdcp force-mosaic force-parameter \
-            force-procmask force-pyramid force-qai-inflate force-stack \
-            force-synthmix force-tabulate-grid force-tile-extent \
-            force-tile-finder force-train force-level2-report \
-			.force-level2-report.Rmd
-
 ### TEMP
 
 temp:
-	mkdir -p $(TB) $(TC) $(TL) $(TH) $(TA)
+	mkdir -p $(TB) $(TM) $(TC) $(TL) $(TH) $(TA)
 
 
 ### CROSS LEVEL COMPILE UNITS
@@ -429,7 +435,7 @@ python: temp
 	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
 
 rstats: temp
-	cp $(DR)/force-level2-report.Rmd $(TB)/.force-level2-report.Rmd
+	cp $(DR)/force-level2-report.Rmd $(TM)/force-level2-report.Rmd
 
 install: bash python rstats install_ clean check
 

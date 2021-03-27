@@ -27,10 +27,12 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
 
 MANDATORY_ARGS=1
 
 export REPORT_EXE="R"
+export REPORT_TEMPLATE="$MISC/force-level2-report.Rmd"
 
 echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
 export -f echoerr
@@ -46,6 +48,14 @@ cmd_not_found() {      # check required external commands
   done
 }
 export -f cmd_not_found
+
+file_not_found() {      # check required files
+  for file in "$@"; do
+    stat=`which $file`
+    if [ ! -r $file ] ; then echoerr "\"$file\": file not found, terminating..."; exit 1; fi
+  done
+}
+export -f file_not_found
 
 help () {
 cat <<HELP
@@ -65,6 +75,7 @@ exit 1
 export -f help
 
 cmd_not_found "$REPORT_EXE";
+file_not_found "$REPORT_TEMPLATE";
 
 # now get the options --------------------------------------------------------------------
 ARGS=`getopt -o ho: --long help,output: -n "$0" -- "$@"`
@@ -93,6 +104,9 @@ if [ ! -d $LOGDIR ]; then
   echoerr "$LOGDIR does not exist."; help
 fi
 
+if [ ! -d $LOGDIR ]; then
+  echoerr "$LOGDIR does not exist."; help
+fi
 
 if [ -z "$OUTPUT" ]; then
   if [ ! -w $LOGDIR ]; then
@@ -108,4 +122,4 @@ debug "binary directory: $BIN"
 debug "log directory: $LOGDIR"
 debug "output: $OUTPUT"
 
-$REPORT_EXE -e "rmarkdown::render('$BIN/.force-level2-report.Rmd', output_file = '$OUTPUT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR'))"
+$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTPUT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR'))"
