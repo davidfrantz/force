@@ -59,6 +59,7 @@ EXECUTABLES = gcc g++ \
               python3 pip3 \
 			  R \
               opencv_version 
+
 OK := $(foreach exec,$(EXECUTABLES),\
         $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
 
@@ -91,12 +92,13 @@ CFLAGS=-O3 -Wall -fopenmp
 DB=bash
 DP=python
 DR=rstats
+DM=force-misc
 DC=src/cross-level
 DL=src/lower-level
 DH=src/higher-level
 DA=src/aux-level
 TB=temp-bin
-TM=$(TB)/force-misc
+TM=$(TB)/$(DM)
 TC=temp-cross
 TL=temp-lower
 TH=temp-higher
@@ -415,7 +417,13 @@ clean:
 
 check:
 	$(foreach exec,$(FORCE_EXE),\
-     $(if $(shell which $(exec)),$(info $(exec) installed),$(error $(exec) was not installed properly!)))
+      $(if $(shell which $(BINDIR)/$(exec)), \
+	    $(info $(exec) installed), \
+		$(error $(exec) was not installed properly!))) 
+	$(foreach misc,$(FORCE_MISC),\
+      $(if $(shell ls $(BINDIR)/$(DM)/$(misc) 2> /dev/null), \
+	    $(info $(misc) installed), \
+		$(error $(misc) was not installed properly!)))
 
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
