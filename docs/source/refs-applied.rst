@@ -17,6 +17,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | H. Haberl, D. Wiedenhofer, F. Schug, D. Frantz, D. Virág, C. Plutzar, K. Gruhler, J. Lederer, G. Schiller, T. Fishman, M. Lanau, A. Gattringer, T. Kemper, G. Liu, H. Tanikawa, S. van der Linden, and P. Hostert (2021): High-Resolution Maps of Material Stocks in Buildings and Infrastructures in Austria and Germany. Environmental Science & Technology.
   | https://doi.org/10.1021/acs.est.0c05642
 
+  | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
+  | https://doi.org/10.1371/journal.pone.0249044
+
 
 * **2020**
 
