@@ -50,12 +50,9 @@ char user[NPOW_10];
          user, _VERSION_);
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
-  printf("Copyright (C) 2013-2020 David Frantz, "
+  printf("Copyright (C) 2013-2021 David Frantz, "
          "david.frantz@geo.hu-berlin.de\n");
-         
-  printf("With active code contributions from\n");
-  printf("  Franz Schug, franz.schug@geo.hu-berlin.de\n"
-         "  Stefan Ernst, stefan.ernst@geo.hu-berlin.de\n");
+  printf("+ many community contributions.\n");
 
   printf("\nFORCE is free software under the terms of the "
          "GNU General Public License as published by the "
@@ -85,9 +82,7 @@ char user[NPOW_10];
          "This list is based on the specific parameterization "
          "you are using.\n");
   
-  printf("\nThe documentation is available at force-eo.readthedocs.io\n");
-
-  printf("\nTutorials are available at davidfrantz.github.io/tutorials\n");
+  printf("\nThe documentation and tutorials are available at force-eo.readthedocs.io\n");
 
   printf("\nFORCE consists of several components:\n"
          "\nLevel 1 Archiving System (L1AS)\n"
