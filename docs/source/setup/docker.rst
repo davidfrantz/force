@@ -32,7 +32,7 @@ Check if this works:
 
     docker run davidfrantz/force force
 
-Which displays general information about FORCE, as well as the version number.
+This displays general information about FORCE, as well as the version number.
 
 
 .. _docker_build:
@@ -47,8 +47,6 @@ If you wish to build a Docker image instead of using the prebuilt version you ca
     # This may take some time (up to 10-20 minutes).
     # The '-t' flag indicates how your local image will be called, in this case 'my-force'
     docker build -t my-force .
-
-There are optional build parameters for enabling/disabling SPLITS and/or DEBUG mode. By default SPLITS is enabled and DEBUG mode is disabled.
 
 
 .. _docker_use:
@@ -87,16 +85,17 @@ To avoid issues with file permissions, you can map your local user to the user w
       davidfrantz/force \
       force-level2 /opt/data/parameters.prm
 
-If this is too long for you, you can define an alias in ``~/.bashrc``:
+If this is too long for you, you can define an alias in ``~/.bashrc`` (log off and on to take effect):
 
   .. code-block:: bash
 
     alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\" davidfrantz/force"
 
-Then, you can call FORCE with correct user and mounted volume like this:
+After defining the alias, you can call FORCE with correct user and mounted volume - but less Docker boilerplate commands:
+
+  .. code-block:: bash
 
     dforce force-level2 /opt/data/parameters.prm
-
 
 If you wish to enter the running container's terminal run it with the ``-it`` flag. 
 In that case you can use this terminal just as you were on a Linux machine.
@@ -112,9 +111,11 @@ If you want to use a specific version - or the develop branch that includes the 
 
   .. code-block:: bash
 
+    # version 3.6.5
     docker run \
       davidfrantz/force:3.6.5
 
+    # develop version
     docker run \
       davidfrantz/force:dev
 
@@ -133,7 +134,10 @@ This sounds complicated, but it really isn't:
     # this command will only print the container's FORCE_CREDENTIALS variable
     # is should result this:
     # FORCE_CREDENTIALS=/app/credentials
-    docker run --env FORCE_CREDENTIALS=/app/credentials -v /path/to/credentials/folder/on/your/machine:/app/credentials davidfrantz/force env | grep FORCE_CREDENTIALS
+    docker run \
+      --env FORCE_CREDENTIALS=/app/credentials \
+      -v /path/to/credentials/folder/on/your/machine:/app/credentials \
+      davidfrantz/force env | grep FORCE_CREDENTIALS
 
 
 .. _singularity:
