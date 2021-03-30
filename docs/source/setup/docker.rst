@@ -11,7 +11,7 @@ If you wish to use FORCE with docker you can do it in two ways:
 If you wish to use FORCE with Singularity, please see the instructions :ref:`below <singularity>`. 
 
 
-.._docker_pull:
+.. _docker_pull:
 
 Ready-to-go: Pull a pre-built image
 -----------------------------------
@@ -35,7 +35,7 @@ Check if this works:
 Which displays general information about FORCE, as well as the version number.
 
 
-.._docker_build:
+.. _docker_build:
 
 For developers: Local build
 ---------------------------
@@ -51,7 +51,7 @@ If you wish to build a Docker image instead of using the prebuilt version you ca
 There are optional build parameters for enabling/disabling SPLITS and/or DEBUG mode. By default SPLITS is enabled and DEBUG mode is disabled.
 
 
-.._docker_use:
+.. _docker_use:
 
 Usage
 -----
@@ -119,7 +119,7 @@ If you want to use a specific version - or the develop branch that includes the 
       davidfrantz/force:dev
 
 
-.._docker_credentials:
+.. _docker_credentials:
 
 User credentials
 ----------------
@@ -145,7 +145,7 @@ The FORCE Docker images can be simply run using Singularity.
 
 The simplest way is to directly run the Docker image:
 
- .. code-block:: bash
+.. code-block:: bash
 
     singularity exec docker://davidfrantz/force:latest force
 
