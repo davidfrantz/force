@@ -11,6 +11,8 @@ If you wish to use FORCE with docker you can do it in two ways:
 If you wish to use FORCE with Singularity, please see the instructions :ref:`below <singularity>`. 
 
 
+.._docker_pull:
+
 Ready-to-go: Pull a pre-built image
 -----------------------------------
 
@@ -22,7 +24,9 @@ The easiest way to use FORCE with Docker is to use a prebuilt image pulled from 
     docker pull davidfrantz/force
 
 This downloads the latest, fully featured FORCE (3.x) on your local machine.
-You can use FORCE like this:
+You may want to do this regularly to always run the latest version of FORCE!
+
+Check if this works:
 
   .. code-block:: bash
 
@@ -30,6 +34,8 @@ You can use FORCE like this:
 
 Which displays general information about FORCE, as well as the version number.
 
+
+.._docker_build:
 
 For developers: Local build
 ---------------------------
@@ -44,24 +50,8 @@ If you wish to build a Docker image instead of using the prebuilt version you ca
 
 There are optional build parameters for enabling/disabling SPLITS and/or DEBUG mode. By default SPLITS is enabled and DEBUG mode is disabled.
 
-If you wish to disable **SPLITS** run the build with the following command:
 
-  .. code-block:: bash
-
-    docker build -t my-force --build-arg splits=false .
-
-If you wish to enable **DEBUG** mode run the build with the following command:
-
-  .. code-block:: bash
-
-    docker build -t my-force --build-arg debug=true .
-
-You can add multiple build arguments, e.g. if you wish to disable SPLITS and enable DEBUG mode run the build with the following command:
-
-  .. code-block:: bash
-
-    docker build -t my-force --build-arg splits=false --build-arg debug=true .
-
+.._docker_use:
 
 Usage
 -----
@@ -76,21 +66,60 @@ After downloading or building your own image, you can run it as a container like
     # using a custom built image
     docker run my-force force
 
-The rest is up to you, you can do anything Docker containers support. E.g. you wish to add a volume to the container and run a ``force-level2`` command is as simple as that:
+The Docker container is isolated from your host, thus FORCE will not be able to see your local files.
+To share a volume, e.g. for input/output data, you can map a local folder to a folder within the container:
 
   .. code-block:: bash
 
-    # Let's say you have a parameter file in /my/local/folder/parameters.prm
-    # You map your local folder into /opt/data for your force container
-    # Without it FORCE will not be able to see your local files since it is isolated
-    docker run -v /my/local/folder:/opt/data davidfrantz/force force-level2 /opt/data/parameters.prm
+    docker run \
+      -v /my/local/folder:/opt/data \
+      davidfrantz/force \
+      force-level2 /opt/data/parameters.prm
 
-If you wish to enter the running container's terminal run it with the ``-it`` flag. In that case you can use this terminal just as you were on a Linux machine.
+The user within the container is different than on your host.
+To avoid issues with file permissions, you can map your local user to the user within the container:
 
   .. code-block:: bash
 
-    docker run -it -v /my/local/folder:/opt/data davidfrantz/force
-  
+    docker run \
+      -v /my/local/folder:/opt/data \
+      --user "$(id -u):$(id -g)" \
+      davidfrantz/force \
+      force-level2 /opt/data/parameters.prm
+
+If this is too long for you, you can define an alias in ``~/.bashrc``:
+
+  .. code-block:: bash
+
+    alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\" davidfrantz/force"
+
+Then, you can call FORCE with correct user and mounted volume like this:
+
+    dforce force-level2 /opt/data/parameters.prm
+
+
+If you wish to enter the running container's terminal run it with the ``-it`` flag. 
+In that case you can use this terminal just as you were on a Linux machine.
+
+  .. code-block:: bash
+
+    docker run \
+      -v /my/local/folder:/opt/data \
+      --user "$(id -u):$(id -g)" \
+      davidfrantz/force
+
+If you want to use a specific version - or the develop branch that includes the latest cutting-edge features:
+
+  .. code-block:: bash
+
+    docker run \
+      davidfrantz/force:3.6.5
+
+    docker run \
+      davidfrantz/force:dev
+
+
+.._docker_credentials:
 
 User credentials
 ----------------
