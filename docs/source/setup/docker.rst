@@ -45,7 +45,7 @@ If you wish to build a Docker image instead of using the prebuilt version you ca
   .. code-block:: bash
 
     # This may take some time (up to 10-20 minutes).
-    # The '-t' flag indicates how your local image will be called, in this case 'my-force'
+    # The '-t' flag indicates how your local image will be named, in this case 'my-force'
     docker build -t my-force .
 
 
@@ -126,13 +126,12 @@ User credentials
 ----------------
 
 If you have ``.scihub`` and ``.laads files`` on your local machine and you wish them to be used by FORCE in Docker you should attach the folder containing these files as a mounted volume, and set a Docker runtime environment variable pointing to that mounted folder location. 
-This sounds complicated, but it really isn't:
 
   .. code-block:: bash
 
     # --env sets the environment variable
     # this command will only print the container's FORCE_CREDENTIALS variable
-    # is should result this:
+    # should be:
     # FORCE_CREDENTIALS=/app/credentials
     docker run \
       --env FORCE_CREDENTIALS=/app/credentials \
