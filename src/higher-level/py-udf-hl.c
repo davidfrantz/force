@@ -21,13 +21,13 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-This file contains functions for plugging-in python into FORCE
+This file contains functions for plugging-in python UDFs into FORCE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Copyright (C) 2020-2021 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#include "py-plugin-hl.h"
+#include "py-udf-hl.h"
 
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
@@ -68,8 +68,8 @@ par_udf_t *udf;
   // choose module
   if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
-  } else if (phl->plg.pyp.out){
-    udf = &phl->plg.pyp;
+  } else if (phl->udf.pyp.out){
+    udf = &phl->udf.pyp;
   } else {
     return;
   }
@@ -184,8 +184,8 @@ par_udf_t *udf;
 
   if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
-  } else if (phl->plg.pyp.out){
-    udf = &phl->plg.pyp;
+  } else if (phl->udf.pyp.out){
+    udf = &phl->udf.pyp;
   } else {
     return;
   }
@@ -250,11 +250,11 @@ int b;
     NULL);
 
   if (py_return == Py_None){
-    printf("None returned from forcepy_init_. Check the python plugin code!\n");
+    printf("None returned from forcepy_init_. Check the python UDF code!\n");
     exit(FAILURE);}
 
   if (!PyList_Check(py_return)){
-    printf("forcepy_init_ did not return a list. Check the python plugin code!\n");
+    printf("forcepy_init_ did not return a list. Check the python UDF code!\n");
     exit(FAILURE);}
 
 
@@ -266,7 +266,7 @@ int b;
     py_bandname = PyList_GetItem(py_return, b);
     py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
     if ((bandname = PyBytes_AsString(py_encoded)) == NULL){
-      printf("forcepy_init_ did not return a list of strings. Check the python plugin code!\n");
+      printf("forcepy_init_ did not return a list of strings. Check the python UDF code!\n");
       exit(FAILURE);}
     Py_DECREF(py_encoded);
     copy_string(udf->bandname[b], NPOW_10, bandname);
@@ -352,7 +352,7 @@ char bandname[NPOW_10];
 
   // copy C data to python objects
   
-  if (submodule == _HL_PLG_){
+  if (submodule == _HL_UDF_){
 
     for (t=0; t<nt; t++){
       date = get_brick_date(ard[t].DAT, 0);
@@ -393,9 +393,9 @@ char bandname[NPOW_10];
 }
 
 
-/** This function connects FORCE to plug'n'play python UDFs
+/** This function connects FORCE to plug-in python UDFs
 --- ard:       pointer to instantly useable ARD image arrays
---- plg:       pointer to instantly useable PLG image arrays
+--- udf:       pointer to instantly useable UDF image arrays
 --- ts:        pointer to instantly useable TSA image arrays
 --- mask:      mask image
 --- submodule: HLPS submodule
@@ -406,11 +406,11 @@ char bandname[NPOW_10];
 --- nb:        number of bands
 --- nt:        number of time steps
 --- nodata:    nodata value
---- udf:       user-defined code parameters
+--- p_udf:     user-defined code parameters
 --- cthread:   number of computing threads
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
+int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
 int b, t;
 py_dimlab_t pylab;
 npy_intp dim_data[4] = { nt, nb, ny, nx };
@@ -427,8 +427,8 @@ short* data_    = NULL;
 short* return_  = NULL;
 
 
-  if (submodule == _HL_PLG_ && plg->pyp_ == NULL) return CANCEL;
-  if (submodule == _HL_TSA_ &&  ts->pyp_ == NULL) return CANCEL;
+  if (submodule == _HL_UDF_ && udf_->pyp_ == NULL) return CANCEL;
+  if (submodule == _HL_TSA_ &&   ts->pyp_ == NULL) return CANCEL;
 
 
   main_module = PyImport_AddModule("__main__");
@@ -454,7 +454,7 @@ short* return_  = NULL;
 
   // copy C data to python objects
   
-  if (submodule == _HL_PLG_){
+  if (submodule == _HL_UDF_){
 
     for (t=0; t<nt; t++){
       for (b=0; b<nb; b++){
@@ -489,17 +489,17 @@ short* return_  = NULL;
     NULL);
 
   if (py_return == Py_None){
-    printf("None returned from python. Check the python plugin code!\n");
+    printf("None returned from python. Check the python UDF code!\n");
     exit(FAILURE);}
 
 
   // copy to output brick
   return_ = (short*)PyArray_DATA(py_return);
 
-  if (submodule == _HL_PLG_){
+  if (submodule == _HL_UDF_){
 
     for (b=0; b<udf->nb; b++){
-      memcpy(plg->pyp_[b], return_, sizeof(short)*nc);
+      memcpy(udf_->pyp_[b], return_, sizeof(short)*nc);
       return_ += nc;
     }
 

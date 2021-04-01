@@ -249,7 +249,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
 
-  // python plugin parameters
+  // python UDF plug-in parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
   register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.pyp.type);
   register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.out);
@@ -441,22 +441,22 @@ void register_lib(params_t *params, par_hl_t *phl){
 }
 
 
-/** This function registers script plugin parameters
+/** This function registers UDF plug-in parameters
 --- params: registered parameters
 --- phl:    HL parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_plg(params_t *params, par_hl_t *phl){
+void register_udf(params_t *params, par_hl_t *phl){
 
-  // python plugin parameters
-  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.pyp.f_code);
-  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.pyp.type);
-  register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.out);
+  // python UDF plug-in parameters
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.pyp.f_code);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->udf.pyp.out);
 
-  // R plugin parameters
-  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rsp.f_code);
-  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.rsp.type);
-  //register_bool_par(params,    "OUTPUT_RSP",   &phl->plg.rsp.out);
+  // R UDF plug-in parameters
+  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
+  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
+  //register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
 
   return;
 }
@@ -1227,8 +1227,8 @@ double tol = 5e-3;
     phl->type = _HL_LIB_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
-  } else if (strcmp(buffer, "++PARAM_PLG_START++") == 0){
-    phl->type = _HL_PLG_;
+  } else if (strcmp(buffer, "++PARAM_UDF_START++") == 0){
+    phl->type = _HL_UDF_;
     phl->input_level1 = _INP_ARD_;
     phl->input_level2 = _INP_NONE_;
   } else {
@@ -1292,8 +1292,8 @@ double tol = 5e-3;
     case _HL_LIB_:
       register_lib(phl->params, phl);
       break;
-    case _HL_PLG_:
-      register_plg(phl->params, phl);
+    case _HL_UDF_:
+      register_udf(phl->params, phl);
       break;
     default:
       printf("Unknown module!\n"); return FAILURE;
@@ -1561,28 +1561,28 @@ double tol = 5e-3;
 
     if (!phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
       copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
-      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
 
   }
 
-  if (phl->type == _HL_PLG_){
+  if (phl->type == _HL_UDF_){
 
-    if (phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") == 0){
-      phl->plg.pyp.out = false;
+    if (phl->udf.pyp.out && strcmp(phl->udf.pyp.f_code, "NULL") == 0){
+      phl->udf.pyp.out = false;
       printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
 
-    if (!phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") != 0){
-      copy_string(phl->plg.pyp.f_code, NPOW_10, "NULL");
-      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+    if (!phl->udf.pyp.out && strcmp(phl->udf.pyp.f_code, "NULL") != 0){
+      copy_string(phl->udf.pyp.f_code, NPOW_10, "NULL");
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
 
     /**
-    if (phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") == 0){
-      phl->plg.rsp.out = false;
+    if (phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") == 0){
+      phl->udf.rsp.out = false;
       printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
 
-    if (!phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") != 0){
-      copy_string(phl->plg.rsp.f_code, NPOW_10, "NULL");
-      printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R plugin. Proceed.\n");}
+    if (!phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") != 0){
+      copy_string(phl->udf.rsp.f_code, NPOW_10, "NULL");
+      printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
       **/
 
   }

@@ -577,7 +577,7 @@ brick_compile_info_t *info = NULL;
           _POL_LENGTH_ +   // polarmetrics
           _POL_LENGTH_ +   // trend on polarmetrics
           _POL_LENGTH_ +   // cat on polarmetrics
-          1;               // python plugin metrics
+          1;               // python UDF metrics
 
   //printf("%d potential products.\n", nprod);
 
@@ -937,7 +937,7 @@ short nodata;
     
     tsa_interpolation(&ts, mask_, nc, nt, ni, nodata, &phl->tsa.tsi);
 
-    python_plugin(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+    python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
       nx, ny, nc, 1, ni, nodata, &phl->tsa.pyp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);

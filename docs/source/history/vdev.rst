@@ -24,6 +24,11 @@ Main release: TBA
   * new program: force-level2-report
     The new program allows to generate an html report of the Level 2 Processing.
 
+* **FORCE HLPS**
+
+  * A new submodule is available: UDF plug-in
+
+
 * **FORCE AUX**
 
   * force-pyramid takes levels and resampling method as additional arguments.

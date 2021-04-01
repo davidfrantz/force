@@ -1415,7 +1415,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
-+++ level interpolation pars
++++ level UDF pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
@@ -1423,7 +1423,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 void write_par_hl_pyp(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# PYTHON-PLUGIN PARAMETERS\n");
+  fprintf(fp, "\n# PYTHON UDF PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
@@ -1453,7 +1453,7 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
   fprintf(fp, "PYTHON_TYPE = PIXEL\n");
 
   if (verbose){
-    fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
+    fprintf(fp, "# Output the results provided by the python UDF? If TRUE, FILE_PYTHON must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_PYP = FALSE\n");
@@ -1463,7 +1463,7 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
-+++ level interpolation pars
++++ level UDF pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
@@ -1471,7 +1471,7 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
 void write_par_hl_rsp(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# R-PLUGIN PARAMETERS\n");
+  fprintf(fp, "\n# R UDF PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
@@ -1488,7 +1488,7 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
   fprintf(fp, "RSTATS_TYPE = PIXEL\n");
 
   if (verbose){
-    fprintf(fp, "# Output the results provided by the R-plugin? If TRUE, FILE_RSTATS must exist.\n");
+    fprintf(fp, "# Output the results provided by the R UDF? If TRUE, FILE_RSTATS must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RSP = FALSE\n");

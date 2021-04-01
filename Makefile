@@ -110,7 +110,7 @@ TA=temp-aux
 all: temp cross lower higher aux exe
 cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
-higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl pyp_hl plugin_hl
+higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl pyp_hl udf_hl
 aux: param_aux param_train_aux train_aux
 exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis
 .PHONY: temp all install install_ bash python clean build check
@@ -346,11 +346,11 @@ cfimp_hl: temp $(DH)/cf-improphe-hl.c
 l2imp_hl: temp $(DH)/l2-improphe-hl.c
 	$(GCC) $(CFLAGS) -c $(DH)/l2-improphe-hl.c -o $(TH)/l2imp_hl.o
 
-pyp_hl: temp $(DH)/py-plugin-hl.c
-	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-plugin-hl.c -o $(TH)/pyp_hl.o $(LDPYTHON)
+pyp_hl: temp $(DH)/py-udf-hl.c
+	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-udf-hl.c -o $(TH)/pyp_hl.o $(LDPYTHON)
 
-plugin_hl: temp $(DH)/plugin-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/plugin-hl.c -o $(TH)/plugin_hl.o
+udf_hl: temp $(DH)/udf-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/udf-hl.c -o $(TH)/udf_hl.o
 
 
 ### AUX COMPILE UNITS

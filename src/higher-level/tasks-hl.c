@@ -213,8 +213,8 @@ bool error = false;
         OUTPUT[pro->pu] = library_completeness(ARD1[pro->pu], MASK[pro->pu], 
           nt1[pro->pu], phl, &aux->library, cube, &nprod[pro->pu]);
         break;
-      case _HL_PLG_:
-        OUTPUT[pro->pu] = script_plugin(ARD1[pro->pu], MASK[pro->pu], 
+      case _HL_UDF_:
+        OUTPUT[pro->pu] = udf_plugin(ARD1[pro->pu], MASK[pro->pu], 
           nt1[pro->pu], phl, cube, &nprod[pro->pu]);
         break;
       default:

@@ -385,11 +385,11 @@ typedef struct {
   char  *base;
 } par_lib_t;
 
-// script plugin
+// UDF plug-in
 typedef struct {
   par_udf_t pyp;
   par_udf_t rsp;
-} par_plg_t;
+} par_udp_t;
 
 // improphe core
 typedef struct {
@@ -490,7 +490,7 @@ typedef struct {
   par_txt_t txt;
   par_lsm_t lsm;
   par_lib_t lib;
-  par_plg_t plg;
+  par_udp_t udf;
 
 } par_hl_t;
 
