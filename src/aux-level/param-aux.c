@@ -1432,7 +1432,7 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
     fprintf(fp, "# Two functions are required to communicate with FORCE:\n");
     fprintf(fp, "# 0) The global space can be used to import modules etc.\n");
     fprintf(fp, "# 1) An initialization function that defines the number and names of output bands:\n");
-    fprintf(fp, "#    ``def forcepy_init():``\n");
+    fprintf(fp, "#    ``def forcepy_init(dates, sensors, bandnames):``\n");
     fprintf(fp, "# 2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``\n");
     fprintf(fp, "# Type: full file path\n");
   }
@@ -1441,13 +1441,13 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# Type of user-defined function. \n");
     fprintf(fp, "# 1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel\n");
-    fprintf(fp, "# as 2D-nd.array [time,bands]. A multi-processing pool is spawned to parallely execute \n");
-    fprintf(fp, "# this function with ``NTHREAD_COMPUTE`` workers.\n");
-    fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, nodata):``\n");
+    fprintf(fp, "# as 4D-nd.array [nDates, nBands, nrows, ncols]. A multi-processing pool is spawned to \n");
+    fprintf(fp, "# parallely execute this function with ``NTHREAD_COMPUTE`` workers.\n");
+    fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):``\n");
     fprintf(fp, "# 2) ``BLOCK`` expects a pixel-function that receives the time series of a complete \n");
-    fprintf(fp, "# processing unit as 4D-nd.array [time,bands,rows,cols]. No parallelization is done on \n");
-    fprintf(fp, "# FORCE's end. \n");
-    fprintf(fp, "#     ``def forcepy_block(inarray, outarray, dates, nodata):``\n");
+    fprintf(fp, "# processing unit as 4D-nd.array [nDates, nBands, nrows, ncols]. No parallelization is  \n");
+    fprintf(fp, "# done on FORCE's end.\n");
+    fprintf(fp, "#     ``def forcepy_block(inblock, outblock, dates, sensors, bandnames, nodata, nproc):``\n");
     fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
   }
   fprintf(fp, "PYTHON_TYPE = PIXEL\n");
