@@ -40,6 +40,10 @@ typedef struct {
 
 enum { _full_, _stats_, _inter_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _pyp_ };
 
+
+void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int ni);
+void free_ts_dates(tsa_t *ts);
+void compile_ts_dates(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int ni);
 brick_t *compile_tsa_brick(brick_t *ard, int idx, brick_compile_info_t *info, par_hl_t *phl);
 brick_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int ni, int idx, int *nproduct);
 
@@ -387,6 +391,153 @@ int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 }
 
 
+/** This function allocates the date arrays
++++ Free the arrays using free_ts_dates
+--- ts:       pointer to instantly useable TSA image arrays
+--- phl:      HL parameters
+--- nt:       number of ARD products over time
+--- ni:       number of interpolated products over time
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int ni){
+
+
+  #ifdef FORCE_DEBUG
+  printf("about to allocate %d %d %d %d %d %d %d %d dates\n", 
+    nt,ni,phl->ny,phl->nq,phl->nm,phl->nw,phl->nd,phl->tsa.lsp.ny);
+  #endif
+
+  if (nt              > 0) alloc((void**)&ts->d_tss, nt, sizeof(date_t));              else ts->d_tss = NULL;
+  if (ni              > 0) alloc((void**)&ts->d_tsi, ni, sizeof(date_t));              else ts->d_tsi = NULL;
+  if (phl->ny         > 0) alloc((void**)&ts->d_fby, phl->ny, sizeof(date_t));         else ts->d_fby = NULL;
+  if (phl->nq         > 0) alloc((void**)&ts->d_fbq, phl->nq, sizeof(date_t));         else ts->d_fbq = NULL;
+  if (phl->nm         > 0) alloc((void**)&ts->d_fbm, phl->nm, sizeof(date_t));         else ts->d_fbm = NULL;
+  if (phl->nw         > 0) alloc((void**)&ts->d_fbw, phl->nw, sizeof(date_t));         else ts->d_fbw = NULL;
+  if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
+  if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
+  if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
+
+  return;
+}
+
+
+/** This function frees the date arrays
+--- ts:       pointer to instantly useable TSA image arrays
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void free_ts_dates(tsa_t *ts){
+
+
+  if (ts->d_tss != NULL){ free((void*)ts->d_tss); ts->d_tss = NULL;}
+  if (ts->d_tsi != NULL){ free((void*)ts->d_tsi); ts->d_tsi = NULL;}
+  if (ts->d_fby != NULL){ free((void*)ts->d_fby); ts->d_fby = NULL;}
+  if (ts->d_fbq != NULL){ free((void*)ts->d_fbq); ts->d_fbq = NULL;}
+  if (ts->d_fbm != NULL){ free((void*)ts->d_fbm); ts->d_fbm = NULL;}
+  if (ts->d_fbw != NULL){ free((void*)ts->d_fbw); ts->d_fbw = NULL;}
+  if (ts->d_fbd != NULL){ free((void*)ts->d_fbd); ts->d_fbd = NULL;}
+  if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
+  if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
+
+  return;
+}
+
+
+/** This function compiles the date arrays
+--- ard:      ARD
+--- ts:       pointer to instantly useable TSA image arrays
+--- phl:      HL parameters
+--- nt:       number of ARD products over time
+--- ni:       number of interpolated products over time
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void compile_ts_dates(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int ni){
+int t, k;
+date_t date;
+
+
+  init_date(&date);
+  set_date(&date, 2000, 1, 1);
+
+  alloc_ts_dates(ts, phl, nt, ni);
+
+  if (nt > 0){
+    for (t=0; t<nt; t++){
+      date = get_brick_date(ard[t].DAT, 0);
+      copy_date(&date, &ts->d_tss[t]);
+    }
+  }
+
+  if (ni > 0){
+    for (t=0; t<ni; t++){
+      if (phl->tsa.tsi.method == _INT_NONE_){
+        date = get_brick_date(ard[t].DAT, 0);
+      } else {
+        set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
+      }
+      copy_date(&date, &ts->d_tsi[t]);
+    }
+  }
+
+  if (phl->ny > 0){
+    for (t=0; t<phl->ny; t++){
+      set_date_year(&date, phl->date_range[_MIN_].year+t);
+      copy_date(&date, &ts->d_fby[t]);
+    }
+  }
+
+  if (phl->nq > 0){
+    for (t=0, k=1; t<phl->nq; t++){
+      while (k < 5 && !phl->date_quarters[k]) k++;
+      set_date_quarter(&date, k);
+      copy_date(&date, &ts->d_fbq[t]);
+      k++;
+    }
+  }
+
+  if (phl->nm > 0){
+    for (t=0, k=1; t<phl->nm; t++){
+      while (k < 13 && !phl->date_months[k]) k++;
+      set_date_month(&date, k);
+      copy_date(&date, &ts->d_fbm[t]);
+      k++;
+    }
+  }
+
+  if (phl->nw > 0){
+    for (t=0, k=1; t<phl->nw; t++){
+      while (k < 53 && !phl->date_weeks[k]) k++;
+      set_date_week(&date, k);
+      copy_date(&date, &ts->d_fbw[t]);
+      k++;
+    }
+  }
+
+  if (phl->nd > 0){
+    for (t=0, k=1; t<phl->nd; t++){
+      while (k < 366 && !phl->date_doys[k]) k++;
+      set_date_doy(&date, k);
+      copy_date(&date, &ts->d_fbd[t]);
+      k++;
+    }
+  }
+
+  if (phl->tsa.lsp.ny > 0){
+    for (t=0; t<phl->tsa.lsp.ny; t++){
+      set_date_year(&date, phl->date_range[_MIN_].year+t+1);
+      copy_date(&date, &ts->d_lsp[t]);
+    }
+  }
+
+  if (phl->tsa.pol.ny > 0){
+    for (t=0; t<phl->tsa.pol.ny; t++){
+      set_date_year(&date, phl->date_range[_MIN_].year+t);
+      copy_date(&date, &ts->d_pol[t]);
+    }
+  }
+
+  return;
+}
+
 
 /** This function compiles the bricks, in which TSA results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
@@ -449,20 +600,6 @@ brick_compile_info_t *info = NULL;
 
   alloc((void**)&TSA, nprod, sizeof(brick_t*));
 
-
-//printf("about to allocate %d %d %d %d %d %d %d %d dates\n", 
-//nt,ni,phl->ny,phl->nq,phl->nm,phl->nw,phl->nd,phl->tsa.lsp.ny);
-
-  if (nt              > 0) alloc((void**)&ts->d_tss, nt, sizeof(date_t));              else ts->d_tss = NULL;
-  if (ni              > 0) alloc((void**)&ts->d_tsi, ni, sizeof(date_t));              else ts->d_tsi = NULL;
-  if (phl->ny         > 0) alloc((void**)&ts->d_fby, phl->ny, sizeof(date_t));         else ts->d_fby = NULL;
-  if (phl->nq         > 0) alloc((void**)&ts->d_fbq, phl->nq, sizeof(date_t));         else ts->d_fbq = NULL;
-  if (phl->nm         > 0) alloc((void**)&ts->d_fbm, phl->nm, sizeof(date_t));         else ts->d_fbm = NULL;
-  if (phl->nw         > 0) alloc((void**)&ts->d_fbw, phl->nw, sizeof(date_t));         else ts->d_fbw = NULL;
-  if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
-  if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
-  if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
-
   //printf("scale, date, ts, bandnames, and sensor ID must be set in compile_tsa!!!\n");
 
   
@@ -488,7 +625,6 @@ brick_compile_info_t *info = NULL;
               date = get_brick_date(ard[t].DAT, 0);
               get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
               set_brick_sensor(TSA[o], t, sensor);
-              copy_date(&date, &ts->d_tss[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_brick_unit(TSA[o], t, "decimal year");
@@ -508,7 +644,6 @@ brick_compile_info_t *info = NULL;
                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
               }
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_tsi[t]);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
               set_brick_unit(TSA[o], t, "decimal year");
@@ -517,7 +652,6 @@ brick_compile_info_t *info = NULL;
             case _year_:
               set_date_year(&date, phl->date_range[_MIN_].year+t);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_fby[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -529,7 +663,6 @@ brick_compile_info_t *info = NULL;
               while (k < 5 && !phl->date_quarters[k]) k++;
               set_date_quarter(&date, k);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_fbq[t]);
               nchar = snprintf(fdate, NPOW_10, "QUARTER-%01d", date.quarter);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -542,7 +675,6 @@ brick_compile_info_t *info = NULL;
               while (k < 13 && !phl->date_months[k]) k++;
               set_date_month(&date, k);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_fbm[t]);
               nchar = snprintf(fdate, NPOW_10, "MONTH-%02d", date.month);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -555,7 +687,6 @@ brick_compile_info_t *info = NULL;
               while (k < 53 && !phl->date_weeks[k]) k++;
               set_date_week(&date, k);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_fbw[t]);
               nchar = snprintf(fdate, NPOW_10, "WEEK-%02d", date.week);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -568,7 +699,6 @@ brick_compile_info_t *info = NULL;
               while (k < 366 && !phl->date_doys[k]) k++;
               set_date_doy(&date, k);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_fbd[t]);
               nchar = snprintf(fdate, NPOW_10, "DOY-%03d", date.doy);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -580,7 +710,6 @@ brick_compile_info_t *info = NULL;
             case _lsp_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t+1);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_lsp[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -591,7 +720,6 @@ brick_compile_info_t *info = NULL;
             case _pol_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t);
               set_brick_sensor(TSA[o], t, "BLEND");
-              copy_date(&date, &ts->d_pol[t]);
               nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
               if (nchar < 0 || nchar >= NPOW_10){ 
                 printf("Buffer Overflow in assembling domain\n"); error++;}
@@ -666,15 +794,7 @@ brick_compile_info_t *info = NULL;
     printf("%d compiling TSA product errors.\n", error);
     for (o=0; o<nprod; o++) free_brick(TSA[o]);
     free((void*)TSA);
-    if (ts->d_tss != NULL){ free((void*)ts->d_tss); ts->d_tss = NULL;}
-    if (ts->d_tsi != NULL){ free((void*)ts->d_tsi); ts->d_tsi = NULL;}
-    if (ts->d_fby != NULL){ free((void*)ts->d_fby); ts->d_fby = NULL;}
-    if (ts->d_fbq != NULL){ free((void*)ts->d_fbq); ts->d_fbq = NULL;}
-    if (ts->d_fbm != NULL){ free((void*)ts->d_fbm); ts->d_fbm = NULL;}
-    if (ts->d_fbw != NULL){ free((void*)ts->d_fbw); ts->d_fbw = NULL;}
-    if (ts->d_fbd != NULL){ free((void*)ts->d_fbd); ts->d_fbd = NULL;}
-    if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
-    if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
+    free_ts_dates(ts);
     return NULL;
   }
 
@@ -798,6 +918,9 @@ short nodata;
   
   for (idx=0; idx<phl->tsa.n; idx++){
 
+    // generate data arrays
+    compile_ts_dates(ard, &ts, phl, nt, ni);
+
     // initialize python udf
     init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
 
@@ -832,16 +955,8 @@ short nodata;
     tsa_standardize(&ts, mask_, nc, nt, ni, nodata, phl);
 
 
-    // clean temporal information
-    if (ts.d_tss != NULL){ free((void*)ts.d_tss); ts.d_tss = NULL;}
-    if (ts.d_tsi != NULL){ free((void*)ts.d_tsi); ts.d_tsi = NULL;}
-    if (ts.d_fby != NULL){ free((void*)ts.d_fby); ts.d_fby = NULL;}
-    if (ts.d_fbq != NULL){ free((void*)ts.d_fbq); ts.d_fbq = NULL;}
-    if (ts.d_fbm != NULL){ free((void*)ts.d_fbm); ts.d_fbm = NULL;}
-    if (ts.d_fbw != NULL){ free((void*)ts.d_fbw); ts.d_fbw = NULL;}
-    if (ts.d_fbd != NULL){ free((void*)ts.d_fbd); ts.d_fbd = NULL;}
-    if (ts.d_lsp != NULL){ free((void*)ts.d_lsp); ts.d_lsp = NULL;}
-    if (ts.d_pol != NULL){ free((void*)ts.d_pol); ts.d_pol = NULL;}
+    // clean date arrays
+    free_ts_dates(&ts);
 
     // terminate python udf
     term_pyp(&phl->tsa.pyp);

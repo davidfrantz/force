@@ -57,7 +57,7 @@ py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *
 
 
 /** This function initializes the python interpreter, and defines a 
-+++ function for python multi-processing on the block level
++++ function for wrapping the UDF code
 --- phl:    HL parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
@@ -65,6 +65,7 @@ void register_python(par_hl_t *phl){
 par_udf_t *udf;
 
 
+  // choose module
   if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
   } else if (phl->plg.pyp.out){
@@ -86,22 +87,6 @@ par_udf_t *udf;
   PyRun_SimpleString("def init(): np.seterr(all='ignore')");
   PyRun_SimpleString("init()");
 
-  PyRun_SimpleString(
-    "print('safety')\n"
-    "from numba import jit, prange, set_num_threads\n"
-    "@jit(nopython=True, nogil=True, parallel=True)\n"
-    "def test(input, nproc):\n"
-    "    set_num_threads(nproc)\n"
-    "    return input\n"
-
-    "input = np.zeros((10,10))\n"
-    "a = test(input, 32)\n"
-    "print(a)\n"
-    "b = test(1, 32)\n"
-    "print(b)\n"
-
-  );
-//exit(0);
   PyRun_SimpleString(
     "def forcepy_wrapper(args):                                                    \n"
     "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata, nproc = args \n"
@@ -142,7 +127,6 @@ par_udf_t *udf;
       "        if 'forcepy_pixel' not in globals():                                              \n"
       "            print('forcepy_pixel not found.')                                             \n"
       "            return None                                                                   \n"
-      "        print('iblock', iblock.shape)                                                     \n"
       "        nDates, nBands, nY, nX = iblock.shape                                             \n"
       "        pool = Pool(nproc, initializer=init)                                              \n"
       "        date = forcepy_date2epoch(year, month, day)                                       \n"
@@ -173,14 +157,10 @@ par_udf_t *udf;
       "        if 'forcepy_block' not in globals():                                           \n"
       "            print('forcepy_block not found.')                                          \n"
       "            return None                                                                \n"
-      "        print('iblock', iblock.shape)                                                  \n"
       "        nDates, nBands, nY, nX = iblock.shape                                          \n"
       "        date = forcepy_date2epoch(year, month, day)                                    \n"
       "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
       "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata, nproc)           \n"
-      //"        input = np.zeros((10,10))\n"
-      //"        forcepy_block(input)           \n"
-      "        print('got it')\n"
       "        return oblock                                                                  \n"
       "    except:                                                                            \n"
       "        print(traceback.format_exc())                                                  \n"
@@ -217,8 +197,14 @@ par_udf_t *udf;
 
 
 /** This function initializes the python udf
---- udf:    user-defined code parameters
-+++ Return: void
+--- ard:       ARD
+--- ts:        pointer to instantly useable TSA image arrays
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nb:        number of bands
+--- nt:        number of products over time
+--- udf:       user-defined code parameters
++++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
 FILE *fpy             = NULL;
@@ -284,7 +270,9 @@ int b;
       exit(FAILURE);}
     Py_DECREF(py_encoded);
     copy_string(udf->bandname[b], NPOW_10, bandname);
+    #ifdef FORCE_DEBUG
     printf("bandname # %d: %s\n", b, udf->bandname[b]);
+    #endif
   }
 
 
@@ -317,6 +305,16 @@ void term_pyp(par_udf_t *udf){
 }
 
 
+/** This function labels the dimension of the UDF input data (time, band, sensor)
+--- ard:       ARD
+--- ts:        pointer to instantly useable TSA image arrays
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nb:        number of bands
+--- nt:        number of products over time
+--- udf:       user-defined code parameters
++++ Return:    void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
 py_dimlab_t pylab;
 int b, t;
@@ -395,25 +393,22 @@ char bandname[NPOW_10];
 }
 
 
-
-
-
-
-/** This function connects FORCE to plug'n'play python code
---- ard:    pointer to instantly useable ARD image arrays
---- ts:     pointer to instantly useable TSA image arrays
---- plg:    pointer to instantly useable PLG image arrays
---- mask:   mask image
---- nt:     number of time steps
---- nodata: nodata value
---- phl:    HL parameters
-
-
-
-
-
-
-+++ Return: SUCCESS/FAILURE
+/** This function connects FORCE to plug'n'play python UDFs
+--- ard:       pointer to instantly useable ARD image arrays
+--- plg:       pointer to instantly useable PLG image arrays
+--- ts:        pointer to instantly useable TSA image arrays
+--- mask:      mask image
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nx:        number of columns
+--- ny:        number of rows
+--- nc:        number of cells
+--- nb:        number of bands
+--- nt:        number of time steps
+--- nodata:    nodata value
+--- udf:       user-defined code parameters
+--- cthread:   number of computing threads
++++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
 int b, t;
