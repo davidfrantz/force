@@ -251,7 +251,8 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
   // python plugin parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
-  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.opyp);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.out);
 
   return;
 }
@@ -435,6 +436,27 @@ void register_lib(params_t *params, par_hl_t *phl){
   register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  &phl->lib.f_lib, &phl->lib.n_lib);
   register_bool_par(params,    "LIB_RESCALE",  &phl->lib.rescale);
   register_char_par(params,    "LIB_BASE",     _CHAR_TEST_NONE_,  &phl->lib.base);
+
+  return;
+}
+
+
+/** This function registers script plugin parameters
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_plg(params_t *params, par_hl_t *phl){
+
+  // python plugin parameters
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.pyp.f_code);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.out);
+
+  // R plugin parameters
+  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rsp.f_code);
+  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.rsp.type);
+  //register_bool_par(params,    "OUTPUT_RSP",   &phl->plg.rsp.out);
 
   return;
 }
@@ -1205,6 +1227,10 @@ double tol = 5e-3;
     phl->type = _HL_LIB_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
+  } else if (strcmp(buffer, "++PARAM_PLG_START++") == 0){
+    phl->type = _HL_PLG_;
+    phl->input_level1 = _INP_ARD_;
+    phl->input_level2 = _INP_NONE_;
   } else {
     printf("No valid parameter file!\n"); return FAILURE;
   }
@@ -1265,6 +1291,9 @@ double tol = 5e-3;
       break;
     case _HL_LIB_:
       register_lib(phl->params, phl);
+      break;
+    case _HL_PLG_:
+      register_plg(phl->params, phl);
       break;
     default:
       printf("Unknown module!\n"); return FAILURE;
@@ -1526,13 +1555,35 @@ double tol = 5e-3;
     }
 
 
-    if (phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
-      phl->tsa.pyp.opyp = false;
+    if (phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
+      phl->tsa.pyp.out = false;
       printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
 
-    if (!phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
+    if (!phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
       copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
       printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+
+  }
+
+  if (phl->type == _HL_PLG_){
+
+    if (phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") == 0){
+      phl->plg.pyp.out = false;
+      printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
+
+    if (!phl->plg.pyp.out && strcmp(phl->plg.pyp.f_code, "NULL") != 0){
+      copy_string(phl->plg.pyp.f_code, NPOW_10, "NULL");
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+
+    /**
+    if (phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") == 0){
+      phl->plg.rsp.out = false;
+      printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
+
+    if (!phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") != 0){
+      copy_string(phl->plg.rsp.f_code, NPOW_10, "NULL");
+      printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R plugin. Proceed.\n");}
+      **/
 
   }
 

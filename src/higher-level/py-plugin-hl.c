@@ -21,9 +21,9 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-This file contains functions for plugging-in python into the TSA submodule
+This file contains functions for plugging-in python into FORCE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Copyright (C) 2020 David Frantz, Andreas Rabe
+Copyright (C) 2020-2021 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
@@ -35,41 +35,141 @@ Copyright (C) 2020 David Frantz, Andreas Rabe
 
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
+
+typedef struct {
+  npy_intp dim_nt[1];
+  npy_intp dim_nb[1];
+  PyArrayObject* year;
+  PyArrayObject* month;
+  PyArrayObject* day;
+  PyArrayObject* sensor;
+  PyArrayObject* bandname;
+  PyArray_Descr *desc_sensor;
+  PyArray_Descr *desc_bandname;
+} py_dimlab_t;
+
+
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+
+
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
 /** This function initializes the python interpreter, and defines a 
-+++ function for python multi-processing on the block level
++++ function for wrapping the UDF code
 --- phl:    HL parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_python(par_hl_t *phl){
+par_udf_t *udf;
+
+
+  // choose module
+  if (phl->tsa.pyp.out){
+    udf = &phl->tsa.pyp;
+  } else if (phl->plg.pyp.out){
+    udf = &phl->plg.pyp;
+  } else {
+    return;
+  }
 
 
   Py_Initialize();
 
   import_array();
+
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
   PyRun_SimpleString("from datetime import date as Date");
+  PyRun_SimpleString("import traceback");
 
-  PyRun_SimpleString("def forcepy_tsi_(iblock, ce, year, month, day, nodata, nproc):         \n"
-                     "   pool = Pool(nproc)                                                  \n"
-                     
-                     "   date = np.array([Date(y,m,d) for y, m, d in zip(year, month, day)]) \n"
-                     
-                     "   argss = list()                                                      \n"
-                     "   for ts in iblock.T:                                                 \n"
-                     "       args = (ts, date, nodata)                                       \n"
-                     "       argss.append(args)                                              \n"
-                     "   res = pool.map(func=forcepy_tsi, iterable=argss)                    \n"
-                     "   pool.close()                                                        \n"
-                     "   del pool                                                            \n"
-                     "   oblock = np.array(res, dtype=np.int16).T                            \n"
-                     "   return oblock.copy()                                                \n");
+  PyRun_SimpleString("def init(): np.seterr(all='ignore')");
+  PyRun_SimpleString("init()");
 
-  register_python_tsa(&phl->tsa.pyp);
+  PyRun_SimpleString(
+    "def forcepy_wrapper(args):                                                    \n"
+    "    forcepy_udf, inarray, nband, date, sensor, bandname, nodata, nproc = args \n"
+    "    outarray = np.full(shape=(nband,), fill_value=nodata, dtype=np.int16)     \n"
+    "    forcepy_udf(inarray, outarray, date, sensor, bandname, nodata, nproc)     \n"
+    "    return outarray                                                           \n");
+
+  PyRun_SimpleString(
+    "def forcepy_date2epoch(year, month, day):                                                  \n"
+    "    dates = np.array(                                                                      \n"
+    "        [np.datetime64(f'{str(y).zfill(4)}-{str(m).zfill(2)}-{str(d).zfill(2)}')           \n"
+    "         for y, m, d in zip(year, month, day)])                                            \n"
+    "    epoch = np.array([(date - np.datetime64('1970-01-01')).item().days for date in dates]) \n"
+    "    return epoch                                                                           \n");
+
+  PyRun_SimpleString(
+    "def forcepy_init_(year, month, day, sensor, bandname):        \n"
+    "    try:                                                      \n"
+    "        if 'forcepy_init' not in globals():                   \n"
+    "            print('forcepy_init not found.')                  \n"
+    "            return None                                       \n"
+    "        date = forcepy_date2epoch(year, month, day)           \n"
+    "        out_bandnames_ = forcepy_init(date, sensor, bandname) \n"
+    "        out_bandnames = list()                                \n"
+    "        for s in out_bandnames_:                              \n"
+    "            try: s = s.decode()                               \n"
+    "            except: pass                                      \n"
+    "            out_bandnames.append(str(s))                      \n"
+    "        return out_bandnames                                  \n"
+    "    except:                                                   \n"
+    "        print(traceback.format_exc())                         \n"
+    "        return None                                           \n");
+
+  if (udf->type == _UDF_PIXEL_){
+    PyRun_SimpleString(
+      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):           \n"
+      "    try:                                                                                  \n"
+      "        if 'forcepy_pixel' not in globals():                                              \n"
+      "            print('forcepy_pixel not found.')                                             \n"
+      "            return None                                                                   \n"
+      "        nDates, nBands, nY, nX = iblock.shape                                             \n"
+      "        pool = Pool(nproc, initializer=init)                                              \n"
+      "        date = forcepy_date2epoch(year, month, day)                                       \n"
+      "        argss = list()                                                                    \n"
+      "        for yi in range(nY):                                                              \n"
+      "            for xi in range(nX):                                                          \n"
+      "                inarray = iblock[:, :, yi:yi+1, xi:xi+1]                                  \n"
+      "                args = (forcepy_pixel, inarray, nband, date, sensor, bandname, nodata, 1) \n"
+      "                argss.append(args)                                                        \n"
+      "        res = pool.map(func=forcepy_wrapper, iterable=argss)                              \n"
+      "        pool.close()                                                                      \n"
+      "        del pool                                                                          \n"
+      "        # reshape space dimensions                                                        \n"
+      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)        \n"
+      "        i = 0                                                                             \n"
+      "        for yi in range(nY):                                                              \n"
+      "            for xi in range(nX):                                                          \n"
+      "                oblock[:, yi, xi] = res[i]                                                \n"
+      "                i += 1                                                                    \n"
+      "        return oblock                                                                     \n"
+      "    except:                                                                               \n"
+      "        print(traceback.format_exc())                                                     \n"
+      "        return None                                                                       \n");
+  } else if (udf->type == _UDF_BLOCK_){
+    PyRun_SimpleString(
+      "def forcepy_(iblock, year, month, day, sensor, bandname, nodata, nband, nproc):        \n"
+      "    try:                                                                               \n"
+      "        if 'forcepy_block' not in globals():                                           \n"
+      "            print('forcepy_block not found.')                                          \n"
+      "            return None                                                                \n"
+      "        nDates, nBands, nY, nX = iblock.shape                                          \n"
+      "        date = forcepy_date2epoch(year, month, day)                                    \n"
+      "        oblock = np.full(shape=(nband, nY, nX), fill_value=nodata, dtype=np.int16)     \n"
+      "        forcepy_block(iblock, oblock, date, sensor, bandname, nodata, nproc)           \n"
+      "        return oblock                                                                  \n"
+      "    except:                                                                            \n"
+      "        print(traceback.format_exc())                                                  \n"
+      "        return None                                                                    \n");
+  } else {
+    printf("unknown UDF type.\n"); 
+    exit(FAILURE);
+  }
+
 
   return;
 }
@@ -78,250 +178,356 @@ void register_python(par_hl_t *phl){
 /** This function cleans up the python interpreter
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void deregister_python(){
+void deregister_python(par_hl_t *phl){
+par_udf_t *udf;
 
 
-  Py_Finalize();
+  if (phl->tsa.pyp.out){
+    udf = &phl->tsa.pyp;
+  } else if (phl->plg.pyp.out){
+    udf = &phl->plg.pyp;
+  } else {
+    return;
+  }
+
+  if (udf->out) Py_Finalize();
 
   return;
 }
 
 
-/** This function loads the provided python function and makes some 
-+++ tests with dummy data
---- pyp:    python-plugin parameters
-+++ Return: void
+/** This function initializes the python udf
+--- ard:       ARD
+--- ts:        pointer to instantly useable TSA image arrays
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nb:        number of bands
+--- nt:        number of products over time
+--- udf:       user-defined code parameters
++++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_python_tsa(par_pyp_t *pyp){
-FILE *fpy                = NULL;
-PyObject *main_module    = NULL;
-PyObject *main_dict      = NULL;
-PyObject *py_fun         = NULL;
-PyObject *py_register    = NULL;
-PyObject *py_nodata      = NULL;
-PyObject *py_nproc       = NULL;
-PyArrayObject* py_tsi    = NULL;
-PyArrayObject* py_ce     = NULL;
-PyArrayObject* py_year   = NULL;
-PyArrayObject* py_month  = NULL;
-PyArrayObject* py_day    = NULL;
-PyArrayObject *py_return = NULL;
-npy_intp *dim            = NULL;
-int ni = 5, nc = 10, ndim;
-npy_intp dim_2d[2] = { ni, nc };
-npy_intp dim_1d[1] = { ni };
-int t, p;
-short* tsi_ = NULL;
-int* ce_    = NULL;
-int* year_  = NULL;
-int* month_ = NULL;
-int* day_   = NULL;
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+FILE *fpy             = NULL;
+py_dimlab_t pylab;
+PyObject *main_module = NULL;
+PyObject *main_dict   = NULL;
+PyObject *py_fun      = NULL;
+PyObject *py_return   = NULL;
+PyObject *py_bandname = NULL;
+PyObject *py_encoded  = NULL;
+char *bandname = NULL;
+int b;
 
 
-  if (!pyp->opyp){
-    pyp->nb = 1;
+  //make sure bandnames are NULL-initialized
+  udf->bandname = NULL;
+
+  if (!udf->out){
+    udf->nb = 1;
     return;
   }
+
 
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+
   // parse the provided python function
-  fpy = fopen(pyp->f_code, "r");
-  PyRun_SimpleFile(fpy, pyp->f_code);
+  fpy = fopen(udf->f_code, "r");
+  PyRun_SimpleFile(fpy, udf->f_code);
 
-  py_fun = PyDict_GetItemString(main_dict, "forcepy_tsi_init");
+  py_fun = PyDict_GetItemString(main_dict, "forcepy_init_");
   if (py_fun == NULL){
-    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_tsi_init");
+    printf("Python error!\n");
     exit(FAILURE);}
 
-  py_register = PyObject_CallFunctionObjArgs(py_fun, NULL);
+  py_return = PyObject_CallFunctionObjArgs(
+    py_fun, 
+    pylab.year, pylab.month, pylab.day, 
+    pylab.sensor, 
+    pylab.bandname, 
+    NULL);
 
-  pyp->nb = (int)Py_SIZE(py_register);
-  Py_DECREF(py_register);
+  if (py_return == Py_None){
+    printf("None returned from forcepy_init_. Check the python plugin code!\n");
+    exit(FAILURE);}
 
-  //printf("%d\n", pyp->nb);
-
-
-  py_fun = PyDict_GetItemString(main_dict, "forcepy_tsi_");
-  if (py_fun == NULL){
-    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_tsi_");
+  if (!PyList_Check(py_return)){
+    printf("forcepy_init_ did not return a list. Check the python plugin code!\n");
     exit(FAILURE);}
 
 
-  // test the provided python function with dummy data
-  py_nodata = PyLong_FromLong(-9999);
-  py_nproc = PyLong_FromLong(2);
+  udf->nb = (int)PyList_Size(py_return);
 
-  py_tsi   = (PyArrayObject *) PyArray_SimpleNew(2, dim_2d, NPY_INT16);
-  py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
+  alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
 
-  tsi_   = (short*)PyArray_DATA(py_tsi);
-  ce_    = (int*)PyArray_DATA(py_ce);
-  year_  = (int*)PyArray_DATA(py_year);
-  month_ = (int*)PyArray_DATA(py_month);
-  day_   = (int*)PyArray_DATA(py_day);
-
-
-  for (t=0; t<ni; t++){
-    for (p=0; p<nc; p++) tsi_[t*nc+p] = t*1000 + p*100;
-    year_[t]  = 2020;
-    month_[t] = t+1;
-    day_[t]   = 15;
-    ce_[t]    = date2ce(year_[t], month_[t], day_[t]);
+  for (b=0; b<udf->nb; b++){
+    py_bandname = PyList_GetItem(py_return, b);
+    py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
+    if ((bandname = PyBytes_AsString(py_encoded)) == NULL){
+      printf("forcepy_init_ did not return a list of strings. Check the python plugin code!\n");
+      exit(FAILURE);}
+    Py_DECREF(py_encoded);
+    copy_string(udf->bandname[b], NPOW_10, bandname);
+    #ifdef FORCE_DEBUG
+    printf("bandname # %d: %s\n", b, udf->bandname[b]);
+    #endif
   }
 
-  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(py_fun, py_tsi, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
-  if (py_return == NULL){
-    printf("Oops. Testing %s failed with dummy data. "
-           "NULL returned from python. "
-           "Clean up the python plugin code!\n", "forcepy_tsi");
-    exit(FAILURE);}
 
-  ndim = PyArray_NDIM(py_return);
-  dim  = PyArray_DIMS(py_return);
-
-  if (ndim != 2){
-    printf("Oops. Testing %s failed with dummy data. "
-           "Returned dimensions are incorrect: %d. "
-           "Clean up the python plugin code!\n", "forcepy_tsi", ndim);
-    exit(FAILURE);}
-
-  if (dim[0] != pyp->nb){
-    printf("Oops. Testing %s failed with dummy data. "
-           "Returned array size is incorrect. "
-           "Expected %d elements in 1st dimension, received %d. "
-           "Clean up the python plugin code!\n", "forcepy_tsi", pyp->nb, (int)dim[0]);
-    exit(FAILURE);}
-
-  if (dim[1] != nc){
-    printf("Oops. Testing %s failed with dummy data. "
-           "Returned array size is incorrect. "
-           "Expected %d elements in 2nd dimension (not all pixels returned), received %d. "
-           "Clean up the python plugin code!\n", "forcepy_tsi", nc, (int)dim[1]);
-    exit(FAILURE);}
-
-
+  Py_DECREF(pylab.year);
+  Py_DECREF(pylab.month);
+  Py_DECREF(pylab.day);
+  Py_DECREF(pylab.bandname);
+  Py_DECREF(pylab.sensor);
   Py_DECREF(py_return);
-  Py_DECREF(py_tsi);
-  Py_DECREF(py_ce);
-  Py_DECREF(py_year);
-  Py_DECREF(py_month);
-  Py_DECREF(py_day);
-  Py_DECREF(py_nodata);
-  Py_DECREF(py_nproc);
-
+  
   fclose(fpy);
 
   return;
 }
 
 
-/** This function connects the TSA module to plug'n'play python code
---- ts:     pointer to instantly useable TSA image arrays
---- mask:   mask image
---- nc:     number of cells
---- ni:     number of interpolation steps
---- nodata: nodata value
---- phl:    HL parameters
-+++ Return: SUCCESS/FAILURE
+/** This function terminates the python udf
+--- udf:    user-defined code parameters
++++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl){
+void term_pyp(par_udf_t *udf){
+
+
+  if (udf->bandname != NULL){
+    free_2D((void**)udf->bandname, udf->nb); 
+    udf->bandname = NULL;
+  }
+
+  return;
+}
+
+
+/** This function labels the dimension of the UDF input data (time, band, sensor)
+--- ard:       ARD
+--- ts:        pointer to instantly useable TSA image arrays
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nb:        number of bands
+--- nt:        number of products over time
+--- udf:       user-defined code parameters
++++ Return:    void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+py_dimlab_t pylab;
 int b, t;
+int* year_      = NULL;
+int* month_     = NULL;
+int* day_       = NULL;
+char *sensor_   = NULL;
+char *bandname_ = NULL;
+date_t date;
+char sensor[NPOW_04];
+char bandname[NPOW_10];
 
-FILE *fpy = NULL;
 
-npy_intp dim_2d[2] = { ni, nc };
-npy_intp dim_1d[1] = { ni };
+  pylab.dim_nt[0] = nt;
+  pylab.dim_nb[0] = nb;
 
+  pylab.year     = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+  pylab.month    = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+  pylab.day      = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
+
+  pylab.desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
+  pylab.desc_sensor->elsize = NPOW_04;
+  pylab.sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nt, pylab.desc_sensor);
+
+  pylab.desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
+  pylab.desc_bandname->elsize = NPOW_10;
+  pylab.bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nb, pylab.desc_bandname);
+
+  year_     = (int*)PyArray_DATA(pylab.year);
+  month_    = (int*)PyArray_DATA(pylab.month);
+  day_      = (int*)PyArray_DATA(pylab.day);
+  sensor_   = (char*)PyArray_DATA(pylab.sensor);
+  bandname_ = (char*)PyArray_DATA(pylab.bandname);
+
+
+  // copy C data to python objects
+  
+  if (submodule == _HL_PLG_){
+
+    for (t=0; t<nt; t++){
+      date = get_brick_date(ard[t].DAT, 0);
+      year_[t]  = date.year;
+      month_[t] = date.month;
+      day_[t]   = date.day;
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+      copy_string(sensor_, NPOW_04, sensor);
+      sensor_ += NPOW_04;
+    }
+
+    for (b=0; b<nb; b++){
+      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+      copy_string(bandname_, NPOW_10, bandname);
+      bandname_ += NPOW_10;
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (t=0; t<nt; t++){
+      year_[t]  = ts->d_tsi[t].year;
+      month_[t] = ts->d_tsi[t].month;
+      day_[t]   = ts->d_tsi[t].day;
+      copy_string(sensor_, NPOW_04, "BLEND");
+      sensor_ += NPOW_04;
+    }
+
+    copy_string(bandname_, NPOW_10, idx_name);
+    bandname_ += NPOW_10;
+
+  } else {
+    printf("unknown submodule. ");
+    exit(FAILURE);
+  }
+
+
+  return pylab;
+}
+
+
+/** This function connects FORCE to plug'n'play python UDFs
+--- ard:       pointer to instantly useable ARD image arrays
+--- plg:       pointer to instantly useable PLG image arrays
+--- ts:        pointer to instantly useable TSA image arrays
+--- mask:      mask image
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nx:        number of columns
+--- ny:        number of rows
+--- nc:        number of cells
+--- nb:        number of bands
+--- nt:        number of time steps
+--- nodata:    nodata value
+--- udf:       user-defined code parameters
+--- cthread:   number of computing threads
++++ Return:    SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int python_plugin(ard_t *ard, plg_t *plg, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
+int b, t;
+py_dimlab_t pylab;
+npy_intp dim_data[4] = { nt, nb, ny, nx };
+FILE     *fpy         = NULL;
 PyObject *main_module = NULL;
-PyObject *main_dict = NULL;
-PyObject *py_fun = NULL;
-
-PyObject *py_nodata = NULL;
-PyObject *py_nproc = NULL;
-PyArrayObject* py_tsi = NULL;
-PyArrayObject* py_ce = NULL;
-PyArrayObject* py_year = NULL;
-PyArrayObject* py_month = NULL;
-PyArrayObject* py_day = NULL;
-PyArrayObject *py_return = NULL;
-short* tsi_ = NULL;
-short* return_ = NULL;
-int* ce_ = NULL;
-int* year_ = NULL;
-int* month_ = NULL;
-int* day_ = NULL;
+PyObject *main_dict   = NULL;
+PyObject *py_fun      = NULL;
+PyObject *py_nodata   = NULL;
+PyObject *py_nproc    = NULL;
+PyObject *py_nband    = NULL;
+PyArrayObject* py_data     = NULL;
+PyArrayObject *py_return   = NULL;
+short* data_    = NULL;
+short* return_  = NULL;
 
 
-  if (ts->pyp_ == NULL) return CANCEL;
+  if (submodule == _HL_PLG_ && plg->pyp_ == NULL) return CANCEL;
+  if (submodule == _HL_TSA_ &&  ts->pyp_ == NULL) return CANCEL;
+
 
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
 
-  fpy = fopen(phl->tsa.pyp.f_code, "r");
-  PyRun_SimpleFile(fpy, phl->tsa.pyp.f_code);
+  fpy = fopen(udf->f_code, "r");
+  PyRun_SimpleFile(fpy, udf->f_code);
 
-  py_fun = PyDict_GetItemString(main_dict, "forcepy_tsi_");
+  py_fun = PyDict_GetItemString(main_dict, "forcepy_");
   if (py_fun == NULL){
-    printf("Python function \"%s\" was not found. Check your python plugin code!\n", "forcepy_tsi_");
+    printf("Python error!\n");
     exit(FAILURE);}
 
   py_nodata = PyLong_FromLong(nodata);
-  py_nproc = PyLong_FromLong(phl->cthread);
+  py_nproc = PyLong_FromLong(cthread);
+  py_nband = PyLong_FromLong(udf->nb);
 
-  py_tsi   = (PyArrayObject *) PyArray_SimpleNew(2, dim_2d, NPY_INT16);
-  py_ce    = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_year  = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_month = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-  py_day   = (PyArrayObject *) PyArray_SimpleNew(1, dim_1d, NPY_INT);
-
-  tsi_   = (short*)PyArray_DATA(py_tsi);
-  ce_    = (int*)PyArray_DATA(py_ce);
-  year_  = (int*)PyArray_DATA(py_year);
-  month_ = (int*)PyArray_DATA(py_month);
-  day_   = (int*)PyArray_DATA(py_day);
+  py_data     = (PyArrayObject *) PyArray_SimpleNew(4, dim_data, NPY_INT16);
+  data_     = (short*)PyArray_DATA(py_data);
 
 
   // copy C data to python objects
-  for (t=0; t<ni; t++){
-    memcpy(tsi_, ts->tsi_[t], sizeof(short)*nc);
-    tsi_ += nc;
-    ce_[t]    = ts->d_tsi[t].ce;
-    year_[t]  = ts->d_tsi[t].year;
-    month_[t] = ts->d_tsi[t].month;
-    day_[t]   = ts->d_tsi[t].day;
+  
+  if (submodule == _HL_PLG_){
+
+    for (t=0; t<nt; t++){
+      for (b=0; b<nb; b++){
+        memcpy(data_, ard[t].dat[b], sizeof(short)*nc);
+        data_ += nc;
+      }
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (t=0; t<nt; t++){
+      memcpy(data_, ts->tsi_[t], sizeof(short)*nc);
+      data_ += nc;
+    }
+
+  } else {
+    printf("unknown submodule. ");
+    exit(FAILURE);
   }
 
-  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
-    py_fun, py_tsi, py_ce, py_year, py_month, py_day, py_nodata, py_nproc, NULL);
 
-  if (py_return == NULL){
-    printf("Oops. NULL returned from python. Clean up the python plugin code!\n");
+  // fire up python
+  py_return = (PyArrayObject *) PyObject_CallFunctionObjArgs(
+    py_fun, 
+    py_data, 
+    pylab.year, pylab.month, pylab.day, 
+    pylab.sensor, 
+    pylab.bandname, 
+    py_nodata, 
+    py_nband, 
+    py_nproc, 
+    NULL);
+
+  if (py_return == Py_None){
+    printf("None returned from python. Check the python plugin code!\n");
     exit(FAILURE);}
 
 
   // copy to output brick
   return_ = (short*)PyArray_DATA(py_return);
-  for (b=0; b<phl->tsa.pyp.nb; b++){
-    memcpy(ts->pyp_[b], return_, sizeof(short)*nc);
-    return_ += nc;
+
+  if (submodule == _HL_PLG_){
+
+    for (b=0; b<udf->nb; b++){
+      memcpy(plg->pyp_[b], return_, sizeof(short)*nc);
+      return_ += nc;
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (b=0; b<udf->nb; b++){
+      memcpy(ts->pyp_[b], return_, sizeof(short)*nc);
+      return_ += nc;
+    }
+
+  } else {
+    printf("unknown submodule.\n");
+    exit(FAILURE);
   }
+
 
 
   // clean
   Py_DECREF(py_return);
-  Py_DECREF(py_tsi);
-  Py_DECREF(py_ce);
-  Py_DECREF(py_year);
-  Py_DECREF(py_month);
-  Py_DECREF(py_day);
+  Py_DECREF(py_data);
   Py_DECREF(py_nodata);
+  Py_DECREF(py_nband);
   Py_DECREF(py_nproc);
+  Py_DECREF(pylab.year);
+  Py_DECREF(pylab.month);
+  Py_DECREF(pylab.day);
+  Py_DECREF(pylab.bandname);
+  Py_DECREF(pylab.sensor);
 
 
   fclose(fpy);

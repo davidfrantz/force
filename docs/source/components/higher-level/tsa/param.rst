@@ -390,11 +390,28 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Python plug-in parameters**
 
-  * This file specifies the file holding user-provided python code. 
+  * This file specifies the file holding user-defined python code. 
     You can skip this by setting ``FILE_PYTHON = NULL``, but this requires ``OUTPUT_PYP = FALSE``.
+    Two functions are required to communicate with FORCE:
+
+    0) The global space can be used to import modules etc.
+    1) An initialization function that defines the number and names of output bands:
+       ``def forcepy_init():``
+    2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
 
     | *Type:* full file path
     | ``FILE_PYTHON = NULL``
+
+  * Type of user-defined function. 
+    1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel as 2D-nd.array [time,bands]. 
+       A multi-processing pool is spawned to parallely execute this function with ``NTHREAD_COMPUTE`` workers.
+       ``def forcepy_pixel(inarray, outarray, dates, nodata):``
+    2) ``BLOCK`` expects a pixel-function that receives the time series of a complete  processing unit as 4D-nd.array [time,bands,rows,cols]. 
+       No parallelization is done on FORCE's end. 
+       ``def forcepy_block(inarray, outarray, dates, nodata):``
+
+    | *Type:* Character. Valid values: {PIXEL,BLOCK}
+    | ``PYTHON_TYPE = PIXEL``
 
   * Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.
 

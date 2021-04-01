@@ -231,12 +231,14 @@ typedef struct {
   float conf;         // confidence level
 } par_trd_t;
 
-// python plugin
+// user-defined function
 typedef struct {
-  char *f_code;
-  int   opyp;
-  int   nb;
-} par_pyp_t;
+  char  *f_code;
+  int    out;
+  int    nb;
+  char **bandname;
+  int    type;
+} par_udf_t;
 
 // aggregation statistics
 typedef struct {
@@ -270,7 +272,7 @@ typedef struct {
 
 // general TSA
 typedef struct {
-  int n;                      // number of indices
+  int n;                 // number of indices
   int  *index;           // index type
   char **index_name;     // short name index type
   int otss;           // flag: output time series brick
@@ -283,7 +285,7 @@ typedef struct {
   par_lsp_t lsp;
   par_pol_t pol;
   par_trd_t trd;
-  par_pyp_t pyp;
+  par_udf_t pyp;
 } par_tsa_t;
 
 // features
@@ -382,6 +384,12 @@ typedef struct {
   int    rescale;
   char  *base;
 } par_lib_t;
+
+// script plugin
+typedef struct {
+  par_udf_t pyp;
+  par_udf_t rsp;
+} par_plg_t;
 
 // improphe core
 typedef struct {
@@ -482,6 +490,7 @@ typedef struct {
   par_txt_t txt;
   par_lsm_t lsm;
   par_lib_t lib;
+  par_plg_t plg;
 
 } par_hl_t;
 
