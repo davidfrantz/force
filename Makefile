@@ -68,7 +68,7 @@ GPP=g++
 G11=g++ -std=c++11
 
 CFLAGS=-O3 -Wall -fopenmp
-CFLAGS=-g -Wall -fopenmp
+#CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
