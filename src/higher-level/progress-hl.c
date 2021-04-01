@@ -154,16 +154,16 @@ void init_progess(progress_t *pro, cube_t *cube, par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void rewind_stdout(progress_t *pro){
   
-//#ifndef FORCE_DEBUG
-//
-//int line, nline = 12;
-//
-//  if (pro->pu >=0){
-//    for (line=0; line<=nline; line++) printf("\033[A\r");
-//    printf("\n");
-//  }
-//
-//#endif
+#ifndef FORCE_DEBUG
+
+int line, nline = 12;
+
+  if (pro->pu >=0){
+    for (line=0; line<=nline; line++) printf("\033[A\r");
+    printf("\n");
+  }
+
+#endif
   
   return;
 }
