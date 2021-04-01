@@ -31,6 +31,7 @@ Main release: TBA
     Python UDFs can now be simply plugged into FORCE, thus running custom Python code without re-compiling FORCE.
     The ``UDF`` submodule acts on the ARD input type (see :ref:`hl-input`).
     Two types of UDFs are supported:
+    
     1) pixel-based UDF: the user only has to write a pixel-function, FORCE takes care of everything else.
     2) block-based UDF: the user has to write a function that receives a block of data. Useful for numpy-stype functions.
 
