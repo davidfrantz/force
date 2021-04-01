@@ -200,6 +200,7 @@ bool verbose;
     write_par_hl_sma(fp, verbose);
     write_par_hl_tsi(fp, verbose);
     write_par_hl_pyp(fp, verbose);
+    //write_par_hl_rsp(fp, verbose);
     write_par_hl_stm(fp, verbose);
     write_par_hl_fold(fp, verbose);
     write_par_hl_lsp(fp, verbose);
@@ -213,7 +214,7 @@ bool verbose;
 
   if (type == _HL_PLG_){
     write_par_hl_pyp(fp, verbose);
-    write_par_hl_rsp(fp, verbose);
+    //write_par_hl_rsp(fp, verbose);
   }
 
   if (type == _HL_CFI_){
