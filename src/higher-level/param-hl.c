@@ -454,9 +454,9 @@ void register_plg(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "OUTPUT_PYP",    &phl->plg.pyp.out);
 
   // R plugin parameters
-  register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rsp.f_code);
-  register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.rsp.type);
-  register_bool_par(params,    "OUTPUT_RSP",   &phl->plg.rsp.out);
+  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->plg.rsp.f_code);
+  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->plg.rsp.type);
+  //register_bool_par(params,    "OUTPUT_RSP",   &phl->plg.rsp.out);
 
   return;
 }
@@ -1573,6 +1573,7 @@ double tol = 5e-3;
       copy_string(phl->plg.pyp.f_code, NPOW_10, "NULL");
       printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
 
+    /**
     if (phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") == 0){
       phl->plg.rsp.out = false;
       printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
@@ -1580,6 +1581,7 @@ double tol = 5e-3;
     if (!phl->plg.rsp.out && strcmp(phl->plg.rsp.f_code, "NULL") != 0){
       copy_string(phl->plg.rsp.f_code, NPOW_10, "NULL");
       printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R plugin. Proceed.\n");}
+      **/
 
   }
 
