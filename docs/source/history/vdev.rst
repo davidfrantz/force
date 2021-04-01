@@ -26,7 +26,21 @@ Main release: TBA
 
 * **FORCE HLPS**
 
-  * A new submodule is available: UDF plug-in
+  * A new submodule is available: ``UDF`` plug-in
+    This submodule is an extension of the plug-in functionality introduced in v3.6.0.
+    Python UDFs can now be simply plugged into FORCE, thus running custom Python code without re-compiling FORCE.
+    The ``UDF`` submodule acts on the ARD input type (see :ref:`hl-input`).
+    Two types of UDFs are supported:
+    1) pixel-based UDF: the user only has to write a pixel-function, FORCE takes care of everything else.
+    2) block-based UDF: the user has to write a function that receives a block of data. Useful for numpy-stype functions.
+
+    A tutorial is planned to showcase the usage.
+
+  * The usage of the previous UDF functionality within the ``TSA`` submodule was harmonized with the new ``UDF`` submodule.
+    You will need to slightly adapt your existing UDF to work with the new version.
+    Both UDF types are supported in the ``TSA`` submodule, too.
+
+    A tutorial is planned to showcase the usage.
 
 
 * **FORCE AUX**
