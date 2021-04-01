@@ -26,7 +26,7 @@ Main release: TBA
 
 * **FORCE HLPS**
 
-  * A new submodule is available: ``UDF`` plug-in
+  * A new submodule is available: ``UDF`` plug-in, enabled by the support of Andreas Rabe.
     This submodule is an extension of the plug-in functionality introduced in v3.6.0.
     Python UDFs can now be simply plugged into FORCE, thus running custom Python code without re-compiling FORCE.
     The ``UDF`` submodule acts on the ARD input type (see :ref:`hl-input`).
