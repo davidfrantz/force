@@ -30,14 +30,14 @@ This file contains functions for spectral adjustment
 
 int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 
-#define _SPECHOMO_N_SEN_  6
-#define _SPECHOMO_N_CLS_ 51
-#define _SPECHOMO_N_SRC_  6
-#define _SPECHOMO_N_DST_ 10
-#define _SPECHOMO_N_COF_  7
-#define _SPECHOMO_N_SIM_  5
-#define _SPECHOMO_GOOD_SAM_ 0.0698132
-#define _SPECHOMO_POOR_SAM_ 0.2617995
+#define _SPECHOMO_N_SEN_  6 // number of sensors that we can homogenize
+#define _SPECHOMO_N_CLS_ 51 // number of clusters, incl. global
+#define _SPECHOMO_N_SRC_  6 // number of source bands
+#define _SPECHOMO_N_DST_ 10 // number of destination bands
+#define _SPECHOMO_N_COF_  7 // number of coefficients
+#define _SPECHOMO_N_SIM_ 10 // max. number of close clusters to be used for kNN
+#define _SPECHOMO_GOOD_SAM_ 0.0698132 // accept clusters that are closer than this angle
+#define _SPECHOMO_POOR_SAM_ 0.2617995 // used to compute a weight for each cluster
 #define _SPECHOMO_MIN_WEIGHT_ 1.0 - _SPECHOMO_GOOD_SAM_/_SPECHOMO_POOR_SAM_
 
 const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
