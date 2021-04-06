@@ -684,7 +684,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
   }
 
 
-  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) default(none)
+  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid,_SPECHOMO_CENTER_,_SPECHOMO_COEFS_) default(none)
   {
 
     #pragma omp for

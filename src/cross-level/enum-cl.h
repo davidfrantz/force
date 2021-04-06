@@ -57,9 +57,9 @@ enum { _X_, _Y_, _Z_ };
 enum { _MIN_, _MAX_ };
 
 // modules
-enum { _LL_LEVEL2_, _HL_BAP_,    _HL_TSA_, _HL_CSO_, _HL_CFI_, 
-       _HL_L2I_,    _HL_ML_,     _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _HL_LIB_,    _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
+       _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
+       _HL_LIB_,    _HL_UDF_, _AUX_TRAIN_, _AUX_SYNTHMIX_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
@@ -155,7 +155,7 @@ enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_,
        _IDX_NBR_, _IDX_ARV_, _IDX_SAV_, _IDX_SRV_, _IDX_TCB_, _IDX_TCG_, 
        _IDX_TCW_, _IDX_TCD_, _IDX_NDB_, _IDX_NDW_, _IDX_MNW_, _IDX_NDS_,
        _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_SW0_,
-       _IDX_LENGTH_};
+       _IDX_KNV_, _IDX_LENGTH_};
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
@@ -240,7 +240,7 @@ enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_,
        
 // landscape metrics
 enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_, 
-       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_LENGTH_ };
+       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_ARE_, _LSM_LENGTH_ };
 
 // satellite mission
 enum { LANDSAT, SENTINEL2, _MISSION_LENGTH_ };
@@ -267,6 +267,9 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 // clock type
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 
+// user-defined function type
+enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
@@ -291,6 +294,7 @@ extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 
 #ifdef __cplusplus
 }

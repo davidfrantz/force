@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2019 David Frantz
+Copyright (C) 2013-2020 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,49 +21,29 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Landscape metrics header
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Copyright (C) 2013-2019 Franz Schug, David Frantz
-Contact: franz.schug@geo.hu-berlin.de
+Python UDF plug-in header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef LANDSCAPE_HL_H
-#define LANDSCAPE_HL_H
+#ifndef PYP_HL_H
+#define PYP_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
-#include <limits.h>  // macro constants of the integer types
 
+#include "../higher-level/tsa-hl.h"
+#include "../higher-level/udf-hl.h"
 
-// check if all needed
-#include "../cross-level/brick-cl.h"
-#include "../cross-level/cube-cl.h"
-#include "../cross-level/quality-cl.h"
-#include "../cross-level/stats-cl.h"
-#include "../cross-level/cite-cl.h"
-#include "../higher-level/param-hl.h"
-#include "../higher-level/read-ard-hl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-  short **mpa_;
-  short **uci_;
-  short **fdi_;
-  short **edd_;
-  short **nbr_;
-  short **ems_;
-  short **avg_;
-  short **std_;
-  short **geo_;
-  short **max_;
-  short **are_;
-} lsm_t;
-
-brick_t **landscape_metrics(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
+void register_python(par_hl_t *phl);
+void deregister_python(par_hl_t *phl);
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void term_pyp(par_udf_t *udf);
+int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread);
 
 #ifdef __cplusplus
 }

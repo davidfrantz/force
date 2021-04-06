@@ -1228,7 +1228,10 @@ double tol = 5e-3;
       }
     }
     
-    if (ard_type == _ARD_REF_) set_brick_domain(brick, b_brick, sen->domain[b]);
+    if (ard_type == _ARD_REF_){
+      set_brick_domain(brick, b_brick, sen->domain[b]);
+      set_brick_bandname(brick, b_brick, sen->domain[b]);
+    }
 
     b_brick++;
 

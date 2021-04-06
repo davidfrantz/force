@@ -250,9 +250,10 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
 
-  // python plugin parameters
+  // python UDF plug-in parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);
-  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.opyp);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.out);
 
   return;
 }
@@ -441,6 +442,27 @@ void register_lib(params_t *params, par_hl_t *phl){
 }
 
 
+/** This function registers UDF plug-in parameters
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_udf(params_t *params, par_hl_t *phl){
+
+  // python UDF plug-in parameters
+  register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.pyp.f_code);
+  register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.pyp.type);
+  register_bool_par(params,    "OUTPUT_PYP",    &phl->udf.pyp.out);
+
+  // R UDF plug-in parameters
+  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
+  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
+  //register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
+
+  return;
+}
+
+
 /** This function checks that each index can be computed with the given
 +++ set of sensors. It also kicks out unused bands to remove I/O
 --- tsa:    TSA parameters
@@ -528,7 +550,7 @@ int *band_ptr[_WVL_LENGTH_] = {
         copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
         break;
       case _IDX_SAV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
+        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
         break;
       case _IDX_SRV_:
@@ -591,6 +613,10 @@ int *band_ptr[_WVL_LENGTH_] = {
       case _IDX_NDM_:
         v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "NDM"); 
+        break;
+      case _IDX_KNV_:
+        v[_WVL_NIR_] = v[_WVL_RED_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "KNV");
         break;
       default:
         printf("unknown INDEX\n");
@@ -887,6 +913,8 @@ int i;
       lsm->ogeo = true;
     } else if (lsm->metrics[i] == _LSM_MAX_){
       lsm->omax = true;
+    } else if (lsm->metrics[i] == _LSM_ARE_){
+      lsm->oare = true;
     } else {
       printf("warning: unknown lsm.\n");
     }
@@ -1223,6 +1251,10 @@ double tol = 5e-3;
     phl->type = _HL_LIB_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
+  } else if (strcmp(buffer, "++PARAM_UDF_START++") == 0){
+    phl->type = _HL_UDF_;
+    phl->input_level1 = _INP_ARD_;
+    phl->input_level2 = _INP_NONE_;
   } else {
     printf("No valid parameter file!\n"); return FAILURE;
   }
@@ -1283,6 +1315,9 @@ double tol = 5e-3;
       break;
     case _HL_LIB_:
       register_lib(phl->params, phl);
+      break;
+    case _HL_UDF_:
+      register_udf(phl->params, phl);
       break;
     default:
       printf("Unknown module!\n"); return FAILURE;
@@ -1544,13 +1579,35 @@ double tol = 5e-3;
     }
 
 
-    if (phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
-      phl->tsa.pyp.opyp = false;
+    if (phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") == 0){
+      phl->tsa.pyp.out = false;
       printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
 
-    if (!phl->tsa.pyp.opyp && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
+    if (!phl->tsa.pyp.out && strcmp(phl->tsa.pyp.f_code, "NULL") != 0){
       copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
-      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python plugin. Proceed.\n");}
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
+
+  }
+
+  if (phl->type == _HL_UDF_){
+
+    if (phl->udf.pyp.out && strcmp(phl->udf.pyp.f_code, "NULL") == 0){
+      phl->udf.pyp.out = false;
+      printf("Warning: no python code provided. OUTPUT_PYP ignored. Proceed.\n");}
+
+    if (!phl->udf.pyp.out && strcmp(phl->udf.pyp.f_code, "NULL") != 0){
+      copy_string(phl->udf.pyp.f_code, NPOW_10, "NULL");
+      printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
+
+    /**
+    if (phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") == 0){
+      phl->udf.rsp.out = false;
+      printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
+
+    if (!phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") != 0){
+      copy_string(phl->udf.rsp.f_code, NPOW_10, "NULL");
+      printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
+      **/
 
   }
 

@@ -112,8 +112,8 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Frantz, D., Stellmes, M., & Hostert, P. (2019). A Global MODIS "
     "Water Vapor Database for the Operational Atmospheric Correction of "
     "Historic and Recent Landsat Imagery. Remote Sensing, 11, 257\n"
-    "Frantz, D., & Stellmes, M. (2018). Water vapor database for "
-    "atmospheric correction of Landsat imagery. PANGAEA", 
+    "Frantz, D., Stellmes, M., Ernst, S. (2021). Water vapor database for "
+    "atmospheric correction of Landsat imagery. Zenodo", 
     false },
   { "BRDF correction", 
     "Wanner, W., Li, X., & Strahler, A.H. (1995). On the derivation of "
@@ -318,6 +318,13 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "red edge prediction of Landsat-8 to Sentinel-2 using land cover optimized "
     "multivariate regressors. Remote Sensing of Environment, 241, 111723.",
     false },
+  { "kNDVI",
+    "Camps-Valls, G., Campos-Taberner, M., Moreno-Martínez, Á., Walther, S., "
+    "Duveiller, G., Cescatti, A., Mahecha, M.D., Muñoz-Marí, J., García-Haro, F.J., "
+    "Guanter, L., Jung, M., Gamon, J.A., Reichstein, M., & Running, S.W. (2021). "
+    "A unified vegetation index for quantifying the terrestrial biosphere. "
+    "Science Advances, 7, eabc7447.",
+    false }
 };
 
 

@@ -351,8 +351,9 @@ float **xyz_tsd_sw2 = NULL;
       if (ref < 0.0) set_subzero(QAI,    p, true);
       if (ref > 1.0) set_saturation(QAI, p, true);
 
-
-      if (ref < -1.0){
+      if (pl2->erase_cloud && get_cloud(QAI, p) == 2){
+        boa_[p] = nodata;
+      } else if (ref < -1.0){
         boa_[p] = nodata;
         set_off(QAI, p, true);
       } else if (ref*10000.0 > SHRT_MAX){
@@ -2051,9 +2052,9 @@ brick_t **L2 = NULL;
 
   /** clean
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  free_3D((void***)_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw);
+  free_wvlut();
 
-    
+
   #ifdef FORCE_DEBUG
   int prod;
   for (prod=0; prod<(*nprod); prod++){ print_brick_info(L2[prod]); write_brick(L2[prod]);}

@@ -81,7 +81,7 @@ progress_t  pro;
   if ((aux = read_aux(phl)) == NULL){
     printf("Reading aux file failed!\n"); return FAILURE;}
 
-  // register python plugins
+  // register python UDF plug-in
   register_python(phl);
 
   // copy and read datacube definition
@@ -162,7 +162,7 @@ progress_t  pro;
   free_aux(phl, aux);
   free_param_higher(phl);
 
-  deregister_python();
+  deregister_python(phl);
 
   CPLPopErrorHandler();
 

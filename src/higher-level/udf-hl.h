@@ -21,27 +21,35 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Python plugin header
+User-defined function header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef PYP_HL_H
-#define PYP_HL_H
+#ifndef UDF_HL_H
+#define UDF_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../higher-level/tsa-hl.h"
+#include "../cross-level/const-cl.h"
+#include "../cross-level/brick-cl.h"
+#include "../higher-level/param-hl.h"
+#include "../higher-level/read-ard-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void register_python(par_hl_t *phl);
-void deregister_python();
-void register_python_tsa(par_pyp_t *pyp);
-int tsa_python_plugin(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl);
+typedef struct {
+  short **pyp_;
+  short **rsp_;
+} udf_t;
+
+#include "../higher-level/py-udf-hl.h"
+
+brick_t **udf_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
+
 
 #ifdef __cplusplus
 }

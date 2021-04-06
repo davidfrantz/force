@@ -6,6 +6,15 @@ Publications
 This list summarizes all scientific publications that describe FORCE, functionality, validation etc. 
 
 
+* **2021**
+
+  | Frantz, D., Stellmes, M., and Ernst, S. (2021). Water vapor database for atmospheric correction of Landsat imagery.  Zenodo. Dataset available online:
+  | https://doi.org/10.5281/zenodo.4468700
+
+  | V. Zekoll, M. Main-Knorn, J. Louis, D. Frantz, R. Richter, and B. Pflug (2021): Comparison of Masking Algorithms for Sentinel-2 Imagery. Remote Sensing 13.
+  | https://doi.org/10.3390/rs13010137
+
+
 * **2020**
 
   | P. Rufin, D. Frantz, L. Yan, and P. Hostert (2020): Operational Coregistration of the Sentinel-2A/B Image Archive Using Multitemporal Landsat Spectral Averages. IEEE Geoscience and Remote Sensing Letters (early access).
