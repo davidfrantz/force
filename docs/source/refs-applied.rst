@@ -8,6 +8,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2021**
 
+  | J. Ardö (2021). A Sentinel-2 Dataset for Uganda. Data, 6. 
+  | https://doi.org/10.3390/data6040035
+
   | S. Cooper, A. Okujeni, D. Pflugmacher, S. van der Linden, and Hostert, P. (2021): Combining simulated hyperspectral EnMAP and Landsat time series for forest aboveground biomass mapping. International Journal of Applied Earth Observation and Geoinformation, 98, 102307. 
   | https://doi.org/10.1016/j.jag.2021.102307
 
