@@ -683,8 +683,10 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
     }
   }
 
-
-  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) firstprivate(_SPECHOMO_CENTER_,_SPECHOMO_COEFS_) shared(ard,mask_,nc,b_src,b_dst,sid) default(none)
+  // attention: removed default(none) for gcc back-compatibility (https://gcc.gnu.org/gcc-9/porting_to.html#ompdatasharing)
+  // adding _SPECHOMO_CENTER_ and _SPECHOMO_COEFS_ to the firstprivate clause was no option as the build time and executables increased substantially
+  // if something goes wrong, this might be a good place to start looking!
+  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) // default(none)
   {
 
     #pragma omp for
