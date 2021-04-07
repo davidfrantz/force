@@ -41,7 +41,7 @@ Related Links
 
 **Learn how to use FORCE**. Have a look at the :ref:`howto`. Check regularly for new content.
 
-**Get help**, and help others in the FORCE self-help `Google group <https://groups.google.com/d/forum/force_eo>`_
+**Get help**, and help others in the FORCE self-help `discussion group <https://github.com/davidfrantz/force/discussions>`_
 
 **Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
