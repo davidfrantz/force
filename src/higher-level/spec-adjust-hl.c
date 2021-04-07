@@ -22,6 +22,11 @@ along with FORCE.  If not, see <http_://www.gnu.org/licenses/>.
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 This file contains functions for spectral adjustment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+D. Scheffler, D. Frantz, and K. Segl (2020). Spectral harmonization and 
+red edge prediction of Landsat-8 to Sentinel-2 using land cover optimized 
+multivariate regressors. Remote Sensing of Environment 241, 111723. 
+https://doi.org/10.1016/j.rse.2020.111723
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
@@ -657,6 +662,14 @@ const double _SPECHOMO_COEFS_[_SPECHOMO_N_SEN_][_SPECHOMO_N_DST_][_SPECHOMO_N_CO
 };
 
 
+/** This function performs spectral adjustment to Sentinel-2 using the 
++++ Scheffler 2020 method
+--- ard:       ARD image (single time step)
+--- mask:      mask image
+--- nc:        number of pixels
+--- sid:       sensor ID
++++ Return:    SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int spectral_predict(ard_t ard, small *mask_, int nc, int sid){
 int b, b_, p, s, c;
 int b_src[_SPECHOMO_N_SRC_];
@@ -686,6 +699,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
   // attention: removed default(none) for gcc back-compatibility (https://gcc.gnu.org/gcc-9/porting_to.html#ompdatasharing)
   // adding _SPECHOMO_CENTER_ and _SPECHOMO_COEFS_ to the firstprivate clause was no option as the build time and executables increased substantially
   // if something goes wrong, this might be a good place to start looking!
+  // if you change something in the parallel block below, it is advised to temporarily add the default(none) and firstprivate clauses
   #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) // default(none)
   {
 
@@ -718,7 +732,9 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           sam = 1.0;
         }
 
-        weight[s] = 1.0 - sam/_SPECHOMO_POOR_SAM_; // not exactly as in the paper
+        // weight for each cluster center
+        // not exactly as in the paper, pragmatic suggestion by D. Scheffler
+        weight[s] = 1.0 - sam / _SPECHOMO_POOR_SAM_;
         if (weight[s] >= _SPECHOMO_MIN_WEIGHT_){
           max_weight = weight[s];
           cluster[0] = s;
@@ -811,6 +827,13 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 };
 
 
+/** This function performs spectral adjustment to Sentinel-2
+--- ard:       ARD
+--- mask:      mask image
+--- nt:        number of ARD products over time
+--- phl:       HL parameters
++++ Return:    SUCCESS/FAILURE/CANCEL
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
 int t, s, nc;
 char sensor[NPOW_04];
@@ -831,10 +854,12 @@ small *mask_ = NULL;
 
   nc = get_brick_chunkncells(ard[0].DAT);
 
+  // for each time step
   for (t=0; t<nt; t++){
 
     get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
 
+    // is the sensor adjustable?
     for (s=0, adjust=false; s<_SPECHOMO_N_SEN_; s++){
       if (strcmp(sensor, _SPECHOMO_SENSOR_[s]) == 0){ 
         adjust = true; 
@@ -848,6 +873,7 @@ small *mask_ = NULL;
 
     if (!adjust) continue;
 
+    // perform the adjustment
     if (spectral_predict(ard[t], mask_, nc, s) == FAILURE){
       printf("failed to compute spectral prediction. "); return FAILURE;}
 
