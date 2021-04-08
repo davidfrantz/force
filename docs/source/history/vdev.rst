@@ -33,6 +33,10 @@ Main release: TBA
 
 * **FORCE HLPS**
 
+  * in force-higher-level, TSA sub-module: 
+    Fixed a coredump that occured when using ``OUTPUT_FB* = FALSE AND OUTPUT_CA* = TRUE``.
+    Thanks to Matt Clark for reporting this issue.
+
   * A new submodule is available: ``UDF`` plug-in, enabled by a lot of support by Andreas Rabe.
     This submodule is an extension of the plug-in functionality introduced in v3.6.0.
     Python UDFs can now be simply plugged into FORCE, thus running custom Python code without re-compiling FORCE.
