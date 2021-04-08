@@ -125,7 +125,7 @@ int p = o;
   info[p].prodlen  = phl->ny;
   info[p].bandname = NULL;
   info[p].prodtype = _year_;
-  info[p].enable   = phl->tsa.fld.ofby+phl->tsa.fld.otry;
+  info[p].enable   = phl->tsa.fld.ofby+phl->tsa.fld.otry+phl->tsa.fld.ocay;
   info[p].write    = phl->tsa.fld.ofby;
   info[p++].ptr    = &ts->fby_;
 
@@ -156,7 +156,7 @@ int p = o;
   info[p].prodlen  = phl->nq;
   info[p].bandname = NULL;
   info[p].prodtype = _quarter_;
-  info[p].enable   = phl->tsa.fld.ofbq+phl->tsa.fld.otrq;
+  info[p].enable   = phl->tsa.fld.ofbq+phl->tsa.fld.otrq+phl->tsa.fld.ocaq;
   info[p].write    = phl->tsa.fld.ofbq;
   info[p++].ptr    = &ts->fbq_;
 
@@ -187,7 +187,7 @@ int p = o;
   info[p].prodlen  = phl->nm;
   info[p].bandname = NULL;
   info[p].prodtype = _month_;
-  info[p].enable   = phl->tsa.fld.ofbm+phl->tsa.fld.otrm;
+  info[p].enable   = phl->tsa.fld.ofbm+phl->tsa.fld.otrm+phl->tsa.fld.ocam;
   info[p].write    = phl->tsa.fld.ofbm;
   info[p++].ptr    = &ts->fbm_;
 
@@ -218,7 +218,7 @@ int p = o;
   info[p].prodlen  = phl->nw;
   info[p].bandname = NULL;
   info[p].prodtype = _week_;
-  info[p].enable   = phl->tsa.fld.ofbw+phl->tsa.fld.otrw;
+  info[p].enable   = phl->tsa.fld.ofbw+phl->tsa.fld.otrw+phl->tsa.fld.ocaw;
   info[p].write    = phl->tsa.fld.ofbw;
   info[p++].ptr    = &ts->fbw_;
 
@@ -249,7 +249,7 @@ int p = o;
   info[p].prodlen  = phl->nd;
   info[p].bandname = NULL;
   info[p].prodtype = _day_;
-  info[p].enable   = phl->tsa.fld.ofbd+phl->tsa.fld.otrd;
+  info[p].enable   = phl->tsa.fld.ofbd+phl->tsa.fld.otrd+phl->tsa.fld.ocad;
   info[p].write    = phl->tsa.fld.ofbd;
   info[p++].ptr    = &ts->fbd_;
 
@@ -607,7 +607,7 @@ brick_compile_info_t *info = NULL;
 
     //printf("%03d: compiling %s product? ", o, info[o].prodname);
     
-    if (info[o].enable){
+    if (info[o].enable > 0){
       
       //printf("Yes\n");
       
