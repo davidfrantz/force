@@ -132,11 +132,16 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Double. Valid values: ]0,BLOCK_SIZE]
     | ``LSM_RADIUS = 50``
   
-
   * This parameter determines if the kernel for landscape metrics calculation is circular or squared.
     
     | *Type:* Character. Valid values: {CIRCLE,SQUARED}
     | ``LSM_KERNEL_SHAPE = CIRCLE``
+    
+  * This parameter defines the minimum size (in pixels) of an area to be considered as a patch. Patches with fewer pixels will be omitted.
+    Mind that this parameter has an effect on all metrics, inlcuding garithmetic mean, maximum value, ...
+    
+    | *Type:* Double. Valid values: ]0,BLOCK_SIZE]
+    | ``LSM_MIN_PATCHSIZE = 3``  
  
   * This parameter defines the type of the threshold that is used to define the foreground class (greater then, greater than or equal to, less than, less than or equal to, equal to). 
     This parameter is a character list, which defines the threshold type for each feature given.

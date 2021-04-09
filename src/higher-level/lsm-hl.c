@@ -202,6 +202,7 @@ int maxVal = 0;
 int logCounter = 0;
 int validDataPixels = 0;
 int kernelSize = (phl->lsm.radius * 2 + 1) * (phl->lsm.radius * 2 + 1);
+double minPatchSize = phl->lsm.minpatchsize;
 int width;
 small *newFeatures = NULL;
 double mx, vx;
@@ -296,7 +297,7 @@ float unit_perim = 0;
     }
 
     // make objects and delete small ones
-    binary_to_objects(newFeatures, nx, ny, 3, &CCL, &SIZE, &nobj);
+    binary_to_objects(newFeatures, nx, ny, minPatchSize, &CCL, &SIZE, &nobj);
     if (nobj < 1) continue;
 
 

@@ -2065,6 +2065,14 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "LSM_RADIUS = 50\n");
+    
+  if (verbose){
+    fprintf(fp, "# This parameter defines the minimum size (in pixels) of an area to be considered as a patch.\n");
+    fprintf(fp, "# Patches with fewer pixels will be omitted. Mind that this parameter has an effect on\n");
+    fprintf(fp, "# all metrics, inlcuding garithmetic mean, maximum value, ...\n");
+    fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
+  }
+  fprintf(fp, "LSM_MIN_PATCHSIZE = 3\n");
 
   if (verbose){
     fprintf(fp, "# This parameter determines if the kernel for landscape metrics calculation\n");
