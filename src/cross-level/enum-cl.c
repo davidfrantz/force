@@ -172,7 +172,7 @@ const tagged_enum_t _TAGGED_ENUM_TXT_[_TXT_LENGTH_] = {
   { _TXT_GRD_, "GRD" }, { _TXT_THT_, "THT" }, { _TXT_BHT_, "BHT" }};
 
 const tagged_enum_t _TAGGED_ENUM_QUERY_[_QUERY_LENGTH_] = {
-  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_LT_, "LT" }};
+  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_GE_, "GE" }, { _QUERY_LT_, "LT" }, { _QUERY_LE_, "LE" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
   { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
