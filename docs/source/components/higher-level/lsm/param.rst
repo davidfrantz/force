@@ -138,12 +138,12 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {CIRCLE,SQUARED}
     | ``LSM_KERNEL_SHAPE = CIRCLE``
  
-  * This parameter defines the type of the threshold that is used to define the foreground class (greater then, less than, equal). 
+  * This parameter defines the type of the threshold that is used to define the foreground class (greater then, greater than or equal to, less than, less than or equal to, equal to). 
     This parameter is a character list, which defines the threshold type for each feature given.
     The list needs to be as long as there are features (including bands).
     
-    | *Type:* Character list. Valid values: {GT,LT,EQ}
-    | ``LSM_THRESHOLD_TYPE = EQ LT EQ EQ GT LT EQ LT GT EQ GT EQ GT GT GT LT LT EQ GT GT GT EQ GT LT LT LT``
+    | *Type:* Character list. Valid values: {GT,GE,LT,LE,EQ}
+    | ``LSM_THRESHOLD_TYPE = EQ LT EQ EQ GT LT EQ LT GE EQ GT EQ GT GT GT LE LE EQ GT GT GT EQ GE LT LT LT``
 
   * This parameter defines the threshold. 
     All pixels that are greater than, lower than or equal to this threshold are defined as foreground class (in dependence of LSM_THRESHOLD_TYPE). 

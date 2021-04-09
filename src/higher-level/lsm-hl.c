@@ -277,9 +277,15 @@ float unit_perim = 0;
             if (features[f].dat[0][p] == phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_GT_:
+            if (features[f].dat[0][p] > phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_GE_:
             if (features[f].dat[0][p] >= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_LT_:
+            if (features[f].dat[0][p] < phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_LE_:
             if (features[f].dat[0][p] <= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           default:
