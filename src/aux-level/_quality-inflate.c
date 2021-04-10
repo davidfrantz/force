@@ -53,7 +53,7 @@ int b, p;
 cube_t *cube = NULL;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 3){ printf("Usage: %s QAI dir\n\n", argv[0]); exit(1);}
 
   // parse arguments

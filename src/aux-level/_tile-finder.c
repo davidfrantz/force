@@ -43,7 +43,7 @@ double res;
 cube_t *cube = NULL;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 5){ printf("usage: %s datacube lon lat res\n\n", argv[0]); return FAILURE;}
 
 

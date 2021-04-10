@@ -59,7 +59,7 @@ GDALDriverH driver;
 progress_t  pro;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 2){ printf("usage: %s parameter-file\n\n", argv[0]); return FAILURE;}
 
 

@@ -75,7 +75,7 @@ int interleave;
 enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc  < 3){ printf("Usage: %s file1 file2 [etc] outfile.\n", argv[0]);
                   printf("  At least two input files need to be given\n\n"); 
                   return FAILURE;}

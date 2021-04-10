@@ -73,7 +73,7 @@ int err;
 GDALDriverH driver;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 3){
     printf("usage: %s image-dir parameter-file\n\n", argv[0]);
     return FAILURE;
@@ -103,7 +103,7 @@ GDALDriverH driver;
   // get command line parameters
   copy_string(pl2->d_level1, NPOW_10, argv[1]);
   copy_string(pl2->f_par,    NPOW_10, argv[2]);
-  check_arg(argv[2]);
+  konami_args(argv[2]);
 
 
   // make GDAL less verbose

@@ -48,7 +48,7 @@ char **bmeta = NULL;
 const char *bname = NULL;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 3){ printf("Usage: %s src dst\n\n", argv[0]); return FAILURE;}
 
 

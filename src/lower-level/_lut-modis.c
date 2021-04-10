@@ -58,7 +58,7 @@ int nchar;
 
 
   /** usage **/
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc < 5 || (argc > 5 && argc != 11)){
     printf("usage: %s coords dir-wvp dir-geometa dir-eoshdf\n", argv[0]);
     printf("           [start-year start-month start-day\n");

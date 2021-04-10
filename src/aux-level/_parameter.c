@@ -76,7 +76,7 @@ int level, input_level, type;
 bool verbose;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 4) usage(argv[0]);
 
   dname = argv[1];

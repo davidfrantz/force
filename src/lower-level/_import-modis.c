@@ -205,7 +205,7 @@ char proj[NPOW_10];
 short nodata = -9999;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 3){
     printf("usage: %s hdf-image out-dir\n\n", argv[0]);
     return FAILURE;

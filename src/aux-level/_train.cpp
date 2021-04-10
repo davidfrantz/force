@@ -56,7 +56,7 @@ Ptr<TrainData> TrainData;
 time_t TIME;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 2){
     printf("usage: %s parameter-file\n\n", argv[0]);
     return FAILURE;
@@ -67,7 +67,7 @@ time_t TIME;
   train = allocate_param_train();
   
   train->f_par = argv[1];
-  check_arg(argv[1]);
+  konami_args(argv[1]);
 
   // parse parameter file
   if (parse_param_train(train) == FAILURE){
