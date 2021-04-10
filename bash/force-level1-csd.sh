@@ -247,6 +247,18 @@ if [ ! -w "$POOL" ]; then
   show_help "$(printf "%s\n       " "Level 1 datapool folder does not exist or is not writeable.")"
 fi
 
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  BOTO_CONFIG=$HOME/.boto
+else
+  BOTO_CONFIG=$FORCE_CREDENTIALS/.boto
+fi
+export BOTO_CONFIG
+
+if [ ! -r $BOTO_CONFIG ]; then
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
+fi
+
+
 # ======================================
 # check type of AOI
 # 1 - shapefile
