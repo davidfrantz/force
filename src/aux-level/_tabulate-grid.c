@@ -60,7 +60,7 @@ coord_t geo[4], map[4], min, max, tile;
 cube_t *cube = NULL;
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  if (argc >= 2) konami_args(argv[1]);
   if (argc != 7){ printf("usage: %s datacube bottom top left right format\n\n", argv[0]); 
                   printf("             bottom top left right in geographic coordinates\n");
                   printf("             format: shp or kml\n\n");
