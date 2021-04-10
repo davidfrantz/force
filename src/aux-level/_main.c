@@ -28,6 +28,7 @@ This program is the general entry point to FORCE
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
@@ -35,12 +36,63 @@ This program is the general entry point to FORCE
 #include "../cross-level/konami-cl.h"
 
 
+void usage(char *exe){
+
+
+  printf("Usage: %s [-h] [-v]\n", exe);
+
+  return;
+}
+
+
+void parse_args(int argc, char *argv[]){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt (argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0]);
+        exit(SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Entrypoint, print short disclaimer, available modules etc.\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          printf("Unknown option `-%c'.\n", optopt);
+        } else {
+          printf("Unknown option character `\\x%x'.\n", optopt);
+        }
+        exit(FAILURE);
+      default:
+        printf("Error parsing arguments.\n");
+        exit(FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  if (optind < argc){
+    konami_args(argv[optind]);
+    printf("Unknown non-optional parameter.\n");
+    usage(argv[0]);
+    exit(FAILURE);
+  }
+
+  return;
+}
+
 
 int main ( int argc, char *argv[] ){
 char user[NPOW_10];
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  parse_args(argc, argv);
 
   if (getlogin_r(user, NPOW_10) != 0) copy_string(user, NPOW_10, "user");
 
