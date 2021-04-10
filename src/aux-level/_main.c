@@ -39,7 +39,7 @@ This program is the general entry point to FORCE
 void usage(char *exe){
 
 
-  printf("Usage: %s [-h] [-v]\n", exe);
+  printf("Usage: %s [-h] [-v] [-i]\n", exe);
 
   return;
 }
