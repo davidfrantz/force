@@ -56,3 +56,4 @@ COPY --from=force_builder $HOME/bin $HOME/bin
 
 WORKDIR /home/docker
 
+CMD ["force"]
