@@ -27,42 +27,108 @@ This program copies FORCE metadata from one file to another
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
+#include "../cross-level/string-cl.h"
 
 
 /** Geospatial Data Abstraction Library (GDAL) **/
-#include "gdal.h"           // public (C callable) GDAL entry points
-#include "cpl_conv.h"       // various convenience functions for CPL
-#include "cpl_string.h"       // various convenience functions for strings
+#include "gdal.h"       // public (C callable) GDAL entry points
+#include "cpl_conv.h"   // various convenience functions for CPL
+#include "cpl_string.h" // various convenience functions for strings
 
 
-int main ( int argc, char *argv[] ){
+typedef struct {
+  int n = 2;
+  char fsrc[NPOW_10];
+  char fdst[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] src dst\n", exe);
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Copy FORCE metadata from one file to another\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fsrc, NPOW_10, argv[optind++]);
+      copy_string(args->fdst, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
+int main (int argc, char *argv[]){
+args_t args;
 int b, nb;
 GDALDatasetH src, dst;
 GDALRasterBandH bsrc, bdst;
-char  *fsrc  = NULL;
-char  *fdst  = NULL;
 char **meta  = NULL;
 char **bmeta = NULL;
 const char *bname = NULL;
 
 
-  if (argc >= 2) konami_args(argv[1]);
-  if (argc != 3){ printf("Usage: %s src dst\n\n", argv[0]); return FAILURE;}
-
-
-  fsrc = argv[1];
-  fdst = argv[2];
-
+  parse_args(argc, argv, &args);
 
   GDALAllRegister();
 
-  if ((src = GDALOpenEx(fsrc, GDAL_OF_READONLY, NULL, NULL, NULL)) == NULL){
-    printf("unable to open %s\n\n", fsrc); return FAILURE;}
+  if ((src = GDALOpenEx(args.fsrc, GDAL_OF_READONLY, NULL, NULL, NULL)) == NULL){
+    printf("unable to open %s\n\n", args.fsrc); return FAILURE;}
 
-  if ((dst = GDALOpenEx(fdst, GDAL_OF_UPDATE,   NULL, NULL, NULL)) == NULL){
-    printf("unable to open %s\n\n", fdst); return FAILURE;}
+  if ((dst = GDALOpenEx(args.fdst, GDAL_OF_UPDATE,   NULL, NULL, NULL)) == NULL){
+    printf("unable to open %s\n\n", args.fdst); return FAILURE;}
 
   if ((nb = GDALGetRasterCount(src)) != GDALGetRasterCount(dst)){
     printf("src and dst images have different number of bands\n\n"); 

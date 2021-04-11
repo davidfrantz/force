@@ -36,11 +36,12 @@ This program is the general entry point to FORCE
 #include "../cross-level/konami-cl.h"
 
 
-void usage(char *exe){
+void usage(char *exe, int exit_code){
 
 
   printf("Usage: %s [-h] [-v] [-i]\n", exe);
 
+  exit(exit_code);
   return;
 }
 
@@ -52,11 +53,10 @@ int opt;
   opterr = 0;
 
   // optional parameters
-  while ((opt = getopt (argc, argv, "hvi")) != -1){
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
     switch(opt){
       case 'h':
-        usage(argv[0]);
-        exit(SUCCESS);
+        usage(argv[0], SUCCESS);
       case 'v':
         printf("FORCE version: %s\n", _VERSION_);
         exit(SUCCESS);
@@ -65,23 +65,22 @@ int opt;
         exit(SUCCESS);
       case '?':
         if (isprint(optopt)){
-          printf("Unknown option `-%c'.\n", optopt);
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
         } else {
-          printf("Unknown option character `\\x%x'.\n", optopt);
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
         }
-        exit(FAILURE);
+        usage(argv[0], FAILURE);
       default:
-        printf("Error parsing arguments.\n");
-        exit(FAILURE);
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
     }
   }
 
   // non-optional parameters
   if (optind < argc){
     konami_args(argv[optind]);
-    printf("Unknown non-optional parameter.\n");
-    usage(argv[0]);
-    exit(FAILURE);
+    fprintf(stderr, "Unknown non-optional parameter.\n");
+    usage(argv[0], FAILURE);
   }
 
   return;
