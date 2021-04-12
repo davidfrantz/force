@@ -61,8 +61,10 @@ void usage(char *exe, int exit_code){
   printf("  -m  = show available modules\n");
   printf("  -c  = generate more compact parameter files without comments\n");
   printf("\n");
-  printf("  'parameter-file' will be generated for FORCE 'module'.\n");
-  printf("  Use -m to show available modules.\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'parameter-file': output file\n");
+  printf("  - 'module':         FORCE module.\n");
+  printf("                      Use -m to show available modules.\n");
   printf("\n");
 
   exit(exit_code);

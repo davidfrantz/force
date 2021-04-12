@@ -40,6 +40,11 @@ void usage(char *exe, int exit_code){
 
 
   printf("Usage: %s [-h] [-v] [-i]\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
 
   exit(exit_code);
   return;

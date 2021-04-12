@@ -51,7 +51,16 @@ typedef struct {
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] src dst\n", exe);
+  printf("Usage: %s [-h] [-v] [-i] src-file dst-file\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'src-file': source of metadata\n");
+  printf("  - 'dst-file': destination of metadata\n");
+  printf("\n");
 
   exit(exit_code);
   return;
