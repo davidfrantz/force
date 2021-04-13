@@ -140,7 +140,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
   * This parameter defines the minimum size (in pixels) of an area to be considered as a patch. Patches with fewer pixels will be omitted.
     Mind that this parameter has an effect on all metrics, inlcuding garithmetic mean, maximum value, ...
     
-    | *Type:* Double. Valid values: ]0,BLOCK_SIZE]
+    | *Type:* Integer. Valid values: ]1,BLOCK_SIZE]
     | ``LSM_MIN_PATCHSIZE = 3``  
  
   * This parameter defines the type of the threshold that is used to define the foreground class (greater then, greater than or equal to, less than, less than or equal to, equal to). 
