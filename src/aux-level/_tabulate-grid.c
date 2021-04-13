@@ -82,8 +82,8 @@ void parse_args(int argc, char *argv[], args_t *args){
 int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
-const char *separator = ",";
-int i = 0;
+const char *separator = "/,";
+int i;
 
 
   opterr = 0;
@@ -109,11 +109,16 @@ int i = 0;
       case 'b':
         copy_string(buffer, NPOW_10, optarg);
         ptr = strtok(buffer, separator);
+        i = 0;
         while (ptr != NULL){
-          args->bbox[i++] = atof(ptr);
+          if (i < 4) args->bbox[i] = atof(ptr);
           ptr = strtok(NULL, separator);
+          i++;
         }
-        if (i != 4) fprintf(stderr, "Bounding box must have 4 numbers.\n");
+        if (i != 4){
+          fprintf(stderr, "Bounding box must have 4 numbers.\n");
+          usage(argv[0], FAILURE);
+        } 
         break;
       case 'f':
         copy_string(args->format, NPOW_10, optarg);
