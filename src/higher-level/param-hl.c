@@ -413,6 +413,7 @@ void register_lsm(params_t *params, par_hl_t *phl){
 
 
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
+  register_int_par(params,     "LSM_MIN_PATCHSIZE",    0, 1e6,  &phl->lsm.minpatchsize);
   register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
   register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);

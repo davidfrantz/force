@@ -53,7 +53,12 @@ Main release: TBA
     Both UDF types are supported in the ``TSA`` submodule, too.
 
     A tutorial is planned to showcase the usage.
-
+    
+  * in force-higher-level, LSM sub-module: 
+    
+    Franz Schug added two new features. 
+    1) The submodule now takes the minimum size of a patch to be considered for metrics calculation as a parameter; new parameter: ``LSM_MIN_PATCHSIZE``. 
+    2) force-lsm now offers greater than or equal to (GE) and lower than or equal to (LE) as additional threshold definitions (``LSM_THRESHOLD_TYPE``).
 
 * **FORCE AUX**
 
