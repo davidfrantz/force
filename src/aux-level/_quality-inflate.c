@@ -41,7 +41,6 @@ This program inflates QAI layers
 #include "gdal.h"           // public (C callable) GDAL entry points
 
 
-
 typedef struct {
   int n = 2;
   char finp[NPOW_10];
