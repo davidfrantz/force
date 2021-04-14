@@ -58,6 +58,11 @@ Main release: TBA
 * **FORCE AUX**
 
   * force-pyramid takes levels and resampling method as additional arguments.
+  
+* **FORCE LSM**
+
+  * force-lsm now takes the minimum size of a patch to be considered for metrics calculation as a parameter
+  * force-lsm now offers greater than or equal to (GE) and lower than or equal to (LE) as additional threshold definitions
 
 
 #-- No changes yet, master is in sync with develop.
