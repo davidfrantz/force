@@ -202,7 +202,7 @@ int maxVal = 0;
 int logCounter = 0;
 int validDataPixels = 0;
 int kernelSize = (phl->lsm.radius * 2 + 1) * (phl->lsm.radius * 2 + 1);
-double minPatchSize = phl->lsm.minpatchsize;
+int minPatchSize = phl->lsm.minpatchsize;
 int width;
 small *newFeatures = NULL;
 double mx, vx;
