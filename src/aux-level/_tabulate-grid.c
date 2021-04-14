@@ -48,7 +48,7 @@ enum { _ll_, _lr_, _ul_, _ur_ };
 
 
 typedef struct {
-  int n = 1;
+  int n;
   double bbox[4]; // bottom,top,left,right
   char dcube[NPOW_10];
   char format[NPOW_10];
@@ -137,6 +137,8 @@ int i;
   }
 
   // non-optional parameters
+  args->n = 1;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){

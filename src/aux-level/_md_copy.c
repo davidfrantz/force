@@ -42,7 +42,7 @@ This program copies FORCE metadata from one file to another
 
 
 typedef struct {
-  int n = 2;
+  int n;
   char fsrc[NPOW_10];
   char fdst[NPOW_10];
 } args_t;
@@ -98,6 +98,8 @@ int opt;
   }
 
   // non-optional parameters
+  args->n = 2;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){

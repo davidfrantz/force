@@ -39,7 +39,7 @@ This program trains (and validates) machine learning models
 
 
 typedef struct {
-  int n = 1;
+  int n;
   char fprm[NPOW_10];
 } args_t;
 
@@ -93,6 +93,8 @@ int opt;
   }
 
   // non-optional parameters
+  args->n = 1;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){

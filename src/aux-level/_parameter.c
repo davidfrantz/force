@@ -40,7 +40,7 @@ parameterize the FORCE programs
 
 
 typedef struct {
-  int  n = 2;
+  int  n;
   char fname[NPOW_10];
   char module_tag[NPOW_10];
   int  module;
@@ -177,6 +177,8 @@ int opt;
   }
 
   // non-optional parameters
+  args->n = 2;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){

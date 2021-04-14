@@ -55,7 +55,7 @@ typedef struct {
 
 
 typedef struct {
-  int n = 1;
+  int n;
   char **fsrc;
   char  fdst[NPOW_10];
   char  ddst[NPOW_10];
@@ -128,6 +128,8 @@ bool o;
   }
 
   // non-optional parameters
+  args->n = 1;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if ((args->n = argc - optind) >= 2){

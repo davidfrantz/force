@@ -42,7 +42,7 @@ This program inflates QAI layers
 
 
 typedef struct {
-  int n = 2;
+  int n;
   char finp[NPOW_10];
   char dout[NPOW_10];
 } args_t;
@@ -98,6 +98,8 @@ int opt;
   }
 
   // non-optional parameters
+  args->n = 2;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){

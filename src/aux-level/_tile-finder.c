@@ -39,7 +39,7 @@ input coordinate.
 
 
 typedef struct {
-  int n = 1;
+  int n;
   double geo[2]; // lon/lat
   double res;
   char dcube[NPOW_10];
@@ -133,6 +133,8 @@ int i;
   }
 
   // non-optional parameters
+  args->n = 1;
+
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){
