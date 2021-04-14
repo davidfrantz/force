@@ -354,6 +354,7 @@ typedef struct {
 // landscape metrics
 typedef struct {
   double radius;
+  int minpatchsize;
   int *query;
   int nquery;
   int *threshold;
