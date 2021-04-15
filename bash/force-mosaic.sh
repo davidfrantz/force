@@ -72,7 +72,7 @@ function mosaic_this(){
   ONAME=${ONAME/.tif/.vrt}
 
   # file list (relative to $OUT)
-  find .. -name $prd > $LIST
+  find -L .. -name $prd > $LIST
 
   # file list exists?
   if [ ! -f $LIST ]; then
@@ -124,7 +124,7 @@ export -f mosaic_this
 
 PRODUCTS="force-mosaic_products.txt"
 
-find .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
+find -L .. \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
 NPROD=$(wc -l $PRODUCTS | cut -d " " -f 1)
 
 echo "mosaicking $NPROD products:"
