@@ -187,8 +187,8 @@ done
 
 
 # test if force-l2ps was compiled in DEBUG mode
-$BINDIR/force-l2ps ? ?
-if [ $? -eq 1 ]; then
+$BINDIR/force-l2ps -d
+if [ $? -ne 0 ]; then
   echo "force-l2ps was compiled in DEBUG mode"
   if [ $NUM -gt 1 ] || [ $CPU -gt 1 ]; then
     echo "  cannot use DEBUG mode in force-level2"

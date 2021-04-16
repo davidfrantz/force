@@ -140,9 +140,9 @@ Ptr<TrainData> TrainData;
 time_t TIME;
 
 
-  parse_args(argc, argv, &args);
-
   time(&TIME);
+
+  parse_args(argc, argv, &args);
   
   train = allocate_param_train();
   copy_string(train->f_par, NPOW_10, args.fprm);

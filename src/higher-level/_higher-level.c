@@ -140,11 +140,10 @@ GDALDriverH driver;
 progress_t  pro;
 
 
-  parse_args(argc, argv, &args);
-
-
   /** INITIALIZING
   +** *******************************************************************/
+  
+  parse_args(argc, argv, &args);
 
   phl = allocate_param_higher();
   copy_string(phl->f_par, NPOW_10, args.fprm);
