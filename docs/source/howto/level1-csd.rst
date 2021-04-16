@@ -36,7 +36,7 @@ Type the following command to start the authorization process
 
 
 Follow the on-screen instructions to authorize access to the Google Cloud Platform APIs.
-A project name is not required, just hit enter or make up a name when asked.
+When asked for a project name, just type in any name. It is not necessary to create a project first.
 
 
 Downloading the metadata catalogues
