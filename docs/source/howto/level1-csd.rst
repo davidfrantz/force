@@ -383,15 +383,10 @@ If Landsat and Sentinel-2 data is queried at the same time, two separate files w
 Information for Docker users
 ----------------------------
 
-If you are running FORCE in Docker, there won't be user folder in the home directory.
+If you are running FORCE in Docker, there is a different user in the container than on the host machine.
 This is a problem for gsutil as the config file is stored there by default.
-You can work around this by mounting the folder where your ``.boto`` file is located and set an environment variable that points gsutil there.
-
-.. code-block:: none
-
-    # this will run an interactive docker session
-    # -v mounts a folder in docker, --env sets an environment variable in docker
-    docker run -it -v /home/yourusername/:/credentials --env BOTO_CONFIG=/credentials/.boto
+You can work around this by mounting the folder where your ``.boto`` file is located (usually your home directory) and set an environment variable that points gsutil there.
+For details about this, please see our instructions on :ref:`Docker usage <docker_use>`.
 
 ------------
 
