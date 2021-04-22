@@ -849,6 +849,17 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
   }
   fprintf(fp, "SENSORS = LND08 SEN2A SEN2B\n");
 
+  if (verbose){
+    fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
+    fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, \n");
+    fprintf(fp, "# LND08, MOD01, MOD02.\n");
+    fprintf(fp, "# A material-specific spectral harmonization will be performed, which will convert the \n");
+    fprintf(fp, "# spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be \n");
+    fprintf(fp, "# predicted, too.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "SPECTRAL_ADJUST = FALSE\n");
+
   return;
 }
 
