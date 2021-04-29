@@ -1056,12 +1056,18 @@ double tol = 5e-3;
   
   if (ard_type == _ARD_REF_ || ard_type == _ARD_AUX_){
     if (date_ard(&date, bname) != SUCCESS){
-      printf("getting date of ARD failed\n");}
+      printf("getting date of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (product_ard(prd, NPOW_02, bname) != SUCCESS){
-      printf("getting product of ARD failed\n");}
+      printf("getting product of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (sen != NULL){
       if (sensor_ard(&sid, sen, bname) != SUCCESS){
-        printf("getting sensor of ARD failed\n");}
+        printf("getting sensor of ARD failed (%s)\n", bname); 
+        exit(FAILURE);
+      }
     }
   } else init_date(&date);
     
