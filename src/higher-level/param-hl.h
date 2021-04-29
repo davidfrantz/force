@@ -235,11 +235,12 @@ typedef struct {
 
 // user-defined function
 typedef struct {
-  char  *f_code;
-  int    out;
-  int    nb;
-  char **bandname;
-  int    type;
+  char   *f_code;
+  int     out;
+  int     nb;
+  char  **bandname;
+  date_t *date;
+  int     type;
 } par_udf_t;
 
 // aggregation statistics

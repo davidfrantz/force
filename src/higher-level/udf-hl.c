@@ -29,12 +29,13 @@ This file contains functions for plug-in UDF scripts
 
 
 typedef struct {
-  int  prodlen;
-  char **bandname;
-  char prodname[NPOW_03];
-  int  prodtype;
-  int  enable;
-  int  write;
+  int      prodlen;
+  char   **bandname;
+  date_t  *date;
+  char     prodname[NPOW_03];
+  int      prodtype;
+  int      enable;
+  int      write;
   short ***ptr;
 } brick_compile_info_t;
 
@@ -50,6 +51,7 @@ int info_udf_pyp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
   copy_string(info[o].prodname, NPOW_02, "PYP");
   info[o].prodlen  = phl->udf.pyp.nb;
   info[o].bandname = phl->udf.pyp.bandname;
+  info[o].date     = phl->udf.pyp.date;
   info[o].prodtype = _pyp_;
   info[o].enable   = phl->udf.pyp.out;
   info[o].write    = phl->udf.pyp.out;
@@ -64,6 +66,7 @@ int info_udf_rsp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
   copy_string(info[o].prodname, NPOW_02, "RSP");
   info[o].prodlen  = phl->udf.rsp.nb;
   info[o].bandname = phl->udf.rsp.bandname;
+  info[o].date     = phl->udf.rsp.date;
   info[o].prodtype = _rsp_;
   info[o].enable   = phl->udf.rsp.out;
   info[o].write    = phl->udf.rsp.out;
@@ -87,8 +90,6 @@ int info_udf_rsp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t **compile_udf(ard_t *ard, udf_t *udf, par_hl_t *phl, cube_t *cube, int nt, int *nproduct){
 brick_t **UDF = NULL;
-int b;
-date_t date;
 int o = 0, nprod;
 int error = 0;
 
@@ -108,28 +109,13 @@ brick_compile_info_t *info = NULL;
 
   alloc((void**)&UDF, nprod, sizeof(brick_t*));
 
-  //printf("scale, date, udf, bandnames, and sensor ID must be set in compile_udf!!!\n");
-
-  
   for (o=0; o<nprod; o++){
 
     if (info[o].enable){
 
-      if ((UDF[o] = compile_udf_brick(ard[0].DAT, &info[o], phl)) == NULL || (  *info[o].ptr = get_bands_short(UDF[o])) == NULL){
-        printf("Error compiling %s product. ", info[o].prodname); error++;
-      } else {
-
-        init_date(&date);
-        set_date(&date, 2000, 1, 1);
-
-        for (b=0; b<info[o].prodlen; b++){
-          set_brick_sensor(UDF[o],   b, "BLEND");
-          set_brick_date(UDF[o], b, date);
-        }
-
-        //print_brick_info(UDF[o]);
-
-      }
+      if ((UDF[o] = compile_udf_brick(ard[0].DAT, &info[o], phl)) == NULL || 
+          (*info[o].ptr = get_bands_short(UDF[o])) == NULL){
+        printf("Error compiling %s product. ", info[o].prodname); error++; }
 
     } else {
       UDF[o]  = NULL;
@@ -137,8 +123,6 @@ brick_compile_info_t *info = NULL;
     }
 
   }
-
-
 
 
   if (error > 0){
@@ -166,7 +150,6 @@ brick_compile_info_t *info = NULL;
 brick_t *compile_udf_brick(brick_t *from, brick_compile_info_t *info, par_hl_t *phl){
 int b;
 brick_t *brick = NULL;
-date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
 int nchar;
@@ -203,9 +186,10 @@ int nchar;
 
   for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
-    set_brick_date(brick, b, date);
     set_brick_bandname(brick, b, info->bandname[b]);
     set_brick_domain(brick, b, info->bandname[b]);
+    set_brick_date(brick, b, info->date[b]);
+    set_brick_sensor(brick, b, "BLEND");
   }
 
   return brick;
