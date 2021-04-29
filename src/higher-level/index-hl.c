@@ -827,6 +827,10 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
       cite_me(_CITE_KNDVI_);
       index_kernelized(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
       break;
+    case _IDX_NDR_:
+      cite_me(_CITE_NDRE_);
+      index_differenced(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
     default:
       printf("unknown INDEX\n");
       break;      

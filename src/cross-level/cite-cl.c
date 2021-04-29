@@ -319,6 +319,13 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Guanter, L., Jung, M., Gamon, J.A., Reichstein, M., & Running, S.W. (2021). "
     "A unified vegetation index for quantifying the terrestrial biosphere. "
     "Science Advances, 7, eabc7447.",
+    false },
+  { "NDRE",
+    "Barnes, E. M., Clarke, T. R., Richards, S. E., Colaizzi, P. D., Haberland, J., "
+    "Kostrzewski, M., ... & Moran, M. S. (2000, July). Coincident detection of crop "
+    "water stress, nitrogen status and canopy density using ground based multispectral "
+    "data. Proceedings of the Fifth International Conference on Precision Agriculture, "
+    "Bloomington, MN, USA (Vol. 1619).",
     false }
 };
 
