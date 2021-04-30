@@ -332,6 +332,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "water stress, nitrogen status and canopy density using ground based multispectral "
     "data. Proceedings of the Fifth International Conference on Precision Agriculture, "
     "Bloomington, MN, USA (Vol. 1619).",
+    false },
+  { "CIre",
+    "Gitelson, A.A., Gritz, Y., Merzlyak, M., 2003. Relationships between leaf "
+    "chlorophyll content and spectral reflectance and algorithms for non-destructive "
+    "chlorophyll assessment in higher plant leaves. J. Plant Physiol. 160, 271282.",
     false }
 };
 

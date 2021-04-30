@@ -217,7 +217,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre}
     | ``INDEX = NDVI EVI NBR``
 
 
@@ -297,6 +297,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     + NDRE1     + Normalized Difference Red Edge Index 1     + (REDEDGE2 - REDEDGE1) / (REDEDGE2 + REDEDGE1)                                            + Gitelson & Merzlyak 1994 +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + NDRE2     + Normalized Difference Red Edge Index 2     + (REDEDGE3 - REDEDGE1) / (REDEDGE3 + REDEDGE1)                                            + Barnes et al. 2000       +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + CIre      + Chlorophyll Index red-edge                 + (REDEDGE3 / REDEDGE1) - 1                                                                + Gitelson et al. 2003     +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     
