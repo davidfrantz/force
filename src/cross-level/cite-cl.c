@@ -320,7 +320,13 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "A unified vegetation index for quantifying the terrestrial biosphere. "
     "Science Advances, 7, eabc7447.",
     false },
-  { "NDRE",
+  { "NDRE1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDRE2",
     "Barnes, E. M., Clarke, T. R., Richards, S. E., Colaizzi, P. D., Haberland, J., "
     "Kostrzewski, M., ... & Moran, M. S. (2000, July). Coincident detection of crop "
     "water stress, nitrogen status and canopy density using ground based multispectral "
