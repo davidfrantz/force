@@ -369,6 +369,15 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
     "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
     false },
+  { "MSRre",
+    "Chen, J., 1996. Evaluation of vegetation indices and modified simple ratio for "
+    "boreal applications. Can. J. Remote Sens. 22, 229242.",
+    false },
+  { "MSRren",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
 };
 
 

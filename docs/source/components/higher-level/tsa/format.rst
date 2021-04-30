@@ -126,6 +126,10 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +                + NDVIre2n+ Normalized Difference Vegetation Index red edge 2 narrow+
 +                +---------+---------------------------------------------------------+
 +                + NDVIre3n+ Normalized Difference Vegetation Index red edge 3 narrow+
++                +---------+---------------------------------------------------------+
++                + MSRre   + Modified Simple Ratio red edge                          +
++                +---------+---------------------------------------------------------+
++                + MSRren  + Modified Simple Ratio red edge narrow                   +
 +----------------+---------+---------------------------------------------------------+
 + 36-38          + Product Type                                                      +
 +                +---------+---------------------------------------------------------+
