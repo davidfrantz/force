@@ -337,7 +337,38 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Gitelson, A.A., Gritz, Y., Merzlyak, M., 2003. Relationships between leaf "
     "chlorophyll content and spectral reflectance and algorithms for non-destructive "
     "chlorophyll assessment in higher plant leaves. J. Plant Physiol. 160, 271282.",
-    false }
+    false },
+  { "NDVIre1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDVIre2",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre1n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre2n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
 };
 
 

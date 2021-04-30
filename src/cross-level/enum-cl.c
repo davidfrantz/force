@@ -73,7 +73,9 @@ const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
   { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       },
   { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    },
   { _IDX_KNV_, "kNDVI"  }, { _IDX_ND1_, "NDRE1"     }, { _IDX_ND2_, "NDRE2"    },
-  { _IDX_CRE_, "CIre"   }};
+  { _IDX_CRE_, "CIre"   }, { _IDX_NR1_, "NDVIre1"   }, { _IDX_NR2_, "NDVIre2"  },
+  { _IDX_NR3_, "NDVIre3"}, { _IDX_N1n_, "NDVIre1n"  }, { _IDX_N2n_, "NDVIre2n" },
+  { _IDX_N3n_, "NDVIre3n"}};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
   { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },

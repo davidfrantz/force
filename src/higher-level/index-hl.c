@@ -153,7 +153,7 @@ int p, t;
 float ind, scale = 10000.0;
 
 
-  #pragma omp parallel private(t,tmp,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  #pragma omp parallel private(t,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
   {
 
     #pragma omp for
@@ -888,6 +888,30 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_CRE_:
       cite_me(_CITE_CIre_);
       index_ratio_minus1(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR1_:
+      cite_me(_CITE_NDVIre1_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR2_:
+      cite_me(_CITE_NDVIre2_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_NR3_:
+      cite_me(_CITE_NDVIre3_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge3, nc, nt, nodata);
+      break;
+    case _IDX_N1n_:
+      cite_me(_CITE_NDVIre1n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_N2n_:
+      cite_me(_CITE_NDVIre2n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_N3n_:
+      cite_me(_CITE_NDVIre3n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge3, nc, nt, nodata);
       break;
     default:
       printf("unknown INDEX\n");

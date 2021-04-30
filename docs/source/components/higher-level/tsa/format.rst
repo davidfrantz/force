@@ -114,6 +114,18 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +                + NDRE2   + Normalized Difference Red Edge Index 2                  +
 +                +---------+---------------------------------------------------------+
 +                + CIre    + Chlorophyll Index Red Edge                              +
++                +---------+---------------------------------------------------------+
++                + NDVIre1 + Normalized Difference Vegetation Index red edge 1       +
++                +---------+---------------------------------------------------------+
++                + NDVIre2 + Normalized Difference Vegetation Index red edge 2       +
++                +---------+---------------------------------------------------------+
++                + NDVIre3 + Normalized Difference Vegetation Index red edge 3       +
++                +---------+---------------------------------------------------------+
++                + NDVIre1n+ Normalized Difference Vegetation Index red edge 1 narrow+
++                +---------+---------------------------------------------------------+
++                + NDVIre2n+ Normalized Difference Vegetation Index red edge 2 narrow+
++                +---------+---------------------------------------------------------+
++                + NDVIre3n+ Normalized Difference Vegetation Index red edge 3 narrow+
 +----------------+---------+---------------------------------------------------------+
 + 36-38          + Product Type                                                      +
 +                +---------+---------------------------------------------------------+
