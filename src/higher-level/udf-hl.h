@@ -21,18 +21,35 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Version number
+User-defined function header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef VERSION_CL_H
-#define VERSION_CL_H
+#ifndef UDF_HL_H
+#define UDF_HL_H
+
+#include <stdio.h>   // core input and output functions
+#include <stdlib.h>  // standard general utilities library
+
+#include "../cross-level/const-cl.h"
+#include "../cross-level/brick-cl.h"
+#include "../higher-level/param-hl.h"
+#include "../higher-level/read-ard-hl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define _VERSION_ "3.6.5-dev"
+typedef struct {
+  short **pyp_;
+  short **rsp_;
+} udf_t;
+
+#include "../higher-level/py-udf-hl.h"
+
+brick_t **udf_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
+
 
 #ifdef __cplusplus
 }

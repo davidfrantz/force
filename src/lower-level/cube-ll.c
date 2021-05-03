@@ -163,8 +163,7 @@ int cube_nx, cube_ny, cube_nc;
 
           if (get_off(CUBED[prod], p)) continue;
           
-          if (get_cloud(CUBED[prod], p) > 0 || get_shadow(CUBED[prod], p) || 
-              get_snow(CUBED[prod], p)) ncld++;
+          if (get_cloud(CUBED[prod], p) > 0 || get_shadow(CUBED[prod], p)) ncld++;
           ndata++;
           empty = false;
 

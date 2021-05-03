@@ -202,6 +202,7 @@ int maxVal = 0;
 int logCounter = 0;
 int validDataPixels = 0;
 int kernelSize = (phl->lsm.radius * 2 + 1) * (phl->lsm.radius * 2 + 1);
+int minPatchSize = phl->lsm.minpatchsize;
 int width;
 small *newFeatures = NULL;
 double mx, vx;
@@ -277,9 +278,15 @@ float unit_perim = 0;
             if (features[f].dat[0][p] == phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_GT_:
+            if (features[f].dat[0][p] > phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_GE_:
             if (features[f].dat[0][p] >= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_LT_:
+            if (features[f].dat[0][p] < phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_LE_:
             if (features[f].dat[0][p] <= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           default:
@@ -290,7 +297,7 @@ float unit_perim = 0;
     }
 
     // make objects and delete small ones
-    binary_to_objects(newFeatures, nx, ny, 3, &CCL, &SIZE, &nobj);
+    binary_to_objects(newFeatures, nx, ny, minPatchSize, &CCL, &SIZE, &nobj);
     if (nobj < 1) continue;
 
 

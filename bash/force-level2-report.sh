@@ -22,19 +22,22 @@
 # 
 ##########################################################################
 
+# this script generates a report for FORCE Level-2 processing system executions
+
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
 
 MANDATORY_ARGS=1
 
-export PARALLEL_EXE="parallel"
-export PYRAMID_EXE="gdaladdo"
+export REPORT_EXE="R"
+export REPORT_TEMPLATE="$MISC/force-level2-report.Rmd"
 
 echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
 export -f echoerr
 
-export DEBUG=false # display debug messages?
+export DEBUG=true # display debug messages?
 debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
 export -f debug
 
@@ -46,96 +49,77 @@ cmd_not_found() {      # check required external commands
 }
 export -f cmd_not_found
 
+file_not_found() {      # check required files
+  for file in "$@"; do
+    stat=`which $file`
+    if [ ! -r $file ] ; then echoerr "\"$file\": file not found, terminating..."; exit 1; fi
+  done
+}
+export -f file_not_found
+
 help () {
 cat <<HELP
 
-Usage: $PROG [-hjrl] image [image]*
+Usage: $PROG [-ho] dir-log
 
   -h  = show his help
-  -j  = number of jobs
-        defaults to 'as many as possible'
-  -r  = resampling option
-        default: nearest
-  -l  = levels, comma-separated
-        default: 2 4 8 16
+  -o  = output file
+        defaults to FORCE_L2PS_YYYYMMDD-HHMMSS.html
 
-$PROG:  compute image pyramids
-        see https://force-eo.readthedocs.io/en/latest/components/auxilliary/pyramid.html
+$PROG:  generate Level 2 processing report
+        see https://force-eo.readthedocs.io/en/latest/components/...tbd
 
 HELP
 exit 1
 }
 export -f help
 
-cmd_not_found "$PARALLEL_EXE"; # important, check required commands !!! dies on missing
-cmd_not_found "$PYRAMID_EXE";  # important, check required commands !!! dies on missing
+cmd_not_found "$REPORT_EXE";
+file_not_found "$REPORT_TEMPLATE";
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hj:r:l: --long help,jobs:,resample:,levels: -n "$0" -- "$@"`
+ARGS=`getopt -o ho: --long help,output: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
-# default options
-NJOB=0
-LEVELS="2,4,8,16"
-RESAMPLE="nearest"
 
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -j|--jobs) NJOB="$2"; shift ;;
-    -r|--resample) RESAMPLE="$2"; shift ;;
-    -l|--levels) LEVELS="$2"; shift ;;
+    -o|--output) OUTPUT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
   shift
 done
 
-export LEVELS=$(echo $LEVELS | sed 's/,/ /g')
-export RESAMPLE
-debug "jobs: $NJOB"
-debug "levels: $LEVELS"
-debug "resample: $RESAMPLE"
 
 if [ $# -lt $MANDATORY_ARGS ] ; then 
   echoerr "Mandatory argument is missing."; help
 fi
 
-pyramid(){
+export LOGDIR=$1
 
-  FINP=$(readlink -f $1) # absolute file path
-  BINP=$(basename $FINP) # basename
-  CINP=${BINP%%.*}       # corename (without extension)
-  DINP=$(dirname  $FINP) # directory name
+if [ ! -d $LOGDIR ]; then
+  echoerr "$LOGDIR does not exist."; help
+fi
 
-  debug "$FINP"
-  debug "$BINP"
-  debug "$CINP"
-  debug "$DINP"
+if [ ! -d $LOGDIR ]; then
+  echoerr "$LOGDIR does not exist."; help
+fi
 
-  # input file exists?
-  if [ ! -r $FINP ]; then
-    echoerr "$FINP ist not readable/existing"
-    exit 1
+if [ -z "$OUTPUT" ]; then
+  if [ ! -w $LOGDIR ]; then
+    echoerr "$LOGDIR is not writeable."; help
   fi
+  TIME=$(date +"%Y%m%d-%H%M%S")
+  OUTPUT="$LOGDIR/FORCE_L2PS_$TIME.html"
+fi
+export OUTPUT
+export OUTDIR=`dirname $OUTPUT`;
 
-  # output dir writeable?
-  if [ ! -w $DINP ]; then
-    echoerr "$DINP ist not writeable/existing"
-    exit 1
-  fi
+debug "binary directory: $BIN"
+debug "log directory: $LOGDIR"
+debug "output: $OUTPUT"
 
-  echo "computing pyramids for $BINP"
-  $PYRAMID_EXE -ro --config COMPRESS_OVERVIEW DEFLATE --config BIGTIFF_OVERVIEW YES -r $RESAMPLE $FINP $LEVELS
-
-}
-export -f pyramid
-
-
-# main thing -----------------------------------------------------------------------------
-
-echo "computing pyramids for $# images:"
-
-printf '%s\n' "$@" | $PARALLEL_EXE -j $NJOB pyramid {}
-
+$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTPUT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR'))"

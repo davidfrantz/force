@@ -176,7 +176,8 @@ const tagged_enum_t _TAGGED_ENUM_TXT_[_TXT_LENGTH_] = {
   { _TXT_GRD_, "GRD" }, { _TXT_THT_, "THT" }, { _TXT_BHT_, "BHT" }};
 
 const tagged_enum_t _TAGGED_ENUM_QUERY_[_QUERY_LENGTH_] = {
-  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_LT_, "LT" }};
+  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_GE_, "GE" }, { _QUERY_LT_, "LT" }, 
+  { _QUERY_LE_, "LE" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
   { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
@@ -198,5 +199,7 @@ const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_] = {
 
 const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
   { _RGB_R_,  "RED" }, { _RGB_G_,  "GREEN" }, { _RGB_B_,  "BLUE" }};
-  
-  
+
+const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_] = {
+  { _UDF_PIXEL_,  "PIXEL" }, { _UDF_BLOCK_,  "BLOCK" }};
+

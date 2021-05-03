@@ -57,9 +57,9 @@ enum { _X_, _Y_, _Z_ };
 enum { _MIN_, _MAX_ };
 
 // modules
-enum { _LL_LEVEL2_, _HL_BAP_,    _HL_TSA_, _HL_CSO_, _HL_CFI_, 
-       _HL_L2I_,    _HL_ML_,     _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _HL_LIB_,    _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
+       _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
+       _HL_LIB_,    _HL_UDF_, _AUX_TRAIN_, _AUX_SYNTHMIX_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
@@ -257,7 +257,7 @@ enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, _RESAMPLE_LENGTH_ };
 enum { _RES_MERGE_NONE_, _RES_MERGE_REGRESSION_, _RES_MERGE_IMPROPHE_, _RES_MERGE_STARFM_, _RES_MERGE_LENGTH_ };
 
 // query type
-enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_LT_, _QUERY_LENGTH_ };
+enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_GE_, _QUERY_LT_, _QUERY_LE_, _QUERY_LENGTH_ };
 
 // kernel type
 enum { _KERNEL_SQUARE_, _KERNEL_CIRCLE_, _KERNEL_LENGTH_ };
@@ -268,6 +268,9 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 
 // clock type
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
+
+// user-defined function type
+enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
@@ -293,6 +296,7 @@ extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 
 #ifdef __cplusplus
 }

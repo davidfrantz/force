@@ -127,7 +127,7 @@ UPDATE=0
 KEEPMETA=0
 
 # Negative coordinates: change ( -) to %dummy% if followed by integer: prevent interpretation as option by getopt
-ARGS=$(echo "$@" | sed -E "s/ -([0-9])/ %dummy%\1/g")
+ARGS=$(echo "$*" | sed -E "s/ -([0-9])/ %dummy%\1/g")
 set -- $ARGS
 
 ARGS=`getopt -o c:d:nks:t:u -l cloudcover:,daterange:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
@@ -169,7 +169,6 @@ done
 # change %dummy% back to -
 ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
 eval set -- "$ARGS"
-
 
 # Check for update flag and update metadata catalogue if set
 if [ $UPDATE -eq 1 ]; then
@@ -246,6 +245,18 @@ fi
 if [ ! -w "$POOL" ]; then
   show_help "$(printf "%s\n       " "Level 1 datapool folder does not exist or is not writeable.")"
 fi
+
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  BOTO_CONFIG=$HOME/.boto
+else
+  BOTO_CONFIG=$FORCE_CREDENTIALS/.boto
+fi
+export BOTO_CONFIG
+
+if [ ! -r $BOTO_CONFIG ]; then
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
+fi
+
 
 # ======================================
 # check type of AOI
@@ -353,7 +364,7 @@ get_data() {
 
   if [ "$AOITYPE" -eq 1 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
-    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S)
+    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S-%N)
     mkdir "$OGRTEMP"
     # get first layer of vector file and reproject to epsg4326
     AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
@@ -409,7 +420,7 @@ get_data() {
     LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh' | sort -t"," -k 2.27,2.34r | awk -F"," '{OFS=","} !a[$10$11,$5]++' | sort -t"," -k 5)
   fi
 
-  METAFNAME="$POOL"/csd_metadata_$(date +%FT%H-%M-%S).txt
+  METAFNAME="$POOL"/csd_metadata_$(date +%FT%H-%M-%S-%N).txt
   printf "%s" "$LINKS" > $METAFNAME
   case $SATELLITE in
     sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
