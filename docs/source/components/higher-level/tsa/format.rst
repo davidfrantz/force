@@ -108,6 +108,28 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +                + BVV     + VV Polarized band                                       +
 +                +---------+---------------------------------------------------------+
 +                + BVH     + VH Polarized band                                       +
++                +---------+---------------------------------------------------------+
++                + ND1     + Normalized Difference Red Edge Index 1                  +
++                +---------+---------------------------------------------------------+
++                + ND2     + Normalized Difference Red Edge Index 2                  +
++                +---------+---------------------------------------------------------+
++                + CRE     + Chlorophyll Index Red Edge                              +
++                +---------+---------------------------------------------------------+
++                + NR1     + Normalized Difference Vegetation Index red edge 1       +
++                +---------+---------------------------------------------------------+
++                + NR2     + Normalized Difference Vegetation Index red edge 2       +
++                +---------+---------------------------------------------------------+
++                + NR3     + Normalized Difference Vegetation Index red edge 3       +
++                +---------+---------------------------------------------------------+
++                + N1N     + Normalized Difference Vegetation Index red edge 1 narrow+
++                +---------+---------------------------------------------------------+
++                + N2N     + Normalized Difference Vegetation Index red edge 2 narrow+
++                +---------+---------------------------------------------------------+
++                + N3N     + Normalized Difference Vegetation Index red edge 3 narrow+
++                +---------+---------------------------------------------------------+
++                + MRE     + Modified Simple Ratio red edge                          +
++                +---------+---------------------------------------------------------+
++                + MRN     + Modified Simple Ratio red edge narrow                   +
 +----------------+---------+---------------------------------------------------------+
 + 36-38          + Product Type                                                      +
 +                +---------+---------------------------------------------------------+

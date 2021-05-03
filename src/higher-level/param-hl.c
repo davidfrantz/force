@@ -619,6 +619,50 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "KNV");
         break;
+      case _IDX_ND1_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE2_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "ND1");
+        break;
+      case _IDX_ND2_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "ND2");
+        break;
+      case _IDX_CRE_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CRE");
+        break;
+      case _IDX_NR1_:
+        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR1");
+        break;
+      case _IDX_NR2_:
+        v[_WVL_REDEDGE2_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR2");
+        break;
+      case _IDX_NR3_:
+        v[_WVL_REDEDGE3_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR3");
+        break;
+      case _IDX_N1n_:
+        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N1N");
+        break;
+      case _IDX_N2n_:
+        v[_WVL_REDEDGE2_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N2N");
+        break;
+      case _IDX_N3n_:
+        v[_WVL_REDEDGE3_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N3N");
+        break;
+      case _IDX_Mre_:
+        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "MRE");
+        break;
+      case _IDX_Mrn_:
+        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "MRN");
+        break;
       default:
         printf("unknown INDEX\n");
         break;

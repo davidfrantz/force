@@ -324,6 +324,64 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Guanter, L., Jung, M., Gamon, J.A., Reichstein, M., & Running, S.W. (2021). "
     "A unified vegetation index for quantifying the terrestrial biosphere. "
     "Science Advances, 7, eabc7447.",
+    false },
+  { "NDRE1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDRE2",
+    "Barnes, E. M., Clarke, T. R., Richards, S. E., Colaizzi, P. D., Haberland, J., "
+    "Kostrzewski, M., ... & Moran, M. S. (2000, July). Coincident detection of crop "
+    "water stress, nitrogen status and canopy density using ground based multispectral "
+    "data. Proceedings of the Fifth International Conference on Precision Agriculture, "
+    "Bloomington, MN, USA (Vol. 1619).",
+    false },
+  { "CIre",
+    "Gitelson, A.A., Gritz, Y., Merzlyak, M., 2003. Relationships between leaf "
+    "chlorophyll content and spectral reflectance and algorithms for non-destructive "
+    "chlorophyll assessment in higher plant leaves. J. Plant Physiol. 160, 271282.",
+    false },
+  { "NDVIre1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDVIre2",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre1n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre2n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "MSRre",
+    "Chen, J., 1996. Evaluation of vegetation indices and modified simple ratio for "
+    "boreal applications. Can. J. Remote Sens. 22, 229242.",
+    false },
+  { "MSRren",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
     false }
 };
 
