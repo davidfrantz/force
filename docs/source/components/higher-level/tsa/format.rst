@@ -109,27 +109,27 @@ Example filename: 1984-2020_182-274_HL_TSA_LNDLG_TCG_STM.tif
 +                +---------+---------------------------------------------------------+
 +                + BVH     + VH Polarized band                                       +
 +                +---------+---------------------------------------------------------+
-+                + NDRE1   + Normalized Difference Red Edge Index 1                  +
++                + ND1     + Normalized Difference Red Edge Index 1                  +
 +                +---------+---------------------------------------------------------+
-+                + NDRE2   + Normalized Difference Red Edge Index 2                  +
++                + ND2     + Normalized Difference Red Edge Index 2                  +
 +                +---------+---------------------------------------------------------+
-+                + CIre    + Chlorophyll Index Red Edge                              +
++                + CRE     + Chlorophyll Index Red Edge                              +
 +                +---------+---------------------------------------------------------+
-+                + NDVIre1 + Normalized Difference Vegetation Index red edge 1       +
++                + NR1     + Normalized Difference Vegetation Index red edge 1       +
 +                +---------+---------------------------------------------------------+
-+                + NDVIre2 + Normalized Difference Vegetation Index red edge 2       +
++                + NR2     + Normalized Difference Vegetation Index red edge 2       +
 +                +---------+---------------------------------------------------------+
-+                + NDVIre3 + Normalized Difference Vegetation Index red edge 3       +
++                + NR3     + Normalized Difference Vegetation Index red edge 3       +
 +                +---------+---------------------------------------------------------+
-+                + NDVIre1n+ Normalized Difference Vegetation Index red edge 1 narrow+
++                + N1N     + Normalized Difference Vegetation Index red edge 1 narrow+
 +                +---------+---------------------------------------------------------+
-+                + NDVIre2n+ Normalized Difference Vegetation Index red edge 2 narrow+
++                + N2N     + Normalized Difference Vegetation Index red edge 2 narrow+
 +                +---------+---------------------------------------------------------+
-+                + NDVIre3n+ Normalized Difference Vegetation Index red edge 3 narrow+
++                + N3N     + Normalized Difference Vegetation Index red edge 3 narrow+
 +                +---------+---------------------------------------------------------+
-+                + MSRre   + Modified Simple Ratio red edge                          +
++                + MRE     + Modified Simple Ratio red edge                          +
 +                +---------+---------------------------------------------------------+
-+                + MSRren  + Modified Simple Ratio red edge narrow                   +
++                + MRN     + Modified Simple Ratio red edge narrow                   +
 +----------------+---------+---------------------------------------------------------+
 + 36-38          + Product Type                                                      +
 +                +---------+---------------------------------------------------------+
