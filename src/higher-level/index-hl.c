@@ -219,13 +219,17 @@ float upper, lower, ind, scale = 10000.0;
         if (!ard[t].msk[p]){
           ts->tss_[t][p] = nodata;
         } else {
-          upper = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
-          lower = sqrt((ard[t].dat[b1][p]/ard[t].dat[b2][p])+1);
-          ind = upper/lower;
-          if (lower == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
-            ts->tss_[t][p] = nodata;
+          if (ard[t].dat[b2][p] != 0){
+            upper = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+            lower = sqrt((ard[t].dat[b1][p]/ard[t].dat[b2][p])+1);
+            ind = upper/lower;
+            if (lower == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
+              ts->tss_[t][p] = nodata;
+            } else {
+              ts->tss_[t][p] = (short)(ind*scale);
+            }
           } else {
-            ts->tss_[t][p] = (short)(ind*scale);
+            ts->tss_[t][p] = nodata;
           }
         }
 
