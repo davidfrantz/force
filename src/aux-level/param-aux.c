@@ -1274,7 +1274,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
     fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}\n");
+    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
+    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 
