@@ -16,6 +16,12 @@ A great way to contribute to FORCE is to help answer user questions on the [disc
 or in the [issues section](https://github.com/davidfrantz/force/issues).
 Taking a few minutes to help answer a question is a very valuable community service, especially to onboard new users.
 
+If asking a question, please tell us who you are, and what your background is.
+And super-important, please report back whether the answer was helpful, and make sure to mark useful responses as ``answered``.
+
+We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+For more information, see our [code of conduct](https://github.com/davidfrantz/force/blob/master/CODE_OF_CONDUCT.md).
+
 Contributors should ideally subscribe to these channels and follow them in order to keep up to date on what's happening in FORCE.
 Answering questions is an excellent and visible way to help our community, and also demonstrates your expertise.
 
