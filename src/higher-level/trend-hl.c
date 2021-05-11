@@ -231,11 +231,10 @@ double mae, rmse;
     #pragma omp for
     for (p=0; p<nc; p++){
 
-      if (mask_ != NULL && !mask_[p]){
-        for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
-        continue;
-      }
+      // fill with nodata
+      for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
 
+      if (mask_ != NULL && !mask_[p]) continue;
 
 
       f_change = 0;
@@ -258,10 +257,7 @@ double mae, rmse;
 
       }
 
-      if (change == SHRT_MIN){
-        for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
-        continue;
-      }
+      if (change == SHRT_MIN) continue;
 
 
       switch (by){
@@ -336,11 +332,11 @@ double mae, rmse;
 
         }
 
-        if (k < 3){
-          for (b=_CAT_YEAR_+1+_TRD_LENGTH_*part; b<_CAT_YEAR_+1+_TRD_LENGTH_*(part+1); b++) cat_[b][p] = nodata;
-          continue;
-        }
 
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p]   = (short)my;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]    = (short)k;
+
+        if (k < 3) continue;
 
         // compute trend coefficients and R-squared
         cv = covariance(cv, k);
@@ -399,7 +395,6 @@ double mae, rmse;
         rmse = sqrt(ssqe/k);
         mae = sae/k;
 
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p]   = (short)my;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)off;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]  = (short)slp;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_GAIN_][p]   = (short)(slp*f_len[part]/off*1000);
@@ -408,7 +403,6 @@ double mae, rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RMSE_][p]   = (short)rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAE_][p]    = (short)mae;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAXE_][p]   = (short)maxe;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]    = (short)k;
 
       }
 
