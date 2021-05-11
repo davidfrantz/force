@@ -333,8 +333,8 @@ double mae, rmse;
         }
 
 
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p]   = (short)my;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]    = (short)k;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p] = (short)my;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]  = (short)k;
 
         if (k < 3) continue;
 
