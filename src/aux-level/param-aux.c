@@ -1858,6 +1858,14 @@ void write_par_hl_trend(FILE *fp, bool verbose){
   }
   fprintf(fp, "TREND_CONF = 0.95\n");
 
+  if (verbose){
+    fprintf(fp, "# In the Change, Aftereffect, Trend (CAT) analysis: do you want to \n");
+    fprintf(fp, "# put a penalty on non-permanent change for the change detection?\n");
+    fprintf(fp, "# This can help to reduce the effect of outliers.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "CHANGE_PENALTY = FALSE\n");
+
   return;
 }
 

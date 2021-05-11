@@ -249,6 +249,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   // trend parameters
   register_enum_par(params,  "TREND_TAIL", _TAGGED_ENUM_TAIL_, _TAIL_LENGTH_, &phl->tsa.trd.tail);
   register_float_par(params, "TREND_CONF", 0, 1, &phl->tsa.trd.conf);
+  register_bool_par(params,  "CHANGE_PENALTY", &phl->tsa.trd.penalty);
 
   // python UDF plug-in parameters
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.pyp.f_code);

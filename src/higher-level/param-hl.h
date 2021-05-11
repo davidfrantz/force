@@ -229,8 +229,9 @@ typedef struct {
 
 // trend
 typedef struct {
-  int tail;           // tail type
-  float conf;         // confidence level
+  int tail;    // tail type
+  float conf;  // confidence level
+  int penalty; // penalty for non-permanent change (CAT)
 } par_trd_t;
 
 // user-defined function

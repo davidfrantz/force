@@ -211,8 +211,8 @@ double mae, rmse;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int cat(short **fld_, date_t *d_fld, small *mask_, int nc, int nf, short **cat_, short nodata, int by, bool in_ce, par_trd_t *trd){
-int p, f, f_pre, f_change, f_min[3], f_max[3], f_len[3];
-float change;
+int p, f, f_pre, f_post, f_change, f_min[3], f_max[3], f_len[3];
+float change, change_now;
 int x, b, part, sig;
 double mx, my, vx, vy, cv, k;
 double off, slp, rsq, yhat;
@@ -225,7 +225,7 @@ double mae, rmse;
   if (cat_ == NULL) return CANCEL;
 
 
-  #pragma omp parallel private(b,part,f,f_pre,f_change,f_min,f_max,f_len,change,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
+  #pragma omp parallel private(b,part,f,f_pre,f_post,f_change,f_min,f_max,f_len,change,change_now,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
   {
 
     #pragma omp for
@@ -247,11 +247,21 @@ double mae, rmse;
 
         f_pre = f-1;
         while (f_pre >= 0 && fld_[f_pre][p] == nodata) f_pre--;
-
         if (f_pre < 0 || fld_[f_pre][p] == nodata) continue;
 
-        if (fld_[f_pre][p]-fld_[f][p] > change){
-          change = fld_[f_pre][p]-fld_[f][p];
+        change_now = fld_[f_pre][p] - fld_[f][p];
+
+        if (trd->penalty){
+
+          f_post = f+1;
+          while (f_post < nf && fld_[f_post][p] == nodata) f_post++;
+          if (f_post >= nf || fld_[f_post][p] == nodata) continue;
+          change_now *= (fld_[f_pre][p] - fld_[f_post][p]) / 1e4;
+
+        }
+
+        if (change_now > change){
+          change = change_now;
           f_change = f;
         }
 
