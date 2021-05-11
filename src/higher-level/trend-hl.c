@@ -337,7 +337,7 @@ double mae, rmse;
         }
 
         if (k < 3){
-          for (b=_CAT_YEAR_+1+_TRD_LENGTH_*part; b<_CAT_YEAR_+1+_TRD_LENGTH_; b++) cat_[b][p] = nodata;
+          for (b=_CAT_YEAR_+1+_TRD_LENGTH_*part; b<_CAT_YEAR_+1+_TRD_LENGTH_*(part+1); b++) cat_[b][p] = nodata;
           continue;
         }
 
