@@ -332,6 +332,7 @@ double mae, rmse;
 
         }
 
+        if (k < 1) continue;
 
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p] = (short)my;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]  = (short)k;
