@@ -256,6 +256,7 @@ double mae, rmse;
           f_post = f+1;
           while (f_post < nf && fld_[f_post][p] == nodata) f_post++;
           if (f_post >= nf || fld_[f_post][p] == nodata) continue;
+  
           change_now *= (fld_[f_pre][p] - fld_[f_post][p]) / 1e4;
 
         }
