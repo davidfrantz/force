@@ -249,7 +249,7 @@ double mae, rmse;
         while (f_pre >= 0 && fld_[f_pre][p] == nodata) f_pre--;
         if (f_pre < 0 || fld_[f_pre][p] == nodata) continue;
 
-        change_now = fld_[f_pre][p] - fld_[f][p];
+        change_now = (float)(fld_[f_pre][p] - fld_[f][p]);
 
         if (trd->penalty){
 
@@ -257,7 +257,7 @@ double mae, rmse;
           while (f_post < nf && fld_[f_post][p] == nodata) f_post++;
           if (f_post >= nf || fld_[f_post][p] == nodata) continue;
   
-          change_now *= (fld_[f_pre][p] - fld_[f_post][p]) / 1e4;
+          change_now *= (float)(fld_[f_pre][p] - fld_[f_post][p]) / 1e4;
 
         }
 
