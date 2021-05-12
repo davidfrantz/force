@@ -251,7 +251,7 @@ double mae, rmse;
 
         change_now = (float)(fld_[f_pre][p] - fld_[f][p]);
 
-        if (trd->penalty){
+        if (change_now > 0 && trd->penalty){
 
           f_post = f+1;
           while (f_post < nf && fld_[f_post][p] == nodata) f_post++;
