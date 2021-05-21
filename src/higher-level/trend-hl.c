@@ -212,7 +212,7 @@ double mae, rmse;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int cat(short **fld_, date_t *d_fld, small *mask_, int nc, int nf, short **cat_, short nodata, int by, bool in_ce, par_trd_t *trd){
 int p, f, f_pre, f_post, f_change, f_min[3], f_max[3], f_len[3];
-float change, change_now;
+float change, change_now, change_real;
 int x, b, part, sig;
 double mx, my, vx, vy, cv, k;
 double off, slp, rsq, yhat;
@@ -225,7 +225,7 @@ double mae, rmse;
   if (cat_ == NULL) return CANCEL;
 
 
-  #pragma omp parallel private(b,part,f,f_pre,f_post,f_change,f_min,f_max,f_len,change,change_now,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
+  #pragma omp parallel private(b,part,f,f_pre,f_post,f_change,f_min,f_max,f_len,change,change_now,change_real,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
   {
 
     #pragma omp for
@@ -249,7 +249,7 @@ double mae, rmse;
         while (f_pre >= 0 && fld_[f_pre][p] == nodata) f_pre--;
         if (f_pre < 0 || fld_[f_pre][p] == nodata) continue;
 
-        change_now = (float)(fld_[f_pre][p] - fld_[f][p]);
+        change_now  = change_real = (float)(fld_[f_pre][p] - fld_[f][p]);
 
         if (change_now > 0 && trd->penalty){
 
@@ -262,7 +262,7 @@ double mae, rmse;
         }
 
         if (change_now > change){
-          change = change_now;
+          change = change_real;
           f_change = f;
         }
 
@@ -420,7 +420,7 @@ double mae, rmse;
 
       // loss, i.e. change relative to total offset
       if (cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p] > 0){
-        cat_[_CAT_LOSS_][p] = (short)(cat_[_CAT_CHANGE_][p]/
+        cat_[_CAT_LOSS_][p] = (short)((float)cat_[_CAT_CHANGE_][p]/
                                       cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
                                       1000);
       } else {
