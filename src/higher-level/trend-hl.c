@@ -407,7 +407,10 @@ double mae, rmse;
         rmse = sqrt(ssqe/k);
         mae = sae/k;
 
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)off;
+        // offset of segment
+        linreg_predict(f_min[part], slp, off, &yhat);
+
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)yhat;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]  = (short)slp;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_GAIN_][p]   = (short)(slp*f_len[part]/off*1000);
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]    = (short)rsq;
