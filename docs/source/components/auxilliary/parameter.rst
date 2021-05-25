@@ -15,7 +15,7 @@ Usage
     force-parameter dir type verbose
 
 * | ``dir`` : File path, can be either relative or absolute.
-* | ``type`` : Type of parameter file that should be generated. Can be on of the following:
+* | ``type`` : Type of parameter file that should be generated. Can be one of the following:
 
     +----------+-------------------------------------------+
     | LEVEL2   | :ref:`Level 2 Processing System <l2ps>`   |
