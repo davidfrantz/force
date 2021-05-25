@@ -131,7 +131,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     
     * 1st column: x-coordinate, 
     * 2nd column: y-coordinate, 
-    * 3rd+ column: response(s)
+    * 3rd+ column: response variable(s)
 
     | *Type:* full file path
     | ``FILE_POINTS = NULL``
