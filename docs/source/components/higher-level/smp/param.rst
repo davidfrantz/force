@@ -127,11 +127,11 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Sampling**
 
-  * File with coordinates, at which the features should be sampled.
+  * File with coordinates, at which the features should be sampled. It is possible to specify more than one response variable.
     
     * 1st column: x-coordinate, 
     * 2nd column: y-coordinate, 
-    *3rd column: response
+    * 3rd+ column: response(s)
 
     | *Type:* full file path
     | ``FILE_POINTS = NULL``
