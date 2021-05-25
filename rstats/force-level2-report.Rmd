@@ -2,6 +2,8 @@
 title: "FORCE Level 2 Processing Report"
 date: "`r Sys.Date()`"
 output: html_document
+params:
+  dlog: "log"
 ---
 
 ```{r load-packages, include = FALSE}
@@ -10,9 +12,6 @@ require(plotly)
 ```
 
 ```{r load-data, include = FALSE}
-dlog = "/data/Jakku/fonda/data/EO-01/output/level2/log"
-
-
 flog = dlog %>% dir(".log$", full.names=TRUE)
 nlog = flog %>% length()
 
