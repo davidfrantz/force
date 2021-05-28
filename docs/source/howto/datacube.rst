@@ -306,7 +306,7 @@ Whenever you use a FORCE routine, cubed data will be generated.
 It is a bit cumbersome to display such data for a large extent without some further treatment.
 The following recipe can be used for any cubed FORCE data - irrespective of processing level.
 
-Lucky us, the [GDAL virtual format](https://gdal.org/drivers/raster/vrt.html) represents an ideal concept for this.
+Lucky us, the `GDAL virtual format <https://gdal.org/drivers/raster/vrt.html>`_ represents an ideal concept for this.
 With VRTs, mosaicks of cubed data can be generated without physically copying the data.
 The VRT is basically a text file in xml-Format, which both holds (relative) links to the original data and the rules to assemble the mosaic on-the-fly.
 FORCE comes with a tool to generate such mosaics:
