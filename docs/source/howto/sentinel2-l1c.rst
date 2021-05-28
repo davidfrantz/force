@@ -1,5 +1,8 @@
 .. _tut-s2l1c:
 
+.. role:: bolditalic
+    :class: bolditalic
+
 Sentinel-2 Level 1C
 ===================
 
@@ -24,7 +27,7 @@ A file queue is generated and updated accordingly - which is the main input to t
 
 .. figure:: img/tutorial-l1sen2.png
 
-   *Sentinel-2 downloader in the* **FORCE Level 1 Archiving Suite**
+   *Sentinel-2 downloader in the* :bolditalic:`FORCE Level 1 Archiving Suite`
 
 
 ----------
