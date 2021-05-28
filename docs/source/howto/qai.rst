@@ -1,5 +1,8 @@
 .. _tut-qai:
 
+.. role:: bolditalic
+    :class: bolditalic
+
 Quality Assurance Information!
 ==============================
 
@@ -220,7 +223,7 @@ The left image was produced by filtering nodata values only, the right image was
 
 .. figure:: img/tutorial-qai-avg.jpg
 
-   `Average reflectance over three month; left: **not using** quality bits; right **with** quality bits`
+   *Average reflectance over three month; left:* :bolditalic:`not using` *quality bits; right* :bolditalic:`with` *quality bits*
 
 
 ------------

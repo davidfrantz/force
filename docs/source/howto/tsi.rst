@@ -1,5 +1,7 @@
 .. _tut-tsi:
 
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
+
 Time Series Interpolation
 =========================
 
