@@ -24,7 +24,7 @@ A file queue is generated and updated accordingly - which is the main input to t
 
 .. figure:: img/tutorial-l1sen2.png
 
-   *Sentinel-2 downloader in the **FORCE Level 1 Archiving Suite***
+   *Sentinel-2 downloader in the* **FORCE Level 1 Archiving Suite**
 
 
 ----------
