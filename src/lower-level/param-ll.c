@@ -190,11 +190,11 @@ char  bname[NPOW_10] = "\0";
 
   // check
   if (fscanf(fpar, "%s", buffer) < 0){
-    printf("No valid parameter file!\n"); return FAILURE;}
+    printf("Cannot scan parameter file!\n"); return FAILURE;}
     
   // check
   if (strcmp(buffer, "++PARAM_LEVEL2_START++") != 0){
-    printf("No valid parameter file!\n"); return FAILURE;}
+    printf("No valid parameter file! '++PARAM_LEVEL2_START++' is missing.\n"); return FAILURE;}
 
   // register parameters
   register_lower(pl2->params, pl2);
