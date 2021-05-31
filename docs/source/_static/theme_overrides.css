@@ -12,3 +12,8 @@
    }
 }
 
+/* reSt-documents don't allow for nested syntax out of the box */
+.bolditalic {
+   font-style: italic;
+   font-weight: bold;
+}
