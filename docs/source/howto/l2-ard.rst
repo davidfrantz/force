@@ -433,7 +433,7 @@ ARD, now what?
 
 FORCE provides a lot of functionality to further process the generated ARD into hARD or hARD+ products, e.g. using pixel-based compositing or time series analyses.
 
-Please see the :ref:'hlps' in the documentation.
+Please see the :ref:`Higher Level Processing System <hlps>` in the documentation.
 Some more tutorials are planned, which deal with all these options.
 
 

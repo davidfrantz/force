@@ -256,6 +256,16 @@ if [ $CHECKLOGS -eq 1 ]; then
   if [ ! -d "$LPATH" ]; then
     show_help "$(printf "%s\n       " "Log folder does not seem to exist.")"
   fi
+
+# set gsutil config var (necessary for docker installations)
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  BOTO_CONFIG=$HOME/.boto
+else
+  BOTO_CONFIG=$FORCE_CREDENTIALS/.boto
+fi
+export BOTO_CONFIG
+if [ ! -r $BOTO_CONFIG ]; then
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
 fi
 
 

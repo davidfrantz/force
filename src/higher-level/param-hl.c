@@ -94,8 +94,9 @@ void register_higher(params_t *params, par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void register_ard1(params_t *params, par_hl_t *phl){
 
-  
+
   register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
+  register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
   register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
   register_intvec_par(params,  "DOY_RANGE", 1, 365, &phl->doy_range, &phl->ndoy);
@@ -618,6 +619,50 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_NIR_] = v[_WVL_RED_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "KNV");
         break;
+      case _IDX_ND1_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE2_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "ND1");
+        break;
+      case _IDX_ND2_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "ND2");
+        break;
+      case _IDX_CRE_:
+        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CRE");
+        break;
+      case _IDX_NR1_:
+        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR1");
+        break;
+      case _IDX_NR2_:
+        v[_WVL_REDEDGE2_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR2");
+        break;
+      case _IDX_NR3_:
+        v[_WVL_REDEDGE3_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "NR3");
+        break;
+      case _IDX_N1n_:
+        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N1N");
+        break;
+      case _IDX_N2n_:
+        v[_WVL_REDEDGE2_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N2N");
+        break;
+      case _IDX_N3n_:
+        v[_WVL_REDEDGE3_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "N3N");
+        break;
+      case _IDX_Mre_:
+        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "MRE");
+        break;
+      case _IDX_Mrn_:
+        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "MRN");
+        break;
       default:
         printf("unknown INDEX\n");
         break;
@@ -632,13 +677,18 @@ int *band_ptr[_WVL_LENGTH_] = {
       printf("cannot compute index, band is missing (check SENSORS). ");
       return FAILURE;
     }
-    if (!v[b] && *band_ptr[b] >= 0){
+    if (!v[b] && *band_ptr[b] >= 0 && !sen->spec_adjust){
       for (s=0; s<sen->n; s++){ sen->band[s][*band_ptr[b]] = -1;}; *band_ptr[b] = -1;
     }
   }
 
-  for (b=0, k=0; b<nb; b++){
-    if (v[b]) *band_ptr[b] = k++;
+  // set target bands
+  if (sen->spec_adjust){
+    for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
+  } else {
+    for (b=0, k=0; b<nb; b++){
+      if (v[b]) *band_ptr[b] = k++;
+    }
   }
 
   #ifdef FORCE_DEBUG
@@ -995,6 +1045,11 @@ const char sensor[_SEN_LENGTH_][NPOW_10] = {
   "S1AIA", "S1AID", "S1BIA",
   "S1BID", "VVVHP", "MOD01",
   "MOD02", "MODIS" };
+bool adjustable[_SEN_LENGTH_] = {
+  true,  true,  true,  true,  true,  true,
+  false, false, false, false, false, false,
+  false, false, false, false, false, true,
+  true,  false };
 const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
@@ -1031,6 +1086,13 @@ int *band_ptr[_WVL_LENGTH_] = {
   for (s=0; s<ns; s++) vs[s] = false;
   for (s=0; s<sen->n; s++) vs[sen->senid[s]] = true;
 
+  // check if spectral band adjustment is possible
+  for (s=0; s<sen->n; s++){
+    if (sen->spec_adjust && !adjustable[sen->senid[s]]){
+      printf("Spectral adjustment not implemented for sensor %s.\n", sensor[sen->senid[s]]); 
+      return FAILURE;
+    }
+  }
 
   // kick out bands that are incomplete
   for (b=0, bb=0; b<nb; b++){
@@ -1038,6 +1100,8 @@ int *band_ptr[_WVL_LENGTH_] = {
     for (s=0, vb[b]=true; s<ns; s++){
       if (vs[s] && band[s][b] == 0) vb[b] = false;
     }
+
+    if (sen->spec_adjust && !vb[b] && band[_SEN_SEN2A_][b] > 0) vb[b] = true;
 
     if (vb[b]){
       *band_ptr[b] = bb++;

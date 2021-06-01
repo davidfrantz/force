@@ -217,7 +217,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}
     | ``INDEX = NDVI EVI NBR``
 
 
@@ -293,6 +293,35 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     + kNDVI     + Kernel NDVI                                + (1 - k) / (1 + k)                                                                        + Camps-Valls et al. 2021  +
     +           +                                            + with k = exp( -(NIR - RED)^2 / (2 * sigma^2) )                                           +                          +
     +           +                                            + with sigma = 0.5 * (NIR + RED)                                                           +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDRE1     + Normalized Difference Red Edge Index 1     + (REDEDGE2 - REDEDGE1) / (REDEDGE2 + REDEDGE1)                                            + Gitelson & Merzlyak 1994 +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDRE2     + Normalized Difference Red Edge Index 2     + (REDEDGE3 - REDEDGE1) / (REDEDGE3 + REDEDGE1)                                            + Barnes et al. 2000       +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + CIre      + Chlorophyll Index red-edge                 + (REDEDGE3 / REDEDGE1) - 1                                                                + Gitelson et al. 2003     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre1   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE1) / (BNIR + REDEDGE1)                                                    + Gitelson & Merzlyak 1994 +
+    +           + red edge 1                                 +                                                                                          +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre2   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE2) / (BNIR + REDEDGE2)                                                    + Fernandez-Manso et al.   +
+    +           + red edge 2                                 +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre3   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE3) / (BNIR + REDEDGE3)                                                    + Fernandez-Manso et al.   +
+    +           + red edge 3                                 +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre1n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE1) / (NIR + REDEDGE1)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 1 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre2n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE2) / (NIR + REDEDGE2)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 2 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre3n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE3) / (NIR + REDEDGE3)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 3 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + MSRre     + Modified Simple Ratio red edge             + ((BNIR / REDEDGE1) - 1) / sqrt((BNIR / REDEDGE1) + 1)                                    + Chen 1996                +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + MSRren    + Modified Simple Ratio red edge narrow      + ((NIR / REDEDGE1) - 1) / sqrt((NIR / REDEDGE1) + 1)                                      + Fernandez-Manso et al.   +
+    +           +                                            +                                                                                          + 2016                     +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     

@@ -26,7 +26,7 @@ Before calculating the statistics, the data is quality filtered, e.g. clouds are
 
 .. figure:: img/tutorial-stm-example.png
 
-   *STM concept |copy| Stefan Ernst*
+   *STM concept* |copy| *Stefan Ernst*
 
 It is important to note that STMs are statistical aggregations - and not composites as in *“we select the full spectrum for the optimal observation”*.
 

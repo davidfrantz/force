@@ -197,7 +197,7 @@ Any other column is ignored (in the example below, the WRS-2 Path/Row is in the 
 
 
 FORCE WVDB downloads each Terra/Aqua granule (collection 6.1) that intersects with any of these coordinates.
-The files are downloaded from the Level1 and Atmosphere Archive and Distribution System (`LAADS <ladsweb.modaps.eosdis.nasa.gov`_) at NASA’s Goddard Space Flight Center.
+The files are downloaded from the Level1 and Atmosphere Archive and Distribution System (`LAADS <ladsweb.modaps.eosdis.nasa.gov>`_) at NASA’s Goddard Space Flight Center.
 Note that any permanent or temporary change/shutdown/decommissioning on LAADS’ or MODIS’ end may result in the nonfunctioning of FORCE WVDB... Also note, that they perform a weekly maintenance, during which their servers are not accessable.
 
 As with any other FORCE program, you can display short usage instructions by executing the program without any parameters.

@@ -61,7 +61,7 @@ However, as it is hard to acquire high spatial resolution DEMs, especially for l
 Often, we use the 30m SRTM DEM or 30m ASTER DEM, or a combination thereof, e.g. SRTM filled with ASTER (SRTM is a bit better, but there are holes in mountainous regions, and coverage is only 60°N-60°S).
 
 The SRTM DEM can be obtained from `EarthExplorer <https://earthexplorer.usgs.gov/>`_.
-The ASTER DEM can be obtained from `EarthData <https://search.earthdata.nasa.gov/search/`_ or `Japan Space Systems <https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/>`_.
+The ASTER DEM can be obtained from `EarthData <https://search.earthdata.nasa.gov/search/>`_ or `Japan Space Systems <https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/>`_.
 Both are free of charge.
 
 
