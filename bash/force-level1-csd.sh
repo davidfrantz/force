@@ -525,14 +525,6 @@ get_data() {
 
       TILEPATH="$POOL"/$TILE
       SCENEPATH="$TILEPATH"/$SCENEID
-      #if [ $SATELLITE = "sentinel2" ]; then
-      #  if [[ $SCENEID == *"_OPER_"* ]]; then
-      #    #SCENEID=$(echo $URL | rev | cut -d"/" -f1 | rev | cut -d"." -f1)
-      #    SCENEID=$(echo $URL | sed 's+^.*/++')
-      #  fi
-      #  SCENEPATH="$TILEPATH"/$SCENEID
-      #fi
-      # Check if scene already exists, delete and download if gsutil temp files are present
       if [ -d "$SCENEPATH" ]; then
         if ! ls -R "$SCENEPATH" | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
           printf "\e[500D\e[4A\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
