@@ -504,14 +504,17 @@ get_data() {
     printf "%s\n" "" "Starting to download "$NSCENES" "$PRINTNAME" Level 1 scenes" "" "" "" "" ""
 
     ITER=1
+    
     for LINK in $LINKS
     do
-      if [ $SATELLITE = "sentinel2" ]; then
-        SCENEID=$(echo $LINK | cut -d"," -f 15)
+      
+    if [ $SATELLITE = "sentinel2" ]; then
+        SCENEID=$(echo $LINK | cut -d"," -f14 | sed 's+^.*/++')
         TILE=$(echo $LINK | cut -d"," -f 1 | grep -o -E "T[0-9]{2}[A-Z]{3}")
         URL=$(echo $LINK | cut -d"," -f 14)
         FILESIZEBYTE=$(echo $LINK | cut -d"," -f 6)
       elif [ $SATELLITE = "landsat" ]; then
+        SCENEID=$(echo $LINK | cut -d"," -f 2)
         TILE=$(echo $SCENEID | cut -d"_" -f 3)
         URL=$(echo $LINK | cut -d"," -f 18)
         FILESIZEBYTE=$(echo $LINK | cut -d, -f 17)
@@ -522,6 +525,13 @@ get_data() {
 
       TILEPATH="$POOL"/$TILE
       SCENEPATH="$TILEPATH"/$SCENEID
+      #if [ $SATELLITE = "sentinel2" ]; then
+      #  if [[ $SCENEID == *"_OPER_"* ]]; then
+      #    #SCENEID=$(echo $URL | rev | cut -d"/" -f1 | rev | cut -d"." -f1)
+      #    SCENEID=$(echo $URL | sed 's+^.*/++')
+      #  fi
+      #  SCENEPATH="$TILEPATH"/$SCENEID
+      #fi
       # Check if scene already exists, delete and download if gsutil temp files are present
       if [ -d "$SCENEPATH" ]; then
         if ! ls -R "$SCENEPATH" | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
