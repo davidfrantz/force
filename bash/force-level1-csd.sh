@@ -256,6 +256,7 @@ if [ $CHECKLOGS -eq 1 ]; then
   if [ ! -d "$LPATH" ]; then
     show_help "$(printf "%s\n       " "Log folder does not seem to exist.")"
   fi
+fi
 
 # set gsutil config var (necessary for docker installations)
 if [ -z "$FORCE_CREDENTIALS" ]; then
