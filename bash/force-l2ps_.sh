@@ -84,8 +84,8 @@ if [ ! -x $EXE ]; then
 fi
 
 # test if DEBUG mode is on
-$EXE ? ?
-if [ $? -eq 1 ]; then
+$EXE -d
+if [ $? -ne 0 ]; then
   echo "$IMAGE: $EXE was compiled in DEBUG mode" > $LOGFILE
   exit 1
 fi

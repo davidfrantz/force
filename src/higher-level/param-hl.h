@@ -429,7 +429,7 @@ typedef struct {
   int type;
 
   // directory variables
-  char *f_par;    // parameter file
+  char  f_par[NPOW_10];    // parameter file
   char *d_lower;  // Lower  Level directory
   char *d_higher; // Higher Level directory
   char *d_mask;   // mask directory

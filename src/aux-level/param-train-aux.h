@@ -69,7 +69,7 @@ typedef struct {
 // training parameters
 typedef struct {
   params_t *params;
-  char *f_par;
+  char f_par[NPOW_10];
   char *f_feature;
   char *f_response;
   char *f_model;

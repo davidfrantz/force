@@ -47,7 +47,7 @@ typedef struct{
 } tagged_enum_t;
 
 // function return codes
-enum { SUCCESS = 0, FAILURE = -1, CANCEL = 1 };
+enum { SUCCESS = 0, FAILURE = 1, CANCEL = 10 };
 
 
 // dimensions
