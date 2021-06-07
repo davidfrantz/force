@@ -209,3 +209,4 @@ echo $QUEUE | parallel -d ' ' -j$CPUFILE --delay $DELAY --eta "$EXE {} $PRM $LOG
 
 rm $CPUFILE
 
+exit 0
