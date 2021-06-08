@@ -8,6 +8,8 @@ FORCE-dev
 
 Main release: TBA
 
+*TODO* sync this list with git commits!
+
 * **General changes**
 
   * Makefile
