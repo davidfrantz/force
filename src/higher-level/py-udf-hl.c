@@ -472,7 +472,7 @@ char bandname[NPOW_10];
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
-int b, t;
+int b, t, k, p;
 py_dimlab_t pylab;
 npy_intp dim_data[4] = { nt, nb, ny, nx };
 FILE     *fpy         = NULL;
@@ -517,10 +517,17 @@ short* return_  = NULL;
   
   if (submodule == _HL_UDF_){
 
-    for (t=0; t<nt; t++){
+    for (t=0, k=0; t<nt; t++){
       for (b=0; b<nb; b++){
-        memcpy(data_, ard[t].dat[b], sizeof(short)*nc);
-        data_ += nc;
+        for (p=0; p<nc; p++){
+          if (!ard[t].msk[p]){
+            data_[k++] = nodata;
+          } else {
+            data_[k++] = ard[t].dat[b][p];
+          }
+        }
+        //memcpy(data_, ard[t].dat[b], sizeof(short)*nc);
+        //data_ += nc;
       }
     }
 

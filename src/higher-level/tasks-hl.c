@@ -154,18 +154,18 @@ bool error = false;
 
 
   if (nt1[pro->pu] > 0){
-    if (screen_qai(ARD1[pro->pu],   nt1[pro->pu], &phl->qai, phl->input_level1) != SUCCESS) error = true;
+    if (screen_qai(ARD1[pro->pu], nt1[pro->pu], MASK[pro->pu], &phl->qai, phl->input_level1) != SUCCESS) error = true;
     if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-      if (screen_noise(ARD1[pro->pu], nt1[pro->pu], &phl->qai) == FAILURE) error = true;
+      if (screen_noise(ARD1[pro->pu], nt1[pro->pu], MASK[pro->pu], &phl->qai) == FAILURE) error = true;
     }
   } else {
     error = true;
   }
 
   if (nt2[pro->pu] > 0){
-    if (screen_qai(ARD2[pro->pu],   nt2[pro->pu], &phl->qai, phl->input_level2) != SUCCESS) error = true;
+    if (screen_qai(ARD2[pro->pu], nt2[pro->pu], MASK[pro->pu], &phl->qai, phl->input_level2) != SUCCESS) error = true;
     if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-      if (screen_noise(ARD2[pro->pu], nt2[pro->pu], &phl->qai) == FAILURE) error = true;
+      if (screen_noise(ARD2[pro->pu], nt2[pro->pu], MASK[pro->pu], &phl->qai) == FAILURE) error = true;
     }
   }
 

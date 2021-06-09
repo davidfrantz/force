@@ -78,15 +78,24 @@ bool use_this_pixel(brick_t *qai, int p, par_qai_t *qai_rule, bool is_ard){
 --- qai_rule: ruleset for QAI filtering
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int screen_qai(ard_t *ard, int nt, par_qai_t *qai_rule, int input_level){
+int screen_qai(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule, int input_level){
 int t, p, nc;
 int error = 0;
 bool is_ard = false;
+small *mask_ = NULL;
+
 
 
   #ifdef FORCE_CLOCK
   time_t TIME; time(&TIME);
   #endif
+
+  // import mask (if available)
+  if (mask != NULL){
+    if ((mask_ = get_band_small(mask, 0)) == NULL){
+      printf("Error getting processing mask."); return FAILURE;}
+  }
+
   
   if (input_level == _INP_ARD_ || input_level == _INP_QAI_) is_ard = true;
 
@@ -111,12 +120,18 @@ bool is_ard = false;
 
   nc = get_brick_chunkncells(ard[0].MSK);
 
-  #pragma omp parallel private(t) shared(ard,nt,nc,qai_rule,is_ard) default(none)
+  #pragma omp parallel private(t) shared(ard,mask_,nt,nc,qai_rule,is_ard) default(none)
   {
 
     #pragma omp for
     for (p=0; p<nc; p++){
-      for (t=0; t<nt; t++) ard[t].msk[p] = use_this_pixel(ard[t].QAI, p, qai_rule, is_ard);
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ard[t].msk[p] = false;
+      } else {
+        for (t=0; t<nt; t++) ard[t].msk[p] = use_this_pixel(ard[t].QAI, p, qai_rule, is_ard);
+      }
+
     }
 
   }
@@ -138,7 +153,7 @@ bool is_ard = false;
 --- qai_rule: ruleset for QAI filtering
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int screen_noise(ard_t *ard, int nt, par_qai_t *qai_rule){
+int screen_noise(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule){
 int p, nc;
 int b = 0; // use shortest wavelength
 int t, t_left, t_mid, t_right, t_first, t_last, t_max, n;
@@ -153,6 +168,7 @@ float ssqr;
 float noise;
 float rel_noise;
 bool *removed = NULL;
+small *mask_ = NULL;
 
 
   #ifdef FORCE_CLOCK
@@ -162,6 +178,12 @@ bool *removed = NULL;
   if (qai_rule->above_noise == 0 && qai_rule->below_noise == 0) return CANCEL;
   if (nt < 3) return CANCEL;
 
+  // import mask (if available)
+  if (mask != NULL){
+    if ((mask_ = get_band_small(mask, 0)) == NULL){
+      printf("Error getting processing mask."); return FAILURE;}
+  }
+
   nc = get_brick_chunkncells(ard[0].MSK);
   nodata = get_brick_nodata(ard[0].DAT, 0);
 
@@ -169,14 +191,15 @@ bool *removed = NULL;
   for (t_mid=0; t_mid<nt; t_mid++) ce[t_mid] = get_brick_ce(ard[t_mid].DAT, 0);
 
 
-  #pragma omp parallel private(t,t_mid,t_left,t_right,t_first,t_last,t_max,n,valid_left,valid_right,y_hat,maxr,t_maxr,ssqr,noise,rel_noise,removed,nout,nadd) shared(ard,nc,nt,ce,nodata,qai_rule,b) default(none)
+  #pragma omp parallel private(t,t_mid,t_left,t_right,t_first,t_last,t_max,n,valid_left,valid_right,y_hat,maxr,t_maxr,ssqr,noise,rel_noise,removed,nout,nadd) shared(ard,mask_,nc,nt,ce,nodata,qai_rule,b) default(none)
   {
 
     alloc((void**)&removed, nt, sizeof(bool));
 
     #pragma omp for
     for (p=0; p<nc; p++){
-      
+
+      if (mask_ != NULL && !mask_[p]) continue;
       
       rel_noise = INT_MAX;
       noise = INT_MAX;
@@ -324,7 +347,7 @@ bool *removed = NULL;
 
 
     free((void*)removed);
-    
+  
   }
 
 
