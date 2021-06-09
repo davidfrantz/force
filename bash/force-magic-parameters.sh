@@ -28,27 +28,32 @@ BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 MANDATORY_ARGS=1
 
-echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
+echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
 
-cmd_not_found() {      # check required external commands
+cmd_not_found(){      # check required external commands
   for cmd in "$@"; do
     stat=`which $cmd`
     if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
   done
 }
 
-help () {
+help(){
 cat <<HELP
 
-Usage: $PROG [-h] [-c {all,paired}] parameter-file
+Usage: $PROG [-h] [-c {all,paired}] [-o] parameter-file
 
-  -h  = show his help
-  -c  = combination type
-        all:    all combinations (default)
-        paired: pairwise combinations
+  optional:
+  -h = show this help
+  -c = combination type
+       all:    all combinations (default)
+       paired: pairwise combinations
+  -o = output directory, defaults to directory of parameter-file
 
-$PROG:  replace variables in parameterfile
-        see https://force-eo.readthedocs.io/en/latest/components/auxilliary/magic-parameters.html
+  mandatory:
+  parameter-file: base parameter-file that includes replacement vectors
+
+$PROG: replace variables in parameterfile
+  see https://force-eo.readthedocs.io/en/latest/components/auxilliary/magic-parameters.html
 
 HELP
 exit 1
@@ -57,15 +62,17 @@ exit 1
 #cmd_not_found "...";    # important, check required commands !!! dies on missing
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hc: --long help,combine: -n "$0" -- "$@"`
+ARGS=`getopt -o hc:o: --long help,combine:,output: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
-combtype='all'
+COMB='all'
+DOUT='NA'
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -c|--combine) combtype="$2"; shift ;;
+    -c|--combine) COMB="$2"; shift ;;
+    -o|--output) DOUT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -82,17 +89,19 @@ else
 fi
 
 # options received, check now ------------------------------------------------------------
-if [ ! "$combtype" = "all" ] && [ ! "$combtype" = "paired" ]; then 
+if [ ! "$COMB" = "all" ] && [ ! "$COMB" = "paired" ]; then 
   echoerr "Invalid combination type"; help
 fi
+
+if [ "$DOUT" == "NA" ]; then DOUT=$DINP; fi
 
 # further checks and preparations --------------------------------------------------------
 if ! [[ -f "$FINP" && -r "$FINP" ]]; then
   echoerr "$FINP is not a readable file, exiting."; exit 1;
 fi
 
-if ! [[ -d "$DINP" && -w "$DINP" ]]; then
-  echoerr "$DINP is not a writeable directory, exiting."; exit 1;
+if ! [[ -d "$DOUT" && -w "$DOUT" ]]; then
+  echoerr "$DOUT is not a writeable directory, exiting."; exit 1;
 fi
 
 # main thing -----------------------------------------------------------------------------
@@ -110,7 +119,7 @@ else
 fi
 
 
-if [ "$combtype" = "all" ]; then 
+if [ "$COMB" = "all" ]; then 
 
   # combine values
   for k in $KEYS; do
@@ -123,7 +132,7 @@ if [ "$combtype" = "all" ]; then
   COMBS=$(eval "echo "$combis"")
   #echo $COMBS
 
-elif [ "$combtype" = "paired" ]; then 
+elif [ "$COMB" = "paired" ]; then 
 
   # get array lengths
   NVALUES=0
@@ -166,7 +175,7 @@ for comb in $COMBS; do
   # bandname
   ((NPAR++))
   C_NPAR=$(printf "%05d" $NPAR)
-  FOUT=$DINP/$CINP"_"$C_NPAR".prm"
+  FOUT=$DOUT/$CINP"_"$C_NPAR".prm"
 
   # init new par
   cp $FINP $FOUT
