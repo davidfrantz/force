@@ -526,8 +526,6 @@ short* return_  = NULL;
             data_[k++] = ard[t].dat[b][p];
           }
         }
-        //memcpy(data_, ard[t].dat[b], sizeof(short)*nc);
-        //data_ += nc;
       }
     }
 
