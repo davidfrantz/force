@@ -142,10 +142,10 @@ double llx, lly;
 +++ that match the input image are selected, and all projection/cubing
 +++ parameters are set.
 --- pl2:    L2 parameters
---- stack:  input image stack
+--- brick:  input image brick
 +++ Return: data cube parameters for multiple cubes
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_equi7cube(par_ll_t *pl2, stack_t *stack){
+multicube_t *start_equi7cube(par_ll_t *pl2, brick_t *brick){
 multicube_t *multicube = NULL;
 cube_t *cube = NULL;
 int *xtiles7[7] = { tiles7_af[0], tiles7_an[0], tiles7_as[0], tiles7_eu[0], tiles7_na[0], tiles7_oc[0], tiles7_sa[0] };
@@ -183,9 +183,8 @@ int nchar;
       printf("Buffer Overflow in assembling dirname\n"); return NULL;}
 
     cube->res = pl2->res;
-    if (strlen(proj7[c]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return NULL;
-    } else { strncpy(cube->proj, proj7[c], strlen(proj7[c])); cube->proj[strlen(proj7[c])] = '\0';}
+
+    copy_string(cube->proj, NPOW_10, proj7[c]);
 
     cube->tilesize  = 100000;
     cube->chunksize =   2000;
@@ -200,12 +199,12 @@ int nchar;
       return NULL;
     }
     if (fmod(cube->chunksize, cube->res) > tol){
-      printf("CHUNK_SIZE must be a multiple of RESOLUTION. ");
+      printf("BLOCK_SIZE must be a multiple of RESOLUTION. ");
       free_multicube(multicube);
       return NULL;
     }
     if (fmod(cube->tilesize, cube->chunksize) > tol){
-      printf("TILE_SIZE must be a multiple of CHUNK_SIZE. ");
+      printf("TILE_SIZE must be a multiple of BLOCK_SIZE. ");
       free_multicube(multicube);
       return NULL;
     }
@@ -242,11 +241,11 @@ int nchar;
     }
 
 
-    utm_ulx = get_stack_ulx(stack);
-    utm_uly = get_stack_uly(stack);
-    utm_lrx = utm_ulx + get_stack_width(stack);
-    utm_lry = utm_uly - get_stack_height(stack);
-    get_stack_proj(stack, utm_proj, NPOW_10);
+    utm_ulx = get_brick_ulx(brick);
+    utm_uly = get_brick_uly(brick);
+    utm_lrx = utm_ulx + get_brick_width(brick);
+    utm_lry = utm_uly - get_brick_height(brick);
+    get_brick_proj(brick, utm_proj, NPOW_10);
 
     // UL
     if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,

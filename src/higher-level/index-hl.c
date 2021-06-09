@@ -36,6 +36,8 @@ enum { TCB, TCG, TCW, TCD};
 
 void index_band(ard_t *ard, small *mask_, tsa_t *ts, int b, int nc, int nt, short nodata);
 void index_differenced(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
+void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
+void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
 void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember);
 
@@ -84,7 +86,7 @@ int p, t;
 
 
 /** This function computes a spectral index time series, with Normalized
-+++ differenced method, e.g. NDVI: (b1-b2/(b1+b2)
++++ differenced method, e.g. NDVI: (b1-b2)/(b1+b2)
 --- ard:    ARD
 --- mask_:  mask image
 --- ts:     pointer to instantly useable TSA image arrays
@@ -123,6 +125,162 @@ float tmp, ind, scale = 10000.0;
           } else {
             ts->tss_[t][p] = (short)(ind*scale);
           }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
+/** This function computes a spectral index time series, with a Ratio - 1,
++++ e.g. CIre: (b1/b2)-1
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_ratio_minus1(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+          ind = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+          if (ard[t].dat[b2][p] == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
+            ts->tss_[t][p] = nodata;
+          } else {
+            ts->tss_[t][p] = (short)(ind*scale);
+          }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
+/** This function computes an MSRre-like time series,
++++ MSRre: ((b1/b2)-1)/sqrt((b1/b2)+1)
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_msrre(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float upper, lower, ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,upper,lower,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+          if (ard[t].dat[b2][p] != 0){
+            upper = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+            lower = sqrt((ard[t].dat[b1][p]/ard[t].dat[b2][p])+1);
+            ind = upper/lower;
+            if (lower == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
+              ts->tss_[t][p] = nodata;
+            } else {
+              ts->tss_[t][p] = (short)(ind*scale);
+            }
+          } else {
+            ts->tss_[t][p] = nodata;
+          }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+/** This function computes a spectral index time series, with kernelized
++++ Normalized differenced method, e.g. NDVI: (b1-b2/(b1+b2)
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float sigma, diff, tmp, ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,sigma,diff,tmp,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+      
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p] || 
+             ard[t].dat[b1][p] <= 0 || 
+             ard[t].dat[b2][p] <= 0){
+          ts->tss_[t][p] = nodata;
+        } else {
+          sigma = 0.5 * (ard[t].dat[b1][p] + ard[t].dat[b2][p]);
+          diff  = ard[t].dat[b1][p] - ard[t].dat[b2][p];
+          tmp   = exp(-(diff*diff) / (2*sigma*sigma));
+          ind   = (1-tmp) / (1+tmp);
+          ts->tss_[t][p] = (short)(ind*scale);
         }
 
       }
@@ -300,7 +458,7 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
-  if (endmember->nb != get_stack_nbands(ard[0].DAT)){
+  if (endmember->nb != get_brick_nbands(ard[0].DAT)){
     printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
     
 
@@ -667,6 +825,9 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_NIR_:
       index_band(ard, mask_, ts, sen->nir, nc, nt, nodata);
       break;
+    case _IDX_SW0_:
+      index_band(ard, mask_, ts, sen->swir0, nc, nt, nodata);
+      break;
     case _IDX_SW1_:
       index_band(ard, mask_, ts, sen->swir1, nc, nt, nodata);
       break;
@@ -766,6 +927,54 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_NDM_:
       cite_me(_CITE_NDMI_);
       index_differenced(ard, mask_, ts, sen->nir, sen->swir1, nc, nt, nodata);
+      break;
+    case _IDX_KNV_:
+      cite_me(_CITE_KNDVI_);
+      index_kernelized(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
+      break;
+    case _IDX_ND1_:
+      cite_me(_CITE_NDRE1_);
+      index_differenced(ard, mask_, ts, sen->rededge2, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_ND2_:
+      cite_me(_CITE_NDRE2_);
+      index_differenced(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_CRE_:
+      cite_me(_CITE_CIre_);
+      index_ratio_minus1(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR1_:
+      cite_me(_CITE_NDVIre1_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR2_:
+      cite_me(_CITE_NDVIre2_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_NR3_:
+      cite_me(_CITE_NDVIre3_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge3, nc, nt, nodata);
+      break;
+    case _IDX_N1n_:
+      cite_me(_CITE_NDVIre1n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_N2n_:
+      cite_me(_CITE_NDVIre2n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_N3n_:
+      cite_me(_CITE_NDVIre3n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge3, nc, nt, nodata);
+      break;
+    case _IDX_Mre_:
+      cite_me(_CITE_MSRre_);
+      index_msrre(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_Mrn_:
+      cite_me(_CITE_MSRren_);
+      index_msrre(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
       break;
     default:
       printf("unknown INDEX\n");

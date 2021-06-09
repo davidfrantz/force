@@ -29,10 +29,14 @@ This program is the FORCE Level-2 Processing System (single image)
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../lower-level/param-ll.h"
@@ -54,7 +58,95 @@ This program is the FORCE Level-2 Processing System (single image)
 #include <omp.h> // multi-platform shared memory multiprocessing
 
 
+typedef struct {
+  int n;
+  char fimg[NPOW_10];
+  char fprm[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] image-dir parameter-file\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'image-dir':      extracted Level 1 image\n");
+  printf("  - 'parameter-file': ML parameter file\n");
+  printf("\n");
+  // option -d is hidden from user and only used from force caller
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvid")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Level 2 processing of single image\n");
+        exit(SUCCESS);
+      case 'd':
+        #ifdef FORCE_DEBUG
+        exit(FAILURE);
+        #endif
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+
+  // non-optional parameters
+  args->n = 2;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fimg, NPOW_10, argv[optind++]);
+      copy_string(args->fprm, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
 int main( int argc, char *argv[] ){
+args_t args;
 int mission, c;
 par_ll_t *pl2  = NULL; // can be renamed to par, once par is not global anymore...
 meta_t   *meta = NULL;
@@ -62,59 +154,28 @@ multicube_t   *multicube = NULL;
 atc_t    *atc  = NULL;
 
 top_t   *TOP = NULL;
-stack_t *DN  = NULL;
-stack_t *TOA = NULL;
-stack_t *QAI = NULL;
+brick_t *DN  = NULL;
+brick_t *TOA = NULL;
+brick_t *QAI = NULL;
 
-stack_t **LEVEL2 = NULL;
+brick_t **LEVEL2 = NULL;
 int nprod;
 int err;
 GDALDriverH driver;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 3){
-    printf("usage: %s image-dir parameter-file\n\n", argv[0]);
-    return FAILURE;
-  }
-
 
   /** initialization + read metadata, parameter and tile file
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+
   time_t TIME; time(&TIME);
-
-
-  #ifdef FORCE_DEBUG
-  //db_check();
-  #endif
-
-  // allow a test, if l2ps is compiled in DEBUG mode
-  if (strcmp(argv[1], "?") == 0){
-    #ifdef FORCE_DEBUG
-    return 1;
-    #endif
-    return 0;
-  }
-
+  
+  parse_args(argc, argv, &args);
+  
 
   pl2 = allocate_param_lower();
-
-  // get command line parameters
-  if (strlen(argv[1]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;;
-  } else { 
-    strncpy(pl2->d_level1, argv[1], strlen(argv[1]));
-    pl2->d_level1[strlen(argv[1])] = '\0';
-  }
-
-  if (strlen(argv[2]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return FAILURE;;
-  } else { 
-    strncpy(pl2->f_par, argv[2], strlen(argv[2]));
-    pl2->f_par[strlen(argv[2])] = '\0';
-  }
-
-  check_arg(argv[2]);
+  copy_string(pl2->d_level1, NPOW_10, args.fimg);
+  copy_string(pl2->f_par,    NPOW_10, args.fprm);
 
 
   // make GDAL less verbose
@@ -180,7 +241,7 @@ GDALDriverH driver;
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (convert_level1(meta, mission, atc, DN, &TOA, QAI) != SUCCESS){
       printf("DN to TOA conversion failed.\n"); return FAILURE;}
-    free_stack_bands(DN);
+    free_brick_bands(DN);
 
 
     /** read/reproject/ckeck DEM and compute slope/aspect
@@ -227,7 +288,7 @@ GDALDriverH driver;
   }
 
   free_param_lower(pl2); free_metadata(meta); free_multicube(multicube);
-  free_stack(DN);
+  free_brick(DN);
 
   cite_push(pl2->d_level2);
   

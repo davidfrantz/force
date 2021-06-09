@@ -279,9 +279,7 @@ float tmp, min[3];
     while (tokenptr != NULL){
 
       if (k == 0){ 
-        if (strlen(tokenptr) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); return FAILURE;
-        } else { strncpy(id[nline], tokenptr, strlen(tokenptr)); id[nline][strlen(tokenptr)] = '\0';}
+        copy_string(id[nline], NPOW_10, tokenptr);
       } else if (k == 4){
         if (strcmp(tokenptr, "D") == 0 || strcmp(tokenptr, "B") == 0){
           valid[nline] = true;  // day image
@@ -532,6 +530,7 @@ GDALRasterBandH band;
 char **sds = NULL, **metadata = NULL;
 char KeyName[NPOW_10];
 char *sdsname = NULL;
+char **sdsopenoptions = NULL;
 int nx, ny, nxc, nyc;
 int yoff, xoff;
 float voff, vscl, val;
@@ -547,7 +546,6 @@ double sumwvp, ctrwvp, *average = NULL, *ctrall = NULL;
 float wlon, elon, nlat, slat;
 bool ok;
 const char *separator = ",";
-
 
   // allocate and initialize wvp averages and pixel counts
   alloc((void**)&average, nc, sizeof(double));
@@ -566,6 +564,7 @@ const char *separator = ",";
 
 
   GDALAllRegister();
+  sdsopenoptions = CSLSetNameValue(sdsopenoptions, "LIST_SDS", "YES");
 
   // read the geometa table
   if (read_modis_geometa(geoname, &id, &gr, &v, &nl, &nv) != SUCCESS){
@@ -658,9 +657,7 @@ const char *separator = ",";
       while (fgets(buffer, NPOW_10, fp) != NULL){
         if (strstr(buffer, pattern) != NULL){
           str = strtok(buffer, separator);
-          if (strlen(str) > NPOW_10-1){
-            printf("cannot copy, string too long.\n"); exit(1);
-          } else { strncpy(basename, str, strlen(str)); basename[strlen(str)] = '\0';}
+          copy_string(basename, NPOW_10, str);
           ok = true;
         }
       }
@@ -702,8 +699,11 @@ const char *separator = ",";
       if (!fileexist(fullname)) continue;
 
       // open input dataset
-      if ((hdfDS = GDALOpen(fullname, GA_ReadOnly)) == NULL){
-        printf("unable to open image\n"); exit(1);
+      if ((hdfDS = GDALOpenEx(fullname, GA_ReadOnly, 
+                              NULL, 
+                              (const char *const *)sdsopenoptions, 
+                              NULL)) == NULL){
+        printf("unable to open image %s\n", fullname); exit(1);
       } else {
         //free((void*)hdfname); hdfname = NULL;
       }
@@ -843,8 +843,11 @@ const char *separator = ",";
   free_2D((void**)id, NPOW_10);
   free((void*)v);
 
+  CSLDestroy(sdsopenoptions);
+
   *avg   = average;
   *count = ctrall;
+  
   
   return;
 }
@@ -871,22 +874,22 @@ float ctr = 0;
   for (c=0; c<nc; c++){
     if (!aqua){
       WVP[c] = modavg[c];
-      if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
+      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
     } else {
       if (modavg[c] < 9999 && mydavg[c] < 9999){
         if (modctr[c] >= mydctr[c]){
           WVP[c] = modavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
         } else {
           WVP[c] = mydavg[c];
-          if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[c][3] = '\0';}
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
         }
       } else if (modavg[c] < 9999 && mydavg[c] >= 9999){
         WVP[c] = modavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MOD", 3); SEN[c][3] = '\0';}
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
       } else if (modavg[c] >= 9999 && mydavg[c] < 9999){
         WVP[c] = mydavg[c];
-        if (WVP[c] < 9999){ strncpy(SEN[c], "MYD", 3); SEN[c][3] = '\0';}
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
       }
     }
     if (WVP[c] < 9999) ctr++;
@@ -1022,7 +1025,7 @@ double *modavg, *mydavg, *modctr, *mydctr;
   // initialize precipitable water with fill
   for (c=0; c<nc; c++){
     WVP[c] = 9999;
-    strncpy(SEN[c], "TBD", 3); SEN[c][3] = '\0';
+    copy_string(SEN[c], NPOW_02, "TBD");
   }
 
   // if TERRA geometa doesn't exist: download

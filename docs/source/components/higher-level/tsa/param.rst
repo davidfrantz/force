@@ -207,6 +207,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Integer list. Valid values: [1,365]
     | ``DOY_RANGE = 1 365``
 
+.. _tsa-param-index:
+
 * **Spectral index**
 
   * Perform the time series analysis using the specified band or index.
@@ -215,9 +217,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}
     | ``INDEX = NDVI EVI NBR``
-
 
 
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
@@ -288,6 +289,39 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     + SMA       + Spectral Mixture Analysis                  + BOA = F * endmember + E                                                                  + Smith et al. 1990        +
     +           +                                            + Fraction F is retrieved using least-squares optimization                                 +                          +
     +           +                                            + from a couple of endmembers and BOA reflectance, E is model error                        +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + kNDVI     + Kernel NDVI                                + (1 - k) / (1 + k)                                                                        + Camps-Valls et al. 2021  +
+    +           +                                            + with k = exp( -(NIR - RED)^2 / (2 * sigma^2) )                                           +                          +
+    +           +                                            + with sigma = 0.5 * (NIR + RED)                                                           +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDRE1     + Normalized Difference Red Edge Index 1     + (REDEDGE2 - REDEDGE1) / (REDEDGE2 + REDEDGE1)                                            + Gitelson & Merzlyak 1994 +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDRE2     + Normalized Difference Red Edge Index 2     + (REDEDGE3 - REDEDGE1) / (REDEDGE3 + REDEDGE1)                                            + Barnes et al. 2000       +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + CIre      + Chlorophyll Index red-edge                 + (REDEDGE3 / REDEDGE1) - 1                                                                + Gitelson et al. 2003     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre1   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE1) / (BNIR + REDEDGE1)                                                    + Gitelson & Merzlyak 1994 +
+    +           + red edge 1                                 +                                                                                          +                          +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre2   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE2) / (BNIR + REDEDGE2)                                                    + Fernandez-Manso et al.   +
+    +           + red edge 2                                 +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre3   + Normalized Difference Vegetation Index     + (BNIR - REDEDGE3) / (BNIR + REDEDGE3)                                                    + Fernandez-Manso et al.   +
+    +           + red edge 3                                 +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre1n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE1) / (NIR + REDEDGE1)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 1 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre2n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE2) / (NIR + REDEDGE2)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 2 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + NDVIre3n  + Normalized Difference Vegetation Index     + (NIR - REDEDGE3) / (NIR + REDEDGE3)                                                      + Fernandez-Manso et al.   +
+    +           + red edge 3 narrow                          +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + MSRre     + Modified Simple Ratio red edge             + ((BNIR / REDEDGE1) - 1) / sqrt((BNIR / REDEDGE1) + 1)                                    + Chen 1996                +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + MSRren    + Modified Simple Ratio red edge narrow      + ((NIR / REDEDGE1) - 1) / sqrt((NIR / REDEDGE1) + 1)                                      + Fernandez-Manso et al.   +
+    +           +                                            +                                                                                          + 2016                     +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
     
@@ -383,6 +417,36 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_TSI = FALSE``
 
+* **Python plug-in parameters**
+
+  * This file specifies the file holding user-defined python code. 
+    You can skip this by setting ``FILE_PYTHON = NULL``, but this requires ``OUTPUT_PYP = FALSE``.
+    Two functions are required to communicate with FORCE:
+
+    0) The global space can be used to import modules etc.
+    1) An initialization function that defines the number and names of output bands:
+       ``def forcepy_init():``
+    2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
+
+    | *Type:* full file path
+    | ``FILE_PYTHON = NULL``
+
+  * Type of user-defined function. 
+    1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel as 2D-nd.array [time,bands]. 
+       A multi-processing pool is spawned to parallely execute this function with ``NTHREAD_COMPUTE`` workers.
+       ``def forcepy_pixel(inarray, outarray, dates, nodata):``
+    2) ``BLOCK`` expects a pixel-function that receives the time series of a complete  processing unit as 4D-nd.array [time,bands,rows,cols]. 
+       No parallelization is done on FORCE's end. 
+       ``def forcepy_block(inarray, outarray, dates, nodata):``
+
+    | *Type:* Character. Valid values: {PIXEL,BLOCK}
+    | ``PYTHON_TYPE = PIXEL``
+
+  * Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_PYP = FALSE``
+
 * **Spectral temporal metrics**
 
   * Output Spectral Temporal Metrics? The remaining parameters in this block are only evaluated if TRUE
@@ -442,7 +506,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``OUTPUT_CAW = FALSE``
     | ``OUTPUT_CAD = FALSE``
 
-* **Land surface phenology parameters**
+* **Land surface phenology parameters (SPLITS)**
 
   .. note::
      The Land Surface Phenology (LSP) options are only available if FORCE was compiled with SPLITS (see :ref:`install` section).
@@ -520,6 +584,81 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Logical. Valid values: {TRUE,FALSE}
     | ``OUTPUT_CAP = FALSE``
+
+
+.. _tsa-param-polar:
+
+
+* **Land surface phenology parameters (Polar-based)**
+
+  .. note::
+     The Polar-based Land Surface Phenology (LSP) metrics are always available (they do not rely on SPLITS).
+
+  * Threshold for detecing Start of Season in the cumulative time series.
+
+    | *Type:* Float. Valid range: ]0,1[
+    | ``POL_START_THRESHOLD = 0.2``
+
+  * Threshold for detecing Mid of Season in the cumulative time series.
+
+    | *Type:* Float. Valid range: ]0,1[
+    | ``POL_MID_THRESHOLD = 0.5``
+
+  * Threshold for detecing End of Season in the cumulative time series.
+
+    | *Type:* Float. Valid range: ]0,1[
+    | ``POL_END_THRESHOLD = 0.8``
+
+  * Should the start of each phenological year be adapated?
+    If FALSE, the start is static, i.e. Date of Early Minimum and Date of Late Minimum are the same for all years and 365 days apart. 
+    If TRUE, they differ from year to year and a phenological year is not forced to be 365 days long.
+    
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``POL_ADAPTIVE = TRUE``
+
+  * Which Polarmetrics should be computed? There will be a POL output file for each metric (with years as bands).
+    Currently available are the dates of the early minimum, late minimum, peak of season, start of season, mid of season, end of season, early average vector, average vector, late average vector; 
+    lengths of the total season, green season, between averge vectors; 
+    values of the early minimum, late minimum, peak of season, start of season, mid of season, end of season, early average vector, average vector, late average vector, base level, green amplitude, seasonal amplitude, peak amplitude, green season mean , green season variability, dates of start of phenological year, difference between start of phenological year and its longterm average; 
+    integrals of the total season, base level, base+total, green season, rising rate, falling rate; 
+    rates of average rising, average falling, maximum rising, maximum falling.
+
+    | *Type:* Character list. Valid values: {DEM,DLM,DPS,DSS,DMS,DES,DEV,DAV,DLV,LTS,LGS,LGV,VEM,VLM,VPS,VSS,VMS,VES,VEV,VAV,VLV,VBL,VGA,VSA,VPA,VGM,VGV,DPY,DPV,IST,IBL,IBT,IGS,IRR,IFR,RAR,RAF,RMR,RMF}
+    | ``POL = VSS VPS VES VSA RMR IGS``
+
+  * Standardize the POL time series with pixel mean and/or standard deviation?
+
+    | *Type:* Logical. Valid values: {NONE,NORMALIZE,CENTER}
+    | ``STANDARDIZE_POL = NONE``
+
+
+  * Output the polar-transformed time series? These are layer stack of cartesian X-and Y-coordinates for each interpolated date. 
+    This results in two files, product IDs are PCX and PCY.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_PCT = FALSE``
+
+
+  * Output the Polarmetrics? These are layer stacks per polarmetric with as many bands as years.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_POL = FALSE``
+
+
+  * Compute and output a linear trend analysis on the requested Polarmetric time series? 
+    Note that the OUTPUT_POL parameters don't need to be TRUE to do this.
+    See also the TREND PARAMETERS block below.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_TRO = FALSE``
+
+
+  * Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on the requested Polarmetric time series?
+    Note that the OUTPUT_POL parameters don't need to be TRUE to do this.
+    See also the TREND PARAMETERS block below.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``OUTPUT_CAO = FALSE``
 
 * **Trend parameters**
 

@@ -33,14 +33,15 @@ BRDF header
 #include <math.h>    // common mathematical functions
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
+#include "../lower-level/sunview-ll.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int brdf_factor(stack_t *sun, stack_t *view, stack_t *cor, int g);
+int brdf_factor(brick_t *sun, brick_t *view, brick_t *cor, int g);
 float brdf_forward(float ti, float tv, float phi, float iso, float vol, float geo);
 void LiKernel(float hbratio, float brratio, float tantv, float tanti, float sinphi, float cosphi, float *result);
 void GetPhaang(float cos1, float cos2, float sin1, float sin2, float cos3, float *cosres, float *res,float *sinres);

@@ -32,7 +32,8 @@ Reading ARD header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/string-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../higher-level/param-hl.h"
@@ -43,14 +44,14 @@ extern "C" {
 #endif
 
 typedef struct {
-  stack_t *DAT;
-  stack_t *QAI;
-  stack_t *DST;
-  stack_t *AOD;
-  stack_t *HOT;
-  stack_t *VZN;
-  stack_t *WVP;
-  stack_t *MSK;
+  brick_t *DAT;
+  brick_t *QAI;
+  brick_t *DST;
+  brick_t *AOD;
+  brick_t *HOT;
+  brick_t *VZN;
+  brick_t *WVP;
+  brick_t *MSK;
   short  **dat;  // quantitative data (reflectance, or index)
   short   *qai;  // quality assurance information (bit-coding)
   short   *dst;  // cloud / cloud shadow distance
@@ -63,12 +64,12 @@ typedef struct {
   //date_t  date; // acquisition date
 } ard_t;
 
-stack_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
+brick_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
 ard_t *read_features(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
 ard_t *read_confield(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
 ard_t *read_ard(int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl);
-stack_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y);
-stack_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, stack_t *ARD);
+brick_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y);
+brick_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, brick_t *ARD);
 int free_ard(ard_t *ard, int nt);
 
 #ifdef __cplusplus

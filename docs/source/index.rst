@@ -5,19 +5,13 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.4.0**
+**Version 3.6.5-dev**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
 .. image:: force.png
 
 .. note::
-   The ``latest`` version of this documentation refers to the ``develop`` software branch, which includes bleeding-edge features that are not part of ``master`` yet.
-   The ``stable`` version of this documentation only describes features that are present in ``master``.
-   New additions to this documentation will only be included in the ``latest`` version.
-   The ``stable`` version will be synced with ``latest`` whenever a new ``master`` version of FORCE is released.
-
-.. warning::
    This documentation is not finished yet. Parts of the description are badly formatted, incomplete, incorrect or are referring to version 2.1. Please, come back later for the definitive documentation.
 
 FORCE is ...
@@ -45,9 +39,9 @@ Related Links
 
 **Get the source code** from `Github <https://github.com/davidfrantz/force>`_. It is open source and free!
 
-**Learn how to use FORCE**. Have a look at my `Tutorials <https://davidfrantz.github.io/tutorials>`_. Check regularly for new content.
+**Learn how to use FORCE**. Have a look at the :ref:`howto`. Check regularly for new content.
 
-**Get help**, and help others in the FORCE self-help `Google group <https://groups.google.com/d/forum/force_eo>`_
+**Get help**, and help others in the FORCE self-help `discussion group <https://github.com/davidfrantz/force/discussions>`_
 
 **Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
@@ -65,7 +59,14 @@ Related Links
 
    about.rst
 
-   
+
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   history/index.rst
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Usage Policy
@@ -75,14 +76,7 @@ Related Links
    policy/development.rst
    policy/license.rst
 
-   
-.. toctree::
-   :maxdepth: 3
-   :hidden:
 
-   history/index.rst
-   
-   
 .. toctree::
    :maxdepth: 1
    :caption: Setup
@@ -93,7 +87,16 @@ Related Links
    setup/depend_opt.rst
    setup/install.rst
    setup/docker.rst
-   
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: How to use the FORCE
+   :hidden:
+
+   howto/index.rst
+
+
 .. toctree::
    :maxdepth: 4
    :caption: Software components
@@ -122,5 +125,4 @@ Related Links
    proj.rst
    issues.rst
    contact.rst
-
 

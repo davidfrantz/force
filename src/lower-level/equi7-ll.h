@@ -33,8 +33,9 @@ Equi7 header
 #include <stdbool.h>  // boolean data type
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/cite-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../lower-level/param-ll.h"
 
 
@@ -42,7 +43,7 @@ Equi7 header
 extern "C" {
 #endif
 
-multicube_t *start_equi7cube(par_ll_t *pl2, stack_t *stack);
+multicube_t *start_equi7cube(par_ll_t *pl2, brick_t *brick);
 
 #ifdef __cplusplus
 }

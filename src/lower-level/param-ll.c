@@ -73,8 +73,12 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
   register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
   register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
+  register_bool_par(params,    "ERASE_CLOUDS",          &pl2->erase_cloud);
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
   register_float_par(params,   "MAX_CLOUD_COVER_TILE",  1, 100, &pl2->maxtc);
+  register_float_par(params,   "CLOUD_BUFFER",          0, 10000, &pl2->cldbuf);
+  register_float_par(params,   "SHADOW_BUFFER",         0, 10000, &pl2->shdbuf);
+  register_float_par(params,   "SNOW_BUFFER",           0, 10000, &pl2->snwbuf);
   register_float_par(params,   "CLOUD_THRESHOLD",       0, 1, &pl2->cldprob);
   register_float_par(params,   "SHADOW_THRESHOLD",      0, 1, &pl2->shdprob);
   register_int_par(params,     "NPROC",                 1, INT_MAX, &pl2->nproc);
@@ -103,9 +107,7 @@ void parse_proj(par_ll_t *pl2){
 int i;
 
 
-  if (strlen(pl2->proj_[0]) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(pl2->proj, pl2->proj_[0], strlen(pl2->proj_[0])); pl2->proj[strlen(pl2->proj_[0])] = '\0';}
+  copy_string(pl2->proj, NPOW_10, pl2->proj_[0]);
   
   for (i=1; i<pl2->nproj_; i++){
     strncat(pl2->proj, " ",           NPOW_10-strlen(pl2->proj)-1);
@@ -172,12 +174,7 @@ char  bname[NPOW_10] = "\0";
       if (findfile(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
          printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
-      if (strlen(bname) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;;
-      } else { 
-        strncpy(pl2->d_level1, bname, strlen(bname));
-        pl2->d_level1[strlen(bname)] = '\0';
-      }
+      copy_string(pl2->d_level1, NPOW_10, bname);
 
     }
 
@@ -193,11 +190,11 @@ char  bname[NPOW_10] = "\0";
 
   // check
   if (fscanf(fpar, "%s", buffer) < 0){
-    printf("No valid parameter file!\n"); return FAILURE;}
+    printf("Cannot scan parameter file!\n"); return FAILURE;}
     
   // check
   if (strcmp(buffer, "++PARAM_LEVEL2_START++") != 0){
-    printf("No valid parameter file!\n"); return FAILURE;}
+    printf("No valid parameter file! '++PARAM_LEVEL2_START++' is missing.\n"); return FAILURE;}
 
   // register parameters
   register_lower(pl2->params, pl2);

@@ -158,13 +158,16 @@ double mae, rmse;
 
       // account for values given in continuous days
       if (in_ce){
-        my  -= 365*(nf-1)/2;  my -= d_fld[0].year; my *= 1000;
-        slp -= 365; slp *= 1000;
+        my  -= 365*(nf-1)/2;
+        slp -= 365;
       }
 
       // standard error of slope, and significance of slope
       seb = sqrt(1.0/(k-2)*ssqe)/sqrt(sxsq);
       sig = slope_significant(1-trd->conf, trd->tail, k, slp, 0.0, seb);
+
+      // account for values given in continuous days
+      if (in_ce) slp *= 1000;
 
       rmse = sqrt(ssqe/k);
       mae = sae/k;
@@ -385,7 +388,7 @@ double mae, rmse;
 
         // account for values given in continuous days
         if (in_ce){
-          my  -= 365*(nf-1)/2;  my -= d_fld[0].year; my *= 1000;
+          my  -= 365*(nf-1)/2;
           slp -= 365; slp *= 1000;
         }
 
@@ -409,6 +412,16 @@ double mae, rmse;
 
       }
 
+      // loss, i.e. change relative to total offset
+      if (cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p] > 0){
+        cat_[_CAT_LOSS_][p] = (short)(cat_[_CAT_CHANGE_][p]/
+                                      cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
+                                      1000);
+      } else {
+        cat_[_CAT_LOSS_][p] = 0;
+      }
+
+
     }
 
   }
@@ -431,7 +444,7 @@ double mae, rmse;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_trend(tsa_t *ts, small *mask_, int nc, short nodata, par_hl_t *phl){
-int l, nlsp = 26;
+int l;
 bool in_ce = false;
 
 
@@ -443,9 +456,16 @@ bool in_ce = false;
 
 
   if (phl->tsa.lsp.otrd){
-    for (l=0; l<nlsp; l++){
+    for (l=0; l<_LSP_LENGTH_; l++){
       if (l < 7) in_ce = true; else in_ce = false;
       trend(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->trp_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
+    }
+  }
+  
+  if (phl->tsa.pol.otrd){
+    for (l=0; l<_POL_LENGTH_; l++){
+      if (l < 9) in_ce = true; else in_ce = false;
+      trend(ts->pol_[l], ts->d_pol, mask_, nc, phl->tsa.pol.ny, ts->tro_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
     }
   }
 
@@ -462,7 +482,7 @@ bool in_ce = false;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_cat(tsa_t *ts, small *mask_, int nc, short nodata, par_hl_t *phl){
-int l, nlsp = 26;
+int l;
 bool in_ce = false;
 
 
@@ -477,9 +497,16 @@ bool in_ce = false;
 
 
   if (phl->tsa.lsp.ocat){
-    for (l=0; l<nlsp; l++){
+    for (l=0; l<_LSP_LENGTH_; l++){
       if (l < 7) in_ce = true; else in_ce = false;
       cat(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->cap_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
+    }
+  }
+  
+  if (phl->tsa.pol.ocat){
+    for (l=0; l<_POL_LENGTH_; l++){
+      if (l < 9) in_ce = true; else in_ce = false;
+      cat(ts->pol_[l], ts->d_pol, mask_, nc, phl->tsa.pol.ny, ts->cao_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
     }
   }
 

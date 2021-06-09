@@ -1,6 +1,6 @@
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This file is part of FORCE - Framework for Operational Radiometric 
+This file is part of FORCE - Framework for Operational Radiometric
 Correction for Environmental monitoring.
 
 Copyright (C) 2013-2020 David Frantz
@@ -29,7 +29,7 @@ This file contains functions for parsing parameter files
 
 
 /** Number of values
-+++ This function takes a parameter in tag and multi-value notation, and 
++++ This function takes a parameter in tag and multi-value notation, and
 +++ returns the number of values.
 --- buf:   buffer that holds tag / value line as read from parameter file
 +++ Return: number of values
@@ -41,14 +41,12 @@ const char *separator = " =";
 int n = -1; // start at -1 to ignore tag
 
 
-  if (strlen(buf) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(buffer, buf, strlen(buf)); buffer[strlen(buf)] = '\0';}
+  copy_string(buffer, NPOW_10, buf);
 
   buffer[strcspn(buffer, "\r\n#")] = 0;
 
   ptr = strtok(buffer, separator);
-  
+
   while (ptr != NULL){
     ptr = strtok(NULL, separator);
     n++;
@@ -75,16 +73,7 @@ const char *separator = " =\n";
   ptr = strtok(str, separator);
 
   while ((ptr = strtok(NULL, separator)) != NULL){
-
-    if (strlen(ptr) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); exit(1);
-    } else { 
-      strncpy(param[num], ptr, strlen(ptr));
-      param[num][strlen(ptr)] = '\0';
-      num++;
-    }
-
-  }
+    copy_string(param[num++], NPOW_10, ptr);}
 
   *n = num;
   return true;
@@ -103,7 +92,7 @@ int y, m, d;
 date_t date;
 
 
-  strncpy(cy, str,   4); cy[4] = '\0'; y= atoi(cy);
+  strncpy(cy, str,   4); cy[4] = '\0'; y = atoi(cy);
   strncpy(cm, str+5, 2); cm[2] = '\0'; m = atoi(cm);
   strncpy(cd, str+8, 2); cd[2] = '\0'; d = atoi(cd);
 
@@ -129,7 +118,7 @@ int e;
   for (e=0; e<n_enums; e++){
     if (strcmp(str, enums[e].tag) == 0) return enums[e].en;
   }
-  
+
   return INT_MAX;
 }
 
@@ -152,18 +141,18 @@ params_t *params = NULL;
 }
 
 
-/** If necessary, this function increases the allocation for the parsed 
+/** If necessary, this function increases the allocation for the parsed
 +++ parameters
 --- params: parsed parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void reallocate_params(params_t *params){
-  
-  
+
+
   if (params->n < params->nmax) return;
-  
+
   re_alloc((void**)&params->par, params->nmax, params->nmax*2, sizeof(par_t));
-  
+
   params->nmax *= 2;
 
   return;
@@ -189,7 +178,7 @@ int i;
     }
 
     free((void*)params); params = NULL;
-    
+
   }
 
   return;
@@ -239,8 +228,8 @@ void allocate_par(par_t *par){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void free_par(par_t *par){
-  
- 
+
+
   switch (par->type){
     case _PAR_INT_:
       if (par->length != NULL) free((void*)par->int_vec_[0]);
@@ -278,7 +267,7 @@ void free_par(par_t *par){
 }
 
 
-/** This function pre-screens a parameter file, and counts how often a 
+/** This function pre-screens a parameter file, and counts how often a
 --- given tag was specified
 --- fpar:   parameter filepath
 --- tag:    parameter tag
@@ -298,7 +287,7 @@ int n = 0;
     if (strcmp(ptr, tag) == 0) n++;
   }
   fseek(fpar, 0, SEEK_SET);
-  
+
   if (n == 0){
     printf("pre-screening parfile failed. No tag %s was detected. ", tag);
     return FAILURE;
@@ -322,18 +311,13 @@ void register_int_par(params_t *params, const char *name, int min, int max, int 
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].int_range[_MIN_] = min;
   params->par[params->n].int_range[_MAX_] = max;
-  
+
   params->par[params->n].type = _PAR_INT_;
   params->par[params->n].length = NULL;
 
@@ -358,15 +342,10 @@ void register_enum_par(params_t *params, const char *name, const tagged_enum_t *
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].n_enums = n_enums;
   alloc((void**)&params->par[params->n].enums, n_enums, sizeof(tagged_enum_t));
   memmove(params->par[params->n].enums, enums, sizeof(tagged_enum_t)*n_enums);
@@ -395,18 +374,13 @@ void register_float_par(params_t *params, const char *name, float min, float max
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].float_range[_MIN_] = min;
   params->par[params->n].float_range[_MAX_] = max;
-  
+
   params->par[params->n].type = _PAR_FLOAT_;
   params->par[params->n].length = NULL;
 
@@ -431,12 +405,7 @@ void register_double_par(params_t *params, const char *name, double min, double 
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
 
@@ -465,23 +434,16 @@ void register_bool_par(params_t *params, const char *name, int *ptr){
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].n_enums = 2;
   alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
-  
-  strncpy(params->par[params->n].enums[0].tag, "FALSE", 5); 
-  params->par[params->n].enums[0].tag[5] = '\0';
-  strncpy(params->par[params->n].enums[1].tag, "TRUE",  4); 
-  params->par[params->n].enums[1].tag[4] = '\0';
-  
+
+  copy_string(params->par[params->n].enums[0].tag, NPOW_04, "FALSE");
+  copy_string(params->par[params->n].enums[1].tag, NPOW_04, "TRUE");
+
   params->par[params->n].enums[0].en = false;
   params->par[params->n].enums[1].en = true;
 
@@ -511,23 +473,13 @@ char cmax[NPOW_10];
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
 
-  if (strlen(min) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(cmin, min, strlen(min)); cmin[strlen(min)] = '\0';}
+  copy_string(cmin, NPOW_10, min);
+  copy_string(cmax, NPOW_10, max);
 
-  if (strlen(max) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(cmax, max, strlen(max)); cmax[strlen(max)] = '\0';}
-  
   params->par[params->n].date_range[_MIN_] =  parse_date(cmin);
   params->par[params->n].date_range[_MAX_] =  parse_date(cmax);
 
@@ -554,17 +506,12 @@ void register_char_par(params_t *params, const char *name, int char_test, char *
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
 
   params->par[params->n].char_test = char_test;
-  
+
   params->par[params->n].type = _PAR_CHAR_;
   params->par[params->n].length = NULL;
 
@@ -591,25 +538,20 @@ void register_intvec_par(params_t *params, const char *name, int min, int max, i
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].int_range[_MIN_] = min;
   params->par[params->n].int_range[_MAX_] = max;
-  
+
   params->par[params->n].type = _PAR_INT_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].int_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -630,26 +572,21 @@ void register_enumvec_par(params_t *params, const char *name, const tagged_enum_
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].n_enums = n_enums;
   alloc((void**)&params->par[params->n].enums, n_enums, sizeof(tagged_enum_t));
   memmove(params->par[params->n].enums, enums, sizeof(tagged_enum_t)*n_enums);
-  
+
   params->par[params->n].type = _PAR_ENUM_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].int_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -670,25 +607,20 @@ void register_floatvec_par(params_t *params, const char *name, float min, float 
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].float_range[_MIN_] = min;
   params->par[params->n].float_range[_MAX_] = max;
-  
+
   params->par[params->n].type = _PAR_FLOAT_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].float_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -709,25 +641,20 @@ void register_doublevec_par(params_t *params, const char *name, double min, doub
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].double_range[_MIN_] = min;
   params->par[params->n].double_range[_MAX_] = max;
-  
+
   params->par[params->n].type = _PAR_DOUBLE_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].double_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -746,34 +673,26 @@ void register_boolvec_par(params_t *params, const char *name, int **ptr, int *pt
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].n_enums = 2;
   alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
-  
-  strncpy(params->par[params->n].enums[0].tag, "FALSE",  5); 
-  params->par[params->n].enums[0].tag[5] = '\0';
-  
-  strncpy(params->par[params->n].enums[1].tag, "TRUE",   4); 
-  params->par[params->n].enums[1].tag[4] = '\0';
-  
+
+  copy_string(params->par[params->n].enums[0].tag, NPOW_04, "FALSE");
+  copy_string(params->par[params->n].enums[1].tag, NPOW_04, "TRUE");
+
   params->par[params->n].enums[0].en = false;
   params->par[params->n].enums[1].en = true;
-  
+
   params->par[params->n].type = _PAR_BOOL_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].int_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -796,33 +715,23 @@ char cmax[NPOW_10];
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
-  if (strlen(min) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(cmin, min, strlen(min)); cmin[strlen(min)] = '\0';}
 
-  if (strlen(max) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(cmax, max, strlen(max)); cmax[strlen(max)] = '\0';}
+  copy_string(cmin, NPOW_10, min);
+  copy_string(cmax, NPOW_10, max);
 
   params->par[params->n].date_range[_MIN_] =  parse_date(cmin);
   params->par[params->n].date_range[_MAX_] =  parse_date(cmax);
-  
+
   params->par[params->n].type = _PAR_DATE_;
 
   params->par[params->n].length = ptr_length;
   *params->par[params->n].length = 0;
 
   params->par[params->n].date_vec_ = ptr;
-  
+
   params->n++;
 
   return;
@@ -842,15 +751,10 @@ void register_charvec_par(params_t *params, const char *name, int char_test, cha
 
   reallocate_params(params);
 
-  if (strlen(name) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { 
-    strncpy(params->par[params->n].name, name, strlen(name));
-    params->par[params->n].name[strlen(name)] = '\0';
-  }
+  copy_string(params->par[params->n].name, NPOW_10, name);
 
   params->par[params->n].set = false;
-  
+
   params->par[params->n].char_test = char_test;
 
   params->par[params->n].type = _PAR_CHAR_;
@@ -859,14 +763,14 @@ void register_charvec_par(params_t *params, const char *name, int char_test, cha
   *params->par[params->n].length = 0;
 
   params->par[params->n].char_vec_ = ptr;
-  
+
   params->n++;
 
   return;
 }
 
 
-/** This function parses a parameter. One line of the parameter file is 
+/** This function parses a parameter. One line of the parameter file is
 +++ compared to all registered parameters
 --- params: parsed parameters
 --- buf:    buffer that holds tag / value line as read from parameter file
@@ -880,10 +784,7 @@ char *ptr = NULL;
 const char *separator = " =";
 
 
-  if (strlen(buf) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); exit(1);
-  } else { strncpy(buffer, buf, strlen(buf)); buffer[strlen(buf)] = '\0';}
-
+  copy_string(buffer, NPOW_10, buf);
   buffer[strcspn(buffer, "\r\n#")] = 0;
 
   ptr = strtok(buffer, separator);
@@ -892,7 +793,7 @@ const char *separator = " =";
   if (tag == NULL) return;
 
   for (i=0; i<params->n; i++){
-    
+
     if (params->par[i].set) continue;
 
     if (strcmp(tag, params->par[i].name) == 0){
@@ -924,12 +825,7 @@ const char *separator = " =";
             *params->par[i].date_ = parse_date(ptr);
             break;
           case _PAR_CHAR_:
-            if (strlen(ptr) > NPOW_10-1){
-              printf("cannot copy, string too long.\n"); exit(1);
-            } else { 
-              strncpy(*params->par[i].char_, ptr, strlen(ptr));
-              (*params->par[i].char_)[strlen(ptr)] = '\0';
-            }
+            copy_string(*params->par[i].char_, NPOW_10, ptr);
             break;
           default:
             printf("unknown datatype for par..\n");
@@ -942,10 +838,7 @@ const char *separator = " =";
         if ((*params->par[i].length = length_par(buf)) < 1) return;
         allocate_par(&params->par[i]);
 
-        if (strlen(buf) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); exit(1);
-        } else { strncpy(buffer, buf, strlen(buf)); buffer[strlen(buf)] = '\0';}
-
+        copy_string(buffer, NPOW_10, buf);
         buffer[strcspn(buffer, "\r\n#")] = 0;
 
         ptr = strtok(buffer, separator);
@@ -976,12 +869,7 @@ const char *separator = " =";
               params->par[i].date_vec_[0][n] = parse_date(ptr);
               break;
             case _PAR_CHAR_:
-              if (strlen(ptr) > NPOW_10-1){
-                printf("cannot copy, string too long.\n"); exit(1);
-              } else { 
-                strncpy(params->par[i].char_vec_[0][n], ptr, strlen(ptr));
-                params->par[i].char_vec_[0][n][strlen(ptr)] = '\0';
-              }
+              copy_string(params->par[i].char_vec_[0][n], NPOW_10, ptr);
               break;
             default:
               printf("unknown datatype for par..\n");
@@ -990,7 +878,7 @@ const char *separator = " =";
 
           n++;
 
-        } 
+        }
 
       }
 
@@ -1015,9 +903,9 @@ char eol[1];
   printf("%d parameters were registered.\n", params->n);
 
   for (i=0; i<params->n; i++){
-    
+
     printf("%s: ", params->par[i].name);
-    
+
     // scalar
     if (params->par[i].length == NULL){
 
@@ -1038,7 +926,7 @@ char eol[1];
           printf("%d\n", *params->par[i].int_);
           break;
         case _PAR_DATE_:
-          printf("%04d-%02d-%02d\n", params->par[i].date_->year, 
+          printf("%04d-%02d-%02d\n", params->par[i].date_->year,
             params->par[i].date_->month, params->par[i].date_->day);
           break;
         case _PAR_CHAR_:
@@ -1053,7 +941,7 @@ char eol[1];
     } else {
 
       for (n=0; n<*params->par[i].length; n++){
-        
+
         if (n == *params->par[i].length-1) eol[0] = '\n'; else eol[0] = ' ';
 
         switch (params->par[i].type){
@@ -1073,7 +961,7 @@ char eol[1];
             printf("%d%s", params->par[i].int_vec_[0][n], eol);
             break;
           case _PAR_DATE_:
-            printf("%04d-%02d-%02d%s", params->par[i].date_vec_[0][n].year, 
+            printf("%04d-%02d-%02d%s", params->par[i].date_vec_[0][n].year,
               params->par[i].date_vec_[0][n].month, params->par[i].date_vec_[0][n].day, eol);
             break;
           case _PAR_CHAR_:
@@ -1089,7 +977,7 @@ char eol[1];
     }
 
   }
-  
+
   return;
 }
 
@@ -1149,7 +1037,7 @@ char eol[1];
           break;
         case _PAR_DATE_:
           if (cur < end){
-            cur += snprintf(cur, end-cur, "%04d-%02d-%02d", params->par[i].date_->year, 
+            cur += snprintf(cur, end-cur, "%04d-%02d-%02d", params->par[i].date_->year,
             params->par[i].date_->month, params->par[i].date_->day);
           } else { printf("Buffer Overflow in assembling par log\n"); exit(1);}
           break;
@@ -1169,7 +1057,7 @@ char eol[1];
     } else {
 
       for (n=0; n<*params->par[i].length; n++){
-        
+
         if (n == *params->par[i].length-1) eol[0] = '\0'; else eol[0] = ' ';
 
         switch (params->par[i].type){
@@ -1200,7 +1088,7 @@ char eol[1];
             break;
           case _PAR_DATE_:
             if (cur < end){
-              cur += snprintf(cur, end-cur, "%04d-%02d-%02d%s", params->par[i].date_vec_[0][n].year, 
+              cur += snprintf(cur, end-cur, "%04d-%02d-%02d%s", params->par[i].date_vec_[0][n].year,
               params->par[i].date_vec_[0][n].month, params->par[i].date_vec_[0][n].day, eol);
             } else { printf("Buffer Overflow in assembling par log\n"); exit(1);}
             break;
@@ -1221,7 +1109,7 @@ char eol[1];
     }
 
   }
-  
+
   return;
 }
 
@@ -1235,20 +1123,20 @@ int error = 0, n;
 
 
   if (par->length == NULL){
-    if (*par->int_ < par->int_range[_MIN_] || 
+    if (*par->int_ < par->int_range[_MIN_] ||
         *par->int_ > par->int_range[_MAX_]) error++;
   } else {
     for (n=0; n<*par->length; n++){
-      if (par->int_vec_[0][n] < par->int_range[_MIN_] || 
+      if (par->int_vec_[0][n] < par->int_range[_MIN_] ||
           par->int_vec_[0][n] > par->int_range[_MAX_]) error++;
     }
   }
-  
+
   if (error > 0){
-    printf("parameter %s is out of bounds [%d,%d].\n", 
+    printf("parameter %s is out of bounds [%d,%d].\n",
       par->name, par->int_range[_MIN_], par->int_range[_MAX_]);
     return FAILURE;
-  } 
+  }
 
   return SUCCESS;
 }
@@ -1276,13 +1164,13 @@ bool ok;
       if (!ok) error++;
     }
   }
-  
+
   if (error > 0){
     printf("parameter %s is out of bounds {%s", par->name, par->enums[0].tag);
     for (e=1; e<par->n_enums; e++) printf(",%s", par->enums[e].tag);
     printf("}.\n");
     return FAILURE;
-  } 
+  }
 
   return SUCCESS;
 }
@@ -1297,20 +1185,20 @@ int error = 0, n;
 
 
   if (par->length == NULL){
-    if (*par->float_ < par->float_range[_MIN_] || 
+    if (*par->float_ < par->float_range[_MIN_] ||
         *par->float_ > par->float_range[_MAX_]) error++;
   } else {
     for (n=0; n<*par->length; n++){
-      if (par->float_vec_[0][n] < par->float_range[_MIN_] || 
+      if (par->float_vec_[0][n] < par->float_range[_MIN_] ||
           par->float_vec_[0][n] > par->float_range[_MAX_]) error++;
     }
   }
-  
+
   if (error > 0){
-    printf("parameter %s is out of bounds [%f,%f].\n", 
+    printf("parameter %s is out of bounds [%f,%f].\n",
       par->name, par->float_range[_MIN_], par->float_range[_MAX_]);
     return FAILURE;
-  } 
+  }
 
   return SUCCESS;
 }
@@ -1325,20 +1213,20 @@ int error = 0, n;
 
 
   if (par->length == NULL){
-    if (*par->double_ < par->double_range[_MIN_] || 
+    if (*par->double_ < par->double_range[_MIN_] ||
         *par->double_ > par->double_range[_MAX_]) error++;
   } else {
     for (n=0; n<*par->length; n++){
-      if (par->double_vec_[0][n] < par->double_range[_MIN_] || 
+      if (par->double_vec_[0][n] < par->double_range[_MIN_] ||
           par->double_vec_[0][n] > par->double_range[_MAX_]) error++;
     }
   }
-  
+
   if (error > 0){
-    printf("parameter %s is out of bounds [%f,%f].\n", 
+    printf("parameter %s is out of bounds [%f,%f].\n",
       par->name, par->double_range[_MIN_], par->double_range[_MAX_]);
     return FAILURE;
-  } 
+  }
 
   return SUCCESS;
 }
@@ -1353,22 +1241,22 @@ int error = 0, n;
 
 
   if (par->length == NULL){
-    if (par->date_->ce < par->date_range[_MIN_].ce || 
+    if (par->date_->ce < par->date_range[_MIN_].ce ||
         par->date_->ce > par->date_range[_MAX_].ce) error++;
   } else {
     for (n=0; n<*par->length; n++){
-      if (par->date_vec_[0][n].ce < par->date_range[_MIN_].ce || 
+      if (par->date_vec_[0][n].ce < par->date_range[_MIN_].ce ||
           par->date_vec_[0][n].ce > par->date_range[_MAX_].ce) error++;
     }
   }
-  
+
   if (error > 0){
-    printf("parameter %s is out of bounds [%04d-%02d-%02d,%04d-%02d-%02d].\n", 
+    printf("parameter %s is out of bounds [%04d-%02d-%02d,%04d-%02d-%02d].\n",
       par->name,
       par->date_range[_MIN_].year, par->date_range[_MIN_].month, par->date_range[_MIN_].day,
       par->date_range[_MAX_].year, par->date_range[_MAX_].month, par->date_range[_MAX_].day);
     return FAILURE;
-  } 
+  }
 
   return SUCCESS;
 }
@@ -1421,7 +1309,7 @@ int n;
 
   } else {
     for (n=0; n<*par->length; n++){
-      
+
       switch (par->char_test){
         case _CHAR_TEST_NULL_OR_EXIST_:
           if ((strcmp(par->char_vec_[0][n], "NULL") != 0) && !fileexist(par->char_vec_[0][n])){
@@ -1474,13 +1362,13 @@ int error = 0, i;
 
 
   for (i=0; i<params->n; i++){
-    
+
     if (params->par[i].set == false){
       printf("parameter %s was not set.\n", params->par[i].name);
       error++;
       continue;
     }
-    
+
     if (params->par[i].length != NULL && *params->par[i].length == 0){
       printf("parameter %s was incorrectly parsed.\n", params->par[i].name);
       error++;
@@ -1515,7 +1403,7 @@ int error = 0, i;
     }
 
   }
-  
+
 
   if (error > 0) return FAILURE; else return SUCCESS;
 }

@@ -43,7 +43,7 @@ int ansi(int *c, int *p, int *step, int *col);
 --- arg:    commandline arguments
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void check_arg(char *arg){
+void konami_args(char *arg){
 char achievement[1024] = "CONGRATULATIONS!!! YOU HAVE EARNED A NEW ACHIEVEMENT: <<<LIGHTSABER>>>\n\n";
 struct timespec ts;
 int i;

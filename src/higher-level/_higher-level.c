@@ -28,8 +28,11 @@ This program is the FORCE Higher Level Processing System
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/tile-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
@@ -44,7 +47,85 @@ This program is the FORCE Higher Level Processing System
 #include <omp.h> // multi-platform shared memory multiprocessing
 
 
+typedef struct {
+  int n;
+  char fprm[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] parameter-file\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'parameter-file': parameter file for any higher level submodule\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Higher level processing (compositing, time series analysis, ...)\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  args->n = 1;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fprm, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
 int main ( int argc, char *argv[] ){
+args_t args;
 par_hl_t    *phl      = NULL;
 cube_t      *cube     = NULL;
 aux_t       *aux      = NULL;
@@ -52,24 +133,20 @@ ard_t       **ARD1    = NULL;
 ard_t       **ARD2    = NULL;
 int         *nt1      = NULL;
 int         *nt2      = NULL;
-stack_t     **MASK    = NULL;
-stack_t     ***OUTPUT = NULL;
+brick_t     **MASK    = NULL;
+brick_t     ***OUTPUT = NULL;
 int         *nprod    = NULL;
 GDALDriverH driver;
 progress_t  pro;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 2){ printf("usage: %s parameter-file\n\n", argv[0]); return FAILURE;}
-
-
-
   /** INITIALIZING
   +** *******************************************************************/
+  
+  parse_args(argc, argv, &args);
 
   phl = allocate_param_higher();
-
-  phl->f_par = argv[1];
+  copy_string(phl->f_par, NPOW_10, args.fprm);
 
   // parse parameter file
   if (parse_param_higher(phl) == FAILURE){
@@ -80,6 +157,9 @@ progress_t  pro;
   // parse auxiliary files
   if ((aux = read_aux(phl)) == NULL){
     printf("Reading aux file failed!\n"); return FAILURE;}
+
+  // register python UDF plug-in
+  register_python(phl);
 
   // copy and read datacube definition
   if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher, phl->blocksize)) == NULL){
@@ -100,8 +180,8 @@ progress_t  pro;
   // allocate array of Level 2 structs
   alloc((void**)&ARD1,   pro.npu, sizeof(ard_t*));
   alloc((void**)&ARD2,   pro.npu, sizeof(ard_t*));
-  alloc((void**)&MASK,   pro.npu, sizeof(stack_t*));
-  alloc((void**)&OUTPUT, pro.npu, sizeof(stack_t**));
+  alloc((void**)&MASK,   pro.npu, sizeof(brick_t*));
+  alloc((void**)&OUTPUT, pro.npu, sizeof(brick_t**));
   alloc((void**)&nprod,  pro.npu, sizeof(int));
   alloc((void**)&nt1,    pro.npu, sizeof(int));
   alloc((void**)&nt2,    pro.npu, sizeof(int));
@@ -158,7 +238,9 @@ progress_t  pro;
   free_datacube(cube);
   free_aux(phl, aux);
   free_param_higher(phl);
-  
+
+  deregister_python(phl);
+
   CPLPopErrorHandler();
 
 

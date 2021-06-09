@@ -3,7 +3,15 @@
 Installation
 ============
 
+Installation instructions
+-------------------------
+
 FORCE is mostly written in C/C++: Thus, it needs to be compiled. Administrator rights are not necessarily required, unless you want to install to the system-wide search path (e.g. to make it available to multiple users).
+
+This recipe assumes that you have installed all :ref:`depend`.
+Alternatively, you can use a Docker base image that includes all dependencies, e.g. [davidfrantz/base](https://hub.docker.com/r/davidfrantz/base).
+We are however suggesting to consider simply using FORCE with Docker or Singularity, see :ref:`docker`.
+
 
 1. Go to the directory, where you usually store source code, e.g.
 
@@ -66,11 +74,15 @@ Installation of the development version
 To install FORCE with all "bleeding-edge features", consider to use the develop version.
 
 * After point (3), change to the develop branch, then proceed with (4).
+  Note that `BINDIR` defaults to ``/develop`` on this branch. Not installing to ``/usr/local/bin`` (which is the default for the master branch) might make sense in the case you want to have both the master and develop versions installed.
+  You might want to change `BINDIR` to a directory that suits you (e.g. ``/usr/local/bin`` or a local directory).
 
   .. code-block:: bash
 
     git checkout -b develop
     git pull origin develop
+
+  If you are running different versions - or want to make sure to always use the latest version - consider using pre-built Docker images, see :ref:`docker`.
 
 
 Installation with optional software
@@ -90,6 +102,8 @@ Installation with optional software
        ./splits.sh enable
 
   c) Proceed with the installation of FORCE
+
+  In the pre-built Docker images, FORCE is already installed with optional software, see :ref:`docker`.
 
 
 Installation in DEBUG mode

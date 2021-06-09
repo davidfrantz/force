@@ -1,6 +1,6 @@
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This file is part of FORCE - Framework for Operational Radiometric 
+This file is part of FORCE - Framework for Operational Radiometric
 Correction for Environmental monitoring.
 
 Copyright (C) 2013-2020 David Frantz
@@ -93,9 +93,9 @@ void write_par_ll_dem(FILE *fp, bool verbose){
 
 
   fprintf(fp, "\n# DIGITAL ELEVATION MODEL\n");
-  fprintf(fp, "# ------------------------------------------------------------------------\n"); 
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
 
-  if (verbose){  
+  if (verbose){
     fprintf(fp, "# This file specifies the DEM. It is highly recommended to use a DEM. It is\n");
     fprintf(fp, "# used for cloud / cloud shadow detection, atmospheric correction and topo-\n");
     fprintf(fp, "# graphic correction. The DEM should be a mosaic that should completely cover\n");
@@ -108,7 +108,7 @@ void write_par_ll_dem(FILE *fp, bool verbose){
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_DEM = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# Nodata value of the DEM.\n");
     fprintf(fp, "# Type: Integer. Valid range: [-32768,32767]\n");
@@ -130,7 +130,7 @@ void write_par_ll_cube(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# DATA CUBES\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This indicates whether the images should be reprojected to the target\n");
     fprintf(fp, "# coordinate system or if they should stay in their original UTM projection.\n");
@@ -138,7 +138,7 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "DO_REPROJ = TRUE\n");
-  
+
   if (verbose){
     fprintf(fp, "# This indicates whether the images should be gridded after processing.\n");
     fprintf(fp, "# If TRUE, sub-directories for the tiles are generated in DIR_LEVEL2. \n");
@@ -148,7 +148,7 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "DO_TILE = TRUE\n");
-  
+
   if (verbose){
     fprintf(fp, "# This is the tile allow-list. It is an optional file that holds all tiles\n");
     fprintf(fp, "# that should be output. Tiles, which are not specified in this file are\n");
@@ -227,7 +227,7 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
   }
   fprintf(fp, "RESAMPLING = CC\n");
-  
+
   return;
 }
 
@@ -258,7 +258,7 @@ void write_par_ll_atcor(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "DO_TOPO = TRUE\n");
-  
+
   if (verbose){
     fprintf(fp, "# This indicates if BRDF correction should be performed. If TRUE, output is\n");
     fprintf(fp, "# nadir BRDF adjusted reflectance instead of BOA reflectance (the output is\n");
@@ -365,24 +365,41 @@ void write_par_ll_aod(FILE *fp, bool verbose){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void write_par_ll_cloud(FILE *fp, bool verbose){
-  
-  
+
+
   fprintf(fp, "\n# CLOUD DETECTION OPTIONS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
+  if (verbose){
+    fprintf(fp, "# If this parameter is enabled, confident cloud detections will be erased in the \n");
+    fprintf(fp, "# reflectance product, i.e. pixels are set to nodata. The cloud flag in the QAI \n");
+    fprintf(fp, "# product will still mark these pixels as clouds. Use this option is disk space \n");
+    fprintf(fp, "# is of concern.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "ERASE_CLOUDS = FALSE\n");
+
   if (verbose){
     fprintf(fp, "# This parameter cancels the processing of images that exceed the given\n");
     fprintf(fp, "# threshold. The processing will be canceled after cloud detection.\n");
     fprintf(fp, "# Type: Integer. Valid range: ]0,100]\n");
   }
   fprintf(fp, "MAX_CLOUD_COVER_FRAME = 75\n");
-  
-  if (verbose){  
+
+  if (verbose){
     fprintf(fp, "# This parameter works on a tile basis. It suppresses the output for chips\n");
     fprintf(fp, "# (tiled image) that exceed the given threshold.\n");
     fprintf(fp, "# Type: Integer. Valid range: ]0,100]\n");
   }
   fprintf(fp, "MAX_CLOUD_COVER_TILE  = 75\n");
+
+  if (verbose){
+    fprintf(fp, "# Buffer sizes (radius in meters) for cloud, cloud shadow and snow masks.\n");
+    fprintf(fp, "# Type: Float. Valid range: [0,10000]\n");
+  }
+  fprintf(fp, "CLOUD_BUFFER  = 300\n");
+  fprintf(fp, "SHADOW_BUFFER = 90\n");
+  fprintf(fp, "SNOW_BUFFER   = 30\n");
 
   if (verbose){
     fprintf(fp, "# These are the main thresholds of the Fmask algorithm.\n");
@@ -406,7 +423,7 @@ void write_par_ll_resmerge(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# RESOLUTION MERGING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the method used for improving the spatial reso-\n");
     fprintf(fp, "# lution of Sentinel-2’s 20 m bands to 10 m. Pixels flagged as cloud or\n");
@@ -436,7 +453,7 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# CO-REGISTRATION OPTIONS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter only applies for Sentinel-2 data. This parameter defines\n");
     fprintf(fp, "# the path to a directory that contains monthly Landsat NIR base images.\n");
@@ -467,7 +484,7 @@ void write_par_ll_misc(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# MISCELLANEOUS OPTIONS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines if impulse noise should be removed. Ony applies\n");
     fprintf(fp, "# to 8bit input data.\n");
@@ -495,8 +512,8 @@ void write_par_ll_tier(FILE *fp, bool verbose){
 
 
   fprintf(fp, "\n# TIER LEVEL\n");
-  fprintf(fp, "# ------------------------------------------------------------------------\n");  
-  
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
   if (verbose){
     fprintf(fp, "# This parameter specifies the acceptable tier level of Landsat Level 1 data.\n");
     fprintf(fp, "# For pre-collection data, TIER = 1 will only accept L1T images, TIER = 2\n");
@@ -525,7 +542,7 @@ void write_par_ll_thread(FILE *fp, bool verbose){
   fprintf(fp, "# Multiprocessing options (NPROC, DELAY) only apply when using the batch\n");
   fprintf(fp, "# utility force-level2. They are not used by the core function force-l2ps.\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This module is using hybrid parallelization, i.e. a mix of multiprocessing\n");
     fprintf(fp, "# and multithreading. Each input image is one process, each process may use\n");
@@ -538,7 +555,7 @@ void write_par_ll_thread(FILE *fp, bool verbose){
   }
   fprintf(fp, "NPROC = 32\n");
   fprintf(fp, "NTHREAD = 2\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter controls whether the individual bands of the Level 1 input\n");
     fprintf(fp, "# images are read sequentially or in parallel. Note that we observed two kinds\n");
@@ -602,34 +619,34 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_DST = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output Aerosol Optical Depth map for the green band? No higher-level FORCE\n");
     fprintf(fp, "# module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_AOD = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the Water Wapor map? No higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_WVP = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the view zenith map? This product can be used in force-level3; no\n");
     fprintf(fp, "# other higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_VZN = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the  Haze Optimzed Transformation output? This product can be\n");
     fprintf(fp, "# used in force-level3; no other higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_HOT = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output overview thumbnails? These are jpegs at reduced spatial resolution,\n");
     fprintf(fp, "# which feature an RGB overview + quality information overlayed (pink: cloud,\n");
@@ -638,7 +655,7 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_OVV = TRUE\n");
-  
+
   return;
 }
 
@@ -654,19 +671,19 @@ void write_par_hl_dirs(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# INPUT/OUTPUT DIRECTORIES\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Lower Level datapool (parent directory of tiled input data)\n");
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_LOWER = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# Higher Level datapool (parent directory of tiled output data)\n");
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_HIGHER = NULL\n");
-  
+
   return;
 }
 
@@ -682,7 +699,7 @@ void write_par_hl_mask(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# MASKING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Analysis Mask datapool (parent directory of tiled analysis masks)\n");
     fprintf(fp, "# If no analsys mask should be applied, give NULL.\n");
@@ -696,7 +713,7 @@ void write_par_hl_mask(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Basename of file\n");
   }
   fprintf(fp, "BASE_MASK = NULL\n");
-  
+
   return;
 }
 
@@ -712,7 +729,7 @@ void write_par_hl_extent(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# PROCESSING EXTENT AND RESOLUTION\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Analysis extent, given in tile numbers (see tile naming)\n");
     fprintf(fp, "# Each existing tile falling into this square extent will be processed\n");
@@ -731,7 +748,7 @@ void write_par_hl_extent(FILE *fp, bool verbose){
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_TILE = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter can be used to override the default blocksize of the input\n");
     fprintf(fp, "# images (as specified in the datacube-definition.prj file). This can be\n");
@@ -742,14 +759,14 @@ void write_par_hl_extent(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Double. Valid range: 0 or [RESOLUTION,TILE_SIZE]\n");
   }
   fprintf(fp, "BLOCK_SIZE = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# Analysis resolution. The tile (and block) size must be dividable by this\n");
     fprintf(fp, "# resolution without remainder, e.g. 30m resolution with 100km tiles is not possible\n");
     fprintf(fp, "# Type: Double. Valid range: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "RESOLUTION = 10\n");
-  
+
   return;
 }
 
@@ -772,7 +789,7 @@ void write_par_hl_psf(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "REDUCE_PSF = FALSE\n");
-   
+
   return;
 }
 
@@ -794,7 +811,7 @@ void write_par_hl_improphed(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "USE_L2_IMPROPHE = FALSE\n");
-  
+
   return;
 }
 
@@ -810,7 +827,7 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# SENSOR ALLOW-LIST\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Sensors to be used in the analysis. Multi-sensor analyses are restricted\n");
     fprintf(fp, "# to the overlapping bands. Following sensors are available: LND04 (6-band\n");
@@ -819,18 +836,30 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
     fprintf(fp, "# Sentinel-2B), sen2a (4-band Sentinel-2A), sen2b (4-band Sentinel-2B),\n");
     fprintf(fp, "# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-\n");
     fprintf(fp, "# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID\n");
-    fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending).\n");
+    fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.\n");
+    fprintf(fp, "# (7-band Aqua MODIS).\n");
     fprintf(fp, "# The resulting outputs are named according to their band designation, i.e. \n");
     fprintf(fp, "# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface\n");
     fprintf(fp, "# bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or\n");
-    fprintf(fp, "# VVVHP (VV/VH polarized).\n");
+    fprintf(fp, "# VVVHP (VV/VH polarized), MODIS (7-band MODIS).\n");
     fprintf(fp, "# BAP Composites with such a band designation can be input again (e.g. \n");
     fprintf(fp, "# SENSORS = LNDLG).\n");
     fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,\n");
-    fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP}\n");
+    fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}\n");
   }
   fprintf(fp, "SENSORS = LND08 SEN2A SEN2B\n");
-  
+
+  if (verbose){
+    fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
+    fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, \n");
+    fprintf(fp, "# LND08, MOD01, MOD02.\n");
+    fprintf(fp, "# A material-specific spectral harmonization will be performed, which will convert the \n");
+    fprintf(fp, "# spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be \n");
+    fprintf(fp, "# predicted, too.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "SPECTRAL_ADJUST = FALSE\n");
+
   return;
 }
 
@@ -846,7 +875,7 @@ void write_par_hl_qai(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# QAI SCREENING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This list controls, which QAI flags are masked out before doing the analysis.\n");
     fprintf(fp, "# Type: Character list. Valid values: {NODATA,CLOUD_OPAQUE,CLOUD_BUFFER,\n");
@@ -854,7 +883,7 @@ void write_par_hl_qai(FILE *fp, bool verbose){
     fprintf(fp, "#   SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}\n");
   }
   fprintf(fp, "SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION\n");
-  
+
   return;
 }
 
@@ -883,7 +912,7 @@ void write_par_hl_noise(FILE *fp, bool verbose){
   }
   fprintf(fp, "ABOVE_NOISE = 3\n");
   fprintf(fp, "BELOW_NOISE = 1\n");
-  
+
   return;
 }
 
@@ -906,7 +935,7 @@ void write_par_hl_time(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Date list. Format: YYYY-MM-DD\n");
   }
   fprintf(fp, "DATE_RANGE = 2010-01-01 2019-12-31\n");
-  
+
   if (verbose){
     fprintf(fp, "# DOY range for filtering the time extent. Day-of-Years that are outside of\n");
     fprintf(fp, "# the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 \n");
@@ -917,7 +946,7 @@ void write_par_hl_time(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer list. Valid values: [1,365]\n");
   }
   fprintf(fp, "DOY_RANGE = 1 365\n");
-  
+
   return;
 }
 
@@ -933,7 +962,7 @@ void write_par_hl_output(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# OUTPUT OPTIONS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
     fprintf(fp, "# ENVI Standard or GeoTiff. GeoTiff images are compressed with LZW and hori-\n");
@@ -974,7 +1003,7 @@ void write_par_hl_thread(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# PARALLEL PROCESSING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This module is using a streaming mechanism to speed up processing. There\n");
     fprintf(fp, "# are three processing teams (3 Threads) that simultaneously handle Input,\n");
@@ -987,7 +1016,7 @@ void write_par_hl_thread(FILE *fp, bool verbose){
   fprintf(fp, "NTHREAD_READ = 8\n");
   fprintf(fp, "NTHREAD_COMPUTE = 22\n");
   fprintf(fp, "NTHREAD_WRITE = 4\n");
-  
+
   return;
 }
 
@@ -1127,25 +1156,25 @@ void write_par_hl_bap(FILE *fp, bool verbose){
     fprintf(fp, "# Output the composite?\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_BAP = TRUE\n");  
+  fprintf(fp, "OUTPUT_BAP = TRUE\n");
 
   if (verbose){
     fprintf(fp, "# Output the compositing information?\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_INF = TRUE\n");  
+  fprintf(fp, "OUTPUT_INF = TRUE\n");
 
   if (verbose){
     fprintf(fp, "# Output the compositing scores?\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_SCR = FALSE\n");  
+  fprintf(fp, "OUTPUT_SCR = FALSE\n");
 
   if (verbose){
     fprintf(fp, "# Output quicklook of the composite?\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_OVV = FALSE\n");  
+  fprintf(fp, "OUTPUT_OVV = FALSE\n");
 
   return;
 }
@@ -1186,7 +1215,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
     fprintf(fp, "# Type: List with basenames of 3 files\n");
   }
   fprintf(fp, "BASE_LSP = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines year, which corresponds to he 1st band of the\n");
     fprintf(fp, "# LSP.\n");
@@ -1204,7 +1233,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid values: [1,2100*365]\n");
   }
   fprintf(fp, "LSP_START = 2000\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter is a threshold in days. If the inter-annual variability of the \n");
     fprintf(fp, "# LSP (of a given pixel) exceeds this value, the long-term average LSP is used \n");
@@ -1219,7 +1248,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
   fprintf(fp, "LSP_NODATA = -9999\n");
-  
+
   return;
 }
 
@@ -1245,7 +1274,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
     fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}\n");
+    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
+    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 
@@ -1260,8 +1290,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# index values for each date.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "OUTPUT_TSS = FALSE\n");  
-  
+  fprintf(fp, "OUTPUT_TSS = FALSE\n");
+
   return;
 }
 
@@ -1279,7 +1309,7 @@ void write_par_hl_sma(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   fprintf(fp, "# This block only applies if INDEX includes SMA\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Endmember file holding the endmembers according to the SENSORS band subset\n");
     fprintf(fp, "# Type: full file path\n");
@@ -1318,7 +1348,7 @@ void write_par_hl_sma(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RMS = FALSE\n");
-  
+
   return;
 }
 
@@ -1334,21 +1364,21 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# INTERPOLATION PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Interpolation method. You can choose between no, linear, moving average\n");
     fprintf(fp, "# or Radial Basis Function Interpolation.\n");
     fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF}\n");
   }
   fprintf(fp, "INTERPOLATE = RBF\n");
-  
+
   if (verbose){
     fprintf(fp, "# Max temporal distance for the moving average filter in days. For each\n");
     fprintf(fp, "# interpolation date, MOVING_MAX days before and after are considered.\n");
     fprintf(fp, "# Type: Integer. Valid range: [1,365]\n");
   }
   fprintf(fp, "MOVING_MAX = 16\n");
-  
+
   if (verbose){
     fprintf(fp, "# Sigma (width of the Gaussian bell) for the RBF filter in days. For each\n");
     fprintf(fp, "# interpolation date, a Gaussian kernel is used to smooth the observations.\n");
@@ -1361,7 +1391,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer list. Valid range: [1,365]\n");
   }
   fprintf(fp, "RBF_SIGMA = 8 16 32\n");
-  
+
   if (verbose){
     fprintf(fp, "# Cutoff density for the RBF filter. The Gaussian kernels have infinite width,\n");
     fprintf(fp, "# which is computationally slow, and doesn't make much sense as observations\n");
@@ -1371,7 +1401,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: ]0,1]\n");
   }
   fprintf(fp, "RBF_CUTOFF = 0.95\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter gives the interpolation step in days.\n");
     fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
@@ -1386,12 +1416,95 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output the Time Series Interpolation? This is a layer stack of index\n");
-    fprintf(fp, "# values for each interpolated date. Note that interpolation will be per-\n"); 
+    fprintf(fp, "# values for each interpolated date. Note that interpolation will be per-\n");
     fprintf(fp, "# formed even if OUTPUT_TSI = FALSE - unless you specify INTERPOLATE = NONE.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_TSI = FALSE\n");
-  
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level UDF pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_pyp(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# PYTHON UDF PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This file specifies the file holding user-defined python code. You can skip this\n");
+    fprintf(fp, "# by setting FILE_PYTHON = NULL, but this requires OUTPUT_PYP = FALSE.\n");
+    fprintf(fp, "# Two functions are required to communicate with FORCE:\n");
+    fprintf(fp, "# 0) The global space can be used to import modules etc.\n");
+    fprintf(fp, "# 1) An initialization function that defines the number and names of output bands:\n");
+    fprintf(fp, "#    ``def forcepy_init(dates, sensors, bandnames):``\n");
+    fprintf(fp, "# 2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_PYTHON = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# Type of user-defined function. \n");
+    fprintf(fp, "# 1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel\n");
+    fprintf(fp, "# as 4D-nd.array [nDates, nBands, nrows, ncols]. A multi-processing pool is spawned to \n");
+    fprintf(fp, "# parallely execute this function with ``NTHREAD_COMPUTE`` workers.\n");
+    fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):``\n");
+    fprintf(fp, "# 2) ``BLOCK`` expects a pixel-function that receives the time series of a complete \n");
+    fprintf(fp, "# processing unit as 4D-nd.array [nDates, nBands, nrows, ncols]. No parallelization is  \n");
+    fprintf(fp, "# done on FORCE's end.\n");
+    fprintf(fp, "#     ``def forcepy_block(inblock, outblock, dates, sensors, bandnames, nodata, nproc):``\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+  }
+  fprintf(fp, "PYTHON_TYPE = PIXEL\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the python UDF? If TRUE, FILE_PYTHON must exist.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_PYP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level UDF pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_rsp(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# R UDF PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This file specifies the file holding user-provided R code. You can skip this\n");
+    fprintf(fp, "# by setting FILE_RSTATS = NULL, but this requires OUTPUT_RSP = FALSE.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_RSTATS = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# TBD\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+  }
+  fprintf(fp, "RSTATS_TYPE = PIXEL\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the R UDF? If TRUE, FILE_RSTATS must exist.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RSP = FALSE\n");
+
   return;
 }
 
@@ -1425,7 +1538,7 @@ void write_par_hl_stm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character list. Valid values: {MIN,Q01-Q99,MAX,AVG,STD,RNG,IQR,SKW,KRT,NUM}\n");
   }
   fprintf(fp, "STM = Q25 Q50 Q75 AVG STD\n");
-  
+
   return;
 }
 
@@ -1441,7 +1554,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# FOLDING PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Which statistic should be used for folding the time series? This parameter\n");
     fprintf(fp, "# is only evaluated if one of the following outputs in this block is requested.\n");
@@ -1461,7 +1574,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output the Fold-by-Year/Quarter/Month/Week/DOY time series? These are layer\n");
-    fprintf(fp, "# stacks of folded index values for each year, quarter, month, week or DOY.\n"); 
+    fprintf(fp, "# stacks of folded index values for each year, quarter, month, week or DOY.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_FBY = FALSE\n");
@@ -1469,7 +1582,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_FBM = FALSE\n");
   fprintf(fp, "OUTPUT_FBW = FALSE\n");
   fprintf(fp, "OUTPUT_FBD = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Compute and output a linear trend analysis on any of the folded time series?\n");
     fprintf(fp, "# Note that the OUTPUT_FBX parameters don't need to be TRUE to do this.\n");
@@ -1481,7 +1594,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_TRM = FALSE\n");
   fprintf(fp, "OUTPUT_TRW = FALSE\n");
   fprintf(fp, "OUTPUT_TRD = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on\n");
     fprintf(fp, "# any of the folded time series?\n");
@@ -1494,7 +1607,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_CAM = FALSE\n");
   fprintf(fp, "OUTPUT_CAW = FALSE\n");
   fprintf(fp, "OUTPUT_CAD = FALSE\n");
-  
+
   return;
 }
 
@@ -1508,12 +1621,12 @@ void write_par_hl_fold(FILE *fp, bool verbose){
 void write_par_hl_lsp(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS\n");
+  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS - SPLITS-BASED\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   fprintf(fp, "# The Land Surface Phenology (LSP) options are only available if FORCE was\n");
   fprintf(fp, "# compiled with SPLITS (see installation section in the FORCE user guide).\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# For estimating LSP for one year, some data from the previous/next year\n");
     fprintf(fp, "# need to be considered to find the seasonal minima, which define a season.\n");
@@ -1524,14 +1637,14 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
   }
   fprintf(fp, "LSP_DOY_PREV_YEAR = 273\n");
   fprintf(fp, "LSP_DOY_NEXT_YEAR = 91\n");
-  
+
   if (verbose){
     fprintf(fp, "# Seasonality is of Northern-, Southern-hemispheric or of mixed type? If\n");
     fprintf(fp, "# mixed, the code will attempt to estimate the type on a per-pixel basis.\n");
     fprintf(fp, "# Type: Character. Valid values: {NORTH,SOUTH,MIXED}\n");
   }
   fprintf(fp, "LSP_HEMISPHERE = NORTH\n");
-  
+
   if (verbose){
     fprintf(fp, "# How many segments per year should be used for the spline fitting? More\n");
     fprintf(fp, "# segments follow the seasonality more closely, less segments smooth the\n");
@@ -1539,28 +1652,28 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
   }
   fprintf(fp, "LSP_N_SEGMENT = 4\n");
-  
+
   if (verbose){
     fprintf(fp, "# Amplitude threshold for detecing Start, and End of Season, i.e. the date,\n");
     fprintf(fp, "# at which xx%% of the amplitude is observed\n");
     fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
   }
   fprintf(fp, "LSP_AMP_THRESHOLD = 0.2\n");
-  
+
   if (verbose){
     fprintf(fp, "# LSP won't be derived if the seasonal index values do not exceed following\n");
     fprintf(fp, "# value. This is useful to remove unvegetated surfaces.\n");
     fprintf(fp, "# Type: Integer. Valid range: [-10000,10000]\n");
   }
   fprintf(fp, "LSP_MIN_VALUE = 500\n");
-  
+
   if (verbose){
     fprintf(fp, "# LSP won't be derived if the seasonal amplitude is below following value\n");
     fprintf(fp, "# This is useful to remove surfaces that do not have a seasonality.\n");
     fprintf(fp, "# Type: Integer. Valid range: [0,10000]\n");
   }
   fprintf(fp, "LSP_MIN_AMPLITUDE = 500\n");
-  
+
   if (verbose){
     fprintf(fp, "# Which Phenometrics should be computed? There will be a LSP output file for\n");
     fprintf(fp, "# each metric (with years as bands).\n");
@@ -1575,44 +1688,146 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
     fprintf(fp, "#   VEM,VSS,VRI,VPS,VFI,VES,VLM,VBL,VSA,IST,IBL,IBT,IGS,RAR,RAF,RMR,RMF}\n");
   }
   fprintf(fp, "LSP = VSS VPS VES VSA RMR IGS\n");
-  
+
   if (verbose){
     fprintf(fp, "# Standardize the LSP time series with pixel mean and/or standard deviation?\n");
     fprintf(fp, "# Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}\n");
   }
   fprintf(fp, "STANDARDIZE_LSP = NONE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the Spline fit? This is a layer stack of fitted index values for\n");
     fprintf(fp, "# interpolated date.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_SPL = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the Phenometrics? These are layer stacks per phenometric with as many\n");
     fprintf(fp, "# bands as years (excluding one year at the beginning/end of the time series.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_LSP = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Compute and output a linear trend analysis on the requested Phenometric time\n");
-    fprintf(fp, "# series? Note that the OUTPUT_FBX parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# series? Note that the OUTPUT_LSP parameters don't need to be TRUE to do this.\n");
     fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_TRP = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on\n");
     fprintf(fp, "# the requested Phenometric time series?\n");
-    fprintf(fp, "# Note that the OUTPUT_FBX parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# Note that the OUTPUT_LSP parameters don't need to be TRUE to do this.\n");
     fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_CAP = FALSE\n");
-  
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level polarmetrics pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_pol(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS - POLAR-BASED\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing Start of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_START_THRESHOLD = 0.2\n");
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing Mid of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_MID_THRESHOLD = 0.5\n");
+
+  if (verbose){
+    fprintf(fp, "# Threshold for detecing End of Season in the cumulative time series.\n");
+    fprintf(fp, "# Type: Float. Valid range: ]0,1[\n");
+  }
+  fprintf(fp, "POL_END_THRESHOLD = 0.8\n");
+
+
+  if (verbose){
+    fprintf(fp, "# Should the start of each phenological year be adapated?\n");
+    fprintf(fp, "# If FALSE, the start is static, i.e. Date of Early Minimum and Date of Late\n");
+    fprintf(fp, "# Minimum are the same for all years and 365 days apart. If TRUE, they differ\n");
+    fprintf(fp, "# from year to year and a phenological year is not forced to be 365 days long.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "POL_ADAPTIVE = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# Which Polarmetrics should be computed? There will be a POL output file for\n");
+    fprintf(fp, "# each metric (with years as bands).\n");
+    fprintf(fp, "# Currently available are the dates of the early minimum, late minimum, peak of season,\n");
+    fprintf(fp, "# start of season, mid of season, end of season, early average vector, average vector,\n");
+    fprintf(fp, "# late average vector; lengths of the total season, green season, between averge vectors;\n");
+    fprintf(fp, "# values of the early minimum, late minimum, peak of season, start of season, mid of season,\n");
+    fprintf(fp, "# end of season, early average vector, average vector, late average vector, base level,\n");
+    fprintf(fp, "# green amplitude, seasonal amplitude, peak amplitude, green season mean , green season\n");
+    fprintf(fp, "# variability, dates of start of phenological year, difference between start of phenological\n");
+    fprintf(fp, "# year and its longterm average; integrals of the total season, base level, base+total,\n");
+    fprintf(fp, "# green season, rising rate, falling rate; rates of average rising, average falling, maximum\n");
+    fprintf(fp, "# rising, maximum falling.\n");
+    fprintf(fp, "# Type: Character list. Valid values: {DEM,DLM,DPS,DSS,DMS,DES,DEV,DAV,DLV,LTS,\n");
+    fprintf(fp, "#   LGS,LGV,VEM,VLM,VPS,VSS,VMS,VES,VEV,VAV,VLV,VBL,VGA,VSA,VPA,VGM,VGV,DPY,DPV,\n");
+    fprintf(fp, "#   IST,IBL,IBT,IGS,IRR,IFR,RAR,RAF,RMR,RMF}\n");
+  }
+  fprintf(fp, "POL = VSS VPS VES VSA RMR IGS\n");
+
+  if (verbose){
+    fprintf(fp, "# Standardize the POL time series with pixel mean and/or standard deviation?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}\n");
+  }
+  fprintf(fp, "STANDARDIZE_POL = NONE\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the polar-transformed time series? These are layer stack of cartesian X-\n");
+    fprintf(fp, "# and Y-coordinates for each interpolated date. This results in two files, product\n");
+    fprintf(fp, "# IDs are PCX and PCY.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_PCT = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the Polarmetrics? These are layer stacks per polarmetric with as many\n");
+    fprintf(fp, "# bands as years.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_POL = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Compute and output a linear trend analysis on the requested Polarmetric time\n");
+    fprintf(fp, "# series? Note that the OUTPUT_POL parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_TRO = FALSE\n");
+
+  if (verbose){
+    fprintf(fp, "# Compute and output an extended Change, Aftereffect, Trend (CAT) analysis on\n");
+    fprintf(fp, "# the requested Polarmetric time series?\n");
+    fprintf(fp, "# Note that the OUTPUT_POL parameters don't need to be TRUE to do this.\n");
+    fprintf(fp, "# See also the TREND PARAMETERS block below.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_CAO = FALSE\n");
+
   return;
 }
 
@@ -1628,7 +1843,7 @@ void write_par_hl_trend(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# TREND PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter specifies the tail-type used for significance testing of\n");
     fprintf(fp, "# the slope in the trend analysis. A left-, two-, or right-tailed t-test\n");
@@ -1636,13 +1851,13 @@ void write_par_hl_trend(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {LEFT,TWO,RIGHT}\n");
   }
   fprintf(fp, "TREND_TAIL = TWO\n");
-  
+
   if (verbose){
     fprintf(fp, "# Confidence level for significance testing of the slope in the trend analysis\n");
     fprintf(fp, "# Type: Float. Valid range: [0,1]\n");
   }
   fprintf(fp, "TREND_CONF = 0.95\n");
-  
+
   return;
 }
 
@@ -1658,14 +1873,14 @@ void write_par_hl_cso(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# CSO PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter specifies bin width for summarizing the CSOs. The width\n");
     fprintf(fp, "# is given in months\n");
     fprintf(fp, "# Type: Integer. Valid values: [1,12]\n");
   }
   fprintf(fp, "MONTH_STEP = 3\n");
-  
+
   if (verbose){
     fprintf(fp, "# Which statistics should be computed? Currently available statistics are\n");
     fprintf(fp, "# the number of observations, and aggregate statistics of the temporal\n");
@@ -1675,7 +1890,7 @@ void write_par_hl_cso(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character list. Valid values: {NUM,MIN,Q01-Q99,MAX,AVG,STD,RNG,IQR,SKW,KRT}\n");
   }
   fprintf(fp, "CSO = NUM AVG STD\n");
-  
+
   return;
 }
 
@@ -1691,7 +1906,7 @@ void write_par_hl_imp(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# ImproPhe PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the seasonal windows for which the Level 2 ARD\n");
     fprintf(fp, "# should be aggregated. This parameter expects a list of DOYs that define\n");
@@ -1720,7 +1935,7 @@ void write_par_hl_imp(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "KERNEL_TEXT = 330\n");
-  
+
   return;
 }
 
@@ -1736,7 +1951,7 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# Continuous Field ImproPhe PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Continuous Field datapool (parent directory of tiled continuous fields)\n");
     fprintf(fp, "# Type: full directory path\n");
@@ -1753,14 +1968,14 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
     fprintf(fp, "# Type: List with basename of files\n");
   }
   fprintf(fp, "BASE_COARSE = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines year, which corresponds to he 1st band of the\n");
     fprintf(fp, "# continuous fields.\n");
     fprintf(fp, "# Type: Integer. Valid values: [1900,2100]\n");
   }
   fprintf(fp, "COARSE_1ST_YEAR = 2000\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the years, for which the spatial resolution should\n");
     fprintf(fp, "# be improved. The corresponding bands of the continuous fields are computed\n");
@@ -1776,7 +1991,7 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
   fprintf(fp, "COARSE_NODATA = -9999\n");
-  
+
   return;
 }
 
@@ -1792,7 +2007,7 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# Level 2 ImproPhe PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the sensors, whose spatial resolution should be\n");
     fprintf(fp, "# improved. The SENSORS parameter above defines the sensors that serve as\n");
@@ -1820,7 +2035,7 @@ void write_par_hl_feature(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# FEATURES\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter specifies the feature(s) used for the analysis. The base-\n");
     fprintf(fp, "# name of a tiled dataset needs to be given, followed by an integer list that\n");
@@ -1833,13 +2048,13 @@ void write_par_hl_feature(FILE *fp, bool verbose){
   fprintf(fp, "INPUT_FEATURE = 2018-2018_001-365_LEVEL4_TSA_SEN2L_NDV_STM.tif 1 2 3 4 5 6\n");
   fprintf(fp, "INPUT_FEATURE = 2018-2018_001-365_LEVEL4_TSA_SEN2L_NIR_STM.tif 7 8 9 10 11 12 13\n");
   fprintf(fp, "INPUT_FEATURE = 2018-2018_001-365_LEVEL4_TSA_SEN2L_RED_STM.tif 1 2 3 4 5 6 7 8 9 10 11 12 13\n");
-  
+
   if (verbose){
     fprintf(fp, "# Nodata value of the features.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
   fprintf(fp, "FEATURE_NODATA = -9999\n");
-  
+
   if (verbose){
     fprintf(fp, "# Should nodata values be excluded if any feature is nodata (TRUE). Or just\n");
     fprintf(fp, "# proceed (FALSE)?\n");
@@ -1862,21 +2077,21 @@ void write_par_hl_txt(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# TEXTURE\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the radius of the kernel used for computing the\n");
     fprintf(fp, "# texture metrics (in projection units, commonly in meters).\n");
     fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "TXT_RADIUS = 50\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the number of iterations for running the morpho-.\n");
     fprintf(fp, "# logical operations.\n");
     fprintf(fp, "# Type: Integer. Valid values: [1,1000]\n");
   }
   fprintf(fp, "TXT_ITERATION = 1\n");
-  
+
   if (verbose){
     fprintf(fp, "# Which Texture Metrics should be computed? There will be one TXT output file\n");
     fprintf(fp, "# for each metric with as many bands as there are features(in the same order).\n");
@@ -1892,7 +2107,7 @@ void write_par_hl_txt(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character.\n");
   }
   fprintf(fp, "TXT_BASE = TEXTURE\n");
-  
+
 
   return;
 }
@@ -1909,21 +2124,29 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# Landscape Metrics\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the radius of the kernel used for computing the\n");
     fprintf(fp, "# landscape metrics (in projection units, commonly in meters).\n");
     fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "LSM_RADIUS = 50\n");
-  
+    
+  if (verbose){
+    fprintf(fp, "# This parameter defines the minimum size (in pixels) of an area to be considered as a patch.\n");
+    fprintf(fp, "# Patches with fewer pixels will be omitted. Mind that this parameter has an effect on\n");
+    fprintf(fp, "# all metrics, inlcuding garithmetic mean, maximum value, ...\n");
+    fprintf(fp, "# Type: Integer. Valid values: ]1,BLOCK_SIZE]\n");
+  }
+  fprintf(fp, "LSM_MIN_PATCHSIZE = 3\n");
+
   if (verbose){
     fprintf(fp, "# This parameter determines if the kernel for landscape metrics calculation\n");
     fprintf(fp, "# is circular or squared.\n");
     fprintf(fp, "# # Type: Character. Valid values: {CIRCLE,SQUARE}\n");
   }
   fprintf(fp, "LSM_KERNEL_SHAPE = CIRCLE\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the type of the threshold that is used to define\n");
     fprintf(fp, "# the foreground class (greater then, less than, equal). This parameter is\n");
@@ -1937,7 +2160,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter defines the threshold. All pixels that are greater than, lower\n");
     fprintf(fp, "# than or equal to this threshold are defined as foreground class (in dependence\n");
-    fprintf(fp, "# of LSM_THRESHOLD_TYPE). Landscape metrics are computed for pixels covererd by\n"); 
+    fprintf(fp, "# of LSM_THRESHOLD_TYPE). Landscape metrics are computed for pixels covererd by\n");
     fprintf(fp, "# the foreground class, no metrics are computed for the pixels covered by the\n");
     fprintf(fp, "# background class. This parameter is an integer list, which defines the threshold\n");
     fprintf(fp, "# for each feature given. The list needs to be as long as there are features (in-\n");
@@ -1953,18 +2176,18 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "LSM_ALL_PIXELS = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Which Landscape Metrics should be computed? There will be one LSM output file\n");
     fprintf(fp, "# for each metric with as many bands as there are features (in the same order).\n");
     fprintf(fp, "# Currently available metrics are unique patch ID, weighted mean patch area, \n");
     fprintf(fp, "# weighted mean fractal dimension index, edge density, number of patches and \n");
     fprintf(fp, "# effective mesh size.\n");
-    fprintf(fp, "# Additionally, arithmetic mean, geometric mean, standard deviation and maximum\n");
-    fprintf(fp, "# value within the kernel are available.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX}\n");
+    fprintf(fp, "# Additionally, arithmetic mean, geometric mean, standard deviation, maximum value\n");
+    fprintf(fp, "# and the area of the foreground class within the kernel are available.\n");
+    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE}\n");
   }
-  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX\n");
+  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE\n");
 
   if (verbose){
     fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
@@ -1988,13 +2211,13 @@ void write_par_hl_lib(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# Library Completeness\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Directory containing the libraries.\n");
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_LIBRARY = NULL\n");
-   
+
   if (verbose){
     fprintf(fp, "# This parameter specifies the libraries which should be tested against the \n");
     fprintf(fp, "# features. The basename(s) must be given. One or multiple libraries can be\n");
@@ -2035,7 +2258,7 @@ void write_par_hl_smp(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# SAMPLING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# File with coordinates, at which the features should be sampled.\n");
     fprintf(fp, "# 1st column: x-coordinate, 2nd column: y-coordinate, 3rd column: response\n");
@@ -2085,15 +2308,15 @@ void write_par_hl_ml(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# MACHINE LEARNING\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Directory containing the machine learning model(s). Models can be trained\n");
     fprintf(fp, "# with force-train\n");
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_MODEL = NULL\n");
-  
-  
+
+
   if (verbose){
     fprintf(fp, "# This parameter specifies the modelset used for prediction. The basename\n");
     fprintf(fp, "# of the machine learning model(s) (.xml) must be given. One or multiple\n");
@@ -2108,7 +2331,7 @@ void write_par_hl_ml(FILE *fp, bool verbose){
   fprintf(fp, "FILE_MODEL = biomass-1.xml biomass-2.xml biomass-3.xml\n");
   fprintf(fp, "FILE_MODEL = canopy-cover.xml\n");
   fprintf(fp, "FILE_MODEL = tree-height.xml\n");
-  
+
   if (verbose){
     fprintf(fp, "# Machine learning method. Currently implemented are Random Forest and\n");
     fprintf(fp, "# Support Vector Machines, both in regression and classification flavors.\n");
@@ -2116,7 +2339,7 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {SVR,SVC,RFR,RFC}\n");
   }
   fprintf(fp, "ML_METHOD = SVR\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter only applies if multiple models are given for a modelset,\n");
     fprintf(fp, "# and machine learning method is of regression flavor. The models are blended\n");
@@ -2131,7 +2354,7 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: [0,...\n");
   }
   fprintf(fp, "ML_CONVERGENCE = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter is a scaling factor to scale the prediction to fit into a\n");
     fprintf(fp, "# 16bit signed integer. This parameter should be set in dependence on the\n");
@@ -2139,7 +2362,7 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: ]0,...\n");
   }
   fprintf(fp, "ML_SCALE = 10000\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
     fprintf(fp, "# be appended by Module ID, product ID, and the file extension.\n");
@@ -2152,14 +2375,14 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_MLP = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the number of models used when blending the prediction? Makes most\n");
     fprintf(fp, "# sense when ML_CONVERGENCE is used.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_MLI = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the uncertainty of the blended prediction? This is the standard\n");
     fprintf(fp, "# deviation of all predictions that are blended into the final prediction.\n");
@@ -2177,7 +2400,7 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RFP = FALSE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Output the Random Forest Classification Margin? This option is only available\n");
     fprintf(fp, "# when ML_METHOD = RFC. If multiple models are given per modelset, the margin is \n");
@@ -2186,8 +2409,8 @@ void write_par_hl_ml(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RFM = FALSE\n");
-  
-  
+
+
   return;
 }
 
@@ -2199,25 +2422,25 @@ void write_par_hl_ml(FILE *fp, bool verbose){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void write_par_aux_train(FILE *fp, bool verbose){
-  
-  
+
+
   fprintf(fp, "\n# INPUT\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# File that is holding the features for training (and probably validation).\n");
     fprintf(fp, "# The file needs to be a table with features in columns, and samples in rows.\n");
     fprintf(fp, "# Column delimiter is whitespace. The same number of features must be given\n");
     fprintf(fp, "# for each sample. Do not include a header. The samples need to match the\n");
-    fprintf(fp, "# response file.\n");  
+    fprintf(fp, "# response file.\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_FEATURES = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# File that is holding the response for training (class labels or numeric\n");
     fprintf(fp, "# values). The file needs to be a table with one column, and samples in rows.\n");
-    fprintf(fp, "# Do not include a header. The samples need to match the feature file.\n");  
+    fprintf(fp, "# Do not include a header. The samples need to match the feature file.\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_RESPONSE = NULL\n");
@@ -2227,13 +2450,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# File for storing the Machine Learning model in xml format. This file\n");
-    fprintf(fp, "# will be overwritten if it exists.\n");  
+    fprintf(fp, "# will be overwritten if it exists.\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_MODEL = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# File for storing the logfile. This file will be overwritten if it exists.\n");  
+    fprintf(fp, "# File for storing the logfile. This file will be overwritten if it exists.\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_LOG = NULL\n");
@@ -2255,21 +2478,21 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: ]0,100]\n");
   }
   fprintf(fp, "PERCENT_TRAIN = 70\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter specifies whether the samples should be randomly drawn (TRUE)\n");
-    fprintf(fp, "# or if the first n samples (FALSE) should be used for training.\n");  
+    fprintf(fp, "# or if the first n samples (FALSE) should be used for training.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "RANDOM_SPLIT = TRUE\n");
-  
+
   if (verbose){
     fprintf(fp, "# Machine learning method. Currently implemented are Random Forest and\n");
     fprintf(fp, "# Support Vector Machines, both in regression and classification flavors.\n");
     fprintf(fp, "# Type: Character. Valid values: {SVR,SVC,RFR,RFC}\n");
   }
   fprintf(fp, "ML_METHOD = RFC\n");
-  
+
   if (verbose){
     fprintf(fp, "# Class weights. This parameter only applies for the classification flavor. \n");
     fprintf(fp, "# This parameter lets you define à priori class weights, which can be useful\n");
@@ -2289,7 +2512,7 @@ void write_par_aux_train(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
   fprintf(fp, "# This block only applies if method is Random Forest\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# Maximum number of trees in the forest. If RF_OOB_ACCURACY is 0, all trees\n");
     fprintf(fp, "# will be grown. If RF_OOB_ACCURACY is set, the algorithm won't grow addi-\n");
@@ -2299,13 +2522,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [0,...\n");
   }
   fprintf(fp, "RF_NTREE = 500\n");
-  
+
   if (verbose){
     fprintf(fp, "# Required accuracy of the ensemble, measured as OOB error. See also RF_NTREE.\n");
     fprintf(fp, "# Type: Float. Valid range: [0,...\n");
   }
   fprintf(fp, "RF_OOB_ACCURACY = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# The number of randomly selected features at each tree node, which are used\n");
     fprintf(fp, "# to find the best split. If set to 0, the square root of the number of all\n");
@@ -2314,13 +2537,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [0,...\n");
   }
   fprintf(fp, "RF_NFEATURE = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# This parameter indicates whether the variable importance should be computed.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "RF_FEATURE_IMPORTANCE = TRUE\n");
-  
+
   if (verbose){
     fprintf(fp, "# If the number of samples in a node is less than this parameter then the\n");
     fprintf(fp, "# node will not be split. If set to 0, it defaults to 1 for the classi-\n");
@@ -2328,7 +2551,7 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [0,...\n");
   }
   fprintf(fp, "RF_DT_MINSAMPLE = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# The maximum possible depth of the tree. That is the training algorithms\n");
     fprintf(fp, "# attempts to split a node while its depth is less than RF_DT_MAXDEPTH.\n");
@@ -2337,7 +2560,7 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [0,...\n");
   }
   fprintf(fp, "RF_DT_MAXDEPTH = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# Termination criteria for regression trees. If all absolute differences\n");
     fprintf(fp, "# between an estimated value in a node and values of train samples in\n");
@@ -2362,13 +2585,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Integer. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_MAXITER = 1000000\n");
-  
+
   if (verbose){
     fprintf(fp, "# Required accuracy of the optimization. See also SVM_MAXITER.\n");
     fprintf(fp, "# Type: Float. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_ACCURACY = 0.001\n");
-  
+
   if (verbose){
     fprintf(fp, "# Cross-validation parameter. The training set is divided into kFold sub-\n");
     fprintf(fp, "# sets. One subset is used to test the model, the others form the train set.\n");
@@ -2376,13 +2599,13 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: [1,...\n");
   }
   fprintf(fp, "SVM_KFOLD = 10\n");
-  
+
   if (verbose){
     fprintf(fp, "# Parameter ϵ of a SVM optimization problem. \n");
     fprintf(fp, "# Type: Float. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_P = 0\n");
-  
+
   if (verbose){
     fprintf(fp, "# Parameter C of a SVM optimization problem. This parameter expects three\n");
     fprintf(fp, "# values which are used to perform a grid search, i.e. minimum value, \n");
@@ -2390,7 +2613,7 @@ void write_par_aux_train(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float list. Valid range: [0,...\n");
   }
   fprintf(fp, "SVM_C_GRID = 0.001 10000 1\n");
-  
+
   if (verbose){
     fprintf(fp, "# Parameter γ of a kernel function. This parameter expects three values\n");
     fprintf(fp, "# which are used to perform a grid search, i.e. minimum value, maximum\n");
@@ -2410,21 +2633,21 @@ void write_par_aux_train(FILE *fp, bool verbose){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void write_par_aux_synthmix(FILE *fp, bool verbose){
-  
-  
+
+
   fprintf(fp, "\n# INPUT\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
-  
+
   if (verbose){
     fprintf(fp, "# File that is holding the features, which should be mixed.\n");
     fprintf(fp, "# The file needs to be a table with features in columns, and samples in rows.\n");
     fprintf(fp, "# Column delimiter is whitespace. The same number of features must be given\n");
     fprintf(fp, "# for each sample. Do not include a header. The samples need to match the\n");
-    fprintf(fp, "# response file.\n");  
+    fprintf(fp, "# response file.\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_FEATURES = NULL\n");
-  
+
   if (verbose){
     fprintf(fp, "# File that is holding the class labels. The file needs to be a table with\n");
     fprintf(fp, "# one column, and samples in rows. Do not include a header. The samples need \n");
@@ -2504,7 +2727,7 @@ if (verbose){
     fprintf(fp, "# a beach and ocean endmember would result in 70%%, 0%% and 30%% fractions for \n");
     fprintf(fp, "# target classes 1, 2, and 3, respectively. Multiple classes can be given, \n");
     fprintf(fp, "# i.e. output tables will be generated for each target class.\n");
-    
+
     fprintf(fp, "# Type: Integer list. Valid values: [1,n-class\n");
   }
   fprintf(fp, "TARGET_CLASS = 1 2 3 4\n");

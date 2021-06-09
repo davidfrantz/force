@@ -98,7 +98,7 @@ FILE *fp = NULL;
   if (!(fp = fopen(fname, "a"))){
     printf("unable to open %s. ", fname); exit(FAILURE);}
 
-  for (row=0; row<=nrow; row++){
+  for (row=0; row<nrow; row++){
 
     if (allow[row]){
 
@@ -129,10 +129,10 @@ FILE *fp = NULL;
 --- nf:        number of features
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    empty stacks
+--- nproduct:  number of output bricks (returned)
++++ Return:    empty bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **sample_points(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct){
+brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct){
 small *mask_ = NULL;
 int f, r, s, i, j, p;
 int cx, cy, chunk, tx, ty;
@@ -157,15 +157,15 @@ double minx, maxx, miny, maxy;
   }
 
 
-  // import stacks
-  cx    = get_stack_chunkncols(features[0].DAT);
-  cy    = get_stack_chunknrows(features[0].DAT);
-  res   = get_stack_res(features[0].DAT);
-  chunk = get_stack_chunk(features[0].DAT);
-  tx    = get_stack_tilex(features[0].DAT);
-  ty    = get_stack_tiley(features[0].DAT);
+  // import bricks
+  cx    = get_brick_chunkncols(features[0].DAT);
+  cy    = get_brick_chunknrows(features[0].DAT);
+  res   = get_brick_res(features[0].DAT);
+  chunk = get_brick_chunk(features[0].DAT);
+  tx    = get_brick_tilex(features[0].DAT);
+  ty    = get_brick_tiley(features[0].DAT);
 
-//  nodata = get_stack_nodata(features[0].DAT, 0);
+//  nodata = get_brick_nodata(features[0].DAT, 0);
 
   // import mask (if available)
   if (mask != NULL){
@@ -186,18 +186,18 @@ double minx, maxx, miny, maxy;
   if (phl->smp.projected){
 
     // corner coordinates of chunk
-    minx = get_stack_x(features[0].DAT, 0);
-    maxx = get_stack_x(features[0].DAT, cx);
-    miny = get_stack_y(features[0].DAT, (chunk+1)*cy);
-    maxy = get_stack_y(features[0].DAT, chunk*cy);
+    minx = get_brick_x(features[0].DAT, 0);
+    maxx = get_brick_x(features[0].DAT, cx);
+    miny = get_brick_y(features[0].DAT, (chunk+1)*cy);
+    maxy = get_brick_y(features[0].DAT, chunk*cy);
 
   } else {
 
     // corner coordinates of chunk
-    get_stack_geo(features[0].DAT, 0,    chunk*cy,        &geo_ul.x, &geo_ul.y);
-    get_stack_geo(features[0].DAT, cx,   chunk*cy,        &geo_ur.x, &geo_ur.y);
-    get_stack_geo(features[0].DAT, 0,    (chunk+1)*cy,    &geo_ll.x, &geo_ll.y);
-    get_stack_geo(features[0].DAT, cx,   (chunk+1)*cy,    &geo_lr.x, &geo_lr.y);
+    get_brick_geo(features[0].DAT, 0,    chunk*cy,        &geo_ul.x, &geo_ul.y);
+    get_brick_geo(features[0].DAT, cx,   chunk*cy,        &geo_ur.x, &geo_ur.y);
+    get_brick_geo(features[0].DAT, 0,    (chunk+1)*cy,    &geo_ll.x, &geo_ll.y);
+    get_brick_geo(features[0].DAT, cx,   (chunk+1)*cy,    &geo_lr.x, &geo_lr.y);
 
     // min/max coordinates
     minx = MIN(geo_ul.x, geo_ll.x);
@@ -206,10 +206,10 @@ double minx, maxx, miny, maxy;
     maxy = MAX(geo_ul.y, geo_ur.y);
 
     // edge coordinates of chunk
-    get_stack_geo(features[0].DAT, cx/2, chunk*cy,        &geo_upper.x, &geo_upper.y);
-    get_stack_geo(features[0].DAT, cx/2, (chunk+1)*cy,    &geo_lower.x, &geo_lower.y);
-    get_stack_geo(features[0].DAT, 0,    chunk*cy + cy/2, &geo_left.x,  &geo_left.y);
-    get_stack_geo(features[0].DAT, cx,   chunk*cy + cy/2, &geo_right.x, &geo_right.y);
+    get_brick_geo(features[0].DAT, cx/2, chunk*cy,        &geo_upper.x, &geo_upper.y);
+    get_brick_geo(features[0].DAT, cx/2, (chunk+1)*cy,    &geo_lower.x, &geo_lower.y);
+    get_brick_geo(features[0].DAT, 0,    chunk*cy + cy/2, &geo_left.x,  &geo_left.y);
+    get_brick_geo(features[0].DAT, cx,   chunk*cy + cy/2, &geo_right.x, &geo_right.y);
 
     // if edge coordinates are outside of corner min/max, expand the box a bit
     if (geo_left.x  < minx) minx -= 2*fabs(geo_left.x -minx);

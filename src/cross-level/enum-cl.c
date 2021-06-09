@@ -46,7 +46,9 @@ const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_] = {
   { _SEN_LNDLG_, "LNDLG" }, { _SEN_SEN2L_, "SEN2L" },
   { _SEN_SEN2H_, "SEN2H" }, { _SEN_RGB_,   "R-G-B" },
   { _SEN_S1AIA_, "S1AIA" }, { _SEN_S1AID_, "S1AID" },
-  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" }};
+  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" },
+  { _SEN_VVVHP_, "VVVHP" }, { _SEN_MOD01_, "MOD01" }, 
+  { _SEN_MOD02_, "MOD02" }, { _SEN_MOD02_, "MODIS" }};
 
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },
@@ -69,7 +71,11 @@ const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
   { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"     },
   { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"     },
   { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       },
-  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }};
+  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    },
+  { _IDX_KNV_, "kNDVI"  }, { _IDX_ND1_, "NDRE1"     }, { _IDX_ND2_, "NDRE2"    },
+  { _IDX_CRE_, "CIre"   }, { _IDX_NR1_, "NDVIre1"   }, { _IDX_NR2_, "NDVIre2"  },
+  { _IDX_NR3_, "NDVIre3"}, { _IDX_N1n_, "NDVIre1n"  }, { _IDX_N2n_, "NDVIre2n" },
+  { _IDX_N3n_, "NDVIre3n"},{ _IDX_Mre_, "MSRre"     }, { _IDX_Mrn_, "MSRren"   }};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
   { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },
@@ -108,13 +114,28 @@ const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_] = {
   { _HEMI_NORTH_, "NORTH" }, { _HEMI_SOUTH_, "SOUTH" }, { _HEMI_MIXED_, "MIXED" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_] = {
-  {_LSP_DEM_, "DEM" }, {_LSP_DSS_, "DSS" }, {_LSP_DRI_, "DRI" }, {_LSP_DPS_, "DPS" },
-  {_LSP_DFI_, "DFI" }, {_LSP_DES_, "DES" }, {_LSP_DLM_, "DLM" }, {_LSP_LTS_, "LTS" },
-  {_LSP_LGS_, "LGS" }, {_LSP_VEM_, "VEM" }, {_LSP_VSS_, "VSS" }, {_LSP_VRI_, "VRI" },
-  {_LSP_VPS_, "VPS" }, {_LSP_VFI_, "VFI" }, {_LSP_VES_, "VES" }, {_LSP_VLM_, "VLM" },
-  {_LSP_VBL_, "VBL" }, {_LSP_VSA_, "VSA" }, {_LSP_IST_, "IST" }, {_LSP_IBL_, "IBL" },
-  {_LSP_IBT_, "IBT" }, {_LSP_IGS_, "IGS" }, {_LSP_RAR_, "RAR" }, {_LSP_RAF_, "RAF" },
-  {_LSP_RMR_, "RMR" }, {_LSP_RMF_, "RMF" }};
+  { _LSP_DEM_, "DEM" }, { _LSP_DSS_, "DSS" }, { _LSP_DRI_, "DRI" }, { _LSP_DPS_, "DPS" },
+  { _LSP_DFI_, "DFI" }, { _LSP_DES_, "DES" }, { _LSP_DLM_, "DLM" }, { _LSP_LTS_, "LTS" },
+  { _LSP_LGS_, "LGS" }, { _LSP_VEM_, "VEM" }, { _LSP_VSS_, "VSS" }, { _LSP_VRI_, "VRI" },
+  { _LSP_VPS_, "VPS" }, { _LSP_VFI_, "VFI" }, { _LSP_VES_, "VES" }, { _LSP_VLM_, "VLM" },
+  { _LSP_VBL_, "VBL" }, { _LSP_VSA_, "VSA" }, { _LSP_IST_, "IST" }, { _LSP_IBL_, "IBL" },
+  { _LSP_IBT_, "IBT" }, { _LSP_IGS_, "IGS" }, { _LSP_RAR_, "RAR" }, { _LSP_RAF_, "RAF" },
+  { _LSP_RMR_, "RMR" }, { _LSP_RMF_, "RMF" }};
+
+const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_] = {
+  { _POL_DEM_, "DEM" }, { _POL_DLM_, "DLM" }, { _POL_DPS_, "DPS" }, 
+  { _POL_DSS_, "DSS" }, { _POL_DMS_, "DMS" }, { _POL_DES_, "DES" }, 
+  { _POL_DEV_, "DEV" }, { _POL_DAV_, "DAV" }, { _POL_DLV_, "DLV" }, 
+  { _POL_LTS_, "LTS" }, { _POL_LGS_, "LGS" }, { _POL_LGV_, "LGV" }, 
+  { _POL_VEM_, "VEM" }, { _POL_VLM_, "VLM" }, { _POL_VPS_, "VPS" }, 
+  { _POL_VSS_, "VSS" }, { _POL_VMS_, "VMS" }, { _POL_VES_, "VES" }, 
+  { _POL_VEV_, "VEV" }, { _POL_VAV_, "VAV" }, { _POL_VLV_, "VLV" }, 
+  { _POL_VBL_, "VBL" }, { _POL_VGA_, "VGA" }, { _POL_VSA_, "VSA" }, 
+  { _POL_VPA_, "VPA" }, { _POL_VGM_, "VGM" }, { _POL_VGV_, "VGV" }, 
+  { _POL_DPY_, "DPY" }, { _POL_DPV_, "DPV" }, { _POL_IST_, "IST" }, 
+  { _POL_IBL_, "IBL" }, { _POL_IBT_, "IBT" }, { _POL_IGS_, "IGS" }, 
+  { _POL_IRR_, "IRR" }, { _POL_IFR_, "IFR" }, { _POL_RAR_, "RAR" }, 
+  { _POL_RAF_, "RAF" }, { _POL_RMR_, "RMR" }, { _POL_RMF_, "RMF" }};
 
 const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
@@ -126,7 +147,8 @@ const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_] = {
   { _TRD_NUM_,  "NUM"}};
        
 const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_] = {
-  { _CAT_CHANGE_, "CHANGE"},             { _CAT_YEAR_, "YEAR-OF-CHANGE"},
+  { _CAT_CHANGE_, "CHANGE"},             { _CAT_LOSS_, "LOSS"}, 
+  { _CAT_YEAR_, "YEAR-OF-CHANGE"},
   { _CAT_TOTAL_MEAN_, "TOTAL-MEAN"},     { _CAT_TOTAL_OFFSET_, "TOTAL-OFFSET"},
   { _CAT_TOTAL_SLOPE_, "TOTAL-SLOPE"},   { _CAT_TOTAL_GAIN_, "TOTAL-GAIN"},
   { _CAT_TOTAL_RSQ_, "TOTAL-RSQ"},       { _CAT_TOTAL_SIG_, "TOTAL-SIG"},
@@ -154,13 +176,14 @@ const tagged_enum_t _TAGGED_ENUM_TXT_[_TXT_LENGTH_] = {
   { _TXT_GRD_, "GRD" }, { _TXT_THT_, "THT" }, { _TXT_BHT_, "BHT" }};
 
 const tagged_enum_t _TAGGED_ENUM_QUERY_[_QUERY_LENGTH_] = {
-  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_LT_, "LT" }};
+  { _QUERY_EQ_, "EQ" }, { _QUERY_GT_, "GT" }, { _QUERY_GE_, "GE" }, { _QUERY_LT_, "LT" }, 
+  { _QUERY_LE_, "LE" }};
 
 const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
   { _LSM_MPA_, "MPA" }, { _LSM_UCI_, "UCI" }, { _LSM_FDI_, "FDI" }, 
   { _LSM_EDD_, "EDD" }, { _LSM_NBR_, "NBR" }, { _LSM_EMS_, "EMS" }, 
   { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
-  { _LSM_MAX_, "MAX" }};
+  { _LSM_MAX_, "MAX" }, { _LSM_ARE_, "ARE" }};
 
 const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_] = {
   { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};
@@ -176,5 +199,7 @@ const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_] = {
 
 const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
   { _RGB_R_,  "RED" }, { _RGB_G_,  "GREEN" }, { _RGB_B_,  "BLUE" }};
-  
-  
+
+const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_] = {
+  { _UDF_PIXEL_,  "PIXEL" }, { _UDF_BLOCK_,  "BLOCK" }};
+

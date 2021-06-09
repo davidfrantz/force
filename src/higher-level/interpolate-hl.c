@@ -41,8 +41,8 @@ void free_rbf(rbf_t *rbf);
 
 
 /** This function "interpolates" the time series with the NONE option:
-+++ it essentially copies the time series stack to the interpolation
-+++ stack
++++ it essentially copies the time series brick to the interpolation
++++ brick
 --- ts:     pointer to instantly useable TSA image arrays
 --- mask:   mask image
 --- nc:     number of cells

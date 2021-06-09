@@ -34,7 +34,7 @@ Enhance spatial resolution header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/quality-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/cite-cl.h"
 
@@ -43,7 +43,7 @@ Enhance spatial resolution header
 extern "C" {
 #endif
 
-int resolution_merge(int mission, int resmerge, stack_t *TOA, stack_t *QAI);
+int resolution_merge(int mission, int resmerge, brick_t *TOA, brick_t *QAI);
 
 #ifdef __cplusplus
 }

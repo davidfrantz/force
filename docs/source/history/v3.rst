@@ -1,7 +1,377 @@
 .. _v3:
 
-Version 3
-=========
+
+FORCE v. 3.6.5
+--------------
+
+Release: 19.03.2021
+
+* **General changes**
+
+  * GitHub discussions
+    GitHub discussions is the new place for discussing and asking for help from the FORCE community.
+    The Google group is not used anymore.
+
+* **FORCE L2PS**
+
+  * fixed bug introduced with 3.6.4
+
+
+FORCE v. 3.6.4
+--------------
+
+Release: 17.03.2021
+
+* **General changes**
+
+  * Docker (1/2): 
+    FORCE is now built from a base image that contains all the installation (davidfrantz/base_image).
+    This makes building and testing way faster.
+
+  * Docker (2/2): 
+    Fabian Lehmann considerably reduced the size of the Docker image.
+
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, LSM sub-module: 
+    Franz Schug added a new metric: ``ARE``, which yields the pixel area of the foreground class.
+    Note: this value is capped at 32767.
+
+  * in force-higher-level, TSA sub-module:
+    A segmentation fault occured when using the SAVI Index.
+    This is now fixed.
+    Thanks for Janos Steiner for reporting this issue.
+
+  * in force-higher-level, TSA sub-module:
+    Implemented the new kNDVI following Camps-Valls et al. 2021.
+    Use with ``INDEX = kNDVI``.
+    Sigma is fixed to 0.5*(NIR+RED).
+
+* **FORCE WVDB**
+
+  * We updated the ready-to-use, global water vapor database. 
+    The dataset is comprised of daily global water vapor data for February 2000 to December 2020 for each land-intersecting Worldwide Reference System 2 (WRS-2) scene, as well as a monthly climatology that can be used if no daily value is available. 
+    The dataset is freely available at `<https://doi.org/10.5281/zenodo.4468700>`_. 
+    This dataset may relieve you of the burden to generate the water vapor database on your own.
+
+* **FORCE L2PS**
+
+  * $BINDIR is now dynamically evaluated on runtime. 
+    For users, this should not make a difference.
+
+
+FORCE v. 3.6.3
+--------------
+
+Release: 11.01.2021
+
+* **General changes**
+
+  * Versioned Docker images are now available again.
+    Thanks to Fegyi for the hint.
+
+  * A github action was implemented to test whether pushed code compiles and installs successfully.
+
+* **FORCE WVDB**
+
+  * Updated force-lut-modis to work with GDAL 3.2.
+    Some subdatasets are not visible anymore since this GDAL version.
+    Added some code to make this work again.  
+    Thanks to Vincent Schut for suggesting a fix.
+
+
+FORCE v. 3.6.2
+--------------
+
+Release: 04.01.2021
+
+* **General changes**
+
+ * Fixed a linking problem when using python3.8.
+   Thanks to Vincent Schut for suggesting a fix.
+
+
+FORCE v. 3.6.1
+--------------
+
+Release: 16.12.2020
+
+* **FORCE L2PS**
+
+ * USGS has sligtly changed the file format of Collection 2 data.
+
+   - Collection 1: *.tar.gz containers
+   - Collection 2: *.tar containers
+   
+   force-level2 now works with containers in tar.gz, tar, and zip format.
+
+
+FORCE v. 3.6.0
+--------------
+
+Release: 10.12.2020
+
+* **General changes**
+
+  * Docker dissemination has changed.
+    A GitHub action was implemented, which automatically builds and publishes a Docker image once the main branch was updated.
+    Thus, the docker image has changed to **davidfrantz/force**.
+    Please use this image from now on.
+    A special thank goes to Fegyi, who has initiated the FORCE Docker image and who hosted the image on his account up to this point!
+
+  * :ref:`depend` have changed.
+    Instead of python, python3 is now specifically required.
+    Also, added python3-dev as dependency (thanks to Willi Weber for the hint).
+
+  * On some systems, FORCE failed to compile due to multiple definitions of _WVLUT_.
+    Thanks to Ansgar Lößer for suggesting a fix for this.
+
+  * Fixed the inconsistent use of the synonyms BLOCK_SIZE and CHUNK_SIZE. 
+    It is BLOCK_SIZE from now on.
+    Thanks to Jonas Ardo for the hint.
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed some issues in force-csd:
+
+    * Reworked how AOIs in the form of vector files are handled.
+      Geopackages are no longer used as database for intersecting user-defined AOIs with the tiles/footprints of Sentinel-2 and Landsat, 
+      as the GDAL GPKG driver and SQLite caused issues with certains setups / installations. 
+      The geopackage format is still supported as AOI input though.
+
+    * Several small fixes
+      Fixes target the reprojection of AOIs, handling of negative values for AOI bounding boxes, command line option parsing, etc.
+      Only the Landsat product with the latest processing datestamp is downloaded if there are several products for one WRS-2 footprint on the same day.
+
+* **FORCE L2PS**
+
+  * Changed the BRDF correction strategy.
+    Before, the reflectance was fixed to a sun zenith of 45° as suggested by Flood et al. 2013.
+    Zhang et al. 2016 demonstrated that this strategy results in global mean absolute differences of the sun zenith greater than the maximum Landsat viewing zenith angle (7.5°).
+    Now, the sun zenith is fixed to the latitude-varying local time, which only results in differences of 0.26°.
+    We are using the mean local time of Landsat 8 and Sentinel-2 overpass.
+    Note that the same change was implemented in the HLS dataset.
+    Thanks for David Roy and Hankui Zhang for discussion and guidance on this topic.
+
+  * Changed the behaviour of the cloud shadow flag.
+    Before, the cloud shadow flag was not set if the cloud flag (any state) was set.
+    Thus, when users wanted to use confident clouds only, i.e. not the buffered clouds, 
+    there was a gap between the cloud and the shadow mask.
+    This is mitigated now: cloud and cloud shadow flags can be set simultaneously. 
+    This also enables "cloud shadow on top of cloud" scenarios.
+    Thanks to Haili Hu for reporting this issue.
+
+  * Changed the behaviour of over-saturated surface reflectance over cold cloud tops.
+    Before, if surface reflectance > 200%, the pixel was set to nodata.
+    Thus, holes in the clouds appeared.
+    Now, the pixel is only flagged as saturated, and reflectance is capped at the maximum Int16 value.
+    Note that this happens because the assumptions for estimating **surface** reflectance are not valid over clouds.
+    Thanks to Philip Frost for reporting this issue.
+
+  * Added a new parameter ``ERASE_CLOUDS``. 
+    If this parameter is enabled, confident cloud detections will be erased in the reflectance product, 
+    i.e. pixels are set to nodata. 
+    The cloud flag in the QAI product will still mark these pixels as clouds. 
+    This option may be usefule when disk space is of concern: 
+    removing the clouds(when used with compressed output options) will result in smaller file sizes.
+
+  * Some users noted that the cloud buffer is too large for their application.
+    This release hands control of the buffer widths to the user.
+    New parameters were added to the parameterfile: ``CLOUD_BUFFER``, ``SHADOW_BUFFER``, ``SNOW_BUFFER``.
+    The size corresponds to the buffer radius in meters.
+
+* **FORCE Import**
+
+  * new program added: force-import-modis
+    A new tool was added, which imports the MODIS Surface Reflectance Daily product MOD09GA/MYD09GA into FORCE.
+    The tool generates a FORCE-compatible datacube in Sinusoidal projection; MODIS tile h18v03 is ingested into FORCE tile X0018_Y0003.
+    The tool converts the MODIS hdf file into a pair of BOA/QAI images in compressed GeoTiff format according to FORCE data structure and naming convention.
+    The BOA product holds the 7 surface reflectance bands (ordered by wavelength).
+    The QAI product holds the Reflectance Data State QA, wherein the MODIS quality flags are translated into the usual FORCE quality flags.
+    File naming is like this: 20150101_LEVEL2_MOD01_BOA.tif (MOD01 = MODIS Terra, MOD02 = MODIS Aqua).
+
+* **FORCE HIGHER LEVEL**
+
+  * force-higher-level is aware of the newly added MODIS sensors, i.e. MOD01 and MOD02 can be specified in the sensor list (``SENSORS``).
+    A new spectral band is available as ``INDEX = SWIR0``, which represents MODIS band 5 (1230 - 1250).
+
+  * in force-higher-level, TSA sub-module: 
+    There is a new functionality, which enables users to plug-in their own python code in a very easy and user-friendly way.
+    Thus, FORCE can now be complemented by custom user functionality without changing or recompling the C code.
+    Two new parameters are now needed in the TSA parameterfile: 
+
+    1) ``FILE_PYTHON`` points to a python file
+    2) ``OUTPUT_PYP = TRUE/FALSE`` defines whether to use the script and output the corresponding data
+
+    An example python script can be found in ``force/example/tsi-plugin.py``.
+    Do not modify the function names and function arguments.
+
+    A tutorial is planned to showcase the usage.
+
+  * in force-higher-level, TSA sub-module, CAT analysis: 
+    Fixed an arithmetic expression bug that occured when computing loss when the regression intercept was 0.
+
+* **FORCE AUX**
+
+  * force-pyramid uses multiprocessing to speed up computation (when multiple input images are given).
+
+
+FORCE v. 3.5.2
+--------------
+
+Release: 05.10.2020
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed some issues in force-csd.
+    Added check for S2 duplicate scenes. 
+    Only the scenes with highest processing baseline and latest processing date is downloaded.
+    Check for already downloaded S2 scenes does not rely on scene name column anymore, as old GCS folder names don't represent old file naming convention. 
+    Scene name for check is extracted from URL now.
+    Added check for length of date string.
+    Fixed problem with converting filesize of scenes from bytes to megabytes.
+    Fixed rounding of reported data volume (no more changing of locale).
+    gsutil does not create log files, check for downloaded data is handled by the script only.
+    Files are downloaded following chronological order based on acquisition time.
+    -k now saves filtered metadata to level1-datapool folder.
+
+* **FORCE AUX**
+
+  * force-parameter now writes the polar-based phenology parameters into the TSA sekeleton.
+
+* **FORCE L2PS**
+
+  * fixed a "cannot copy" bug when using the water vapor database when correcting Landsat data.
+
+
+FORCE v. 3.5.1
+--------------
+
+Release: 17.09.2020
+
+* **Docker changes**
+
+  * Fegyi fixed an issue: files generated through docker were owned by root before.
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * Stefan Ernst fixed a small issue with the force-csd progress bar, as well as an issue when the end data wasn't defined.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, TSA sub-module, CAT analysis: 
+    There is another change parameter: loss = change / offset * 1000. 
+    The offset is the regression intercept of the linear trend applied to the full time series.
+
+
+FORCE v. 3.5.0
+--------------
+
+Release: 15.09.2020
+
+
+* **General changes**
+
+  * GDAL >= 3.0 support:
+
+    Since GDAL >= 3.0, the coordinates from coordinate transformation operations are no longer sorted as X/Y or LON/LAT, but in the typical order of each coordinate system.
+    This has caused an incompatibility of FORCE with GDAL >= 3.
+    This is fixed now. Still, do not use FORCE < 3.5 with GDAL >= 3. Update FORCE instead.
+
+  * Fixed a small bug that prevented program execution when the parameterfile was too long.
+
+  * FORCE programs will now transition to a Unix-typical usage, where non-mandatory options are specified with -o or --long-option.
+    This will happen from time to time in the next releases. 
+    The new program force-level1-csd is a prototype for this.
+
+  * Reduced the amount of compiler warnings when compiling with gcc 9.3.0 under Ubuntu 20.40 LTS.
+    This is ongoing work. The goal is to get rid of all warnings (they are not critical, though).
+
+* **FORCE LEVEL 1 ARCHIVING SYSTEM**
+
+  * new program force-level1-csd:
+
+    The new force-csd tool (cloud storage download) was kindly contributed by Stefan Ernst.
+    This tool goes way beyond the capabilities of the former sensor-specific scripts force-level1-landsat and force-level1-sentinel2.
+    It downloads Sentinel-2 AND Landsat data from the Google Cloud Storage.
+    You need the gutils python package, and you might need an account on Google's end. 
+    This is currently free. After communicating with Google, we expect this to remain free in the future.
+    force-csd is very efficient, you can use parallel downloads. 
+    You can filter the datapool w.r.t. sensor, date, cloud cover, tier level etc. 
+    The area of interest can be specified in a variety of ways, e.g. coordinate string as in force-level1-sentinel2, but a list of WRS-2/MGRS scenes, or vector geometries (e.g. shapefile) are also supported.
+    Of course, it also takes care about the file queues needed for Level 2 Processing.
+
+  * deprecated programs: force-level1-landsat and force-level1-sentinel2:
+
+    Due to the superiority of force-level1-csd, force-level1-landsat and force-level1-sentinel2 are now deprecated.
+    They will remain in the repo for a while, but will only receive minimal support in the future. 
+    Users are encouraged to change their workflow accordingly.
+
+* **FORCE HIGHER LEVEL**
+
+  * in force-higher-level, Level 3 sub-module: 
+  
+    Included a safety query, which ensures that at least one score should be > 0.
+    Setting all scores to 0 resulted in some crashes.
+    Thanks to Jonas Ardö to report on this.
+
+  * in force-higher-level, TSA sub-module: 
+
+    A new suite of metrics was implemented: Land Surface Phenology descriptors based on a polar transformation, Polarmetrics it is.
+    This is based on the paper by Bjorn-Gustaf J. Brooks: https://www.mdpi.com/1999-4907/11/6/606, but was modified (e.g. to consider interannual shifts in the start of the phenological year) and complemented by many more metrics.
+    A couple of new parameters are now necessary, force-parameter has been updated to include these in the skeleton.
+    See :ref:`tsa-param-polar`.
+
+  * in force-higher-level, TSA sub-module: 
+  
+    The domain tag of the bandwise FORCE metadata domain was updated to be interoperable with a 4D data model (see force-stack below).
+
+  * in force-higher-level, TSA sub-module: 
+
+    When folding the time series, the quantile statistics were broken with a memory error.
+    This is fixed now. Thanks for Christoph Raab and Benjamin Jakimow for reporting this.
+
+  * in force-higher-level, TSA sub-module, trend and CAT analyses: 
+
+    Added a new band to for computing relative change, i.e. gain/loss relative to initial value: (slope*timesteps)/offset. 
+    This makes most sense when the index has a physical meaning like fractional cover. 
+    This does not make sense at all when offset is negative! Take care.
+
+  * in force-higher-level, TSA sub-module, trend and CAT analyses: 
+
+    fixed an issue that compromised signifance levels for trends, which were computed on DOY-based phenometrics.
+
+* **FORCE AUX**
+
+  * in force-mosaic:
+
+    force-mosaic now copies all metadata to the generated mosaics.
+    For this, the new aux tool force-mdcp is used
+
+  * new program force-mdcp:
+  
+    This new helper tool copies metadata from one file to another.
+    This included the FORCE metadata domains.
+    This program is now used by force-mosaic to carry the metadata to the generated mosaics.
+
+  * new program force-stack:
+
+    This new tool stacks files in VRT format.
+    This works with physical images (e.g. GeoTiffs), as well as VRT files (as e.g. generated by force-mosaic).
+    A variable number of input files can be stacked, wildcards are supported.
+    Most basically, this is e.g. useful to look at RGB combinations in QGIS, where RGB visualizations cannot be used when the channels are not in the same file.
+    If the number of bands in the input files is different, the images are stacked after another, e.g. file 1 band 1, file 1 band 2, file 2 band 1.
+    If the number of bands in the input files is the same, the images are stacked with band interleave, e.g. file 1 band 1, file 2 band 1, file 1 band 2, file 2 band 2.
+    The second option implements a 4D data model (think of time series), which is consistent with the QGIS plugins Raster Time Series Manager and Raster Data Plotting (C) Andreas Rabe.
+    A tutorial is in development to illustrate the interoperable use between FORCE and said QGIS plugins.
+
+  * in force-magic-parameters:
+
+    The user can now change between "all combinations" or "paired combinations".
+    Please refer to the program description:
+    https://force-eo.readthedocs.io/en/latest/components/auxilliary/magic-parameters.htm
+
 
 FORCE v. 3.4.0
 --------------

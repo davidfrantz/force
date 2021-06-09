@@ -46,7 +46,7 @@ typedef struct {
   short ***imp_;
 } l2i_t;
 
-stack_t **level2_improphe(ard_t *ard_hr, ard_t *ard_mr, stack_t *mask, int nt_hr, int nt_mr, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t **level2_improphe(ard_t *ard_hr, ard_t *ard_mr, brick_t *mask, int nt_hr, int nt_mr, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

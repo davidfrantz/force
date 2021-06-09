@@ -25,11 +25,11 @@
 # this script is a wrapper, and acts as bridge between a batch interface, and the core FORCE Level-2 processing system
 
 
-EXPECTED_ARGS=6
+EXPECTED_ARGS=5
 
 # if wrong number of input args, stop
 if [ $# -ne $EXPECTED_ARGS ]; then
-  echo "Usage: `basename $0` image parfile bindir logdir tempdir timeout_zip"
+  echo "Usage: `basename $0` image parfile logdir tempdir timeout_zip"
   echo ""
   exit 1
 fi
@@ -37,10 +37,11 @@ fi
 
 IMAGE=$1
 PRM=$2
-BINDIR=$3
-LOGDIR=$4
-TEMPDIR=$5
-TIMEOUT_ZIP=$6
+LOGDIR=$3
+TEMPDIR=$4
+TIMEOUT_ZIP=$5
+
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 BASE=$(basename $IMAGE)
 LOGFILE=$LOGDIR/$BASE.log
@@ -83,16 +84,16 @@ if [ ! -x $EXE ]; then
 fi
 
 # test if DEBUG mode is on
-$EXE ? ?
-if [ $? -eq 1 ]; then
+$EXE -d
+if [ $? -ne 0 ]; then
   echo "$IMAGE: $EXE was compiled in DEBUG mode" > $LOGFILE
   exit 1
 fi
 
 TODO=$IMAGE
 
-# extract Landsat image
-if [[ $IMAGE == *".tar.gz"* ]]; then
+# extract Landsat image (C1 tar.gz)
+if [[ $IMAGE == *".tar.gz" ]]; then
 
   BASE_=$(echo $BASE | sed 's/.tar.gz//')
   TODO=$TEMPDIR/$BASE_
@@ -111,8 +112,28 @@ if [[ $IMAGE == *".tar.gz"* ]]; then
 
 fi
 
+# extract Landsat image (C2 tar)
+if [[ $IMAGE == *".tar" ]]; then
+
+  BASE_=$(echo $BASE | sed 's/.tar//')
+  TODO=$TEMPDIR/$BASE_
+
+  mkdir -p $TODO
+  if [ ! -d $TODO ]; then
+    echo "$IMAGE: creating temp directory failed" > $LOGFILE
+    exit 1
+  fi
+
+  timeout -k $TIMEOUT_ZIP 10m tar --ignore-command-error -xf $IMAGE --exclude gap_mask --exclude='*GCP.txt' --exclude='*VER.jpg' --exclude='*VER.txt' --exclude='*BQA.TIF' --exclude='*.GTF' --exclude='LE07*B8.TIF' --exclude='LE07*B6_VCID_2.TIF' --exclude='LC08*B11.TIF' --exclude='LC08*B8.TIF' -C $TODO &> /dev/null
+  if [ ! $? -eq 0 ]; then
+    echo "$IMAGE: tar container is corrupt, connection stalled or similar." > $LOGFILE
+    exit 1
+  fi
+
+fi
+
 # extract Sentinel-2 image 
-if [[ $IMAGE == *".zip"* ]]; then
+if [[ $IMAGE == *".zip" ]]; then
 
    timeout -k $TIMEOUT_ZIP 10m unzip -qq -d $TEMPDIR $IMAGE &>/dev/null
    if [ ! $? -eq 0 ]; then
@@ -144,12 +165,17 @@ $EXE $TODO $PRM >> $LOGFILE
 #fi
 
 # clean up if Landsat was extracted
-if [[ $IMAGE == *".tar.gz"* ]]; then
+if [[ $IMAGE == *".tar.gz" ]]; then
+  rm -r $TODO
+fi
+
+# clean up if Landsat was extracted
+if [[ $IMAGE == *".tar" ]]; then
   rm -r $TODO
 fi
 
 # clean up if Sentinel-2 was extracted
-if [[ $IMAGE == *".zip"* ]]; then
+if [[ $IMAGE == *".zip" ]]; then
   rm -r $TEMPDIR/$BASE_
 fi
 

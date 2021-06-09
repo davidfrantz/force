@@ -112,8 +112,8 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Frantz, D., Stellmes, M., & Hostert, P. (2019). A Global MODIS "
     "Water Vapor Database for the Operational Atmospheric Correction of "
     "Historic and Recent Landsat Imagery. Remote Sensing, 11, 257\n"
-    "Frantz, D., & Stellmes, M. (2018). Water vapor database for "
-    "atmospheric correction of Landsat imagery. PANGAEA", 
+    "Frantz, D., Stellmes, M., Ernst, S. (2021). Water vapor database for "
+    "atmospheric correction of Landsat imagery. Zenodo", 
     false },
   { "BRDF correction", 
     "Wanner, W., Li, X., & Strahler, A.H. (1995). On the derivation of "
@@ -136,7 +136,14 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Roy, D., Li, Z., & Zhang, H. (2017). Adjustment of Sentinel-2 Multi-"
     "Spectral Instrument (MSI) Red-Edge Band Reflectance to Nadir BRDF "
     "Adjusted Reflectance (NBAR) and Quantification of Red-Edge Band "
-    "BRDF Effects. Remote Sensing, 9, 1325",
+    "BRDF Effects. Remote Sensing, 9, 1325\n"
+    "Zhang, H. K., Roy, D. P., & Kovalskyy, V. (2015). Optimal solar geometry "
+    "definition for global long-term Landsat time-series bidirectional "
+    "reflectance normalization. IEEE Transactions on Geoscience and Remote Sensing, "
+    "54(3), 1410-1418\n"
+    "Li, Z., Zhang, H. K., & Roy, D. P. (2019). Investigation of Sentinel-2 "
+    "bidirectional reflectance hot-spot sensing conditions. IEEE Transactions "
+    "on Geoscience and Remote Sensing, 57(6), 3591-3598",
     false },
   { "Co-Registration Sentinel-2 -> Landsat", 
     "Yan, L., Roy, D.P., Zhang, H., Li, J., & Huang, H. (2016). An "
@@ -300,6 +307,81 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Gao, B. (1996). NDWI — A normalized difference water index for remote "
     "sensing of vegetation liquid water from space. Remote Sensing of Environment, "
     "58, 3, 257-266",
+    false },
+  { "Polar metrics",
+    "Brooks, B., Lee, D., Pomara, L., Hargrove, W. (2020). Monitoring Broadscale "
+    "Vegetational Diversity and Change across North American Landscapes Using Land "
+    "Surface Phenology. Forests 11(6), 606",
+    false },
+  { "Spectral band adjustment and band prediction",
+    "Scheffler, D., Frantz, D., & Segl, K. (2020). Spectral harmonization and "
+    "red edge prediction of Landsat-8 to Sentinel-2 using land cover optimized "
+    "multivariate regressors. Remote Sensing of Environment, 241, 111723.",
+    false },
+  { "kNDVI",
+    "Camps-Valls, G., Campos-Taberner, M., Moreno-Martínez, Á., Walther, S., "
+    "Duveiller, G., Cescatti, A., Mahecha, M.D., Muñoz-Marí, J., García-Haro, F.J., "
+    "Guanter, L., Jung, M., Gamon, J.A., Reichstein, M., & Running, S.W. (2021). "
+    "A unified vegetation index for quantifying the terrestrial biosphere. "
+    "Science Advances, 7, eabc7447.",
+    false },
+  { "NDRE1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDRE2",
+    "Barnes, E. M., Clarke, T. R., Richards, S. E., Colaizzi, P. D., Haberland, J., "
+    "Kostrzewski, M., ... & Moran, M. S. (2000, July). Coincident detection of crop "
+    "water stress, nitrogen status and canopy density using ground based multispectral "
+    "data. Proceedings of the Fifth International Conference on Precision Agriculture, "
+    "Bloomington, MN, USA (Vol. 1619).",
+    false },
+  { "CIre",
+    "Gitelson, A.A., Gritz, Y., Merzlyak, M., 2003. Relationships between leaf "
+    "chlorophyll content and spectral reflectance and algorithms for non-destructive "
+    "chlorophyll assessment in higher plant leaves. J. Plant Physiol. 160, 271282.",
+    false },
+  { "NDVIre1",
+    "Gitelson, A.A., Merzlyak, M., 1994. Spectral reflectance changes associated with "
+    "autumn senescence of Aesculus hippocastanum L. and Acer platanoides L. leaves. "
+    "Spectral features and relation to chlorophyll estimation. J. Plant Physiol. 143, "
+    "286292.",
+    false },
+  { "NDVIre2",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre1n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre2n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "NDVIre3n",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "MSRre",
+    "Chen, J., 1996. Evaluation of vegetation indices and modified simple ratio for "
+    "boreal applications. Can. J. Remote Sens. 22, 229242.",
+    false },
+  { "MSRren",
+    "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
+    "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
+    "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
     false }
 };
 

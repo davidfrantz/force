@@ -31,49 +31,49 @@ Contact: franz.schug@geo.hu-berlin.de
 #include "lsm-hl.h"
 
 
-stack_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct);
-stack_t *compile_lsm_stack(stack_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
+brick_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t *compile_lsm_brick(brick_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
 int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
 
 
-/** This function compiles the stacks, in which LSM results are stored.
+/** This function compiles the bricks, in which LSM results are stored.
 +++ It also sets metadata and sets pointers to instantly useable image
 +++ arrays.
 --- features: input features
 --- lsm:      pointer to instantly useable LSM image arrays
 --- phl:      HL parameters
 --- cube:     datacube definition
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for LSM results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for LSM results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct){
-stack_t **LSM = NULL;
-int b, o, nprod = 10;
+brick_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **LSM = NULL;
+int b, o, nprod = 11;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
 char domain[NPOW_10];
-enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
-int prodlen[10] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[10][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX" };
+enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
+int prodlen[11] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
+char prodname[11][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE" };
 
-int prodtype[10] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_ };
+int prodtype[11] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
 
-bool enable[10] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
+bool enable[11] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
 
-bool write[10]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax };
+bool write[11]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
 
-short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_};
+short ***ptr[11] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_, &lsm->are_};
 
 
-  alloc((void**)&LSM, nprod, sizeof(stack_t*));
+  alloc((void**)&LSM, nprod, sizeof(brick_t*));
 
   for (o=0; o<nprod; o++){
     if (enable[o]){
-      if ((LSM[o] = compile_lsm_stack(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(LSM[o])) == NULL){
+      if ((LSM[o] = compile_lsm_brick(features[0].DAT, prodlen[prodtype[o]], write[o], prodname[o], phl)) == NULL || (*ptr[o] = get_bands_short(LSM[o])) == NULL){
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
@@ -87,8 +87,8 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
             if (nchar < 0 || nchar >= NPOW_10){ 
               printf("Buffer Overflow in assembling domain\n"); error++;}
           }
-          set_stack_domain(LSM[o],   b, domain);
-          set_stack_bandname(LSM[o], b, domain);
+          set_brick_domain(LSM[o],   b, domain);
+          set_brick_bandname(LSM[o], b, domain);
         }
       }
     } else{
@@ -99,7 +99,7 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
 
   if (error > 0){
     printf("%d compiling LSM product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(LSM[o]);
+    for (o=0; o<nprod; o++) free_brick(LSM[o]);
     free((void*)LSM);
     return NULL;
   }
@@ -109,53 +109,53 @@ short ***ptr[10] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, 
 }
 
 
-/** This function compiles a LSM stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
---- write:     should this stack be written, or only used internally?
+/** This function compiles a LSM brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for LSM result
++++ Return:    brick for LSM result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_lsm_stack(stack_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
+brick_t *compile_lsm_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
 int nchar;
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Landscape Metrics");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Landscape Metrics");
+  set_brick_product(brick, prodname);
 
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher,
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%s_HL_LSM_%s", phl->lsm.base, prodname);
   if (nchar < 0 || nchar >= NPOW_10){
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
 
 
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else{
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
+    set_brick_save(brick, b, true);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -169,12 +169,12 @@ int nchar;
 --- nf:        number of features
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with TXT results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with TXT results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **landscape_metrics(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **landscape_metrics(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct){
 lsm_t lsm;
-stack_t **LSM;
+brick_t **LSM;
 small *mask_ = NULL;
 int nprod = 0;
 int f, i, j, p, t, nx, ny, nc, ni, nj, np, u;
@@ -202,6 +202,7 @@ int maxVal = 0;
 int logCounter = 0;
 int validDataPixels = 0;
 int kernelSize = (phl->lsm.radius * 2 + 1) * (phl->lsm.radius * 2 + 1);
+int minPatchSize = phl->lsm.minpatchsize;
 int width;
 small *newFeatures = NULL;
 double mx, vx;
@@ -211,11 +212,11 @@ float unit_perim = 0;
 
   cite_me(_CITE_LSM_);
 
-  // import stacks
-  nx = get_stack_chunkncols(features[0].DAT);
-  ny = get_stack_chunknrows(features[0].DAT);
-  nc = get_stack_chunkncells(features[0].DAT);
-  nodata = get_stack_nodata(features[0].DAT, 0);
+  // import bricks
+  nx = get_brick_chunkncols(features[0].DAT);
+  ny = get_brick_chunknrows(features[0].DAT);
+  nc = get_brick_chunkncells(features[0].DAT);
+  nodata = get_brick_nodata(features[0].DAT, 0);
 
   // import mask (if available)
   if (mask != NULL){
@@ -225,7 +226,7 @@ float unit_perim = 0;
       return NULL;}
   }
 
-  // compile products + stacks
+  // compile products + bricks
   if ((LSM = compile_lsm(features, &lsm, phl, cube, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile LSM products!\n");
     *nproduct = 0;
@@ -267,7 +268,8 @@ float unit_perim = 0;
         if (phl->lsm.ostd) lsm.std_[f][p] = nodata;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = nodata;
         if (phl->lsm.omax) lsm.max_[f][p] = nodata;
-
+        if (phl->lsm.oare) lsm.are_[f][p] = nodata;
+        
         if (mask_ != NULL && !mask_[p]) continue;
         if (!features[f].msk[p] && phl->ftr.exclude) continue;
 
@@ -276,9 +278,15 @@ float unit_perim = 0;
             if (features[f].dat[0][p] == phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_GT_:
+            if (features[f].dat[0][p] > phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_GE_:
             if (features[f].dat[0][p] >= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           case _QUERY_LT_:
+            if (features[f].dat[0][p] < phl->lsm.threshold[f]) newFeatures[p] = true;
+            break;
+          case _QUERY_LE_:
             if (features[f].dat[0][p] <= phl->lsm.threshold[f]) newFeatures[p] = true;
             break;
           default:
@@ -289,7 +297,7 @@ float unit_perim = 0;
     }
 
     // make objects and delete small ones
-    binary_to_objects(newFeatures, nx, ny, 3, &CCL, &SIZE, &nobj);
+    binary_to_objects(newFeatures, nx, ny, minPatchSize, &CCL, &SIZE, &nobj);
     if (nobj < 1) continue;
 
 
@@ -350,7 +358,7 @@ float unit_perim = 0;
           if (!features[f].msk[np] && phl->ftr.exclude) continue;
 
           // if inactive pixel
-          if (!newFeatures[np] && !phl->lsm.allpx) continue;
+          if (!newFeatures[np]) continue;
 
           //do not incorporate nodata values in sum
           if (features[f].dat[0][np] != nodata){
@@ -422,6 +430,14 @@ float unit_perim = 0;
         if (phl->lsm.oavg) lsm.avg_[f][p] = mx;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = exp(logSum / (float)logCounter);
         if (phl->lsm.omax) lsm.max_[f][p] = maxVal;
+        if (phl->lsm.oare){
+            if (validDataPixels <= SHRT_MAX) {
+                lsm.are_[f][p] = validDataPixels;
+            } else {
+                lsm.are_[f][p] = SHRT_MAX;
+            }
+            
+        }
         if (phl->lsm.ostd) lsm.std_[f][p] = standdev(vx, validDataPixels);
 
 

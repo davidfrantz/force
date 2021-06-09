@@ -41,7 +41,7 @@ int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir);
 int list_ard_filter_ce(int cemin, int cemax, dir_t dir);
 
 
-/** Reducce spatial resolution using an approximate Point Spread Function
+/** Reduce spatial resolution using an approximate Point Spread Function
 +++ This function will convolve the full-res image with a Gaussian Lowpass
 +++ with filter size based upon the two resolutions. Afterward, the image
 +++ is reduced using boxcar averaging.
@@ -288,15 +288,7 @@ dir_t d;
   for (m=0, d.n=0; m<d.N; m++){
 
     if (strcmp(d.LIST[m]->d_name, phl->b_mask) == 0){
-      
-      if (strlen(d.LIST[m]->d_name) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(d.list[d.n], d.LIST[m]->d_name, strlen(d.LIST[m]->d_name)); 
-        d.list[d.n][strlen(d.LIST[m]->d_name)] = '\0';
-        d.n++;
-      }
-      
+      copy_string(d.list[d.n++], NPOW_10, d.LIST[m]->d_name);
       break;
     }
 
@@ -375,15 +367,7 @@ int nchar;
       if (!phl->date_doys[date.doy])  vs = false;
 
       // allow-list image
-      if (vs){
-        if (strlen(d.LIST[t]->d_name) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); return FAILURE;
-        } else { 
-          strncpy(d.list[d.n], d.LIST[t]->d_name, strlen(d.LIST[t]->d_name)); 
-          d.list[d.n][strlen(d.LIST[t]->d_name)] = '\0';
-          d.n++;
-        }
-      }
+      if (vs) copy_string(d.list[d.n++], NPOW_10, d.LIST[t]->d_name);
 
     }
 
@@ -428,25 +412,14 @@ int n;
   for (t=0, n=0; t<dir.n; t++){
     date_ard(&date, dir.list[t]);
     if (date.ce < cemin || date.ce > cemax) continue;
-    if (strlen(dir.list[t]) > NPOW_10-1){
-      printf("cannot copy, string too long.\n"); return FAILURE;
-    } else { 
-      strncpy(list[n], dir.list[t], strlen(dir.list[t])); 
-      list[n][strlen(dir.list[t])] = '\0';
-      n++;
-    }
+    copy_string(list[n++], NPOW_10, dir.list[t]);
   }
 
   for (t=0; t<dir.n; t++){
     if (t >= n){
-      strncpy(dir.list[t], "NULL",  4); dir.list[t][4] = '\0';
+      copy_string(dir.list[t], NPOW_10, "NULL");
     } else {
-      if (strlen(list[t]) > NPOW_10-1){
-        printf("cannot copy, string too long.\n"); return FAILURE;
-      } else { 
-        strncpy(dir.list[t], list[t], strlen(list[t])); 
-        dir.list[t][strlen(list[t])] = '\0';
-      }
+      copy_string(dir.list[t], NPOW_10, list[t]);
     }
   }
   free_2D((void**)list, dir.n);
@@ -476,10 +449,10 @@ int n;
 --- chunk:   block number
 --- cube:    datacube parameters, e.g. resolution
 --- phl:     HL parameters
-+++ Return: image stack
++++ Return: image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
-stack_t *MASK = NULL;
+brick_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+brick_t *MASK = NULL;
 small *mask_ = NULL;
 int nc, p;
 char fname[NPOW_10];
@@ -533,10 +506,10 @@ int n = 0;
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
   free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
 
-  nc = get_stack_chunkncells(MASK);
+  nc = get_brick_chunkncells(MASK);
   if ((mask_ = get_band_small(MASK, 0)) == NULL){
     printf("Error getting processing mask."); 
-    free_stack(MASK);
+    free_brick(MASK);
     *success = FAILURE; return NULL;}
 
   // count and make sure that mask_ is binary
@@ -550,7 +523,7 @@ int n = 0;
 
   if (n == 0){
     //printf("no valid pixel in mask in this block. skip this block!\n");
-    free_stack(MASK);
+    free_brick(MASK);
     *success = CANCEL;
     return NULL;
   }
@@ -629,12 +602,12 @@ int error = 0;
           printf("Error adding feature %s. ", fname); error++;}
       }
       
-      // compile a 0-filled QAI stack, processing must continue..
-      if ((features[f].QAI = copy_stack(features[f].DAT, 1, _DT_SHORT_)) == NULL || 
+      // compile a 0-filled QAI brick, processing must continue..
+      if ((features[f].QAI = copy_brick(features[f].DAT, 1, _DT_SHORT_)) == NULL || 
           (features[f].qai = get_band_short(features[f].QAI, 0)) == NULL){
         printf("Error compiling feature %s.", fname); error++;}
         
-      nc = get_stack_chunkncells(features[f].DAT);
+      nc = get_brick_chunkncells(features[f].DAT);
       
       for (p=0; p<nc; p++){
         if (features[f].dat[0][p] == phl->ftr.nodata) set_off(features[f].QAI, p, true);
@@ -731,8 +704,8 @@ int error = 0;
           printf("Error adding continuous field products %s. ", fname); error++;}
       }
       
-      // compile a 0-filled QAI stack, processing must continue..
-      if ((con[f].QAI = copy_stack(con[f].DAT, 1, _DT_SHORT_)) == NULL || 
+      // compile a 0-filled QAI brick, processing must continue..
+      if ((con[f].QAI = copy_brick(con[f].DAT, 1, _DT_SHORT_)) == NULL || 
           (con[f].qai = get_band_short(con[f].QAI, 0)) == NULL){
         printf("Error compiling continuous field %s.", fname); error++;}
 
@@ -827,10 +800,8 @@ bool level3 = false;
       if (phl->prd.imp){
         
         // backup filename
-        if (strlen(fname) > NPOW_10-1){
-          printf("cannot copy, string too long.\n"); exit(1);
-        } else { strncpy(temp, fname, strlen(fname)); temp[strlen(fname)] = '\0';}
-        
+        copy_string(temp, NPOW_10, fname);
+
 
         // new filename
         if (strstr(fname, "BOA")  != NULL) pch = strstr(fname, "BOA");
@@ -839,11 +810,7 @@ bool level3 = false;
         strncpy(pch, "IMP", 3);
 
         // if no improphed product exists, use normal one
-        if (!fileexist(fname)){
-          if (strlen(temp) > NPOW_10-1){
-            printf("cannot copy, string too long.\n"); exit(1);
-          } else { strncpy(fname, temp, strlen(temp)); fname[strlen(temp)] = '\0';}
-        }
+        if (!fileexist(fname)) copy_string(fname, NPOW_10, temp);
 
       }
 
@@ -881,12 +848,12 @@ bool level3 = false;
               printf("Error adding QAI products %s. ", fname); error++;}
           }
         } else {
-          if ((ard[t].QAI = copy_stack(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
+          if ((ard[t].QAI = copy_brick(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
             printf("Error compiling feature %s.", fname); error++;}
             
-          nc = get_stack_chunkncells(ard[t].DAT);
-          nb = get_stack_nbands(ard[t].DAT);
+          nc = get_brick_chunkncells(ard[t].DAT);
+          nb = get_brick_nbands(ard[t].DAT);
           
           for (p=0; p<nc; p++){
           for (b=0; b<nb; b++){
@@ -1015,7 +982,7 @@ bool level3 = false;
 }
 
 
-/** This function reads a block of ARD-styled data, and returns a stack. 
+/** This function reads a block of ARD-styled data, and returns a brick. 
 +++ GDAL takes care of image decimation / replication if the image has a 
 +++ different spatial resolution than expected. A PSF aggregation can also
 +++ be used.
@@ -1025,7 +992,7 @@ bool level3 = false;
 --- read_b:    if not ARD reflectance, what is the first band to read?
 --- read_nb:   if not ARD reflectance, how many bands to read?
 --- nodata:    nodata value
---- datatype:  datatype for stack
+--- datatype:  datatype for brick
 --- chunk:     block number
 --- tx:        tile X-ID
 --- ty:        tile Y-ID
@@ -1033,12 +1000,12 @@ bool level3 = false;
 --- psf:       use PSF?
 --- partial_x: only read part of the block (width)
 --- partial_y: only read part of the block (height)
-+++ Return:    image stack
++++ Return:    image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y){
-stack_t *stack  = NULL;
-short   *stack_short_ = NULL;
-small   *stack_small_ = NULL;
+brick_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y){
+brick_t *brick  = NULL;
+short   *brick_short_ = NULL;
+small   *brick_small_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
 
@@ -1051,7 +1018,7 @@ int b, nbands, nb = 0, offb = read_b, p;
 int nx, ny, nc;
 int xoff_disc, yoff_disc;
 int nx_read, ny_read, nc_read;
-int b_stack;
+int b_brick;
 int b_disc;
 int nx_disc, ny_disc, nc_disc;
 double res_disc;
@@ -1089,12 +1056,18 @@ double tol = 5e-3;
   
   if (ard_type == _ARD_REF_ || ard_type == _ARD_AUX_){
     if (date_ard(&date, bname) != SUCCESS){
-      printf("getting date of ARD failed\n");}
+      printf("getting date of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (product_ard(prd, NPOW_02, bname) != SUCCESS){
-      printf("getting product of ARD failed\n");}
+      printf("getting product of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (sen != NULL){
       if (sensor_ard(&sid, sen, bname) != SUCCESS){
-        printf("getting sensor of ARD failed\n");}
+        printf("getting sensor of ARD failed (%s)\n", bname); 
+        exit(FAILURE);
+      }
     }
   } else init_date(&date);
     
@@ -1123,7 +1096,9 @@ double tol = 5e-3;
     nb     = read_nb;
     nbands = read_nb;
   }
-  //printf("reading %d bands.\n", nb);
+  #ifdef FORCE_DEBUG
+  printf("reading %d bands.\n", nb);
+  #endif
 
 
 
@@ -1204,24 +1179,29 @@ double tol = 5e-3;
   #endif
 
   alloc((void**)&read_buf, nc_read, sizeof(short));
-  stack = allocate_stack(nb, nc, datatype);
+  brick = allocate_brick(nb, nc, datatype);
 
-  for (b=0, b_stack=0; b<nbands; b++){
+  for (b=0, b_brick=0; b<nbands; b++){
 
     if (ard_type == _ARD_REF_){
-      if ((b_disc = sen->band[sid][b]) < 0) continue;
+      if ((b_disc = sen->band[sid][b])  < 0) continue;
+      if ((b_disc = sen->band[sid][b]) == 0){
+        set_brick_domain(brick, b_brick, sen->domain[b]);
+        b_brick++;
+        continue;
+      }
     } else {
       b_disc = offb+b;
     }
 
     #ifdef FORCE_DEBUG
-    printf("read band %d to %d, %d bands in total\n", b_disc, b_stack, nb);
+    printf("read band %d to %d, %d bands in total\n", b_disc, b_brick, nb);
     #endif
 
     if (datatype == _DT_SMALL_){
-      if ((stack_small_ = get_band_small(stack, b_stack)) == NULL) return NULL;
+      if ((brick_small_ = get_band_small(brick, b_brick)) == NULL) return NULL;
     } else if (datatype == _DT_SHORT_){
-      if ((stack_short_ = get_band_short(stack, b_stack)) == NULL) return NULL;
+      if ((brick_short_ = get_band_short(brick, b_brick)) == NULL) return NULL;
     } else {
       printf("unsupported datatype. "); return NULL;
     }
@@ -1238,25 +1218,28 @@ double tol = 5e-3;
       for (p=0; p<nc; p++) psf_buf[p] = nodata;
       reduce_psf(read_buf, nx_disc, ny_disc, nc_disc, psf_buf, nx, ny, nc, nodata);
       if (datatype == _DT_SMALL_){
-        for (p=0; p<nc; p++) stack_small_[p] = psf_buf[p];
+        for (p=0; p<nc; p++) brick_small_[p] = psf_buf[p];
       } else if (datatype == _DT_SHORT_){
-        for (p=0; p<nc; p++) stack_short_[p] = psf_buf[p];
+        for (p=0; p<nc; p++) brick_short_[p] = psf_buf[p];
       } else {
         printf("unsupported datatype. "); return NULL;
       }
     } else {
       if (datatype == _DT_SMALL_){
-        for (p=0; p<nc; p++) stack_small_[p] = read_buf[p];
+        for (p=0; p<nc; p++) brick_small_[p] = read_buf[p];
       } else if (datatype == _DT_SHORT_){
-        for (p=0; p<nc; p++) stack_short_[p] = read_buf[p];
+        for (p=0; p<nc; p++) brick_short_[p] = read_buf[p];
       } else {
         printf("unsupported datatype. "); return NULL;
       }
     }
     
-    if (ard_type == _ARD_REF_) set_stack_domain(stack, b_stack, sen->domain[b]);
+    if (ard_type == _ARD_REF_){
+      set_brick_domain(brick, b_brick, sen->domain[b]);
+      set_brick_bandname(brick, b_brick, sen->domain[b]);
+    }
 
-    b_stack++;
+    b_brick++;
 
   }
 
@@ -1266,41 +1249,41 @@ double tol = 5e-3;
 
   //CSLDestroy(open_options);
 
-  // compile stack correctly
-  set_stack_geotran(stack,    geotran_disc);
-  set_stack_res(stack,        cube->res);
-  set_stack_proj(stack,       cube->proj);
-  set_stack_ncols(stack,      cube->nx);
-  set_stack_nrows(stack,      cube->ny);
-  set_stack_chunkncols(stack, cube->cx);
-  set_stack_chunknrows(stack, cube->cy);
-  set_stack_nchunks(stack,    cube->cn);
-  set_stack_chunk(stack,      chunk);
-  set_stack_tilex(stack,      tx);
-  set_stack_tiley(stack,      ty);
+  // compile brick correctly
+  set_brick_geotran(brick,    geotran_disc);
+  set_brick_res(brick,        cube->res);
+  set_brick_proj(brick,       cube->proj);
+  set_brick_ncols(brick,      cube->nx);
+  set_brick_nrows(brick,      cube->ny);
+  set_brick_chunkncols(brick, cube->cx);
+  set_brick_chunknrows(brick, cube->cy);
+  set_brick_nchunks(brick,    cube->cn);
+  set_brick_chunk(brick,      chunk);
+  set_brick_tilex(brick,      tx);
+  set_brick_tiley(brick,      ty);
 
-  set_stack_filename(stack, "DONOTOUTPUT");
-  set_stack_dirname(stack, "DONOTOUTPUT");
-  set_stack_product(stack, prd);
-  set_stack_sensorid(stack, sid);
-  set_stack_name(stack, "FORCE Level 2 ARD");
+  set_brick_filename(brick, "DONOTOUTPUT");
+  set_brick_dirname(brick, "DONOTOUTPUT");
+  set_brick_product(brick, prd);
+  set_brick_sensorid(brick, sid);
+  set_brick_name(brick, "FORCE Level 2 ARD");
 
-  set_stack_open(stack,   OPEN_FALSE);
-  set_stack_format(stack, _FMT_GTIFF_);
+  set_brick_open(brick,   OPEN_FALSE);
+  set_brick_format(brick, _FMT_GTIFF_);
   
   //printf("some of the ARD metadata should be read from disc. TBI\n");
-  for (b=0; b<nb; b++) set_stack_nodata(stack, b, nodata);
-  for (b=0; b<nb; b++) set_stack_scale(stack, b, 10000);
-  for (b=0; b<nb; b++) set_stack_date(stack, b, date);
+  for (b=0; b<nb; b++) set_brick_nodata(brick, b, nodata);
+  for (b=0; b<nb; b++) set_brick_scale(brick, b, 10000);
+  for (b=0; b<nb; b++) set_brick_date(brick, b, date);
   if(sen != NULL){
-    for (b=0; b<nb; b++) set_stack_sensor(stack, b, sen->sensor[sid]);
+    for (b=0; b<nb; b++) set_brick_sensor(brick, b, sen->sensor[sid]);
   }
    
-  return stack;
+  return brick;
 }
 
 
-/** This function adds a partial block of ARD-styled data to the stack we
+/** This function adds a partial block of ARD-styled data to the brick we
 +++ already have. This is needed for functions that use kernel based pro-
 +++ cessing and need to incorporate data from neighoring blocks and/or
 +++ tiles to generate seamless output.
@@ -1310,23 +1293,23 @@ double tol = 5e-3;
 --- read_b:   if not ARD reflectance, what is the first band to read?
 --- read_nb:  if not ARD reflectance, how many bands to read?
 --- nodata:   nodata value
---- datatype: datatype for stack
+--- datatype: datatype for brick
 --- chunk:    block number
 --- tx:       tile X-ID
 --- ty:       tile Y-ID
 --- cube:     datacube parameters, e.g. resolution
 --- psf:      use PSF?
 --- radius:   distance (in projection units) that need to be added
---- ARD:      image stack we already have in memory (freed within)
-+++ Return:   extended image stack
+--- ARD:      image brick we already have in memory (freed within)
++++ Return:   extended image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, stack_t *ARD){
-stack_t *add  = NULL;
+brick_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, brick_t *ARD){
+brick_t *add  = NULL;
 small  **add_small_ = NULL;
 short  **add_short_ = NULL;
-stack_t *stack  = NULL;
-small  **stack_small_ = NULL;
-short  **stack_short_ = NULL;
+brick_t *brick  = NULL;
+small  **brick_small_ = NULL;
+short  **brick_short_ = NULL;
 double res;
 int pix;
 int b, nb;
@@ -1339,8 +1322,8 @@ char c_tn[NPOW_04];
 int nchar;
 
 
-  nb = get_stack_nbands(ARD);
-  res = get_stack_res(ARD);
+  nb = get_brick_nbands(ARD);
+  res = get_brick_res(ARD);
   
   pix = (int)(radius/res);
 
@@ -1349,28 +1332,26 @@ int nchar;
   nc = nx*ny;
   
   #ifdef FORCE_DEBUG
-  printf("stack with added edges has %d x %d pixels = %d cells\n",
+  printf("brick with added edges has %d x %d pixels = %d cells\n",
     nx, ny, nc);
   #endif
   
   nchunk = cube->cn;
 
-  stack = copy_stack(ARD, nb, _DT_NONE_);
-  set_stack_chunkncols(stack, nx);
-  set_stack_chunknrows(stack, ny);
-  allocate_stack_bands(stack, nb, nc, datatype);
+  brick = copy_brick(ARD, nb, _DT_NONE_);
+  set_brick_chunkncols(brick, nx);
+  set_brick_chunknrows(brick, ny);
+  allocate_brick_bands(brick, nb, nc, datatype);
   if (datatype == _DT_SMALL_){
-    if ((stack_small_ = get_bands_small(stack)) == NULL) return NULL;
+    if ((brick_small_ = get_bands_small(brick)) == NULL) return NULL;
   } else if (datatype == _DT_SHORT_){
-    if ((stack_short_ = get_bands_short(stack)) == NULL) return NULL;
+    if ((brick_short_ = get_bands_short(brick)) == NULL) return NULL;
   } else {
     printf("unsupported datatype. "); return NULL;
   }
   
   // copy file name
-  if (strlen(file) > NPOW_10-1){
-    printf("cannot copy, string too long.\n"); return NULL;
-  } else { strncpy(fname, file, strlen(file)); fname[strlen(file)] = '\0';}
+  copy_string(fname, NPOW_10, file);
   
   nchar = snprintf(c_tc, NPOW_04, "X%04d_Y%04d", tx, ty);
   if (nchar < 0 || nchar >= NPOW_04){ 
@@ -1428,9 +1409,7 @@ int nchar;
         printf("error in assembling filename for neighboring block.\n"); return NULL;
       } else strncpy(pch, c_tn, 11);
 
-      if (strlen(c_tn) > NPOW_04-1){
-        printf("cannot copy, string too long.\n"); return NULL;
-      } else { strncpy(c_tc, c_tn, strlen(c_tn)); c_tc[strlen(c_tn)] = '\0';}
+      copy_string(c_tc, NPOW_04, c_tn);
           
       
       #ifdef FORCE_DEBUG
@@ -1490,15 +1469,15 @@ int nchar;
 
       if (datatype == _DT_SMALL_){
         if (add_small_ == NULL){
-          for (b=0; b<nb; b++) stack_small_[b][p] = nodata;
+          for (b=0; b<nb; b++) brick_small_[b][p] = nodata;
         } else {
-          for (b=0; b<nb; b++) stack_small_[b][p] = add_small_[b][p_add];
+          for (b=0; b<nb; b++) brick_small_[b][p] = add_small_[b][p_add];
         }
       } else if (datatype == _DT_SHORT_){
         if (add_short_ == NULL){
-          for (b=0; b<nb; b++) stack_short_[b][p] = nodata;
+          for (b=0; b<nb; b++) brick_short_[b][p] = nodata;
         } else {
-          for (b=0; b<nb; b++) stack_short_[b][p] = add_short_[b][p_add];
+          for (b=0; b<nb; b++) brick_short_[b][p] = add_short_[b][p_add];
         }
       } else {
         printf("unsupported datatype. "); return NULL;
@@ -1507,7 +1486,7 @@ int nchar;
     }
     }
 
-    free_stack(add);
+    free_brick(add);
     add = NULL;
     add_small_ = NULL;
     add_short_ = NULL;
@@ -1520,7 +1499,7 @@ int nchar;
   printf("\ndone adding this dataset\n\n");
   #endif
 
-  return stack;
+  return brick;
 }
 
 
@@ -1533,14 +1512,14 @@ int free_ard(ard_t *ard, int nt){
 int t;
 
   for (t=0; t<nt; t++){
-    if (ard[t].DAT != NULL){ free_stack(ard[t].DAT); ard[t].DAT = NULL;}
-    if (ard[t].QAI != NULL){ free_stack(ard[t].QAI); ard[t].QAI = NULL;}
-    if (ard[t].DST != NULL){ free_stack(ard[t].DST); ard[t].DST = NULL;}
-    if (ard[t].AOD != NULL){ free_stack(ard[t].AOD); ard[t].AOD = NULL;}
-    if (ard[t].HOT != NULL){ free_stack(ard[t].HOT); ard[t].HOT = NULL;}
-    if (ard[t].VZN != NULL){ free_stack(ard[t].VZN); ard[t].VZN = NULL;}
-    if (ard[t].WVP != NULL){ free_stack(ard[t].WVP); ard[t].WVP = NULL;}
-    if (ard[t].MSK != NULL){ free_stack(ard[t].MSK); ard[t].MSK = NULL;}
+    if (ard[t].DAT != NULL){ free_brick(ard[t].DAT); ard[t].DAT = NULL;}
+    if (ard[t].QAI != NULL){ free_brick(ard[t].QAI); ard[t].QAI = NULL;}
+    if (ard[t].DST != NULL){ free_brick(ard[t].DST); ard[t].DST = NULL;}
+    if (ard[t].AOD != NULL){ free_brick(ard[t].AOD); ard[t].AOD = NULL;}
+    if (ard[t].HOT != NULL){ free_brick(ard[t].HOT); ard[t].HOT = NULL;}
+    if (ard[t].VZN != NULL){ free_brick(ard[t].VZN); ard[t].VZN = NULL;}
+    if (ard[t].WVP != NULL){ free_brick(ard[t].WVP); ard[t].WVP = NULL;}
+    if (ard[t].MSK != NULL){ free_brick(ard[t].MSK); ard[t].MSK = NULL;}
   }
   free((void*)ard);
   ard = NULL;

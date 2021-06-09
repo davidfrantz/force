@@ -32,7 +32,8 @@ Atmospheric correction header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/string-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/atc-ll.h"
@@ -48,7 +49,7 @@ Atmospheric correction header
 extern "C" {
 #endif
 
-stack_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, stack_t *TOA, stack_t *QAI, top_t *TOP, int *nprod);
+brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, top_t *TOP, int *nprod);
 
 #ifdef __cplusplus
 }

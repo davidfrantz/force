@@ -123,20 +123,20 @@ float **k = NULL;
 }
 
 
-/** This function buffers all TRUE pixels by r pixels. Stack entry point
---- stack:  stack with binary image (only use with 0/1)
+/** This function buffers all TRUE pixels by r pixels. Brick entry point
+--- brick:  brick with binary image (only use with 0/1)
 --- b:      band
 --- r:      radius
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int buffer(stack_t *stack, int b, int r){
+int buffer(brick_t *brick, int b, int r){
 small *image = NULL;
 int nx, ny;
 
-  if ((image = get_band_small(stack, b)) == NULL) return FAILURE;
+  if ((image = get_band_small(brick, b)) == NULL) return FAILURE;
 
-  nx = get_stack_ncols(stack);
-  ny = get_stack_nrows(stack);
+  nx = get_brick_ncols(brick);
+  ny = get_brick_nrows(brick);
 
   return buffer_(image, nx, ny, r);
 }
@@ -155,6 +155,8 @@ int i, j, k, p, d, x, y;
 int nc = nx*ny;
 small *tmp = NULL;
 
+
+  if (r <= 0) return SUCCESS;
 
   alloc((void**)&tmp, nc, sizeof(small));
 
@@ -209,19 +211,19 @@ small *tmp = NULL;
 
 /** This function performs a majority filling, i.e. FALSE cells that are 
 +++ surrounded by 5 or more TRUE cells will be set to TRUE. This fills
-+++ small holes in a binary image. Stack entry point
---- stack:  stack with binary image (only use with 0/1)
++++ small holes in a binary image. Brick entry point
+--- brick:  brick with binary image (only use with 0/1)
 --- b:      band
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int majorfill(stack_t *stack, int b){
+int majorfill(brick_t *brick, int b){
 small *image = NULL;
 int nx, ny;
 
-  if ((image = get_band_small(stack, b)) == NULL) return FAILURE;
+  if ((image = get_band_small(brick, b)) == NULL) return FAILURE;
 
-  nx = get_stack_ncols(stack);
-  ny = get_stack_nrows(stack);
+  nx = get_brick_ncols(brick);
+  ny = get_brick_nrows(brick);
 
   return majorfill_(image, nx, ny);
 }
@@ -277,19 +279,19 @@ int i, j, ii, jj, ni, nj, p, k;
 
 
 /** This function computes the distance transformation, i.e. the pixel 
-+++ distance of any FALSE cell to its next TRUE cell. Stack entry point
---- stack:  stack with binary image (only use with 0/1)
++++ distance of any FALSE cell to its next TRUE cell. Brick entry point
+--- brick:  brick with binary image (only use with 0/1)
 --- b:      band
 +++ Return: distance transformed image
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ushort *dist_transform(stack_t *stack, int b){
+ushort *dist_transform(brick_t *brick, int b){
 small *image = NULL;
 int nx, ny;
 
-  if ((image = get_band_small(stack, b)) == NULL) return NULL;
+  if ((image = get_band_small(brick, b)) == NULL) return NULL;
 
-  nx = get_stack_ncols(stack);
-  ny = get_stack_nrows(stack);
+  nx = get_brick_ncols(brick);
+  ny = get_brick_nrows(brick);
 
   return dist_transform_(image, nx, ny);
 }
@@ -431,28 +433,28 @@ int sep;
 
 /** This function performs connected components labeling, i.e. it segments
 +++ all 8-connected TRUE patches. A unique ID is given to each segment, 
-+++ starting at top-left. Stack entry point
---- stack:  stack with binary image (only use with 0/1)
++++ starting at top-left. Brick entry point
+--- brick:  brick with binary image (only use with 0/1)
 --- b:              band of binary image
---- b_stack:        stack that CCL should go to
---- b_segmentation: band of stack that holds CCL
+--- b_brick:        brick that CCL should go to
+--- b_segmentation: band of brick that holds CCL
 +++ Return:         number of segments
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int connectedcomponents(stack_t *stack, int b_stack, stack_t *segmentation, int b_segmentation){
-small *stack_        = NULL;
+int connectedcomponents(brick_t *brick, int b_brick, brick_t *segmentation, int b_segmentation){
+small *brick_        = NULL;
 int   *segmentation_ = NULL;
 int nx, ny;
 
-  if ((stack_        = get_band_small(stack,      b_stack))        == NULL) return -1;
+  if ((brick_        = get_band_small(brick,      b_brick))        == NULL) return -1;
   if ((segmentation_ = get_band_int(segmentation, b_segmentation)) == NULL) return -1;
 
-  nx = get_stack_ncols(stack);
-  ny = get_stack_nrows(stack);
+  nx = get_brick_ncols(brick);
+  ny = get_brick_nrows(brick);
 
-  if (nx != get_stack_ncols(segmentation)) return -1;
-  if (ny != get_stack_nrows(segmentation)) return -1;
+  if (nx != get_brick_ncols(segmentation)) return -1;
+  if (ny != get_brick_nrows(segmentation)) return -1;
 
-  return connectedcomponents_(stack_, segmentation_, nx, ny);
+  return connectedcomponents_(brick_, segmentation_, nx, ny);
 }
 
 
@@ -684,14 +686,14 @@ int id, nc, p, no;
 
 /** Fast hybrid greyscale reconstruction algorithm
 +++ This function is an efficient implementation of a greyscale flood-fill
-+++ procesure. Stack entry point
---- mask:     stack with mask image
++++ procesure. Brick entry point
+--- mask:     brick with mask image
 --- b_mask:   band of mask image
---- marker:   stack with marker image
+--- marker:   brick with marker image
 --- b_marker: band of marker image
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int greyscale_reconstruction(stack_t *mask, int b_mask, stack_t *marker, int b_marker){
+int greyscale_reconstruction(brick_t *mask, int b_mask, brick_t *marker, int b_marker){
 short *mask_   = NULL;
 short *marker_ = NULL;
 int nx, ny;
@@ -699,11 +701,11 @@ int nx, ny;
   if ((mask_   = get_band_short(mask,   b_mask))   == NULL) return FAILURE;
   if ((marker_ = get_band_short(marker, b_marker)) == NULL) return FAILURE;
 
-  nx = get_stack_ncols(mask);
-  ny = get_stack_nrows(mask);
+  nx = get_brick_ncols(mask);
+  ny = get_brick_nrows(mask);
 
-  if (nx != get_stack_ncols(marker)) return FAILURE;
-  if (ny != get_stack_nrows(marker)) return FAILURE;
+  if (nx != get_brick_ncols(marker)) return FAILURE;
+  if (ny != get_brick_nrows(marker)) return FAILURE;
 
   return greyscale_reconstruction_(mask_, marker_, nx, ny);
 }

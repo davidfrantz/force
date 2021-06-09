@@ -37,7 +37,7 @@ Contact: franz.schug@geo.hu-berlin.de
 
 
 // check if all needed
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/stats-cl.h"
@@ -60,9 +60,10 @@ typedef struct {
   short **std_;
   short **geo_;
   short **max_;
+  short **are_;
 } lsm_t;
 
-stack_t **landscape_metrics(ard_t *features, stack_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
+brick_t **landscape_metrics(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

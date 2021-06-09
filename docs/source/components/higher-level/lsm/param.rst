@@ -132,18 +132,23 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Double. Valid values: ]0,BLOCK_SIZE]
     | ``LSM_RADIUS = 50``
   
-
   * This parameter determines if the kernel for landscape metrics calculation is circular or squared.
     
     | *Type:* Character. Valid values: {CIRCLE,SQUARED}
     | ``LSM_KERNEL_SHAPE = CIRCLE``
+    
+  * This parameter defines the minimum size (in pixels) of an area to be considered as a patch. Patches with fewer pixels will be omitted.
+    Mind that this parameter has an effect on all metrics, inlcuding garithmetic mean, maximum value, ...
+    
+    | *Type:* Integer. Valid values: ]1,BLOCK_SIZE]
+    | ``LSM_MIN_PATCHSIZE = 3``  
  
-  * This parameter defines the type of the threshold that is used to define the foreground class (greater then, less than, equal). 
+  * This parameter defines the type of the threshold that is used to define the foreground class (greater then, greater than or equal to, less than, less than or equal to, equal to). 
     This parameter is a character list, which defines the threshold type for each feature given.
     The list needs to be as long as there are features (including bands).
     
-    | *Type:* Character list. Valid values: {GT,LT,EQ}
-    | ``LSM_THRESHOLD_TYPE = EQ LT EQ EQ GT LT EQ LT GT EQ GT EQ GT GT GT LT LT EQ GT GT GT EQ GT LT LT LT``
+    | *Type:* Character list. Valid values: {GT,GE,LT,LE,EQ}
+    | ``LSM_THRESHOLD_TYPE = EQ LT EQ EQ GT LT EQ LT GE EQ GT EQ GT GT GT LE LE EQ GT GT GT EQ GE LT LT LT``
 
   * This parameter defines the threshold. 
     All pixels that are greater than, lower than or equal to this threshold are defined as foreground class (in dependence of LSM_THRESHOLD_TYPE). 
@@ -162,10 +167,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
   
   * Which Landscape Metrics should be computed? There will be one LSM output file for each metric with as many bands as there are features (in the same order).
     Currently available metrics are unique patch ID, weighted mean patch area, weighted mean fractal dimension index, edge density, number of patches and effective mesh size.
-    Additionally, arithmetic mean, geometric mean, standard deviation and maximum value within the kernel are available.
+    Additionally, arithmetic mean, geometric mean, standard deviation, maximum value and the area of the foreground class within the kernel are available.
     
-    | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX}
-    | ``LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX``
+    | *Type:* Character list. Valid values: {UCI,MPA,FDI,WED,NBR,EMS,AVG,GEO,STD,MAX,ARE}
+    | ``LSM = UCI MPA FDI WED NBR EMS AVG GEO STD MAX ARE``
 
   * This parameter defines the basename for the output files. 
     The basename will be appended by Module ID, product ID, and the file extension.

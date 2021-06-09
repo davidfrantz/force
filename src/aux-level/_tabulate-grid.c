@@ -29,6 +29,9 @@ cessing grid + the bounding box of each tile in projected coordinates
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cube-cl.h"
@@ -40,9 +43,124 @@ cessing grid + the bounding box of each tile in projected coordinates
 #include "ogr_api.h"        // OGR geometry and feature definition
 
 
-int main( int argc, char *argv[] ){
-char *dir = NULL;
-char *format = NULL;
+enum { _bottom_, _top_, _left_, _right_ };
+enum { _ll_, _lr_, _ul_, _ur_ };
+
+
+typedef struct {
+  int n;
+  double bbox[4]; // bottom,top,left,right
+  char dcube[NPOW_10];
+  char format[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] [-b bottom,top,left,right] [-f format] datacube-dir\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  -b bottom,top,left,right  = bounding box\n");
+  printf("     use geographic coordinates! 4 comma-separated numbers\n");
+  printf("\n");
+  printf("  -f format  = output format: shp or kml (default)\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'datacube-dir': directory of existing datacube\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+char buffer[NPOW_10];
+char *ptr = NULL;
+const char *separator = "/,";
+int i;
+
+
+  opterr = 0;
+
+  // default parameters
+  args->bbox[_bottom_] =  -90;
+  args->bbox[_top_]    =   90;
+  args->bbox[_left_]   = -180;
+  args->bbox[_right_]  =  180;
+  copy_string(args->format, NPOW_10, "kml");
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvit:b:f:")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Extract the data cube grid to shapefile\n");
+        exit(SUCCESS);
+      case 'b':
+        copy_string(buffer, NPOW_10, optarg);
+        ptr = strtok(buffer, separator);
+        i = 0;
+        while (ptr != NULL){
+          if (i < 4) args->bbox[i] = atof(ptr);
+          ptr = strtok(NULL, separator);
+          i++;
+        }
+        if (i != 4){
+          fprintf(stderr, "Bounding box must have 4 numbers.\n");
+          usage(argv[0], FAILURE);
+        } 
+        break;
+      case 'f':
+        copy_string(args->format, NPOW_10, optarg);
+        break;
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  args->n = 1;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->dcube, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
+int main(int argc, char *argv[]){
+args_t args;
 char fname[NPOW_10];
 char tile_id[NPOW_10];
 int nchar;
@@ -60,48 +178,41 @@ coord_t geo[4], map[4], min, max, tile;
 cube_t *cube = NULL;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 7){ printf("usage: %s datacube bottom top left right format\n\n", argv[0]); 
-                  printf("             bottom top left right in geographic coordinates\n");
-                  printf("             format: shp or kml\n\n");
-                  return FAILURE;}
-
+  parse_args(argc, argv, &args);
 
   OGRRegisterAll();
 
-  // get command line parameters
-  dir      = argv[1];
-  geo[0].x = atof(argv[4]); geo[0].y = atof(argv[2]); // LL
-  geo[1].x = atof(argv[5]); geo[1].y = atof(argv[2]); // LR
-  geo[2].x = atof(argv[4]); geo[2].y = atof(argv[3]); // UL
-  geo[3].x = atof(argv[5]); geo[3].y = atof(argv[3]); // UR
-  format   = argv[6];
+  // get geographic coords
+  geo[_ll_].x = args.bbox[_left_];  geo[_ll_].y = args.bbox[_bottom_];
+  geo[_lr_].x = args.bbox[_right_]; geo[_lr_].y = args.bbox[_bottom_];
+  geo[_ul_].x = args.bbox[_left_];  geo[_ul_].y = args.bbox[_top_];
+  geo[_ur_].x = args.bbox[_right_]; geo[_ur_].y = args.bbox[_top_];
   min.x = INT_MAX; min.y = INT_MAX; max.x = INT_MIN; max.y = INT_MIN; 
 
 
   // get driver
-  if (strcmp(format, "shp") == 0){
+  if (strcmp(args.format, "shp") == 0){
     if ((driver = OGRGetDriverByName("ESRI Shapefile")) == NULL){
-      printf("%s driver is not available\n", format); return FAILURE;}
-  } else if (strcmp(format, "kml") == 0){
+      fprintf(stderr, "%s driver is not available.\n", args.format); usage(argv[0], FAILURE);}
+  } else if (strcmp(args.format, "kml") == 0){
     if ((driver = OGRGetDriverByName("KML")) == NULL){
-      printf("%s driver is not available\n", format); return FAILURE;}
+      fprintf(stderr, "%s driver is not available.\n", args.format); usage(argv[0], FAILURE);}
   } else {
-      printf("unknown format %s, use shp or kml\n", format); return FAILURE;
+      fprintf(stderr, "Unknown format %s.\n", args.format); usage(argv[0], FAILURE);
   }
 
   // read datacube definition
-  if ((cube = read_datacube_def(dir)) == NULL){
-    printf("Reading datacube definition failed.\n"); return FAILURE;}
+  if ((cube = read_datacube_def(args.dcube)) == NULL){
+    fprintf(stderr, "Reading datacube definition failed.\n"); usage(argv[0], FAILURE);}
   wkt = cube->proj;
 
   // Output name
-  nchar = snprintf(fname, NPOW_10, "%s/%s", dir, format);
+  nchar = snprintf(fname, NPOW_10, "%s/%s", args.dcube, args.format);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
   if (fileexist(fname)){
-    printf("Grid already exists: %s.\n", fname); return FAILURE;}
+    fprintf(stderr, "Grid already exists: %s.\n", fname); usage(argv[0], FAILURE);}
 
   // get border coordinates in target css coordinates
   for (c=0; c<4; c++){

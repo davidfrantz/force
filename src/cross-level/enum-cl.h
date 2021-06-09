@@ -47,7 +47,7 @@ typedef struct{
 } tagged_enum_t;
 
 // function return codes
-enum { SUCCESS = 0, FAILURE = -1, CANCEL = 1 };
+enum { SUCCESS = 0, FAILURE = 1, CANCEL = 10 };
 
 
 // dimensions
@@ -57,9 +57,9 @@ enum { _X_, _Y_, _Z_ };
 enum { _MIN_, _MAX_ };
 
 // modules
-enum { _LL_LEVEL2_, _HL_BAP_,    _HL_TSA_, _HL_CSO_, _HL_CFI_, 
-       _HL_L2I_,    _HL_ML_,     _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _HL_LIB_,    _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
+       _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
+       _HL_LIB_,    _HL_UDF_, _AUX_TRAIN_, _AUX_SYNTHMIX_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
@@ -120,12 +120,14 @@ enum { OPEN_FALSE,   // do not write
 enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_SEN2A_, 
        _SEN_SEN2B_, _SEN_sen2a_, _SEN_sen2b_, _SEN_LNDLG_, _SEN_SEN2L_, 
        _SEN_SEN2H_, _SEN_RGB_,   _SEN_S1AIA_, _SEN_S1AID_, _SEN_S1BIA_,
-       _SEN_S1BID_, _SEN_VVVHP_, _SEN_LENGTH_ };
+       _SEN_S1BID_, _SEN_VVVHP_, _SEN_MOD01_, _SEN_MOD02_, _SEN_MODIS_,
+       _SEN_LENGTH_ };
 
 // wavelength domains
-enum { _WVL_BLUE_, _WVL_GREEN_, _WVL_RED_,  _WVL_REDEDGE1_, _WVL_REDEDGE2_, _WVL_REDEDGE3_, 
-       _WVL_BNIR_, _WVL_NIR_,   _WVL_SWIR1_, _WVL_SWIR2_,   _WVL_VV_,       _WVL_VH_, 
-       _WVL_LENGTH_ };
+enum { _WVL_BLUE_,     _WVL_GREEN_,    _WVL_RED_,   _WVL_REDEDGE1_, 
+       _WVL_REDEDGE2_, _WVL_REDEDGE3_, _WVL_BNIR_,  _WVL_NIR_, 
+       _WVL_SWIR0_,    _WVL_SWIR1_,    _WVL_SWIR2_, _WVL_VV_, 
+       _WVL_VH_,       _WVL_LENGTH_ };
 
 // AOD target types
 enum { _AOD_WAT_, _AOD_SHD_, _AOD_VEG_ };
@@ -152,7 +154,10 @@ enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_,
        _IDX_RE1_, _IDX_RE2_, _IDX_RE3_, _IDX_BNR_, _IDX_NDV_, _IDX_EVI_, 
        _IDX_NBR_, _IDX_ARV_, _IDX_SAV_, _IDX_SRV_, _IDX_TCB_, _IDX_TCG_, 
        _IDX_TCW_, _IDX_TCD_, _IDX_NDB_, _IDX_NDW_, _IDX_MNW_, _IDX_NDS_,
-       _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_LENGTH_};
+       _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_SW0_,
+       _IDX_KNV_, _IDX_ND1_, _IDX_ND2_, _IDX_CRE_, _IDX_NR1_, _IDX_NR2_,
+       _IDX_NR3_, _IDX_N1n_, _IDX_N2n_, _IDX_N3n_, _IDX_Mre_, _IDX_Mrn_,
+       _IDX_LENGTH_};
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
@@ -189,13 +194,22 @@ enum { _LSP_DEM_, _LSP_DSS_, _LSP_DRI_, _LSP_DPS_, _LSP_DFI_, _LSP_DES_,
        _LSP_VPS_, _LSP_VFI_, _LSP_VES_, _LSP_VLM_, _LSP_VBL_, _LSP_VSA_, 
        _LSP_IST_, _LSP_IBL_, _LSP_IBT_, _LSP_IGS_, _LSP_RAR_, _LSP_RAF_, 
        _LSP_RMR_, _LSP_RMF_, _LSP_LENGTH_ };
-       
+
+// polar metrics
+enum { _POL_DEM_, _POL_DLM_, _POL_DPS_, _POL_DSS_, _POL_DMS_, _POL_DES_, 
+       _POL_DEV_, _POL_DAV_, _POL_DLV_, _POL_LTS_, _POL_LGS_, _POL_LGV_, 
+       _POL_VEM_, _POL_VLM_, _POL_VPS_, _POL_VSS_, _POL_VMS_, _POL_VES_, 
+       _POL_VEV_, _POL_VAV_, _POL_VLV_, _POL_VBL_, _POL_VGA_, _POL_VSA_, 
+       _POL_VPA_, _POL_VGM_, _POL_VGV_, _POL_DPY_, _POL_DPV_, _POL_IST_, 
+       _POL_IBL_, _POL_IBT_, _POL_IGS_, _POL_IRR_, _POL_IFR_, _POL_RAR_, 
+       _POL_RAF_, _POL_RMR_, _POL_RMF_, _POL_LENGTH_ };
+
 // folding
 enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGTH_ };
 
 // time series parts
 enum { _PART_TOTAL_, _PART_BEFORE_, _PART_AFTER_, _PART_LENGTH_ };
- 
+
 // trend
 enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
        _TRD_GAIN_, _TRD_RSQ_,    _TRD_SIG_,
@@ -203,7 +217,8 @@ enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
        _TRD_NUM_,  _TRD_LENGTH_ };
        
 // change, aftereffect, trend
-enum { _CAT_CHANGE_,       _CAT_YEAR_,
+enum { _CAT_CHANGE_,       _CAT_LOSS_, 
+       _CAT_YEAR_,
        _CAT_TOTAL_MEAN_,   _CAT_TOTAL_OFFSET_,
        _CAT_TOTAL_SLOPE_,  _CAT_TOTAL_GAIN_,
        _CAT_TOTAL_RSQ_,    _CAT_TOTAL_SIG_,
@@ -227,10 +242,10 @@ enum { _TXT_ERO_, _TXT_DIL_, _TXT_OPN_, _TXT_CLS_,
        
 // landscape metrics
 enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_, 
-       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_LENGTH_ };
+       _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_ARE_, _LSM_LENGTH_ };
 
 // satellite mission
-enum { LANDSAT, SENTINEL2 };
+enum { LANDSAT, SENTINEL2, _MISSION_LENGTH_ };
 
 // sun/view angles
 enum { ZEN, AZI, cZEN, cAZI, sZEN, sAZI, tZEN, tAZI };
@@ -242,7 +257,7 @@ enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, _RESAMPLE_LENGTH_ };
 enum { _RES_MERGE_NONE_, _RES_MERGE_REGRESSION_, _RES_MERGE_IMPROPHE_, _RES_MERGE_STARFM_, _RES_MERGE_LENGTH_ };
 
 // query type
-enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_LT_, _QUERY_LENGTH_ };
+enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_GE_, _QUERY_LT_, _QUERY_LE_, _QUERY_LENGTH_ };
 
 // kernel type
 enum { _KERNEL_SQUARE_, _KERNEL_CIRCLE_, _KERNEL_LENGTH_ };
@@ -253,6 +268,9 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 
 // clock type
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
+
+// user-defined function type
+enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
@@ -265,6 +283,7 @@ extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_LSP_[_LSP_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_POL_[_POL_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STD_[_STD_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_ML_[_ML_LENGTH_];
@@ -277,6 +296,7 @@ extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 
 #ifdef __cplusplus
 }

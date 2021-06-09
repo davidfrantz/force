@@ -28,21 +28,77 @@ This program is the general entry point to FORCE
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 
 
+void usage(char *exe, int exit_code){
 
-int main ( int argc, char *argv[] ){
+
+  printf("Usage: %s [-h] [-v] [-i]\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[]){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Entrypoint, print short disclaimer, available modules etc.\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  if (optind < argc){
+    konami_args(argv[optind]);
+    fprintf(stderr, "Unknown non-optional parameter.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
+int main (int argc, char *argv[]){
 char user[NPOW_10];
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  parse_args(argc, argv);
 
-  if (getlogin_r(user, NPOW_10) != 0){
-    strncpy(user, "user", 4); user[4] = '\0';}
+  if (getlogin_r(user, NPOW_10) != 0) copy_string(user, NPOW_10, "user");
 
   printf("\n##########################################################################\n");
 
@@ -50,11 +106,9 @@ char user[NPOW_10];
          user, _VERSION_);
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
-  printf("Copyright (C) 2013-2020 David Frantz, "
+  printf("Copyright (C) 2013-2021 David Frantz, "
          "david.frantz@geo.hu-berlin.de\n");
-         
-  printf("With active code contributions from\n");
-  printf("  Franz Schug, franz.schug@geo.hu-berlin.de\n");
+  printf("+ many community contributions.\n");
 
   printf("\nFORCE is free software under the terms of the "
          "GNU General Public License as published by the "
@@ -84,20 +138,28 @@ char user[NPOW_10];
          "This list is based on the specific parameterization "
          "you are using.\n");
   
-  printf("\nThe documentation is available at force-eo.readthedocs.io\n");
-
-  printf("\nTutorials are available at davidfrantz.github.io/tutorials\n");
+  printf("\nThe documentation and tutorials are available at force-eo.readthedocs.io\n");
 
   printf("\nFORCE consists of several components:\n"
+         "\nLevel 1 Archiving System (L1AS)\n"
+         "+ force-level1-csd       Download from cloud storage + maintenance of Level 1 "
+         "Landsat and Sentinel-2 data pool\n"
          "+ force-level1-landsat   Maintenance of Level 1 Landsat "
-         "data pool\n"
-         "+ force-level1-sentinel2 Download + maintenance of Level 1 "
-         "Sentinel-2 data pool\n"
-         "+ force-parameter        Generation of parameter files\n"
+         "data pool (deprecated)\n"
+         "+ force-level1-sentinel2 Download from ESA + maintenance of Level 1 "
+         "Sentinel-2 data pool (deprecated)\n"
+         "\nLevel 2 Processing System (L2PS)\n"
          "+ force-level2           Level 2 processing of image archive\n"
          "+ force-l2ps             Level 2 processing of single image\n"
+         "\nWater Vapor Database (WVDB)\n"
+         "+ force-lut-modis        Generation and maintenance of water vapor database "
+         "using MODIS products\n"
+         "\nHigher Level Processing System (HLPS)\n"
          "+ force-higher-level     Higher level processing (compositing, "
          "time series analysis, ...)\n"
+         "\nAuxiliary (AUX)\n"
+         "+ force-parameter        Generation of parameter files\n"
+         "+ force-magic-parameters Replace variables in parameter file with vectors\n"
          "+ force-train            Training (and validation) of Machine "
          "Learning models\n"
          "+ force-synthmix         Synthetic Mixing of training data\n"
@@ -111,7 +173,9 @@ char user[NPOW_10];
          "cube format\n"
          "+ force-procmask         Processing masks from raster images\n"
          "+ force-pyramid          Generation of image pyramids\n"
-         "+ force-mosaic           Mosaicking of image chips\n");
+         "+ force-mosaic           Mosaicking of image chips\n"
+         "+ force-stack            Stack images, works with 4D data model\n"
+         "+ force-mdcp             Copy FORCE metadata from one file to another\n");
 
   printf("\n##########################################################################\n\n");
 

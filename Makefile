@@ -31,6 +31,8 @@ GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
 GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
+PYTHON != python3-config --includes 
+PYTHON2 != python3-config --ldflags
 #SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
 
 # Linked libs
@@ -39,9 +41,40 @@ LDGSL=-lgsl -lgslcblas
 #LDSPLITS=-lsplits -larmadillo
 LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
 LDCURL=-lcurl
+LDPYTHON != (python3-config --libs --embed || python3-config --libs) | tail -n 1
 
 # NO! changes below this line (unless you know what to do, then go ahead)
 ##########################################################################
+
+### DEPENDENCIES
+
+EXECUTABLES = gcc g++ \
+              parallel \
+              gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
+              gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
+              gdal_edit.py gdal_calc.py gdal-config \
+              ogrinfo ogr2ogr \
+              gsl-config curl-config \
+              unzip tar lockfile-create lockfile-remove rename \
+              python3 pip3 \
+			  R \
+              opencv_version 
+
+OK := $(foreach exec,$(EXECUTABLES),\
+        $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
+
+
+### EXECUTABLES AND MISC FILES TO BE CHECKED
+
+FORCE_EXE = force force-cube force-higher-level force-import-modis \
+            force-l2ps force-l2ps_ force-level1-csd force-level1-landsat \
+            force-level1-sentinel2 force-level2 force-lut-modis \
+            force-magic-parameters force-mdcp force-mosaic force-parameter \
+            force-procmask force-pyramid force-qai-inflate force-stack \
+            force-synthmix force-tabulate-grid force-tile-extent \
+            force-tile-finder force-train force-level2-report
+
+FORCE_MISC = force-level2-report.Rmd
 
 
 ### COMPILER
@@ -58,11 +91,14 @@ CFLAGS=-O3 -Wall -fopenmp
 
 DB=bash
 DP=python
+DR=rstats
+DM=force-misc
 DC=src/cross-level
 DL=src/lower-level
 DH=src/higher-level
 DA=src/aux-level
 TB=temp-bin
+TM=$(TB)/$(DM)
 TC=temp-cross
 TL=temp-lower
 TH=temp-higher
@@ -72,21 +108,23 @@ TA=temp-aux
 ### TARGETS
 
 all: temp cross lower higher aux exe
-cross: enum_cl cite_cl utils_cl alloc_cl stack_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
+cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
-higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl
+higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl udf_hl
 aux: param_aux param_train_aux train_aux
-exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack
-.PHONY: temp all install install_ bash python clean build
-
+exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis
+.PHONY: temp all install install_ bash python clean build check
 
 ### TEMP
 
 temp:
-	mkdir -p $(TB) $(TC) $(TL) $(TH) $(TA)
+	mkdir -p $(TB) $(TM) $(TC) $(TL) $(TH) $(TA)
 
 
 ### CROSS LEVEL COMPILE UNITS
+
+string_cl: temp $(DC)/string-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/string-cl.c -o $(TC)/string_cl.o
 
 enum_cl: temp $(DC)/enum-cl.c
 	$(GCC) $(CFLAGS) -c $(DC)/enum-cl.c -o $(TC)/enum_cl.o
@@ -100,8 +138,8 @@ utils_cl: temp $(DC)/utils-cl.c
 alloc_cl: temp $(DC)/alloc-cl.c
 	$(GCC) $(CFLAGS) -c $(DC)/alloc-cl.c -o $(TC)/alloc_cl.o
 
-stack_cl: temp $(DC)/stack-cl.c
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/stack-cl.c -o $(TC)/stack_cl.o $(LDGDAL)
+brick_cl: temp $(DC)/brick-cl.c
+	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/brick-cl.c -o $(TC)/brick_cl.o $(LDGDAL)
 
 imagefuns_cl: temp $(DC)/imagefuns-cl.c
 	$(GCC) $(CFLAGS) -c $(DC)/imagefuns-cl.c -o $(TC)/imagefuns_cl.o
@@ -266,6 +304,9 @@ standardize_hl: temp $(DH)/standardize-hl.c
 pheno_hl: temp $(DH)/pheno-hl.cpp
 	$(GPP) $(CFLAGS) $(SPLITS) -c $(DH)/pheno-hl.cpp -o $(TH)/pheno_hl.o $(LDSPLITS)
 
+polar_hl: temp $(DH)/polar-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/polar-hl.c -o $(TH)/polar_hl.o
+
 trend_hl: temp $(DH)/trend-hl.c
 	$(GCC) $(CFLAGS) -c $(DH)/trend-hl.c -o $(TH)/trend_hl.o
  
@@ -304,7 +345,16 @@ cfimp_hl: temp $(DH)/cf-improphe-hl.c
  
 l2imp_hl: temp $(DH)/l2-improphe-hl.c
 	$(GCC) $(CFLAGS) -c $(DH)/l2-improphe-hl.c -o $(TH)/l2imp_hl.o
- 
+  
+spec-adjust_hl: temp $(DH)/spec-adjust-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/spec-adjust-hl.c -o $(TH)/spec-adjust_hl.o
+
+pyp_hl: temp $(DH)/py-udf-hl.c
+	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-udf-hl.c -o $(TH)/pyp_hl.o $(LDPYTHON)
+
+udf_hl: temp $(DH)/udf-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/udf-hl.c -o $(TH)/udf_hl.o
+
 
 ### AUX COMPILE UNITS
 
@@ -336,13 +386,13 @@ force-train: temp cross aux $(DA)/_train.cpp
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) -o $(TB)/force-train $(DA)/_train.cpp $(TC)/*.o $(TA)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV)
  
 force-qai-inflate: temp cross higher $(DA)/_quality-inflate.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/force-qai-inflate $(DA)/_quality-inflate.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) -o $(TB)/force-qai-inflate $(DA)/_quality-inflate.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON)
  
 force-l2ps: temp cross lower $(DL)/_level2.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-l2ps $(DL)/_level2.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 force-higher-level: temp cross higher $(DH)/_higher-level.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON)
 
 force-lut-modis: temp cross lower $(DL)/_lut-modis.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-lut-modis $(DL)/_lut-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
@@ -353,9 +403,12 @@ force-mdcp: temp cross $(DA)/_md_copy.c
 force-stack: temp cross $(DA)/_stack.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stack $(DA)/_stack.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
+force-import-modis: temp cross lower $(DL)/_import-modis.c
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-import-modis $(DL)/_import-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+
 ### dummy code for testing stuff  
 
-dummy: temp cross aux src/dummy.c
+dummy: temp cross aux higher src/dummy.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV)
 
   
@@ -363,14 +416,25 @@ dummy: temp cross aux src/dummy.c
 
 install_:
 	chmod 0755 $(TB)/*
-	cp $(TB)/* $(BINDIR)
+	cp -a $(TB)/. $(BINDIR)
 
 clean:
 	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA) 
 
+check:
+	$(foreach exec,$(FORCE_EXE),\
+      $(if $(shell which $(BINDIR)/$(exec)), \
+	    $(info $(exec) installed), \
+		$(error $(exec) was not installed properly!))) 
+	$(foreach misc,$(FORCE_MISC),\
+      $(if $(shell ls $(BINDIR)/$(DM)/$(misc) 2> /dev/null), \
+	    $(info $(misc) installed), \
+		$(error $(misc) was not installed properly!)))
+
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
 	cp $(DB)/force-l2ps_.sh $(TB)/force-l2ps_
+	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
 	cp $(DB)/force-level1-landsat.sh $(TB)/force-level1-landsat
 	cp $(DB)/force-level1-sentinel2.sh $(TB)/force-level1-sentinel2
 	cp $(DB)/force-level2.sh $(TB)/force-level2
@@ -379,12 +443,15 @@ bash: temp
 	cp $(DB)/force-procmask.sh $(TB)/force-procmask
 	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
 	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
-	sed -i 's+BINDIR=???+BINDIR=$(BINDIR)+g' $(TB)/force-level2
+	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
 
 python: temp
 	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
 
-install: bash python install_ clean
+rstats: temp
+	cp $(DR)/force-level2-report.Rmd $(TM)/force-level2-report.Rmd
+
+install: bash python rstats install_ clean check
 
 build:
 	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))

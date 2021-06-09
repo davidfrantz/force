@@ -16,7 +16,7 @@ The water vapor database may be generated/updated with force-lut-modis, which au
   
 .. seealso::
   
-  An application-ready global water vapor database (daily values for 2000–July 2018 + monthly climatology) can be downloaded from `PANGAEA <https://doi.org/10.1594/PANGAEA.893109>`_.
+  An application-ready global water vapor database (daily values for 2000–2020 + monthly climatology) can be downloaded from `Zenodo <https://doi.org/10.5281/zenodo.4468700>`_.
 
 .. seealso:: 
 

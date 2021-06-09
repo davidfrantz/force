@@ -327,8 +327,8 @@ short **seasonal_avg_ = NULL;
 
         if (!ard[t].msk[p]) continue;
 
-        year = get_stack_year(ard[t].DAT, 0);
-        doy  = get_stack_doy(ard[t].DAT,  0);
+        year = get_brick_year(ard[t].DAT, 0);
+        doy  = get_brick_doy(ard[t].DAT,  0);
 
         // get seasonal window
         for (w=0, ok=false; w<nwin; w++){

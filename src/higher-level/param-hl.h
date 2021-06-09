@@ -34,6 +34,7 @@ Higher Level Processing paramater header
 #include <float.h>   // macro constants of the floating-point library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
 
 
@@ -76,6 +77,8 @@ typedef struct {
   char **sensor;
   char   target[NPOW_10];
 
+  int spec_adjust; // spectral band adjustment to S2A?
+
   int blue;
   int green;
   int red;
@@ -84,6 +87,7 @@ typedef struct {
   int rededge3;
   int bnir;
   int nir;
+  int swir0;
   int swir1;
   int swir2;
   int vv;
@@ -190,21 +194,54 @@ typedef struct {
   int ospl;       // flag: output spline fit
   int olsp;       // flag: output LSP metrics
   int *metrics, nmetrics;
-  int odem, odss, odri, odps, odfi, odes;
-  int odlm, olts, olgs, ovem, ovss, ovri;;
-  int ovps, ovfi, oves, ovlm, ovbl, ovsa;
-  int oist, oibl, oibt, oigs, orar, oraf;
-  int ormr, ormf;
+  int use[_LSP_LENGTH_];
+  //int odem, odss, odri, odps, odfi, odes;
+  //int odlm, olts, olgs, ovem, ovss, ovri;;
+  //int ovps, ovfi, oves, ovlm, ovbl, ovsa;
+  //int oist, oibl, oibt, oigs, orar, oraf;
+  //int ormr, ormf;
   int otrd;       // flag: output LSP trends
   int ocat;       // flag: output LSP cats
   int standard;
 } par_lsp_t;
+
+// polar metrics
+typedef struct {
+  int ny;
+  int ns;
+  float start;
+  float mid;
+  float end;
+  int opct;       // flag: output polar coordinate transformed TS
+  int opol;       // flag: output polar metrics
+  int *metrics, nmetrics;
+  int use[_POL_LENGTH_];
+  //int odem, odss, odev, odms, odav, odlv;
+  //int odes, odlm, olts, olgs, olgv, ovem;
+  //int ovss, ovev, ovms, ovav, ovlv, oves;
+  //int ovlm, ovbl, ovsa, ovga, ovgv, odpy;
+  //int odpv;
+  int otrd;       // flag: output POL trends
+  int ocat;       // flag: output POL cats
+  int standard;
+  int adaptive;
+} par_pol_t;
 
 // trend
 typedef struct {
   int tail;           // tail type
   float conf;         // confidence level
 } par_trd_t;
+
+// user-defined function
+typedef struct {
+  char   *f_code;
+  int     out;
+  int     nb;
+  char  **bandname;
+  date_t *date;
+  int     type;
+} par_udf_t;
 
 // aggregation statistics
 typedef struct {
@@ -238,10 +275,10 @@ typedef struct {
 
 // general TSA
 typedef struct {
-  int n;                      // number of indices
+  int n;                 // number of indices
   int  *index;           // index type
   char **index_name;     // short name index type
-  int otss;           // flag: output time series stack
+  int otss;           // flag: output time series brick
   int standard;
 
   par_stm_t stm;
@@ -249,7 +286,9 @@ typedef struct {
   par_tsi_t tsi;
   par_sma_t sma;
   par_lsp_t lsp;
+  par_pol_t pol;
   par_trd_t trd;
+  par_udf_t pyp;
 } par_tsa_t;
 
 // features
@@ -318,6 +357,7 @@ typedef struct {
 // landscape metrics
 typedef struct {
   double radius;
+  int minpatchsize;
   int *query;
   int nquery;
   int *threshold;
@@ -334,6 +374,7 @@ typedef struct {
   int ostd;
   int ogeo;
   int omax;
+  int oare;
   char *base;
   int kernel;
 } par_lsm_t;
@@ -347,6 +388,12 @@ typedef struct {
   int    rescale;
   char  *base;
 } par_lib_t;
+
+// UDF plug-in
+typedef struct {
+  par_udf_t pyp;
+  par_udf_t rsp;
+} par_udp_t;
 
 // improphe core
 typedef struct {
@@ -382,7 +429,7 @@ typedef struct {
   int type;
 
   // directory variables
-  char *f_par;    // parameter file
+  char  f_par[NPOW_10];    // parameter file
   char *d_lower;  // Lower  Level directory
   char *d_higher; // Higher Level directory
   char *d_mask;   // mask directory
@@ -447,6 +494,7 @@ typedef struct {
   par_txt_t txt;
   par_lsm_t lsm;
   par_lib_t lib;
+  par_udp_t udf;
 
 } par_hl_t;
 

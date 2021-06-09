@@ -32,7 +32,8 @@ Level 1 metadata header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/string-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../lower-level/table-ll.h"
 #include "../lower-level/param-ll.h"
 
@@ -77,13 +78,13 @@ int init_metadata(meta_t *meta);
 cal_t *allocate_calibration(int nb);
 void free_calibration(cal_t *cal);
 int init_calibration(cal_t *cal);
-int check_metadata(par_ll_t *pl2, meta_t *meta, stack_t *DN);
+int check_metadata(par_ll_t *pl2, meta_t *meta, brick_t *DN);
 int print_metadata(meta_t *meta, int nb);
-int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, stack_t **dn);
-int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, stack_t **dn);
+int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, brick_t **dn);
+int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, brick_t **dn);
 void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type);
 int parse_metadata_mission(par_ll_t *pl2);
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, stack_t **DN);
+int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN);
 
 #ifdef __cplusplus
 }

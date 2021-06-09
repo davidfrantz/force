@@ -28,11 +28,11 @@ This file contains functions for CSO procesing
 #include "cso-hl.h"
 
 
-stack_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct);
-stack_t *compile_cso_stack(stack_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
+brick_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct);
+brick_t *compile_cso_brick(brick_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
 
-/** This function compiles the stacks, in which CSO results are stored. 
+/** This function compiles the bricks, in which CSO results are stored. 
 +++ It also sets metadata and sets pointers to instantly useable image 
 +++ arrays.
 --- ard:      ARD
@@ -41,11 +41,11 @@ stack_t *compile_cso_stack(stack_t *ard, int nb, bool write, char *prodname, par
 --- cube:     datacube definition
 --- nt:       number of ARD products over time
 --- nw:       number of windows for CSO
---- nproduct: number of output stacks (returned)
-+++ Return:   stacks for CSO results
+--- nproduct: number of output bricks (returned)
++++ Return:   bricks for CSO results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct){
-stack_t **CSO = NULL;
+brick_t **compile_cso(ard_t *ard, cso_t *cs, par_hl_t *phl, cube_t *cube, int nt, int nw, int *nproduct){
+brick_t **CSO = NULL;
 short nodata = SHRT_MIN;
 int w, q;
 int year, month;
@@ -59,15 +59,15 @@ int nchar;
 short ***ptr[NPOW_08];
 
 
-  if (phl->cso.sta.num > -1){ strncpy(prodname[phl->cso.sta.num], "NUM", 3); prodname[phl->cso.sta.num][3] = '\0';}
-  if (phl->cso.sta.min > -1){ strncpy(prodname[phl->cso.sta.min], "MIN", 3); prodname[phl->cso.sta.min][3] = '\0';}
-  if (phl->cso.sta.max > -1){ strncpy(prodname[phl->cso.sta.max], "MAX", 3); prodname[phl->cso.sta.max][3] = '\0';}
-  if (phl->cso.sta.rng > -1){ strncpy(prodname[phl->cso.sta.rng], "RNG", 3); prodname[phl->cso.sta.rng][3] = '\0';}
-  if (phl->cso.sta.iqr > -1){ strncpy(prodname[phl->cso.sta.iqr], "IQR", 3); prodname[phl->cso.sta.iqr][3] = '\0';}
-  if (phl->cso.sta.avg > -1){ strncpy(prodname[phl->cso.sta.avg], "AVG", 3); prodname[phl->cso.sta.avg][3] = '\0';}
-  if (phl->cso.sta.std > -1){ strncpy(prodname[phl->cso.sta.std], "STD", 3); prodname[phl->cso.sta.std][3] = '\0';}
-  if (phl->cso.sta.skw > -1){ strncpy(prodname[phl->cso.sta.skw], "SKW", 3); prodname[phl->cso.sta.skw][3] = '\0';}
-  if (phl->cso.sta.krt > -1){ strncpy(prodname[phl->cso.sta.krt], "KRT", 3); prodname[phl->cso.sta.krt][3] = '\0';}
+  if (phl->cso.sta.num > -1) copy_string(prodname[phl->cso.sta.num], NPOW_03, "NUM");
+  if (phl->cso.sta.min > -1) copy_string(prodname[phl->cso.sta.min], NPOW_03, "MIN");
+  if (phl->cso.sta.max > -1) copy_string(prodname[phl->cso.sta.max], NPOW_03, "MAX");
+  if (phl->cso.sta.rng > -1) copy_string(prodname[phl->cso.sta.rng], NPOW_03, "RNG");
+  if (phl->cso.sta.iqr > -1) copy_string(prodname[phl->cso.sta.iqr], NPOW_03, "IQR");
+  if (phl->cso.sta.avg > -1) copy_string(prodname[phl->cso.sta.avg], NPOW_03, "AVG");
+  if (phl->cso.sta.std > -1) copy_string(prodname[phl->cso.sta.std], NPOW_03, "STD");
+  if (phl->cso.sta.skw > -1) copy_string(prodname[phl->cso.sta.skw], NPOW_03, "SKW");
+  if (phl->cso.sta.krt > -1) copy_string(prodname[phl->cso.sta.krt], NPOW_03, "KRT");
   for (q=0; q<phl->cso.sta.nquantiles; q++){
     nchar = snprintf(prodname[phl->cso.sta.qxx[q]], NPOW_03, "Q%02.0f", phl->cso.sta.q[q]*100);
     if (nchar < 0 || nchar >= NPOW_03){
@@ -78,7 +78,7 @@ short ***ptr[NPOW_08];
   for (o=0; o<nprod; o++) ptr[o] = &cs->cso_[o];
 
 
-  alloc((void**)&CSO, nprod, sizeof(stack_t*));
+  alloc((void**)&CSO, nprod, sizeof(brick_t*));
 
   // alloc dates, use one additional date to have right boundary
   if (nw > 0) alloc((void**)&cs->d_cso, nw+1, sizeof(date_t)); else cs->d_cso = NULL;
@@ -87,7 +87,7 @@ short ***ptr[NPOW_08];
 
   for (o=0; o<nprod; o++){
 
-    if ((CSO[o] = compile_cso_stack(ard[0].QAI, nw, true, prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(CSO[o])) == NULL){
+    if ((CSO[o] = compile_cso_brick(ard[0].QAI, nw, true, prodname[o], phl)) == NULL || (  *ptr[o] = get_bands_short(CSO[o])) == NULL){
       printf("Error compiling %s product. ", prodname[o]); error++;
     } else {
       init_date(&date);
@@ -101,11 +101,11 @@ short ***ptr[NPOW_08];
         compact_date(date.year, date.month, date.day, fdate, NPOW_10);
 //printf("W: "); print_date(&date);
         if (w < nw){
-          set_stack_nodata(CSO[o], w, nodata);
-          set_stack_wavelength(CSO[o], w, w+1);
-          set_stack_date(CSO[o], w, date);
-          set_stack_domain(CSO[o], w, fdate);
-          set_stack_bandname(CSO[o], w, fdate);
+          set_brick_nodata(CSO[o], w, nodata);
+          set_brick_wavelength(CSO[o], w, w+1);
+          set_brick_date(CSO[o], w, date);
+          set_brick_domain(CSO[o], w, fdate);
+          set_brick_bandname(CSO[o], w, fdate);
         }
         month += phl->cso.step;
       }
@@ -116,7 +116,7 @@ short ***ptr[NPOW_08];
 
   if (error > 0){
     printf("%d compiling CSO product errors.\n", error);
-    for (o=0; o<nprod; o++) free_stack(CSO[o]);
+    for (o=0; o<nprod; o++) free_brick(CSO[o]);
     free((void*)CSO);
     if (cs->d_cso != NULL){ free((void*)cs->d_cso); cs->d_cso = NULL;}
     return NULL;
@@ -127,34 +127,34 @@ short ***ptr[NPOW_08];
 }
 
 
-/** This function compiles a CSO stack
---- from:      stack from which most attributes are copied
---- nb:        number of bands in stack
---- write:     should this stack be written, or only used internally?
+/** This function compiles a CSO brick
+--- from:      brick from which most attributes are copied
+--- nb:        number of bands in brick
+--- write:     should this brick be written, or only used internally?
 --- prodname:  product name
 --- phl:       HL parameters
-+++ Return:    stack for CSO result
++++ Return:    brick for CSO result
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t *compile_cso_stack(stack_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
+brick_t *compile_cso_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
-stack_t *stack = NULL;
+brick_t *brick = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
 int nchar;
 
 
-  if ((stack = copy_stack(from, nb, _DT_SHORT_)) == NULL) return NULL;
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
 
-  set_stack_name(stack, "FORCE Clear-Sky Observations");
-  set_stack_product(stack, prodname);
+  set_brick_name(brick, "FORCE Clear-Sky Observations");
+  set_brick_product(brick, prodname);
   
-  //printf("dirname should be assemlbed in write_stack, check with L2\n");
+  //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_stack_tilex(stack), get_stack_tiley(stack));
+    get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-  set_stack_dirname(stack, dname);
+  set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d-%02d_HL_CSO_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
@@ -162,24 +162,24 @@ int nchar;
     phl->cso.step, phl->sen.target, prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
-  set_stack_filename(stack, fname);
+  set_brick_filename(brick, fname);
   
 
   if (write){
-    set_stack_open(stack, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_BLOCK);
   } else {
-    set_stack_open(stack, OPEN_FALSE);
+    set_brick_open(brick, OPEN_FALSE);
   }
-  set_stack_format(stack, phl->format);
-  set_stack_explode(stack, phl->explode);
-  set_stack_par(stack, phl->params->log);
+  set_brick_format(brick, phl->format);
+  set_brick_explode(brick, phl->explode);
+  set_brick_par(brick, phl->params->log);
 
   for (b=0; b<nb; b++){
-    set_stack_save(stack, b, true);
-    set_stack_date(stack, b, date);
+    set_brick_save(brick, b, true);
+    set_brick_date(brick, b, date);
   }
 
-  return stack;
+  return brick;
 }
 
 
@@ -193,12 +193,12 @@ int nchar;
 --- nt:        number of ARD products over time
 --- phl:       HL parameters
 --- cube:      datacube definition
---- nproduct:  number of output stacks (returned)
-+++ Return:    stacks with CSO results
+--- nproduct:  number of output bricks (returned)
++++ Return:    bricks with CSO results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-stack_t **clear_sky_observations(ard_t *ard, stack_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct){
+brick_t **clear_sky_observations(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct){
 cso_t cs;
-stack_t **CSO;
+brick_t **CSO;
 small *mask_ = NULL;
 int o, w, k, n, q, p, nprod = 0;
 int t, t_left;
@@ -220,8 +220,8 @@ bool alloc_q_array = false;
   cite_me(_CITE_CSO_);
 
 
-  // import stacks
-  nc = get_stack_chunkncells(ard[0].QAI);
+  // import bricks
+  nc = get_brick_chunkncells(ard[0].QAI);
 
   // import mask (if available)
   if (mask != NULL){
@@ -244,7 +244,7 @@ bool alloc_q_array = false;
   //printf("nw: %d\n", nw);
 
 
-  // compile products + stacks
+  // compile products + bricks
   if ((CSO = compile_cso(ard, &cs, phl, cube, nt, nw, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile CSO products!\n"); 
     free((void*)CSO);
@@ -264,7 +264,7 @@ bool alloc_q_array = false;
 
     for (t=t_left; t<nt; t++){
 
-      ce = get_stack_ce(ard[t].QAI, 0);
+      ce = get_brick_ce(ard[t].QAI, 0);
 
       if (ce >= cs.d_cso[w].ce && ce < cs.d_cso[w+1].ce){
         if (t0[w] < 0) t0[w] = t;
@@ -320,7 +320,7 @@ bool alloc_q_array = false;
             // check nodata
             if (!ard[t].msk[p]) continue;
             
-            ce = get_stack_ce(ard[t].QAI, 0);
+            ce = get_brick_ce(ard[t].QAI, 0);
 
             // if current date is larger than previous date (incl. left window boundary),
             // include dt in stats

@@ -2,7 +2,7 @@
 
 **Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.4.0**
+**Version 3.6.5-dev**
 
 ![FORCE Logo](/images/force.png)
 
@@ -25,7 +25,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
 
 **The documentation** is available on [**Read***the***Docs**](https://force-eo.readthedocs.io/).
 
-**Learn how to use FORCE**. Have a look at my [Tutorials](https://davidfrantz.github.io/tutorials). Check regularly for new content.
+**Learn how to use FORCE**. Have a look at the [Tutorials](https://force-eo.readthedocs.io/en/latest/howto/index.html). Check regularly for new content.
 
 **Get help**, and help others in the FORCE self-help [Google group](https://groups.google.com/d/forum/force_eo)
 

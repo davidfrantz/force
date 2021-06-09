@@ -32,7 +32,7 @@ Topographic effects header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/stack-cl.h"
+#include "../cross-level/brick-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../cross-level/cite-cl.h"
@@ -46,17 +46,17 @@ extern "C" {
 #endif
 
 typedef struct {
-  stack_t *dem; // binned digital elevation model
-  stack_t *exp; // exposition (slope / aspect)
-  stack_t *ill; // illumination angle
-  stack_t *sky; // sky view factor
-  stack_t *c;   // C-factor SWIR2
+  brick_t *dem; // binned digital elevation model
+  brick_t *exp; // exposition (slope / aspect)
+  brick_t *ill; // illumination angle
+  brick_t *sky; // sky view factor
+  brick_t *c;   // C-factor SWIR2
 } top_t;
 
 void free_topography(top_t *top);
-int compile_topography(par_ll_t *pl2, atc_t *atc, top_t **topography, stack_t *QAI);
-stack_t *cfactor_topography(atc_t *atc, stack_t *TOA, stack_t *QAI, stack_t *DEM, stack_t *EXP, stack_t *ILL);
-int average_elevation_cell(int g, stack_t *CDEM, stack_t *FDEM, stack_t *QAI);
+int compile_topography(par_ll_t *pl2, atc_t *atc, top_t **topography, brick_t *QAI);
+brick_t *cfactor_topography(atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, brick_t *EXP, brick_t *ILL);
+int average_elevation_cell(int g, brick_t *CDEM, brick_t *FDEM, brick_t *QAI);
 
 #ifdef __cplusplus
 }

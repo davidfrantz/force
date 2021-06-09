@@ -28,7 +28,7 @@ This file contains functions for screening quality bit files
 #include "quality-hl.h"
 
 
-bool use_this_pixel(stack_t *qai, int p, par_qai_t *qai_rule, bool is_ard);
+bool use_this_pixel(brick_t *qai, int p, par_qai_t *qai_rule, bool is_ard);
 
 
 /** Decide whether to use this pixel
@@ -39,7 +39,7 @@ bool use_this_pixel(stack_t *qai, int p, par_qai_t *qai_rule, bool is_ard);
 --- qai_rule: ruleset for QAI filtering
 +++ Return:   true/false
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool use_this_pixel(stack_t *qai, int p, par_qai_t *qai_rule, bool is_ard){
+bool use_this_pixel(brick_t *qai, int p, par_qai_t *qai_rule, bool is_ard){
   
   if (!is_ard            && get_off(qai, p))               return false;
 
@@ -96,9 +96,9 @@ bool is_ard = false;
 
     #pragma omp for
     for (t=0; t<nt; t++){
-      if ((ard[t].MSK = copy_stack(ard[t].QAI, 1, _DT_SMALL_)) == NULL || 
+      if ((ard[t].MSK = copy_brick(ard[t].QAI, 1, _DT_SMALL_)) == NULL || 
           (ard[t].msk = get_band_small(ard[t].MSK, 0)) == NULL){
-        printf("Error compiling screened QAI stack."); error++;}
+        printf("Error compiling screened QAI brick."); error++;}
     }
 
   }
@@ -109,7 +109,7 @@ bool is_ard = false;
   }
 
 
-  nc = get_stack_chunkncells(ard[0].MSK);
+  nc = get_brick_chunkncells(ard[0].MSK);
 
   #pragma omp parallel private(t) shared(ard,nt,nc,qai_rule,is_ard) default(none)
   {
@@ -162,11 +162,11 @@ bool *removed = NULL;
   if (qai_rule->above_noise == 0 && qai_rule->below_noise == 0) return CANCEL;
   if (nt < 3) return CANCEL;
 
-  nc = get_stack_chunkncells(ard[0].MSK);
-  nodata = get_stack_nodata(ard[0].DAT, 0);
+  nc = get_brick_chunkncells(ard[0].MSK);
+  nodata = get_brick_nodata(ard[0].DAT, 0);
 
   alloc((void**)&ce, nt, sizeof(int));
-  for (t_mid=0; t_mid<nt; t_mid++) ce[t_mid] = get_stack_ce(ard[t_mid].DAT, 0);
+  for (t_mid=0; t_mid<nt; t_mid++) ce[t_mid] = get_brick_ce(ard[t_mid].DAT, 0);
 
 
   #pragma omp parallel private(t,t_mid,t_left,t_right,t_first,t_last,t_max,n,valid_left,valid_right,y_hat,maxr,t_maxr,ssqr,noise,rel_noise,removed,nout,nadd) shared(ard,nc,nt,ce,nodata,qai_rule,b) default(none)

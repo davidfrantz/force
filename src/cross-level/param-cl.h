@@ -35,6 +35,7 @@ Parsing parameter header
 #include <limits.h>  // macro constants of the integer types
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/date-cl.h"
 #include "../cross-level/dir-cl.h"

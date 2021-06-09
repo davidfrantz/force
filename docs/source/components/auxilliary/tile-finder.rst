@@ -1,3 +1,5 @@
+.. _tile-finder:
+
 Coordinate locator
 ==================
 
