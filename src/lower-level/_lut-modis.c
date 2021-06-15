@@ -52,13 +52,15 @@ typedef struct {
   char dhdf[NPOW_10];
   date_t date_start;
   date_t date_end;
+  bool daily;
+  bool climatology;
 } args_t;
 
 
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] [-d] coords-file wvp-dir geometa-dir download-dir\n", exe);
+  printf("Usage: %s [-h] [-v] [-i] [-d] [-t] [-c] coords-file wvp-dir geometa-dir download-dir\n", exe);
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");
@@ -66,6 +68,8 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  -d  = date range as YYYYMMDD,YYYYMMDD\n");
   printf("        default: 20000224,today\n");
+  printf("  -t  = build daily tables? Default: true\n");
+  printf("  -c  = build climatology? Default: true\n");
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - 'coords-file':  text file with coordinates\n");
@@ -91,9 +95,11 @@ int opt;
   args->date_start.month =  2;
   args->date_start.day   =  24;
   current_date(&args->date_end);
+  args->daily       = true;
+  args->climatology = true;
 
   // optional parameters
-  while ((opt = getopt(argc, argv, "hvid:")) != -1){
+  while ((opt = getopt(argc, argv, "hvid:t:c:")) != -1){
     switch(opt){
       case 'h':
         usage(argv[0], SUCCESS);
@@ -116,6 +122,26 @@ int opt;
         strncpy(cm, optarg+13, 2); cm[2] = '\0';
         strncpy(cd, optarg+15, 2); cd[2] = '\0';
         set_date(&args->date_end, atoi(cy), atoi(cm), atoi(cd));
+        break;
+      case 't':
+        if (strcmp(optarg, "true") == 0){
+          args->daily = true;
+        } else if (strcmp(optarg, "false") == 0){
+          args->daily = false;
+        } else {
+          fprintf(stderr, "unknown -t option (is: %s, valid: true or false)\n", optarg);
+          usage(argv[0], FAILURE);
+        }
+        break;
+      case 'c':
+        if (strcmp(optarg, "true") == 0){
+          args->climatology = true;
+        } else if (strcmp(optarg, "false") == 0){
+          args->climatology = false;
+        } else {
+          fprintf(stderr, "unknown -c option (is: %s, valid: true or false)\n", optarg);
+          usage(argv[0], FAILURE);
+        }
         break;
       case '?':
         if (isprint(optopt)){
@@ -187,117 +213,125 @@ int nchar;
   alloc_2D((void***)&SEN, nc, NPOW_02, sizeof(char));
 
 
-
   /** Step 1: daily Look-up-tables
   +++ do for each day between start and end **/
 
-  while (0 < 1){
+  if (args.daily){
 
-    printf("%4d/%02d/%02d. ", args.date_start.year, args.date_start.month, args.date_start.day); fflush(stdout);
+    while (0 < 1){
 
-    // LUT name
-    nchar = snprintf(tablename, NPOW_10, "%s/WVP_%04d-%02d-%02d.txt", args.dwvp, 
-      args.date_start.year, args.date_start.month, args.date_start.day);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+      printf("%4d/%02d/%02d. ", args.date_start.year, args.date_start.month, args.date_start.day); fflush(stdout);
 
-    // create LUT only if it doesn't exist
-    if (!fileexist(tablename)){
-      printf("do. ");
-      create_wvp_lut(args.dgeo, args.dhdf, tablename, args.date_start, nc, COO, WVP, SEN, key);
-    } else {
-      printf("LUT exists.\n");
+      // LUT name
+      nchar = snprintf(tablename, NPOW_10, "%s/WVP_%04d-%02d-%02d.txt", args.dwvp, 
+        args.date_start.year, args.date_start.month, args.date_start.day);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+
+      // create LUT only if it doesn't exist
+      if (!fileexist(tablename)){
+        printf("do. ");
+        create_wvp_lut(args.dgeo, args.dhdf, tablename, args.date_start, nc, COO, WVP, SEN, key);
+      } else {
+        printf("LUT exists.\n");
+      }
+
+      // if iterated date is end date, stop.
+      if (args.date_start.year  == args.date_end.year && 
+          args.date_start.month == args.date_end.month && 
+          args.date_start.day   == args.date_end.day) break;
+
+      // go to next day
+      //date_plus(&args.date_start, timeinfo);
+      date_plus(&args.date_start);
+
     }
 
-    // if iterated date is end date, stop.
-    if (args.date_start.year  == args.date_end.year && 
-        args.date_start.month == args.date_end.month && 
-        args.date_start.day   == args.date_end.day) break;
-
-    // go to next day
-    //date_plus(&args.date_start, timeinfo);
-    date_plus(&args.date_start);
-
   }
-
-  // monthly averages
-  printf("build climatology!\n");
-
-  //get_startdate(sy, sm, sd);
-  args.date_start.year = 2000, args.date_start.month =  2, args.date_start.day =  24;
-  current_date(&args.date_end);
-  //date_set(args.date_start, timeinfo);
-
-
-  alloc_3D((void****)&AVG, 3, 12, nc, sizeof(double));
 
 
   /** Step 2: Look-up-table climatology
   +++ do for each day between MODIS start and today **/
+  if (args.climatology){
 
-  while (0 < 1){
+    // monthly averages
+    printf("build climatology!\n");
 
-    // LUT name
-    nchar = snprintf(tablename, NPOW_10, "%s/WVP_%04d-%02d-%02d.txt", args.dwvp, 
-      args.date_start.year, args.date_start.month, args.date_start.day);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+    //get_startdate(sy, sm, sd);
+    args.date_start.year = 2000, args.date_start.month =  2, args.date_start.day =  24;
+    current_date(&args.date_end);
+    //date_set(args.date_start, timeinfo);
 
-    // sum LUT values
-    if (fileexist(tablename)){
+    alloc_3D((void****)&AVG, 3, 12, nc, sizeof(double));
 
-      // read the table
-      read_wvp_lut(tablename, nc, COO, WVP);
+    while (0 < 1){
 
-      for (c=0; c<nc; c++){
-        if (WVP[c] == 9999) continue;
-        
-        AVG[2][args.date_start.month-1][c]++;
+      // LUT name
+      nchar = snprintf(tablename, NPOW_10, "%s/WVP_%04d-%02d-%02d.txt", args.dwvp, 
+        args.date_start.year, args.date_start.month, args.date_start.day);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
-        if (AVG[2][args.date_start.month-1][c] == 1){
-          AVG[0][args.date_start.month-1][c] = WVP[c];
-        } else {
-          var_recurrence(WVP[c], &AVG[0][args.date_start.month-1][c], &AVG[1][args.date_start.month-1][c], AVG[2][args.date_start.month-1][c]);
+      // sum LUT values
+      if (fileexist(tablename)){
+
+        // read the table
+        read_wvp_lut(tablename, nc, COO, WVP);
+
+        for (c=0; c<nc; c++){
+          if (WVP[c] == 9999) continue;
+          
+          AVG[2][args.date_start.month-1][c]++;
+
+          if (AVG[2][args.date_start.month-1][c] == 1){
+            AVG[0][args.date_start.month-1][c] = WVP[c];
+          } else {
+            var_recurrence(WVP[c], &AVG[0][args.date_start.month-1][c], &AVG[1][args.date_start.month-1][c], AVG[2][args.date_start.month-1][c]);
+          }
         }
+
+      }
+
+      // if iterated date is today, stop.
+      if (args.date_start.year  == args.date_end.year && 
+          args.date_start.month == args.date_end.month && 
+          args.date_start.day   == args.date_end.day) break;
+
+      // go to next day
+      date_plus(&args.date_start);
+
+    }
+
+    // finalize stats
+    for (m=0; m<12; m++){
+    for (c=0; c<nc; c++){
+
+      if (AVG[2][m][c] < 1){
+        AVG[0][m][c] = 9999;
+      }
+
+      if (AVG[2][m][c] < 2){
+        AVG[1][m][c] = 9999;
+      } else {
+        AVG[1][m][c] = standdev(AVG[1][m][c], AVG[2][m][c]);
       }
 
     }
-
-    // if iterated date is today, stop.
-    if (args.date_start.year  == args.date_end.year && 
-        args.date_start.month == args.date_end.month && 
-        args.date_start.day   == args.date_end.day) break;
-
-    // go to next day
-    date_plus(&args.date_start);
-
-  }
-
-  // finalize stats
-  for (m=0; m<12; m++){
-  for (c=0; c<nc; c++){
-
-    if (AVG[2][m][c] < 1){
-      AVG[0][m][c] = 9999;
     }
 
-    if (AVG[2][m][c] < 2){
-      AVG[1][m][c] = 9999;
-    } else {
-      AVG[1][m][c] = standdev(AVG[1][m][c], AVG[2][m][c]);
-    }
+
+    // write climatology
+    write_avg_table(args.dwvp, nc, COO, AVG);
+
+    // free memory
+    free_3D((void***)AVG, 3, 12);
 
   }
-  }
 
-
-  // write climatology
-  write_avg_table(args.dwvp, nc, COO, AVG);
 
   // free memory
   free((void*)WVP);
   free_2D((void**)COO, 2);
-  free_3D((void***)AVG, 3, 12);
   free_2D((void**)SEN, nc);
 
   return SUCCESS;
