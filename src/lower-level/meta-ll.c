@@ -71,9 +71,10 @@ void free_metadata(meta_t *meta){
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int init_metadata(meta_t *meta){
+
   #ifdef FORCE_DEBUG
-printf("check that all meta is initialized, brick as well?\n");
-#endif
+  printf("check that all meta is initialized, brick as well?\n");
+  #endif
 
   meta->fill = SHRT_MIN;
 
@@ -280,6 +281,9 @@ int b, b_temp = 0, nb = 0, b_rsr, lid = 0, path = 0, row = 0;
 date_t date;
 GDALDatasetH fp_;
 
+  #ifdef FORCE_DEBUG
+  printf("reading Landsat metadata\n");
+  #endif
 
   // scan directory for MTL.txt file
   if (findfile(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
@@ -664,9 +668,12 @@ int svgrid = 5000;
 
   /** initialize **/
 
+  #ifdef FORCE_DEBUG
+  printf("reading Sentinel-2 metadata\n");
+  #endif
+
   meta->dtype = 16;
   meta->sat = 65535;
-
 
 
   nb = 13;
@@ -688,6 +695,10 @@ int svgrid = 5000;
     printf("Finding top-level S2 metadata file failed. ");
     return FAILURE;
   }
+
+  #ifdef FORCE_DEBUG
+  printf("top-level metadata: %s\n", metaname);
+  #endif
 
 
   // open xml
@@ -892,6 +903,9 @@ int svgrid = 5000;
     printf("Finding granule metadata file failed. "); return FAILURE;
   }
 
+  #ifdef FORCE_DEBUG
+  printf("granule-level metadata: %s\n", metaname);
+  #endif
 
   // open xml
   if ((fp = fopen(metaname, "r")) == NULL){
@@ -1306,7 +1320,7 @@ int nchar;
 /** This function identifies the satellite mission, i.e. Landsat or Senti-
 +++ nel-2
 --- pl2:    L2 parameters
-+++ Return: SUCCESS/FAILURE
++++ Return: mission
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int parse_metadata_mission(par_ll_t *pl2){
 int mission;
@@ -1320,7 +1334,7 @@ char metaname[NPOW_10];
     mission = SENTINEL2;
     pl2->res = pl2->res_sentinel2;
   } else {
-    printf("unknown Satellite Mission. "); return FAILURE;
+    printf("unknown Satellite Mission. "); return _UNKNOWN_;
   }
 
   #ifdef FORCE_DEBUG
@@ -1345,7 +1359,7 @@ meta_t *meta = NULL;
 #ifdef FORCE_DEBUG
 printf("there are still some things to do int meta. checking etc\n");
 #endif
-  if ((mission = parse_metadata_mission(pl2)) == FAILURE) return FAILURE;
+  if ((mission = parse_metadata_mission(pl2)) == _UNKNOWN_) return FAILURE;
 
   switch (mission){
     case LANDSAT:
