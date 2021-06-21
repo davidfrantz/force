@@ -211,8 +211,8 @@ double mae, rmse;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int cat(short **fld_, date_t *d_fld, small *mask_, int nc, int nf, short **cat_, short nodata, int by, bool in_ce, par_trd_t *trd){
-int p, f, f_pre, f_change, f_min[3], f_max[3], f_len[3];
-float change;
+int p, f, f_pre, f_post, f_change, f_min[3], f_max[3], f_len[3];
+float change, change_now, change_real;
 int x, b, part, sig;
 double mx, my, vx, vy, cv, k;
 double off, slp, rsq, yhat;
@@ -225,17 +225,16 @@ double mae, rmse;
   if (cat_ == NULL) return CANCEL;
 
 
-  #pragma omp parallel private(b,part,f,f_pre,f_change,f_min,f_max,f_len,change,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
+  #pragma omp parallel private(b,part,f,f_pre,f_post,f_change,f_min,f_max,f_len,change,change_now,change_real,x,mx,my,vx,vy,cv,k,ssqe,sae,sxsq,maxe,seb,mae,rmse,off,slp,rsq,yhat,e,sig) shared(mask_,fld_,d_fld,cat_,nc,nf,by,nodata,in_ce,trd) default(none)
   {
 
     #pragma omp for
     for (p=0; p<nc; p++){
 
-      if (mask_ != NULL && !mask_[p]){
-        for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
-        continue;
-      }
+      // fill with nodata
+      for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
 
+      if (mask_ != NULL && !mask_[p]) continue;
 
 
       f_change = 0;
@@ -248,20 +247,28 @@ double mae, rmse;
 
         f_pre = f-1;
         while (f_pre >= 0 && fld_[f_pre][p] == nodata) f_pre--;
-
         if (f_pre < 0 || fld_[f_pre][p] == nodata) continue;
 
-        if (fld_[f_pre][p]-fld_[f][p] > change){
-          change = fld_[f_pre][p]-fld_[f][p];
+        change_now  = change_real = (float)(fld_[f_pre][p] - fld_[f][p]);
+
+        if (change_now > 0 && trd->penalty){
+
+          f_post = f+1;
+          while (f_post < nf && fld_[f_post][p] == nodata) f_post++;
+          if (f_post >= nf || fld_[f_post][p] == nodata) continue;
+  
+          change_now *= (float)(fld_[f_pre][p] - fld_[f_post][p]) / 1e4;
+
+        }
+
+        if (change_now > change){
+          change = change_real;
           f_change = f;
         }
 
       }
 
-      if (change == SHRT_MIN){
-        for (b=0; b<_CAT_LENGTH_; b++) cat_[b][p] = nodata;
-        continue;
-      }
+      if (change == SHRT_MIN) continue;
 
 
       switch (by){
@@ -336,11 +343,12 @@ double mae, rmse;
 
         }
 
-        if (k < 3){
-          for (b=_CAT_YEAR_+1+_TRD_LENGTH_*part; b<_CAT_YEAR_+1+_TRD_LENGTH_; b++) cat_[b][p] = nodata;
-          continue;
-        }
+        if (k < 1) continue;
 
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p] = (short)my;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]  = (short)k;
+
+        if (k < 3) continue;
 
         // compute trend coefficients and R-squared
         cv = covariance(cv, k);
@@ -399,8 +407,10 @@ double mae, rmse;
         rmse = sqrt(ssqe/k);
         mae = sae/k;
 
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p]   = (short)my;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)off;
+        // offset of segment
+        linreg_predict(f_min[part], slp, off, &yhat);
+
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)yhat;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]  = (short)slp;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_GAIN_][p]   = (short)(slp*f_len[part]/off*1000);
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]    = (short)rsq;
@@ -408,13 +418,12 @@ double mae, rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RMSE_][p]   = (short)rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAE_][p]    = (short)mae;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAXE_][p]   = (short)maxe;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]    = (short)k;
 
       }
 
       // loss, i.e. change relative to total offset
       if (cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p] > 0){
-        cat_[_CAT_LOSS_][p] = (short)(cat_[_CAT_CHANGE_][p]/
+        cat_[_CAT_LOSS_][p] = (short)((float)cat_[_CAT_CHANGE_][p]/
                                       cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
                                       1000);
       } else {
