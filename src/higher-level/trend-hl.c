@@ -419,8 +419,8 @@ double mae, rmse;
 
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p]   = (short)yhat;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]    = (short)slp;
-        if (off > 0){
-           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*100);
+        if (yhat > 0){
+          cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/yhat*100);
         } else {
           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = 0;
         }
