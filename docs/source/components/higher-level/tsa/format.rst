@@ -363,17 +363,21 @@ The Trend Analysis products contains trend parameters:
 +------+-----------------------------+
 + 4    + relative change             +
 +------+-----------------------------+
-+ 4    + R-squared                   +
++ 5    + absolute change             +
 +------+-----------------------------+
-+ 5    + Significance (-1, 0, 1)     +
++ 6    + R-squared                   +
 +------+-----------------------------+
-+ 6    + Root Mean Squared Error     +
++ 7    + Significance (-1, 0, 1)     +
 +------+-----------------------------+
-+ 7    + Mean Absolute Error         +
++ 8    + Root Mean Squared Error     +
 +------+-----------------------------+
-+ 8    + Maximum Absolute Residual   +
++ 9    + Mean Absolute Error         +
 +------+-----------------------------+
-+ 9    + Number of used observations +
++ 10   + Maximum Absolute Residual   +
++------+-----------------------------+
++ 11   + Number of used observations +
++------+-----------------------------+
++ 12   + Length of time series       +
 +------+-----------------------------+
 
 
@@ -387,12 +391,14 @@ CAT detects one change per time series, splits the time series into three parts,
 +==========+====================================================================+
 + 1        + Magnitude of change                                                +
 +----------+--------------------------------------------------------------------+
-+ 2        + Time of change                                                     +
++ 2        + Relative change                                                    +
 +----------+--------------------------------------------------------------------+
-+ 3 to 12  + Trend parameters for complete time series (see Trend product)      +
++ 3        + Time of change                                                     +
 +----------+--------------------------------------------------------------------+
-+ 13 to 22 + Trend parameters for time series before change (see Trend product) +
++ 4 to 15  + Trend parameters for complete time series (see Trend product)      +
 +----------+--------------------------------------------------------------------+
-+ 23 to 32 + Trend parameters for time series after change (see Trend product)  +
++ 16 to 27 + Trend parameters for time series before change (see Trend product) +
++----------+--------------------------------------------------------------------+
++ 28 to 39 + Trend parameters for time series after change (see Trend product)  +
 +----------+--------------------------------------------------------------------+
 
