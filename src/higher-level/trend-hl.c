@@ -176,7 +176,11 @@ double mae, rmse;
       trd_[_TRD_MEAN_][p]     = (short)my;
       trd_[_TRD_OFFSET_][p]   = (short)off;
       trd_[_TRD_SLOPE_][p]    = (short)slp;
-      trd_[_TRD_PRC_GAIN_][p] = (short)(slp*nf/off*1000);
+      if (off > 0){
+         trd_[_TRD_PRC_GAIN_][p] = (short)(slp*nf/off*1000);
+      } else {
+         trd_[_TRD_PRC_GAIN_][p] = 0;
+      }
       trd_[_TRD_ABS_GAIN_][p] = (short)(slp*nf);
       trd_[_TRD_RSQ_][p]      = (short)rsq;
       trd_[_TRD_SIG_][p]      = (short)sig;
@@ -415,7 +419,11 @@ double mae, rmse;
 
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p]   = (short)yhat;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]    = (short)slp;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*1000);
+        if (off > 0){
+           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*1000);
+        } else {
+          cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = 0;
+        }
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_ABS_GAIN_][p] = (short)(slp*f_len[part]);
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]      = (short)rsq;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SIG_][p]      = (short)sig;
