@@ -141,29 +141,32 @@ const tagged_enum_t _TAGGED_ENUM_TAIL_[_TAIL_LENGTH_] = {
   { _TAIL_LEFT_, "LEFT" }, { _TAIL_TWO_, "TWO" }, { _TAIL_RIGHT_, "RIGHT" }};
 
 const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_] = {
-  { _TRD_MEAN_, "MEAN"}, { _TRD_OFFSET_, "OFFSET"}, { _TRD_SLOPE_, "SLOPE"}, 
-  { _TRD_GAIN_, "GAIN"}, { _TRD_RSQ_,    "RSQ"},    { _TRD_SIG_,   "SIG"}, 
-  { _TRD_RMSE_, "RMSE"}, { _TRD_MAE_,    "MAE"},    { _TRD_MAXE_,  "MAXRES"}, 
-  { _TRD_NUM_,  "NUM"}};
+  { _TRD_MEAN_,     "MEAN"},     { _TRD_OFFSET_,   "OFFSET"},    { _TRD_SLOPE_, "SLOPE"}, 
+  { _TRD_PRC_GAIN_, "PCT_GAIN"}, { _TRD_ABS_GAIN_, "ABS_GAIN" }, { _TRD_RSQ_,   "RSQ"}, 
+  { _TRD_SIG_,      "SIG"},      { _TRD_RMSE_,     "RMSE"},      { _TRD_MAE_,   "MAE"},
+  { _TRD_MAXE_,     "MAXRES"},   { _TRD_NUM_,      "NUM"},       { _TRD_LEN_,   "LENGTH" }};
        
 const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_] = {
-  { _CAT_CHANGE_, "CHANGE"},             { _CAT_LOSS_, "LOSS"}, 
-  { _CAT_YEAR_, "YEAR-OF-CHANGE"},
-  { _CAT_TOTAL_MEAN_, "TOTAL-MEAN"},     { _CAT_TOTAL_OFFSET_, "TOTAL-OFFSET"},
-  { _CAT_TOTAL_SLOPE_, "TOTAL-SLOPE"},   { _CAT_TOTAL_GAIN_, "TOTAL-GAIN"},
-  { _CAT_TOTAL_RSQ_, "TOTAL-RSQ"},       { _CAT_TOTAL_SIG_, "TOTAL-SIG"},
-  { _CAT_TOTAL_RMSE_, "TOTAL-RMSE"},     { _CAT_TOTAL_MAE_, "TOTAL-MAE"},
-  { _CAT_TOTAL_MAXE_, "TOTAL-MAXRES"},   { _CAT_TOTAL_NUM_, "TOTAL-NUM"},
-  { _CAT_BEFORE_MEAN_, "BEFORE-MEAN"},   { _CAT_BEFORE_OFFSET_, "BEFORE-OFFSET"},
-  { _CAT_BEFORE_SLOPE_, "BEFORE-SLOPE"}, { _CAT_BEFORE_GAIN_, "BEFORE-GAIN"},
-  { _CAT_BEFORE_RSQ_, "BEFORE-RSQ"},     { _CAT_BEFORE_SIG_, "BEFORE-SIG"},
-  { _CAT_BEFORE_RMSE_, "BEFORE-RMSE"},   { _CAT_BEFORE_MAE_, "BEFORE-MAE"},
-  { _CAT_BEFORE_MAXE_, "BEFORE-MAXRES"}, { _CAT_BEFORE_NUM_, "BEFORE-NUM"},
-  { _CAT_AFTER_MEAN_, "AFTER-MEAN"},     { _CAT_AFTER_OFFSET_, "AFTER-OFFSET"},
-  { _CAT_AFTER_SLOPE_, "AFTER-SLOPE"},   { _CAT_AFTER_GAIN_, "AFTER-GAIN"},
-  { _CAT_AFTER_RSQ_, "AFTER-RSQ"},       { _CAT_AFTER_SIG_, "AFTER-SIG"},
-  { _CAT_AFTER_RMSE_, "AFTER-RMSE"},     { _CAT_AFTER_MAE_, "AFTER-MAE"},
-  { _CAT_AFTER_MAXE_, "AFTER-MAXRES"},   { _CAT_AFTER_NUM_, "AFTER-NUM"}};
+  { _CAT_CHANGE_, "CHANGE"},                   { _CAT_LOSS_, "LOSS"}, 
+  { _CAT_YEAR_,            "YEAR-OF-CHANGE"},
+  { _CAT_TOTAL_MEAN_,      "TOTAL-MEAN"},      { _CAT_TOTAL_OFFSET_,    "TOTAL-OFFSET"},
+  { _CAT_TOTAL_SLOPE_,     "TOTAL-SLOPE"},     { _CAT_TOTAL_PCT_GAIN_,  "TOTAL-PCT-GAIN"},
+  { _CAT_TOTAL_ABS_GAIN_,  "TOTAL-ABS-GAIN"},  { _CAT_TOTAL_RSQ_,       "TOTAL-RSQ"},  
+  { _CAT_TOTAL_SIG_,       "TOTAL-SIG"},       { _CAT_TOTAL_RMSE_,      "TOTAL-RMSE"}, 
+  { _CAT_TOTAL_MAE_,       "TOTAL-MAE"},       { _CAT_TOTAL_MAXE_,      "TOTAL-MAXRES"}, 
+  { _CAT_TOTAL_NUM_,       "TOTAL-NUM"},       { _CAT_TOTAL_LEN_,       "TOTAL-LENGTH"},  
+  { _CAT_BEFORE_MEAN_,     "BEFORE-MEAN"},     { _CAT_BEFORE_OFFSET_,   "BEFORE-OFFSET"},
+  { _CAT_BEFORE_SLOPE_,    "BEFORE-SLOPE"},    { _CAT_BEFORE_PCT_GAIN_, "BEFORE-PCT-GAIN"},
+  { _CAT_BEFORE_ABS_GAIN_, "BEFORE-ABS-GAIN"}, { _CAT_BEFORE_RSQ_,      "BEFORE-RSQ"},  
+  { _CAT_BEFORE_SIG_,      "BEFORE-SIG"},      { _CAT_BEFORE_RMSE_,     "BEFORE-RMSE"},
+  { _CAT_BEFORE_MAE_,      "BEFORE-MAE"},      { _CAT_BEFORE_MAXE_,     "BEFORE-MAXRES"},
+  { _CAT_BEFORE_NUM_,      "BEFORE-NUM"},      { _CAT_BEFORE_LEN_,      "BEFORE-LENGTH"},
+  { _CAT_AFTER_MEAN_,      "AFTER-MEAN"},      { _CAT_AFTER_OFFSET_,    "AFTER-OFFSET"},
+  { _CAT_AFTER_SLOPE_,     "AFTER-SLOPE"},     { _CAT_AFTER_PCT_GAIN_,  "AFTER-PCT-GAIN"}, 
+  { _CAT_AFTER_ABS_GAIN_,  "AFTER-ABS-GAIN"},  { _CAT_AFTER_RSQ_,       "AFTER-RSQ"}, 
+  { _CAT_AFTER_SIG_,       "AFTER-SIG"},       { _CAT_AFTER_RMSE_,      "AFTER-RMSE"},  
+  { _CAT_AFTER_MAE_,       "AFTER-MAE"},       { _CAT_AFTER_MAXE_,      "AFTER-MAXRES"},
+  { _CAT_AFTER_NUM_,       "AFTER-NUM"},       { _CAT_AFTER_LEN_,       "AFTER-LENGTH"}};
   
 const tagged_enum_t _TAGGED_ENUM_STD_[_STD_LENGTH_] = {
   { _STD_NONE_, "NONE" }, {_STD_NORMAL_, "NORMALIZE"}, {_STD_CENTER_, "CENTER" }};

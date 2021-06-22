@@ -173,16 +173,18 @@ double mae, rmse;
       mae = sae/k;
 
 
-      trd_[_TRD_MEAN_][p]   = (short)my;
-      trd_[_TRD_OFFSET_][p] = (short)off;
-      trd_[_TRD_SLOPE_][p]  = (short)slp;
-      trd_[_TRD_GAIN_][p]   = (short)(slp*nf/off*1000);
-      trd_[_TRD_RSQ_][p]    = (short)rsq;
-      trd_[_TRD_SIG_][p]    = (short)sig;
-      trd_[_TRD_RMSE_][p]   = (short)rmse;
-      trd_[_TRD_MAE_][p]    = (short)mae;
-      trd_[_TRD_MAXE_][p]   = (short)maxe;
-      trd_[_TRD_NUM_][p]    = (short)k;
+      trd_[_TRD_MEAN_][p]     = (short)my;
+      trd_[_TRD_OFFSET_][p]   = (short)off;
+      trd_[_TRD_SLOPE_][p]    = (short)slp;
+      trd_[_TRD_PRC_GAIN_][p] = (short)(slp*nf/off*1000);
+      trd_[_TRD_ABS_GAIN_][p] = (short)(slp*nf);
+      trd_[_TRD_RSQ_][p]      = (short)rsq;
+      trd_[_TRD_SIG_][p]      = (short)sig;
+      trd_[_TRD_RMSE_][p]     = (short)rmse;
+      trd_[_TRD_MAE_][p]      = (short)mae;
+      trd_[_TRD_MAXE_][p]     = (short)maxe;
+      trd_[_TRD_NUM_][p]      = (short)k;
+      trd_[_TRD_LEN_][p]      = (short)nf;
 
     }
 
@@ -347,6 +349,7 @@ double mae, rmse;
 
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MEAN_][p] = (short)my;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_NUM_][p]  = (short)k;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_LEN_][p]  = (short)f_len[part];
 
         if (k < 3) continue;
 
@@ -410,14 +413,15 @@ double mae, rmse;
         // offset of segment
         linreg_predict(f_min[part], slp, off, &yhat);
 
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p] = (short)yhat;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]  = (short)slp;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_GAIN_][p]   = (short)(slp*f_len[part]/off*1000);
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]    = (short)rsq;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SIG_][p]    = (short)sig;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RMSE_][p]   = (short)rmse;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAE_][p]    = (short)mae;
-        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAXE_][p]   = (short)maxe;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p]   = (short)yhat;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]    = (short)slp;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*1000);
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_ABS_GAIN_][p] = (short)(slp*f_len[part]);
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RSQ_][p]      = (short)rsq;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SIG_][p]      = (short)sig;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_RMSE_][p]     = (short)rmse;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAE_][p]      = (short)mae;
+        cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_MAXE_][p]     = (short)maxe;
 
       }
 
