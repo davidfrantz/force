@@ -177,7 +177,7 @@ double mae, rmse;
       trd_[_TRD_OFFSET_][p]   = (short)off;
       trd_[_TRD_SLOPE_][p]    = (short)slp;
       if (off > 0){
-         trd_[_TRD_PRC_GAIN_][p] = (short)(slp*nf/off*1000);
+         trd_[_TRD_PRC_GAIN_][p] = (short)(slp*nf/off*100);
       } else {
          trd_[_TRD_PRC_GAIN_][p] = 0;
       }
@@ -420,7 +420,7 @@ double mae, rmse;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_OFFSET_][p]   = (short)yhat;
         cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_SLOPE_][p]    = (short)slp;
         if (off > 0){
-           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*1000);
+           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = (short)(slp*f_len[part]/off*100);
         } else {
           cat_[_CAT_YEAR_+1+_TRD_LENGTH_*part+_TRD_PRC_GAIN_][p] = 0;
         }
@@ -437,7 +437,7 @@ double mae, rmse;
       if (cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p] > 0){
         cat_[_CAT_LOSS_][p] = (short)((float)cat_[_CAT_CHANGE_][p]/
                                       cat_[_CAT_YEAR_+1+_TRD_LENGTH_*_PART_TOTAL_+_TRD_OFFSET_][p]*
-                                      1000);
+                                      100);
       } else {
         cat_[_CAT_LOSS_][p] = 0;
       }
