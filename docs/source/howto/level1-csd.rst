@@ -178,6 +178,11 @@ There are two further optional arguments that don't affect the search parameters
   Two files will be created if Landsat and Sentinel-2 data is queried
   at the same time. Filename: csd_metadata_YYYY-MM-DDTHH-MM-SS
 
+  -l | --logs
+  Check for FORCE Level-2 log files and remove any products from the search
+  that have been processed previously. Note that this only checks for the
+  presence of log files, not for actual Level-2 products.
+
 
 .. note::
 
