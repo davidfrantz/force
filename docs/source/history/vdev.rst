@@ -8,8 +8,6 @@ FORCE-dev
 
 Main release: TBA
 
-*TODO* sync this list with git commits! (synced until May 6)
-
 * **General changes**
 
   * Code of Conduct was added.
@@ -38,6 +36,8 @@ Main release: TBA
 
   * Stefan Ernst fixed a bug when ``-n`` was given as first option.
 
+  * Stefan Ernst added an option ``-l``, which checks against logs from *FORCE L2PS*, and only downloads images that weren't processed already.
+
 * **FORCE L2PS**
 
   * new program: force-level2-report
@@ -48,6 +48,8 @@ Main release: TBA
     ``MAX_CLOUD_COVER_TILE`` considered clouds, cloud shadows, and snow.
     The latter caused unexpected results, thus ``MAX_CLOUD_COVER_TILE`` now drops the snow evaluation.
     Thanks to Marco Wolsza for bringing up this issue.
+
+  * force-lut-modis has new options, that specify whether the daily tables and/or climatology should be generated or not.
 
 * **FORCE HLPS**
 
@@ -70,6 +72,23 @@ Main release: TBA
 
   * in force-higher-level, TSA sub-module: 
     Daniel Scheffler added a whole bunch of new red edge indices, see :ref:`tsa-param-index`.
+
+  * in force-higher-level, TSA sub-module: 
+    Reworked some aspects of the CAT transformation.
+    - Mean and number of observations are also written (instead of nodata) if one segment (total/before/after) had less than 3 observations;
+    all trend parameters remain nodata however.
+    - Added a new parameter ``CHANGE_PENALTY`` that puts a penalty on change candidates, where the subsequent index value is high. 
+    If this parameter is TRUE, the change is detected as the point in time with maximum (pre - now)*(pre-post).
+    If FALSE, the change is detected as the point in time with maximum (pre - now); this is the same as before.
+    - The offsets are now reported at the beginning of each segment. 
+    Before, the offsets were reported at the beginning of the time series, which was especially disadvantagous for the "after change" segment.
+    Thanks to Franz Schug for discussion and testing.
+
+  * in force-higher-level, TSA sub-module: 
+    Reworked some aspects of the Trend analysis and CAT transformation.
+    - Added new layers for the absolute gain, which is the slope * length of the times series.
+    - Added new layers for the length of the time series.
+    - The relative change (slope * length of time series / offset) is now reported in percent. Also, this layer is 0 if offset <= 0.
 
   * in force-higher-level, TSA sub-module: 
     Fixed an issue when computing kNDVI.
@@ -105,8 +124,10 @@ Main release: TBA
 
   * force-pyramid takes levels and resampling method as additional arguments.
 
-  * force-parameter allows to specify the parameter file name
+  * force-parameter allows to specify the parameter file name.
 
-  * force-mosaic takes optional output folder relative to the input data (default: ``mosaic``) and number of parallel jobs (default: all)
+  * force-mosaic has new options: output folder relative to the input data (default: ``mosaic``), and number of parallel jobs.
+
+  * force cube thas new options: attribute name for  vector data to be burned into the raster; output nodata; output datatype; output basename; number of parallel jobs.
 
 #-- No changes yet, master is in sync with develop.
