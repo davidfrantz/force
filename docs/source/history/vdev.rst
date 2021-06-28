@@ -129,7 +129,7 @@ Main release: TBA
 
   * force-mosaic has new options: output folder relative to the input data (default: ``mosaic``), and number of parallel jobs.
 
-  * force cube thas new options: attribute name for  vector data to be burned into the raster; output nodata; output datatype; output basename; number of parallel jobs.
+  * force cube thas new options: attribute name for vector data to be burned into the raster; input layername; output nodata; output datatype; output basename; number of parallel jobs.
 
 
 #-- No changes yet, master is in sync with develop.
