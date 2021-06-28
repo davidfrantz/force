@@ -70,6 +70,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -a = optional attribute name for vector data. $PROG will burn these values 
        into the output raster. default: no attribute is used; a binary mask 
        with geometry presence (1) or absence (0) is generated
+  -l = layer name for vector data (default: basename of input, without extension)
   -n = output nodate value (defaults to 255) 
   -t = output data type (defaults to Byte; see GDAL for datatypes; 
        but note that FORCE HLPS only understands Int16 and Byte types correctly)
@@ -139,10 +140,6 @@ function cubethis(){
       BURNOPT=( -a "$ATTRIBUTE" )
     fi
 
-    echo $RASTERIZE_EXE "${BURNOPT[@]}" -a_nodata $ONODATA -ot $DATATYPE -of GTiff \
-      -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
-      -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK \
-      -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY "$FINP" "$FOUT"
     $RASTERIZE_EXE "${BURNOPT[@]}" -a_nodata $ONODATA -ot $DATATYPE -of GTiff \
       -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
       -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK \
@@ -199,7 +196,7 @@ export -f cubethis
 
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hvir:s:o:b:j:a:n:t: --long help,version,info,resample:,resolution:,output:,basename:,jobs:,attribute:,nodata:,datatype: -n "$0" -- "$@"`
+ARGS=`getopt -o hvir:s:o:b:j:a:n:t:l: --long help,version,info,resample:,resolution:,output:,basename:,jobs:,attribute:,nodata:,datatype:,layer: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -211,6 +208,7 @@ NJOB=0
 ATTRIBUTE="DEFAULT"
 DATATYPE="Byte"
 ONODATA=255
+LAYER="DEFAULT"
 
 while :; do
   case "$1" in
@@ -220,6 +218,7 @@ while :; do
     -r|--resample) RESAMPLE="$2"; shift ;;
     -s|--resolution) RES="$2"; shift ;;
     -a|attribute) ATTRIBUTE="$2"; shift;;
+    -l|layer) LAYER="$2"; shift;;
     -n|nodata) ONODATA="$2"; shift;;
     -t|datatype) DATATYPE="$2"; shift;;
     -o|--output) DOUT="$2"; shift ;;
@@ -286,11 +285,17 @@ for i in "$@"; do
   else
     COUT=$BASE # corename from user parameters
   fi
-  debug "input  file: $FINP"
+
+  if [ $LAYER == "DEFAULT" ]; then
+    LAYER=$CINP  # layername from input file
+  fi
+
+  debug "input  file:      $FINP"
   debug "input  directory: $DINP"
-  debug "input  basename: $BINP"
-  debug "input  corename: $CINP"
-  debug "output corename: $COUT"
+  debug "input  layername: $LAYER"
+  debug "input  basename:  $BINP"
+  debug "input  corename:  $CINP"
+  debug "output corename:  $COUT"
 
   if ! [[ -f "$FINP" && -r "$FINP" ]]; then
     echoerr "$FINP is not a readable file, exiting."; exit 1;
@@ -348,10 +353,10 @@ for i in "$@"; do
     if [ $? -ne 0 ]; then
       echoerr "warping vector failed."; exit 1
     fi
-    XMIN=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMIN=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-    XMAX=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMAX=$($VECTOR_INFO_EXE $FTMP -so $CINP | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    XMIN=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMIN=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    XMAX=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMAX=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
     FINP=$FTMP
   fi
   debug "$XMIN $YMAX $XMAX $YMIN"
