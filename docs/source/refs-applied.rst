@@ -6,6 +6,12 @@ Applied Publications
 This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
+* **in press**
+
+  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (in press): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment.
+  | https://doi.org/10.1016/j.rse.2021.112558
+
+
 * **2021**
 
   | J. Ardö (2021). A Sentinel-2 Dataset for Uganda. Data, 6. 
