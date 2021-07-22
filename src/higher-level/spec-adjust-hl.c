@@ -674,10 +674,10 @@ int spectral_predict(ard_t ard, small *mask_, int nc, int sid){
 int b, b_, p, s, c;
 int b_src[_SPECHOMO_N_SRC_];
 int b_dst[_SPECHOMO_N_DST_];
-float xy, xx, yy, sam;
-float weight[_SPECHOMO_N_CLS_], max_weight;
-int cluster[_SPECHOMO_N_SIM_], n_cls;
-float pred, wpred[_SPECHOMO_N_DST_], wsum;
+double xy, xx, yy, sam;
+double weight[_SPECHOMO_N_CLS_], weight_select[_SPECHOMO_N_SIM_], max_weight;
+int cluster_select[_SPECHOMO_N_SIM_], max_cluster, n_cluster;
+double pred, wpred[_SPECHOMO_N_DST_], wsum;
 
 
   // get the correct source bands from brick
@@ -700,7 +700,7 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
   // adding _SPECHOMO_CENTER_ and _SPECHOMO_COEFS_ to the firstprivate clause was no option as the build time and executables increased substantially
   // if something goes wrong, this might be a good place to start looking!
   // if you change something in the parallel block below, it is advised to temporarily add the default(none) and firstprivate clauses
-  #pragma omp parallel private(s,c,b,b_,weight,cluster,max_weight,xy,xx,yy,sam,n_cls,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) // default(none)
+  #pragma omp parallel private(s,c,b,b_,weight,weight_select,cluster_select,max_weight,max_cluster,n_cluster,xy,xx,yy,sam,wpred,wsum,pred) shared(ard,mask_,nc,b_src,b_dst,sid) // default(none)
   {
 
     #pragma omp for
@@ -709,13 +709,14 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
       if (mask_ != NULL && !mask_[p]) continue;
       if (!ard.msk[p]) continue;
 
-      memset(weight,  0, _SPECHOMO_N_CLS_*sizeof(float));
-      memset(cluster, 0, _SPECHOMO_N_SIM_*sizeof(int));
+      memset(weight,         0, _SPECHOMO_N_CLS_*sizeof(double));
+      memset(weight_select,  0, _SPECHOMO_N_SIM_*sizeof(double));
+      memset(cluster_select, 0, _SPECHOMO_N_SIM_*sizeof(int));
       max_weight = -1.0;
+      max_cluster = 0;
 
-      // compute SAM and weight for each cluster,
-      // find closest cluster (highest weight)
-      for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
+      // compute SAM and weight for each cluster
+      for (s=0; s<_SPECHOMO_N_CLS_; s++){
 
         // SAM to each cluster center
         xy = xx = yy = 0.0;
@@ -734,62 +735,95 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
 
         // weight for each cluster center
         // not exactly as in the paper, pragmatic suggestion by D. Scheffler
-        weight[s] = 1.0 - sam / _SPECHOMO_POOR_SAM_;
-        if (weight[s] >= _SPECHOMO_MIN_WEIGHT_){
-          max_weight = weight[s];
-          cluster[0] = s;
+        if (sam > _SPECHOMO_POOR_SAM_){
+          weight[s] = 0.01;
+        } else {
+          weight[s] = 1.0 - sam / _SPECHOMO_POOR_SAM_;
+        }
+
+        #ifdef FORCE_DEBUG
+        printf("\n");
+        printf("on/off: %d\n", ard.msk[p]);
+        printf("ard: ");
+        for (b=0; b<_SPECHOMO_N_SRC_; b++) printf("%05d ", ard.dat[b_src[b]][p]);
+        printf("\n");
+        printf("lib: ");
+        for (b=0; b<_SPECHOMO_N_SRC_; b++) printf("%05d ", _SPECHOMO_CENTER_[sid][b][s]);
+        printf("\n");
+        printf("xx: %.2f, yy: %.2f, xy: %.2f, sam: %.2f, weight: %.2f\n", xx, yy, xy, sam, weight[s]);
+        #endif
+
+        // maximum weight of close clusters (-1 if no close cluster)
+        if (weight[s] >= _SPECHOMO_MIN_WEIGHT_ && 
+            weight[s] >   max_weight && 
+            s != _SPECHOMO_N_SIM_-1){
+
+            max_weight  = weight[s];
+            max_cluster = s;
+
+        }
+
+        #ifdef FORCE_DEBUG
+        printf("max_weight: %.2f, max_cluster: %02d\n", max_weight, max_cluster);
+        #endif
+
+      }
+
+      #ifdef FORCE_DEBUG
+      print_dvector(weight,  "all weights", _SPECHOMO_N_CLS_, 2, 4);
+      #endif
+
+
+      n_cluster = 0;
+
+      // find closest clusters, fill with global
+      for (c=0; c<_SPECHOMO_N_SIM_; c++){
+
+        // if no more close cluster can be found, add global cluster, then stop
+        if (max_weight < 0){
+          cluster_select[c] = _SPECHOMO_N_CLS_-1;
+          weight_select[c]  = weight[cluster_select[c]];
+          break;
+        }
+
+        // copy closest cluster
+        cluster_select[c] = max_cluster;
+        weight_select[c]  = weight[cluster_select[c]];
+
+        // remove weight from closest cluster
+        weight[cluster_select[c]] = 0.0;
+
+        // find the next closest cluster
+        max_weight = -1.0;
+        for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
+          if (weight[s] >= _SPECHOMO_MIN_WEIGHT_ && 
+              weight[s] >  max_weight){
+            max_weight  = weight[s];
+            max_cluster = s;
+          }
+
         }
 
       }
 
+      // number of close clusters
+      n_cluster = c+1;
 
-      // get the n_cls closest clusters 
-      if (max_weight < 0){
-
-        // use global regressor
-        cluster[0] = _SPECHOMO_N_CLS_-1;
-        weight[cluster[0]] = 1.0;
-        n_cls = 1;
-
-      } else {
-
-        // use a couple of material-specific regressors
-        n_cls = 1;
-
-        // we already found the closest cluster, 
-        // now find the remaining closest clusters
-        for (c=1; c<_SPECHOMO_N_SIM_; c++){
-
-          max_weight = 0.0;
-
-          for (s=0; s<(_SPECHOMO_N_CLS_-1); s++){
-            if (weight[s] >= _SPECHOMO_MIN_WEIGHT_ && 
-                weight[s] <  weight[cluster[c-1]]){
-              max_weight  = weight[s];
-              cluster[c]  = s;
-            }
-          }
-
-          // no more close cluster available
-          if (max_weight < _SPECHOMO_MIN_WEIGHT_){
-            break;
-          } else {
-            n_cls++;
-          }
-
-        }
-
-      }
-
-
-      memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(float));
-      wsum = 0.0;
-
+      #ifdef FORCE_DEBUG
+      printf("found %d clusters\n", n_cluster);
+      print_ivector(cluster_select, "cluster", _SPECHOMO_N_SIM_, 7);
+      print_dvector(weight_select,  "weights", _SPECHOMO_N_SIM_, 2, 4);
+      #endif
+      
       // predict the target reflectance by using a weighted average of 
       // all close regressors
-      for (c=0; c<n_cls; c++){
 
-        s = cluster[c];
+      memset(wpred, 0, _SPECHOMO_N_DST_*sizeof(double));
+      wsum = 0.0;
+
+      for (c=0; c<n_cluster; c++){
+
+        s = cluster_select[c];
 
         for (b=0;  b <_SPECHOMO_N_DST_; b++){
 
@@ -798,14 +832,15 @@ float pred, wpred[_SPECHOMO_N_DST_], wsum;
           }
           pred += _SPECHOMO_COEFS_[sid][b][b_][s]; // offset
 
-          wpred[b] += weight[s]*pred;
+          wpred[b] += weight_select[c]*pred;
 
         }
 
-        wsum += weight[s];
+        wsum += weight_select[c];
 
       }
-      
+
+
       #ifdef FORCE_DEBUG
       if (p==0){
         printf("using %d regressors\n", n_cls);
