@@ -36,7 +36,7 @@ Type the following command to start the authorization process
 
 
 Follow the on-screen instructions to authorize access to the Google Cloud Platform APIs.
-A project name is not required, just hit enter or make up a name when asked.
+When asked for a project name, just type in any name. It is not necessary to create a project first.
 
 
 Downloading the metadata catalogues
@@ -177,6 +177,11 @@ There are two further optional arguments that don't affect the search parameters
   Will write the results of the query to the level 1 datapool directory.
   Two files will be created if Landsat and Sentinel-2 data is queried
   at the same time. Filename: csd_metadata_YYYY-MM-DDTHH-MM-SS
+
+  -l | --logs
+  Check for FORCE Level-2 log files and remove any products from the search
+  that have been processed previously. Note that this only checks for the
+  presence of log files, not for actual Level-2 products.
 
 
 .. note::
@@ -383,15 +388,10 @@ If Landsat and Sentinel-2 data is queried at the same time, two separate files w
 Information for Docker users
 ----------------------------
 
-If you are running FORCE in Docker, there won't be user folder in the home directory.
+If you are running FORCE in Docker, there is a different user in the container than on the host machine.
 This is a problem for gsutil as the config file is stored there by default.
-You can work around this by mounting the folder where your ``.boto`` file is located and set an environment variable that points gsutil there.
-
-.. code-block:: none
-
-    # this will run an interactive docker session
-    # -v mounts a folder in docker, --env sets an environment variable in docker
-    docker run -it -v /home/yourusername/:/credentials --env BOTO_CONFIG=/credentials/.boto
+You can work around this by mounting the folder where your ``.boto`` file is located (usually your home directory) and set an environment variable that points gsutil there.
+For details about this, please see our instructions on :ref:`Docker usage <docker_use>`.
 
 ------------
 

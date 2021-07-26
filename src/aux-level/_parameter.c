@@ -30,21 +30,56 @@ parameterize the FORCE programs
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../aux-level/param-aux.h"
 
 
-void usage(char *prog){
-  
-  
-  printf("usage: %s dir type verbose\n", prog); 
+typedef struct {
+  int  n;
+  char fname[NPOW_10];
+  char module_tag[NPOW_10];
+  int  module;
+  int  level;
+  int  input_level;
+  bool comments;
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] [-m] [-c] parameter-file module\n", exe); 
   printf("\n");
-  printf("  type can be one of the following:\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("  -m  = show available modules\n");
+  printf("  -c  = generate more compact parameter files without comments\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'parameter-file': output file\n");
+  printf("  - 'module':         FORCE module.\n");
+  printf("                      Use -m to show available modules.\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void show_modules(int exit_code){
+
+  printf("  available modules:\n");
   printf("    LEVEL2:   Level 2 Processing System\n");
   printf("    LEVEL3:   Level 3 Processing System\n");
   printf("    TSA:      Time Series Analysis\n");
   printf("    CSO:      Clear-Sky Observations\n");
+  printf("    UDF:      Plug-In User Defined Functions\n");
   printf("    L2IMP:    Level 2 ImproPhe\n");
   printf("    CFIMP:    Continuous Field ImproPhe\n");
   printf("    SMP:      Sampling\n");
@@ -54,234 +89,259 @@ void usage(char *prog){
   printf("    TXT:      Texture\n");
   printf("    LSM:      Landscape Metrics\n");
   printf("    LIB:      Library Completeness\n");
-  printf("  verbose (1) will generate long parameter\n");
-  printf("    files with comments for each parameter. \n");
-  printf("    verbose (0) will generate compact parameter\n");
-  printf("    files without any comments.\n");
   printf("\n");
 
-  exit(FAILURE);
+  exit(exit_code);
+  return;
+}
+
+
+void parse_module(char *argv, args_t *args){
+int m, n_modules = 14;
+char module_tags[14][NPOW_10] = {
+  "LEVEL2", "LEVEL3", "TSA",   "CSO", 
+  "UDF",    "CFIMP",  "L2IMP", "ML",      
+  "SMP",    "TXT",    "LSM",   "LIB",
+  "TRAIN",  "SYNTHMIX" };
+int modules[14] = {
+  _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, 
+  _HL_UDF_,    _HL_CFI_, _HL_L2I_, _HL_ML_, 
+  _HL_SMP_,    _HL_TXT_, _HL_LSM_, _HL_LIB_, 
+  _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+int levels[14] = {
+  _LOWER_LEVEL_,  _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
+  _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
+  _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
+  _AUX_LEVEL_,    _AUX_LEVEL_ };
+int input_levels[14] = {
+  _INP_RAW_, _INP_ARD_, _INP_ARD_, _INP_QAI_,
+  _INP_ARD_, _INP_ARD_, _INP_ARD_, _INP_FTR_,
+  _INP_FTR_, _INP_FTR_, _INP_FTR_, _INP_FTR_,
+  _INP_AUX_, _INP_AUX_ };
+
+
+  copy_string(args->module_tag, NPOW_10, argv);
+
+  for (m=0; m<n_modules; m++){
+    if (strcmp(argv, module_tags[m]) == 0){
+      args->module = modules[m];
+      args->level = levels[m];
+      args->input_level = input_levels[m];
+      return;
+    }
+  }
+
+  fprintf(stderr, "No valid module.\n");
+  show_modules(FAILURE);
+
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // default parameters
+  args->comments = true;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvimc")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Generation of parameter files\n");
+        exit(SUCCESS);
+      case 'm':
+        show_modules(SUCCESS);
+      case 'c':
+        args->comments = false;
+        break;
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  args->n = 2;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fname, NPOW_10, argv[optind++]);
+      parse_module(argv[optind++], args);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
 }
 
 
 int main( int argc, char *argv[] ){
+args_t args;
 FILE *fp;
-char fname[NPOW_10];
-char *dname = NULL;
-char *ctype = NULL;
-char *cverb = NULL;
-int nchar;
-int level, input_level, type;
-bool verbose;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 4) usage(argv[0]);
+  parse_args(argc, argv, &args);
 
-  dname = argv[1];
-  ctype = argv[2];
-  cverb = argv[3];
-  puts(ctype);
-    
-  if (strcmp(ctype, "LEVEL2") == 0){
-    level = _LOWER_LEVEL_;
-    input_level = _INP_RAW_;
-    type = _LL_LEVEL2_;
-  } else if (strcmp(ctype, "LEVEL3") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_ARD_;
-    type = _HL_BAP_;
-  } else if (strcmp(ctype, "TSA") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_ARD_;
-    type = _HL_TSA_;
-  } else if (strcmp(ctype, "CSO") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_QAI_;
-    type = _HL_CSO_;
-  } else if (strcmp(ctype, "CFIMP") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_ARD_;
-    type = _HL_CFI_;
-  } else if (strcmp(ctype, "L2IMP") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_ARD_;
-    type = _HL_L2I_;
-  } else if (strcmp(ctype, "ML") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_FTR_;
-    type = _HL_ML_;
-  } else if (strcmp(ctype, "SMP") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_FTR_;
-    type = _HL_SMP_;
-  } else if (strcmp(ctype, "TXT") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_FTR_;
-    type = _HL_TXT_;
-  } else if (strcmp(ctype, "LSM") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_FTR_;
-    type = _HL_LSM_;
-  } else if (strcmp(ctype, "LIB") == 0){
-    level = _HIGHER_LEVEL_;
-    input_level = _INP_FTR_;
-    type = _HL_LIB_;
-  } else if (strcmp(ctype, "TRAIN") == 0){
-    level = _AUX_LEVEL_;
-    input_level = _INP_AUX_;
-    type = _AUX_TRAIN_;
-  } else if (strcmp(ctype, "SYNTHMIX") == 0){
-    level = _AUX_LEVEL_;
-    input_level = _INP_AUX_;
-    type = _AUX_SYNTHMIX_;
-  } else {
-    printf("No valid type!\n"); return FAILURE;
-  }
-
-  if (atoi(cverb) == 0){
-    verbose = false;
-  } else if (atoi(cverb) == 1){
-    verbose = true;
-  } else {
-    printf("Unknown verbosity\n"); return FAILURE;
-  }
-
-
-  nchar = snprintf(fname, NPOW_10, "%s/%s-skeleton.prm", dname, ctype);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
-
-  if ((fp = fopen(fname, "w")) == NULL){
+  if ((fp = fopen(args.fname, "w")) == NULL){
     printf("Unable to open output file!\n"); return FAILURE; }
 
 
-  fprintf(fp, "++PARAM_%s_START++\n", ctype);
+  fprintf(fp, "++PARAM_%s_START++\n", args.module_tag);
   
-  if (level == _HIGHER_LEVEL_){
-    write_par_hl_dirs(fp, verbose);
-    write_par_hl_mask(fp, verbose);
-    write_par_hl_output(fp, verbose);
-    write_par_hl_thread(fp, verbose);
-    write_par_hl_extent(fp, verbose);
+  if (args.level == _HIGHER_LEVEL_){
+    write_par_hl_dirs(fp, args.comments);
+    write_par_hl_mask(fp, args.comments);
+    write_par_hl_output(fp, args.comments);
+    write_par_hl_thread(fp, args.comments);
+    write_par_hl_extent(fp, args.comments);
   }
 
-  if (input_level == _INP_ARD_){
-    write_par_hl_psf(fp, verbose);
-    write_par_hl_improphed(fp, verbose);
-    write_par_hl_sensor(fp, verbose);
-    write_par_hl_qai(fp, verbose);
-    write_par_hl_noise(fp, verbose);
-    write_par_hl_time(fp, verbose);
+  if (args.input_level == _INP_ARD_){
+    write_par_hl_psf(fp, args.comments);
+    write_par_hl_improphed(fp, args.comments);
+    write_par_hl_sensor(fp, args.comments);
+    write_par_hl_qai(fp, args.comments);
+    write_par_hl_noise(fp, args.comments);
+    write_par_hl_time(fp, args.comments);
   }
 
-  if (input_level == _INP_QAI_){
-    write_par_hl_sensor(fp, verbose);
-    write_par_hl_qai(fp, verbose);
-    write_par_hl_time(fp, verbose);
+  if (args.input_level == _INP_QAI_){
+    write_par_hl_sensor(fp, args.comments);
+    write_par_hl_qai(fp, args.comments);
+    write_par_hl_time(fp, args.comments);
   }
 
-  if (input_level == _INP_FTR_){
-    write_par_hl_feature(fp, verbose);
+  if (args.input_level == _INP_FTR_){
+    write_par_hl_feature(fp, args.comments);
   }
 
-  if (type == _HL_BAP_){
-    write_par_hl_bap(fp, verbose);
-    write_par_hl_pac(fp, verbose);
+  if (args.module == _HL_BAP_){
+    write_par_hl_bap(fp, args.comments);
+    write_par_hl_pac(fp, args.comments);
   }
 
-  if (type == _HL_TSA_){
-    write_par_hl_index(fp, verbose);
-    write_par_hl_sma(fp, verbose);
-    write_par_hl_tsi(fp, verbose);
-    write_par_hl_pyp(fp, verbose);
-    write_par_hl_stm(fp, verbose);
-    write_par_hl_fold(fp, verbose);
-    write_par_hl_lsp(fp, verbose);
-    write_par_hl_pol(fp, verbose);
-    write_par_hl_trend(fp, verbose);
+  if (args.module == _HL_TSA_){
+    write_par_hl_index(fp, args.comments);
+    write_par_hl_sma(fp, args.comments);
+    write_par_hl_tsi(fp, args.comments);
+    write_par_hl_pyp(fp, args.comments);
+    //write_par_hl_rsp(fp, args.comments);
+    write_par_hl_stm(fp, args.comments);
+    write_par_hl_fold(fp, args.comments);
+    write_par_hl_lsp(fp, args.comments);
+    write_par_hl_pol(fp, args.comments);
+    write_par_hl_trend(fp, args.comments);
   }
 
-  if (type == _HL_CSO_){
-    write_par_hl_cso(fp, verbose);
+  if (args.module == _HL_CSO_){
+    write_par_hl_cso(fp, args.comments);
   }
 
-  if (type == _HL_CFI_){
-    write_par_hl_imp(fp, verbose);
-    write_par_hl_cfi(fp, verbose);
+  if (args.module == _HL_UDF_){
+    write_par_hl_pyp(fp, args.comments);
+    //write_par_hl_rsp(fp, args.comments);
   }
 
-  if (type == _HL_L2I_){
-    write_par_hl_imp(fp, verbose);
-    write_par_hl_l2i(fp, verbose);
+  if (args.module == _HL_CFI_){
+    write_par_hl_imp(fp, args.comments);
+    write_par_hl_cfi(fp, args.comments);
   }
 
-  if (type == _HL_TXT_){
-    write_par_hl_txt(fp, verbose);
+  if (args.module == _HL_L2I_){
+    write_par_hl_imp(fp, args.comments);
+    write_par_hl_l2i(fp, args.comments);
   }
 
-  if (type == _HL_LSM_){
-    write_par_hl_lsm(fp, verbose);
+  if (args.module == _HL_TXT_){
+    write_par_hl_txt(fp, args.comments);
   }
 
-  if (type == _HL_LIB_){
-    write_par_hl_lib(fp, verbose);
+  if (args.module == _HL_LSM_){
+    write_par_hl_lsm(fp, args.comments);
   }
 
-  if (type == _HL_SMP_){
-    write_par_hl_smp(fp, verbose);
+  if (args.module == _HL_LIB_){
+    write_par_hl_lib(fp, args.comments);
   }
 
-  if (type == _HL_ML_){
-    write_par_hl_ml(fp, verbose);
-  }
-  
-  if (type == _AUX_TRAIN_){
-    write_par_aux_train(fp, verbose);
+  if (args.module == _HL_SMP_){
+    write_par_hl_smp(fp, args.comments);
   }
 
-  if (type == _AUX_SYNTHMIX_){
-    write_par_aux_synthmix(fp, verbose);
+  if (args.module == _HL_ML_){
+    write_par_hl_ml(fp, args.comments);
   }
   
-  if (level == _LOWER_LEVEL_){
-    write_par_ll_dirs(fp, verbose);
-    write_par_ll_dem(fp, verbose);
-    write_par_ll_cube(fp, verbose);
-    write_par_ll_atcor(fp, verbose);
-    write_par_ll_wvp(fp, verbose);
-    write_par_ll_aod(fp, verbose);
-    write_par_ll_cloud(fp, verbose);
-    write_par_ll_resmerge(fp, verbose);
-    write_par_ll_coreg(fp, verbose);
-    write_par_ll_misc(fp, verbose);
-    write_par_ll_tier(fp, verbose);
-    write_par_ll_thread(fp, verbose);
-    write_par_ll_output(fp, verbose);
+  if (args.module == _AUX_TRAIN_){
+    write_par_aux_train(fp, args.comments);
+  }
+
+  if (args.module == _AUX_SYNTHMIX_){
+    write_par_aux_synthmix(fp, args.comments);
   }
   
-  fprintf(fp, "\n++PARAM_%s_END++\n", ctype);
+  if (args.level == _LOWER_LEVEL_){
+    write_par_ll_dirs(fp, args.comments);
+    write_par_ll_dem(fp, args.comments);
+    write_par_ll_cube(fp, args.comments);
+    write_par_ll_atcor(fp, args.comments);
+    write_par_ll_wvp(fp, args.comments);
+    write_par_ll_aod(fp, args.comments);
+    write_par_ll_cloud(fp, args.comments);
+    write_par_ll_resmerge(fp, args.comments);
+    write_par_ll_coreg(fp, args.comments);
+    write_par_ll_misc(fp, args.comments);
+    write_par_ll_tier(fp, args.comments);
+    write_par_ll_thread(fp, args.comments);
+    write_par_ll_output(fp, args.comments);
+  }
+  
+  fprintf(fp, "\n++PARAM_%s_END++\n", args.module_tag);
 
   fclose(fp);
 
   
-  printf("An empty parameter file skeleton was written to\n  %s\n", fname);
+  printf("An empty parameter file skeleton was written to\n  %s\n", args.fname);
   printf("Note that all parameters need to be given, even though some may not be used\n");
   printf("with your specific parameterization.\n");
-  printf("You should rename the file, e.g. my-first-%s.prm.\n", ctype);
   printf("Parameterize according to your needs and run with\n");
 
-  if (level == _LOWER_LEVEL_){
-    printf("force-level2 %s/my-first-%s.prm\n", dname, ctype);
+  if (args.level == _LOWER_LEVEL_){
+    printf("force-level2 %s\n", args.fname);
     printf(" or for a single image:\n");
-    printf("force-l2ps image %s/my-first-%s.prm\n", dname, ctype);
-  } else if (level == _HIGHER_LEVEL_){
-    printf("force-higher-level %s/my-first-%s.prm\n", dname, ctype);
-  } else if (level == _AUX_LEVEL_){
-    if (type == _AUX_TRAIN_){
-      printf("force-train %s/my-first-%s.prm\n", dname, ctype);
-    } else if (type == _AUX_SYNTHMIX_){
-      printf("force-synthmix %s/my-first-%s.prm\n", dname, ctype);
+    printf("force-l2ps image %s\n", args.fname);
+  } else if (args.level == _HIGHER_LEVEL_){
+    printf("force-higher-level %s\n", args.fname);
+  } else if (args.level == _AUX_LEVEL_){
+    if (args.module == _AUX_TRAIN_){
+      printf("force-train %s\n", args.fname);
+    } else if (args.module == _AUX_SYNTHMIX_){
+      printf("force-synthmix %s\n", args.fname);
     }
   }
 

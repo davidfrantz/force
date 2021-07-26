@@ -849,6 +849,17 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
   }
   fprintf(fp, "SENSORS = LND08 SEN2A SEN2B\n");
 
+  if (verbose){
+    fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
+    fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, \n");
+    fprintf(fp, "# LND08, MOD01, MOD02.\n");
+    fprintf(fp, "# A material-specific spectral harmonization will be performed, which will convert the \n");
+    fprintf(fp, "# spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be \n");
+    fprintf(fp, "# predicted, too.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "SPECTRAL_ADJUST = FALSE\n");
+
   return;
 }
 
@@ -1263,7 +1274,8 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
     fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA}\n");
+    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
+    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 
@@ -1415,7 +1427,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
-+++ level interpolation pars
++++ level UDF pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
 +++ Return:  void
@@ -1423,21 +1435,75 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
 void write_par_hl_pyp(FILE *fp, bool verbose){
 
 
-  fprintf(fp, "\n# PYTHON-PLUGIN PARAMETERS\n");
+  fprintf(fp, "\n# PYTHON UDF PARAMETERS\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
-    fprintf(fp, "# This file specifies the file holding user-provided python code. You can skip this\n");
+    fprintf(fp, "# This file specifies the file holding user-defined python code. You can skip this\n");
     fprintf(fp, "# by setting FILE_PYTHON = NULL, but this requires OUTPUT_PYP = FALSE.\n");
+    fprintf(fp, "# Two functions are required to communicate with FORCE:\n");
+    fprintf(fp, "# 0) The global space can be used to import modules etc.\n");
+    fprintf(fp, "# 1) An initialization function that defines the number and names of output bands:\n");
+    fprintf(fp, "#    ``def forcepy_init(dates, sensors, bandnames):``\n");
+    fprintf(fp, "# 2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``\n");
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_PYTHON = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# Output the results provided by the python-plugin? If TRUE, FILE_PYTHON must exist.\n");
+    fprintf(fp, "# Type of user-defined function. \n");
+    fprintf(fp, "# 1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel\n");
+    fprintf(fp, "# as 4D-nd.array [nDates, nBands, nrows, ncols]. A multi-processing pool is spawned to \n");
+    fprintf(fp, "# parallely execute this function with ``NTHREAD_COMPUTE`` workers.\n");
+    fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):``\n");
+    fprintf(fp, "# 2) ``BLOCK`` expects a pixel-function that receives the time series of a complete \n");
+    fprintf(fp, "# processing unit as 4D-nd.array [nDates, nBands, nrows, ncols]. No parallelization is  \n");
+    fprintf(fp, "# done on FORCE's end.\n");
+    fprintf(fp, "#     ``def forcepy_block(inblock, outblock, dates, sensors, bandnames, nodata, nproc):``\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+  }
+  fprintf(fp, "PYTHON_TYPE = PIXEL\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the python UDF? If TRUE, FILE_PYTHON must exist.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_PYP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level UDF pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_rsp(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# R UDF PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This file specifies the file holding user-provided R code. You can skip this\n");
+    fprintf(fp, "# by setting FILE_RSTATS = NULL, but this requires OUTPUT_RSP = FALSE.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_RSTATS = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# TBD\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+  }
+  fprintf(fp, "RSTATS_TYPE = PIXEL\n");
+
+  if (verbose){
+    fprintf(fp, "# Output the results provided by the R UDF? If TRUE, FILE_RSTATS must exist.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_RSP = FALSE\n");
 
   return;
 }
@@ -1792,6 +1858,14 @@ void write_par_hl_trend(FILE *fp, bool verbose){
   }
   fprintf(fp, "TREND_CONF = 0.95\n");
 
+  if (verbose){
+    fprintf(fp, "# In the Change, Aftereffect, Trend (CAT) analysis: do you want to \n");
+    fprintf(fp, "# put a penalty on non-permanent change for the change detection?\n");
+    fprintf(fp, "# This can help to reduce the effect of outliers.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "CHANGE_PENALTY = FALSE\n");
+
   return;
 }
 
@@ -2065,6 +2139,14 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
   }
   fprintf(fp, "LSM_RADIUS = 50\n");
+    
+  if (verbose){
+    fprintf(fp, "# This parameter defines the minimum size (in pixels) of an area to be considered as a patch.\n");
+    fprintf(fp, "# Patches with fewer pixels will be omitted. Mind that this parameter has an effect on\n");
+    fprintf(fp, "# all metrics, inlcuding garithmetic mean, maximum value, ...\n");
+    fprintf(fp, "# Type: Integer. Valid values: ]1,BLOCK_SIZE]\n");
+  }
+  fprintf(fp, "LSM_MIN_PATCHSIZE = 3\n");
 
   if (verbose){
     fprintf(fp, "# This parameter determines if the kernel for landscape metrics calculation\n");

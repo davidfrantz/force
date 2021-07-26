@@ -161,14 +161,17 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     + VVVHP  + VV/VH Dual Polarized  +      +       +     +     +     +     +      +     +       +       + 1  + 2  +
     +--------+-----------------------+------+-------+-----+-----+-----+-----+------+-----+-------+-------+----+----+
  
-    | *Type:* Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP}
+    | *Type:* Character list. Valid values: {LND04, LND05, LND07, LND08, SEN2A, SEN2B, sen2a, sen2b, S1AIA, S1BIA,
+        S1AID, S1BID, LNDLG, SEN2L, SEN2H, R-G-B, VVVHP}
     | ``SENSORS = LND08 SEN2A SEN2B``
 
 * **QAI screening**
 
   * This list controls, which QAI flags are masked out before doing the analysis.
   
-    | *Type:* Character list. Valid values: {NODATA,CLOUD_OPAQUE,CLOUD_BUFFER,CLOUD_CIRRUS,CLOUD_SHADOW,SNOW,WATER,AOD_FILL,AOD_HIGH,AOD_INT,SUBZERO,SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}
+    | *Type:* Character list. Valid values: {NODATA, CLOUD_OPAQUE, CLOUD_BUFFER, CLOUD_CIRRUS, CLOUD_SHADOW, SNOW,WATER,
+        AOD_FILL, AOD_HIGH, AOD_INT, SUBZERO, SATURATION, SUN_LOW, ILLUMIN_NONE, ILLUMIN_POOR, ILLUMIN_LOW, SLOPED,
+        WVP_NONE}
     | ``SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION``
     
   * Threshold for removing outliers.

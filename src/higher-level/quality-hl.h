@@ -41,8 +41,8 @@ Higher Level quality screening
 extern "C" {
 #endif
 
-int screen_qai(ard_t *ard, int nt, par_qai_t *qai_rule, int input_level);
-int screen_noise(ard_t *ard, int nt, par_qai_t *qai_rule);
+int screen_qai(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule, int input_level);
+int screen_noise(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule);
 
 #ifdef __cplusplus
 }

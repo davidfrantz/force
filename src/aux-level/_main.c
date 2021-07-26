@@ -28,6 +28,7 @@ This program is the general entry point to FORCE
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
+#include <ctype.h>   // testing and mapping characters
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
@@ -35,12 +36,67 @@ This program is the general entry point to FORCE
 #include "../cross-level/konami-cl.h"
 
 
+void usage(char *exe, int exit_code){
 
-int main ( int argc, char *argv[] ){
+
+  printf("Usage: %s [-h] [-v] [-i]\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[]){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Entrypoint, print short disclaimer, available modules etc.\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  if (optind < argc){
+    konami_args(argv[optind]);
+    fprintf(stderr, "Unknown non-optional parameter.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
+int main (int argc, char *argv[]){
 char user[NPOW_10];
 
 
-  if (argc >= 2) check_arg(argv[1]);
+  parse_args(argc, argv);
 
   if (getlogin_r(user, NPOW_10) != 0) copy_string(user, NPOW_10, "user");
 
@@ -50,12 +106,9 @@ char user[NPOW_10];
          user, _VERSION_);
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
-  printf("Copyright (C) 2013-2020 David Frantz, "
+  printf("Copyright (C) 2013-2021 David Frantz, "
          "david.frantz@geo.hu-berlin.de\n");
-         
-  printf("With active code contributions from\n");
-  printf("  Franz Schug, franz.schug@geo.hu-berlin.de\n"
-         "  Stefan Ernst, stefan.ernst@geo.hu-berlin.de\n");
+  printf("+ many community contributions.\n");
 
   printf("\nFORCE is free software under the terms of the "
          "GNU General Public License as published by the "
@@ -85,9 +138,7 @@ char user[NPOW_10];
          "This list is based on the specific parameterization "
          "you are using.\n");
   
-  printf("\nThe documentation is available at force-eo.readthedocs.io\n");
-
-  printf("\nTutorials are available at davidfrantz.github.io/tutorials\n");
+  printf("\nThe documentation and tutorials are available at force-eo.readthedocs.io\n");
 
   printf("\nFORCE consists of several components:\n"
          "\nLevel 1 Archiving System (L1AS)\n"

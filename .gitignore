@@ -4,4 +4,3 @@ docs/build
 python/test*
 *.pyc
 .vscode
-

@@ -21,75 +21,35 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Training paramater header
+User-defined function header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef PARAM_TRAIN_H
-#define PARAM_TRAIN_H
+#ifndef UDF_HL_H
+#define UDF_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/param-cl.h"
+#include "../cross-level/brick-cl.h"
+#include "../higher-level/param-hl.h"
+#include "../higher-level/read-ard-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// support vector parameters
 typedef struct {
-  int max_iter;
-  float accuracy;
-  int kfold;
-  float *Cgrid;
-  float *Gammagrid;
-  int nCgrid, nGammagrid;
-  float P;
-} par_sv_t;
+  short **pyp_;
+  short **rsp_;
+} udf_t;
 
-// decision tree parameters
-typedef struct {
-  int min_sample;
-  int max_depth;
-  float reg_accuracy;
-} par_dt_t;
+#include "../higher-level/py-udf-hl.h"
 
-// random forest parameters
-typedef struct {
-  int ntree;
-  float oob_accuracy;
-  int feature_subset;
-  int feature_importance;
-  par_dt_t dt;
-} par_rf_t;
+brick_t **udf_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
 
-// training parameters
-typedef struct {
-  params_t *params;
-  char f_par[NPOW_10];
-  char *f_feature;
-  char *f_response;
-  char *f_model;
-  char *f_log;
-  par_sv_t sv;
-  par_rf_t rf;
-  int method;
-  float per_train;
-  int random_split;
-  int response_var;
-  char **class_weights;
-  int nclass_weights;
-  float *priors;
-  int npriors;
-  char log[NPOW_14];
-} par_train_t;
-
-par_train_t *allocate_param_train();
-void free_param_train(par_train_t *train);
-int parse_param_train(par_train_t *train);
 
 #ifdef __cplusplus
 }

@@ -40,7 +40,7 @@ Konami code header
 extern "C" {
 #endif
 
-void check_arg(char *arg);
+void konami_args(char *arg);
 
 #ifdef __cplusplus
 }

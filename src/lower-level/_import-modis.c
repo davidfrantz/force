@@ -29,6 +29,9 @@ This program imports MODIS 09 GA products to FORCE
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
 
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/dir-cl.h"
 #include "../cross-level/string-cl.h"
@@ -42,6 +45,87 @@ This program imports MODIS 09 GA products to FORCE
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "cpl_string.h"     // various convenience functions for strings
 #include "gdal.h"           // public (C callable) GDAL entry points
+
+
+typedef struct {
+  int n;
+  char fimg[NPOW_10];
+  char dout[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] image output-dir\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'image':      input image (HDF)\n");
+  printf("  - 'output-dir': output directory\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Import MODIS surface reflectance daily\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+
+  // non-optional parameters
+  args->n = 2;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fimg, NPOW_10, argv[optind++]);
+      copy_string(args->dout, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
 
 
 int get_modqa(ushort *modqa_, int index, int p, int bitfields){
@@ -164,10 +248,8 @@ int p, b;
 
 
 int main ( int argc, char *argv[] ){
+args_t args;
 
-
-char *finp = NULL;
-char *dout = NULL;
 char binp[NPOW_10];
 char ext[NPOW_10];
 char dtile[NPOW_10];
@@ -205,27 +287,19 @@ char proj[NPOW_10];
 short nodata = -9999;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 3){
-    printf("usage: %s hdf-image out-dir\n\n", argv[0]);
-    return FAILURE;
-  }
+  parse_args(argc, argv, &args);
 
-
-  // input args
-  finp = argv[1];
-  dout = argv[2];
 
   // basename and extension
-  basename_with_ext(finp, binp, NPOW_10);
-  extension2(finp, ext, NPOW_10);
+  basename_with_ext(args.fimg, binp, NPOW_10);
+  extension2(args.fimg, ext, NPOW_10);
 
   // some tests on input parameters
-  if (!fileexist(finp)){
-    printf("input file %s does not exist.\n\n", finp); return FAILURE;}
+  if (!fileexist(args.fimg)){
+    printf("input file %s does not exist.\n\n", args.fimg); return FAILURE;}
 
-  if (!fileexist(dout)){
-    printf("output directory %s does not exist.\n\n", dout); return FAILURE;}
+  if (!fileexist(args.dout)){
+    printf("output directory %s does not exist.\n\n", args.dout); return FAILURE;}
 
   if (strstr(binp, "09GA") == NULL){
     printf("input file %s is not a MODIS 09GA product.\n\n", binp); return FAILURE;}
@@ -257,20 +331,20 @@ short nodata = -9999;
   doy2md(doy, &month, &day); // not accurate in leap years
   set_date(&date, year, month, day);
   
-  nchar = snprintf(dtile, NPOW_10, "%s/X%04d_Y%04d", dout, tx, ty);
+  nchar = snprintf(dtile, NPOW_10, "%s/X%04d_Y%04d", args.dout, tx, ty);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling output directory\n");return FAILURE;}
 
   if (!fileexist(dtile)) createdir(dtile);
 
   // open input dataset
-  if ((fp = GDALOpen(finp, GA_ReadOnly)) == NULL){
-    printf("unable to open %s\n\n", finp); return FAILURE;}
+  if ((fp = GDALOpen(args.fimg, GA_ReadOnly)) == NULL){
+    printf("unable to open %s\n\n", args.fimg); return FAILURE;}
 
   // get SDS listing
   sds = GDALGetMetadata(fp, "SUBDATASETS");
   if (CSLCount(sds) == 0){
-    printf("unable to retrieve SDS list from %s\n\n", finp);return FAILURE;}
+    printf("unable to retrieve SDS list from %s\n\n", args.fimg);return FAILURE;}
   //CSLPrint(sds, NULL);
   
 
@@ -346,7 +420,7 @@ short nodata = -9999;
 
   write_brick(BOA);
   write_brick(QAI);
-  write_modcube(dout, proj);
+  write_modcube(args.dout, proj);
 
   free_brick(BOA);
   free_brick(QAI);

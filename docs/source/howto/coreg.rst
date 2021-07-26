@@ -211,7 +211,7 @@ Eventually, the logfiles reports on the original shift in X- and Y-direction bet
 .. figure:: img/tutorial-coreg-shift.png
    :scale: 33 %
 
-   *Density plot of detected image shifts (~1500 images investigated). |copy| Philippe Rufin*
+   *Density plot of detected image shifts (~1500 images investigated).* |copy| *Philippe Rufin*
 
 
 ------------

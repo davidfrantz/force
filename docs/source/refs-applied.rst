@@ -6,7 +6,16 @@ Applied Publications
 This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
+* **in press**
+
+  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (in press): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment.
+  | https://doi.org/10.1016/j.rse.2021.112558
+
+
 * **2021**
+
+  | J. Ardö (2021). A Sentinel-2 Dataset for Uganda. Data, 6. 
+  | https://doi.org/10.3390/data6040035
 
   | S. Cooper, A. Okujeni, D. Pflugmacher, S. van der Linden, and Hostert, P. (2021): Combining simulated hyperspectral EnMAP and Landsat time series for forest aboveground biomass mapping. International Journal of Applied Earth Observation and Geoinformation, 98, 102307. 
   | https://doi.org/10.1016/j.jag.2021.102307
@@ -16,6 +25,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | H. Haberl, D. Wiedenhofer, F. Schug, D. Frantz, D. Virág, C. Plutzar, K. Gruhler, J. Lederer, G. Schiller, T. Fishman, M. Lanau, A. Gattringer, T. Kemper, G. Liu, H. Tanikawa, S. van der Linden, and P. Hostert (2021): High-Resolution Maps of Material Stocks in Buildings and Infrastructures in Austria and Germany. Environmental Science & Technology.
   | https://doi.org/10.1021/acs.est.0c05642
+
+  | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
+  | https://doi.org/10.1371/journal.pone.0249044
 
 
 * **2020**

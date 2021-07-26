@@ -41,7 +41,7 @@ int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir);
 int list_ard_filter_ce(int cemin, int cemax, dir_t dir);
 
 
-/** Reducce spatial resolution using an approximate Point Spread Function
+/** Reduce spatial resolution using an approximate Point Spread Function
 +++ This function will convolve the full-res image with a Gaussian Lowpass
 +++ with filter size based upon the two resolutions. Afterward, the image
 +++ is reduced using boxcar averaging.
@@ -1056,12 +1056,18 @@ double tol = 5e-3;
   
   if (ard_type == _ARD_REF_ || ard_type == _ARD_AUX_){
     if (date_ard(&date, bname) != SUCCESS){
-      printf("getting date of ARD failed\n");}
+      printf("getting date of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (product_ard(prd, NPOW_02, bname) != SUCCESS){
-      printf("getting product of ARD failed\n");}
+      printf("getting product of ARD failed (%s)\n", bname); 
+      exit(FAILURE);
+    }
     if (sen != NULL){
       if (sensor_ard(&sid, sen, bname) != SUCCESS){
-        printf("getting sensor of ARD failed\n");}
+        printf("getting sensor of ARD failed (%s)\n", bname); 
+        exit(FAILURE);
+      }
     }
   } else init_date(&date);
     
@@ -1090,7 +1096,9 @@ double tol = 5e-3;
     nb     = read_nb;
     nbands = read_nb;
   }
-  //printf("reading %d bands.\n", nb);
+  #ifdef FORCE_DEBUG
+  printf("reading %d bands.\n", nb);
+  #endif
 
 
 
@@ -1176,7 +1184,12 @@ double tol = 5e-3;
   for (b=0, b_brick=0; b<nbands; b++){
 
     if (ard_type == _ARD_REF_){
-      if ((b_disc = sen->band[sid][b]) < 0) continue;
+      if ((b_disc = sen->band[sid][b])  < 0) continue;
+      if ((b_disc = sen->band[sid][b]) == 0){
+        set_brick_domain(brick, b_brick, sen->domain[b]);
+        b_brick++;
+        continue;
+      }
     } else {
       b_disc = offb+b;
     }
@@ -1221,7 +1234,10 @@ double tol = 5e-3;
       }
     }
     
-    if (ard_type == _ARD_REF_) set_brick_domain(brick, b_brick, sen->domain[b]);
+    if (ard_type == _ARD_REF_){
+      set_brick_domain(brick, b_brick, sen->domain[b]);
+      set_brick_bandname(brick, b_brick, sen->domain[b]);
+    }
 
     b_brick++;
 

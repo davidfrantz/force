@@ -22,7 +22,7 @@
 #
 ##########################################################################
 
-# Copyright (C) 2020 Stefan Ernst
+# Copyright (C) 2020-2021 Stefan Ernst
 # Contact: stefan.ernst@hu-berlin.de
 
 # This script downloads Landsat and Sentinel-2 Level 1 data from GCS
@@ -57,7 +57,7 @@ is_smaller() {
   awk -v val1="$1" -v val2="$2" 'BEGIN {print (val1 < val2)}'
 }
 
-round() { 
+round() {
   local valmult=$(awk -v val="$1" -v digits="$2" 'BEGIN {print (val * 10^digits)}')
   awk -v val="$valmult" -v digits="$2" 'BEGIN {print (int(val+0.5)) / 10^digits}'
 }
@@ -125,12 +125,13 @@ LANDSAT=0
 SENTINEL=0
 UPDATE=0
 KEEPMETA=0
+CHECKLOGS=0
 
 # Negative coordinates: change ( -) to %dummy% if followed by integer: prevent interpretation as option by getopt
-ARGS=$(echo "$@" | sed -E "s/ -([0-9])/ %dummy%\1/g")
+ARGS=$(echo "$*" | sed -E "s/ -([0-9])/ %dummy%\1/g")
 set -- $ARGS
 
-ARGS=`getopt -o c:d:nks:t:u -l cloudcover:,daterange:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
+ARGS=`getopt -o c:d:l:nks:t:u -l cloudcover:,daterange:,logs:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
 if [ $? != 0 ] ; then show_help "$(printf "%s\n       " "Error in command line options. Please check your options.")"; fi
 eval set -- "$ARGS"
 
@@ -150,6 +151,10 @@ while :; do
       DRYRUN=1 ;;
     -k|--keep-meta)
       KEEPMETA=1 ;;
+    -l|--logs)
+      CHECKLOGS=1
+      LPATH="$2"
+      shift ;;
     -s|--sensors)
       SENSIN="$2"
       shift ;;
@@ -158,10 +163,10 @@ while :; do
       shift ;;
     -u|--update)
       UPDATE=1 ;;
-    --) 
+    --)
       shift; break ;;
     *)
-      break 
+      break
   esac
   shift
 done
@@ -169,7 +174,6 @@ done
 # change %dummy% back to -
 ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
 eval set -- "$ARGS"
-
 
 # Check for update flag and update metadata catalogue if set
 if [ $UPDATE -eq 1 ]; then
@@ -210,7 +214,7 @@ QUEUE="$3"
 AOI="$4"
 
 # check for empty arguments
-if [[ -z $METADIR || -z $POOL || -z $QUEUE || -z $AOI || -z $CCMIN || -z $CCMAX || -z $DATEMIN || -z $DATEMAX || -z $SENSIN || -z $TIER ]]; then
+if [[ -z $CHECKLOGS || -z $METADIR || -z $POOL || -z $QUEUE || -z $AOI || -z $CCMIN || -z $CCMAX || -z $DATEMIN || -z $DATEMAX || -z $SENSIN || -z $TIER ]]; then
   show_help "$(printf "%s\n       " "One or more arguments are undefined, please check the following" "" "Metadata directory: $METADIR" "Level-1 pool: $POOL" "Queue: $QUEUE" "AOI: $AOI" "Sensors: $SENSIN" "Start date: $DATEMIN, End date: $DATEMAX" "Cloud cover minimum: $CCMIN, cloud cover maximum: $CCMAX" "Tier (Landsat only): $TIER")"
 fi
 
@@ -247,6 +251,25 @@ if [ ! -w "$POOL" ]; then
   show_help "$(printf "%s\n       " "Level 1 datapool folder does not exist or is not writeable.")"
 fi
 
+# check if LOGS folder exists and create list of processed scenes
+if [ $CHECKLOGS -eq 1 ]; then
+  if [ ! -d "$LPATH" ]; then
+    show_help "$(printf "%s\n       " "Log folder does not seem to exist.")"
+  fi
+fi
+
+# set gsutil config var (necessary for docker installations)
+if [ -z "$FORCE_CREDENTIALS" ]; then
+  BOTO_CONFIG=$HOME/.boto
+else
+  BOTO_CONFIG=$FORCE_CREDENTIALS/.boto
+fi
+export BOTO_CONFIG
+if [ ! -r $BOTO_CONFIG ]; then
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
+fi
+
+
 # ======================================
 # check type of AOI
 # 1 - shapefile
@@ -268,7 +291,7 @@ if [ -f $AOI ]; then
       grep -U -q $'\015' $AOI; then
         show_help "$(printf "%s\n       " "AOI file seems to contain CR characters." "Did you create this file under Windows/MacOS?" "Please make sure this file uses UNIX end of line (LF) and does not contain whitespace.")"
     fi
-    
+
     AOI=$(cat $AOI | sed 's/,/./g')
     OGR=0
   fi
@@ -353,7 +376,7 @@ get_data() {
 
   if [ "$AOITYPE" -eq 1 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
-    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S)
+    OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S-%N)
     mkdir "$OGRTEMP"
     # get first layer of vector file and reproject to epsg4326
     AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
@@ -364,11 +387,11 @@ get_data() {
     WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetCapabilities&typename="$SATELLITE"&bbox="$BBOX
     ogr2ogr -f "ESRI Shapefile" "$OGRTEMP"/$SATELLITE.shp WFS:"$WFSURL" -append -update
     # intersect AOI and tiles
-    # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs | 
+    # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs |
     TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, aoi_reprojected WHERE ST_Intersects($SATELLITE.geometry, aoi_reprojected.geometry)" "$OGRTEMP" | xargs -n 1 | sort -u | xargs | sed 's/PRFID,//')
     TILES="_"$(echo $TILERAW | sed 's/ /_|_/g')"_"
     rm -rf "$OGRTEMP"
-    
+
   elif [ "$AOITYPE" -eq 2 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
     WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
@@ -409,25 +432,56 @@ get_data() {
     LINKS=$(grep -E $TILES $METACAT | grep -E $(echo ""$SENSORS"" | sed 's/ /_|/g')"_" | grep -E $(echo "_"$TIER | sed 's/,/,|_/g')"," | awk -F "," '{OFS=","} {gsub("-","",$5)}1' | awk -v start="$DATEMIN" -v stop="$DATEMAX" -v clow="$CCMIN" -v chigh="$CCMAX" -F "," '$5 >= start && $5 <= stop && $6 == 01 && $12 >= clow && $12 <= chigh' | sort -t"," -k 2.27,2.34r | awk -F"," '{OFS=","} !a[$10$11,$5]++' | sort -t"," -k 5)
   fi
 
-  METAFNAME="$POOL"/csd_metadata_$(date +%FT%H-%M-%S).txt
-  printf "%s" "$LINKS" > $METAFNAME
-  case $SATELLITE in
-    sentinel2) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
-    landsat) TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$17/1048576} END {printf "%f", s}') ;;
-  esac
-  NSCENES=$(sed -n '$=' $METAFNAME)
+  METAFNAME="$POOL"/csd_metadata_"$SATELLITE"_$(date +%FT%H-%M-%S-%N).txt
+  printf "%s" "$LINKS" > "$METAFNAME"
+  NSCENES=$(sed -n '$=' "$METAFNAME")
+  
+  # ============================================================
+  # Check log folder for processed products
+  if [[ $CHECKLOGS -eq 1 ]]; then
+
+    LOGS=$(find "$LPATH" -maxdepth 1 -type f -name '*.log' | rev | cut -d/ -f1 | rev | cut -d. -f1)
+    LOGSFNAME="$POOL"/logs_$(date +%FT%H-%M-%S-%N).txt
+    printf "%s\n" "$LOGS" > "$LOGSFNAME"
+    # make sure there are log files present in the provided path
+    if [ -z "$LOGS" ]; then
+      printf "%s\n" "Error: No FORCE Level 2 log files found in ""$LPATH"" " "Please make sure you provided the correct file path" ""
+      exit 1
+    fi
+
+    LINKS=$(grep -v -f $LOGSFNAME $METAFNAME) || true  # bypass set -e to avoid exiting when all scenes were already processed
+    rm "$LOGSFNAME"
+
+    if [[ -z $LINKS ]]; then
+      printf "%s\n" "$NSCENES $PRINTNAME Level 1 scenes found." "According to the log files, all of these have already been processed. Exiting."
+      rm "$METAFNAME"
+      exit 0
+    fi
+    
+    printf "%s\n" "$LINKS" >| "$METAFNAME"
+    NSCENESUPDATED=$(wc -l "$METAFNAME" | cut -d" " -f1)
+    NPROCESSED=$(( $NSCENES - $NSCENESUPDATED ))
+    NSCENES="$NSCENESUPDATED"
+  fi
+  
   if [ $KEEPMETA -eq 0 ]; then
-    rm $METAFNAME
+    rm "$METAFNAME"
   else
-    sed -i "1 s/^/$(head -n 1 $METACAT)\n/" $METAFNAME
-    mv $METAFNAME "${METAFNAME/_metadata_/_metadata_"$SATELLITE"_}"
+    sed -i "1 s/^/$(head -n 1 $METACAT)\n/" "$METAFNAME"
   fi
 
 
   # ============================================================
   # Get total number and size of scenes matching criteria
-  UNIT="MB"
+  
+  case $SATELLITE in
+    sentinel2) 
+      TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$6/1048576} END {printf "%f", s}') ;;
+    landsat) 
+      TOTALSIZE=$(printf "%s" "$LINKS" | awk -F "," '{s+=$17/1048576} END {printf "%f", s}') ;;
+  esac  
   PRSIZE=$TOTALSIZE
+  UNIT="MB"
   if [ ${PRSIZE%%.*} -gt 1024 ]; then
     PRSIZE=$(echo $PRSIZE | awk '{print $1 / 1024}')
     UNIT="GB"
@@ -442,12 +496,14 @@ get_data() {
   fi
   PRSIZE=$(round $PRSIZE 2)
 
-  if [ -z $NSCENES ];then
+  if [ -z $NSCENES ]; then
     printf "%s\n" "There were no $PRINTNAME Level 1 scenes found matching the search criteria." ""
   else
     printf "%s\n" "$NSCENES $PRINTNAME Level 1 scenes matching criteria found" "$PRSIZE$UNIT data volume found."
+    if [ $CHECKLOGS -eq 1 ]; then
+      printf "%s\n" "" "$(( $NSCENES + $NPROCESSED )) scenes found in total." "$NPROCESSED scenes from this search were already processed and are not included in the results."
+    fi
   fi
-
 
   # ============================================================
   # Download scenes
@@ -457,43 +513,38 @@ get_data() {
 
     POOL=$(cd "$POOL"; pwd)
     printf "%s\n" "" "Starting to download "$NSCENES" "$PRINTNAME" Level 1 scenes" "" "" "" "" ""
-    
+
     ITER=1
+    
     for LINK in $LINKS
     do
-      SCENEID=$(echo $LINK | cut -d"," -f 2)
-
-      if [ $SATELLITE = "sentinel2" ]; then
+      
+    if [ $SATELLITE = "sentinel2" ]; then
+        SCENEID=$(echo $LINK | cut -d"," -f14 | sed 's+^.*/++')
         TILE=$(echo $LINK | cut -d"," -f 1 | grep -o -E "T[0-9]{2}[A-Z]{3}")
         URL=$(echo $LINK | cut -d"," -f 14)
         FILESIZEBYTE=$(echo $LINK | cut -d"," -f 6)
       elif [ $SATELLITE = "landsat" ]; then
+        SCENEID=$(echo $LINK | cut -d"," -f 2)
         TILE=$(echo $SCENEID | cut -d"_" -f 3)
         URL=$(echo $LINK | cut -d"," -f 18)
         FILESIZEBYTE=$(echo $LINK | cut -d, -f 17)
       fi
       FILESIZE=$(echo $(echo $FILESIZEBYTE | awk '{print $1 / 1048576}') | cut -d"." -f1)
-      
+
       show_progress
-      
+
       TILEPATH="$POOL"/$TILE
       SCENEPATH="$TILEPATH"/$SCENEID
-      if [ $SATELLITE = "sentinel2" ]; then
-        if [[ $SCENEID == *"_OPER_"* ]]; then
-          SCENEID=$(echo $URL | rev | cut -d"/" -f1 | rev | cut -d"." -f1)
-        fi
-        SCENEPATH="$TILEPATH"/$SCENEID".SAFE"
-      fi
-      # Check if scene already exists, download anyway if gsutil temp files are present
       if [ -d "$SCENEPATH" ]; then
         if ! ls -R "$SCENEPATH" | grep -q ".gstmp" && ! [ -z "$(ls -A $SCENEPATH)" ]; then
           printf "\e[500D\e[4A\e[2KScene "$SCENEID"("$ITER" of "$NSCENES") exists, skipping...\e[4B"
-          
+
           ((ITER++))
           continue
         fi
       fi
-      
+
       # create target directory if it doesn't exist
       if [ ! -w "$TILEPATH" ]; then
         mkdir "$TILEPATH"
@@ -509,7 +560,7 @@ get_data() {
       lockfile-create $QUEUE
       echo "$SCENEPATH QUEUED" >> $QUEUE
       lockfile-remove $QUEUE
- 
+
       ((ITER++))
     done
   fi

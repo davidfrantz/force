@@ -86,7 +86,7 @@ int p, t;
 
 
 /** This function computes a spectral index time series, with Normalized
-+++ differenced method, e.g. NDVI: (b1-b2/(b1+b2)
++++ differenced method, e.g. NDVI: (b1-b2)/(b1+b2)
 --- ard:    ARD
 --- mask_:  mask image
 --- ts:     pointer to instantly useable TSA image arrays
@@ -135,6 +135,111 @@ float tmp, ind, scale = 10000.0;
   return;
 }
 
+
+/** This function computes a spectral index time series, with a Ratio - 1,
++++ e.g. CIre: (b1/b2)-1
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_ratio_minus1(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+          ind = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+          if (ard[t].dat[b2][p] == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
+            ts->tss_[t][p] = nodata;
+          } else {
+            ts->tss_[t][p] = (short)(ind*scale);
+          }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
+/** This function computes an MSRre-like time series,
++++ MSRre: ((b1/b2)-1)/sqrt((b1/b2)+1)
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_msrre(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
+int p, t;
+float upper, lower, ind, scale = 10000.0;
+
+
+  #pragma omp parallel private(t,upper,lower,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+          if (ard[t].dat[b2][p] != 0){
+            upper = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+            lower = sqrt((ard[t].dat[b1][p]/ard[t].dat[b2][p])+1);
+            ind = upper/lower;
+            if (lower == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
+              ts->tss_[t][p] = nodata;
+            } else {
+              ts->tss_[t][p] = (short)(ind*scale);
+            }
+          } else {
+            ts->tss_[t][p] = nodata;
+          }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
 
 /** This function computes a spectral index time series, with kernelized
 +++ Normalized differenced method, e.g. NDVI: (b1-b2/(b1+b2)
@@ -826,6 +931,50 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_KNV_:
       cite_me(_CITE_KNDVI_);
       index_kernelized(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
+      break;
+    case _IDX_ND1_:
+      cite_me(_CITE_NDRE1_);
+      index_differenced(ard, mask_, ts, sen->rededge2, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_ND2_:
+      cite_me(_CITE_NDRE2_);
+      index_differenced(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_CRE_:
+      cite_me(_CITE_CIre_);
+      index_ratio_minus1(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR1_:
+      cite_me(_CITE_NDVIre1_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_NR2_:
+      cite_me(_CITE_NDVIre2_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_NR3_:
+      cite_me(_CITE_NDVIre3_);
+      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge3, nc, nt, nodata);
+      break;
+    case _IDX_N1n_:
+      cite_me(_CITE_NDVIre1n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_N2n_:
+      cite_me(_CITE_NDVIre2n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge2, nc, nt, nodata);
+      break;
+    case _IDX_N3n_:
+      cite_me(_CITE_NDVIre3n_);
+      index_differenced(ard, mask_, ts, sen->nir, sen->rededge3, nc, nt, nodata);
+      break;
+    case _IDX_Mre_:
+      cite_me(_CITE_MSRre_);
+      index_msrre(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
+      break;
+    case _IDX_Mrn_:
+      cite_me(_CITE_MSRren_);
+      index_msrre(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
       break;
     default:
       printf("unknown INDEX\n");

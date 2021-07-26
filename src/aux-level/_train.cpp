@@ -24,15 +24,99 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 This program trains (and validates) machine learning models
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
+#include <stdio.h>   // core input and output functions
+#include <stdlib.h>  // standard general utilities library
+
+#include <ctype.h>   // testing and mapping characters
+#include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
+#include "../cross-level/string-cl.h"
 #include "../cross-level/utils-cl.h"
 #include "../aux-level/param-train-aux.h"
 #include "../aux-level/train-aux.h"
 
 
+typedef struct {
+  int n;
+  char fprm[NPOW_10];
+} args_t;
+
+
+void usage(char *exe, int exit_code){
+
+
+  printf("Usage: %s [-h] [-v] [-i] parameter-file\n", exe);
+  printf("\n");
+  printf("  -h  = show this help\n");
+  printf("  -v  = show version\n");
+  printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  Positional arguments:\n");
+  printf("  - 'parameter-file': ML parameter file\n");
+  printf("\n");
+
+  exit(exit_code);
+  return;
+}
+
+
+void parse_args(int argc, char *argv[], args_t *args){
+int opt;
+
+
+  opterr = 0;
+
+  // optional parameters
+  while ((opt = getopt(argc, argv, "hvi")) != -1){
+    switch(opt){
+      case 'h':
+        usage(argv[0], SUCCESS);
+      case 'v':
+        printf("FORCE version: %s\n", _VERSION_);
+        exit(SUCCESS);
+      case 'i':
+        printf("Train (and validate) Machine Learning models\n");
+        exit(SUCCESS);
+      case '?':
+        if (isprint(optopt)){
+          fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+        } else {
+          fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+        }
+        usage(argv[0], FAILURE);
+      default:
+        fprintf(stderr, "Error parsing arguments.\n");
+        usage(argv[0], FAILURE);
+    }
+  }
+
+  // non-optional parameters
+  args->n = 1;
+
+  if (optind < argc){
+    konami_args(argv[optind]);
+    if (argc-optind == args->n){
+      copy_string(args->fprm, NPOW_10, argv[optind++]);
+    } else if (argc-optind < args->n){
+      fprintf(stderr, "some non-optional arguments are missing.\n");
+      usage(argv[0], FAILURE);
+    } else if (argc-optind > args->n){
+      fprintf(stderr, "too many non-optional arguments.\n");
+      usage(argv[0], FAILURE);
+    }
+  } else {
+    fprintf(stderr, "non-optional arguments are missing.\n");
+    usage(argv[0], FAILURE);
+  }
+
+  return;
+}
+
+
 int main ( int argc, char *argv[] ){
+args_t args;
 par_train_t *train = NULL;
 int f = 0, s, k, j, n_feature, n_sample, n_sample2;
 int n_sample_train, n_sample_val;
@@ -56,18 +140,12 @@ Ptr<TrainData> TrainData;
 time_t TIME;
 
 
-  if (argc >= 2) check_arg(argv[1]);
-  if (argc != 2){
-    printf("usage: %s parameter-file\n\n", argv[0]);
-    return FAILURE;
-  }
-
   time(&TIME);
+
+  parse_args(argc, argv, &args);
   
   train = allocate_param_train();
-  
-  train->f_par = argv[1];
-  check_arg(argv[1]);
+  copy_string(train->f_par, NPOW_10, args.fprm);
 
   // parse parameter file
   if (parse_param_train(train) == FAILURE){

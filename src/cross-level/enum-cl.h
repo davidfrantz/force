@@ -47,7 +47,7 @@ typedef struct{
 } tagged_enum_t;
 
 // function return codes
-enum { SUCCESS = 0, FAILURE = -1, CANCEL = 1 };
+enum { SUCCESS = 0, FAILURE = 1, CANCEL = 10 };
 
 
 // dimensions
@@ -57,9 +57,9 @@ enum { _X_, _Y_, _Z_ };
 enum { _MIN_, _MAX_ };
 
 // modules
-enum { _LL_LEVEL2_, _HL_BAP_,    _HL_TSA_, _HL_CSO_, _HL_CFI_, 
-       _HL_L2I_,    _HL_ML_,     _HL_SMP_, _HL_TXT_, _HL_LSM_, 
-       _HL_LIB_,    _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
+       _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
+       _HL_LIB_,    _HL_UDF_, _AUX_TRAIN_, _AUX_SYNTHMIX_ };
 
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
@@ -155,7 +155,9 @@ enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_,
        _IDX_NBR_, _IDX_ARV_, _IDX_SAV_, _IDX_SRV_, _IDX_TCB_, _IDX_TCG_, 
        _IDX_TCW_, _IDX_TCD_, _IDX_NDB_, _IDX_NDW_, _IDX_MNW_, _IDX_NDS_,
        _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_SW0_,
-       _IDX_KNV_, _IDX_LENGTH_};
+       _IDX_KNV_, _IDX_ND1_, _IDX_ND2_, _IDX_CRE_, _IDX_NR1_, _IDX_NR2_,
+       _IDX_NR3_, _IDX_N1n_, _IDX_N2n_, _IDX_N3n_, _IDX_Mre_, _IDX_Mrn_,
+       _IDX_LENGTH_};
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
@@ -209,29 +211,33 @@ enum { _FLD_YEAR_, _FLD_QUARTER_, _FLD_MONTH_, _FLD_WEEK_, _FLD_DOY_, _FLD_LENGT
 enum { _PART_TOTAL_, _PART_BEFORE_, _PART_AFTER_, _PART_LENGTH_ };
 
 // trend
-enum { _TRD_MEAN_, _TRD_OFFSET_, _TRD_SLOPE_,
-       _TRD_GAIN_, _TRD_RSQ_,    _TRD_SIG_,
-       _TRD_RMSE_, _TRD_MAE_,    _TRD_MAXE_,
-       _TRD_NUM_,  _TRD_LENGTH_ };
-       
+enum { _TRD_MEAN_,  _TRD_OFFSET_, 
+       _TRD_SLOPE_, _TRD_PRC_GAIN_, _TRD_ABS_GAIN_, 
+       _TRD_RSQ_,   _TRD_SIG_,
+       _TRD_RMSE_,  _TRD_MAE_,      _TRD_MAXE_,
+       _TRD_NUM_,   _TRD_LEN_,      _TRD_LENGTH_ };
+
 // change, aftereffect, trend
-enum { _CAT_CHANGE_,       _CAT_LOSS_, 
+enum { _CAT_CHANGE_,          _CAT_LOSS_, 
        _CAT_YEAR_,
-       _CAT_TOTAL_MEAN_,   _CAT_TOTAL_OFFSET_,
-       _CAT_TOTAL_SLOPE_,  _CAT_TOTAL_GAIN_,
-       _CAT_TOTAL_RSQ_,    _CAT_TOTAL_SIG_,
-       _CAT_TOTAL_RMSE_,   _CAT_TOTAL_MAE_,
-       _CAT_TOTAL_MAXE_,   _CAT_TOTAL_NUM_,
-       _CAT_BEFORE_MEAN_,  _CAT_BEFORE_OFFSET_,
-       _CAT_BEFORE_SLOPE_, _CAT_BEFORE_GAIN_,
-       _CAT_BEFORE_RSQ_,   _CAT_BEFORE_SIG_,
-       _CAT_BEFORE_RMSE_,  _CAT_BEFORE_MAE_,
-       _CAT_BEFORE_MAXE_,  _CAT_BEFORE_NUM_,
-       _CAT_AFTER_MEAN_,   _CAT_AFTER_OFFSET_,
-       _CAT_AFTER_SLOPE_,  _CAT_AFTER_GAIN_,
-       _CAT_AFTER_RSQ_,    _CAT_AFTER_SIG_,
-       _CAT_AFTER_RMSE_,   _CAT_AFTER_MAE_,
-       _CAT_AFTER_MAXE_,   _CAT_AFTER_NUM_,
+       _CAT_TOTAL_MEAN_,      _CAT_TOTAL_OFFSET_,
+       _CAT_TOTAL_SLOPE_,     _CAT_TOTAL_PCT_GAIN_,
+       _CAT_TOTAL_ABS_GAIN_,  _CAT_TOTAL_RSQ_, 
+       _CAT_TOTAL_SIG_,       _CAT_TOTAL_RMSE_,   
+       _CAT_TOTAL_MAE_,       _CAT_TOTAL_MAXE_, 
+       _CAT_TOTAL_NUM_,       _CAT_TOTAL_LEN_,
+       _CAT_BEFORE_MEAN_,     _CAT_BEFORE_OFFSET_,
+       _CAT_BEFORE_SLOPE_,    _CAT_BEFORE_PCT_GAIN_,
+       _CAT_BEFORE_ABS_GAIN_, _CAT_BEFORE_RSQ_,
+       _CAT_BEFORE_SIG_,      _CAT_BEFORE_RMSE_, 
+       _CAT_BEFORE_MAE_,      _CAT_BEFORE_MAXE_, 
+       _CAT_BEFORE_NUM_,      _CAT_BEFORE_LEN_,
+       _CAT_AFTER_MEAN_,      _CAT_AFTER_OFFSET_,
+       _CAT_AFTER_SLOPE_,     _CAT_AFTER_PCT_GAIN_,
+       _CAT_AFTER_ABS_GAIN_,  _CAT_AFTER_RSQ_,  
+       _CAT_AFTER_SIG_,       _CAT_AFTER_RMSE_, 
+       _CAT_AFTER_MAE_,       _CAT_AFTER_MAXE_,  
+       _CAT_AFTER_NUM_,       _CAT_AFTER_LEN_,
        _CAT_LENGTH_ };
 
 // texture metrics
@@ -243,7 +249,7 @@ enum { _LSM_MPA_, _LSM_UCI_, _LSM_FDI_, _LSM_EDD_, _LSM_NBR_,
        _LSM_EMS_, _LSM_AVG_, _LSM_STD_, _LSM_GEO_, _LSM_MAX_, _LSM_ARE_, _LSM_LENGTH_ };
 
 // satellite mission
-enum { LANDSAT, SENTINEL2, _MISSION_LENGTH_ };
+enum { LANDSAT, SENTINEL2, _UNKNOWN_, _MISSION_LENGTH_ };
 
 // sun/view angles
 enum { ZEN, AZI, cZEN, cAZI, sZEN, sAZI, tZEN, tAZI };
@@ -255,7 +261,7 @@ enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, _RESAMPLE_LENGTH_ };
 enum { _RES_MERGE_NONE_, _RES_MERGE_REGRESSION_, _RES_MERGE_IMPROPHE_, _RES_MERGE_STARFM_, _RES_MERGE_LENGTH_ };
 
 // query type
-enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_LT_, _QUERY_LENGTH_ };
+enum  { _QUERY_EQ_, _QUERY_GT_, _QUERY_GE_, _QUERY_LT_, _QUERY_LE_, _QUERY_LENGTH_ };
 
 // kernel type
 enum { _KERNEL_SQUARE_, _KERNEL_CIRCLE_, _KERNEL_LENGTH_ };
@@ -266,6 +272,9 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 
 // clock type
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
+
+// user-defined function type
+enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
@@ -291,6 +300,7 @@ extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 
 #ifdef __cplusplus
 }

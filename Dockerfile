@@ -48,11 +48,15 @@ RUN echo "building FORCE" && \
   make clean && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
-  force
+  force && \
+# clone FORCE UDF
+  git clone https://github.com/davidfrantz/force-udf.git
 
 FROM davidfrantz/base:latest as force
 
-COPY --from=force_builder $HOME/bin $HOME/bin
+COPY --chown=docker:docker --from=force_builder $HOME/bin $HOME/bin
+COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
 
 WORKDIR /home/docker
 
+CMD ["force"]

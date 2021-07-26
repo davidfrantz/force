@@ -3,9 +3,15 @@
 Dependencies
 ============
 
-There are a number of required open-source dependencies. The suggested installation procedures are tested with ``Ubuntu 18.04 LTS``. 
+There are a number of required open-source dependencies. The suggested installation procedures are tested with ``Ubuntu 18.04 LTS`` and ``Ubuntu 20.04 LTS``. 
 
 FORCE can also be installed on other Liunx distributions (e.g. CentOS). The installation of packages generally works similarly, but some adaptation might be needed.
+
+.. note::
+   As FORCE is being developed further, dependencies are growing, and installation becomes more complex.
+   Thus, we suggest to consider using FORCE with Docker or Singularity, see :ref:`docker`.
+   This allows you to skip the complete installation, and to always use the latest FORCE version.
+
 
 * **GNU parallel** is used for some parallelization tasks.
   We developed the code using version 20140322.
@@ -114,6 +120,31 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
   .. code-block:: bash
 
     pip install numpy gsutil
+
+* **pandoc** is used to convert from markdown to html.
+  The software can be installed with:
+
+  .. code-block:: bash
+
+    sudo apt-get install pandoc
+
+* **R** is used by a couple of auxilliary scripts.
+
+  .. code-block:: bash
+
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -sc)-cran40/"
+    sudo apt-get install r-base
+
+* Some **R packages** are needed:
+
+  .. code-block:: bash
+
+    Rscript -e 'install.packages("rmarkdown", repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("plotly",    repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("stringi",   repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("knitr",     repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("dplyr",     repos="https://cloud.r-project.org")'
 
 * **OpenCV** is used for machine learning and image processing tasks
   We developed the code using OpenCV v. 4.1. 

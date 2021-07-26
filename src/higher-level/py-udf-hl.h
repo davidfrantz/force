@@ -21,75 +21,29 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Training paramater header
+Python UDF plug-in header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef PARAM_TRAIN_H
-#define PARAM_TRAIN_H
+#ifndef PYP_HL_H
+#define PYP_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../cross-level/const-cl.h"
-#include "../cross-level/param-cl.h"
+#include "../higher-level/tsa-hl.h"
+#include "../higher-level/udf-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// support vector parameters
-typedef struct {
-  int max_iter;
-  float accuracy;
-  int kfold;
-  float *Cgrid;
-  float *Gammagrid;
-  int nCgrid, nGammagrid;
-  float P;
-} par_sv_t;
-
-// decision tree parameters
-typedef struct {
-  int min_sample;
-  int max_depth;
-  float reg_accuracy;
-} par_dt_t;
-
-// random forest parameters
-typedef struct {
-  int ntree;
-  float oob_accuracy;
-  int feature_subset;
-  int feature_importance;
-  par_dt_t dt;
-} par_rf_t;
-
-// training parameters
-typedef struct {
-  params_t *params;
-  char f_par[NPOW_10];
-  char *f_feature;
-  char *f_response;
-  char *f_model;
-  char *f_log;
-  par_sv_t sv;
-  par_rf_t rf;
-  int method;
-  float per_train;
-  int random_split;
-  int response_var;
-  char **class_weights;
-  int nclass_weights;
-  float *priors;
-  int npriors;
-  char log[NPOW_14];
-} par_train_t;
-
-par_train_t *allocate_param_train();
-void free_param_train(par_train_t *train);
-int parse_param_train(par_train_t *train);
+void register_python(par_hl_t *phl);
+void deregister_python(par_hl_t *phl);
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void term_pyp(par_udf_t *udf);
+int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread);
 
 #ifdef __cplusplus
 }

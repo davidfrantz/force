@@ -1032,7 +1032,7 @@ double *modavg, *mydavg, *modctr, *mydctr;
   if (!failure_terra(d_now)) try__ = 0; else try__ = 99;
 
   nchar = snprintf(ftpname, NPOW_10, 
-    "https://ladsweb.modaps.eosdis.nasa.gov/archive/geoMeta/6/TERRA/%4d/MOD03_%4d-%02d-%02d.txt", 
+    "https://ladsweb.modaps.eosdis.nasa.gov/archive/geoMeta/61/TERRA/%4d/MOD03_%4d-%02d-%02d.txt", 
     d_now.year, d_now.year, d_now.month, d_now.day);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling file name\n"); exit(1);}
@@ -1067,7 +1067,7 @@ double *modavg, *mydavg, *modctr, *mydctr;
     if (!failure_aqua(d_now)) try__ = 0; else try__ = 99;
 
     nchar = snprintf(ftpname, NPOW_10, 
-      "https://ladsweb.modaps.eosdis.nasa.gov/archive/geoMeta/6/AQUA/%4d/MYD03_%4d-%02d-%02d.txt", 
+      "https://ladsweb.modaps.eosdis.nasa.gov/archive/geoMeta/61/AQUA/%4d/MYD03_%4d-%02d-%02d.txt", 
       d_now.year, d_now.year, d_now.month, d_now.day);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling file name\n"); exit(1);}
