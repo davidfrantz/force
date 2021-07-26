@@ -24,7 +24,7 @@
 # Modify the following lines to match your needs
 
 # Installation directory
-BINDIR=/develop
+BINDIR=/usr/bin/local
 
 # Libraries
 GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
