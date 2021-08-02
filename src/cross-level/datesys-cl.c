@@ -135,7 +135,7 @@ int date_overshoot(date_t *d){
 	date_t today;
 	current_date(&today);
 
-	if (d->doy > today.doy && d->year > today.year) {
+	if (d->doy > today.doy && d->year >= today.year) {
 		return 1;
 	} else {
 		return 0;
