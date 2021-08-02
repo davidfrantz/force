@@ -122,6 +122,10 @@ int opt;
         strncpy(cm, optarg+13, 2); cm[2] = '\0';
         strncpy(cd, optarg+15, 2); cd[2] = '\0';
         set_date(&args->date_end, atoi(cy), atoi(cm), atoi(cd));
+        if (date_overshoot(args->date_start) || date_overshoot(args->date_end)) {
+        	fprintf(stderr, "start or end date exceed current date\n");
+			usage(argv[0], FAILURE);
+        }
         break;
       case 't':
         if (strcmp(optarg, "true") == 0){
