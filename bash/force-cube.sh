@@ -61,8 +61,8 @@ Usage: $PROG [-hvirsantobj] input-file(s)
 
   optional:
   -h = show this help
-  -v  = show version
-  -i  = show program's purpose
+  -v = show version
+  -i = show program's purpose
   -r = resampling method
        any GDAL resampling method for raster data, e.g. cubic (default)
        is ignored for vector data
@@ -77,12 +77,12 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -o = output directory: the directory where you want to store the cubes
        defaults to current directory
        'datacube-definition.prj' needs to exist in there
-  -b  = basename of output file (without extension)
-        defaults to the basename of the input-file
-        cannot be used when multiple input files are given
-  -j  = number of jobs, defaults to 'as many as possible'
+  -b = basename of output file (without extension)
+       defaults to the basename of the input-file
+       cannot be used when multiple input files are given
+  -j = number of jobs, defaults to 'as many as possible'
 
-  mandatory;
+  mandatory:
   input-file(s) = the file(s) you want to cube
 
   -----
