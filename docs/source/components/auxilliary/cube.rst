@@ -7,7 +7,9 @@ Usage
 ^^^^^
 
 .. code-block:: bash
+
     Usage: force-cube [-hvirsantobj] input-file(s)
+
     optional:
     -h = show this help
     -v = show version
@@ -28,5 +30,6 @@ Usage
     -b = basename of output file (without extension) defaults to the basename of the input-file
          cannot be used when multiple input files are given
     -j = number of jobs, defaults to 'as many as possible'
+
     mandatory:
     input-file(s) = the file(s) you want to cube
