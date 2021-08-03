@@ -131,3 +131,33 @@ struct tm *timeinfo;
   return;
 }
 
+
+/** Is date in future?
++++ (C) Florian Katerndahl
++++ Fails if date is in future
+--- d:      date struct
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int date_overshoot(date_t *d){
+date_t today;
+
+  current_date(&today);
+
+  if (d->ce > today.ce) return FAILURE;
+
+  return SUCCESS;
+}
+
+
+/** Compare dates
++++ Fails if early date is actually later
+--- d_early: date struct
+--- d_late:  date struct
++++ Return:  SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int date_order(date_t *d_early, date_t *d_late){
+
+  if (d_early->ce > d_late->ce) return FAILURE;
+
+  return SUCCESS;
+}
