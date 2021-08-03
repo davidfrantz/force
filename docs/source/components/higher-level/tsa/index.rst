@@ -38,7 +38,7 @@ hARD+ products can be directly used to fuel your research questions without any 
   The program will exit with an error message if the requested index is not available for the chosen sensor set.
   Multiple indices may be given, and all processing will be repeated for each index.
   However, input data is read once only, and only the required bands are input to reduce I/O.
-  The full time series is generated, quality-controlled, and potentially output. The time series may be centered and/or standardized to each pixel’s mean and/or standard deviation before output as indication for vegetation under-/over-performance.
+  The full time series is generated, quality-controlled, and potentially output. The time series may be centered and/or tandardized to each pixel’s mean and/or standard deviation before output as indication for vegetation under-/over-performance. 
   In the case of SMA, a :ref:`tsa-endmember` needs to be provided.
   Only the abundance image related to one endmember is retained.
   The SMA can be constrained (Sum-to-One and/or Non-Negativity), and the fractions can be shade normalized.

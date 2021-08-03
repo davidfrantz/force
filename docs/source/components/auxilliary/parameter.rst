@@ -12,27 +12,10 @@ Usage
 
 .. code-block:: bash
 
-    force-parameter [-h] [-v] [-i] [-m] [-c] parameter-file module
+    force-parameter dir type verbose
 
-optional arguments
-"""""""""""""""""""
-
-* ``-h`` show help page
-
-* ``-v`` show version of FORCE
-
-* ``-i`` show program's purpose
-
-* ``-m`` show available modules
-
-* ``-c`` generate more compact parameter files without comments
-
-mandatory arguments
-"""""""""""""""""""
-
-* ``parameter-file`` File path as well as the file name, can be either relative or absolute.
-
-* ``module`` Name of FORCE module. Currently available modules are:
+* | ``dir`` : File path, can be either relative or absolute.
+* | ``type`` : Type of parameter file that should be generated. Can be one of the following:
 
     +----------+-------------------------------------------+
     | LEVEL2   | :ref:`Level 2 Processing System <l2ps>`   |
@@ -42,8 +25,6 @@ mandatory arguments
     | TSA      | :ref:`Time Series Analysis <tsa>`         |
     +----------+-------------------------------------------+
     | CSO      | :ref:`Clear-Sky Observations <cso>`       |
-    +----------+-------------------------------------------+
-    | UDF      | Plug-In User Defined Functions            |
     +----------+-------------------------------------------+
     | L2IMP    | :ref:`Level 2 ImproPhe <l2i>`             |
     +----------+-------------------------------------------+
@@ -63,3 +44,7 @@ mandatory arguments
     +----------+-------------------------------------------+
     | LIB      | Library Completeness                      |
     +----------+-------------------------------------------+
+
+* | ``verbose`` : If ``1``, then a long parameter file with comments will be generated.
+    If ``0``, no comments will be included.
+
