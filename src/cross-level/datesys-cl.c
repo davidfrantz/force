@@ -134,17 +134,18 @@ struct tm *timeinfo;
 
 /** Is date in future?
 +++ (C) Florian Katerndahl
++++ Fails if date is in future
 --- d:      date struct
-+++ Return: true/false
++++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool date_overshoot(date_t *d){
+int date_overshoot(date_t *d){
 date_t today;
 
   current_date(&today);
 
-  if (d->ce > today.ce) return true;
+  if (d->ce > today.ce) return FAILURE;
 
-  return false;
+  return SUCCESS;
 }
 
 
