@@ -131,13 +131,18 @@ struct tm *timeinfo;
   return;
 }
 
-int date_overshoot(date_t *d){
-	date_t today;
-	current_date(&today);
 
-	if (d->ce > today.ce) {
-		return 1;
-	} else {
-		return 0;
-	}
+/** Is date in future?
++++ (C) Florian Katerndahl
+--- d:      date struct
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool date_overshoot(date_t *d){
+  date_t today;
+
+  current_date(&today);
+
+  if (d->ce > today.ce) return true;
+
+  return false;
 }
