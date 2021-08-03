@@ -126,6 +126,10 @@ int opt;
           fprintf(stderr, "start or end date exceed current date\n");
           usage(argv[0], FAILURE);
         }
+        if (date_order(&args->date_start, &args->date_end) == FAILURE){
+          fprintf(stderr, "start date is later than end date\n");
+          usage(argv[0], FAILURE);
+        }
         break;
       case 't':
         if (strcmp(optarg, "true") == 0){
