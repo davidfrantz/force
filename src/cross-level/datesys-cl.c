@@ -156,7 +156,7 @@ date_t today;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int date_order(date_t *d_early, date_t *d_late){
 
-  if (d_early->ce > d_late.ce) return FAILURE;
+  if (d_early->ce > d_late->ce) return FAILURE;
 
   return SUCCESS;
 }
