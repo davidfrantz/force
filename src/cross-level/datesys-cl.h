@@ -43,6 +43,8 @@ extern "C" {
 void current_date(date_t *d);
 void date_plus(date_t *d);
 void date_minus(date_t *d);
+int date_overshoot(date_t *d);
+int date_order(date_t *d_early, date_t *d_late);
 
 #ifdef __cplusplus
 }
