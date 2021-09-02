@@ -10,7 +10,7 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (in press): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment.
   | https://doi.org/10.1016/j.rse.2021.112558
-
+  
 
 * **2021**
 
@@ -28,6 +28,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
   | https://doi.org/10.1371/journal.pone.0249044
+
+  | G. Tetteh, A. Gocht, S. Erasmi, M. Schwieder, and C. Conrad (): Evaluation of Sentinel-1 and Sentinel-2 Feature Sets for Delineating Agricultural Fields in Heterogeneous Landscapes. IEEE Access, 9, 116702 - 116719
+  | https://doi.org/10.1109/ACCESS.2021.3105903
 
 
 * **2020**
