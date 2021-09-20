@@ -843,13 +843,13 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
 
       #ifdef FORCE_DEBUG
       if (p==0){
-        printf("using %d regressors\n", n_cls);
+        printf("using %d regressors\n", n_cluster);
         for (b=0; b<_SPECHOMO_N_DST_; b++) printf("reflectance before: %04d ", 
           ard.dat[b_dst[b]][p]); printf("\n");
         for (b=0; b<_SPECHOMO_N_DST_; b++) printf("reflectance after:  %04d ", 
-          wpred[b] / wsum;); printf("\n");
+          wpred[b] / wsum); printf("\n");
       }
-      //ard.dat[0][p] = n_cls;
+      //ard.dat[0][p] = n_cluster;
       #endif
 
       for (b=0; b <_SPECHOMO_N_DST_; b++) ard.dat[b_dst[b]][p] = wpred[b] / wsum;
