@@ -26,6 +26,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | H. Haberl, D. Wiedenhofer, F. Schug, D. Frantz, D. Virág, C. Plutzar, K. Gruhler, J. Lederer, G. Schiller, T. Fishman, M. Lanau, A. Gattringer, T. Kemper, G. Liu, H. Tanikawa, S. van der Linden, and P. Hostert (2021): High-Resolution Maps of Material Stocks in Buildings and Infrastructures in Austria and Germany. Environmental Science & Technology.
   | https://doi.org/10.1021/acs.est.0c05642
 
+  | J. Kreyling, F. Tanneberger, F. Jansen, S. van der Linden, C. Aggenbach, V. Blüml, J. Couwenberg, W-J Emsens, H. Joosten, A. Klimkowska, W. Kotowski, L. Kozub, B. Lennartz, Y. Liczner, H. Liu, D. Michaelis, C. Oehmke, K. Parakenings, E. Pleyl, A. Poyda, S. Raabe, M. Röhl, K. Rücker, A. Schneider, J. Schrautzer, C. Schröder, F. Schug, E. Seeber, F. Thiel, S. Thiele, B. Tiemeyer, T. Timmermann, T. Urich, R. van Diggelen, K. Vegelin, E. Verbruggen, M. Wilmking, N. Wrage-Mönnig, L. Wołejko, D. Zak, and G. Jurasinski (2021): Rewetting does not return drained fen peatlands to their old selves. Nature Communications 12, 5693.
+  | https://doi.org/10.1038/s41467-021-25619-y
+
   | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
   | https://doi.org/10.1371/journal.pone.0249044
 
