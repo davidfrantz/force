@@ -33,6 +33,9 @@ FROM davidfrantz/base:latest as force_builder
 ENV SOURCE_DIR $HOME/src/force
 ENV INSTALL_DIR $HOME/bin
 
+# build args
+ARG debug=disable
+
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
@@ -41,7 +44,7 @@ COPY --chown=docker:docker . .
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
   ./splits.sh enable && \
-  ./debug.sh disable && \
+  ./debug.sh $debug && \
   sed -i "/^BINDIR=/cBINDIR=$INSTALL_DIR/" Makefile && \
   make -j && \
   make install && \
