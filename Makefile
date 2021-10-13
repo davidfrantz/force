@@ -72,7 +72,7 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-magic-parameters force-mdcp force-mosaic force-parameter \
             force-procmask force-pyramid force-qai-inflate force-stack \
             force-synthmix force-tabulate-grid force-tile-extent \
-            force-tile-finder force-train force-level2-report
+            force-tile-finder force-train force-level2-report force-cube-init
 
 FORCE_MISC = force-level2-report.Rmd
 
@@ -84,7 +84,7 @@ GPP=g++
 G11=g++ -std=c++11
 
 CFLAGS=-O3 -Wall -fopenmp
-#CFLAGS=-g -Wall -fopenmp
+CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
@@ -112,7 +112,7 @@ cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_c
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl udf_hl
 aux: param_aux param_train_aux train_aux
-exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis
+exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init
 .PHONY: temp all install install_ bash python clean build check
 
 ### TEMP
@@ -405,6 +405,9 @@ force-stack: temp cross $(DA)/_stack.c
 
 force-import-modis: temp cross lower $(DL)/_import-modis.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-import-modis $(DL)/_import-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+
+force-cube-init: temp cross lower  $(DA)/_init-cube.c
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-cube-init $(DA)/_init-cube.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 ### dummy code for testing stuff  
 
