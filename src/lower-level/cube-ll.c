@@ -355,83 +355,88 @@ double tol = 5e-3;
       return NULL;
     }
 
-    utm_ulx = get_brick_ulx(brick);
-    utm_uly = get_brick_uly(brick);
-    utm_lrx = utm_ulx + get_brick_width(brick);
-    utm_lry = utm_uly - get_brick_height(brick);
-    get_brick_proj(brick, utm_proj, NPOW_10);
+    if (brick != NULL){
 
-    // UL
-    if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
-                         utm_proj, cube->proj)) == FAILURE){
-      printf("computing upper left in dst_srs failed. ");
-      free_multicube(multicube);
-      return NULL;
+      utm_ulx = get_brick_ulx(brick);
+      utm_uly = get_brick_uly(brick);
+      utm_lrx = utm_ulx + get_brick_width(brick);
+      utm_lry = utm_uly - get_brick_height(brick);
+      get_brick_proj(brick, utm_proj, NPOW_10);
+
+      // UL
+      if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
+                          utm_proj, cube->proj)) == FAILURE){
+        printf("computing upper left in dst_srs failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+
+      // UR
+      if ((warp_any_to_any(utm_lrx, utm_uly, &urx, &ury,
+                          utm_proj, cube->proj)) == FAILURE){
+        printf("computing upper left in dst_srs failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+      
+      // LR
+      if ((warp_any_to_any(utm_lrx, utm_lry, &lrx, &lry,
+                          utm_proj, cube->proj)) == FAILURE){
+        printf("computing lower right in dst_srs failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+
+      // LL
+      if ((warp_any_to_any(utm_ulx, utm_lry, &llx, &lly,
+                          utm_proj, cube->proj)) == FAILURE){
+        printf("computing lower right in dst_srs failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+
+      tile_find(ulx, uly, &tilex, &tiley, &t_ulx, &t_uly, cube);
+      tile_find(urx, ury, &tilex, &tiley, &t_urx, &t_ury, cube);
+      tile_find(lrx, lry, &tilex, &tiley, &t_lrx, &t_lry, cube);
+      tile_find(llx, lly, &tilex, &tiley, &t_llx, &t_lly, cube);
+      
+      #ifdef FORCE_DEBUG
+      printf("tile UL: %d %d\n", t_ulx, t_uly);
+      printf("tile UR: %d %d\n", t_urx, t_ury);
+      printf("tile LR: %d %d\n", t_lrx, t_lry);
+      printf("tile LL: %d %d\n", t_llx, t_lly);
+      #endif
+
+      cube->tminx = INT_MAX;
+      if (t_ulx < cube->tminx) cube->tminx = t_ulx;
+      if (t_urx < cube->tminx) cube->tminx = t_urx;
+      if (t_lrx < cube->tminx) cube->tminx = t_lrx;
+      if (t_llx < cube->tminx) cube->tminx = t_llx;
+
+      cube->tminy = INT_MAX;
+      if (t_uly < cube->tminy) cube->tminy = t_uly;
+      if (t_ury < cube->tminy) cube->tminy = t_ury;
+      if (t_lry < cube->tminy) cube->tminy = t_lry;
+      if (t_lly < cube->tminy) cube->tminy = t_lly;
+
+      cube->tmaxx = INT_MIN;
+      if (t_ulx > cube->tmaxx) cube->tmaxx = t_ulx;
+      if (t_urx > cube->tmaxx) cube->tmaxx = t_urx;
+      if (t_lrx > cube->tmaxx) cube->tmaxx = t_lrx;
+      if (t_llx > cube->tmaxx) cube->tmaxx = t_llx;
+
+      cube->tmaxy = INT_MIN;
+      if (t_uly > cube->tmaxy) cube->tmaxy = t_uly;
+      if (t_ury > cube->tmaxy) cube->tmaxy = t_ury;
+      if (t_lry > cube->tmaxy) cube->tmaxy = t_lry;
+      if (t_lly > cube->tmaxy) cube->tmaxy = t_lly;
+
+      cube->tnx = cube->tmaxx-cube->tminx+1;
+      cube->tny = cube->tmaxy-cube->tminy+1;
+      cube->tnc = cube->tnx*cube->tny;
+
     }
 
-    // UR
-    if ((warp_any_to_any(utm_lrx, utm_uly, &urx, &ury,
-                         utm_proj, cube->proj)) == FAILURE){
-      printf("computing upper left in dst_srs failed. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-    
-    // LR
-    if ((warp_any_to_any(utm_lrx, utm_lry, &lrx, &lry,
-                         utm_proj, cube->proj)) == FAILURE){
-      printf("computing lower right in dst_srs failed. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-
-    // LL
-    if ((warp_any_to_any(utm_ulx, utm_lry, &llx, &lly,
-                         utm_proj, cube->proj)) == FAILURE){
-      printf("computing lower right in dst_srs failed. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-
-    tile_find(ulx, uly, &tilex, &tiley, &t_ulx, &t_uly, cube);
-    tile_find(urx, ury, &tilex, &tiley, &t_urx, &t_ury, cube);
-    tile_find(lrx, lry, &tilex, &tiley, &t_lrx, &t_lry, cube);
-    tile_find(llx, lly, &tilex, &tiley, &t_llx, &t_lly, cube);
-    
-    #ifdef FORCE_DEBUG
-    printf("tile UL: %d %d\n", t_ulx, t_uly);
-    printf("tile UR: %d %d\n", t_urx, t_ury);
-    printf("tile LR: %d %d\n", t_lrx, t_lry);
-    printf("tile LL: %d %d\n", t_llx, t_lly);
-    #endif
-
-    cube->tminx = INT_MAX;
-    if (t_ulx < cube->tminx) cube->tminx = t_ulx;
-    if (t_urx < cube->tminx) cube->tminx = t_urx;
-    if (t_lrx < cube->tminx) cube->tminx = t_lrx;
-    if (t_llx < cube->tminx) cube->tminx = t_llx;
-
-    cube->tminy = INT_MAX;
-    if (t_uly < cube->tminy) cube->tminy = t_uly;
-    if (t_ury < cube->tminy) cube->tminy = t_ury;
-    if (t_lry < cube->tminy) cube->tminy = t_lry;
-    if (t_lly < cube->tminy) cube->tminy = t_lly;
-
-    cube->tmaxx = INT_MIN;
-    if (t_ulx > cube->tmaxx) cube->tmaxx = t_ulx;
-    if (t_urx > cube->tmaxx) cube->tmaxx = t_urx;
-    if (t_lrx > cube->tmaxx) cube->tmaxx = t_lrx;
-    if (t_llx > cube->tmaxx) cube->tmaxx = t_llx;
-
-    cube->tmaxy = INT_MIN;
-    if (t_uly > cube->tmaxy) cube->tmaxy = t_uly;
-    if (t_ury > cube->tmaxy) cube->tmaxy = t_ury;
-    if (t_lry > cube->tmaxy) cube->tmaxy = t_lry;
-    if (t_lly > cube->tmaxy) cube->tmaxy = t_lly;
-
-    cube->tnx = cube->tmaxx-cube->tminx+1;
-    cube->tny = cube->tmaxy-cube->tminy+1;
-    cube->tnc = cube->tnx*cube->tny;
 
     if (write_datacube_def(cube) == FAILURE){
       printf("Writing datacube definition failed. "); 
