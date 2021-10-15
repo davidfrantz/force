@@ -27,7 +27,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
 
 **Learn how to use FORCE**. Have a look at the [Tutorials](https://force-eo.readthedocs.io/en/latest/howto/index.html). Check regularly for new content.
 
-**Get help**, and help others in the FORCE self-help [Google group](https://groups.google.com/d/forum/force_eo)
+**Get help**, and help others in the FORCE [discussion section](https://github.com/davidfrantz/force/discussions)
 
 **Follow** the FORCE project at [ResearchGate](https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring)
 
