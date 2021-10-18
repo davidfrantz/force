@@ -9,7 +9,7 @@ This tutorial explains what Analysis Ready Data are, and how to use the FORCE Le
 
 .. admonition:: Info
 
-   *This tutorial uses FORCE v. 3.2*
+   *This tutorial uses FORCE v. 3.7*
 
 
 What are Levels?
