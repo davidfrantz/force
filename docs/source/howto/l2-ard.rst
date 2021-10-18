@@ -9,7 +9,7 @@ This tutorial explains what Analysis Ready Data are, and how to use the FORCE Le
 
 .. admonition:: Info
 
-   *This tutorial uses FORCE v. 3.2*
+   *This tutorial uses FORCE v. 3.7*
 
 
 What are Levels?
@@ -108,29 +108,26 @@ An empty Level 2 parameter file can be generated with
 
 .. code-block:: bash
 
-   force-parameter /data/force/param LEVEL2 1
+   force-parameter /data/force/param/l2ps.prm LEVEL2
 
-   LEVEL2
    An empty parameter file skeleton was written to
-     /data/force/param/LEVEL2-skeleton.prm
+     /data/force/param/l2ps.prm
    Note that all parameters need to be given, even though some may not be used
    with your specific parameterization.
-   You should rename the file, e.g. my-first-LEVEL2.prm.
    Parameterize according to your needs and run with
-   force-level2 /data/force/param/my-first-LEVEL2.prm
+   force-level2 /data/force/param/l2ps.prm
     or for a single image:
-   force-l2ps image /data/force/param/my-first-LEVEL2.prm
+   force-l2ps image /data/force/param/l2ps.prm
 
 
-The trailing ``1`` means that descriptions for every parameter will be included.
-If you prefer a shorter parameter file, give a ``0`` instead.
+This will generate a verbose parameter file which includes a description for every parameter. If you
+prefer a shorter parameter file, set the optional ``-c`` flag (see :ref:`aux-parameter` for detailed documentation).
 The descriptions can also be found here: :ref:`l2-param`.
 
-Let’s rename the file, and have a look:
+Let’s have a look:
 
 .. code-block:: bash
 
-   mv /data/force/param/LEVEL2-skeleton.prm /data/force/param/l2ps.prm
    head /data/force/param/l2ps.prm
 
    ++PARAM_LEVEL2_START++

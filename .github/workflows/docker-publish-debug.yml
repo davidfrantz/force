@@ -16,6 +16,7 @@ env:
 jobs:
   push:
     name: Push debug image to Docker Hub
+    if: github.repository == 'davidfrantz/force'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
