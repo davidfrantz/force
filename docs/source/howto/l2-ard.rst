@@ -370,6 +370,30 @@ The processing time (real time) is appended at the end.
    S2A_OPER_MSI_L1C_TL_SGS__20160916T135429_A006453_T33JYG_N02.04: dc: 100.00%. wc:   1.78%. sc:   2.85%. cc: 100.00%. Skip. Processing time: 12 mins 17 secs
 
 
+A more convient way to get an overview is to generate an html report:
+
+.. code-block:: bash
+
+   force-level2-report /data/force/log
+
+
+This tool generates some interactive charts that visualize the information available in the logfiles.
+
+.. raw::
+   :file: ../html/report_20211011020320.html
+
+
+.. important::
+   The first chart gives an overview about the processing success.
+   ``Success``, ``Too cloudy``, and ``Coregistration failed`` are all OK.
+   The category ``Error`` is bad and means that something went wrong.
+   If so, the names of the failed images will be listed below.
+
+.. note::
+   ``Error`` can also mean that the images are still under processing.
+   Run *force-level2-report* **after** *force-level2*!
+
+
 Output format
 -------------
 
