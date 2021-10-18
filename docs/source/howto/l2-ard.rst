@@ -377,7 +377,7 @@ A more convient way to get an overview is to generate an html report:
    force-level2-report /data/force/log
 
 
-This tool generates some interactive charts that visualize the information available in the logfiles.
+This tool generates some interactive charts that visualize the information available in the logfiles:
 
 .. raw:: html
    :file: ../html/report_20211011020320.html
