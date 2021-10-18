@@ -1,9 +1,9 @@
 .. _tut-tsi:
 
-.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
-
 Time Series Interpolation
 =========================
+
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
 **How to interpolate and animate time series**
 
@@ -14,8 +14,8 @@ This tutorial introduces the Time Series Analysis (TSA) submodule of the FORCE H
    *This tutorial uses FORCE v. 3.5*
 
 
-----------
-Why interpolation?**
+Why interpolation?
+------------------
 
 Despite regular observations, EO time series are generally not equidistant.
 Nominal equidistance is only given for areas that are not covered by orbital overlaps (16 days revisit at nadir for a single Landsat).
@@ -34,13 +34,13 @@ Equidistance is established, which might be needed for following processing step
 
 Time Series interpolation is a basic option within the :ref:`tsa` submodule of the FORCE :ref:`hlps` Processing system (HLPS), and may be performed before using more advanced time series analysis methods:
 
-.. figure:: img/force-tsa-workflow.jpg
+.. figure:: ../components/higher-level/tsa/tsa-workflow.jpg
 
    *Time Series Analysis Workflow*
 
 
-----------
-RBF interpolation**
+RBF interpolation
+-----------------
 
 In FORCE, a couple of interpolation methods are implemented.
 

@@ -1,10 +1,9 @@
 .. _tut-stm:
 
-.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
-
-
 Spectral Temporal Metrics
 =========================
+
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
 **How to aggregate time series**
 

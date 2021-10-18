@@ -40,7 +40,6 @@ Multiple :ref:`hl-submodules` are available, which either process ARD or feature
    :hidden:
    :maxdepth: 3
 
-   higher-level.rst
    hl-input.rst
    hl-compute.rst
    hl-aux.rst
