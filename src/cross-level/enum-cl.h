@@ -276,6 +276,14 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 // user-defined function type
 enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
+
+// projection
+enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };
+
+// continent
+enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_, 
+       _CONTINENT_NA_, _CONTINENT_OC_, _CONTINENT_SA_, _CONTINENT_LENGTH_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
