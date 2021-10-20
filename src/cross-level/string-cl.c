@@ -50,3 +50,39 @@ void copy_string(char *dst, size_t size, const char *src){
   return;
 }
 
+
+int char_to_int(const char *src, int *val){
+long int temp_val;
+char *temp;
+errno = 0;
+
+
+  temp_val = strtol(src, &temp, 0);
+
+  if (temp == src || *temp != '\0' || errno == ERANGE){
+    return FAILURE;}
+
+  if (temp_val < INT_MIN ||
+      temp_val > INT_MAX){
+    return FAILURE;}
+
+  *val = (int)temp_val;
+  return SUCCESS;
+}
+
+
+int char_to_float(const char *src, float *val){
+float temp_val;
+char *temp;
+errno = 0;
+
+
+  temp_val = strtof(src, &temp);
+
+  if (temp == src || *temp != '\0' || errno == ERANGE){
+    return FAILURE;}
+
+  *val = (float)temp_val;
+  return SUCCESS;
+}
+

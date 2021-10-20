@@ -31,13 +31,18 @@ String handling header
 #include <stdio.h>    // core input and output functions
 #include <stdlib.h>   // standard general utilities library
 #include <string.h>   // string handling functions
+#include <limits.h>   // macro constants of the integer types
+#include <errno.h>    // error numbers
 
+#include "../cross-level/const-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void copy_string(char *dst, size_t size, const char *src);
+int char_to_int(const char *src, int *val);
+int char_to_float(const char *src, float *val);
 
 #ifdef __cplusplus
 }
