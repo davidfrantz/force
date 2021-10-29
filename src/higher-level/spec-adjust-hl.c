@@ -754,7 +754,7 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
         printf("lib: ");
         for (b=0; b<_SPECHOMO_N_SRC_; b++) printf("%05d ", _SPECHOMO_CENTER_[sid][b][s]);
         printf("\n");
-        printf("xx: %.2f, yy: %.2f, xy: %.2f, sam: %.8f, sam_deg: %.8f, weight: %.8f\n", xx, yy, xy, sam, sam*180/3.141592653589793, weight[s]);
+        printf("xx: %.2f, yy: %.2f, xy: %.2f, sam: %.8f, sam_deg: %.8f, weight: %.8f\n", xx, yy, xy, sam, sam*_R2D_CONV_, weight[s]);
         #endif
 
         // maximum weight of close clusters (-1 if no close cluster)
