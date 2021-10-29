@@ -395,11 +395,11 @@ float dn_scale, toa_scale;
       dn_scale  = get_brick_scale(DN,  b);
       toa_scale = get_brick_scale(TOA, b);
       
-      #pragma omp parallel shared(b, nc, dn_scale, toa_scale, dn_, toa_) default(none) 
+      #pragma omp parallel shared(b, nc, dn_scale, toa_scale, dn_, toa_, meta) default(none) 
       {
 
         #pragma omp for schedule(static)
-        for (p=0; p<nc; p++) toa_[b][p] = dn_[b][p]/dn_scale*toa_scale;
+        for (p=0; p<nc; p++) toa_[b][p] = (dn_[b][p] + meta->cal[b].radd) / dn_scale*toa_scale;
         
       }
 

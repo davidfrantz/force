@@ -334,8 +334,6 @@ GDALDatasetH fp_;
 
 
         meta->cal = allocate_calibration(nb);
-        //alloc((void**)&meta->cal, nb, sizeof(cal_t));
-        //for (b=0; b<nb; b++) init_calib(&meta->cal[b]);
 
 
         // set start of Relative Spectral Response Array
@@ -736,8 +734,6 @@ int svgrid = 5000;
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
 
         meta->cal = allocate_calibration(nb);
-        //alloc((void**)&meta->cal, nb, sizeof(cal_t));
-        //for (b=0; b<nb; b++) init_calib(&meta->cal[b]);
 
         // set start of Relative Spectral Response Array
         if (strcmp(sensor, "SEN2A") == 0){
@@ -883,6 +879,25 @@ int svgrid = 5000;
           tokenptr = strtok(NULL, separator);
         }
 
+      // additive scaling factor (since baseline 4.0)
+      } else if (strcmp(tag, "RADIO_ADD_OFFSET") == 0){
+        // re-init to 0 to be compatible with older baselines
+        for (b=0; b<nb; b++){
+           if (meta->cal[b].radd == meta->cal[b].fill) meta->cal[b].radd = 0;
+        }
+        b = -1;
+        while (strcmp(tokenptr, "/RADIO_ADD_OFFSET") != 0){
+          if (b < 0){
+            char_to_int(tokenptr, &b);
+          } else if (b >= 0 || b < nb){
+            char_to_float(tokenptr, &meta->cal[b].radd);
+          }
+          tag = tokenptr;
+          tokenptr = strtok(NULL, separator);
+        }
+        #ifdef FORCE_DEBUG
+        if (b >= 0) printf("additive scaling factor for band %d: %f\n", b, meta->cal[b].radd);
+        #endif
       }
 
       // in case tag (key words) is not the first word in a line
