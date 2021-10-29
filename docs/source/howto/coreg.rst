@@ -1,10 +1,9 @@
 .. _tut-coreg:
 
-.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
-
-
 Coregistration
 ==============
+
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
 **How to coregister Sentinel-2 with Landsat**
 

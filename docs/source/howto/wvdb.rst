@@ -129,7 +129,8 @@ The file holds the long-term average, long-term standard deviation, and the numb
    -53.6847 70.9100 0.546611 0.273735 276
 
 
-.. figure:: img/wvdb.gif" width="750
+.. figure:: ../components/lower-level/wvdb/wvdb.gif
+   :width: 750
 
    *Global animation of the climatology (monthly average)*
 
@@ -245,7 +246,7 @@ This directory is the directory, to which DIR_WVPLUT in the FORCE L2PS parameter
 ``DIR_WVPLUT = /data/Earth/global/wvp/wvdb``
 
 
-If you have finished compiling the WVDB, you may delete the MODIS *.hdf files.
+If you have finished compiling the WVDB, you may delete the MODIS \*.hdf files.
 
 Download the entire data record (in one process - this is slow):
 
