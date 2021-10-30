@@ -120,14 +120,15 @@ short **toa_ = NULL;
   if ((bands[b++] = find_domain(TOA, "SWIR1"))    < 0) return FAILURE;
   if ((bands[b++] = find_domain(TOA, "SWIR2"))    < 0) return FAILURE;
 
-  #pragma omp parallel private() shared() default(none)
+  // kernel size
+  w = r*2+1; nw = w*w;
+
+
+  #pragma omp parallel private(k,b,j,p,ii,jj,ni,nj,np,X,x,y,c,cov,work,chisq,est,err) shared(r,w,nb,nw,nv,ny,nx,QAI,toa_,bands,green,red,bnir) default(none)
   {
 
     /** initialize and allocate
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-
-    // kernel size
-    w = r*2+1; nw = w*w;
 
     // nw-by-nv predictor variables; kernel + central pixel
     X = gsl_matrix_calloc(nw, nv);
@@ -158,8 +159,10 @@ short **toa_ = NULL;
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
     #pragma omp for schedule(guided)  
-    for (i=0, p=0; i<ny; i++){
-    for (j=0; j<nx; j++, p++){
+    for (i=0; i<ny; i++){
+    for (j=0; j<nx; j++){
+
+      p = i*nx+j;
 
       if (get_off(QAI, p) || get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) continue;
 
