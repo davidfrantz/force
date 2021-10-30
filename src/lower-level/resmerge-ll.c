@@ -155,7 +155,7 @@ short **toa_ = NULL;
   /** do regression for every valid pixel, and for each 20m band
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
   for (i=0, p=0; i<ny; i++){
-  for (j=0; j<ny; j++, p++){
+  for (j=0; j<nx; j++, p++){
 
     if (get_off(QAI, p) || get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) continue;
 
