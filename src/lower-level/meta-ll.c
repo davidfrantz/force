@@ -681,6 +681,10 @@ int svgrid = 5000;
   set_brick_ncols(DN, 1);
   set_brick_nrows(DN, 1);
 
+  meta->cal = allocate_calibration(nb);
+
+  // re-init to 0 to be compatible with older baselines
+  for (b=0; b<nb; b++) meta->cal[b].radd = 0;
 
 
   /** parse top-level xml **/
@@ -732,8 +736,6 @@ int svgrid = 5000;
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
-
-        meta->cal = allocate_calibration(nb);
 
         // set start of Relative Spectral Response Array
         if (strcmp(sensor, "SEN2A") == 0){
@@ -881,10 +883,6 @@ int svgrid = 5000;
 
       // additive scaling factor (since baseline 4.0)
       } else if (strcmp(tag, "RADIO_ADD_OFFSET") == 0){
-        // re-init to 0 to be compatible with older baselines
-        for (b=0; b<nb; b++){
-           if (meta->cal[b].radd == meta->cal[b].fill) meta->cal[b].radd = 0;
-        }
         b = -1;
         while (strcmp(tokenptr, "/RADIO_ADD_OFFSET") != 0){
           if (b < 0){
