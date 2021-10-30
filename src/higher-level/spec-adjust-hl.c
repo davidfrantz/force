@@ -43,7 +43,7 @@ int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 #define _SPECHOMO_N_SIM_ 10 // max. number of close clusters to be used for kNN
 #define _SPECHOMO_GOOD_SAM_ 0.0698132 // good clusters are closer than this angle (4°)
 #define _SPECHOMO_MEDI_SAM_ 0.2094395 // ok'ish clusters are closer than this angle (12°)
-#define _SPECHOMO_POOR_SAM_ 0.2617995 // clusters further away from this angle (15°) should not be uses
+#define _SPECHOMO_POOR_SAM_ 0.2617995 // clusters further away from this angle (15°) should not be used
                                       // also used to compute a weight for each cluster
 #define _SPECHOMO_MIN_WEIGHT_ 1.0 - _SPECHOMO_GOOD_SAM_/_SPECHOMO_POOR_SAM_
 #define _SPECHOMO_MED_WEIGHT_ 1.0 - _SPECHOMO_MEDI_SAM_/_SPECHOMO_POOR_SAM_
@@ -747,13 +747,14 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
         #ifdef FORCE_DEBUG
         printf("\n");
         printf("on/off: %d\n", ard.msk[p]);
+        printf("cluster number: %d\n", s);
         printf("ard: ");
         for (b=0; b<_SPECHOMO_N_SRC_; b++) printf("%05d ", ard.dat[b_src[b]][p]);
         printf("\n");
         printf("lib: ");
         for (b=0; b<_SPECHOMO_N_SRC_; b++) printf("%05d ", _SPECHOMO_CENTER_[sid][b][s]);
         printf("\n");
-        printf("xx: %.2f, yy: %.2f, xy: %.2f, sam: %.5f, weight: %.5f\n", xx, yy, xy, sam, weight[s]);
+        printf("xx: %.2f, yy: %.2f, xy: %.2f, sam: %.8f, sam_deg: %.8f, weight: %.8f\n", xx, yy, xy, sam, sam*_R2D_CONV_, weight[s]);
         #endif
 
         // maximum weight of close clusters (-1 if no close cluster)
