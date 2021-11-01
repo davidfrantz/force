@@ -216,12 +216,6 @@ short **toa_ = NULL;
     }
 
 
-    #ifdef FORCE_DEBUG
-    set_brick_filename(TOA, "TOA-RESMERGED");
-    print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
-    #endif
-
-
     /** clean
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     gsl_matrix_free (X); gsl_vector_free (x);
@@ -233,6 +227,11 @@ short **toa_ = NULL;
     free((void*)cov);    free((void*)work);
 
   }
+
+  #ifdef FORCE_DEBUG
+  set_brick_filename(TOA, "TOA-RESMERGED");
+  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
+  #endif
 
   #ifdef FORCE_CLOCK
   proctime_print("Resolution merge", TIME);
