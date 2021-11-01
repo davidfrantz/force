@@ -13,6 +13,7 @@ Release: 01.11.2021
 
   * The multi-parameter based resolution merge option caused segfaults in some images.
     This is fixed now, ``RES_MERGE = REGRESSION`` is now safe to use.
+    Thanks to J. Antonio Guzmán Q. for reporting this issue.
     In addition, this method lacked multithreading, which is no implemented, too.
 
 * **FORCE HLPS**
