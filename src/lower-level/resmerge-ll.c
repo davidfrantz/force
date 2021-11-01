@@ -120,110 +120,119 @@ short **toa_ = NULL;
   if ((bands[b++] = find_domain(TOA, "SWIR1"))    < 0) return FAILURE;
   if ((bands[b++] = find_domain(TOA, "SWIR2"))    < 0) return FAILURE;
 
-
-  /** initialize and allocate
-  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-
   // kernel size
   w = r*2+1; nw = w*w;
 
-  // nw-by-nv predictor variables; kernel + central pixel
-  X = gsl_matrix_calloc(nw, nv);
-  x = gsl_vector_calloc(nv);
-  
-  // set first column of X to 1 -> intercept c0
-  for (k=0; k<nw; k++) gsl_matrix_set(X, k, 0, 1.0);
-  gsl_vector_set(x, 0, 1.0);
 
-  // vector of nw observations
-  alloc((void**)&y, nb, sizeof(gsl_vector*));
-  for (b=0; b<nb; b++) y[b] = gsl_vector_calloc(nw);
+  #pragma omp parallel private(k,b,j,p,ii,jj,ni,nj,np,X,x,y,c,cov,work,chisq,est,err) shared(r,w,nb,nw,nv,ny,nx,QAI,toa_,bands,green,red,bnir) default(none)
+  {
 
-  // nv regression coefficients
-  alloc((void**)&c, nb, sizeof(gsl_vector*));
-  for (b=0; b<nb; b++) c[b] = gsl_vector_calloc(nv);
+    /** initialize and allocate
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-  // nv-by-nv covariance matrix
-  alloc((void**)&cov, nb, sizeof(gsl_matrix*));
-  for (b=0; b<nb; b++) cov[b] = gsl_matrix_calloc(nv, nv);
+    // nw-by-nv predictor variables; kernel + central pixel
+    X = gsl_matrix_calloc(nw, nv);
+    x = gsl_vector_calloc(nv);
+    
+    // set first column of X to 1 -> intercept c0
+    for (k=0; k<nw; k++) gsl_matrix_set(X, k, 0, 1.0);
+    gsl_vector_set(x, 0, 1.0);
 
-  // workspace
-  alloc((void**)&work, nb, sizeof(gsl_multifit_linear_workspace*));
-  for (b=0; b<nb; b++) work[b] = gsl_multifit_linear_alloc(nw, nv);
+    // vector of nw observations
+    alloc((void**)&y, nb, sizeof(gsl_vector*));
+    for (b=0; b<nb; b++) y[b] = gsl_vector_calloc(nw);
+
+    // nv regression coefficients
+    alloc((void**)&c, nb, sizeof(gsl_vector*));
+    for (b=0; b<nb; b++) c[b] = gsl_vector_calloc(nv);
+
+    // nv-by-nv covariance matrix
+    alloc((void**)&cov, nb, sizeof(gsl_matrix*));
+    for (b=0; b<nb; b++) cov[b] = gsl_matrix_calloc(nv, nv);
+
+    // workspace
+    alloc((void**)&work, nb, sizeof(gsl_multifit_linear_workspace*));
+    for (b=0; b<nb; b++) work[b] = gsl_multifit_linear_alloc(nw, nv);
 
 
-  /** do regression for every valid pixel, and for each 20m band
-  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  for (i=0, p=0; i<ny; i++){
-  for (j=0; j<ny; j++, p++){
+    /** do regression for every valid pixel, and for each 20m band
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-    if (get_off(QAI, p) || get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) continue;
+    #pragma omp for schedule(guided)  
+    for (i=0; i<ny; i++){
+    for (j=0; j<nx; j++){
 
-    // add central pixel
-    gsl_vector_set(x, 1, toa_[green][p]/10000.0);
-    gsl_vector_set(x, 2, toa_[red][p]/10000.0);
-    gsl_vector_set(x, 3, toa_[bnir][p]/10000.0);
+      p = i*nx+j;
 
-    k = 0;
+      if (get_off(QAI, p) || get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) continue;
 
-    // add neighboring pixels
-    for (ii=-r; ii<=r; ii++){
-    for (jj=-r; jj<=r; jj++){
+      // add central pixel
+      gsl_vector_set(x, 1, toa_[green][p]/10000.0);
+      gsl_vector_set(x, 2, toa_[red][p]/10000.0);
+      gsl_vector_set(x, 3, toa_[bnir][p]/10000.0);
 
-      ni = i+ii; nj = j+jj;
-      if (ni < 0 || ni >= ny || nj < 0 || nj >= nx) continue;
-      np = ni*nx+nj;
+      k = 0;
 
-      if (get_off(QAI, np)) continue;
+      // add neighboring pixels
+      for (ii=-r; ii<=r; ii++){
+      for (jj=-r; jj<=r; jj++){
 
-      gsl_matrix_set(X, k, 1, toa_[green][np]/10000.0);
-      gsl_matrix_set(X, k, 2, toa_[red][np]/10000.0);
-      gsl_matrix_set(X, k, 3, toa_[bnir][np]/10000.0);
-      
-      for (b=0; b<nb; b++) gsl_vector_set(y[b], k, toa_[bands[b]][np]/10000.0);
+        ni = i+ii; nj = j+jj;
+        if (ni < 0 || ni >= ny || nj < 0 || nj >= nx) continue;
+        np = ni*nx+nj;
 
-      k++;
+        if (get_off(QAI, np)) continue;
+
+        gsl_matrix_set(X, k, 1, toa_[green][np]/10000.0);
+        gsl_matrix_set(X, k, 2, toa_[red][np]/10000.0);
+        gsl_matrix_set(X, k, 3, toa_[bnir][np]/10000.0);
+        
+        for (b=0; b<nb; b++) gsl_vector_set(y[b], k, toa_[bands[b]][np]/10000.0);
+
+        k++;
+
+      }
+      }
+
+      // append zeros, if less than nw neighboring pixels were added
+      while (k < nw){
+        gsl_matrix_set(X, k, 1, 0.0);
+        gsl_matrix_set(X, k, 2, 0.0);
+        gsl_matrix_set(X, k, 3, 0.0);
+        for (b=0; b<nb; b++) gsl_vector_set(y[b], k, 0.0);
+        k++;
+      }
+
+      // solve model, and predict central pixel
+      for (b=0; b<nb; b++){
+
+        gsl_multifit_linear(X, y[b], c[b], cov[b], &chisq, work[b]);
+        gsl_multifit_linear_est(x, c[b], cov[b], &est, &err);
+        toa_[bands[b]][p] = (short)(est*10000);
+
+      }
 
     }
     }
 
-    // append zeros, if less than nw neighboring pixels were added
-    while (k < nw){
-      gsl_matrix_set(X, k, 1, 0.0);
-      gsl_matrix_set(X, k, 2, 0.0);
-      gsl_matrix_set(X, k, 3, 0.0);
-      for (b=0; b<nb; b++) gsl_vector_set(y[b], k, 0.0);
-      k++;
-    }
 
-    // solve model, and predict central pixel
-    for (b=0; b<nb; b++){
+    #ifdef FORCE_DEBUG
+    set_brick_filename(TOA, "TOA-RESMERGED");
+    print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
+    #endif
 
-      gsl_multifit_linear(X, y[b], c[b], cov[b], &chisq, work[b]);
-      gsl_multifit_linear_est(x, c[b], cov[b], &est, &err);
-      toa_[bands[b]][p] = (short)(est*10000);
 
-    }
+    /** clean
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+    gsl_matrix_free (X); gsl_vector_free (x);
+    for (b=0; b<nb; b++) gsl_vector_free(y[b]); 
+    for (b=0; b<nb; b++) gsl_vector_free (c[b]); 
+    for (b=0; b<nb; b++) gsl_matrix_free (cov[b]); 
+    for (b=0; b<nb; b++) gsl_multifit_linear_free(work[b]); 
+    free((void*)y);      free((void*)c);
+    free((void*)cov);    free((void*)work);
 
   }
-  }
-
-
-  #ifdef FORCE_DEBUG
-  set_brick_filename(TOA, "TOA-RESMERGED");
-  print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
-  #endif
-
-
-  /** clean
-  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  gsl_matrix_free (X); gsl_vector_free (x);
-  for (b=0; b<nb; b++) gsl_vector_free(y[b]); 
-  for (b=0; b<nb; b++) gsl_vector_free (c[b]); 
-  for (b=0; b<nb; b++) gsl_matrix_free (cov[b]); 
-  for (b=0; b<nb; b++) gsl_multifit_linear_free(work[b]); 
-  free((void*)y);      free((void*)c);
-  free((void*)cov);    free((void*)work);
 
   #ifdef FORCE_CLOCK
   proctime_print("Resolution merge", TIME);

@@ -1,5 +1,28 @@
 .. _v3:
 
+FORCE v. 3.7.3
+--------------
+
+Release: 01.11.2021
+
+* **FORCE L2PS**
+
+  * The fix for ESA baseline 4.0 in v. 3.7.2 introduced an issue for old/current processsing baselines.
+    This is fixed now, backwards compatibility is given again.
+    Thanks to Vincent Schut for noticing.
+
+  * The multi-parameter based resolution merge option caused segfaults in some images.
+    This is fixed now, ``RES_MERGE = REGRESSION`` is now safe to use.
+    Thanks to J. Antonio Guzmán Q. for reporting this issue.
+    In addition, this method lacked multithreading, which is no implemented, too.
+
+* **FORCE HLPS**
+
+  * in force-higher-level, all sub-modules:
+    Implemented updates for enhancing the material-specific spectral adjustment.
+    Thanks to Daniel Scheffler for discussion, testing and help on porting.
+
+
 FORCE v. 3.7.2
 --------------
 
