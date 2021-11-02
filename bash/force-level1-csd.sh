@@ -404,11 +404,10 @@ get_data() {
   # AOI is coordinate pairs, get tiles/footprints from WFS server
   elif [ "$AOITYPE" -eq 2 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..." "Geometry type: "$GEOMETRY
+    WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
     if [ "$GEOMETRY" = "POINT" ]; then
-      WKT=$(echo $AOI | sed 's/\//,/g')
       WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3CLiteral%3E%3Cgml:Point%20srsName=%22EPSG:4326%22%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:Point%3E%3C/Literal%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
     elif [ "$GEOMETRY" = "POLYGON" ]; then
-      WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
       WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
     fi
     TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL")
