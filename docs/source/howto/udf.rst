@@ -369,7 +369,13 @@ We will implement the `Dynamic Habitat Indices <https://www.sciencedirect.com/sc
 which were designed for biodiversity assessments and to describe habitats of different species 
 (these are **very** similar to the STMs already included in FORCE, but not exactly the same).
 
-Describe
+There are three DHIs:
+
+1) DHI cum – cumulative DHI, i.e., the area under the phenological curve of a year
+2) DHI min – minimum DHI, i.e., the minimum value of the phenological curve of a year
+3) DHI var – seasonality DHI, i.e., the coefficient of variation of the phenological curve of a year
+
+image here
 
 FORCE parameter file:
 
