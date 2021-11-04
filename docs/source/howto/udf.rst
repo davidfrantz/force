@@ -99,7 +99,8 @@ For this, create a file (same filename as defined above), and edit it with the I
 
 In the global scope, we can import any module that you may need (you have to install it beforehand, but installing it in your userspace is sufficient - 
 **although this might not work when using the FORCE Docker container**).
-Input and output arrays are *numpy*, so we always need this. Additionally, we use *scipy* for some algebra.
+Input and output arrays are *numpy*, so we always need this. 
+Additionally, we use *scipy* for some algebra (note: some versions don't work... ``v. 1.6.0`` was successfully used here.
 
 .. code-block:: python
 
@@ -185,24 +186,29 @@ This is it, we can conveniently roll out the UDF using FORCE:
     force-higher-level /data/udf/medoid.prm
 
 
-The resulting image looks like this:
+The resulting composite looks like this (study area: Rhineland Palatinate, Germany):
 
 Screenshot
 
 
-Time series analysis entry point
------------------------------------
+Entry Point 2: Time series analysis entry point
+-----------------------------------------------
 
 Example 2: Interpolation
 “”””””””””””””””””””””””
 
-The second entry point is within the ``TSA`` submodule. The mode of operation is similar to above, but here, the user profits from other functions already implemented in FORCE, among others the calculation of spectral indices or time series interpolation.
+The second entry point is within the ``TSA`` submodule. 
+The mode of operation is similar to above, but here, the user profits from other functions already implemented in FORCE, 
+among others the calculation of spectral indices or time series interpolation.
 
-But probably, you want to implement a different interpolation?! How about a harmonic model? Let’s generate a FORCE parameter file:
+But probably, you want interpolate the data with a different method? 
+How about the popular `harmonic model <https://www.sciencedirect.com/science/article/abs/pii/S0034425715000590?via%3Dihub>`_? 
+Let’s generate a FORCE parameter file:
 
 .. code-block:: none
 
    force-parameter -c /data/udf/harmonic.prm TSA
+
 
 We are going to use multiple years of Landsat and Sentinel-2 data without interpolation:
 
@@ -212,17 +218,20 @@ We are going to use multiple years of Landsat and Sentinel-2 data without interp
    DATE_RANGE = 2015-01-01 2020-12-31
    INTERPOLATE = NONE
 
-Another new feature in FORCE v. 3.7: `land-cover-adaptive spectral harmonization <https://doi.org/10.1016/j.rse.2020.111723>`_, so let’s try this:
+
+Another new feature in FORCE >= v. 3.7: `land-cover-adaptive spectral harmonization <https://doi.org/10.1016/j.rse.2020.111723>`_, so let’s try this:
 
 .. code-block:: none
 
    SPECTRAL_ADJUST = TRUE
+
 
 As spectral index, we will use the recently developed `kernelized NDVI <https://doi.org/10.1126/sciadv.abc7447>`_:
 
 .. code-block:: none
 
    INDEX = kNDVI
+
 
 Again, a pixel-based UDF:
 
@@ -232,73 +241,81 @@ Again, a pixel-based UDF:
    PYTHON_TYPE = PIXEL
    OUTPUT_PYP = TRUE
 
-In the python script, we load some modules to deal with dates, and *scipy* for fitting a regressor.
+
+We create a new python script, and start by loading some modules to deal with dates, 
+as well as *scipy* for fitting a regressor.
 
 .. code-block:: python
 
-from datetime import datetime, timedelta
-import numpy as np
-from scipy.optimize import curve_fit
+    from datetime import datetime, timedelta
+    import numpy as np
+    from scipy.optimize import curve_fit
 
 
-We can use the global scope to define parameters, e.g. config variables like the start /end dates and interpolation step:
-
-.. code-block:: python
-
-# some global config variables
-date_start = 16436  # days since epoch (1970-01-01)
-date_end   = 18627  # days since epoch (1970-01-01)
-step = 16  # days
-
-
-In the initializer, we use these variables to generate formatted bandnames. As a rule, FORCE will automatically check whether the 1st word is an 8-digit date, and will then set metadata correctly.
+We can use the global scope to define parameters, e.g. config variables like the start/end dates and interpolation step:
 
 .. code-block:: python
 
-def forcepy_init(dates, sensors, bandnames):
-
-    bandnames = [(datetime(1970, 1, 1) + timedelta(days=days)).strftime('%Y%m%d') + ' sin-interpolation'
-                 for days in range(date_start, date_end, step)]
-    return bandnames
-
-
-In the next step, we define a regressor, e.g. Zhe Zhu’s [time series model based on harmonic components](https://www.sciencedirect.com/science/article/pii/S0034425715000590). We are not going into detail here as we assume that the reader is familiar with how these things work in Python:
-
-.. code-block:: python
-
-# regressor
-# - define all three models from the paper
-def objective_simple(x, a0, a1, b1, c1):
-    return a0 + a1 * np.cos(2 * np.pi / 365 * x) + b1 * np.sin(2 * np.pi / 365 * x) + c1 * x
+    # some global config variables
+    date_start = 16436  # days since epoch (1970-01-01)
+    date_end   = 18627  # days since epoch (1970-01-01)
+    step = 16  # days
 
 
-def objective_advanced(x, a0, a1, b1, c1, a2, b2):
-    return objective_simple(x, a0, a1, b1, c1) + a2 * np.cos(4 * np.pi / 365 * x) + b2 * np.sin(4 * np.pi / 365 * x)
-
-
-def objective_full(x, a0, a1, b1, c1, a2, b2, a3, b3):
-    return objective_advanced(x, a0, a1, b1, c1, a2, b2) + a3 * np.cos(6 * np.pi / 365 * x) + b3 * np.sin(
-        6 * np.pi / 365 * x)
-
-
-# - choose which model to use
-objective = objective_full
-
-
-In ``forcepy_pixel``, we flatten the input array. We can do this because the TSA module is only considering one index at a time, thus dimensions 2-3 are of length 1. If there is no data, we are exiting early.
+In the initializer function, we use these variables to generate formatted bandnames. 
+As a rule, FORCE will automatically check whether the 1st word is an 8-digit date, and if so, it will set the metadata correctly.
 
 .. code-block:: python
 
-def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
+    def forcepy_init(dates, sensors, bandnames):
 
-    # prepare dataset
-    profile = inarray.flatten()
-    valid = profile != nodata
-    if not np.any(valid):
-        return
+        bandnames = [(datetime(1970, 1, 1) + timedelta(days=days)).strftime('%Y%m%d') + ' sin-interpolation'
+                    for days in range(date_start, date_end, step)]
+        return bandnames
 
 
-We fit a harmonic model to the VI time series (y) along the date axis (x):
+In the next step, we define a regressor, 
+e.g. Zhe Zhu’s [time series model based on harmonic components](https://www.sciencedirect.com/science/article/pii/S0034425715000590). 
+We are not going into detail here as we assume that the reader is familiar with how these things work in Python:
+
+.. code-block:: python
+
+    # regressor
+    # - define all three models from the paper
+    def objective_simple(x, a0, a1, b1, c1):
+        return a0 + a1 * np.cos(2 * np.pi / 365 * x) + b1 * np.sin(2 * np.pi / 365 * x) + c1 * x
+
+
+    def objective_advanced(x, a0, a1, b1, c1, a2, b2):
+        return objective_simple(x, a0, a1, b1, c1) + a2 * np.cos(4 * np.pi / 365 * x) + b2 * np.sin(4 * np.pi / 365 * x)
+
+
+    def objective_full(x, a0, a1, b1, c1, a2, b2, a3, b3):
+        return objective_advanced(x, a0, a1, b1, c1, a2, b2) + a3 * np.cos(6 * np.pi / 365 * x) + b3 * np.sin(
+            6 * np.pi / 365 * x)
+
+
+    # - choose which model to use
+    objective = objective_full
+
+
+In ``forcepy_pixel``, we flatten the input array. 
+We can do this because the TSA module is only considering one index at a time, thus dimensions 2-3 are of length 1. 
+If we use multiple Indices (e.g. ``INDEX = kNDVI TC-GREEN NDVI``), the function is simply invoked multiple times.
+If there is no data, we are exiting early and safe.
+
+.. code-block:: python
+
+    def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
+
+        # prepare dataset
+        profile = inarray.flatten()
+        valid = profile != nodata
+        if not np.any(valid):
+            return
+
+
+We fit a harmonic model to the VI time series (``y``) along the date axis (``x``):
 
 .. code-block:: python
 
@@ -306,6 +323,7 @@ We fit a harmonic model to the VI time series (y) along the date axis (x):
     xtrain = dates[valid]
     ytrain = profile[valid]
     popt, _ = curve_fit(objective, xtrain, ytrain)
+
 
 Then, we predict the VI at each interpolation step ...
 
@@ -315,11 +333,13 @@ Then, we predict the VI at each interpolation step ...
     xtest = np.array(range(date_start, date_end, step))
     ytest = objective(xtest, *popt)
 
+
 ... and put the values into the output array:
 
 .. code-block:: python
 
     outarray[:] = ytest
+
 
 FORCE roll-out:
 
@@ -327,15 +347,27 @@ FORCE roll-out:
 
    force-higher-level /data/udf/medoid.prm
 
+
 The interpolated time series look like this:
 
 Screenshot
 
+
 Example 3: Predictive features
 “”””””””””””””””””””””””””””””
 
-So far, we have written pixel functions. These are parallelized according to the ``NTHREAD_COMPUTE`` parameter using a Python multiprocessing pool, i.e., a Python layer that is hidden from you for your convenience. FORCE also offers to provide block functions, wherein the python UDF receives a whole block of data. In this case, FORCE does not parallelize the computation, but this can be well compensated for if your UDF is constrained to a series of fast numpy array functions.
-A potential use case is the generation of predictive features. FORCE already packs a lot of that functionality, but in case you need more flexibility, the following recipe might be interesting for you. We will implement the `Dynamic Habitat Indices <>`_, which were designed for biodiversity assessments and to describe habitats of different species (these are **very** similar to the STMs already included in FORCE, but not the same).
+So far, we have written pixel functions. 
+These are parallelized according to the ``NTHREAD_COMPUTE`` parameter using a Python multiprocessing pool, 
+i.e., a Python layer that is hidden from you for your convenience. 
+FORCE also offers to provide block functions, wherein the python UDF receives a whole block of data. 
+In this case, FORCE does not parallelize the computation, 
+but this can be well compensated for if your UDF is constrained to a series of fast numpy array functions.
+A potential use case is the generation of predictive features. 
+FORCE already packs a lot of that functionality, but in case you need more flexibility, 
+the following recipe might be interesting for you. 
+We will implement the `Dynamic Habitat Indices <https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682>`_, 
+which were designed for biodiversity assessments and to describe habitats of different species 
+(these are **very** similar to the STMs already included in FORCE, but not exactly the same).
 
 Describe
 
@@ -343,18 +375,23 @@ FORCE parameter file:
 
 .. code-block:: none
 
-   force-parameter -c /data/udf/harmonic.prm TSA
+   force-parameter -c /data/udf/dhi.prm TSA
 
-We are going to use exactly one year of Landsat and Sentinel-2 data. We enable RBF interpolation with extraordinarily large kernels to make sure that the time series does not contain any nodata values. The latter is necessary as the “cumulative” DHI is sensitive to the number of observations *N* (I would prefer to normalize by *N*, i.e., the mean, but we here want to implement the original DHI).
+
+We are going to use exactly one year of Landsat and Sentinel-2 data. 
+We enable RBF interpolation with extraordinarily large kernels to make sure that the time series does not contain any nodata values. 
+The latter is necessary as the **cumulative** DHI is sensitive to the number of observations *N* 
+(I personally would prefer to normalize by *N*, i.e., the mean, but we here want to implement the original DHI).
 
 .. code-block:: none
 
    SENSORS = LND07 LND08 SEN2A SEN2B
-   DATE_RANGE = 2015-01-01 2020-12-31
+   DATE_RANGE = 2018-01-01 2018-12-31
    INTERPOLATE = RBF
    RBF_SIGMA = 8 16 32 64
    RBF_CUTOFF = 0.95
    INT_DAY = 16
+
 
 As above, we also use spectrally harmonized kNDVI: 
 
@@ -363,7 +400,8 @@ As above, we also use spectrally harmonized kNDVI:
    SPECTRAL_ADJUST = TRUE
    INDEX = kNDVI
 
-Then, we tell FORCE that we will provide a block function:
+
+Then, we tell FORCE that we will provide a **block function**:
 
 .. code-block:: none
 
@@ -371,46 +409,61 @@ Then, we tell FORCE that we will provide a block function:
    PYTHON_TYPE = BLOCK
    OUTPUT_PYP = TRUE
 
-The Python script has a very similar structure to the previous examples. Load some modules ...
+
+The Python script has a very similar structure to the previous examples. 
+We load some modules ...
 
 .. code-block:: python
 
-import numpy as np
-import warnings
+    import numpy as np
+    import warnings
+
 
 ... and define the three DHI output bands:
 
 .. code-block:: python
 
-def forcepy_init(dates, sensors, bandnames):
+    def forcepy_init(dates, sensors, bandnames):
 
-    return ['cumulative', 'minimum', 'variation']
+        return ['cumulative', 'minimum', 'variation']
 
 
-``forcepy_block`` has the same function signature as ``forcepy_pixel``, but the input array holds a complete block of data, i.e., nrows and ncols are greater than 1. In the TSA submodule, nbands is always 1, thus, we strip away the band dimension, convert the array to Float, and replace nodata values by NaN to enable *np.nan*-functions.
+``forcepy_block`` has the same function signature as ``forcepy_pixel``, 
+but the input array holds a complete block of data, i.e., 
+nrows and ncols are greater than 1. 
+In the TSA submodule, nbands is always 1, thus, 
+we strip away the band dimension, convert the array to Float, 
+and replace nodata values by NaN to enable *np.nan*-functions.
+Again, we assume that you know how these things work in *Python*, thus, 
+we do not provide much explanation here.
 
 .. code-block:: python
 
-def forcepy_block(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
-    """
-    inarray:   numpy.ndarray[nDates, nBands, nrows, ncols](Int16)
-    outarray:  numpy.ndarray[nOutBands](Int16) initialized with no data values
-    dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
-    sensors:   numpy.ndarray[nDates](str)
-    bandnames: numpy.ndarray[nBands](str)
-    nodata:    int
-    nproc:     number of allowed processes/threads
-    Write results into outarray.
-    """
+    def forcepy_block(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
+        """
+        inarray:   numpy.ndarray[nDates, nBands, nrows, ncols](Int16)
+        outarray:  numpy.ndarray[nOutBands](Int16) initialized with no data values
+        dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
+        sensors:   numpy.ndarray[nDates](str)
+        bandnames: numpy.ndarray[nBands](str)
+        nodata:    int
+        nproc:     number of allowed processes/threads
+        Write results into outarray.
+        """
 
-    # prepare data
-    inarray = inarray[:, 0].astype(np.float32) # cast to float ...
-    invalid = inarray == nodata
-    if np.all(invalid):
-        return
-    inarray[invalid] = np.nan        # ... and inject NaN to enable np.nan*-functions
+        # prepare data
+        inarray = inarray[:, 0].astype(np.float32) # cast to float ...
+        invalid = inarray == nodata
+        if np.all(invalid):
+            return
+        inarray[invalid] = np.nan        # ... and inject NaN to enable np.nan*-functions
 
-Next, we catch and ignore warnings. This is a cosmetic procedure as numpy will print some warning if one pixel only contains nodata values. DHI computation is simple, we simply use numpy statistical aggregations along the temporal axis. The scaling factors are necessary as FORCE expects 16bit Integers.
+
+Next, we catch and ignore warnings. 
+This is a cosmetic procedure as numpy will print some warnings if one pixel only contains nodata values (not critical, but ugly). 
+The DHI computation itself is simple: 
+we simply use numpy statistical aggregations along the temporal axis. 
+The scaling factors are necessary as FORCE expects to receive 16bit Integers from *Python*.
 
 .. code-block:: python
 
@@ -421,6 +474,7 @@ Next, we catch and ignore warnings. This is a cosmetic procedure as numpy will p
         minimum    = np.nanmin(inarray, axis=0)
         variation  = np.nanstd(inarray, axis=0) / np.nanmean(inarray, axis=0) * 1e4
 
+
 The three DHI indices are then copied to the output array ...
 
 .. code-block:: python
@@ -430,20 +484,25 @@ The three DHI indices are then copied to the output array ...
         valid = np.isfinite(arr)
         outarr[valid] = arr[valid]
 
-and we roll out with:
+
+... and we roll out with:
 
 .. code-block:: none
 
-   force-higher-level /data/udf/medoid.prm
+   force-higher-level /data/udf/dhi.prm
+
 
 If we generate for a large extent (multiple tiles), use mosaics and pyramids:
 
 .. code-block:: none
 
+   force-pyramid /data/udf/X*/*.tif
    force-mosaic /data/udf
-   force-pyramid /data/udf/mosaic/*
 
-The DHIs for Germany look like this. In red, we have land covers with a high seasonality (e.g. agriculture). In cyan, we have land covers with a high minimum and cumulation (e.g. coniferous forest). In green, we have ... or. In ....  
+The DHIs for Rhineland-Palatinate, Germany, look like this.
+In red, we have land covers with a high seasonality (e.g. agriculture). 
+In cyan, we have land covers with a high minimum and cumulation (e.g. coniferous forest). 
+In green, we have ... or. In ....  
 
 Screenshot
 
@@ -451,6 +510,19 @@ Screenshot
 FORCE UDF repository
 --------------------
 
-Now, it’s your turn! Plug your python algos into FORCE and roll them out. If you do, we encourage you to share your UDFs, such that the community as a whole benefits, and has access to a broad variety of workflows. This extra step of publishing your workflow is a small step to overcome the so-called `”Valley of Death” <https://twitter.com/gcamara/status/1127887595168514049>_` in Earth observation applications and fosters reproducible research! To make it easier for you, we have created a `FORCE UDF repository <https://github.com/davidfrantz/force-udf>_`, where you can push your UDF (only minimal documentation needed). All examples from this tutorial are included there, too. As a bonus, the UDFs in this repository are automatically shipped with the FORCE Docker container (`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`), thus making it easier than ever to contribute to the FORCE project.
+Now, it’s your turn! 
+Plug your python algos into FORCE and roll them out. 
+If you do, we encourage you to share your UDFs, such that the community as a whole benefits, 
+and has access to a broad variety of workflows. 
+This extra step of publishing your workflow is a small step to overcome the so-called 
+`”Valley of Death” <https://twitter.com/gcamara/status/1127887595168514049>_` in Earth observation applications and 
+fosters reproducible research! 
+To make it easier for you, we have created a `FORCE UDF repository <https://github.com/davidfrantz/force-udf>_`, 
+where you can pull request your UDF (only minimal documentation needed, see the examples). 
+All examples from this tutorial are included there, too. 
+As a bonus, the UDFs in this repository are automatically shipped with the FORCE Docker containers 
+(`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`), 
+thus making it easier than ever to contribute to the FORCE project.
 
 image udf logo
+
