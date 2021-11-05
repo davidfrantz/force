@@ -573,8 +573,8 @@ where you can pull-request your UDF (only minimal documentation needed, see the 
 
 All examples from this tutorial are included there, too. 
 
-As a bonus, the UDFs in this repository are automatically shipped with the FORCE Docker containers 
-(`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`) (mounted under ``/udf``), 
+As a bonus, the UDFs in that repository are automatically shipped with the FORCE Docker containers 
+(`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>`_) (mounted under ``/home/docker``, e.g. ``/home/docker/udf/python/ard/medoid/medoid.py``), 
 thus making it easier than ever to contribute to the FORCE project.
 
 .. image:: img/tutorial-udf-repo.png
