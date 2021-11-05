@@ -81,7 +81,7 @@ In this tutorial, we will implement the medoid, a compositing technique heavily 
 
 .. figure:: img/tutorial-udf-medoid-flood.png
 
-   *Illustrative example of medoid selection in 2-dimensional space* |copy| `*Neil Flood / Remote Sensing* <https://www.mdpi.com/2072-4292/5/12/6481>`_
+   *Illustrative example of medoid selection in 2-dimensional space* |copy| `Neil Flood / Remote Sensing <https://www.mdpi.com/2072-4292/5/12/6481>`_
 
 
 First, we generate a FORCE parameter file:
@@ -104,7 +104,7 @@ We are going to use one year of Landsat data:
 
 Then, we tell FORCE where to find the UDF script, and that the UDF shall be a pixel function. 
 This means that we need to provide some *Python* code that works on the *time series of a single pixel*. 
-The last parameter tells FORCE that we activate UDF processing and output the designated product (``PYP - **Py**thon **P**lugin`` that is).
+The last parameter tells FORCE that we activate UDF processing and output the designated product (``PYP`` - **Py**thon **P**lugin that is).
 
 .. code-block:: none
 
@@ -226,7 +226,7 @@ How about the popular `harmonic model <https://www.sciencedirect.com/science/art
 
 .. figure:: img/tutorial-udf-harmonic-zhu.png
 
-   *Harmonic models fitted to a Landsat time series |copy| `Zhe Zhu / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425715000590?via%3Dihub>`_*
+   *Harmonic models fitted to a Landsat time series* |copy| `Zhe Zhu / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425715000590?via%3Dihub>`_
 
 
 Let’s generate a FORCE parameter file:
@@ -411,7 +411,7 @@ There are three DHIs:
 
 .. figure:: img/tutorial-udf-dhi-hobi.png
 
-   *Calculation of the DHIs |copy| `Martina Hobi / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682>`_*
+   *Calculation of the DHIs* |copy| `Martina Hobi / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682>`_
 
 
 Generate a FORCE parameter file:
