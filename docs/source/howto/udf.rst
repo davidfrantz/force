@@ -9,14 +9,19 @@ User-Defined Functions
  
 This tutorial introduces User-Defined Functions in the FORCE Higher Level Processing system (HLPS).
  
-.. info::
-  This tutorial uses FORCE v. 3.7.3. 
+.. admonition:: Info
+
+  *This tutorial uses FORCE v. 3.7.3*.
+
   We assume that you already have an existing Level 2 ARD data pool, which contains preprocessed data for multiple years (see Level 2 ARD tutorial). 
   We also assume that you have a basic understanding of the higher-level processing system (see interpolation tutorial).
   *Python* skills are mandatory, too.
 
 .. image:: ../img/force-udf.png
     :target: https://github.com/davidfrantz/force-udf
+
+
+------------
 
 
 FORCE and UDFs
@@ -48,8 +53,7 @@ the output of metadata,
 parallelization, 
 and whatnot...
 
-Now, we developed one possible solution and aimed at combining the best of both worlds: 
-
+Now, we developed one possible solution and aimed at combining the best of both worlds. 
 We use 
 
 1) FORCE as “backend” to handle all the boring but necessary stuff that a regular user wants no part of, and
@@ -77,7 +81,7 @@ In this tutorial, we will implement the medoid, a compositing technique heavily 
 
 .. figure:: img/tutorial-udf-medoid-flood.png
 
-   *Illustrative example of medoid selection in 2-dimensional space |copy| `Neil Flood / Remote Sensing <https://www.mdpi.com/2072-4292/5/12/6481>`_*
+   *Illustrative example of medoid selection in 2-dimensional space* |copy| `*Neil Flood / Remote Sensing* <https://www.mdpi.com/2072-4292/5/12/6481>`_
 
 
 First, we generate a FORCE parameter file:
