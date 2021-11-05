@@ -14,7 +14,7 @@ Usage
 .. note::
     In FORCE <= 3.6.5 only the ``datacube-dir`` could be specified as parameter.
 
-.. code:: none
+.. code-block:: none
 
     force-mosaic [-h] [-v] [-i] [-j] [-m] datacube-dir
 

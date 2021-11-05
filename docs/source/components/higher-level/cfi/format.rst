@@ -76,13 +76,13 @@ Following 21-digit naming convention is applied to all output files:
 
 Digits 1–4	Year
 Digits 6–13	Processing Type
-		IMPROPHE
+IMPROPHE
 Digits 15–17	Product Tag
 XXX		These custom3-digit tags are specified in the parameter file
 Digits 19–21	File extension
-		tif		image data in compressed GeoTiff format
-		dat		image data in flat binary ENVI format
-		hdr		metadata
+tif		image data in compressed GeoTiff format
+dat		image data in flat binary ENVI format
+hdr		metadata
 
 File format
 The data are provided in compressed GeoTiff or flat binary ENVI Standard format. Each dataset consists of an image dataset (.tif/.dat) and metadata (.hdr). The image data have signed 16bit datatype. Each predicted image is stored as separate file.
