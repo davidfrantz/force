@@ -48,7 +48,7 @@ We use FORCE as “backend” to handle all the boring but necessary stuff that 
 use User-Defined Functions (UDF) written in *Python* to implement, well, whatever you can think of.
 
 These UDFs only contain the algorithm itself with minimal boilerplate. 
-You can write simple scripts, or even plug in complicated algorithms - you have a BFAST, LandTrendr, or CCDC implementation in Python? Plug-it in! 
+You can write simple scripts, or even plug in complicated algorithms - you have a BFAST, LandTrendr, or CCDC implementation in *Python*? Plug-it in! 
 You don’t even need to re-compile FORCE, just name the path to the UDF and run. 
 The FORCE Docker images even pack some UDFs that are instantly ready to go (we will come back to this later).
 
@@ -84,7 +84,7 @@ We are going to use one year of Landsat data.
 
 
 Then, we tell FORCE where to find the UDF script, and that the UDF shall be a pixel function. 
-This means that we need to provide some python code that works on the time series of a single pixel. 
+This means that we need to provide some *Python* code that works on the time series of a single pixel. 
 The last parameter tells FORCE that we enable UDF processing and output the designated product (``PYP - **Py**thon **P**lugin`` that is).
 
 .. code-block:: none
@@ -188,7 +188,9 @@ This is it, we can conveniently roll out the UDF using FORCE:
 
 The resulting composite looks like this (study area: Rhineland Palatinate, Germany):
 
-Screenshot
+.. figure:: img/tutorial-udf-medoid.png
+
+   *Medoid composite for Rhineland Palatinate, Germany (R: NIR, G: SWIR1, B: Red)*
 
 
 Entry Point 2: Time series analysis entry point
@@ -242,7 +244,7 @@ Again, a pixel-based UDF:
    OUTPUT_PYP = TRUE
 
 
-We create a new python script, and start by loading some modules to deal with dates, 
+We create a new *Python* script, and start by loading some modules to deal with dates, 
 as well as *scipy* for fitting a regressor.
 
 .. code-block:: python
@@ -276,7 +278,7 @@ As a rule, FORCE will automatically check whether the 1st word is an 8-digit dat
 
 In the next step, we define a regressor, 
 e.g. Zhe Zhu’s [time series model based on harmonic components](https://www.sciencedirect.com/science/article/pii/S0034425715000590). 
-We are not going into detail here as we assume that the reader is familiar with how these things work in Python:
+We are not going into detail here as we assume that the reader is familiar with how these things work in *Python*:
 
 .. code-block:: python
 
@@ -350,16 +352,22 @@ FORCE roll-out:
 
 The interpolated time series look like this:
 
-Screenshot
+.. figure:: img/tutorial-udf-harmonic.png
+
+   *Harmonic fit for a deciduous forest pixel.*
+
+.. note::
+    As described above, FORCE sets the metadata dates, such that the 
+    ``Raster Data Plotting`` and ``Raster Time Series Manager`` ``QGIS`` plug-ins can visualize these data.
 
 
 Example 3: Predictive features
 “”””””””””””””””””””””””””””””
 
 So far, we have written pixel functions. 
-These are parallelized according to the ``NTHREAD_COMPUTE`` parameter using a Python multiprocessing pool, 
-i.e., a Python layer that is hidden from you for your convenience. 
-FORCE also offers to provide block functions, wherein the python UDF receives a whole block of data. 
+These are parallelized according to the ``NTHREAD_COMPUTE`` parameter using a *Python* multiprocessing pool, 
+i.e., a *Python* layer that is hidden from you for your convenience. 
+FORCE also offers to provide block functions, wherein the *Python* UDF receives a whole block of data. 
 In this case, FORCE does not parallelize the computation, 
 but this can be well compensated for if your UDF is constrained to a series of fast numpy array functions.
 A potential use case is the generation of predictive features. 
@@ -416,7 +424,7 @@ Then, we tell FORCE that we will provide a **block function**:
    OUTPUT_PYP = TRUE
 
 
-The Python script has a very similar structure to the previous examples. 
+The *Python* script has a very similar structure to the previous examples. 
 We load some modules ...
 
 .. code-block:: python
@@ -505,19 +513,24 @@ If we generate for a large extent (multiple tiles), use mosaics and pyramids:
    force-pyramid /data/udf/X*/*.tif
    force-mosaic /data/udf
 
-The DHIs for Rhineland-Palatinate, Germany, look like this.
-In red, we have land covers with a high seasonality (e.g. agriculture). 
-In cyan, we have land covers with a high minimum and cumulation (e.g. coniferous forest). 
-In green, we have ... or. In ....  
+.. figure:: img/tutorial-udf-dhi.png
 
-Screenshot
+   *Dynamic Habitat Indices for Rhineland Palatinate, Germany (R: cumulative, G: minimum, B: variation)*
+
+
+In yellow, we have land covers that have photosynthetically active vegetation across the entire year (high cumulation and high minimum), e.g. coniferous forests.
+In red, we have a fairly high cumulation, too, but a low minimum, e.g. deciduous forests that shed their leaves in the winter.
+In blue, we have land covers with high seasonality and a complete barren surface at one point in the year. 
+These are mostly agricultural areas.
+The gradient from blue to purple indicates that biomass is present for a longer time throughout the year for some of the fields. 
+This may be related to different crop types (that take longer to grow) or where double cropping is present.
 
 
 FORCE UDF repository
 --------------------
 
 Now, it’s your turn! 
-Plug your python algos into FORCE and roll them out. 
+Plug your *Python* algos into FORCE and roll them out. 
 If you do, we encourage you to share your UDFs, such that the community as a whole benefits, 
 and has access to a broad variety of workflows. 
 This extra step of publishing your workflow is a small step to overcome the so-called 
@@ -530,5 +543,23 @@ As a bonus, the UDFs in this repository are automatically shipped with the FORCE
 (`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`), 
 thus making it easier than ever to contribute to the FORCE project.
 
-image udf logo
+.. image:: ../img/force-udf.png
+    :target: https://github.com/davidfrantz/force-udf
 
+
+------------
+
+.. |author-pic| image:: profile/dfrantz.jpg
+
+.. |df-link| replace:: Trier University
+.. _df-link: https://www.uni-trier.de/universitaet/fachbereiche-faecher/fachbereich-vi/faecher/kartographie/personal/frantz
+
++--------------+--------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                   +
++              + `David Frantz <https://davidfrantz.github.io>`_,                               +
++              + main developer of **FORCE**,                                                   +
++              + Assistant Professor at |df-link|_                                              +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+
