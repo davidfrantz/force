@@ -65,7 +65,10 @@ You have a BFAST, LandTrendr, or CCDC implementation in *Python*? Plug-it in!
 You don’t even need to re-compile FORCE, just name the path to the UDF and run. 
 The FORCE Docker images even pack some UDFs that are instantly ready to go (we will come back to this later).
 
-FORCE currently provides two entry points for UDFs, both in the Higher Level Processing module:
+FORCE currently provides two entry points for UDFs, both in the Higher Level Processing module.
+
+
+------------
 
 
 Entry Point 1: The generic entry point for ARD
@@ -209,6 +212,9 @@ and conveniently roll out the UDF using FORCE:
 .. figure:: img/tutorial-udf-medoid.png
 
    *Medoid composite for Rhineland Palatinate, Germany (R: NIR, G: SWIR1, B: Red)*
+
+
+------------
 
 
 Entry Point 2: Time series analysis entry point
@@ -385,6 +391,9 @@ The interpolated time series look like this:
     ``Raster Data Plotting`` and ``Raster Time Series Manager`` ``QGIS`` plug-ins can visualize these data.
 
 
+------------
+
+
 Example 3: Predictive features
 ******************************
 
@@ -554,6 +563,9 @@ In blue, we have land covers with high seasonality and a complete barren surface
 These are mostly agricultural areas.
 The gradient from blue to purple indicates that biomass is present for a longer time throughout the year for some of the fields. 
 This may be related to different crop types (that take longer to grow) or where double cropping is present.
+
+
+------------
 
 
 FORCE UDF repository
