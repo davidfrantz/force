@@ -812,6 +812,7 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
 
       // number of close clusters
       n_cluster = c+1;
+      if (n_cluster > _SPECHOMO_N_SIM_) n_cluster = _SPECHOMO_N_SIM_;
 
       #ifdef FORCE_DEBUG
       printf("found %d clusters\n", n_cluster);
