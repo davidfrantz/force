@@ -3,14 +3,20 @@
 User-Defined Functions
 ======================
  
+.. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
+
 **How to customize your processing**
  
 This tutorial introduces User-Defined Functions in the FORCE Higher Level Processing system (HLPS).
  
-.. info:
+.. info::
   This tutorial uses FORCE v. 3.7.3. 
   We assume that you already have an existing Level 2 ARD data pool, which contains preprocessed data for multiple years (see Level 2 ARD tutorial). 
   We also assume that you have a basic understanding of the higher-level processing system (see interpolation tutorial).
+  *Python* skills are mandatory, too.
+
+.. image:: ../img/force-udf.png
+    :target: https://github.com/davidfrantz/force-udf
 
 
 FORCE and UDFs
@@ -44,11 +50,14 @@ and whatnot...
 
 Now, we developed one possible solution and aimed at combining the best of both worlds: 
 
-We use FORCE as “backend” to handle all the boring but necessary stuff that a regular user wants no part of, and
-use User-Defined Functions (UDF) written in *Python* to implement, well, whatever you can think of.
+We use 
+
+1) FORCE as “backend” to handle all the boring but necessary stuff that a regular user wants no part of, and
+2) introduce User-Defined Functions (UDF) written in *Python* to implement, well, whatever you can think of.
 
 These UDFs only contain the algorithm itself with minimal boilerplate. 
-You can write simple scripts, or even plug in complicated algorithms - you have a BFAST, LandTrendr, or CCDC implementation in *Python*? Plug-it in! 
+You can write simple scripts, or even plug in complicated algorithms. 
+You have a BFAST, LandTrendr, or CCDC implementation in *Python*? Plug-it in! 
 You don’t even need to re-compile FORCE, just name the path to the UDF and run. 
 The FORCE Docker images even pack some UDFs that are instantly ready to go (we will come back to this later).
 
@@ -59,11 +68,17 @@ Entry Point 1: The generic entry point for ARD
 ----------------------------------------------
 
 Example 1: Compositing
-“”””””””””””””””””””””
+**********************
 
 The ``UDF`` submodule provides you a high level of flexibility 
 as it gives you access to the complete reflectance profile of multi-temporal and multi-sensor FORCE data collections. 
-In this tutorial, we will implement the medoid, a compositing technique heavily used by our ``Australian colleagues <https://www.mdpi.com/2072-4292/5/12/6481>``_ - but not yet natively available in FORCE. 
+
+In this tutorial, we will implement the medoid, a compositing technique heavily used by our `Australian colleagues <https://www.mdpi.com/2072-4292/5/12/6481>`_ - but not yet natively available in FORCE. 
+
+.. figure:: img/tutorial-udf-medoid-flood.png
+
+   *Illustrative example of medoid selection in 2-dimensional space |copy| `Neil Flood / Remote Sensing <https://www.mdpi.com/2072-4292/5/12/6481>`_*
+
 
 First, we generate a FORCE parameter file:
 
@@ -73,9 +88,9 @@ First, we generate a FORCE parameter file:
 
 
 Then, you have to specify the regular things like input and output directories, processing extent, parallelization options, etc. 
-We will not go into detail here, please see the basic HLPS tutorial for general usage.
+We will not go into detail here, please see the :ref:`basic HLPS tutorial <tut-tsi>` for general usage.
 
-We are going to use one year of Landsat data.
+We are going to use one year of Landsat data:
 
 .. code-block:: none
 
@@ -84,8 +99,8 @@ We are going to use one year of Landsat data.
 
 
 Then, we tell FORCE where to find the UDF script, and that the UDF shall be a pixel function. 
-This means that we need to provide some *Python* code that works on the time series of a single pixel. 
-The last parameter tells FORCE that we enable UDF processing and output the designated product (``PYP - **Py**thon **P**lugin`` that is).
+This means that we need to provide some *Python* code that works on the *time series of a single pixel*. 
+The last parameter tells FORCE that we activate UDF processing and output the designated product (``PYP - **Py**thon **P**lugin`` that is).
 
 .. code-block:: none
 
@@ -100,7 +115,7 @@ For this, create a file (same filename as defined above), and edit it with the I
 In the global scope, we can import any module that you may need (you have to install it beforehand, but installing it in your userspace is sufficient - 
 **although this might not work when using the FORCE Docker container**).
 Input and output arrays are *numpy*, so we always need this. 
-Additionally, we use *scipy* for some algebra (note: some versions don't work... ``v. 1.6.0`` was successfully used here.
+Additionally, we use *scipy* for some algebra (note: some versions don't work... ``v. 1.6.0`` was successfully used here).
 
 .. code-block:: python
 
@@ -118,14 +133,14 @@ we want to match the output bands with the input, thus, we simply pass through t
 
 .. code-block:: python
 
-def forcepy_init(dates, sensors, bandnames):
-    """
-    dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
-    sensors:   numpy.ndarray[nDates](str)
-    bandnames: numpy.ndarray[nBands](str)
-    """
+    def forcepy_init(dates, sensors, bandnames):
+        """
+        dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
+        sensors:   numpy.ndarray[nDates](str)
+        bandnames: numpy.ndarray[nBands](str)
+        """
 
-    return bandnames
+        return bandnames
 
 
 In the next step, we implement the pixel-based algorithm in the ``forcepy_pixel`` function. 
@@ -133,29 +148,29 @@ In the next step, we implement the pixel-based algorithm in the ``forcepy_pixel`
 
 .. code-block:: python
 
-def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
-    """
-    inarray:   numpy.ndarray[nDates, nBands, nrows, ncols](Int16), nrows & ncols always 1
-    outarray:  numpy.ndarray[nOutBands](Int16) initialized with no data values
-    dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
-    sensors:   numpy.ndarray[nDates](str)
-    bandnames: numpy.ndarray[nBands](str)
-    nodata:    int
-    nproc:     number of allowed processes/threads (always 1)
-    Write results into outarray.
-    """
+    def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):
+        """
+        inarray:   numpy.ndarray[nDates, nBands, nrows, ncols](Int16), nrows & ncols always 1
+        outarray:  numpy.ndarray[nOutBands](Int16) initialized with no data values
+        dates:     numpy.ndarray[nDates](int) days since epoch (1970-01-01)
+        sensors:   numpy.ndarray[nDates](str)
+        bandnames: numpy.ndarray[nBands](str)
+        nodata:    int
+        nproc:     number of allowed processes/threads (always 1)
+        Write results into outarray.
+        """
 
 The input is a 4D numpy array with dimensions for dates, bands, rows, and columns. 
-When writing a “pixel-function”, rows and columns are always 1 (we will come later to “block-functions”), 
+When writing a "pixel-function", rows and columns are always 1 (we will come later to "block-functions"), 
 thus our first step is to collapse the spatial dimensions. 
 We check against the nodata value, and skip early if none of the time steps holds data: 
 
 .. code-block:: python
 
-    inarray = inarray[:, :, 0, 0]
-    valid = np.where(inarray[:, 0] != nodata)[0]  # skip no data; just check first band
-    if len(valid) == 0:
-        return
+        inarray = inarray[:, :, 0, 0]
+        valid = np.where(inarray[:, 0] != nodata)[0]  # skip no data; just check first band
+        if len(valid) == 0:
+            return
 
 
 This small piece of code implements the medoid. 
@@ -163,11 +178,11 @@ It extracts the spectrum of the observation that is most central in our multidim
 
 .. code-block:: python
 
-    pairwiseDistancesSparse = pdist(inarray[valid], 'euclidean')
-    pairwiseDistances = squareform(pairwiseDistancesSparse)
-    cumulativDistance = np.sum(pairwiseDistances, axis=0)
-    argMedoid = valid[np.argmin(cumulativDistance)]
-    medoid = inarray[argMedoid, :]
+        pairwiseDistancesSparse = pdist(inarray[valid], 'euclidean')
+        pairwiseDistances = squareform(pairwiseDistancesSparse)
+        cumulativDistance = np.sum(pairwiseDistances, axis=0)
+        argMedoid = valid[np.argmin(cumulativDistance)]
+        medoid = inarray[argMedoid, :]
 
 
 Finally, we copy the medoid spectrum to the pre-allocated output array. 
@@ -176,17 +191,16 @@ Each band should go to one index.
 
 .. code-block:: python
 
-    outarray[:] = medoid
+        outarray[:] = medoid
 
 
-This is it, we can conveniently roll out the UDF using FORCE:
+This is it, save the script,
+and conveniently roll out the UDF using FORCE:
 
 .. code-block:: none
 
     force-higher-level /data/udf/medoid.prm
 
-
-The resulting composite looks like this (study area: Rhineland Palatinate, Germany):
 
 .. figure:: img/tutorial-udf-medoid.png
 
@@ -197,7 +211,7 @@ Entry Point 2: Time series analysis entry point
 -----------------------------------------------
 
 Example 2: Interpolation
-“”””””””””””””””””””””””
+************************
 
 The second entry point is within the ``TSA`` submodule. 
 The mode of operation is similar to above, but here, the user profits from other functions already implemented in FORCE, 
@@ -205,6 +219,12 @@ among others the calculation of spectral indices or time series interpolation.
 
 But probably, you want interpolate the data with a different method? 
 How about the popular `harmonic model <https://www.sciencedirect.com/science/article/abs/pii/S0034425715000590?via%3Dihub>`_? 
+
+.. figure:: img/tutorial-udf-harmonic-zhu.png
+
+   *Harmonic models fitted to a Landsat time series |copy| `Zhe Zhu / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425715000590?via%3Dihub>`_*
+
+
 Let’s generate a FORCE parameter file:
 
 .. code-block:: none
@@ -221,7 +241,7 @@ We are going to use multiple years of Landsat and Sentinel-2 data without interp
    INTERPOLATE = NONE
 
 
-Another new feature in FORCE >= v. 3.7: `land-cover-adaptive spectral harmonization <https://doi.org/10.1016/j.rse.2020.111723>`_, so let’s try this:
+Another new feature in FORCE >= v. 3.7: `land-cover-adaptive spectral harmonization <https://doi.org/10.1016/j.rse.2020.111723>`_, so let’s try this as well:
 
 .. code-block:: none
 
@@ -276,8 +296,8 @@ As a rule, FORCE will automatically check whether the 1st word is an 8-digit dat
         return bandnames
 
 
-In the next step, we define a regressor, 
-e.g. Zhe Zhu’s [time series model based on harmonic components](https://www.sciencedirect.com/science/article/pii/S0034425715000590). 
+In the next step, we define the regressor, 
+e.g. Zhe Zhu’s `time series model based on harmonic components <https://www.sciencedirect.com/science/article/pii/S0034425715000590>`_. 
 We are not going into detail here as we assume that the reader is familiar with how these things work in *Python*:
 
 .. code-block:: python
@@ -321,29 +341,29 @@ We fit a harmonic model to the VI time series (``y``) along the date axis (``x``
 
 .. code-block:: python
 
-    # fit
-    xtrain = dates[valid]
-    ytrain = profile[valid]
-    popt, _ = curve_fit(objective, xtrain, ytrain)
+        # fit
+        xtrain = dates[valid]
+        ytrain = profile[valid]
+        popt, _ = curve_fit(objective, xtrain, ytrain)
 
 
 Then, we predict the VI at each interpolation step ...
 
 .. code-block:: python
 
-    # predict
-    xtest = np.array(range(date_start, date_end, step))
-    ytest = objective(xtest, *popt)
+        # predict
+        xtest = np.array(range(date_start, date_end, step))
+        ytest = objective(xtest, *popt)
 
 
 ... and put the values into the output array:
 
 .. code-block:: python
 
-    outarray[:] = ytest
+        outarray[:] = ytest
 
 
-FORCE roll-out:
+Save the script, and roll-out with FORCE:
 
 .. code-block:: none
 
@@ -354,25 +374,27 @@ The interpolated time series look like this:
 
 .. figure:: img/tutorial-udf-harmonic.png
 
-   *Harmonic fit for a deciduous forest pixel.*
+   *Harmonic fit for a deciduous forest pixel. White points: individual kNDVI observations. Green curve: fitted values.*
 
 .. note::
-    As described above, FORCE sets the metadata dates, such that the 
+    As described above, FORCE sets the dates in the metadata, such that the 
     ``Raster Data Plotting`` and ``Raster Time Series Manager`` ``QGIS`` plug-ins can visualize these data.
 
 
 Example 3: Predictive features
-“”””””””””””””””””””””””””””””
+******************************
 
 So far, we have written pixel functions. 
 These are parallelized according to the ``NTHREAD_COMPUTE`` parameter using a *Python* multiprocessing pool, 
 i.e., a *Python* layer that is hidden from you for your convenience. 
 FORCE also offers to provide block functions, wherein the *Python* UDF receives a whole block of data. 
 In this case, FORCE does not parallelize the computation, 
-but this can be well compensated for if your UDF is constrained to a series of fast numpy array functions.
+but this can be well compensated for if your UDF is constrained to a series of fast *numpy* array functions.
+
 A potential use case is the generation of predictive features. 
 FORCE already packs a lot of that functionality, but in case you need more flexibility, 
 the following recipe might be interesting for you. 
+
 We will implement the `Dynamic Habitat Indices <https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682>`_, 
 which were designed for biodiversity assessments and to describe habitats of different species 
 (these are **very** similar to the STMs already included in FORCE, but not exactly the same).
@@ -383,9 +405,12 @@ There are three DHIs:
 2) DHI min – minimum DHI, i.e., the minimum value of the phenological curve of a year
 3) DHI var – seasonality DHI, i.e., the coefficient of variation of the phenological curve of a year
 
-image here
+.. figure:: img/tutorial-udf-dhi-hobi.png
 
-FORCE parameter file:
+   *Calculation of the DHIs |copy| `Martina Hobi / Remote Sensing of Environment <https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682>`_*
+
+
+Generate a FORCE parameter file:
 
 .. code-block:: none
 
@@ -394,8 +419,9 @@ FORCE parameter file:
 
 We are going to use exactly one year of Landsat and Sentinel-2 data. 
 We enable RBF interpolation with extraordinarily large kernels to make sure that the time series does not contain any nodata values. 
-The latter is necessary as the **cumulative** DHI is sensitive to the number of observations *N* 
-(I personally would prefer to normalize by *N*, i.e., the mean, but we here want to implement the original DHI).
+The latter is necessary as the **cumulative** DHI is sensitive to the number of observations *N*.
+
+    I personally would prefer to normalize by *N*, i.e., the mean, but we here want to implement the original DHI.
 
 .. code-block:: none
 
@@ -481,22 +507,22 @@ The scaling factors are necessary as FORCE expects to receive 16bit Integers fro
 
 .. code-block:: python
 
-    # calculate DHI
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)
-        cumulative = np.nansum(inarray, axis=0) / 1e2
-        minimum    = np.nanmin(inarray, axis=0)
-        variation  = np.nanstd(inarray, axis=0) / np.nanmean(inarray, axis=0) * 1e4
+        # calculate DHI
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            cumulative = np.nansum(inarray, axis=0) / 1e2
+            minimum    = np.nanmin(inarray, axis=0)
+            variation  = np.nanstd(inarray, axis=0) / np.nanmean(inarray, axis=0) * 1e4
 
 
 The three DHI indices are then copied to the output array ...
 
 .. code-block:: python
 
-    # store results
-    for arr, outarr in zip([cumulative, minimum, variation], outarray):
-        valid = np.isfinite(arr)
-        outarr[valid] = arr[valid]
+        # store results
+        for arr, outarr in zip([cumulative, minimum, variation], outarray):
+            valid = np.isfinite(arr)
+            outarr[valid] = arr[valid]
 
 
 ... and we roll out with:
@@ -531,19 +557,23 @@ FORCE UDF repository
 
 Now, it’s your turn! 
 Plug your *Python* algos into FORCE and roll them out. 
+
 If you do, we encourage you to share your UDFs, such that the community as a whole benefits, 
-and has access to a broad variety of workflows. 
+and gains access to a broad variety of workflows. 
 This extra step of publishing your workflow is a small step to overcome the so-called 
-`”Valley of Death” <https://twitter.com/gcamara/status/1127887595168514049>_` in Earth observation applications and 
+`"Valley of Death" <https://twitter.com/gcamara/status/1127887595168514049>`_ in Earth observation applications and 
 fosters reproducible research! 
-To make it easier for you, we have created a `FORCE UDF repository <https://github.com/davidfrantz/force-udf>_`, 
-where you can pull request your UDF (only minimal documentation needed, see the examples). 
+
+To make it easier for you, we have created a `FORCE UDF repository <https://github.com/davidfrantz/force-udf>`_, 
+where you can pull-request your UDF (only minimal documentation needed, see the examples). 
+
 All examples from this tutorial are included there, too. 
+
 As a bonus, the UDFs in this repository are automatically shipped with the FORCE Docker containers 
-(`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`), 
+(`davidfrantz/force <https://hub.docker.com/r/davidfrantz/force>_`) (mounted under ``/udf``), 
 thus making it easier than ever to contribute to the FORCE project.
 
-.. image:: ../img/force-udf.png
+.. image:: img/tutorial-udf-repo.png
     :target: https://github.com/davidfrantz/force-udf
 
 
