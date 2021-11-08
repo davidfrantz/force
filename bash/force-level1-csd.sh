@@ -295,7 +295,7 @@ if [ -f $AOI ]; then
     AOI=$(cat $AOI | sed 's/,/./g')
     OGR=0
   fi
-# if aoi is not a file, it's a polygon or tile list as cmd line input
+# if aoi is not a file, it's a point, polygon or tile list as cmd line input
 else
   AOI=$(echo $AOI | sed 's/,/ /g')
   OGR=0
@@ -310,8 +310,8 @@ if [ $OGR -eq 0 ]; then
       if ! $(echo $COORD | grep -q "/"); then
         show_help "$(printf "%s\n       " "At least one of the AOI coordinates does not seem to be separated by a forward slash /" "Coordinate: $COORD")"
       fi
-      LAT=$(echo $COORD | cut -d"/" -f1)
-      LON=$(echo $COORD | cut -d"/" -f2)
+      LAT=$(echo $COORD | cut -d"/" -f2)
+      LON=$(echo $COORD | cut -d"/" -f1)
 
       if ! [ $(is_in_range $LAT -90 90) -eq 1 ]; then
         show_help "$(printf "%s\n       " "Latitude out of range" "Coordinate: $COORD - $LAT is not in range -90 to 90" "This error may also mean that you tried to use a vector file as AOI but provided an incorrect path")"
@@ -319,6 +319,14 @@ if [ $OGR -eq 0 ]; then
         show_help "$(printf "%s\n       " "Longitute out of range" "Coordinate: $COORD - $LON is not in range -180 to 180")"
       fi
     done
+    # were the right number of coordinate pairs provided?
+    if [ $(echo $AOI | grep -o "/" | wc -l) -eq 1 ]; then
+      GEOMETRY="POINT"
+    elif [ $(echo $AOI | grep -o "/" | wc -l) -gt 1 ] && [ $(echo $AOI | grep -o "/" | wc -l) -lt 4 ]; then
+      show_help "$(printf "%s\n       " "Wrong number of AOI coordinate pairs provided" "When defining a point use one coordinate pair only." "Use at least four coordinate pairs to define a polygon (last pair must be the same as the first pair).")"
+    else
+      GEOMETRY="POLYGON"
+    fi
   # else, AOI input must be tile list - check if tiles are valid Path/Row or S2 tiles
   else
     AOITYPE=3
@@ -374,6 +382,7 @@ get_data() {
     printf "%s\n" "" "WARNING: The selected time window exceeds the last update of the $PRINTNAME metadata catalogue." "Results may be incomplete, please consider updating the metadata catalogue using the -u option."
   fi
 
+  # AOI is shapefile, get tiles/footprints from WFS server
   if [ "$AOITYPE" -eq 1 ]; then
     printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
     OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S-%N)
@@ -392,13 +401,19 @@ get_data() {
     TILES="_"$(echo $TILERAW | sed 's/ /_|_/g')"_"
     rm -rf "$OGRTEMP"
 
+  # AOI is coordinate pairs, get tiles/footprints from WFS server
   elif [ "$AOITYPE" -eq 2 ]; then
-    printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..."
+    printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..." "Geometry type: "$GEOMETRY
     WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
-    WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL")
+    if [ "$GEOMETRY" = "POINT" ]; then
+      WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3CLiteral%3E%3Cgml:Point%20srsName=%22EPSG:4326%22%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:Point%3E%3C/Literal%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
+    elif [ "$GEOMETRY" = "POLYGON" ]; then
+      WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
+    fi
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL" | sed 's/"//g')
     TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
 
+  # AOI is tile list
   elif [ "$AOITYPE" -eq 3 ]; then
     sensor_tile_mismatch() {
       printf "%s\n" "" "Error: $PRINTNAME sensor(s) specified, but no $PRINTNAME tiles identified." "Check if sensors and footprints match or use the -s option to specify sensors to query." ""
