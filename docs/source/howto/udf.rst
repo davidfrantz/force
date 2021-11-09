@@ -614,7 +614,7 @@ thus making it easier than ever to contribute to the FORCE project.
 + **EO**, **ARD**, **Data Science**, **Open Science**                                           +
 +--------------+--------------------------------------------------------------------------------+
 + |ar-pic|     + The FORCE-Python bridge and UDF mechanic was co-developed by                   +
-+              + `Andreas Rabe,                                                                 +
++              + Andreas Rabe,                                                                  +
 +              + research assistant at |ar-link|_                                               +
 +              + *Views are his own.*                                                           +
 +--------------+--------------------------------------------------------------------------------+
