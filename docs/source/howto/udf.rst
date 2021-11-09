@@ -595,17 +595,28 @@ thus making it easier than ever to contribute to the FORCE project.
 
 ------------
 
-.. |author-pic| image:: profile/dfrantz.jpg
+.. |df-pic| image:: profile/dfrantz.jpg
+.. |ar-pic| image:: profile/arabe.jpg
 
 .. |df-link| replace:: Trier University
 .. _df-link: https://www.uni-trier.de/universitaet/fachbereiche-faecher/fachbereich-vi/faecher/kartographie/personal/frantz
 
+.. |ar-link| replace:: Humboldt-Universität zu Berlin
+.. _ar-link: https://www.geographie.hu-berlin.de/en/professorships/eol/people/labmembers/andreas_rabe
+
 +--------------+--------------------------------------------------------------------------------+
-+ |author-pic| + This tutorial was written by                                                   +
++ |df-pic|     + This tutorial was written by                                                   +
 +              + `David Frantz <https://davidfrantz.github.io>`_,                               +
 +              + main developer of **FORCE**,                                                   +
 +              + Assistant Professor at |df-link|_                                              +
 +              + *Views are his own.*                                                           +
 +--------------+--------------------------------------------------------------------------------+
 + **EO**, **ARD**, **Data Science**, **Open Science**                                           +
++--------------+--------------------------------------------------------------------------------+
++ |ar-pic|     + The FORCE-Python bridge and UDF mechanic was co-developed by                   +
++              + `Andreas Rabe,                                                                 +
++              + research assistant at |ar-link|_                                               +
++              + *Views are his own.*                                                           +
++--------------+--------------------------------------------------------------------------------+
++ **Software Development**, **Remote Sensing**, **Data Science**, **Python**, **QGIS**          +
 +--------------+--------------------------------------------------------------------------------+
