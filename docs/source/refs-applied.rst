@@ -6,11 +6,10 @@ Applied Publications
 This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
-* **in press**
+* **2022**
 
-  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (in press): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment.
-  | https://doi.org/10.1016/j.rse.2021.112558
-  
+  | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
+  | https://doi.org/10.1016/j.rse.2021.112781
 
 * **2021**
 
@@ -28,6 +27,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | J. Kreyling, F. Tanneberger, F. Jansen, S. van der Linden, C. Aggenbach, V. Blüml, J. Couwenberg, W-J Emsens, H. Joosten, A. Klimkowska, W. Kotowski, L. Kozub, B. Lennartz, Y. Liczner, H. Liu, D. Michaelis, C. Oehmke, K. Parakenings, E. Pleyl, A. Poyda, S. Raabe, M. Röhl, K. Rücker, A. Schneider, J. Schrautzer, C. Schröder, F. Schug, E. Seeber, F. Thiel, S. Thiele, B. Tiemeyer, T. Timmermann, T. Urich, R. van Diggelen, K. Vegelin, E. Verbruggen, M. Wilmking, N. Wrage-Mönnig, L. Wołejko, D. Zak, and G. Jurasinski (2021): Rewetting does not return drained fen peatlands to their old selves. Nature Communications 12, 5693.
   | https://doi.org/10.1038/s41467-021-25619-y
+
+  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (2021): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment 264, 112558.
+  | https://doi.org/10.1016/j.rse.2021.112558
 
   | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
   | https://doi.org/10.1371/journal.pone.0249044
