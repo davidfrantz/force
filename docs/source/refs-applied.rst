@@ -28,6 +28,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | J. Kreyling, F. Tanneberger, F. Jansen, S. van der Linden, C. Aggenbach, V. Blüml, J. Couwenberg, W-J Emsens, H. Joosten, A. Klimkowska, W. Kotowski, L. Kozub, B. Lennartz, Y. Liczner, H. Liu, D. Michaelis, C. Oehmke, K. Parakenings, E. Pleyl, A. Poyda, S. Raabe, M. Röhl, K. Rücker, A. Schneider, J. Schrautzer, C. Schröder, F. Schug, E. Seeber, F. Thiel, S. Thiele, B. Tiemeyer, T. Timmermann, T. Urich, R. van Diggelen, K. Vegelin, E. Verbruggen, M. Wilmking, N. Wrage-Mönnig, L. Wołejko, D. Zak, and G. Jurasinski (2021): Rewetting does not return drained fen peatlands to their old selves. Nature Communications 12, 5693.
   | https://doi.org/10.1038/s41467-021-25619-y
 
+  | F. Lobert, A.-K. Holtgrave, M. Schwieder, M. Pause, J. Vogt, A. Gocht, and S. Erasmi (2021): Mowing event detection in permanent grasslands: Systematic evaluation of input features from Sentinel-1, Sentinel-2, and Landsat 8 time series. Remote Sensing of Environment 267, 112751.
+  | https://doi.org/10.1016/j.rse.2021.112751
+  
   | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (2021): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment 264, 112558.
   | https://doi.org/10.1016/j.rse.2021.112558
 
