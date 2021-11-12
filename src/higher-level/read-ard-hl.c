@@ -1129,6 +1129,10 @@ double tol = 5e-3;
 
   GDALGetGeoTransform(dataset, geotran_disc); 
   res_disc = geotran_disc[1];
+
+  #ifdef FORCE_DEBUG
+  print_dvector(geotran_disc, "Geotransformation", 6, 10, 2);
+  #endif
   
   if (fmod(width, res_disc) > tol){
     printf("requested image width %f must be a multiple of image resolution %f (%f > %f). ", width, res_disc, fmod(width, res_disc), tol);
@@ -1212,7 +1216,7 @@ double tol = 5e-3;
     if (GDALRasterIO(band, GF_Read, 
       xoff_disc, yoff_disc, nx_disc, ny_disc, 
       read_buf, nx_read, ny_read, GDT_Int16, 0, 0) == CE_Failure){
-      printf("could not read image. "); return NULL;}
+      printf("could not read image.\n"); return NULL;}
 
     if (psf && nc_disc > nc){
       for (p=0; p<nc; p++) psf_buf[p] = nodata;

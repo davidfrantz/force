@@ -5,7 +5,7 @@ Input type
 
 Input for HLPS must be in **datacube** format!
 
-.. seealso:: Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how we define a datacube.
+.. seealso:: Check out the `datacube tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how we define a datacube.
 
 
 The different :ref:`hl-submodules` either process **ARD** or **feature datasets**:
@@ -17,7 +17,7 @@ The different :ref:`hl-submodules` either process **ARD** or **feature datasets*
    They consist of a reflectance product (mostly BOA, but TOA, IMP, BAP are supported, too), and pixel-based quality information (mostly QAI, but INF is supported, too).
    These input data need to follow a strict data format, including number of bands, naming convention with time stamp, sensor etc.
 
-   .. seealso:: Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-ard/l2-ard/>`_, which explains what Analysis Ready Data are, and how to use the FORCE :ref:`l2ps` to generate them..
+   .. seealso:: Check out the `ARD tutorial <https://davidfrantz.github.io/tutorials/force-ard/l2-ard/>`_, which explains what Analysis Ready Data are, and how to use the FORCE :ref:`l2ps` to generate them..
 
 2. **Feature datasets** can be anything from individual ARD datasets to external datasets like precipitation or DEM.
 

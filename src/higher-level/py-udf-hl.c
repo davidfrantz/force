@@ -65,6 +65,10 @@ void register_python(par_hl_t *phl){
 par_udf_t *udf;
 
 
+  #ifdef FORCE_DEBUG
+  printf("starting to register python interface\n");
+  #endif
+
   // choose module
   if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
@@ -170,6 +174,9 @@ par_udf_t *udf;
     exit(FAILURE);
   }
 
+  #ifdef FORCE_DEBUG
+  printf("finished to register python interface\n");
+  #endif
 
   return;
 }
@@ -182,6 +189,10 @@ void deregister_python(par_hl_t *phl){
 par_udf_t *udf;
 
 
+  #ifdef FORCE_DEBUG
+  printf("starting to deregister python interface\n");
+  #endif
+
   if (phl->tsa.pyp.out){
     udf = &phl->tsa.pyp;
   } else if (phl->udf.pyp.out){
@@ -191,6 +202,10 @@ par_udf_t *udf;
   }
 
   if (udf->out) Py_Finalize();
+
+  #ifdef FORCE_DEBUG
+  printf("finished to deregister python interface\n");
+  #endif
 
   return;
 }
@@ -216,7 +231,10 @@ date_t d;
 
   init_date(&d);
 
-  if (strlen(ptr) != 8) return CANCEL;
+  if (strlen(ptr) != 8){
+    *date = d;
+    return CANCEL;
+  }
 
   strncpy(cy, ptr,   4); cy[4] = '\0';
   strncpy(cm, ptr+4, 2); cm[2] = '\0';
@@ -225,7 +243,7 @@ date_t d;
   set_date(&d, atoi(cy), atoi(cm), atoi(cd));
 
   #ifdef FORCE_DEBUG
-  printf("date from pyp bandname: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
+  printf("date from pyp bandname 1: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
     d.year, d.month, d.day, d.doy, d.week, d.ce);
   #endif
 
@@ -235,6 +253,11 @@ date_t d;
   if (d.doy < 1       || d.doy > 365){     init_date(&d); return CANCEL; }
   if (d.week < 1      || d.week > 52){     init_date(&d); return CANCEL; }
   if (d.ce < 1900*365 || d.ce > 2100*365){ init_date(&d); return CANCEL; }
+
+  #ifdef FORCE_DEBUG
+  printf("date from pyp bandname 2: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
+    d.year, d.month, d.day, d.doy, d.week, d.ce);
+  #endif
 
   *date = d;
   return SUCCESS;
@@ -264,6 +287,10 @@ char *bandname = NULL;
 date_t date;
 int b;
 
+
+  #ifdef FORCE_DEBUG
+  printf("starting to initialize python interface\n");
+  #endif
 
   //make sure bandnames and dates are NULL-initialized
   udf->bandname = NULL;
@@ -341,6 +368,10 @@ int b;
   
   fclose(fpy);
 
+  #ifdef FORCE_DEBUG
+  printf("finished to initialize python interface\n");
+  #endif
+
   return;
 }
 
@@ -352,6 +383,10 @@ int b;
 void term_pyp(par_udf_t *udf){
 
 
+  #ifdef FORCE_DEBUG
+  printf("starting to terminate python interface\n");
+  #endif
+
   if (udf->bandname != NULL){
     free_2D((void**)udf->bandname, udf->nb); 
     udf->bandname = NULL;
@@ -361,6 +396,10 @@ void term_pyp(par_udf_t *udf){
     free((void*)udf->date); 
     udf->date = NULL;
   }
+
+  #ifdef FORCE_DEBUG
+  printf("finished to terminate python interface\n");
+  #endif
 
   return;
 }
@@ -492,6 +531,10 @@ short* return_  = NULL;
   if (submodule == _HL_TSA_ &&   ts->pyp_ == NULL) return CANCEL;
 
 
+  #ifdef FORCE_DEBUG
+  printf("starting to run python interface\n");
+  #endif
+
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
@@ -598,6 +641,9 @@ short* return_  = NULL;
 
   fclose(fpy);
 
+  #ifdef FORCE_DEBUG
+  printf("finished to run python interface\n");
+  #endif
 
   return SUCCESS;
 }

@@ -6,11 +6,10 @@ Applied Publications
 This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
 
 
-* **in press**
+* **2022**
 
-  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (in press): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment.
-  | https://doi.org/10.1016/j.rse.2021.112558
-  
+  | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
+  | https://doi.org/10.1016/j.rse.2021.112781
 
 * **2021**
 
@@ -31,6 +30,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | F. Lobert, A.-K. Holtgrave, M. Schwieder, M. Pause, J. Vogt, A. Gocht, and S. Erasmi (2021): Mowing event detection in permanent grasslands: Systematic evaluation of input features from Sentinel-1, Sentinel-2, and Landsat 8 time series. Remote Sensing of Environment 267, 112751.
   | https://doi.org/10.1016/j.rse.2021.112751
+  
+  | A. Okujeni, C. Jänicke, S. Cooper, D. Frantz, P. Hostert, M. Clark, K. Segl, and S. van der Linden (2021): Multi-season unmixing of vegetation class fractions across diverse Californian ecoregions using simulated spaceborne imaging spectroscopy data. Remote Sensing of Environment 264, 112558.
+  | https://doi.org/10.1016/j.rse.2021.112558
 
   | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
   | https://doi.org/10.1371/journal.pone.0249044

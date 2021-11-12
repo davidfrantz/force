@@ -1,7 +1,7 @@
 .. _aux-parameter:
 
 force-parameter
-==========
+===============
 
 force-parameter generates parameter file skeletons for each FORCE module. The skeletons also contain more in depth
 descriptions for each parameter, and supported parameter values/ranges. The descriptions can be turned off to generate
@@ -15,7 +15,7 @@ Usage
     force-parameter [-h] [-v] [-i] [-m] [-c] parameter-file module
 
 optional arguments
-"""""""""""""""""""
+""""""""""""""""""
 
 * ``-h`` show help page
 

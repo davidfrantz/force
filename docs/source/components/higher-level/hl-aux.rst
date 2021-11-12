@@ -46,7 +46,7 @@ Truncated example:
 
 .. seealso::
 
-  Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how to visualize the tiling grid using :ref:`tabulate-grid`.
+  Check out the `datacube tutorial <https://davidfrantz.github.io/tutorials/force-datacube/datacube/>`_, which explains how to visualize the tiling grid using :ref:`tabulate-grid`.
   
 
 .. _processing-masks:
@@ -62,6 +62,6 @@ The pixels that have a mask value of 0 will be skipped.
 
 .. seealso::
 
-  Check out this `tutorial <https://davidfrantz.github.io/tutorials/force-masks/masks/>`_, which explains what processing masks are, why they are super-useful, how to generate them, and how to use them in the FORCE Higher Level Processing System.
+  Check out the `processing mask tutorial <https://davidfrantz.github.io/tutorials/force-masks/masks/>`_, which explains what processing masks are, why they are super-useful, how to generate them, and how to use them in the FORCE Higher Level Processing System.
 
 

@@ -30,6 +30,8 @@ There are several tutorials available that showcase how to use the FORCE.
 +              +        + :ref:`tut-stm`      + How to aggregate time series                                            +
 +              +        +---------------------+-------------------------------------------------------------------------+
 +              +        + :ref:`tut-mask`     + Speed up Higher Level Processing using masks                            +
++              +        +---------------------+-------------------------------------------------------------------------+
++              +        + :ref:`tut-udf`      + How to customize your processing using User-Defined Functions (UDF)     +
 +--------------+--------+---------------------+-------------------------------------------------------------------------+
 
 
@@ -50,3 +52,4 @@ There are several tutorials available that showcase how to use the FORCE.
    masks.rst
    tsi.rst
    stm.rst
+   udf.rst

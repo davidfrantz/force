@@ -338,7 +338,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 * **Spectral mixture analysis**
 
   * This block only applies if INDEX includes SMA
-   Endmember file holding the endmembers according to the SENSORS band subset
+    Endmember file holding the endmembers according to the SENSORS band subset
 
     | *Type:* full file path
     | ``FILE_ENDMEM  = NULL``
@@ -432,8 +432,9 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | ``FILE_PYTHON = NULL``
 
   * Type of user-defined function. 
-    1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel as 2D-nd.array [time,bands]. 
-       A multi-processing pool is spawned to parallely execute this function with ``NTHREAD_COMPUTE`` workers.
+
+    1) ``PIXEL`` expects a pixel-function that receives the time series of a single pixel as 2D-nd.array [time,bands].
+       A multi-processing pool is spawned to parallely execute this function with ``NTHREAD_COMPUTE`` workers. 
        ``def forcepy_pixel(inarray, outarray, dates, nodata):``
     2) ``BLOCK`` expects a pixel-function that receives the time series of a complete  processing unit as 4D-nd.array [time,bands,rows,cols]. 
        No parallelization is done on FORCE's end. 
