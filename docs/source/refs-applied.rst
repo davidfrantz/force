@@ -11,6 +11,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
   | https://doi.org/10.1016/j.rse.2021.112781
 
+  | D. Morresi, R. Marzano, E. Lingua, R. Motta, and  M. Garbarino (2022): Mapping burn severity in the western Italian Alps through phenologically coherent reflectance composites derived from Sentinel-2 imagery. Remote Sensing of Environment 269, 112800.
+  | https://doi.org/10.1016/j.rse.2021.112800
+
 * **2021**
 
   | J. Ardö (2021). A Sentinel-2 Dataset for Uganda. Data, 6. 
