@@ -3,16 +3,21 @@
 Applied Publications
 ====================
 
-This list summarizes all scientific publications that have used FORCE. If you have used FORCE, or are aware of unlisted papers, I would be happy if you you could send me your published papers with DOI, and I will include them here in this list (:ref:`contact`).
+This list summarizes all scientific publications that have used FORCE. 
+If you have used FORCE, or are aware of unlisted papers, 
+I would be happy if you you could send me your published papers with DOI, 
+and I will include them here in this list (:ref:`contact`).
 
+
+* **in press**
+
+  | M. Schwieder, M. Wesemeyer, D. Frantz, K. Pfoch, S. Erasmi, J. Pickert, C. Nendel, and P. Hostert (in press): Mapping grassland mowing events across Germany based on combined Sentinel-2 and Landsat 8 time series. Remote Sensing of Environment, 112795.
+  | https://doi.org/10.1016/j.rse.2021.112795
 
 * **2022**
 
   | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
   | https://doi.org/10.1016/j.rse.2021.112781
-
-  | D. Morresi, R. Marzano, E. Lingua, R. Motta, and  M. Garbarino (2022): Mapping burn severity in the western Italian Alps through phenologically coherent reflectance composites derived from Sentinel-2 imagery. Remote Sensing of Environment 269, 112800.
-  | https://doi.org/10.1016/j.rse.2021.112800
 
 * **2021**
 
@@ -40,9 +45,11 @@ This list summarizes all scientific publications that have used FORCE. If you ha
   | F. Schug, D. Frantz, S. van der Linden, and P. Hostert (2021): Gridded population mapping for Germany based on building density, height and type from Earth Observation data using census disaggregation and bottom-up estimates. PLOS ONE 16, e0249044. 
   | https://doi.org/10.1371/journal.pone.0249044
 
-  | G. Tetteh, A. Gocht, S. Erasmi, M. Schwieder, and C. Conrad (): Evaluation of Sentinel-1 and Sentinel-2 Feature Sets for Delineating Agricultural Fields in Heterogeneous Landscapes. IEEE Access, 9, 116702 - 116719
+  | G. Tetteh, A. Gocht, S. Erasmi, M. Schwieder, and C. Conrad (2021): Evaluation of Sentinel-1 and Sentinel-2 Feature Sets for Delineating Agricultural Fields in Heterogeneous Landscapes. IEEE Access, 9, 116702 - 116719
   | https://doi.org/10.1109/ACCESS.2021.3105903
 
+  | F. Weiser, A. Sauer, D. Gettueva, R. Field, S. Irl, O. Vetaas, A. Chiarucci, S. Hoffmann, J. Fernández-Palacios, R. Otto, A. Jentsch, A. Provenzale, and C. Beierkuhnlein (2021): Impacts of Forest Fire on Understory Species Diversity in Canary Pine Ecosystems on the Island of La Palma. Forests 12, 1638.
+  | https://doi.org/10.3390/f12121638
 
 * **2020**
 
@@ -128,4 +135,3 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
   | A. Schneibel, M. Stellmes, A. Röder, M. Finckh, R. Revermann, D. Frantz and J. Hill (2016): Evaluating the trade-off between food and timber resulting from the conversion of Miombo forests to agricultural land in Angola using multi-temporal Landsat data. Science of The Total Environment, 548–549: 390-401. 
   | https://doi.org/10.1016/j.scitotenv.2015.12.137
-
