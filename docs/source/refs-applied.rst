@@ -19,6 +19,9 @@ and I will include them here in this list (:ref:`contact`).
   | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
   | https://doi.org/10.1016/j.rse.2021.112781
 
+  | M. Ziliani, M. Altaf, B. Aragon, R. Houburg, T. Franz, Y. Lu, J. Sheffield, I. Hoteit, and M. McCabe (2022): Early season prediction of within-field crop yield variability by assimilating CubeSat data into a crop model. Agricultural and Forest Meteorology 313, 108736.
+  | https://doi.org/10.1016/j.agrformet.2021.108736
+  
 * **2021**
 
   | J. Ardö (2021). A Sentinel-2 Dataset for Uganda. Data, 6. 
