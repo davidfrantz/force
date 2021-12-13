@@ -8,6 +8,9 @@ This list summarizes all scientific publications that have used FORCE. If you ha
 
 * **2022**
 
+  | L. Blickensdörfer, M. Schwieder, D. Pflugmacher, C. Nendel, S. Erasmi, and P. Hostert (2022): Mapping of crop types and crop sequences with combined time series of Sentinel-1, Sentinel-2 and Landsat 8 data for Germany. Remote Sensing of Environment 269, 112831.
+  | https://doi.org/10.1016/j.rse.2021.112831
+
   | K. Kowalski, A. Okujeni, M. Brell, and P. Hostert (2022): Quantifying drought effects in Central European grasslands through regression-based unmixing of intra-annual Sentinel-2 time series. Remote Sensing of Environment 268, 112781.
   | https://doi.org/10.1016/j.rse.2021.112781
 
