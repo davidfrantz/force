@@ -169,7 +169,7 @@ float ind, scale = 10000.0;
         if (!ard[t].msk[p]){
           ts->tss_[t][p] = nodata;
         } else {
-          ind = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
+          ind = (ard[t].dat[b1][p] / (float)ard[t].dat[b2][p]) - 1.0;
           if (ard[t].dat[b2][p] == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
             ts->tss_[t][p] = nodata;
           } else {
