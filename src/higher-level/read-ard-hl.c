@@ -332,9 +332,17 @@ int nchar;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
 
+  #ifdef FORCE_DEBUG
+  printf("scanning %s for files\n", d.name);
+  #endif
+
   // directory listing
   if ((d.N = scandir(d.name, &d.LIST, 0, alphasort)) < 0){
     return FAILURE;}
+
+  #ifdef FORCE_DEBUG
+  printf("found %d files, filtering now\n");
+  #endif
 
   // reflectance products
   alloc_2D((void***)&d.list, d.N, NPOW_10, sizeof(char));
@@ -356,7 +364,11 @@ int nchar;
       // check against sensor list
       for (s=0, vs=false; s<sen->n; s++){
         if (strstr(d.LIST[t]->d_name, sen->sensor[s]) != NULL){
-          vs = true; break;
+          #ifdef FORCE_DEBUG
+          printf("sensor is: %s\n", sen->sensor[s]);
+          #endif
+          vs = true; 
+          break;
         }
       }
 
@@ -477,7 +489,7 @@ int n = 0;
   // get mask file listing, skip if tile is empty
   if (list_mask(tx, ty, phl, &dir) == FAILURE){
     #ifdef FORCE_DEBUG
-    printf("No data in here. Skip.\n");
+    printf("No data in here (no mask). Skip.\n");
     #endif
     *success = CANCEL;
     return NULL;
@@ -772,7 +784,7 @@ bool level3 = false;
   // get ARD file listing, skip if tile is empty
   if (list_ard(tx, ty, sen, phl, &dir) == FAILURE){
     #ifdef FORCE_DEBUG
-    printf("No data in here. Skip.\n");
+    printf("No data in here (datasets). Skip.\n");
     #endif
     *nt = 0;
     return NULL;

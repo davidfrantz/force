@@ -284,7 +284,7 @@ bool valid;
         
         mean = mean_old = var = 0;
         ntree = 0;
-        memset(mean_prob, 0, phl->mcl.nclass_all_sets*sizeof(double));
+        if (rfprob) memset(mean_prob, 0, phl->mcl.nclass_all_sets*sizeof(double));
 
         for (m=0; m<phl->mcl.nmodel[s]; m++, k++){
 
