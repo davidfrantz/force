@@ -1,5 +1,43 @@
 .. _v3:
 
+FORCE v. 3.7.5
+--------------
+
+Release: 04.01.2022
+
+* **FORCE HLPS**
+
+  * in force-higher-level, TSA sub-module:
+    Added a fix to prevent truncation of the Chlorophyll Index red-edge (Clre) index.
+    Thanks to Dirk Pflugmacher for the notification.
+
+  * in force-higher-level, ML sub-module:
+    Fixed a bug that resulted in a segfault when using RF classification, but
+    not with RF probability output.
+
+
+FORCE v. 3.7.4
+--------------
+
+Release: 12.11.2021
+
+* **FORCE L1AS**
+
+  * Stefan Ernst fixed some issues in force-level1-csd regarding checks for coorindate ranges and quotes.
+
+* **FORCE HLPS**
+
+  * in force-higher-level, all sub-modules:
+    Implemented a fix to prevent a segfault when we have many good cluster in the
+    spectral adjustment.
+
+* **FORCE AUX**
+
+  * fixed an error in ``force-tile-extent``, which still used the *old* syntax of
+    ``force-cube`` in its call.
+    Thanks to Fabian Thiel for the notification.
+
+
 FORCE v. 3.7.3
 --------------
 
