@@ -224,14 +224,6 @@ fig <- plot_ly(data = data %>%
 fig
 ```
 
-```{r plot-l1-ts, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, ts),
-              x = ~ts, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
-```
-
 
 # Number of Level 2 images
 
