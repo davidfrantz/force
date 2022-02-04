@@ -51,9 +51,41 @@ struct tm *timeinfo;
   d->doy   = md2doy(d->month,d->day);
   d->week  = doy2week(d->doy);
   d->ce    = doy2ce(d->doy,d->year);
+  d->hh    = timeinfo->tm_hour;
+  d->mm    = timeinfo->tm_min;
+  d->ss    = timeinfo->tm_sec;
 
   return;
 }
+
+
+/** Get current time as UTC
++++ This function gets the current time and date and returns a date struct
++++ containing year, month, day, day-of-year, week-of-year and days since
++++ current era. 
+--- d:      date struct (returned)
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void current_date_gmt(date_t *d){
+time_t rawtime;
+struct tm *timeinfo;
+
+
+  time(&rawtime);
+  timeinfo = gmtime(&rawtime);
+  d->year  = timeinfo->tm_year+1900;
+  d->month = timeinfo->tm_mon+1;
+  d->day   = timeinfo->tm_mday;
+  d->doy   = md2doy(d->month,d->day);
+  d->week  = doy2week(d->doy);
+  d->ce    = doy2ce(d->doy,d->year);
+  d->hh    = timeinfo->tm_hour;
+  d->mm    = timeinfo->tm_min;
+  d->ss    = timeinfo->tm_sec;
+
+  return;
+}
+
 
 
 /** Set time

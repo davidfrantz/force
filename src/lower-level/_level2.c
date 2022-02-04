@@ -33,6 +33,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
@@ -163,12 +164,18 @@ int nprod;
 int err;
 GDALDriverH driver;
 
+time_t TIME; 
 
 
   /** initialization + read metadata, parameter and tile file
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-  time_t TIME; time(&TIME);
+  // start time for runtime measurement
+  time(&TIME);
+
+  // gather process info for logfile
+  print_process_info();
+
   
   parse_args(argc, argv, &args);
   

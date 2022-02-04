@@ -41,6 +41,7 @@ extern "C" {
 #endif
 
 void current_date(date_t *d);
+void current_date_gmt(date_t *d);
 void date_plus(date_t *d);
 void date_minus(date_t *d);
 int date_overshoot(date_t *d);

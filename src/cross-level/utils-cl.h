@@ -35,11 +35,16 @@ Utility functions header
 #include <stdbool.h> // boolean data type
 #include <float.h>   // macro constants of the floating-point library
 
+#include "../cross-level/date-cl.h"
+#include "../cross-level/datesys-cl.h"
+#include "../cross-level/sys-cl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+void print_process_info();
 void print_ivector(int    *v, const char *name, int n, int big);
 void print_fvector(float  *v, const char *name, int n, int big, int small);
 void print_dvector(double *v, const char *name, int n, int big, int small);
