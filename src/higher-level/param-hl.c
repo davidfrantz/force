@@ -1239,7 +1239,7 @@ void free_param_higher(par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int parse_param_higher(par_hl_t *phl){
 FILE *fpar;
-char  buffer[NPOW_10] = "\0";
+char  buffer[NPOW_16] = "\0";
 int d, w, m, q, y, tmp;
 double tol = 5e-3;
   
@@ -1371,7 +1371,7 @@ double tol = 5e-3;
 
 
   // process line by line
-  while (fgets(buffer, NPOW_10, fpar) != NULL) parse_parameter(phl->params, buffer);
+  while (fgets(buffer, NPOW_16, fpar) != NULL) parse_parameter(phl->params, buffer);
   fclose(fpar);
 
 

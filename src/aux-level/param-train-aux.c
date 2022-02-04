@@ -109,7 +109,7 @@ void free_param_train(par_train_t *train){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int parse_param_train(par_train_t *train){
 FILE *fpar = NULL;
-char  buffer[NPOW_10] = "\0";
+char  buffer[NPOW_16] = "\0";
 int i;
 float sum = 0.0, tol=0.01;
 
@@ -133,7 +133,7 @@ float sum = 0.0, tol=0.01;
 
 
   // process line by line
-  while (fgets(buffer, NPOW_10, fpar) != NULL) parse_parameter(train->params, buffer);
+  while (fgets(buffer, NPOW_16, fpar) != NULL) parse_parameter(train->params, buffer);
   fclose(fpar);
 
 

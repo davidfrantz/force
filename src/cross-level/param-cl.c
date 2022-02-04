@@ -35,13 +35,13 @@ This file contains functions for parsing parameter files
 +++ Return: number of values
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int length_par(const char *buf){
-char buffer[NPOW_10];
+char buffer[NPOW_16];
 char *ptr = NULL;
 const char *separator = " =";
 int n = -1; // start at -1 to ignore tag
 
 
-  copy_string(buffer, NPOW_10, buf);
+  copy_string(buffer, NPOW_16, buf);
 
   buffer[strcspn(buffer, "\r\n#")] = 0;
 
@@ -51,6 +51,10 @@ int n = -1; // start at -1 to ignore tag
     ptr = strtok(NULL, separator);
     n++;
   }
+
+  #ifdef FORCE_DEBUG
+  printf("%d elements in parameter vector\n", n);
+  #endif
 
   return n;
 }
@@ -778,14 +782,18 @@ void register_charvec_par(params_t *params, const char *name, int char_test, cha
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void parse_parameter(params_t *params, const char *buf){
 int i, n;
-char buffer[NPOW_10];
+char buffer[NPOW_16];
 char *tag = NULL;
 char *ptr = NULL;
 const char *separator = " =";
 
 
-  copy_string(buffer, NPOW_10, buf);
+  copy_string(buffer, NPOW_16, buf);
   buffer[strcspn(buffer, "\r\n#")] = 0;
+
+  #ifdef FORCE_DEBUG
+  printf("%s\n", buffer);
+  #endif
 
   ptr = strtok(buffer, separator);
   tag = ptr;
@@ -825,6 +833,10 @@ const char *separator = " =";
             *params->par[i].date_ = parse_date(ptr);
             break;
           case _PAR_CHAR_:
+            if (strlen(ptr) >= NPOW_10){
+              printf("cannot copy parameter, string too long.\n");
+              exit(FAILURE);
+            }
             copy_string(*params->par[i].char_, NPOW_10, ptr);
             break;
           default:
@@ -838,12 +850,11 @@ const char *separator = " =";
         if ((*params->par[i].length = length_par(buf)) < 1) return;
         allocate_par(&params->par[i]);
 
-        copy_string(buffer, NPOW_10, buf);
+        copy_string(buffer, NPOW_16, buf);
         buffer[strcspn(buffer, "\r\n#")] = 0;
 
         ptr = strtok(buffer, separator);
         tag = ptr;
-
 
         n = 0;
 
@@ -869,6 +880,10 @@ const char *separator = " =";
               params->par[i].date_vec_[0][n] = parse_date(ptr);
               break;
             case _PAR_CHAR_:
+              if (strlen(ptr) >= NPOW_10){
+                printf("cannot copy parameter, string too long.\n");
+                exit(FAILURE);
+              }
               copy_string(params->par[i].char_vec_[0][n], NPOW_10, ptr);
               break;
             default:
