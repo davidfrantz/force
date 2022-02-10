@@ -2009,14 +2009,17 @@ brick_t **L2 = NULL;
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (mission == LANDSAT){
       if ((atc->wvp = water_vapor_from_lut(pl2, atc)) < 0){
-        printf("Cannot read wvp from LUT. "); return NULL;}
+        printf("Cannot read wvp from LUT. "); return NULL;
+      } else {
+        printf("Average water vapour: %.2f\n", atc->wvp);
+      }
     } else atc->wvp = 0.0;
 
     /** angle-dependent coarse-grid atmospheric modelling
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     atmo_angledep(pl2, meta, atc, TOP, QAI);
 
-    /** compile AOD, use image-based water/shadow targets, refine by DODB, 
+    /** compile AOD, use image-based water/shadow targets,
     +++ use external values (one or several options are possible)
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (compile_aod(pl2, meta, atc, TOA, QAI, TOP) == FAILURE){

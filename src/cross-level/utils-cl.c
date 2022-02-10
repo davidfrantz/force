@@ -28,21 +28,25 @@ This file contains some utility functions
 #include "utils-cl.h"
 
 
-void print_process_info(){
+void print_process_info(const char *prog){
 date_t date;
 char **sys_meta = NULL;
 int n_sys_meta = 0;
 int i = 0;
 
 
-  printf("Process Start (GMT):\n");
+  printf("Process Start (GMT) :::\n");
   current_date_gmt(&date);
   print_date(&date);
 
-  printf("\nSystem Info:\n");
+  printf("\nSystem Info :::\n");
   sys_meta = system_info(&n_sys_meta);
   for (i=0; i<n_sys_meta; i+=2) printf("%s: %s\n", sys_meta[i], sys_meta[i+1]);
   if (sys_meta  != NULL){ free_2DC((void**)sys_meta); sys_meta  = NULL;}
+
+  printf("\nSoftware :::\n");
+  printf("Program: %s\n", prog);
+  printf("Version: %s\n", _VERSION_);
 
   return;
 }

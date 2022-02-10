@@ -74,7 +74,7 @@ void free_multicube(multicube_t *multicube);
 void init_datacube(cube_t *cube);
 void init_multicube(multicube_t *multicube, int n);
 void print_datacube(cube_t *cube);
-void print_multicube(multicube_t *multicube);
+void print_multicube(multicube_t *multicube, bool skip);
 void update_datacube_extent(cube_t *cube, int tminx, int tmaxx, int tminy, int tmaxy);
 void update_datacube_res(cube_t *cube, double res);
 int write_datacube_def(cube_t *cube);

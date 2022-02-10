@@ -215,7 +215,7 @@ int cube_nx, cube_ny, cube_nc;
     printf("error in cubing Level 2 products\n"); return FAILURE;}
   
   // print to stdout for logfile
-  printf("%2d product(s) written. ", ntile);
+  printf("Number of tiles written: %d\n", ntile);
 
   // clean
   free((void*)tiles_x); free((void*)tiles_y);
@@ -259,7 +259,7 @@ int nchar;
       printf("error flushing L2 products. \n"); return FAILURE;}
   }
 
-  printf(" 1 product(s) written. ");
+  printf("Number of tiles written: %d\n", 1);
 
 
   #ifdef FORCE_CLOCK
@@ -504,6 +504,8 @@ int prod;
   #endif
   
 
+  printf("\nOutput :::\n");
+
   /** tile or flush the data to disc
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -583,6 +585,9 @@ multicube_t *multicube = NULL;
       printf("Starting datacube failed.\n"); return NULL;}
 
   }
+
+
+  print_multicube(multicube, true);
   
   return multicube;
 }

@@ -808,6 +808,8 @@ int i = 0;
       brick->fname, bname, brick->extension);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+    
+    printf("Output file: %s\n", fname);
 
     timeout = lock_timeout(get_brick_size(brick));
 
@@ -820,11 +822,9 @@ int i = 0;
     // read and rewrite brick (safer when using compression)
     if (brick->open != OPEN_CREATE && brick->open != OPEN_BLOCK && fileexist(fname)){
 
-      // read brick
-      #ifdef FORCE_DEBUG
-      printf("reading existing file.\n");
-      #endif
+      printf("Output file create: %d\n", false);
 
+      // read brick
       if ((fo = GDALOpen(fname, GA_ReadOnly)) == NULL){
         printf("Unable to open %s. ", fname); return FAILURE;}
 
@@ -876,6 +876,10 @@ int i = 0;
       GDALClose(fo);
 
       free((void*)buf);
+
+    } else {
+
+      printf("Output file create: %d\n", true);
 
     }
 

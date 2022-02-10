@@ -74,6 +74,7 @@ int init_topography(top_t *top){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int ocean_topography(brick_t *DEM){
 int i, j, ii, jj, p, np, nx, ny;
+int count1, count2, count3, count4;
 float *dem_ = NULL;
 float nodata;
 
@@ -88,61 +89,76 @@ float nodata;
   nodata = get_brick_nodata(DEM, 0);
   if ((dem_ = get_band_float(DEM, 0)) == NULL) return FAILURE;
 
-  #pragma omp parallel private(i, ii, p, np) shared(nx, ny, dem_, nodata) default(none) 
+  #pragma omp parallel private(i, ii, p, np) shared(nx, ny, dem_, nodata) reduction(+: count1) default(none) 
   {
 
     #pragma omp for schedule(static)
     for (j=0; j<nx; j++){
     for (i=0, ii=1; ii<ny; i++, ii++){
       p = i*nx+j; np = ii*nx+j;
-      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)) dem_[np] = 0.0;
+      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)){
+        dem_[np] = 0.0;
+        count1++;
+      }
     }
     }
 
   }
   
 
-  #pragma omp parallel private(i, ii, p, np) shared(nx, ny, dem_, nodata) default(none) 
+  #pragma omp parallel private(i, ii, p, np) shared(nx, ny, dem_, nodata) reduction(+: count2) default(none) 
   {
 
     #pragma omp for schedule(static)
     for (j=0; j<nx; j++){
     for (i=(ny-1), ii=(ny-2); ii>=0; i--, ii--){
       p = i*nx+j; np = ii*nx+j;
-      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)) dem_[np] = 0.0;
+      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)){
+        dem_[np] = 0.0;
+        count2++;
+      }
     }
     }
   
   }
 
   
-  #pragma omp parallel private(j, jj, p, np) shared(nx, ny, dem_, nodata) default(none) 
+  #pragma omp parallel private(j, jj, p, np) shared(nx, ny, dem_, nodata) reduction(+: count3) default(none) 
   {
 
     #pragma omp for schedule(static)
     for (i=0; i<ny; i++){
     for (j=0, jj=1; jj<nx; j++, jj++){
       p = i*nx+j; np = i*nx+jj;
-      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)) dem_[np] = 0.0;
+      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)){
+        dem_[np] = 0.0;
+        count3++;
+      }
     }
     }
   
   }
 
   
-  #pragma omp parallel private(j, jj, p, np) shared(nx, ny, dem_, nodata) default(none) 
+  #pragma omp parallel private(j, jj, p, np) shared(nx, ny, dem_, nodata) reduction(+: count4) default(none) 
   {
 
     #pragma omp for schedule(static)
     for (i=0; i<ny; i++){
     for (j=(nx-1), jj=(nx-2); jj>=0; j--, jj--){
       p = i*nx+j; np = i*nx+jj;
-      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)) dem_[np] = 0.0;
+      if (fequal(dem_[p], 0) && fequal(dem_[np], nodata)){
+        dem_[np] = 0.0;
+        count4++;
+      }
     }
     }
     
   }
 
+
+  printf("\nOcean Detection from DEM :::\n");
+  printf("Ocean detection (px): %d\n", count1+count2+count3+count4);
 
   #ifdef FORCE_CLOCK
   proctime_print("detect ocean from topography", TIME);
@@ -489,11 +505,12 @@ small  *cdem_ = NULL;
   }
 
  
-  #ifdef FORCE_DEBUG
-  printf("elevation stats:\n");
-  printf(" avg: %+6.3f, min: %+6.3f, max: %+6.3f, step: %+6.3f, cnum: %d\n",
-  atc->dem.avg, atc->dem.min, atc->dem.max, atc->dem.step, atc->dem.cnum);
-  #endif
+  printf("\nDEM Statistics :::\n");
+  printf("avg elevation (km): %+6.3f\n", atc->dem.avg);
+  printf("min elevation (km): %+6.3f\n", atc->dem.min);
+  printf("max elevation (km): %+6.3f\n", atc->dem.max);
+  printf("elevation step for quantization (km): %+6.3f\n", atc->dem.step);
+  printf("number of elevation classes in quantization: %d\n", atc->dem.cnum);
 
   #ifdef FORCE_CLOCK
   proctime_print("stats topography", TIME);
@@ -514,6 +531,7 @@ small  *cdem_ = NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int illumination_topography(atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI){
 int p, g, nc;
+int deep, poor, moderate, good;
 float slp, asp;
 ushort *slp_ = NULL;
 ushort *asp_ = NULL;
@@ -535,7 +553,7 @@ float **sun_ = NULL;
   if ((sun_ = get_bands_float(atc->xy_sun)) == NULL) return FAILURE;
 
 
-  #pragma omp parallel private(g, slp, asp) shared(nc, QAI, slp_, asp_, ill_, sky_, sun_, atc) default(none) 
+  #pragma omp parallel private(g, slp, asp) shared(nc, QAI, slp_, asp_, ill_, sky_, sun_, atc) reduction(+: deep, poor, moderate, good) default(none) 
   {
 
     #pragma omp for schedule(guided)
@@ -559,10 +577,15 @@ float **sun_ = NULL;
       // set illumination QAI
       if (ill_[p] < 0){
         set_illumination(QAI, p, 3); // deep shadow
+        deep++;
       } else if (ill_[p] < 1736.482){
         set_illumination(QAI, p, 2); // poor
+        poor++;
       } else if (ill_[p] < 5735.764){
         set_illumination(QAI, p, 1); // moderate
+        moderate++;
+      } else {
+        good++;
       }
 
       // sky view factor (portion of the sky dome diffusing on to a tilted surface)
@@ -572,6 +595,12 @@ float **sun_ = NULL;
     
   }
 
+
+  printf("\nIllumination Condition :::\n");
+  printf("Good     illumination (px): %d\n", good);
+  printf("Moderate illumination (px): %d\n", moderate);
+  printf("Poor     illumination (px): %d\n", poor);
+  printf("No       illumination (px): %d\n", deep);
 
   #ifdef FORCE_CLOCK
   proctime_print("illumination condition", TIME);

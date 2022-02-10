@@ -610,6 +610,10 @@ GDALDatasetH fp_;
   }
 
 
+  printf("\nMetadata :::\n");
+  printf("Sensor: %s\n", sensor);
+  printf("Tile: %s\n", meta->refsys);
+  printf("Acquisition "); print_date(&date);
 
   #ifdef FORCE_DEBUG
   print_metadata(meta, nb);
@@ -1185,6 +1189,11 @@ int svgrid = 5000;
   set_brick_filename(DN, "DIGITAL-NUMBERS");
   set_brick_par(DN, pl2->params->log);
 
+
+  printf("\nMetadata :::\n");
+  printf("Sensor: %s\n", sensor);
+  printf("Tile: %s\n", meta->refsys);
+  printf("Acquisition "); print_date(&date);
 
   #ifdef FORCE_DEBUG
   print_metadata(meta, nb);

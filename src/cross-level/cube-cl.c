@@ -159,8 +159,7 @@ int c;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_datacube(cube_t *cube){
 
-  printf("Data cube definition:\n");
-  printf("Path: %s\n", cube->dname);
+  printf("Data cube definition: %s/datacube-definition.prj\n", cube->dname);
   printf("Projection: %s\n", cube->proj);
   printf("Active resolution: %.2f\n", cube->res);
   printf("X-origin (geo): %.2f\n",  cube->origin_geo.x);
@@ -187,12 +186,16 @@ void print_datacube(cube_t *cube){
 --- multicube: multiple datacubes
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_multicube(multicube_t *multicube){
+void print_multicube(multicube_t *multicube, bool skip){
 int c;
 
-  printf("Multicube contains %d datacubes\n", multicube->n);
+  printf("\nMulticube :::\n");
+  printf("Number of potential cubes: %d\n", multicube->n);
+
   for (c=0; c<multicube->n; c++){
-    printf("\nCube %d is covered with data: %d\n", c, multicube->cover[c]);
+    if (skip && !multicube->cover[c]) continue;
+    printf("Cube Number: %d\n", c);
+    printf("Cube is covered with data: %d\n", multicube->cover[c]);
     print_datacube(multicube->cube[c]);
   }
 

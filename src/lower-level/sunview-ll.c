@@ -219,6 +219,16 @@ float *xy_szen = NULL;
     }
   }
 
+  printf("\nSun-Sensor-Geometry :::\n");
+  printf("min cosszen: %.2f\n", atc->cosszen[0]);
+  printf("max cosszen: %.2f\n", atc->cosszen[1]);
+  printf("min cosvzen: %.2f\n", atc->cosvzen[0]);
+  printf("max cosvzen: %.2f\n", atc->cosvzen[1]);
+  printf("min szen(°): %.2f\n", acos(atc->cosszen[1]) * _R2D_CONV_);
+  printf("max szen(°): %.2f\n", acos(atc->cosszen[0]) * _R2D_CONV_);
+  printf("min vzen(°): %.2f\n", acos(atc->cosvzen[1]) * _R2D_CONV_);
+  printf("max vzen(°): %.2f\n", acos(atc->cosvzen[0]) * _R2D_CONV_);
+
 
   #ifdef FORCE_DEBUG
   print_brick_info(atc->xy_sun);  set_brick_open(atc->xy_sun,  OPEN_CREATE); write_brick(atc->xy_sun);

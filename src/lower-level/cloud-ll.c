@@ -361,8 +361,10 @@ int snw_buf;
 
   free((void*)snw_);
 
-  printf("dc: %6.2f%%. wc: %6.2f%%. sc: %6.2f%%. ", 
-    non/(float)nc*100.0, nwtr/(float)non*100.0, nsnw/(float)non*100.0);
+  printf("Data  cover (%): %6.2f%\n", non        / (float)nc  * 100.0);
+  printf("Water cover (%): %6.2f%\n", nwtr       / (float)non * 100.0);
+  printf("Snow  cover (%): %6.2f%\n", nsnw       / (float)non * 100.0);
+  printf("PCP   cover (%): %6.2f%\n", (non-nclr) / (float)non * 100.0);
 
   #ifdef FORCE_CLOCK
   proctime_print("potential cloud identification", TIME);
@@ -1422,6 +1424,8 @@ short  *temp_      = NULL;
   /** make cloud objects and delete small clouds **/
   binary_to_objects(cld_, nx, ny, 3, &CCL, &SIZE, &nobj);
 
+  printf("Number of cloud objects: %d\n", nobj);
+
 
   /** skip shadow matching if there is no cloud left **/
   if (nobj == 0){
@@ -1728,6 +1732,7 @@ small *shd_   = NULL;
 
   nc = get_brick_ncells(QAI);
 
+  printf("\nCloud Detection :::\n");
 
   /** Potential Cloud Pixels **/
   if (potential_cloud(pl2, &npix, &nclear, &nland, 
@@ -1806,13 +1811,18 @@ small *shd_   = NULL;
   print_brick_info(QAI); set_brick_open(QAI, OPEN_CREATE); write_brick(QAI);
   #endif
 
-  printf("cc: %6.2f%%. ", atc->cc);
+  printf("Cloud cover (%): %6.2f%\n", atc->cc);
 
   #ifdef CMIX_FAS
   exit(1);
   #endif
 
-  if (atc->cc > pl2->maxcc){ printf("Skip. "); return CANCEL;}
+  if (atc->cc > pl2->maxcc){ 
+    printf("Cloud cover evaluation: abort\n");
+    return CANCEL;
+  } else {
+    printf("Cloud cover evaluation: proceed\n");
+  }
 
   #ifdef FORCE_CLOCK
   proctime_print("cloud module", TIME);

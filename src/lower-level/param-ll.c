@@ -179,7 +179,7 @@ char  bname[NPOW_10] = "\0";
     }
 
     basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
-    //printf("%s: ", pl2->b_level1);
+
   } else {
     printf("No input image given!\n"); return FAILURE;}
 

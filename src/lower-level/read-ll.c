@@ -316,6 +316,9 @@ ushort **dn_  = NULL;
   }
   }
 
+  printf("\nImpulse Noise Detection :::");
+  printf("Impulse Noise (px): %d\n", count);
+
 
   #ifdef FORCE_CLOCK
   proctime_print("Impulse Noise Level 1", TIME);

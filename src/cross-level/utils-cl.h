@@ -44,7 +44,7 @@ Utility functions header
 extern "C" {
 #endif
 
-void print_process_info();
+void print_process_info(const char *prog);
 void print_ivector(int    *v, const char *name, int n, int big);
 void print_fvector(float  *v, const char *name, int n, int big, int small);
 void print_dvector(double *v, const char *name, int n, int big, int small);

@@ -174,7 +174,7 @@ time_t TIME;
   time(&TIME);
 
   // gather process info for logfile
-  print_process_info();
+  print_process_info(argv[0]);
 
   
   parse_args(argc, argv, &args);
@@ -184,6 +184,9 @@ time_t TIME;
   copy_string(pl2->d_level1, NPOW_10, args.fimg);
   copy_string(pl2->f_par,    NPOW_10, args.fprm);
 
+  printf("\nInput :::\n");
+  printf("Image: %s\n", pl2->d_level1);
+  printf("Parameters: %s\n", pl2->f_par);
 
   // make GDAL less verbose
   CPLPushErrorHandler(CPLQuietErrorHandler);

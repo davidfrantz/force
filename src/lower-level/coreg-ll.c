@@ -242,15 +242,17 @@ int nland = 0;
   free((void*)nx_pyr);
   free((void*)ny_pyr);
 
-  printf("coreg (#tie, x/y shift, rmse): %d/%.2f/%.2f/%.2f", dm.ntie, dm.coefs[0]*res, dm.coefs[3]*res, dm.rmse);
+  printf("Tie points (px): %d\n", dm.ntie);
+  printf("Shift in x-direction (m): %.2f\n", dm.coefs[0]*res);
+  printf("Shift in y-direction (m): %.2f\n", dm.coefs[3]*res);
+  printf("RMSE of co-registration plane (m): %.2f\n", dm.rmse*res);
 
   if (success){
-    printf(" - good, ");
+    printf("Co-Registration evaluation: proceed\n");
     for (b=0; b<nb; b++) target[b] = register_band(transform, &dm, target[b], nx, ny, nodata);
     qai_[0] = register_quality(transform, &dm, qai_[0], nx, ny, qai_nodata);
   } else {
-    //printf(" - fail, ");
-    printf(" coreg failed. Exit.\n");
+    printf("Co-Registration evaluation: abort\n");
     exit(1);
   }
   
@@ -1630,9 +1632,7 @@ int success = FAILURE;
   if (mission != SENTINEL2 || strcmp(pl2->d_coreg, "NULL") == 0) return SUCCESS;
 
   
-  #ifdef FORCE_DEBUG
-  printf("doing coreg\n");
-  #endif
+  printf("\nCo-Registration :::\n");
 
   cite_me(_CITE_COREG_);
 
@@ -1666,9 +1666,8 @@ int success = FAILURE;
   if (!fileexist(fname)){
     printf("could not retrieve base image. First 5 digits = 'YYYY-'. "); return FAILURE;}
 
-  #ifdef FORCE_DEBUG
-  printf("reference image: %s\n", fname);
-  #endif
+  printf("Base image: %s\n", fname);
+  printf("Base image year start: %d\n", year - dy + 1);
 
 
   BASE = copy_brick(TOA, 1, _DT_SHORT_);

@@ -191,7 +191,7 @@ int kms, kmv, kw;
 +++ will only return SUCCESS for Landsat. Note that WVP and Tg won't be 
 +++ allocated in this case. Water vapor is estimated for each 60m pixel
 +++ using the complete radiative transfer assuming that BOA reflectance
-+++ of the NIR reference channel @ 0.865µm and the NIR water vapor channel
++++ of the NIR reference channel @ 0.865ï¿½m and the NIR water vapor channel
 +++ @ 0.945 should be equal. Nelder-Mead Simplex optimization is used.
 +++ Water and shadow pixels will be set to the scene average, and a QAI
 +++ flag is set in this case.
@@ -206,7 +206,7 @@ brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick
 int i, j, ii, jj, p, nx, ny, g, z, k;
 int b_reference, b_measure;
 float reference, measure, dem;
-float w, w_avg;
+float w, w_avg = 0;
 double w_sum = 0, num = 0;
 float param[16];
 const gsl_multimin_fminimizer_type *T = NULL;
@@ -440,6 +440,8 @@ float **xyz_s_m = NULL;
     }
 
   }
+
+  printf("Average water vapour: %.2f\n", w_avg);
 
 
   #ifdef FORCE_DEBUG
@@ -703,7 +705,7 @@ int year, month, day;
 
           dist = sqrt(diff_x*diff_x+diff_y*diff_y);
 
-          // only use fairly near estimates (less than 1.5°)
+          // only use fairly near estimates (less than 1.5ï¿½)
           if (dist < min_dist && dist < 1.5){
             min_dist = dist;
             wvp = atof(tokenptr);
