@@ -1820,8 +1820,8 @@ printf("aod_bands as local variable?\n");
   /** print for logfile **/
   for (b=0; b<nb; b++) printf("AOD band %d: %06.4f\n", b, atc->aod[b]);
   printf("AOD green: %06.4f\n", atc->aod[green]);
-  printf("# of AOD water targets: %d\n", dark.nwat);
-  printf("# of AOD vegetation targets: %d\n", dark.nveg);
+  printf("AOD water targets (#): %d\n", dark.nwat);
+  printf("AOD vegetation targets (#): %d\n", dark.nveg);
   
   #ifdef FORCE_DEBUG
   print_brick_info(atc->xy_aod);    set_brick_open(atc->xy_aod,    OPEN_CREATE); write_brick(atc->xy_aod);

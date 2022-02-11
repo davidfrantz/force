@@ -1992,6 +1992,8 @@ brick_t **L2 = NULL;
     cite_me(_CITE_RADTRAN_);
     cite_me(_CITE_ATMVAL_);
 
+    printf("\nAtmospheric Correction :::\n");
+
 
     /** elevation stats (mean, max/min, # of 100m classes)
     +++ rayleigh scattering @ sea level

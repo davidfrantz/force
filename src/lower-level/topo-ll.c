@@ -790,8 +790,8 @@ float **xyz_tss = NULL;
 float **xyz_tsd = NULL;
 
 
-  #ifdef FORCE_CLOCK
   time_t TIME; time(&TIME);
+  #ifdef FORCE_CLOCK
   #endif
   
   
@@ -1017,8 +1017,8 @@ float **xyz_tsd = NULL;
   print_brick_info(CF); set_brick_open(CF, OPEN_CREATE); write_brick(CF);
   #endif
   
-  #ifdef FORCE_CLOCK
   proctime_print("topographic correction factors", TIME);
+  #ifdef FORCE_CLOCK
   #endif
 
   return CF;
