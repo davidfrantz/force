@@ -735,10 +735,12 @@ int i = 0;
   // choose between formats
   switch (brick->format){
     case _FMT_ENVI_:
-      driver = GDALGetDriverByName("ENVI");
+      if ((driver = GDALGetDriverByName("ENVI")) == NULL){
+        printf("%s driver not found\n", "ENVI"); return FAILURE;}
       break;
     case _FMT_GTIFF_:
-      driver = GDALGetDriverByName("GTiff");
+      if ((driver = GDALGetDriverByName("GTiff")) == NULL){
+        printf("%s driver not found\n", "GTiff"); return FAILURE;}
       options = CSLSetNameValue(options, "COMPRESS", "LZW");
       options = CSLSetNameValue(options, "PREDICTOR", "2");
       options = CSLSetNameValue(options, "INTERLEAVE", "BAND");
@@ -756,9 +758,20 @@ int i = 0;
         options = CSLSetNameValue(options, "BLOCKYSIZE", ychunk);
       }
       break;
+    case _FMT_COG_:
+      if ((driver = GDALGetDriverByName("COG")) == NULL){
+        printf("%s driver not found\n", "COG"); return FAILURE;}
+      options = CSLSetNameValue(options, "COMPRESS", "LZW");
+      options = CSLSetNameValue(options, "PREDICTOR", "YES");
+      options = CSLSetNameValue(options, "INTERLEAVE", "PIXEL");
+      options = CSLSetNameValue(options, "BIGTIFF", "YES");
+      printf("setting COG\n");
+      break;
     case _FMT_JPEG_:
-      driver = GDALGetDriverByName("MEM");
-      driver_cpy = GDALGetDriverByName("JPEG");
+      if ((driver = GDALGetDriverByName("MEM")) == NULL){
+        printf("%s driver not found\n", "MEM"); return FAILURE;}
+      if ((driver_cpy = GDALGetDriverByName("JPEG")) == NULL){
+        printf("%s driver not found\n", "JPEG"); return FAILURE;}
       break;
     default:
       printf("unknown format. ");
@@ -1855,6 +1868,8 @@ void set_brick_extension(brick_t *brick, const char *extension){
     printf("extension does not match with format.\n");}
   if (get_brick_format(brick) == _FMT_GTIFF_ && strcmp(extension, "tif") != 0){
     printf("extension does not match with format.\n");}
+  if (get_brick_format(brick) == _FMT_COG_ && strcmp(extension, "tif") != 0){
+    printf("extension does not match with format.\n");}
   if (get_brick_format(brick) == _FMT_JPEG_ && strcmp(extension, "jpg") != 0){
     printf("extension does not match with format.\n");}
 
@@ -1914,6 +1929,8 @@ void set_brick_format(brick_t *brick, int format){
   if (format == _FMT_ENVI_){
     set_brick_extension(brick, "dat");
   } else if (format == _FMT_GTIFF_){
+    set_brick_extension(brick, "tif");
+  } else if (format == _FMT_COG_){
     set_brick_extension(brick, "tif");
   } else if (format == _FMT_JPEG_){
     set_brick_extension(brick, "jpg");

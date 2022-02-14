@@ -601,13 +601,13 @@ void write_par_ll_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard or GeoTiff. GeoTiff images are compressed with LZW and hori-\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
     fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
     fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
 
@@ -965,13 +965,13 @@ void write_par_hl_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard or GeoTiff. GeoTiff images are compressed with LZW and hori-\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
     fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
     fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
 
