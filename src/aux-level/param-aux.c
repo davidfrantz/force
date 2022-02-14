@@ -832,7 +832,7 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
     fprintf(fp, "# Sensors to be used in the analysis. Multi-sensor analyses are restricted\n");
     fprintf(fp, "# to the overlapping bands. Following sensors are available: LND04 (6-band\n");
     fprintf(fp, "# Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),\n");
-    fprintf(fp, "# LND08 (6-band Landsat 8 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band\n");
+    fprintf(fp, "# LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band\n");
     fprintf(fp, "# Sentinel-2B), sen2a (4-band Sentinel-2A), sen2b (4-band Sentinel-2B),\n");
     fprintf(fp, "# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-\n");
     fprintf(fp, "# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID\n");
@@ -844,15 +844,15 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
     fprintf(fp, "# VVVHP (VV/VH polarized), MODIS (7-band MODIS).\n");
     fprintf(fp, "# BAP Composites with such a band designation can be input again (e.g. \n");
     fprintf(fp, "# SENSORS = LNDLG).\n");
-    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,\n");
+    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,\n");
     fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}\n");
   }
-  fprintf(fp, "SENSORS = LND08 SEN2A SEN2B\n");
+  fprintf(fp, "SENSORS = LND08 LND09 SEN2A SEN2B\n");
 
   if (verbose){
     fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
     fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, \n");
-    fprintf(fp, "# LND08, MOD01, MOD02.\n");
+    fprintf(fp, "# LND08, LND09, MOD01, MOD02.\n");
     fprintf(fp, "# A material-specific spectral harmonization will be performed, which will convert the \n");
     fprintf(fp, "# spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be \n");
     fprintf(fp, "# predicted, too.\n");
@@ -2022,11 +2022,11 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
     fprintf(fp, "# target images. For a list of available sensors, see the description for\n");
     fprintf(fp, "# the SENSORS parameter. For improving the spatial resolution of Landsat to\n");
     fprintf(fp, "# Sentinel-2, it is recommended to use \"SENSORS = sen2a sen2b\", and\n");
-    fprintf(fp, "# \"SENSORS_LOWRES = LND07 LND08\"\n");
-    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,SEN2A,\n");
+    fprintf(fp, "# \"SENSORS_LOWRES = LND07 LND08 LND09\"\n");
+    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,\n");
     fprintf(fp, "#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID}\n");
   }
-  fprintf(fp, "SENSORS_LOWRES = LND07 LND08\n");
+  fprintf(fp, "SENSORS_LOWRES = LND07 LND08 LND09\n");
 
   return;
 }
