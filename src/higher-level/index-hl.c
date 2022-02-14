@@ -220,8 +220,8 @@ float upper, lower, ind, scale = 10000.0;
           ts->tss_[t][p] = nodata;
         } else {
           if (ard[t].dat[b2][p] != 0){
-            upper = (ard[t].dat[b1][p]/ard[t].dat[b2][p])-1;
-            lower = sqrt((ard[t].dat[b1][p]/ard[t].dat[b2][p])+1);
+            upper = (ard[t].dat[b1][p] / (float)ard[t].dat[b2][p]) - 1.0;
+            lower = sqrt((ard[t].dat[b1][p] / (float)ard[t].dat[b2][p]) + 1.0);
             ind = upper/lower;
             if (lower == 0 || ind*scale > SHRT_MAX || ind*scale < SHRT_MIN){
               ts->tss_[t][p] = nodata;

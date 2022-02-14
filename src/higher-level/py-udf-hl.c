@@ -511,7 +511,8 @@ char bandname[NPOW_10];
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
-int b, t, k, p;
+int b, t, p;
+size_t k;
 py_dimlab_t pylab;
 npy_intp dim_data[4] = { nt, nb, ny, nx };
 FILE     *fpy         = NULL;

@@ -106,6 +106,7 @@ const int _RSR_START_LND04_ = 0;
 const int _RSR_START_LND05_ = 7;
 const int _RSR_START_LND07_ = 14;
 const int _RSR_START_LND08_ = 21;
+const int _RSR_START_LND09_ = 21; // quick fix
 const int _RSR_START_SEN2A_ = 30;
 const int _RSR_START_SEN2B_ = 43;
 

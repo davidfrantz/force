@@ -155,7 +155,7 @@ void free_param_lower(par_ll_t *pl2){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int parse_param_lower(par_ll_t *pl2){
 FILE *fpar = NULL;
-char  buffer[NPOW_10] = "\0";
+char  buffer[NPOW_16] = "\0";
 char  ext[NPOW_10] = "\0";
 char  bname[NPOW_10] = "\0";
 
@@ -200,7 +200,7 @@ char  bname[NPOW_10] = "\0";
   register_lower(pl2->params, pl2);
 
   // parse line by line
-  while (fgets(buffer, NPOW_10, fpar) != NULL) parse_parameter(pl2->params, buffer);
+  while (fgets(buffer, NPOW_16, fpar) != NULL) parse_parameter(pl2->params, buffer);
   
   // close
   fclose(fpar);

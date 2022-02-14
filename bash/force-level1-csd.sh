@@ -176,23 +176,41 @@ ARGS=$(echo "$@" | sed -E "s/%dummy%([0-9])/-\1/g")
 eval set -- "$ARGS"
 
 # Check for update flag and update metadata catalogue if set
+check_satellite_grid_files() {
+  SHAPEFILE=("$1"/$2.shp "$1"/$2.shx "$1"/$2.dbf "$1"/$2.prj)
+    for FILE in "${SHAPEFILE[@]}"; do
+      if ! [ -f $FILE ]; then
+        DOWNLOADSHP=$(($DOWNLOADSHP + 1))
+      fi
+    done
+}
+
 if [ $UPDATE -eq 1 ]; then
   METADIR="$1"
   if [ $# -lt  1 ]; then
     show_help "$(printf "%s\n       " "Metadata directory not specified")"
   elif [ $# -gt 1 ]; then
     show_help "$(printf "%s\n       " "Too many arguments." "Only specify the metadata directory when using the update option (-u)." "The only allowed optional argument is -s. Use it if you would like to only" "update either the Landsat or Sentinel-2 metadata catalogue.")"
-  elif ! [ -w "$METADIR" ]; then
+  elif ! [ -d "$METADIR" ]; then
     show_help "$(printf "%s\n       " "Metadata directory does not exist, exiting")"
   elif ! [ -w "$METADIR" ]; then
     show_help "$(printf "%s\n       " "Can not write to metadata directory, exiting")"
   else
+    DOWNLOADSHP=0
     which_satellite
     if [ $LANDSAT -eq 1 ]; then
       update_meta landsat landsat
+      check_satellite_grid_files "$METADIR" landsat
     fi
     if [ $SENTINEL -eq 1 ]; then
       update_meta sentinel-2 sentinel2
+      check_satellite_grid_files "$METADIR" sentinel
+    fi
+    if [ $DOWNLOADSHP -gt 0 ]; then
+      printf "%s\n" "" "Downloading and extracting tile / footprint shapefiles..."
+      wget -q https://github.com/ernstste/ls_s2_tiles/blob/main/ls_s2_tiles.zip?raw=true -O "$METADIR"/tiles.zip
+      unzip -oq "$METADIR"/tiles.zip -d "$METADIR"
+      rm "$METADIR"/tiles.zip
     fi
   fi
   printf "%s\n" "" "Done. You can run this script without option -u to download data now." ""
@@ -281,7 +299,6 @@ if [ -f $AOI ]; then
   # is AOI a GDAL readable file?
   if ogrinfo $AOI >& /dev/null; then
     AOITYPE=1
-    OGR=1
   else
     # Must be tile list or bounding box
     # check if tile list / bounding box file contains whitespaces or non-unix eol
@@ -293,15 +310,13 @@ if [ -f $AOI ]; then
     fi
 
     AOI=$(cat $AOI | sed 's/,/./g')
-    OGR=0
   fi
-# if aoi is not a file, it's a point, polygon or tile list as cmd line input
 else
+  # if aoi is not a file, it's a point, polygon or tile list as cmd line input
   AOI=$(echo $AOI | sed 's/,/ /g')
-  OGR=0
 fi
 
-if [ $OGR -eq 0 ]; then
+if [ -z $AOITYPE ]; then
   # check if AOI input contains bounding box coordinates
   if $(echo $AOI | grep -q "/"); then
     AOITYPE=2
@@ -382,36 +397,58 @@ get_data() {
     printf "%s\n" "" "WARNING: The selected time window exceeds the last update of the $PRINTNAME metadata catalogue." "Results may be incomplete, please consider updating the metadata catalogue using the -u option."
   fi
 
-  # AOI is shapefile, get tiles/footprints from WFS server
-  if [ "$AOITYPE" -eq 1 ]; then
-    printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
+  if [ "$AOITYPE" -eq 1 ] || [ "$AOITYPE" -eq 2 ]; then
+
+    # check if tiles / footprints shapefile is in metadata directory
+    SHAPEFILE=($METADIR/$SATELLITE.shp $METADIR/$SATELLITE.shx $METADIR/$SATELLITE.dbf $METADIR/$SATELLITE.prj)
+    for FILE in "${SHAPEFILE[@]}"; do
+      if ! [ -f $FILE ]; then
+        printf "%s\n" "" "Error: $FILE not found" "Shapefile for $PRINTNAME missing or incomplete." "Use the -u option to download the shapefile specifying $PRINTNAME tiles / footprints and update the metadata catalogue." ""
+        exit 1
+      fi
+    done
+
     OGRTEMP="$POOL"/l1csd-temp_$(date +%FT%H-%M-%S-%N)
     mkdir "$OGRTEMP"
-    # get first layer of vector file and reproject to epsg4326
-    AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
-    AOIREPRO="$OGRTEMP"/aoi_reprojected.shp
-    ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" "$AOIREPRO" "$AOI"
-    # get ls/s2 tiles intersecting with bounding box of AOI
-    BBOX=$(ogrinfo -so "$AOIREPRO" "$AOILAYER" | grep "Extent: " | sed 's/Extent: //; s/(//g; s/)//g; s/, /,/g; s/ - /,/')
-    WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetCapabilities&typename="$SATELLITE"&bbox="$BBOX
-    ogr2ogr -f "ESRI Shapefile" "$OGRTEMP"/$SATELLITE.shp WFS:"$WFSURL" -append -update
-    # intersect AOI and tiles
-    # remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs |
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, aoi_reprojected WHERE ST_Intersects($SATELLITE.geometry, aoi_reprojected.geometry)" "$OGRTEMP" | xargs -n 1 | sort -u | xargs | sed 's/PRFID,//')
+
+    create_vrt() {
+    cat << EOF > "$1"
+<OGRVRTDataSource>
+    <OGRVRTLayer name="$2">
+        <SrcDataSource>$3/$2.shp</SrcDataSource>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="aoi">
+        <SrcDataSource>$4</SrcDataSource>
+    </OGRVRTLayer>
+</OGRVRTDataSource>
+EOF
+    }
+    
+    # AOI is shapefile: reproject aoi to lat/lon
+    if [ "$AOITYPE" -eq 1 ]; then
+      printf "%s\n" "" "Searching for footprints / tiles intersecting with geometries of AOI shapefile..."
+      # get first layer of vector file and reproject to epsg4326
+      # AOILAYER=$(ogrinfo "$AOI" | grep "1: " | sed "s/1: //; s/ ([[:alnum:]]*.*)//")
+      ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" "$OGRTEMP"/aoi.shp "$AOI"
+
+    # AOI is coordinate pairs, create point/polygon shapefile from coords
+    elif [ "$AOITYPE" -eq 2 ]; then
+      printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..." "Geometry type: "$GEOMETRY
+      WKT=$(echo $AOI | sed 's/ /,/g; s/\// /g')
+      if [ "$GEOMETRY" = "POINT" ]; then
+        printf "id,WKT\n1,POINT($WKT)" > "$OGRTEMP/aoi.csv"
+      elif [ "$GEOMETRY" = "POLYGON" ]; then
+        printf "id,WKT\n1,\"MULTIPOLYGON((($WKT)))\"" > "$OGRTEMP/aoi.csv"
+      fi
+      ogr2ogr -f "ESRI Shapefile" "$OGRTEMP/aoi.shp" -dialect sqlite -sql "SELECT id, GeomFromText(WKT) FROM aoi" "$OGRTEMP/aoi.csv" -a_srs EPSG:4326
+    fi
+
+    # create db containing aoi and tiles and get tile names intersecting aoi
+    create_vrt "$OGRTEMP/db.vrt" "$SATELLITE" "$METADIR" "$OGRTEMP"/aoi.shp
+    # intersect AOI and tiles, remove duplicate entries resulting from multiple features in same tiles: | xargs -n 1 | sort -u | xargs |
+    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -dialect sqlite -sql "SELECT $SATELLITE.PRFID FROM $SATELLITE, aoi WHERE ST_Intersects($SATELLITE.geometry, aoi.geometry)" "$OGRTEMP/db.vrt" | xargs -n 1 | sort -u | xargs | sed 's/PRFID,//')
     TILES="_"$(echo $TILERAW | sed 's/ /_|_/g')"_"
     rm -rf "$OGRTEMP"
-
-  # AOI is coordinate pairs, get tiles/footprints from WFS server
-  elif [ "$AOITYPE" -eq 2 ]; then
-    printf "%s\n" "" "Searching for footprints / tiles intersecting with input geometry..." "Geometry type: "$GEOMETRY
-    WKT=$(echo $AOI | sed 's/ /%20/g; s/\//,/g')
-    if [ "$GEOMETRY" = "POINT" ]; then
-      WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3CLiteral%3E%3Cgml:Point%20srsName=%22EPSG:4326%22%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:Point%3E%3C/Literal%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
-    elif [ "$GEOMETRY" = "POLYGON" ]; then
-      WFSURL="http://ows.geo.hu-berlin.de/cgi-bin/qgis_mapserv.fcgi?MAP=/owsprojects/grids.qgs&SERVICE=WFS&REQUEST=GetFeature&typename="$SATELLITE"&Filter=%3Cogc:Filter%3E%3Cogc:Intersects%3E%3Cogc:PropertyName%3Eshape%3C/ogc:PropertyName%3E%3Cgml:Polygon%20srsName=%22EPSG:4326%22%3E%3Cgml:outerBoundaryIs%3E%3Cgml:LinearRing%3E%3Cgml:coordinates%3E"$WKT"%3C/gml:coordinates%3E%3C/gml:LinearRing%3E%3C/gml:outerBoundaryIs%3E%3C/gml:Polygon%3E%3C/ogc:Intersects%3E%3C/ogc:Filter%3E"
-    fi
-    TILERAW=$(ogr2ogr -f CSV /vsistdout/ -select "PRFID" WFS:"$WFSURL" | sed 's/"//g')
-    TILES="_"$(echo $TILERAW | sed 's/PRFID, //; s/ /_|_/g')"_"
 
   # AOI is tile list
   elif [ "$AOITYPE" -eq 3 ]; then
@@ -426,7 +463,6 @@ get_data() {
      sentinel2)
         TILERAW=$(echo "$AOI" | grep -E -o "T[0-6][0-9][A-Z]{3}") || sensor_tile_mismatch
         TILES="_"$(echo $TILERAW | sed 's/ /_|_/g')"_" ;;
-
     esac
   fi
 

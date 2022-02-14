@@ -43,6 +43,7 @@ time <- mm + ss / 60
 
 id <- log %>%
      gsub(":.*", "", .) %>%
+     gsub("/ ", "", .) %>%
      basename()
 
 id_split <- id %>% strsplit("_")
@@ -108,7 +109,24 @@ data <- data.frame(status,
                   year  = format(date, "%Y"),
                   month = format(date, "%m"),
                   week  = format(date, "%W"),
-                  doy   = format(date, "%j"),
+                  doy       = format(date, "%j"),
+                  yearhalf  = paste(
+                                   format(date, "%Y"),
+                                   format(date, "%m") %>%
+                                          as.integer() %>%
+                                          `/`(6) %>%
+                                          ceiling(),
+                                   sep = "-"
+                            ),
+                  yearquarter  = paste(
+                                   format(date, "%Y"),
+                                   format(date, "%m") %>%
+                                          as.integer() %>%
+                                          `/`(3) %>%
+                                          ceiling(),
+                                   sep = "-"
+                            ),
+                  yearmonth = format(date, "%Y-%m"),
                   dc,
                   cc,
                   sc,
@@ -166,6 +184,30 @@ fig <- plot_ly(data = data %>%
 fig
 ```
 
+```{r plot-l1-yearhalf, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearhalf),
+              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-yearquarter, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearquarter),
+              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-yearmonth, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearmonth),
+              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
 ```{r plot-l1-month, echo = FALSE, warning = FALSE}
 fig <- plot_ly(data = data %>%
                      count(sensor, month),
@@ -205,6 +247,33 @@ fig <- plot_ly(data = data %>%
 fig
 ```
 
+```{r plot-l2-yearhalf, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearhalf) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-yearquarter, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearquarter) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-yearmonth, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearmonth) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
 ```{r plot-l2-month, echo = FALSE, warning = FALSE}
 fig <- plot_ly(data = data %>%
                      group_by(sensor, month) %>%
@@ -222,7 +291,6 @@ fig <- plot_ly(data = data %>%
       layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
 fig
 ```
-
 
 
 # Coverages

@@ -117,11 +117,11 @@ enum { OPEN_FALSE,   // do not write
        OPEN_BLOCK }; // write block into file
 
 // sensors
-enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_SEN2A_, 
-       _SEN_SEN2B_, _SEN_sen2a_, _SEN_sen2b_, _SEN_LNDLG_, _SEN_SEN2L_, 
-       _SEN_SEN2H_, _SEN_RGB_,   _SEN_S1AIA_, _SEN_S1AID_, _SEN_S1BIA_,
-       _SEN_S1BID_, _SEN_VVVHP_, _SEN_MOD01_, _SEN_MOD02_, _SEN_MODIS_,
-       _SEN_LENGTH_ };
+enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_LND09_, 
+       _SEN_SEN2A_, _SEN_SEN2B_, _SEN_sen2a_, _SEN_sen2b_, _SEN_LNDLG_, 
+       _SEN_SEN2L_, _SEN_SEN2H_, _SEN_RGB_,   _SEN_S1AIA_, _SEN_S1AID_, 
+       _SEN_S1BIA_, _SEN_S1BID_, _SEN_VVVHP_, _SEN_MOD01_, _SEN_MOD02_, 
+       _SEN_MODIS_, _SEN_LENGTH_ };
 
 // wavelength domains
 enum { _WVL_BLUE_,     _WVL_GREEN_,    _WVL_RED_,   _WVL_REDEDGE1_, 

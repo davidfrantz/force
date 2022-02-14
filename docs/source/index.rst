@@ -5,7 +5,7 @@ FORCE documentation
 
 **FORCE: Framework for Operational Radiometric Correction for Environmental monitoring**
 
-**Version 3.7.5**
+**Version 3.7.6-develop**
 
 `Download from Github <https://github.com/davidfrantz/force>`_.
 
@@ -23,7 +23,8 @@ FORCE natively supports the integrated processing and analysis of
 
   * Landsat 4/5 TM, 
   * Landsat 7 ETM+, 
-  * Landsat 8 OLI and 
+  * Landsat 8 OLI,
+  * Landsat 9 OLI, and 
   * Sentinel-2 A/B MSI.
 
 Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or environmental variables.
