@@ -41,6 +41,7 @@ extern const int _RSR_START_LND04_;
 extern const int _RSR_START_LND05_;
 extern const int _RSR_START_LND07_;
 extern const int _RSR_START_LND08_;
+extern const int _RSR_START_LND09_;
 extern const int _RSR_START_SEN2A_;
 extern const int _RSR_START_SEN2B_;
 extern const float _RSR_[56][1991];

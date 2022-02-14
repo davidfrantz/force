@@ -314,7 +314,7 @@ GDALDatasetH fp_;
         lid = atoi(tokenptr+strlen(tokenptr)-1);
 
         // set datatype, saturation value, and number of bands
-        if (lid == 8){
+        if (lid >= 8){
           meta->dtype = 16;
           meta->sat = 65535;
           nb = 9;
@@ -350,6 +350,9 @@ GDALDatasetH fp_;
           case 8:
             b_rsr = _RSR_START_LND08_;
             break;
+          case 9:
+            b_rsr = _RSR_START_LND09_;
+            break;
           default:
             printf("unknown satellite. ");
             return FAILURE;
@@ -360,7 +363,7 @@ GDALDatasetH fp_;
         #endif
 
         b = 0;
-        if (lid == 8){
+        if (lid >= 8){
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "1");
           meta->cal[b].rsr_band = b_rsr++;
@@ -1377,7 +1380,6 @@ printf("there are still some things to do int meta. checking etc\n");
   switch (mission){
     case LANDSAT:
       if (parse_metadata_landsat(pl2, meta, DN)  != SUCCESS) return FAILURE;
-
       break;
     case SENTINEL2:
       if (parse_metadata_sentinel2(pl2, meta, DN) != SUCCESS) return FAILURE;
