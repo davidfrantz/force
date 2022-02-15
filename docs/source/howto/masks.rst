@@ -26,17 +26,22 @@ What is the advantage of using processing masks?
 ------------------------------------------------
 
 - Processing masks speed up processing.
+
   - For each processing unit (block within the tile), the analysis mask is read first.
     If no valid pixel is in there, all the other data are not input, and the block is skipped.
     As an example, when processing a country like Japan, and provide a land mask, you can speed up processing significantly as many blocks are skipped entirely.
   - On the pixel level, invalid pixels are skipped, too.
     This is especially beneficial for CPU-heavy tasks, e.g. machine learning predictions.
     As an example, when computing a tree species classification, you can speed up processing substantially if you provide a forest masks.
+
 - Processing masks decrease data volume substantially.
+
   - In the processed products, the pixels of no interest have a nodata value.
     As all FORCE output is compressed (unless you choose to output in ENVI format; I don't recommend to do this), the compression kicks in nicely if you have used processing masks.
     You can easily decrease data volume by several factors.
+
 - Processing masks facilitate analyzing the processed data.
+
   - In the processed products, the pixels of no interest have a nodata value.
     Thus, you don't need to sort the pixels on your own, e.g. computing confusion matrices and classification accuracy is more straightforward to implement.
 
