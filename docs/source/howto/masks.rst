@@ -208,7 +208,7 @@ In our case, the data are already in datacube format, covering 597 tiles:
 We generate the masks using ``force-procmask``, which internally uses ``gdal_calc.py`` for executing the raster algebra.
 Thus, the arithmetic expression must be given in gdalnumeric syntax, e.g. 'A>3000'.
 ``A`` refers to our input image. 
-If this is a multiband file, the desired band can be specified with the ``-b`` option 
+If this is a multiband file, the desired band can be specified with the ``-l`` option 
 (if not given, the first band is used).
 In our example input image, the tree percentage is in band 2 and the percentage values are scaled by 100 (i.e. 100% = 10000).
 To generate a mask with tree cover > 30%, we use the following:
