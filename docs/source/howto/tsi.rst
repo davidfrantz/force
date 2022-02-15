@@ -11,7 +11,7 @@ This tutorial introduces the Time Series Analysis (TSA) submodule of the FORCE H
 
 .. admonition:: Info
 
-   *This tutorial uses FORCE v. 3.5*
+   *This tutorial uses FORCE v. 3.7.6*
 
 
 Why interpolation?
@@ -78,24 +78,20 @@ Parameterfile
 
 We start by generating an empty TSA parameterfile, and rename the file.
 
-.. code-block:: bash
+.. code-block:: none
 
    mkdir /data/europe/interpolation
-   force-parameter /data/europe/interpolation TSA 1
-   cd /data/europe/interpolation
-   mv TSA-skeleton.prm tsi.prm
+   force-parameter /data/europe/interpolation/tsi.prm TSA
 
-   TSA
-   An empty parameter file skeleton was written to
-     /data/europe/interpolation/TSA-skeleton.prm
-   Note that all parameters need to be given, even though some may not be used
-   with your specific parameterization.
-   You should rename the file, e.g. my-first-TSA.prm.
-   Parameterize according to your needs and run with
-   force-higher-level /data/europe/interpolation/my-first-TSA.prm
+   $ An empty parameter file skeleton was written to
+   $ /data/europe/interpolation/tsi.prm
+   $ Note that all parameters need to be given, even though some may not be used
+   $ with your specific parameterization.
+   $ Parameterize according to your needs and run with
+   $ force-higher-level /data/europe/interpolation/tsi.prm
 
 
-If you prefer a more compact parameterfile without all the comments, use ``0`` instead of ``1`` as the last parameter.
+If you prefer a more compact parameterfile without all the comments, use the ``-c`` option.
 The full set of parameters is also documented here: :ref:`tsa-param`.
 
 
@@ -120,16 +116,16 @@ Analysis mask
 As we are only interested in the land surface - and there is a lot of water around Crete - we use a processing mask.
 Have a look at the :ref:`tut-mask` tutorial for further details.
 
-.. code-block:: bash
+.. code-block:: none
 
    mkdir -p /data/europe/masks
    cp /data/europe/level2/datacube-definition.prj -t /data/europe/masks
-   force-cube /data/gis/admin/crete.gpkg /data/europe/masks rasterize 30
+   force-cube -o /data/europe/mask -s 30 /data/gis/admin/crete.gpkg
 
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   ... 
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ ... 
 
 
 In the parameterfile, use the masks like this:
@@ -167,17 +163,20 @@ There are different ways to obtain these values, e.g. by generating, and filteri
 The easiest way, however, is to use ``force-tile-extent`` with a vector geometry.
 Example for Crete, Greece:
 
-.. code-block:: bash
+.. code-block:: none
 
-   force-tile-extent /data/gis/admin/crete.gpkg /data/europe/level2 /data/europe/interpolation/crete.txt
+   force-tile-extent \
+      /data/gis/admin/crete.gpkg \
+      /data/europe/level2 \
+      /data/europe/interpolation/crete.txt
 
-   Suggested Processing extent:
-   X_TILE_RANGE = 103 111
-   Y_TILE_RANGE = 101 105
-   
-   Processing extent is not square.
-   Suggest to use the tile allow-list:
-   FILE_TILE = /data/europe/interpolation/crete.txt
+   $ Suggested Processing extent:
+   $ X_TILE_RANGE = 103 111
+   $ Y_TILE_RANGE = 101 105
+   $ 
+   $ Processing extent is not square.
+   $ Suggest to use the tile allow-list:
+   $ FILE_TILE = /data/europe/interpolation/crete.txt
 
 
 Block size
@@ -186,7 +185,7 @@ Block size
 .. tip::
 
    The block size is a parameter that you should only adjust if you are running in RAM-shortages.
-   First, try the default value and don’t worry*
+   First, try the default value and don't worry*
 
 However, if the program is *killed* by the system, this can be mitigated by adjusting ``BLOCK_SIZE``.
 
@@ -210,7 +209,7 @@ By default, FORCE screens for nodata values, various cloud types, cloud shadows,
 
 
 In addition, recognizing that cloud masks are never perfect, TSA offers an outlier detection routine.
-This screens each pixel’s time series and might be used to remove undetected cloud, cloud shadow, or snow remnants.
+This screens each pixel's time series and might be used to remove undetected cloud, cloud shadow, or snow remnants.
 
 The outlier detection is iteratively removing outliers until the time series noise is smaller than the given value.
 Note however: this method might also remove some *valid* data points, e.g. mowing events in intensively managed grasslands.
@@ -230,7 +229,7 @@ For our purpose, using this option is fine, thus, let's keep the default values:
 Temporal extent, Sensor, Index
 """"""""""""""""""""""""""""""
 
-To eventually generate a long term animation, let’s use 30 years of Landsat data:
+To eventually generate a long term animation, let's use 30 years of Landsat data:
 
 .. code-block:: bash
 
@@ -263,7 +262,7 @@ In order to generate a nice-looking and information-rich animation, we are using
 Interpolation
 """""""""""""
 
-Now, let’s define the interpolation parameters.
+Now, let's define the interpolation parameters.
 
 We wil be using the RBF interpolation to create a smoothed time series with 16-day interpolation steps.
 
@@ -317,7 +316,7 @@ The progress bar will tell you how much time is spent for reading, computing, an
 This helps you identify if your job is e.g. input-limited.
 You might want to adjust the settings accordingly (also note that you may have more or less CPUs than me).
 
-Please also note: fairly often, inexperienced users tend to overdo parallel reads/writes beyond a value that is reasonable - if reading/writing doesn’t accelerate when you add more CPUs, this is likely the case (you might even slow down your job by overdoing I/O).
+Please also note: fairly often, inexperienced users tend to overdo parallel reads/writes beyond a value that is reasonable - if reading/writing doesn't accelerate when you add more CPUs, this is likely the case (you might even slow down your job by overdoing I/O).
 
 .. code-block:: bash
 
@@ -331,55 +330,55 @@ Processing
 
 Processing is straightforward:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-higher-level /data/europe/interpolation/tsi.prm
 
 
-   number of processing units: 280
-    (active tiles: 28, chunks per tile: 10)
-   ________________________________________
-   Progress:                        100.00%
-   Time for I/C/O:           054%/037%/008%
-   ETA:             00y 00m 00d 00h 00m 00s
-   
-   ________________________________________
-   Real time:       00y 00m 00d 00h 58m 41s
-   Virtual time:    00y 00m 00d 01h 32m 54s
-   Saved time:      00y 00m 00d 00h 34m 13s
-   
-   ________________________________________
-   Virtual I-time:  00y 00m 00d 00h 50m 30s
-   Virtual C-time:  00y 00m 00d 00h 34m 31s
-   Virtual O-time:  00y 00m 00d 00h 07m 53s
-   
-   ________________________________________
-   I-bound time:    00y 00m 00d 00h 23m 42s
-   C-bound time:    00y 00m 00d 00h 07m 10s
-   O-bound time:    00y 00m 00d 00h 00m 26s
+   $ number of processing units: 280
+   $  (active tiles: 28, chunks per tile: 10)
+   $ ________________________________________
+   $ Progress:                        100.00%
+   $ Time for I/C/O:           054%/037%/008%
+   $ ETA:             00y 00m 00d 00h 00m 00s
+   $ 
+   $ ________________________________________
+   $ Real time:       00y 00m 00d 00h 58m 41s
+   $ Virtual time:    00y 00m 00d 01h 32m 54s
+   $ Saved time:      00y 00m 00d 00h 34m 13s
+   $ 
+   $ ________________________________________
+   $ Virtual I-time:  00y 00m 00d 00h 50m 30s
+   $ Virtual C-time:  00y 00m 00d 00h 34m 31s
+   $ Virtual O-time:  00y 00m 00d 00h 07m 53s
+   $ 
+   $ ________________________________________
+   $ I-bound time:    00y 00m 00d 00h 23m 42s
+   $ C-bound time:    00y 00m 00d 00h 07m 10s
+   $ O-bound time:    00y 00m 00d 00h 00m 26s
 
 
 After this, we do some postprocessing for simplified data handling, and to prepare the data for ingestion into the QGIS plugins.
 
 First, we generate a mosaic:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-mosaic /data/europe/interpolation
 
-   mosaicking 3 products:
-   1 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.tif
-   2 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.tif
-   3 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.tif
-
-   mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.tif
-   27 chips found.
-
-   mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.tif
-   27 chips found.
-
-   mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.tif
-   27 chips found.
+   $ mosaicking 3 products:
+   $ 1 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.tif
+   $ 2 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.tif
+   $ 3 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.tif
+   $ 
+   $ mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.tif
+   $ 27 chips found.
+   $ 
+   $ mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.tif
+   $ 27 chips found.
+   $ 
+   $ mosaicking 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.tif
+   $ 27 chips found.
 
 
 Then, we build a four-dimensional stack from the three tasseled cap components.
@@ -391,50 +390,49 @@ This data model is a prerequisite to the usage of the following QGIS plugins.
    For very long time series, ``force-stack`` still seems a bit slow - but at least it works... 
 
 
-.. code-block:: bash
+.. code-block:: none
 
    cd mosaic
    force-stack *TCB*TSI.vrt *TCG*TSI.vrt *TCW*TSI.vrt 4D-Tasseled-Cap-TSI.vrt
 
-   file 1:
-     /data/europe/interpolation/mosaic
-     1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt
-     9000 4000 684
-   file 2:
-     /data/europe/interpolation/mosaic
-     1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt
-     9000 4000 684
-   file 3:
-     /data/europe/interpolation/mosaic
-     1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt
-     9000 4000 684
-   
-   Same number of bands detected. Stacking by band.
-   
-   Band 0001: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 1
-   Band 0002: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 1
-   Band 0003: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 1
-   Band 0004: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 2
-   Band 0005: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 2
-   Band 0006: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 2
-   Band 0007: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 3
-   Band 0008: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 3
-   Band 0009: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 3
-   ...
-   Band 2050: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 684
-   Band 2051: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 684
-   Band 2052: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 684
+   $ file 1:
+   $   /data/europe/interpolation/mosaic
+   $   1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt
+   $   9000 4000 684
+   $ file 2:
+   $   /data/europe/interpolation/mosaic
+   $   1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt
+   $   9000 4000 684
+   $ file 3:
+   $   /data/europe/interpolation/mosaic
+   $   1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt
+   $   9000 4000 684
+   $ 
+   $ Same number of bands detected. Stacking by band.
+   $ 
+   $ Band 0001: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 1
+   $ Band 0002: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 1
+   $ Band 0003: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 1
+   $ Band 0004: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 2
+   $ Band 0005: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 2
+   $ Band 0006: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 2
+   $ Band 0007: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 3
+   $ Band 0008: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 3
+   $ Band 0009: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 3
+   $ ...
+   $ Band 2050: 1990-2019_001-365_HL_TSA_LNDLG_TCB_TSI.vrt band 684
+   $ Band 2051: 1990-2019_001-365_HL_TSA_LNDLG_TCG_TSI.vrt band 684
+   $ Band 2052: 1990-2019_001-365_HL_TSA_LNDLG_TCW_TSI.vrt band 684
 
 
 For rapid display, we compute pyramids:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-pyramid 4D-Tasseled-Cap-TSI.vrt
 
-   /data/europe/interpolation/mosaic/4D-Tasseled-Cap-TSI.vrt
-   computing pyramids for 4D-Tasseled-Cap-TSI.vrt
-   0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for 4D-Tasseled-Cap-TSI.vrt
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
 
 
 Visualization
