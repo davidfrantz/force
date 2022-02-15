@@ -222,7 +222,7 @@ After this, we generate a mosaic.
 
 With ``OUTPUT_EXPLODE = TRUE``, you get one image for each requested index and statistical aggregation, i.e. 42 images in our case:
 
-.. code-block:: bash
+.. code-block:: none
 
   force-mosaic /data/europe/stm
 
@@ -257,7 +257,7 @@ This example here stacks the 50% quantiles of the reflectance bands, as well as 
 
 For fast visualization, we are computing pyramids.
 
-.. code-block:: bash
+.. code-block:: none
 
    cd /data/europe/stm/mosaic
    force-stack *RED_STM_Q50.vrt *NIR_STM_Q50.vrt *SW1_STM_Q50.vrt stack-bands-STM_Q50.vrt
