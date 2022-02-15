@@ -53,36 +53,36 @@ FORCE comes with a program to generate processing masks from vector data (e.g. s
 
    force-cube -h
 
-   Usage: force-cube [-hvirsantobj] input-file(s)
-
-   optional:
-   -h = show this help
-   -v = show version
-   -i = show program's purpose
-   -r = resampling method
-         any GDAL resampling method for raster data, e.g. cubic (default)
-         is ignored for vector data
-   -s = pixel resolution of cubed data, defaults to 10
-   -a = optional attribute name for vector data. force-cube will burn these values 
-         into the output raster. default: no attribute is used; a binary mask 
-         with geometry presence (1) or absence (0) is generated
-   -l = layer name for vector data (default: basename of input, without extension)
-   -n = output nodate value (defaults to 255) 
-   -t = output data type (defaults to Byte; see GDAL for datatypes; 
-         but note that FORCE HLPS only understands Int16 and Byte types correctly)
-   -o = output directory: the directory where you want to store the cubes
-         defaults to current directory
-         'datacube-definition.prj' needs to exist in there
-   -b = basename of output file (without extension)
-         defaults to the basename of the input-file
-         cannot be used when multiple input files are given
-   -j = number of jobs, defaults to 'as many as possible'
-
-   mandatory:
-   input-file(s) = the file(s) you want to cube
-
-   -----
-      see https://force-eo.readthedocs.io/en/latest/components/auxilliary/cube.html
+   $ Usage: force-cube [-hvirsantobj] input-file(s)
+   $ 
+   $ optional:
+   $ -h = show this help
+   $ -v = show version
+   $ -i = show program's purpose
+   $ -r = resampling method
+   $       any GDAL resampling method for raster data, e.g. cubic (default)
+   $       is ignored for vector data
+   $ -s = pixel resolution of cubed data, defaults to 10
+   $ -a = optional attribute name for vector data. force-cube will burn these values 
+   $       into the output raster. default: no attribute is used; a binary mask 
+   $       with geometry presence (1) or absence (0) is generated
+   $ -l = layer name for vector data (default: basename of input, without extension)
+   $ -n = output nodate value (defaults to 255) 
+   $ -t = output data type (defaults to Byte; see GDAL for datatypes; 
+   $       but note that FORCE HLPS only understands Int16 and Byte types correctly)
+   $ -o = output directory: the directory where you want to store the cubes
+   $       defaults to current directory
+   $       'datacube-definition.prj' needs to exist in there
+   $ -b = basename of output file (without extension)
+   $       defaults to the basename of the input-file
+   $       cannot be used when multiple input files are given
+   $ -j = number of jobs, defaults to 'as many as possible'
+   $ 
+   $ mandatory:
+   $ input-file(s) = the file(s) you want to cube
+   $ 
+   $ -----
+   $    see https://force-eo.readthedocs.io/en/latest/components/auxilliary/cube.html
 
 
 
@@ -100,10 +100,10 @@ In the following example, we generate a processing mask for the administrative a
 
    force-cube -o /data/europe/mask vienna.shp
 
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
 
 
 In this example, Vienna is covered by four tiles, a cubed GeoTiff was generated in each tile:
@@ -112,10 +112,10 @@ In this example, Vienna is covered by four tiles, a cubed GeoTiff was generated 
 
    ls /data/europe/mask/X*/vienna.tif
 
-   /data/europe/mask/X0077_Y0058/vienna.tif
-   /data/europe/mask/X0077_Y0059/vienna.tif
-   /data/europe/mask/X0078_Y0058/vienna.tif
-   /data/europe/mask/X0078_Y0059/vienna.tif
+   $ /data/europe/mask/X0077_Y0058/vienna.tif
+   $ /data/europe/mask/X0077_Y0059/vienna.tif
+   $ /data/europe/mask/X0078_Y0058/vienna.tif
+   $ /data/europe/mask/X0078_Y0059/vienna.tif
 
 
 For speedy visuailzation, build overviews and pyramids:
@@ -125,17 +125,17 @@ For speedy visuailzation, build overviews and pyramids:
    force-pyramid /data/europe/mask/X*/*.tif
    force-mosaic /data/europe/mask
 
-   computing pyramids for vienna.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for vienna.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for vienna.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for vienna.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-
-   mosaicking vienna.tif
-   4 chips found.
+   $ computing pyramids for vienna.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for vienna.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for vienna.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for vienna.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ 
+   $ mosaicking vienna.tif
+   $ 4 chips found.
 
 
 .. figure:: img/tutorial-mask-vector.jpg
@@ -152,31 +152,31 @@ FORCE comes with a program to generate processing masks from a raster image with
 
    force-procmask -h
 
-   Usage: force-procmask [-sldobj] input-basename calc-expr
-
-   optional:
-   -s = pixel resolution of cubed data, defaults to 10
-   -l = input-layer: band number in case of multi-band input rasters,
-         defaults to 1
-   -d = input directory: the datacube directory
-         defaults to current directory
-         'datacube-definition.prj' needs to exist in there
-   -o = output directory: the directory where you want to store the cubes
-         defaults to current directory
-   -b = basename of output file (without extension)
-         defaults to the basename of the input-file, 
-         appended by '_procmask'
-   -j = number of jobs, defaults to 'as many as possible'
-
-   Positional arguments:
-   - input-basename: basename of input data
-   - calc-expr: Calculation in gdalnumeric syntax, e.g. 'A>2500'"
-                  The input variable is 'A'
-                  For details about GDAL expressions, see 
-                  https://gdal.org/programs/gdal_calc.html
-
-   -----
-      see https://force-eo.readthedocs.io/en/latest/components/auxilliary/procmask.html
+   $ Usage: force-procmask [-sldobj] input-basename calc-expr
+   $ 
+   $ optional:
+   $ -s = pixel resolution of cubed data, defaults to 10
+   $ -l = input-layer: band number in case of multi-band input rasters,
+   $       defaults to 1
+   $ -d = input directory: the datacube directory
+   $       defaults to current directory
+   $       'datacube-definition.prj' needs to exist in there
+   $ -o = output directory: the directory where you want to store the cubes
+   $       defaults to current directory
+   $ -b = basename of output file (without extension)
+   $       defaults to the basename of the input-file, 
+   $       appended by '_procmask'
+   $ -j = number of jobs, defaults to 'as many as possible'
+   $ 
+   $ Positional arguments:
+   $ - input-basename: basename of input data
+   $ - calc-expr: Calculation in gdalnumeric syntax, e.g. 'A>2500'"
+   $                The input variable is 'A'
+   $                For details about GDAL expressions, see 
+   $                https://gdal.org/programs/gdal_calc.html
+   $ 
+   $ -----
+   $    see https://force-eo.readthedocs.io/en/latest/components/auxilliary/procmask.html
 
 
 In the example given below, our input image is a multiband continuous fields dataset, 
@@ -193,16 +193,16 @@ In our case, the data are already in datacube format, covering 597 tiles:
    cd /data/europe/pred
    ls X*/*.tif | head
 
-   X0052_Y0045/CONFIELD_MLP.tif
-   X0052_Y0046/CONFIELD_MLP.tif
-   X0052_Y0047/CONFIELD_MLP.tif
-   X0052_Y0048/CONFIELD_MLP.tif
-   X0052_Y0049/CONFIELD_MLP.tif
-   X0052_Y0050/CONFIELD_MLP.tif
-   X0052_Y0051/CONFIELD_MLP.tif
-   X0052_Y0052/CONFIELD_MLP.tif
-   X0052_Y0053/CONFIELD_MLP.tif
-   X0053_Y0045/CONFIELD_MLP.tif
+   $ X0052_Y0045/CONFIELD_MLP.tif
+   $ X0052_Y0046/CONFIELD_MLP.tif
+   $ X0052_Y0047/CONFIELD_MLP.tif
+   $ X0052_Y0048/CONFIELD_MLP.tif
+   $ X0052_Y0049/CONFIELD_MLP.tif
+   $ X0052_Y0050/CONFIELD_MLP.tif
+   $ X0052_Y0051/CONFIELD_MLP.tif
+   $ X0052_Y0052/CONFIELD_MLP.tif
+   $ X0052_Y0053/CONFIELD_MLP.tif
+   $ X0053_Y0045/CONFIELD_MLP.tif
 
 
 We generate the masks using ``force-procmask``, which internally uses ``gdal_calc.py`` for executing the raster algebra.
@@ -225,11 +225,11 @@ To generate a mask with tree cover > 30%, we use the following:
       'A>3000'
 
 
-   Computers / CPU cores / Max jobs to run
-   1:local / 80 / 597
-
-   Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
-   ETA: 0s Left: 0 AVG: 0.00s  local:0/597/100%/0.1s 
+   $ Computers / CPU cores / Max jobs to run
+   $ 1:local / 80 / 597
+   $ 
+   $ Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
+   $ ETA: 0s Left: 0 AVG: 0.00s  local:0/597/100%/0.1s 
 
 
 We now have one cubed mask for each input image in the mask directory:
@@ -238,7 +238,7 @@ We now have one cubed mask for each input image in the mask directory:
 
    ls /data/europe/mask/X*/forest-mask.tif | wc -l
 
-   597
+   $ 597
 
 
 For speedy visuailzation, build overviews and pyramids:
@@ -248,18 +248,18 @@ For speedy visuailzation, build overviews and pyramids:
    force-pyramid /data/europe/mask/X*/forest-mask.tif
    force-mosaic /data/europe/mask
 
-   computing pyramids for forest-mask.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for forest-mask.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for forest-mask.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for forest-mask.tif
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   ...
-
-   mosaicking forest-mask.tif
-   597 chips found.
+   $ computing pyramids for forest-mask.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for forest-mask.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for forest-mask.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for forest-mask.tif
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ ...
+   $ 
+   $ mosaicking forest-mask.tif
+   $ 597 chips found.
 
 
 .. figure:: img/tutorial-mask-raster.jpg
