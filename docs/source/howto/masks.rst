@@ -54,7 +54,7 @@ Option 1: from vector data to mask
 
 FORCE comes with a program to generate processing masks from vector data (e.g. shapefile or geopackage): 
 
-.. code-block:: bash
+.. code-block:: none
 
    force-cube -h
 
@@ -101,7 +101,7 @@ Do not worry about data volume when converting from vector to raster data, becau
 
 In the following example, we generate a processing mask for the administrative area of Vienna, Austria.
 
-.. code-block:: bash
+.. code-block:: none
 
    force-cube -o /data/europe/mask vienna.shp
 
@@ -113,7 +113,7 @@ In the following example, we generate a processing mask for the administrative a
 
 In this example, Vienna is covered by four tiles, a cubed GeoTiff was generated in each tile:
 
-.. code-block:: bash
+.. code-block:: none
 
    ls /data/europe/mask/X*/vienna.tif
 
@@ -125,7 +125,7 @@ In this example, Vienna is covered by four tiles, a cubed GeoTiff was generated 
 
 For speedy visuailzation, build overviews and pyramids:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-pyramid /data/europe/mask/X*/*.tif
    force-mosaic /data/europe/mask
@@ -153,7 +153,7 @@ Option 2: from raster data to mask
 
 FORCE comes with a program to generate processing masks from a raster image with continuous values:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-procmask -h
 
@@ -193,7 +193,7 @@ which gives the percentages of built-up land (urban), high vegetation (trees), a
 
 In our case, the data are already in datacube format, covering 597 tiles:
 
-.. code-block:: bash
+.. code-block:: none
 
    cd /data/europe/pred
    ls X*/*.tif | head
@@ -218,7 +218,7 @@ If this is a multiband file, the desired band can be specified with the ``-l`` o
 In our example input image, the tree percentage is in band 2 and the percentage values are scaled by 100 (i.e. 100% = 10000).
 To generate a mask with tree cover > 30%, we use the following:
 
-.. code-block:: bash
+.. code-block:: none
 
    cd /data/europe/pred
 
@@ -239,7 +239,7 @@ To generate a mask with tree cover > 30%, we use the following:
 
 We now have one cubed mask for each input image in the mask directory:
 
-.. code-block:: bash
+.. code-block:: none
 
    ls /data/europe/mask/X*/forest-mask.tif | wc -l
 
@@ -248,7 +248,7 @@ We now have one cubed mask for each input image in the mask directory:
 
 For speedy visuailzation, build overviews and pyramids:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-pyramid /data/europe/mask/X*/forest-mask.tif
    force-mosaic /data/europe/mask
@@ -279,7 +279,7 @@ Processing masks can easily be used in ``force-higher-level`` by setting the ``D
 They are the parent directory of the cubed masks, and the basename of the masks, respectively.
 To use the Vienna mask from above:
 
-.. code-block:: bash
+.. code-block:: none
 
    DIR_MASK = /data/europe/mask
    BASE_MASK = vienna.tif
