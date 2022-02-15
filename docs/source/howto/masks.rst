@@ -175,7 +175,7 @@ FORCE comes with a program to generate processing masks from a raster image with
    $ 
    $ Positional arguments:
    $ - input-basename: basename of input data
-   $ - calc-expr: Calculation in gdalnumeric syntax, e.g. 'A>2500'"
+   $ - calc-expr: Calculation in gdalnumeric syntax, e.g. 'A>2500'
    $                The input variable is 'A'
    $                For details about GDAL expressions, see 
    $                https://gdal.org/programs/gdal_calc.html
