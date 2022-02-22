@@ -134,7 +134,7 @@ int datatype = get_brick_datatype(brick);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
-int  b;
+int b, o;
 
   if (from->chunk < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
@@ -148,6 +148,9 @@ int  b;
   set_brick_dirname(brick, from->dname);
   set_brick_filename(brick, from->fname);
   set_brick_sensorid(brick, from->sid);
+  set_brick_driver(brick, from->driver);
+  for (o=0; o<from->ngdalopt; o++) set_brick_gdaloptions(brick, o, from->gdalopt[o]);
+  set_brick_extension(brick, from->extension);
   set_brick_format(brick, from->format);
   set_brick_open(brick, from->open);
   set_brick_explode(brick, from->explode);
@@ -498,7 +501,11 @@ int i;
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
   copy_string(brick->extension, NPOW_02, "NA");
+  copy_string(brick->driver,    NPOW_04, "NA");
 
+  for (i=0; i<NPOW_06; i++) copy_string(brick->gdalopt[i], NPOW_10, "NA");
+
+  brick->ngdalopt = 0;
   brick->sid = -1;
   brick->format = 0;
   brick->open = OPEN_FALSE;
@@ -576,12 +583,14 @@ int b;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_brick_info(brick_t *brick){
-int b;
+int b, o;
 
 
   printf("\nbrick info for %s - %s - SID %d\n", brick->name, brick->product, brick->sid);
-  printf("open: %d, format %d, explode %d\n", 
-    brick->open, brick->format, brick->explode);
+  printf("open: %d, format %d, explode %d, GDAL driver: %s\n", 
+    brick->open, brick->format, brick->explode, brick->driver);
+  for (o=0; o<brick->ngdalopt; o++) printf("GDAL Output Option '%s = %s'", 
+    brick->gdalopt[o*2], brick->gdalopt[(o+1)*2]);
   printf("datatype %d with %d bytes\n", 
     brick->datatype, brick->byte);
   printf("filename: %s/%s.%s\n", brick->dname, brick->fname, brick->extension);
@@ -1921,6 +1930,74 @@ int get_brick_sensorid(brick_t *brick){
 }
 
 
+
+/** This function sets the driver of a brick
+--- brick:   brick
+--- driver:  driver
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_driver(brick_t *brick, const char *driver){
+
+  copy_string(brick->driver, NPOW_04, driver);
+
+  return;
+}
+
+/** This function gets the driver of a brick
+--- brick:  brick
+--- driver: driver (modified)
+--- size:   length of the buffer for extension
++++ Return: driver
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_brick_driver(brick_t *brick, char driver[], size_t size){
+
+  copy_string(driver, size, brick->driver);
+
+  return;
+}
+
+
+/** This function sets the GDAL options of a brick
+--- brick:    brick
+--- o:        option number
+--- gdalopt:  GDAL options
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_gdaloptions(brick_t *brick, int o, const char *gdalopt){
+
+
+  if (o >= NPOW_06){
+    printf("too many GDAL output options.\n");
+    exit(FAILURE);
+  }
+
+  copy_string(brick->gdalopt[o], NPOW_10, gdalopt);
+  brick->ngdalopt = o+1;
+
+  return;
+}
+
+/** This function gets the GDAL options of a brick
+--- brick:    brick
+--- o:        option number
+--- gdalopt:  GDAL options (modified)
+--- size:     length of the buffer for extension
++++ Return: GDAL options
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_brick_gdaloptions(brick_t *brick, int o, char gdalopt[], size_t size){
+
+
+  if (o >= brick->ngdalopt){
+    printf("too many GDAL output options.\n");
+    exit(FAILURE);
+  }
+
+  copy_string(gdalopt, size, brick->gdalopt[o]);
+
+  return;
+}
+
+
 /** This function sets the format of a brick
 --- brick:   brick
 --- format:  format
@@ -1932,18 +2009,16 @@ void set_brick_format(brick_t *brick, int format){
 
   if (format == _FMT_ENVI_){
     set_brick_extension(brick, "dat");
+    set_brick_driver(brick, "ENVI");
   } else if (format == _FMT_GTIFF_){
     set_brick_extension(brick, "tif");
+    set_brick_driver(brick, "GTiff");
   } else if (format == _FMT_COG_){
     set_brick_extension(brick, "tif");
+    set_brick_driver(brick, "COG");
   } else if (format == _FMT_JPEG_){
     set_brick_extension(brick, "jpg");
-  } else if (format == _FMT_CUSTOM_){
-    printf("Custom format to be implemented.");
-    exit(FAILURE);
-  } else {
-    set_brick_extension(brick, "xxx");
-    printf("unknown format.\n");
+    set_brick_driver(brick, "JPEG");
   }
 
   return;

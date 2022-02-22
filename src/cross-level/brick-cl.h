@@ -48,17 +48,20 @@ extern "C" {
 #endif
 
 typedef struct {
-  char name[NPOW_10];      // name of brick
-  char product[NPOW_03];   // product short name
-  char dname[NPOW_10];     // dirpath  for product
-  char fname[NPOW_10];     // filename for product
-  char extension[NPOW_02]; // file extension
-  int sid;               // sensor ID
-  int format;            // output format
-  int open;              // open mode
-  int explode;           // explode to single-bands?
-  int datatype;          // datatype
-  int byte;              // number of bytes
+  char name[NPOW_10];             // name of brick
+  char product[NPOW_03];          // product short name
+  char dname[NPOW_10];            // dirpath  for product
+  char fname[NPOW_10];            // filename for product
+  char extension[NPOW_02];        // file extension
+  int sid;                        // sensor ID
+  int format;                     // output format
+  char driver[NPOW_04];           // GDAL driver short name
+  char gdalopt[NPOW_06][NPOW_10]; // GDAL output options
+  int ngdalopt;                   // number of GDAL output options
+  int open;                       // open mode
+  int explode;                    // explode to single-bands?
+  int datatype;                   // datatype
+  int byte;                       // number of bytes
 
   int nb;                // number of images
   int nx;                // number of columns
@@ -134,6 +137,10 @@ void     set_brick_extension(brick_t *brick, const char *extension);
 void     get_brick_extension(brick_t *brick, char extension[], size_t size);
 void     set_brick_sensorid(brick_t *brick, int sid);
 int      get_brick_sensorid(brick_t *brick);
+void     set_brick_driver(brick_t *brick, const char *driver);
+void     get_brick_driver(brick_t *brick, char driver[], size_t size);
+void     set_brick_gdaloptions(brick_t *brick, int o, const char *gdalopt);
+void     get_brick_gdaloptions(brick_t *brick, int o, char gdalopt[], size_t size);
 void     set_brick_format(brick_t *brick, int format);
 int      get_brick_format(brick_t *brick);
 void     set_brick_open(brick_t *brick, int open);
