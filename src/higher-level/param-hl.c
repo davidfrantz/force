@@ -76,6 +76,7 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
   register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
+  register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &phl->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
@@ -1673,6 +1674,13 @@ double tol = 5e-3;
     if (phl->mcl.orfm && phl->mcl.method != _ML_RFC_){
       phl->mcl.orfm = false;
       printf("Random Forest Classifcation Margin cannot be computed. Ignored and continue.\n");
+    }
+  }
+
+  if (phl->format == _FMT_CUSTOM_){
+    if (strcmp(phl->f_gdalopt, "NULL") == 0 || !fileexist(phl->f_gdalopt)){
+      printf("If OUTPUT_FORMAT = CUSTOM, FILE_OUTPUT_OPTIONS needs to be given. "); 
+      return FAILURE;
     }
   }
 

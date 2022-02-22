@@ -474,6 +474,7 @@ typedef struct {
   int nd, nw, nm, nq, ny;
 
   // miscellaneous
+  char *f_gdalopt;        // file for GDAL options
   int format;                // output format
   int explode;
   int owr;             // flag: overwrite output

@@ -37,7 +37,8 @@ const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_] = {
 
 const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_] = {
   { _FMT_ENVI_, "ENVI" }, { _FMT_GTIFF_, "GTiff" }, 
-  { _FMT_COG_, "COG" },   { _FMT_JPEG_, "JPEG" }};
+  { _FMT_COG_, "COG" },   { _FMT_JPEG_, "JPEG" },
+  { _FMT_CUSTOM_, "CUSTOM"}};
 
 const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_] = {
   { _SEN_LND04_, "LND04" }, { _SEN_LND05_, "LND05" },

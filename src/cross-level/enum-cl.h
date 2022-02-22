@@ -81,7 +81,7 @@ enum { _DT_NONE_,  _DT_SHORT_, _DT_SMALL_,
        _DT_FLOAT_, _DT_INT_,   _DT_USHORT_ };
 
 // output formats
-enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_LENGTH_ };
+enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_CUSTOM_, _FMT_LENGTH_ };
 
 // t-test tailtype
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };

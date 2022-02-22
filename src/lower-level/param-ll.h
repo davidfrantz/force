@@ -56,6 +56,7 @@ typedef struct {
   char *f_queue;          // file queue
   char *d_aod;            // directory of AOD LUT
   char *d_wvp;            // directory of water vapor LUT
+  char *f_gdalopt;        // file for GDAL options
 
   /** output parameters **/
   int format; // output format

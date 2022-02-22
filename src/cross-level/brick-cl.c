@@ -773,6 +773,10 @@ int i = 0;
       if ((driver_cpy = GDALGetDriverByName("JPEG")) == NULL){
         printf("%s driver not found\n", "JPEG"); return FAILURE;}
       break;
+    case _FMT_CUSTOM_:
+      printf("Custom format to be implemented.");
+      return FAILURE;
+      break;
     default:
       printf("unknown format. ");
       return FAILURE;
@@ -1934,6 +1938,9 @@ void set_brick_format(brick_t *brick, int format){
     set_brick_extension(brick, "tif");
   } else if (format == _FMT_JPEG_){
     set_brick_extension(brick, "jpg");
+  } else if (format == _FMT_CUSTOM_){
+    printf("Custom format to be implemented.");
+    exit(FAILURE);
   } else {
     set_brick_extension(brick, "xxx");
     printf("unknown format.\n");
