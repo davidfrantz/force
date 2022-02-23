@@ -21,50 +21,35 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Named constant definitions
+GDAL options
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef CONSTANT_CL_H
-#define CONSTANT_CL_H
+#ifndef GDALOPT_CL_H
+#define GDALOPT_CL_H
 
-#include "../cross-level/_version-cl.h"
-#include "../cross-level/enum-cl.h"
+#include <stdio.h>   // core input and output functions
+#include <stdbool.h>  // boolean data type
+#include <string.h>  // string handling functions
+
+#include "../cross-level/const-cl.h"
+#include "../cross-level/read-cl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// abbreviated datatypes
-typedef unsigned short int ushort;
-typedef unsigned char small;
-
-// coordinate struct
 typedef struct {
-  double x, y;
-} coord_t;
+  char driver[NPOW_04];        // GDAL driver short name
+  char extension[NPOW_02];     // file extension
+  char option[NPOW_06][NPOW_10]; // GDAL output options
+  int n;                   // number of GDAL output options
+} gdalopt_t;
 
-
-// pi
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-// radians to degree conversion
-#define _R2D_CONV_  57.29577951308232286465
-#define _D2R_CONV_   0.01745329251994329547
-
-// compiler options
-//#define FORCE_CLOCK
-#define FORCE_DEBUG
-//#define FORCE_DEV
-
-//#define SPLITS
-
-//#define ACIX
-//#define ACIX2
-//#define CMIX_FAS
-//#define CMIX_FAS_2
+void default_gdaloptions(int format, gdalopt_t *gdalopt);
+void parse_gdaloptions(char *fname, gdalopt_t *gdalopt);
+void print_gdaloptions(gdalopt_t *gdalopt);
 
 #ifdef __cplusplus
 }

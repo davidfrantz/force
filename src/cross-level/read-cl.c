@@ -59,6 +59,8 @@ int nj_buf = NPOW_00;
   // read line by line
   while (fgets(buffer, NPOW_16, fp) != NULL){
     
+    buffer[strcspn(buffer, "\r\n")] = 0;
+
     ptr = strtok(buffer, separator);
     nj = 0;
 
@@ -108,3 +110,68 @@ int nj_buf = NPOW_00;
   return tab;
 }
 
+
+/** This function reads a tag and value file
+--- fname:  text file
+--- nrows: number of rows (returned)
++++ Return: tag and values
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+char ***read_tagvalue(char *fname, int *nrows){
+FILE *fp;
+char  buffer[NPOW_16] = "\0";
+char *ptr = NULL;
+const char *separator = " =";
+char ***tagval = NULL;
+int n = 0;
+int n_buf = NPOW_00;
+
+
+
+  alloc_3D((void****)&tagval, n_buf, _TV_LENGTH_, NPOW_10, sizeof(char));
+
+  // open file
+  if (!(fp = fopen(fname, "r"))){
+    printf("unable to open tag and value file %s. ", fname); return NULL;}
+
+
+  // read line by line
+  while (fgets(buffer, NPOW_16, fp) != NULL){
+
+    buffer[strcspn(buffer, "\r\n")] = 0;
+
+    if ((ptr = strtok(buffer, separator)) == NULL){
+      printf("could not read tag/value pair from:\n  %s\n", fname);
+      exit(FAILURE);
+    } else {
+      copy_string(tagval[n][_TV_TAG_], NPOW_10, ptr);
+    }
+
+    if ((ptr = strtok(NULL, separator)) == NULL){
+      printf("could not read tag/value pair from:\n  %s\n", fname);
+      exit(FAILURE);
+    } else {
+      copy_string(tagval[n][_TV_VAL_], NPOW_10, ptr);
+    }
+
+    n++;
+
+    // if too many rows, add twice of previous rows to buffer
+    if (n >= n_buf){
+      re_alloc_3D((void****)&tagval, n_buf, _TV_LENGTH_, NPOW_10, n_buf*2, _TV_LENGTH_, NPOW_10, sizeof(double));
+      n_buf *= 2;
+    }
+
+  }
+
+  fclose(fp);
+
+
+  // re-shape buffer to actual dimensions, 1st rows, then cols
+  if (n != n_buf){
+    re_alloc_3D((void****)&tagval, n_buf, _TV_LENGTH_, NPOW_10, n, _TV_LENGTH_, NPOW_10, sizeof(double));
+  }
+
+
+  *nrows = n;
+  return tagval;
+}

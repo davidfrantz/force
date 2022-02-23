@@ -241,10 +241,14 @@ char  bname[NPOW_10] = "\0";
   if (pl2->dotopo && !fileexist(pl2->fdem)){
     printf("FILE_DEM does not exist in the file system. Give a DEM, or use DOTOPO = FALSE + FILE_DEM = NULL (surface will be assumed flat, z = 0m). "); return FAILURE;}
 
-  if (pl2->format == _FMT_CUSTOM_){
+  if (pl2->format != _FMT_CUSTOM_){
+    default_gdaloptions(pl2->format, &pl2->gdalopt);
+  } else {
     if (strcmp(pl2->f_gdalopt, "NULL") == 0 || !fileexist(pl2->f_gdalopt)){
       printf("If OUTPUT_FORMAT = CUSTOM, FILE_OUTPUT_OPTIONS needs to be given. "); 
       return FAILURE;
+    } else {
+      parse_gdaloptions(pl2->f_gdalopt, &pl2->gdalopt);
     }
   }
 

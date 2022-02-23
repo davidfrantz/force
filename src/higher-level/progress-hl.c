@@ -511,7 +511,7 @@ bool progress(progress_t *pro){
 
   processing_unit(pro);
 
-  rewind_stdout(pro);
+//  rewind_stdout(pro);
 
   bound_time(pro);
   add_time(pro);

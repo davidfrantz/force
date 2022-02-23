@@ -276,6 +276,8 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 // user-defined function type
 enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
+// tag and value
+enum { _TV_TAG_, _TV_VAL_, _TV_LENGTH_ };
 
 // projection
 enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };

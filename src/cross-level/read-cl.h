@@ -34,6 +34,7 @@ Reading all-purpose files
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
+#include "../cross-level/string-cl.h"
 
 
 #ifdef __cplusplus
@@ -41,6 +42,7 @@ extern "C" {
 #endif
 
 double **read_table(char *fname, int *nrows, int *ncols);
+char ***read_tagvalue(char *fname, int *nrows);
 
 #ifdef __cplusplus
 }

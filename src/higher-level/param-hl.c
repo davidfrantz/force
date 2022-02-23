@@ -1677,10 +1677,14 @@ double tol = 5e-3;
     }
   }
 
-  if (phl->format == _FMT_CUSTOM_){
+  if (phl->format != _FMT_CUSTOM_){
+    default_gdaloptions(phl->format, &phl->gdalopt);
+  } else {
     if (strcmp(phl->f_gdalopt, "NULL") == 0 || !fileexist(phl->f_gdalopt)){
       printf("If OUTPUT_FORMAT = CUSTOM, FILE_OUTPUT_OPTIONS needs to be given. "); 
       return FAILURE;
+    } else {
+      parse_gdaloptions(phl->f_gdalopt, &phl->gdalopt);
     }
   }
 
