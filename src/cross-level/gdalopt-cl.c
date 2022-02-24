@@ -39,8 +39,8 @@ int o = 0;
 
   switch (format){
     case _FMT_ENVI_:
-      copy_string(gdalopt->extension, NPOW_02, "dat");
-      copy_string(gdalopt->driver,    NPOW_04, "ENVI");
+      copy_string(gdalopt->extension,   NPOW_02, "dat");
+      copy_string(gdalopt->driver,      NPOW_04, "ENVI");
       break;
     case _FMT_GTIFF_:
       copy_string(gdalopt->extension,   NPOW_02, "tif");
@@ -53,25 +53,12 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "BAND");
       copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
-      if (brick->cx > 0){
-        nchar = snprintf(xchunk, NPOW_08, "%d", brick->cx);
-        if (nchar < 0 || nchar >= NPOW_08){ 
-          printf("Buffer Overflow in assembling BLOCKXSIZE\n"); exit(FAILURE);}
-        copy_string(gdalopt->option[o++], NPOW_10, "BLOCKXSIZE");
-        copy_string(gdalopt->option[o++], NPOW_10, xchunk);
-      }
-      if (brick->cy > 0){
-        nchar = snprintf(ychunk, NPOW_08, "%d", brick->cy);
-        if (nchar < 0 || nchar >= NPOW_08){ 
-          printf("Buffer Overflow in assembling BLOCKYSIZE\n"); exit(FAILURE);}
-        copy_string(gdalopt->option[o++], NPOW_10, "BLOCKYSIZE");
-        copy_string(gdalopt->option[o++], NPOW_10, ychunk);
-      }
+      //copy_string(gdalopt->option[o++], NPOW_10, "TILED");
+      //copy_string(gdalopt->option[o++], NPOW_10, "YES");
       break;
     case _FMT_COG_:
-      copy_string(gdalopt->extension, NPOW_02, "tif");
-      copy_string(gdalopt->driver,    NPOW_04, "COG");
-
+      copy_string(gdalopt->extension,   NPOW_02, "tif");
+      copy_string(gdalopt->driver,      NPOW_04, "COG");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "LZW");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
@@ -80,10 +67,12 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "PIXEL");
       copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      copy_string(gdalopt->option[o++], NPOW_10, "TILED");
+      copy_string(gdalopt->option[o++], NPOW_10, "YES");
       break;
     case _FMT_JPEG_:
-      copy_string(gdalopt->extension, NPOW_02, "jpg");
-      copy_string(gdalopt->driver,    NPOW_04, "JPEG");
+      copy_string(gdalopt->extension,   NPOW_02, "jpg");
+      copy_string(gdalopt->driver,      NPOW_04, "JPEG");
       break;
     case _FMT_CUSTOM_:
       break;
@@ -97,6 +86,43 @@ int o = 0;
 
   return;
 }
+
+
+/** This function updates the blocksize in GDAL output options
+--- format:  Default format
+--- gdalopt: GDAL options (returned)
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void update_gdaloptions_blocksize(int format, gdalopt_t *gdalopt, int cx, int cy){
+int nchar;
+int o = gdalopt->n;
+char blockxsize[NPOW_10];
+char blockysize[NPOW_10];
+
+
+  if (format != _FMT_GTIFF_) return;
+
+  if (cx > 0){
+    nchar = snprintf(blockxsize, NPOW_10, "%d", cx);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling BLOCKXSIZE\n"); exit(FAILURE);}
+    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKXSIZE");
+    copy_string(gdalopt->option[o++], NPOW_10, blockxsize);
+  }
+  if (cy > 0){
+    nchar = snprintf(blockysize, NPOW_10, "%d", cy);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling BLOCKYSIZE\n"); exit(FAILURE);}
+    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKYSIZE");
+    copy_string(gdalopt->option[o++], NPOW_10, blockysize);
+  }
+
+  gdalopt->n = o;
+
+
+  return;
+}
+
 
 /** This function reads GDAL output options
 --- fname:   text file
@@ -165,11 +191,11 @@ void print_gdaloptions(gdalopt_t *gdalopt){
 int o;
 
 
-  printf("GDAL output options :::");
-  printf("Driver:    %s", gdalopt->driver);
-  printf("Extension: %s", gdalopt->extension);
+  printf("GDAL output options :::\n");
+  printf("Driver:    %s\n", gdalopt->driver);
+  printf("Extension: %s\n", gdalopt->extension);
   for (o=0; o<gdalopt->n; o+=2){
-    printf("Option %2d: %s = %s", o, gdalopt->option[o], gdalopt->option[o+1]);
+    printf("Option %2d: %s = %s\n", o, gdalopt->option[o], gdalopt->option[o+1]);
   }
 
   return;

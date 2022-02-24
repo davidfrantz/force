@@ -737,7 +737,10 @@ int i = 0;
     printf("%s driver not found\n", "MEM"); return FAILURE;}
 
   // set GDAL output options
-  for (o=0; o<brick->format.n; o+=2) options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
+  for (o=0; o<brick->format.n; o+=2){
+    printf("setting options %s = %s\n",  brick->format.option[o], brick->format.option[o+1]);
+    options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
+  }
 
   switch (brick->datatype){
     case _DT_SHORT_:
@@ -860,7 +863,7 @@ int i = 0;
         printf("Unable to open %s. ", fname); return FAILURE;}
     } else {
       if ((fp = GDALCreate(driver, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
-        printf("Error creating file %s. ", fname); return FAILURE;}
+        printf("Error creating memory file %s. ", fname); return FAILURE;}
     }
       
     if (brick->open == OPEN_BLOCK){
@@ -884,33 +887,6 @@ int i = 0;
 
       b_brick = bands[_brick_][f][b];
       b_file  = bands[_FILE_][f][b];
-
-      i = 0;
-
-
-      copy_string(band_meta[i++], NPOW_14, "Domain");
-      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
-      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Scale");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Sensor");
-      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
-
-      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
-      copy_string(band_meta[i++], NPOW_14, "Date");
-      copy_string(band_meta[i++], NPOW_14, ldate);
-
 
       band = GDALGetRasterBand(fp, b_file);
 
@@ -953,7 +929,6 @@ int i = 0;
 
       GDALSetDescription(band, brick->bandname[b_brick]);
       GDALSetRasterNoDataValue(band, brick->nodata[b_brick]);
-      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
 
     }
 
@@ -968,15 +943,51 @@ int i = 0;
     //if (format == _FMT_ENVI_) 
     //GDALSetDescription(fp, brick->name);
 
-
-    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
-    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp, fp_meta[i],  fp_meta[i+1],  "FORCE");
     
-    
-    // copy to physical file. This is needed for drivers taht do not support CREATE
-    if ((fp_physical = GDALCreateCopy(driver_physical, fname, fp, FALSE, NULL, NULL, NULL)) == NULL){
+    // copy to physical file. This is needed for drivers that do not support CREATE
+    if ((fp_physical = GDALCreateCopy(driver_physical, fname, fp, FALSE, options, NULL, NULL)) == NULL){
         printf("Error creating file %s. ", fname); return FAILURE;}
 
+    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp_physical, sys_meta[i], sys_meta[i+1], "FORCE");
+    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp_physical, fp_meta[i],  fp_meta[i+1],  "FORCE");
+
+    for (b=0; b<nbands; b++){
+
+      b_brick = bands[_brick_][f][b];
+      b_file  = bands[_FILE_][f][b];
+
+      i = 0;
+
+      copy_string(band_meta[i++], NPOW_14, "Domain");
+      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
+      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
+
+      copy_string(band_meta[i++], NPOW_14, "Scale");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      copy_string(band_meta[i++], NPOW_14, "Sensor");
+      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
+
+      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
+      copy_string(band_meta[i++], NPOW_14, "Date");
+      copy_string(band_meta[i++], NPOW_14, ldate);
+
+
+      band = GDALGetRasterBand(fp_physical, b_file);
+
+      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
+
+    }
+    
     GDALClose(fp_physical);
     GDALClose(fp);
 
@@ -1337,10 +1348,8 @@ printf("warp_from_disc_to_known_brick should handle multiband src and dst images
 
   if ((src_dataset = GDALOpen(fname, GA_ReadOnly)) == NULL){
     printf("unable to open image for warping: %s\n", fname); return FAILURE;}
-    
-  //src_band = GDALGetRasterBand(src_dataset, src_b+1);
-  //src_nodata = (int)GDALGetRasterNoDataValue(src_band, NULL); doesn't work...
-  
+
+ 
   #ifdef FORCE_DEBUG
   printf("src nodata is %d, band is %d, dataset is %s\n", src_nodata, src_b+1, fname);
   #endif

@@ -193,13 +193,12 @@ GDALDriverH driver;
   cite_me(_CITE_L2PS_);
 
   // parse metadata
-  if ((mission = parse_metadata(pl2, &meta, &DN)) == _UNKNOWN_){
+  if ((mission = parse_metadata(pl2, &meta, &DN)) == FAILURE){
     printf("Parsing metadata failed.\n"); return FAILURE;}
 
   // write and init a new datacube
   if ((multicube = start_multicube(pl2, DN)) == NULL){
     printf("Starting datacube(s) failed.\n"); return FAILURE;}
-
 
   // open threads
   if (omp_get_thread_limit() < (pl2->nthread)){
@@ -214,6 +213,10 @@ GDALDriverH driver;
 
     // skip inactive cubes
     if (!multicube->cover[c]) continue;
+
+    // update blocksize in GDAL options
+    update_gdaloptions_blocksize(pl2->format, &pl2->gdalopt, 
+      multicube->cube[c]->cx, multicube->cube[c]->cy);
 
 
     /** read Digital Numbers + projection

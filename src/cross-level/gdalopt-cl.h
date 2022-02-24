@@ -48,6 +48,7 @@ typedef struct {
 } gdalopt_t;
 
 void default_gdaloptions(int format, gdalopt_t *gdalopt);
+void update_gdaloptions_blocksize(int format, gdalopt_t *gdalopt, int cx, int cy);
 void parse_gdaloptions(char *fname, gdalopt_t *gdalopt);
 void print_gdaloptions(gdalopt_t *gdalopt);
 

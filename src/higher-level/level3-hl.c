@@ -186,7 +186,7 @@ int cx, cy, cx_, cy_, cc_;
   set_brick_filename(brick, fname);
 
   set_brick_open(brick, OPEN_BLOCK);
-  set_brick_format(brick, phl->format);
+  set_brick_format(brick, &phl->gdalopt);
   set_brick_explode(brick, explode);
   set_brick_par(brick, phl->params->log);
 

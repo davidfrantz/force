@@ -559,7 +559,7 @@ GDALDatasetH fp_;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -1159,7 +1159,7 @@ int svgrid = 5000;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -1376,8 +1376,7 @@ printf("there are still some things to do int meta. checking etc\n");
 
   switch (mission){
     case LANDSAT:
-      if (parse_metadata_landsat(pl2, meta, DN)  != SUCCESS) return FAILURE;
-
+      if (parse_metadata_landsat(pl2,   meta, DN) != SUCCESS) return FAILURE;
       break;
     case SENTINEL2:
       if (parse_metadata_sentinel2(pl2, meta, DN) != SUCCESS) return FAILURE;
