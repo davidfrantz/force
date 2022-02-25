@@ -141,8 +141,6 @@ bool b_ext = false;
 
   for (i=0; i<nrows; i++){
 
-    printf("tag: %s, val: %s\n", tagval[i][_TV_TAG_], tagval[i][_TV_VAL_]);
-
     if (strcmp(tagval[i][_TV_TAG_], "DRIVER") == 0){
       copy_string(gdalopt->driver, NPOW_04, tagval[i][_TV_VAL_]);
       b_driver = true;
@@ -173,9 +171,8 @@ bool b_ext = false;
   }
  
   #ifdef FORCE_DEBUG
-
-  #endif
   print_gdaloptions(gdalopt);
+  #endif
 
   free_3D((void***)tagval, nrows, _TV_LENGTH_);
 

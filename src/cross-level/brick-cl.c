@@ -738,7 +738,9 @@ int i = 0;
 
   // set GDAL output options
   for (o=0; o<brick->format.n; o+=2){
+    #ifdef FORCE_DEBUG
     printf("setting options %s = %s\n",  brick->format.option[o], brick->format.option[o+1]);
+    #endif
     options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
   }
 
