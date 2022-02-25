@@ -39,11 +39,11 @@ int o = 0;
 
   switch (format){
     case _FMT_ENVI_:
-      copy_string(gdalopt->extension,   NPOW_02, "dat");
+      copy_string(gdalopt->extension,   NPOW_04, "dat");
       copy_string(gdalopt->driver,      NPOW_04, "ENVI");
       break;
     case _FMT_GTIFF_:
-      copy_string(gdalopt->extension,   NPOW_02, "tif");
+      copy_string(gdalopt->extension,   NPOW_04, "tif");
       copy_string(gdalopt->driver,      NPOW_04, "GTiff");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "LZW");
@@ -53,11 +53,9 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "BAND");
       copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
-      //copy_string(gdalopt->option[o++], NPOW_10, "TILED");
-      //copy_string(gdalopt->option[o++], NPOW_10, "YES");
       break;
     case _FMT_COG_:
-      copy_string(gdalopt->extension,   NPOW_02, "tif");
+      copy_string(gdalopt->extension,   NPOW_04, "tif");
       copy_string(gdalopt->driver,      NPOW_04, "COG");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "LZW");
@@ -71,7 +69,7 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
       break;
     case _FMT_JPEG_:
-      copy_string(gdalopt->extension,   NPOW_02, "jpg");
+      copy_string(gdalopt->extension,   NPOW_04, "jpg");
       copy_string(gdalopt->driver,      NPOW_04, "JPEG");
       break;
     case _FMT_CUSTOM_:
@@ -145,7 +143,7 @@ bool b_ext = false;
       copy_string(gdalopt->driver, NPOW_04, tagval[i][_TV_VAL_]);
       b_driver = true;
     } else if (strcmp(tagval[i][_TV_TAG_], "EXTENSION") == 0){
-      copy_string(gdalopt->extension, NPOW_02, tagval[i][_TV_VAL_]);
+      copy_string(gdalopt->extension, NPOW_04, tagval[i][_TV_VAL_]);
       b_ext = true;
     } else {
       if (o >= (NPOW_06-1)){

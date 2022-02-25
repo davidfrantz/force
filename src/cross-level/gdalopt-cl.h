@@ -42,7 +42,7 @@ extern "C" {
 
 typedef struct {
   char driver[NPOW_04];        // GDAL driver short name
-  char extension[NPOW_02];     // file extension
+  char extension[NPOW_04];     // file extension
   char option[NPOW_06][NPOW_10]; // GDAL output options
   int n;                   // number of GDAL output options
 } gdalopt_t;
