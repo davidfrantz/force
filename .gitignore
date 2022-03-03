@@ -1,5 +1,6 @@
 temp*
 docs/build
+docs/source/_build
 .idea
 python/test*
 *.pyc
