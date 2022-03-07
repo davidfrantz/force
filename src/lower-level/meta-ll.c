@@ -314,7 +314,7 @@ GDALDatasetH fp_;
         lid = atoi(tokenptr+strlen(tokenptr)-1);
 
         // set datatype, saturation value, and number of bands
-        if (lid == 8){
+        if (lid >= 8){
           meta->dtype = 16;
           meta->sat = 65535;
           nb = 9;
@@ -350,6 +350,9 @@ GDALDatasetH fp_;
           case 8:
             b_rsr = _RSR_START_LND08_;
             break;
+          case 9:
+            b_rsr = _RSR_START_LND09_;
+            break;
           default:
             printf("unknown satellite. ");
             return FAILURE;
@@ -360,7 +363,7 @@ GDALDatasetH fp_;
         #endif
 
         b = 0;
-        if (lid == 8){
+        if (lid >= 8){
 
           copy_string(meta->cal[b].orig_band, NPOW_03, "1");
           meta->cal[b].rsr_band = b_rsr++;
@@ -650,9 +653,9 @@ int i = 0, j = 0, ii, jj;
 int left, right;
 int top, bottom;
 int sv_nx = 0, sv_ny = 0;
-float **s_sz = NULL, **s_sa = NULL;
-float **s_vz = NULL, **s_va = NULL;
-int   **k_vz = NULL, **k_va = NULL;
+int d = 0, nd;
+float *s_sz = NULL, *s_sa = NULL;
+float ***s_vz = NULL, ***s_va = NULL;
 bool s = false, v = false, z = false, a = false;
 char d_img[NPOW_10];
 char id_img[NPOW_10];
@@ -674,7 +677,8 @@ int svgrid = 5000;
   meta->sat = 65535;
 
 
-  nb = 13;
+  nb = 13; // number of bands
+  nd = 12; // number of detectors
   DN = allocate_brick(nb, 0, _DT_NONE_);
 
   set_brick_res(DN, INT_MAX);
@@ -958,20 +962,33 @@ int svgrid = 5000;
         if (svgrid != atoi(tokenptr)){
           printf("SUN_VIEW_GRID is incompatible with Sentinel-2 metadata. "); return FAILURE;}
 
-        sv_nx = ceil(get_brick_width(DN)/(float)svgrid);
-        sv_ny = ceil(get_brick_height(DN)/(float)svgrid);
-        if (s_sz == NULL) alloc_2D((void***)&s_sz, sv_ny, sv_nx, sizeof(float));
-        if (s_vz == NULL) alloc_2D((void***)&s_vz, sv_ny, sv_nx, sizeof(float));
-        if (s_sa == NULL) alloc_2D((void***)&s_sa, sv_ny, sv_nx, sizeof(float));
-        if (s_va == NULL) alloc_2D((void***)&s_va, sv_ny, sv_nx, sizeof(float));
-        if (k_vz == NULL) alloc_2D((void***)&k_vz, sv_ny, sv_nx, sizeof(int));
-        if (k_va == NULL) alloc_2D((void***)&k_va, sv_ny, sv_nx, sizeof(int));
+        sv_nx = ceil(get_brick_width(DN)/(float)svgrid) + 1;
+        sv_ny = ceil(get_brick_height(DN)/(float)svgrid) + 1;
+        if (s_sz == NULL) alloc((void**)&s_sz, sv_ny*sv_nx, sizeof(float));
+        if (s_sa == NULL) alloc((void**)&s_sa, sv_ny*sv_nx, sizeof(float));
+        if (s_vz == NULL) alloc_3D((void****)&s_vz, nb, nd, sv_ny*sv_nx, sizeof(float));
+        if (s_va == NULL) alloc_3D((void****)&s_va, nb, nd, sv_ny*sv_nx, sizeof(float));
+        //if (k_vz == NULL) alloc_2D((void***)&k_vz, sv_ny, sv_nx, sizeof(int));
+        //if (k_va == NULL) alloc_2D((void***)&k_va, sv_ny, sv_nx, sizeof(int));
       } else if (strcmp(tag, "Sun_Angles_Grid") == 0){
         s = true;
       } else if (strcmp(tag, "/Sun_Angles_Grid") == 0){
         s = false;
       } else if (strcmp(tag, "Viewing_Incidence_Angles_Grids") == 0){
         v = true;
+        b = 0;
+        d = 0;
+        while (tokenptr != NULL){
+          if (strcmp(tokenptr, "bandId") == 0){
+            tokenptr = strtok(NULL, separator);
+            b = atoi(tokenptr);
+          }
+          if (strcmp(tokenptr, "detectorId") == 0){
+            tokenptr = strtok(NULL, separator);
+            d = atoi(tokenptr) - 1;
+          }
+          tokenptr = strtok(NULL, separator);
+        }
       } else if (strcmp(tag, "/Viewing_Incidence_Angles_Grids") == 0){
         v = false;
       } else if (strcmp(tag, "Zenith") == 0){
@@ -990,20 +1007,18 @@ int svgrid = 5000;
 
           if (s){
             if (z){
-              if (strcmp(tokenptr, "NaN") !=0) s_sz[i][j] = atof(tokenptr);
+              if (strcmp(tokenptr, "NaN") !=0) s_sz[i*sv_ny+j] = atof(tokenptr);
             } else if (a){
-              if (strcmp(tokenptr, "NaN") !=0) s_sa[i][j] = atof(tokenptr);
+              if (strcmp(tokenptr, "NaN") !=0) s_sa[i*sv_ny+j] = atof(tokenptr);
             }
           } else if (v){
             if (z){
               if (strcmp(tokenptr, "NaN") !=0){
-                s_vz[i][j] += atof(tokenptr);
-                k_vz[i][j]++;
+                s_vz[b][d][i*sv_ny+j] += atof(tokenptr);
               }
             } else if (a){
               if (strcmp(tokenptr, "NaN") !=0){
-                s_va[i][j] += atof(tokenptr);
-                k_va[i][j]++;
+                s_va[b][d][i*sv_ny+j] += atof(tokenptr);
               }
             }
           }
@@ -1026,15 +1041,33 @@ int svgrid = 5000;
   fclose(fp);
 
 
-  // get image subset
+  // interpolate the grids
+  // angles are given at grid intersections, we need one value per cell
+  interpolate_sunview_grid(s_sz, sv_nx, sv_ny, meta->s2.nodata);
+  interpolate_sunview_grid(s_sa, sv_nx, sv_ny, meta->s2.nodata);
+  for (b=0; b<nb; b++){
+    for (d=0; d<nd; d++){
+      interpolate_sunview_grid(s_vz[b][d], sv_nx, sv_ny, meta->s2.nodata);
+      interpolate_sunview_grid(s_va[b][d], sv_nx, sv_ny, meta->s2.nodata);
+    }
+  }
+  sv_nx--;
+  sv_ny--;
 
+  // collapse view grids
+  collapse_view_grid(s_vz, nb, nd, sv_nx, sv_ny, meta->s2.nodata);
+  collapse_view_grid(s_va, nb, nd, sv_nx, sv_ny, meta->s2.nodata);
+
+
+  // get image subset
   left = sv_nx-1; right  = 0;
   top  = sv_ny-1; bottom = 0;
 
   for (i=0; i<sv_ny; i++){
   for (j=0; j<sv_nx; j++){
 
-    if (k_vz[i][j] > 0 && k_va[i][j] > 0){
+    if (s_vz[0][0][i*sv_ny+j] != meta->s2.nodata && 
+        s_va[0][0][i*sv_ny+j] != meta->s2.nodata){
       if (j < left)   left   = j;
       if (j > right)  right  = j;
       if (i < top)    top    = i;
@@ -1078,73 +1111,35 @@ int svgrid = 5000;
   if (meta->s2.vazi == NULL) alloc_2D((void***)&meta->s2.vazi, meta->s2.ny, meta->s2.nx, sizeof(float));
 
 
-  // average of view angles
+  // copy values to final view sun grids
   for (i=0; i<meta->s2.ny; i++){
   for (j=0; j<meta->s2.nx; j++){
 
     ii = i+top;
     jj = j+left;
 
-    if (k_vz[ii][jj] > 0){
-      meta->s2.vzen[i][j] = s_vz[ii][jj]/k_vz[ii][jj];
-      meta->s2.szen[i][j] = s_sz[ii][jj];
-    } else {
-      meta->s2.vzen[i][j] = meta->s2.nodata;
-      meta->s2.szen[i][j] = meta->s2.nodata;
-    }
-    if (k_va[ii][jj] > 0){
-      meta->s2.vazi[i][j] = s_va[ii][jj]/k_va[ii][jj];
-      meta->s2.sazi[i][j] = s_sa[ii][jj];
-    } else {
-      meta->s2.vazi[i][j] = meta->s2.nodata;
-      meta->s2.sazi[i][j] = meta->s2.nodata;
-    }
+    meta->s2.szen[i][j] = s_sz[ii*sv_ny+jj];
+    meta->s2.sazi[i][j] = s_sa[ii*sv_ny+jj];
+    meta->s2.vzen[i][j] = s_vz[0][0][ii*sv_ny+jj];
+    meta->s2.vazi[i][j] = s_va[0][0][ii*sv_ny+jj];
+
 
   }
   }
 
-
-  // try to fill the left edge (duplicate values - silly method, but it will do for now)
-
-  // average of view angles
-  for (i=0; i<meta->s2.ny; i++){
-  for (j=0; j<meta->s2.nx; j++){
-
-    if ((jj = j+1) == meta->s2.nx) continue;
-
-    if (meta->s2.vzen[i][j]  == meta->s2.nodata &&
-        meta->s2.vzen[i][jj] != meta->s2.nodata){
-
-      meta->s2.vzen[i][j] = meta->s2.vzen[i][jj];
-      meta->s2.szen[i][j] = meta->s2.szen[i][jj];
-      meta->s2.vazi[i][j] = meta->s2.vazi[i][jj];
-      meta->s2.sazi[i][j] = meta->s2.sazi[i][jj];
-
-    }
-
-  }
-  }
-
-
-
-
-  //right++;
-  //bottom++;
 
   meta->s2.left   = left   * svgrid/get_brick_res(DN);
   meta->s2.top    = top    * svgrid/get_brick_res(DN);
   meta->s2.right  = right  * svgrid/get_brick_res(DN);
   meta->s2.bottom = bottom * svgrid/get_brick_res(DN);
 
-  if (meta->s2.right > get_brick_ncols(DN))  meta->s2.right  = get_brick_ncols(DN);
+  if (meta->s2.right  > get_brick_ncols(DN)) meta->s2.right  = get_brick_ncols(DN);
   if (meta->s2.bottom > get_brick_nrows(DN)) meta->s2.bottom = get_brick_nrows(DN);
 
-  free_2D((void**)s_sz, sv_ny);
-  free_2D((void**)s_sa, sv_ny);
-  free_2D((void**)s_vz, sv_ny);
-  free_2D((void**)s_va, sv_ny);
-  free_2D((void**)k_vz, sv_ny);
-  free_2D((void**)k_va, sv_ny);
+  free((void*)s_sz);
+  free((void*)s_sa);
+  free_3D((void***)s_vz, nb, nd);
+  free_3D((void***)s_va, nb, nd);
 
   #ifdef FORCE_DEBUG
   printf("active image subset: UL %d/%d to LR %d/%d\n", meta->s2.left, meta->s2.top, meta->s2.right, meta->s2.bottom);
@@ -1330,6 +1325,111 @@ int nchar;
 }
 
 
+/** This function interpolates the sun and view angle grids given in the 
++++ Sentinel-2 metadata. The interpolation grid will be interpolated to
++++ a cell-based grid, and then clipped to the image extent.
++++ int_grid: interpolation grid (modified)
+--- nx:       number of columns
+--- ny:       number of rows
+--- nodata:   nodata value
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata){
+int i, j, ii, jj;
+int cell_nx, cell_ny;
+int cell_p, int_p;
+float *cell_grid = NULL;
+float sum, num;
+
+
+  cell_nx = int_nx - 1;
+  cell_ny = int_ny - 1;
+
+  alloc((void**)&cell_grid, cell_ny*cell_nx, sizeof(float));
+
+
+  for (i=0, cell_p=0; i<cell_ny; i++){
+  for (j=0; j<cell_nx; j++, cell_p++){
+
+    sum = num = 0;
+
+    for (ii=0; ii<=1; ii++){
+    for (jj=0; jj<=1; jj++){
+
+      int_p = (i+ii) * int_ny + (j+jj);
+
+      if (int_grid[int_p] > 0){
+        sum += int_grid[int_p];
+        num++;
+      }
+    }
+    }
+
+    if (num > 0){
+      cell_grid[cell_p] = sum/num;
+    } else {
+      cell_grid[cell_p] = nodata;
+    }
+
+  }
+  }
+
+  memmove(int_grid, cell_grid, cell_nx*cell_ny*sizeof(float));
+  re_alloc((void**)&int_grid, int_nx*int_ny, cell_nx*cell_ny, sizeof(float));
+  free((void*)cell_grid);
+
+  return;
+}
+
+
+/** This function collapses the Sentinel-2 view angle grids to a single
++++ grid. All band- and detector-based grids will be averaged. There is
++++ room for improvement at this point. The collapsed grid will be put
++++ into the first slot.
++++ grid:     3D grid (modified)
+--- nb:       number of bands
+--- nd:       number of detectors
+--- nx:       number of columns
+--- ny:       number of rows
+--- nodata:   nodata value
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void collapse_view_grid(float ***grid, int nb, int nd, int nx, int ny, float nodata){
+int b, d, i, j, p;
+float sum, num;
+
+
+  for (i=0, p=0; i<ny; i++){
+  for (j=0; j<nx; j++, p++){
+
+    sum = num = 0;
+
+    for (b=0; b<nb; b++){
+    for (d=0; d<nd; d++){
+
+      if (grid[b][d][p] != nodata){
+        sum += grid[b][d][p];
+        num++;
+      }
+
+    }
+    }
+
+    if (num > 0){
+      grid[0][0][p] = sum/num;
+    } else {
+      grid[0][0][p] = nodata;
+    }
+
+  }
+  }
+  
+
+  return;
+}
+
+
+
 /** This function identifies the satellite mission, i.e. Landsat or Senti-
 +++ nel-2
 --- pl2:    L2 parameters
@@ -1376,7 +1476,7 @@ printf("there are still some things to do int meta. checking etc\n");
 
   switch (mission){
     case LANDSAT:
-      if (parse_metadata_landsat(pl2,   meta, DN) != SUCCESS) return FAILURE;
+      if (parse_metadata_landsat(pl2, meta, DN)  != SUCCESS) return FAILURE;
       break;
     case SENTINEL2:
       if (parse_metadata_sentinel2(pl2, meta, DN) != SUCCESS) return FAILURE;

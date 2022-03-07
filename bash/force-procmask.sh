@@ -104,7 +104,8 @@ function mask(){
     --creation-option='NUM_THREADS=ALL_CPUS' \
     --creation-option='BIGTIFF=YES' \
     --creation-option="BLOCKXSIZE=$XBLOCK" \
-    --creation-option="BLOCKYSIZE=$YBLOCK"
+    --creation-option="BLOCKYSIZE=$YBLOCK" \
+    --quiet
 
 }
 export -f mask
@@ -129,7 +130,7 @@ while :; do
     -i|--info) echo "Processing masks from raster images"; exit 0;;
     -s|--resolution) RES="$2"; shift ;;
     -l|--layer) LAYER="$2"; shift;;
-    -d|--input) DINP=$(readlink -f" $2"); shift ;;
+    -d|--input) DINP=$(readlink -f "$2"); shift ;;
     -o|--output) DOUT=$(readlink -f "$2"); shift ;;
     -b|--basename) OBASE="$2"; shift ;;
     -j|--jobs) NJOB="$2"; shift ;;

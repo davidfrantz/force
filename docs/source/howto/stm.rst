@@ -11,7 +11,7 @@ This tutorial explains what Spectral Temporal Metrics are, and how to generate t
 
 .. admonition:: Info
 
-   *This tutorial uses FORCE v. 3.5*
+   *This tutorial uses FORCE v. 3.7.6*
 
 
 What are Spectral Temporal Metrics?
@@ -24,10 +24,11 @@ This can be the annual mean, standard deviation or median.
 Before calculating the statistics, the data is quality filtered, e.g. clouds are removed.
 
 .. figure:: img/tutorial-stm-example.png
+   :height: 400
 
    *STM concept* |copy| *Stefan Ernst*
 
-It is important to note that STMs are statistical aggregations - and not composites as in *“we select the full spectrum for the optimal observation”*.
+It is important to note that STMs are statistical aggregations - and not composites as in *"we select the full spectrum for the optimal observation"*.
 
 Thus, some care should be taken when dealing with these kinds of metrics: an STM spectrum cannot be interpreted in the classic remote-sensing-textbook sense.
 
@@ -62,7 +63,9 @@ It is hard to give a suggestion here, as this is a complex decision, which depen
 
 To demonstrate, we are generating annual STMs for entire 2018:
 
-``TIME_RANGE = 2018-01-01 2018-12-31``
+.. code-block:: bash
+
+   TIME_RANGE = 2018-01-01 2018-12-31
 
 
 Sensors
@@ -88,7 +91,9 @@ Bands / Indices
 
 We will produce STMs for some spectral bands, as well as some indices:
 
-``INDEX = RED NIR SWIR1 NDVI NDBI MNDWI``
+.. code-block:: bash
+
+   INDEX = RED NIR SWIR1 NDVI NDBI MNDWI
 
 
 Outlier detection
@@ -108,9 +113,11 @@ Interpolation
 """""""""""""
 
 Before temporally aggregating the L2 observations, we can interpolate the time series.
-Try this out! But for now, let’s go without:
+Try this out! But for now, let's go without:
 
-``INTERPOLATE = NONE``
+.. code-block:: bash
+
+   INTERPOLATE = NONE
 
 
 STMs
@@ -150,7 +157,7 @@ Currently available are
 +-----+------------------------------------------------+
 
 
-Let’s go with these metrics for now:
+Let's go with these metrics for now:
 
 .. code-block:: bash
 
@@ -165,7 +172,9 @@ By default, HLPS will produce multi-band files for each spectral band/index, i.e
 
 If you rather prefer single-band images, i.e. one file for each index and each STM, use 
 
-OUTPUT_EXPLODE = TRUE
+.. code-block:: bash
+
+   OUTPUT_EXPLODE = TRUE
 
 
 Other parameters
@@ -182,61 +191,61 @@ Processing
 Processing is straightforward.
 Simply use:
 
-.. code-block:: bash
+.. code-block:: none
 
    force-higher-level /data/europe/stm/stm.prm
 
-   number of processing units: 280
-    (active tiles: 28, chunks per tile: 10)
-   ________________________________________
-   Progress:                        100.00%
-   Time for I/C/O:           087%/008%/004%
-   ETA:             00y 00m 00d 00h 00m 00s
-   
-   ________________________________________
-   Real time:       00y 00m 00d 00h 19m 05s
-   Virtual time:    00y 00m 00d 00h 21m 35s
-   Saved time:      00y 00m 00d 00h 02m 30s
-   
-   ________________________________________
-   Virtual I-time:  00y 00m 00d 00h 18m 53s
-   Virtual C-time:  00y 00m 00d 00h 01m 47s
-   Virtual O-time:  00y 00m 00d 00h 00m 55s
-   
-   ________________________________________
-   I-bound time:    00y 00m 00d 00h 17m 10s
-   C-bound time:    00y 00m 00d 00h 00m 07s
-   O-bound time:    00y 00m 00d 00h 00m 03s
+   $ number of processing units: 280
+   $  (active tiles: 28, chunks per tile: 10)
+   $ ________________________________________
+   $ Progress:                        100.00%
+   $ Time for I/C/O:           087%/008%/004%
+   $ ETA:             00y 00m 00d 00h 00m 00s
+   $ 
+   $ ________________________________________
+   $ Real time:       00y 00m 00d 00h 19m 05s
+   $ Virtual time:    00y 00m 00d 00h 21m 35s
+   $ Saved time:      00y 00m 00d 00h 02m 30s
+   $ 
+   $ ________________________________________
+   $ Virtual I-time:  00y 00m 00d 00h 18m 53s
+   $ Virtual C-time:  00y 00m 00d 00h 01m 47s
+   $ Virtual O-time:  00y 00m 00d 00h 00m 55s
+   $ 
+   $ ________________________________________
+   $ I-bound time:    00y 00m 00d 00h 17m 10s
+   $ C-bound time:    00y 00m 00d 00h 00m 07s
+   $ O-bound time:    00y 00m 00d 00h 00m 03s
 
 
 After this, we generate a mosaic.
 
 With ``OUTPUT_EXPLODE = TRUE``, you get one image for each requested index and statistical aggregation, i.e. 42 images in our case:
 
-.. code-block:: bash
+.. code-block:: none
 
   force-mosaic /data/europe/stm
 
-   mosaicking 42 products:
-   1 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_AVG.tif
-   2 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q10.tif
-   3 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.tif
-   4 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q50.tif
-   ...
-   40 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q75.tif
-   41 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q90.tif
-   42 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_STD.tif
-   
-   mosaicking 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_AVG.tif
-   26 chips found.
-   
-   mosaicking 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.tif
-   26 chips found.
-
-   ... 
-
-   mosaicking 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_AVG.tif
-   26 chips found.
+   $ mosaicking 42 products:
+   $ 1 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_AVG.tif
+   $ 2 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q10.tif
+   $ 3 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.tif
+   $ 4 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q50.tif
+   $ ...
+   $ 40 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q75.tif
+   $ 41 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q90.tif
+   $ 42 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_STD.tif
+   $ 
+   $ mosaicking 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_AVG.tif
+   $ 26 chips found.
+   $ 
+   $ mosaicking 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.tif
+   $ 26 chips found.
+   $ 
+   $ ... 
+   $ 
+   $ mosaicking 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_AVG.tif
+   $ 26 chips found.
 
 
 Visualization
@@ -248,60 +257,60 @@ This example here stacks the 50% quantiles of the reflectance bands, as well as 
 
 For fast visualization, we are computing pyramids.
 
-.. code-block:: bash
+.. code-block:: none
 
    cd /data/europe/stm/mosaic
    force-stack *RED_STM_Q50.vrt *NIR_STM_Q50.vrt *SW1_STM_Q50.vrt stack-bands-STM_Q50.vrt
    force-stack *NDB_STM_Q90.vrt *NDV_STM_Q90.vrt *MNW_STM_Q90.vrt stack-indices-STM_Q90.vrt
-   ls *.vrt | parallel force-pyramid {}
+   force-pyramid *.vrt
 
-   file 1:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_RED_STM_Q50.vrt
-     9000 4000 1
-   file 2:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_NIR_STM_Q50.vrt
-     9000 4000 1
-   file 3:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q50.vrt
-     9000 4000 1
-   
-   Same number of bands detected. Stacking by band.
-   
-   Band 0001: 2018-2018_001-365_HL_TSA_LNDLG_RED_STM_Q50.vrt band 1
-   Band 0002: 2018-2018_001-365_HL_TSA_LNDLG_NIR_STM_Q50.vrt band 1
-   Band 0003: 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q50.vrt band 1
-   
-   file 1:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_NDB_STM_Q90.vrt
-     9000 4000 1
-   file 2:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_NDV_STM_Q90.vrt
-     9000 4000 1
-   file 3:
-     /data/europe/stm/mosaic
-     2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q90.vrt
-     9000 4000 1
-   
-   Same number of bands detected. Stacking by band.
-   
-   Band 0001: 2018-2018_001-365_HL_TSA_LNDLG_NDB_STM_Q90.vrt band 1
-   Band 0002: 2018-2018_001-365_HL_TSA_LNDLG_NDV_STM_Q90.vrt band 1
-   Band 0003: 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q90.vrt band 1
-   
-   computing pyramids for 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q10.vrt
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.vrt
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   ...
-   computing pyramids for stack-bands-STM_Q50.vrt
-   0...10...20...30...40...50...60...70...80...90...100 - done.
-   computing pyramids for stack-indices-STM_Q90.vrt
-   0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ file 1:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_RED_STM_Q50.vrt
+   $   9000 4000 1
+   $ file 2:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_NIR_STM_Q50.vrt
+   $   9000 4000 1
+   $ file 3:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q50.vrt
+   $   9000 4000 1
+   $ 
+   $ Same number of bands detected. Stacking by band.
+   $ 
+   $ Band 0001: 2018-2018_001-365_HL_TSA_LNDLG_RED_STM_Q50.vrt band 1
+   $ Band 0002: 2018-2018_001-365_HL_TSA_LNDLG_NIR_STM_Q50.vrt band 1
+   $ Band 0003: 2018-2018_001-365_HL_TSA_LNDLG_SW1_STM_Q50.vrt band 1
+   $ 
+   $ file 1:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_NDB_STM_Q90.vrt
+   $   9000 4000 1
+   $ file 2:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_NDV_STM_Q90.vrt
+   $   9000 4000 1
+   $ file 3:
+   $   /data/europe/stm/mosaic
+   $   2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q90.vrt
+   $   9000 4000 1
+   $ 
+   $ Same number of bands detected. Stacking by band.
+   $ 
+   $ Band 0001: 2018-2018_001-365_HL_TSA_LNDLG_NDB_STM_Q90.vrt band 1
+   $ Band 0002: 2018-2018_001-365_HL_TSA_LNDLG_NDV_STM_Q90.vrt band 1
+   $ Band 0003: 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q90.vrt band 1
+   $ 
+   $ computing pyramids for 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q10.vrt
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for 2018-2018_001-365_HL_TSA_LNDLG_MNW_STM_Q25.vrt
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ ...
+   $ computing pyramids for stack-bands-STM_Q50.vrt
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
+   $ computing pyramids for stack-indices-STM_Q90.vrt
+   $ 0...10...20...30...40...50...60...70...80...90...100 - done.
 
 
 .. figure:: img/tutorial-stm-qgis.jpg

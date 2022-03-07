@@ -43,14 +43,15 @@ const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_] = {
 const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_] = {
   { _SEN_LND04_, "LND04" }, { _SEN_LND05_, "LND05" },
   { _SEN_LND07_, "LND07" }, { _SEN_LND08_, "LND08" },
-  { _SEN_SEN2A_, "SEN2A" }, { _SEN_SEN2B_, "SEN2B" },
-  { _SEN_sen2a_, "sen2a" }, { _SEN_sen2b_, "sen2b" },
-  { _SEN_LNDLG_, "LNDLG" }, { _SEN_SEN2L_, "SEN2L" },
-  { _SEN_SEN2H_, "SEN2H" }, { _SEN_RGB_,   "R-G-B" },
-  { _SEN_S1AIA_, "S1AIA" }, { _SEN_S1AID_, "S1AID" },
-  { _SEN_S1BIA_, "S1BIA" }, { _SEN_S1BID_, "S1BID" },
-  { _SEN_VVVHP_, "VVVHP" }, { _SEN_MOD01_, "MOD01" }, 
-  { _SEN_MOD02_, "MOD02" }, { _SEN_MOD02_, "MODIS" }};
+  { _SEN_LND09_, "LND09" }, { _SEN_SEN2A_, "SEN2A" }, 
+  { _SEN_SEN2B_, "SEN2B" }, { _SEN_sen2a_, "sen2a" }, 
+  { _SEN_sen2b_, "sen2b" }, { _SEN_LNDLG_, "LNDLG" }, 
+  { _SEN_SEN2L_, "SEN2L" }, { _SEN_SEN2H_, "SEN2H" }, 
+  { _SEN_RGB_,   "R-G-B" }, { _SEN_S1AIA_, "S1AIA" }, 
+  { _SEN_S1AID_, "S1AID" }, { _SEN_S1BIA_, "S1BIA" }, 
+  { _SEN_S1BID_, "S1BID" }, { _SEN_VVVHP_, "VVVHP" }, 
+  { _SEN_MOD01_, "MOD01" }, { _SEN_MOD02_, "MOD02" }, 
+  { _SEN_MOD02_, "MODIS" }};
 
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },

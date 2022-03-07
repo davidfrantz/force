@@ -1041,22 +1041,23 @@ char upper[NPOW_10] = "UPPER";
 const int  ns = _SEN_LENGTH_, nb = _WVL_LENGTH_;
 const char sensor[_SEN_LENGTH_][NPOW_10] = {
   "LND04", "LND05", "LND07",
-  "LND08", "SEN2A", "SEN2B",
-  "sen2a", "sen2b", "LNDLG",
-  "SEN2L", "SEN2H", "R-G-B",
-  "S1AIA", "S1AID", "S1BIA",
-  "S1BID", "VVVHP", "MOD01",
-  "MOD02", "MODIS" };
+  "LND08", "LND09", "SEN2A", 
+  "SEN2B", "sen2a", "sen2b", 
+  "LNDLG", "SEN2L", "SEN2H", 
+  "R-G-B", "S1AIA", "S1AID", 
+  "S1BIA", "S1BID", "VVVHP", 
+  "MOD01", "MOD02", "MODIS" };
 bool adjustable[_SEN_LENGTH_] = {
-  true,  true,  true,  true,  true,  true,
-  false, false, false, false, false, false,
-  false, false, false, false, false, true,
-  true,  false };
+  true,  true,  true,  true,  true,  true,  
+  true,  false, false, false, false, false, 
+  false, false, false, false, false, false, 
+  true,  true,  false };
 const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
+  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 9 OLI  (legacy bands)
   { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
   { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
   { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
