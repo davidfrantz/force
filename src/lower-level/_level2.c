@@ -193,7 +193,7 @@ GDALDriverH driver;
   cite_me(_CITE_L2PS_);
 
   // parse metadata
-  if ((mission = parse_metadata(pl2, &meta, &DN)) == FAILURE){
+  if (parse_metadata(pl2, &meta, &DN, &mission) == FAILURE){
     printf("Parsing metadata failed.\n"); return FAILURE;}
 
   // write and init a new datacube

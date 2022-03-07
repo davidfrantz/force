@@ -86,7 +86,7 @@ void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int
 void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata);
 void collapse_view_grid(float ***grid, int nb, int nd, int nx, int ny, float nodata);
 int parse_metadata_mission(par_ll_t *pl2);
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN);
+int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission);
 
 #ifdef __cplusplus
 }
