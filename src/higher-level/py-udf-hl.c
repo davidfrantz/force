@@ -87,8 +87,11 @@ par_udf_t *udf;
   PyRun_SimpleString("import numpy as np");
   PyRun_SimpleString("from datetime import date as Date");
   PyRun_SimpleString("import traceback");
+  PyRun_SimpleString("import signal");
 
-  PyRun_SimpleString("def init(): np.seterr(all='ignore')");
+  PyRun_SimpleString("def init():                                                  \n"
+					 "    np.seterr(all='ignore')                                  \n"
+					 "    signal.signal(signal.SIGINT, signal.SIG_DFL)             \n");
   PyRun_SimpleString("init()");
 
   PyRun_SimpleString(
