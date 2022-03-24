@@ -439,6 +439,10 @@ float *CLEARTEMP = NULL;
 
   }
 
+  #ifdef FORCE_DEBUG
+  printf("low/high temperature quantiles: %f / %f\n", lowtemp, hightemp);
+  #endif
+
   free((void*)CLEARTEMP);
   
 
