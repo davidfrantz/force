@@ -81,7 +81,7 @@ enum { _DT_NONE_,  _DT_SHORT_, _DT_SMALL_,
        _DT_FLOAT_, _DT_INT_,   _DT_USHORT_ };
 
 // output formats
-enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_JPEG_, _FMT_LENGTH_ };
+enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_CUSTOM_, _FMT_LENGTH_ };
 
 // t-test tailtype
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };
@@ -276,6 +276,8 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 // user-defined function type
 enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
+// tag and value
+enum { _TV_TAG_, _TV_VAL_, _TV_LENGTH_ };
 
 // projection
 enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };

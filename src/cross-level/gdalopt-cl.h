@@ -21,33 +21,40 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Reading all-purpose files
+GDAL options
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef READ_CL_H
-#define READ_CL_H
+#ifndef GDALOPT_CL_H
+#define GDALOPT_CL_H
 
 #include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
+#include <stdbool.h>  // boolean data type
 #include <string.h>  // string handling functions
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/alloc-cl.h"
-#include "../cross-level/string-cl.h"
+#include "../cross-level/read-cl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-double **read_table(char *fname, int *nrows, int *ncols);
-char ***read_tagvalue(char *fname, int *nrows);
+typedef struct {
+  char driver[NPOW_04];        // GDAL driver short name
+  char extension[NPOW_04];     // file extension
+  char option[NPOW_06][NPOW_10]; // GDAL output options
+  int n;                   // number of GDAL output options
+} gdalopt_t;
+
+void default_gdaloptions(int format, gdalopt_t *gdalopt);
+void update_gdaloptions_blocksize(int format, gdalopt_t *gdalopt, int cx, int cy);
+void parse_gdaloptions(char *fname, gdalopt_t *gdalopt);
+void print_gdaloptions(gdalopt_t *gdalopt);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-
 

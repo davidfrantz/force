@@ -36,6 +36,7 @@ Higher Level Processing paramater header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
+#include "../cross-level/gdalopt-cl.h"
 
 
 #ifdef __cplusplus
@@ -474,7 +475,9 @@ typedef struct {
   int nd, nw, nm, nq, ny;
 
   // miscellaneous
-  int format;                // output format
+  char *f_gdalopt;   // file for GDAL options
+  gdalopt_t gdalopt; // GDAL output options
+  int format;        // output format
   int explode;
   int owr;             // flag: overwrite output
   int ithread;

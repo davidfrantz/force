@@ -1020,6 +1020,7 @@ short   *brick_short_ = NULL;
 small   *brick_small_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
+gdalopt_t format;
 
 short *read_buf  = NULL;
 short *psf_buf   = NULL;
@@ -1284,8 +1285,11 @@ double tol = 5e-3;
   set_brick_sensorid(brick, sid);
   set_brick_name(brick, "FORCE Level 2 ARD");
 
+  default_gdaloptions(_FMT_GTIFF_, &format);
+  update_gdaloptions_blocksize(_FMT_GTIFF_, &format, cube->cx, cube->cy);
+
   set_brick_open(brick,   OPEN_FALSE);
-  set_brick_format(brick, _FMT_GTIFF_);
+  set_brick_format(brick, &format);
   
   //printf("some of the ARD metadata should be read from disc. TBI\n");
   for (b=0; b<nb; b++) set_brick_nodata(brick, b, nodata);

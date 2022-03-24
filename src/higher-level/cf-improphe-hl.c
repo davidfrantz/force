@@ -142,7 +142,7 @@ int nchar;
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }
-  set_brick_format(brick, phl->format);
+  set_brick_format(brick, &phl->gdalopt);
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 

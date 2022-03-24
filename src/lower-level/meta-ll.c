@@ -562,7 +562,7 @@ GDALDatasetH fp_;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -1154,7 +1154,7 @@ int svgrid = 5000;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -1464,17 +1464,17 @@ char metaname[NPOW_10];
 --- dn:       Digital Number brick
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN){
-int mission;
+int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission){
+int mission_id;
 meta_t *meta = NULL;
 
   meta = allocate_metadata();
 #ifdef FORCE_DEBUG
 printf("there are still some things to do int meta. checking etc\n");
 #endif
-  if ((mission = parse_metadata_mission(pl2)) == _UNKNOWN_) return FAILURE;
+  if ((mission_id = parse_metadata_mission(pl2)) == _UNKNOWN_) return FAILURE;
 
-  switch (mission){
+  switch (mission_id){
     case LANDSAT:
       if (parse_metadata_landsat(pl2, meta, DN)  != SUCCESS) return FAILURE;
       break;
@@ -1487,6 +1487,7 @@ printf("there are still some things to do int meta. checking etc\n");
   }
 
   *metadata = meta;
-  return mission;
+  *mission = mission_id;
+  return SUCCESS;
 }
 

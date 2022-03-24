@@ -211,23 +211,47 @@ int i;
 }
 
 
-/** Re-Allocate 2D-array
+/** Re-Allocate 3D-array
 +++ This function re-allocates blocks of memory. If the block is larger
 +++ than before, the new part is initialized with 0.
 --- ptr:    Pointer to the memory block
 --- n1_now:  Number of elements of current block (1st dimension)
 --- n2_now:  Number of elements of current block (2nd dimension)
---- n2_now:  Number of elements of current block (3rd dimension)
+--- n3_now:  Number of elements of current block (3rd dimension)
 --- n1:      Number of elements that block should have (1st dimension)
 --- n2:      Number of elements that block should have (2nd dimension)
---- n2:      Number of elements that block should have (3rd dimension)
+--- n3:      Number of elements that block should have (3rd dimension)
 --- size:   Size of each element
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void re_alloc_3D(void ****ptr, size_t n1_now, size_t n2_now, size_t n3_now, size_t n1, size_t n2, size_t n3, size_t size){
-  
-  printf("re_alloc_3D not implemented yet.\n");
-  
+void ***arr = *ptr;
+int i;
+
+  if (n1_now == n1 && n2_now == n2 && n3_now == n3) return;
+
+  if (n2_now != n2 || n3_now != n3){
+    for (i=0; i<n1_now; i++) re_alloc_2D((void***)&arr[i], n2_now, n3_now, n2, n3, size);
+  }
+
+
+  if (n1_now > n1){
+    for (i=n1; i<n1_now; i++) free_2D((void**)arr[i], n2);
+    #ifdef FORCE_DEBUG
+    for (i=n1; i<n1_now; i++) printf("freed element %d\n", i);
+    #endif
+  }
+
+  re_alloc((void**)&arr, n1_now, n1, sizeof(void*));
+
+  if (n1_now < n1){
+    for (i=n1_now; i<n1; i++) alloc_2D((void***)&arr[i], n2, n3, size);
+    #ifdef FORCE_DEBUG
+    for (i=n1_now; i<n1; i++) printf("allocated element %d of length %lu and size %lu\n", i, n2, size);
+    #endif
+  }
+
+  *ptr = arr;
   return;
 }
 

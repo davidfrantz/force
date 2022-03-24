@@ -134,7 +134,7 @@ int datatype = get_brick_datatype(brick);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
-int  b;
+int b;
 
   if (from->chunk < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
@@ -148,9 +148,6 @@ int  b;
   set_brick_dirname(brick, from->dname);
   set_brick_filename(brick, from->fname);
   set_brick_sensorid(brick, from->sid);
-  set_brick_format(brick, from->format);
-  set_brick_open(brick, from->open);
-  set_brick_explode(brick, from->explode);
 
   set_brick_geotran(brick, from->geotran);
   set_brick_nbands(brick, nb);
@@ -166,6 +163,10 @@ int  b;
   set_brick_tiley(brick, from->ty);
   set_brick_proj(brick, from->proj);
   set_brick_par(brick, from->par);
+
+  set_brick_format(brick, &from->format);
+  set_brick_open(brick, from->open);
+  set_brick_explode(brick, from->explode);
 
   if (nb == from->nb){
     for (b=0; b<nb; b++) copy_brick_band(brick, b, from, b);
@@ -497,10 +498,9 @@ int i;
   copy_string(brick->product,   NPOW_03, "NA");
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
-  copy_string(brick->extension, NPOW_02, "NA");
 
   brick->sid = -1;
-  brick->format = 0;
+  default_gdaloptions(_FMT_GTIFF_, &brick->format);
   brick->open = OPEN_FALSE;
   brick->explode = 0;
   brick->datatype = _DT_NONE_;
@@ -580,11 +580,12 @@ int b;
 
 
   printf("\nbrick info for %s - %s - SID %d\n", brick->name, brick->product, brick->sid);
-  printf("open: %d, format %d, explode %d\n", 
-    brick->open, brick->format, brick->explode);
+  printf("open: %d, explode %d\n", 
+    brick->open, brick->explode);
+  print_gdaloptions(&brick->format);
   printf("datatype %d with %d bytes\n", 
     brick->datatype, brick->byte);
-  printf("filename: %s/%s.%s\n", brick->dname, brick->fname, brick->extension);
+  printf("filename: %s/%s\n", brick->dname, brick->fname);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
     brick->nx, brick->ny, brick->nc, 
     brick->res, brick->nb);
@@ -632,22 +633,20 @@ void print_brick_band_info(brick_t *brick, int b){
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int write_brick(brick_t *brick){
-int f, b, b_, p;
+int f, b, b_, p, o;
 int b_brick, b_file, nbands, nfiles;
 int ***bands = NULL;
 char *lock = NULL;
 double timeout;
-GDALDatasetH fp_cpy = NULL;
+GDALDatasetH fp_physical = NULL;
 GDALDatasetH fp = NULL;
 GDALDatasetH fo = NULL;
 GDALRasterBandH band = NULL;
+GDALDriverH driver_physical = NULL;
 GDALDriverH driver = NULL;
-GDALDriverH driver_cpy = NULL;
 char **options = NULL;
 float *buf = NULL;
 float now, old;
-char xchunk[NPOW_08];
-char ychunk[NPOW_08];
 int xoff_write, yoff_write, nx_write, ny_write;
 
 char bname[NPOW_10];
@@ -731,38 +730,18 @@ int i = 0;
   
   //CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
   
+  // get driver
+  if ((driver_physical = GDALGetDriverByName(brick->format.driver)) == NULL){
+    printf("%s driver not found\n", brick->format.driver); return FAILURE;}
+  if ((driver = GDALGetDriverByName("MEM")) == NULL){
+    printf("%s driver not found\n", "MEM"); return FAILURE;}
 
-  // choose between formats
-  switch (brick->format){
-    case _FMT_ENVI_:
-      driver = GDALGetDriverByName("ENVI");
-      break;
-    case _FMT_GTIFF_:
-      driver = GDALGetDriverByName("GTiff");
-      options = CSLSetNameValue(options, "COMPRESS", "LZW");
-      options = CSLSetNameValue(options, "PREDICTOR", "2");
-      options = CSLSetNameValue(options, "INTERLEAVE", "BAND");
-      options = CSLSetNameValue(options, "BIGTIFF", "YES");
-      if (brick->cx > 0){
-        nchar = snprintf(xchunk, NPOW_08, "%d", brick->cx);
-        if (nchar < 0 || nchar >= NPOW_08){ 
-          printf("Buffer Overflow in assembling BLOCKXSIZE\n"); return FAILURE;}
-        options = CSLSetNameValue(options, "BLOCKXSIZE", xchunk);
-      }
-      if (brick->cy > 0){
-        nchar = snprintf(ychunk, NPOW_08, "%d", brick->cy);
-        if (nchar < 0 || nchar >= NPOW_08){ 
-          printf("Buffer Overflow in assembling BLOCKYSIZE\n"); return FAILURE;}
-        options = CSLSetNameValue(options, "BLOCKYSIZE", ychunk);
-      }
-      break;
-    case _FMT_JPEG_:
-      driver = GDALGetDriverByName("MEM");
-      driver_cpy = GDALGetDriverByName("JPEG");
-      break;
-    default:
-      printf("unknown format. ");
-      return FAILURE;
+  // set GDAL output options
+  for (o=0; o<brick->format.n; o+=2){
+    #ifdef FORCE_DEBUG
+    printf("setting options %s = %s\n",  brick->format.option[o], brick->format.option[o+1]);
+    #endif
+    options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
   }
 
   switch (brick->datatype){
@@ -805,7 +784,7 @@ int i = 0;
     } else bname[0] = '\0';
   
     nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", brick->dname, 
-      brick->fname, bname, brick->extension);
+      brick->fname, bname, brick->format.extension);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
@@ -886,7 +865,7 @@ int i = 0;
         printf("Unable to open %s. ", fname); return FAILURE;}
     } else {
       if ((fp = GDALCreate(driver, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
-        printf("Error creating file %s. ", fname); return FAILURE;}
+        printf("Error creating memory file %s. ", fname); return FAILURE;}
     }
       
     if (brick->open == OPEN_BLOCK){
@@ -910,33 +889,6 @@ int i = 0;
 
       b_brick = bands[_brick_][f][b];
       b_file  = bands[_FILE_][f][b];
-
-      i = 0;
-
-
-      copy_string(band_meta[i++], NPOW_14, "Domain");
-      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
-      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Scale");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Sensor");
-      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
-
-      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
-      copy_string(band_meta[i++], NPOW_14, "Date");
-      copy_string(band_meta[i++], NPOW_14, ldate);
-
 
       band = GDALGetRasterBand(fp, b_file);
 
@@ -979,7 +931,6 @@ int i = 0;
 
       GDALSetDescription(band, brick->bandname[b_brick]);
       GDALSetRasterNoDataValue(band, brick->nodata[b_brick]);
-      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
 
     }
 
@@ -994,16 +945,52 @@ int i = 0;
     //if (format == _FMT_ENVI_) 
     //GDALSetDescription(fp, brick->name);
 
+    
+    // copy to physical file. This is needed for drivers that do not support CREATE
+    if ((fp_physical = GDALCreateCopy(driver_physical, fname, fp, FALSE, options, NULL, NULL)) == NULL){
+        printf("Error creating file %s. ", fname); return FAILURE;}
 
-    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp, sys_meta[i], sys_meta[i+1], "FORCE");
-    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp, fp_meta[i],  fp_meta[i+1],  "FORCE");
-    
-    
-    if (brick->format == _FMT_JPEG_){
-      if ((fp_cpy = GDALCreateCopy(driver_cpy, fname, fp, FALSE, NULL, NULL, NULL)) == NULL){
-          printf("Error creating file %s. ", fname); return FAILURE;}
-      GDALClose(fp_cpy);
+    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp_physical, sys_meta[i], sys_meta[i+1], "FORCE");
+    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp_physical, fp_meta[i],  fp_meta[i+1],  "FORCE");
+
+    for (b=0; b<nbands; b++){
+
+      b_brick = bands[_brick_][f][b];
+      b_file  = bands[_FILE_][f][b];
+
+      i = 0;
+
+      copy_string(band_meta[i++], NPOW_14, "Domain");
+      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
+      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
+
+      copy_string(band_meta[i++], NPOW_14, "Scale");
+      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
+      if (nchar < 0 || nchar >= NPOW_14){ 
+        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
+
+      copy_string(band_meta[i++], NPOW_14, "Sensor");
+      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
+
+      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
+      copy_string(band_meta[i++], NPOW_14, "Date");
+      copy_string(band_meta[i++], NPOW_14, ldate);
+
+
+      band = GDALGetRasterBand(fp_physical, b_file);
+
+      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
+
     }
+    
+    GDALClose(fp_physical);
     GDALClose(fp);
 
   
@@ -1363,10 +1350,8 @@ printf("warp_from_disc_to_known_brick should handle multiband src and dst images
 
   if ((src_dataset = GDALOpen(fname, GA_ReadOnly)) == NULL){
     printf("unable to open image for warping: %s\n", fname); return FAILURE;}
-    
-  //src_band = GDALGetRasterBand(src_dataset, src_b+1);
-  //src_nodata = (int)GDALGetRasterNoDataValue(src_band, NULL); doesn't work...
-  
+
+ 
   #ifdef FORCE_DEBUG
   printf("src nodata is %d, band is %d, dataset is %s\n", src_nodata, src_b+1, fname);
   #endif
@@ -1843,42 +1828,6 @@ void get_brick_filename(brick_t *brick, char fname[], size_t size){
 }
 
 
-/** This function sets the extension of a brick
---- brick:     brick
---- extension: extension
-+++ Return:    void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_extension(brick_t *brick, const char *extension){
-  
-  
-  if (get_brick_format(brick) == _FMT_ENVI_ && strcmp(extension, "dat") != 0){
-    printf("extension does not match with format.\n");}
-  if (get_brick_format(brick) == _FMT_GTIFF_ && strcmp(extension, "tif") != 0){
-    printf("extension does not match with format.\n");}
-  if (get_brick_format(brick) == _FMT_JPEG_ && strcmp(extension, "jpg") != 0){
-    printf("extension does not match with format.\n");}
-
-  copy_string(brick->extension, NPOW_02, extension);
-
-  return;
-}
-
-
-/** This function gets the extension of a brick
---- brick:     brick
---- extension: extension (modified)
---- size:      length of the buffer for extension
-+++ Return:    void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_brick_extension(brick_t *brick, char extension[], size_t size){
-
-
-  copy_string(extension, size, brick->extension);
-
-  return;
-}
-
-
 /** This function sets the sensor ID of a brick
 --- brick:  brick
 --- sid:    sensor ID
@@ -1902,25 +1851,16 @@ int get_brick_sensorid(brick_t *brick){
 }
 
 
+
 /** This function sets the format of a brick
 --- brick:   brick
 --- format:  format
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_format(brick_t *brick, int format){
+void set_brick_format(brick_t *brick, gdalopt_t *format){
 
-  brick->format = format;
 
-  if (format == _FMT_ENVI_){
-    set_brick_extension(brick, "dat");
-  } else if (format == _FMT_GTIFF_){
-    set_brick_extension(brick, "tif");
-  } else if (format == _FMT_JPEG_){
-    set_brick_extension(brick, "jpg");
-  } else {
-    set_brick_extension(brick, "xxx");
-    printf("unknown format.\n");
-  }
+  brick->format = *format;
 
   return;
 }
@@ -1929,7 +1869,7 @@ void set_brick_format(brick_t *brick, int format){
 --- brick:  brick
 +++ Return: format
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_brick_format(brick_t *brick){
+gdalopt_t get_brick_format(brick_t *brick){
   
   return brick->format;
 }

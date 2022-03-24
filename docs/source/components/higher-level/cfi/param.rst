@@ -43,12 +43,12 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Output options**
 
-  * Output format, which is either uncompressed flat binary image format aka ENVI Standard or GeoTiff. 
+  * Output format, which is either uncompressed flat binary image format aka ENVI Standard, GeoTiff, or COG. 
     GeoTiff images are compressed with LZW and horizontal differencing; BigTiff support is enabled; the Tiff is structured with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) specifications.
     Metadata are written to the ENVI header or directly into the Tiff to the FORCE domain.
     If the size of the metadata exceeds the Tiff's limit, an external .aux.xml file is additionally generated.
 
-    | *Type:* Character. Valid values: {ENVI,GTiff}
+    | *Type:* Character. Valid values: {ENVI,GTiff,COG}
     | ``OUTPUT_FORMAT = GTiff``
 
   * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.

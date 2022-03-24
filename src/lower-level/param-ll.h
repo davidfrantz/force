@@ -34,6 +34,7 @@ Level 2 Processing paramater header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
+#include "../cross-level/gdalopt-cl.h"
 
 
 #ifdef __cplusplus
@@ -56,9 +57,11 @@ typedef struct {
   char *f_queue;          // file queue
   char *d_aod;            // directory of AOD LUT
   char *d_wvp;            // directory of water vapor LUT
+  char *f_gdalopt;        // file for GDAL options
 
   /** output parameters **/
   int format; // output format
+  gdalopt_t gdalopt; // GDAL output options
   int odst;   // flag: output cloud/shadow distance
   int ovzn;   // flag: output view zenith angle
   int ohot;   // flag: output haze optimized transformation
