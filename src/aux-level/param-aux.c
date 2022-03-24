@@ -616,7 +616,7 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
     fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
     fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
-    fprintf(fp, "# and EXTENNSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# and EXTENSION = tif. The driver name refers to the GDAL short driver names. \n");
     fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
     fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
     fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
@@ -993,7 +993,7 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
     fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
     fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
-    fprintf(fp, "# and EXTENNSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# and EXTENSION = tif. The driver name refers to the GDAL short driver names. \n");
     fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
     fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
     fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
