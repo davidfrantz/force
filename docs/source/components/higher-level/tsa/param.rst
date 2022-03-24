@@ -56,6 +56,22 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff,COG}
     | ``OUTPUT_FORMAT = GTiff``
 
+  * File that contains custom GDAL output options. 
+    This is only used if OUTPUT_FORMAT = CUSTOM. 
+    If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
+    The file should be written in tag and value notation. 
+    The first two lines are mandatory and specify GDAL driver and file extension, 
+    e.g. DRIVER = GTiff and EXTENNSION = tif. 
+    The driver name refers to the GDAL short driver names. 
+    Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).
+    Please note: with opening output options up to the user, it is now possible to
+    give invalid or conflicting options that result in the failure of creating files.
+    Type: full file path
+
+    | *Type:* full file path
+    | ``FILE_OUTPUT_OPTIONS = NULL``
+
+
 * **Parallel processing**
 
   * This module is using a streaming mechanism to speed up processing.
@@ -423,10 +439,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You can skip this by setting ``FILE_PYTHON = NULL``, but this requires ``OUTPUT_PYP = FALSE``.
     Two functions are required to communicate with FORCE:
 
-    0) The global space can be used to import modules etc.
-    1) An initialization function that defines the number and names of output bands:
+    1) The global space can be used to import modules etc.
+    2) An initialization function that defines the number and names of output bands:
        ``def forcepy_init():``
-    2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
+    3) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
 
     | *Type:* full file path
     | ``FILE_PYTHON = NULL``

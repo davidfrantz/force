@@ -51,6 +51,21 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     | *Type:* Character. Valid values: {ENVI,GTiff,COG}
     | ``OUTPUT_FORMAT = GTiff``
 
+  * File that contains custom GDAL output options. 
+    This is only used if OUTPUT_FORMAT = CUSTOM. 
+    If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
+    The file should be written in tag and value notation. 
+    The first two lines are mandatory and specify GDAL driver and file extension, 
+    e.g. DRIVER = GTiff and EXTENNSION = tif. 
+    The driver name refers to the GDAL short driver names. 
+    Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).
+    Please note: with opening output options up to the user, it is now possible to
+    give invalid or conflicting options that result in the failure of creating files.
+    Type: full file path
+
+    | *Type:* full file path
+    | ``FILE_OUTPUT_OPTIONS = NULL``
+
   * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
   
     | *Type:* Logical. Valid values: {TRUE,FALSE}
