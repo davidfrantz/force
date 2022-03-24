@@ -607,9 +607,22 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
+
+  if (verbose){
+    fprintf(fp, "# File that contains custom GDAL output options. This is only used if \n");
+    fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
+    fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
+    fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
+    fprintf(fp, "# and EXTENNSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
+    fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
+    fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
 
   if (verbose){
     fprintf(fp, "# Output the cloud/cloud shadow/snow distance output? Note that this is NOT\n");
@@ -971,9 +984,22 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
+
+  if (verbose){
+    fprintf(fp, "# File that contains custom GDAL output options. This is only used if \n");
+    fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
+    fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
+    fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
+    fprintf(fp, "# and EXTENNSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
+    fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
+    fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
 
   if (verbose){
     fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
