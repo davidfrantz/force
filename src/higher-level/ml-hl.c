@@ -201,9 +201,10 @@ brick_t **ML;
 small *mask_ = NULL;
 bool regression;
 bool rf, rfprob;
-float fpred[NPOW_03][NPOW_06];
-int   ipred[NPOW_03][NPOW_06];
+float **fpred = NULL;
+int   **ipred = NULL;
 int nprod = 0;
+int mmax = -1;
 int f, s, m, k, c, sc, p, nc;
 double mean, mean_old, var, std, mn;
 double *mean_prob;
@@ -238,10 +239,24 @@ bool valid;
   if (phl->mcl.orfp || phl->mcl.orfm) rfprob = true; else rfprob = false;
 
 
+  // maximum number of models
+  for (s=0; s<phl->mcl.nmodelset; s++){
+    if (phl->mcl.nmodel[s] > mmax) mmax = phl->mcl.nmodel[s];
+  }
 
-  #pragma omp parallel private(f,s,m,k,c,sc,mean,mn,mean_old,var,std,fpred,ipred,mean_prob,max_prob,max2_prob,win_class,ntree,valid) shared(features,mod,regression,rf,rfprob,ml,nf,nc,mask_,phl,ML,nodata) default(none)
+  if (mmax < 0){
+    printf("number of models is invalid\n");
+    *nproduct = 0;
+    return NULL;
+  }
+
+
+
+  #pragma omp parallel private(f,s,m,k,c,sc,mean,mn,mean_old,var,std,fpred,ipred,mean_prob,max_prob,max2_prob,win_class,ntree,valid) shared(features,mod,regression,rf,rfprob,ml,nf,nc,mask_,phl,ML,nodata,mmax) default(none)
   {
 
+    alloc_2D((void***)&fpred, phl->mcl.nmodelset, mmax, sizeof(float));
+    alloc_2D((void***)&ipred, phl->mcl.nmodelset, mmax, sizeof(int));
     if (rfprob) alloc((void**)&mean_prob, phl->mcl.nclass_all_sets, sizeof(double));
 
     #pragma omp for schedule(dynamic,1)
@@ -374,10 +389,13 @@ bool valid;
 
     }
     
+    
+    free_2D((void**)fpred, phl->mcl.nmodelset);
+    free_2D((void**)ipred, phl->mcl.nmodelset);
     if (rfprob) free((void*)mean_prob);
 
   }
-  
+
   *nproduct = nprod;
   return ML;
 }
