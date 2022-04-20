@@ -254,10 +254,16 @@ small *mask_ = NULL;
 
           if (!valid_left || !valid_right) continue;
 
-          y_hat = fabs(ard[t_mid].dat[b][p] - 
-                      (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 
-                      (ce[t_right]-ce[t_left]) * (ce[t_mid]-ce[t_left]) - 
-                       ard[t_left].dat[b][p]);
+
+          if (ce[t_right] == ce[t_left]){
+            y_hat = fabs(ard[t_mid].dat[b][p] - 
+                        (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 2.0);
+          } else {
+            y_hat = fabs(ard[t_mid].dat[b][p] - 
+                        (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 
+                        (ce[t_right]-ce[t_left]) * (ce[t_mid]-ce[t_left]) - 
+                        ard[t_left].dat[b][p]);
+          }
           t_max = t_mid;
           
           if (t_left == t_first &&
@@ -329,11 +335,15 @@ small *mask_ = NULL;
 
         if (!valid_left || !valid_right) continue;
 
-
-        y_hat = fabs(ard[t_mid].dat[b][p] - 
-                    (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 
-                    (ce[t_right]-ce[t_left]) * (ce[t_mid]-ce[t_left]) - 
-                     ard[t_left].dat[b][p]);
+        if (ce[t_right] == ce[t_left]){
+          y_hat = fabs(ard[t_mid].dat[b][p] - 
+                      (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 2.0);
+        } else {
+          y_hat = fabs(ard[t_mid].dat[b][p] - 
+                      (ard[t_right].dat[b][p]-ard[t_left].dat[b][p]) / 
+                      (ce[t_right]-ce[t_left]) * (ce[t_mid]-ce[t_left]) - 
+                      ard[t_left].dat[b][p]);
+        }
 
         rel_noise = y_hat/noise;
 
