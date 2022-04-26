@@ -382,6 +382,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
     "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
     "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "CCI",
+    "Gamon, J.A., Huemmrich, K.F., Wong, C.Y., Ensminger, I., Garrity, S., "
+    "Hollinger, D.Y., Noormets, A. Peñuelas, J., 2016. A remotely sensed pigment index "
+    "reveals photosynthetic phenology in evergreen conifers. Proc. Natl. Acad. Sci. "
+    "113(46), 13087-13092. https://doi.org/10.1073/pnas.1606162113",
     false }
 };
 
