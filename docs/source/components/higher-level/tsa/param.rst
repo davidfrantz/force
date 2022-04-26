@@ -343,8 +343,6 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     +           +                                            +                                                                                          + 2016                     +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
-    + NDWI      + Normalized Difference Water Index          + (GREEN - NIR) / (GREEN + NIR)                                                            + McFeeters 1996           +
-    
   * Standardize the TSS time series with pixel mean and/or standard deviation?
 
     | *Type:* Logical. Valid values: {NONE,NORMALIZE,CENTER}
