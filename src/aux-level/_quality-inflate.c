@@ -197,6 +197,8 @@ cube_t *cube = NULL;
   set_brick_bandname(QIM, _QAI_FLAG_SLP_, "Slope flag");           
   set_brick_bandname(QIM, _QAI_FLAG_WVP_, "Water vapor flag");
   
+  for (b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_nodata(QIM, b, 255);
+
   #ifdef FORCE_DEBUG
   printf("valid data %d %d\n",           _QAI_FLAG_OFF_,  _QAI_BIT_OFF_);
   printf("Cloud state %d %d\n",          _QAI_FLAG_CLD_,  _QAI_BIT_CLD_);
