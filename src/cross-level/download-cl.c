@@ -93,6 +93,9 @@ struct curl_slist *list = NULL;
   // data pointer to pass to the write callback
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
+  // fail on HTTP response >= 400
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+
   // perform file transfer 
   res = curl_easy_perform(curl);
 

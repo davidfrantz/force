@@ -665,6 +665,10 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "MRN");
         break;
+      case _IDX_CCI_:
+        v[_WVL_GREEN_] = v[_WVL_RED_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CCI");
+        break;
       default:
         printf("unknown INDEX\n");
         break;
