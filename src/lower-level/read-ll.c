@@ -146,7 +146,7 @@ int threads;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int bounds_level1(meta_t *meta, brick_t *DN, brick_t **QAI, par_ll_t *pl2){
-int b, b_temp, nb, p, nx, ny, nc;
+int b, b_temp, b_cirrus, nb, p, nx, ny, nc;
 brick_t *qai  = NULL;
 ushort **dn_  = NULL;
 small   *off_ = NULL;
@@ -162,7 +162,8 @@ int tvalid = 0;
   nx = get_brick_ncols(DN);
   ny = get_brick_nrows(DN);
   nc = get_brick_ncells(DN);
-  b_temp = find_domain(DN,  "TEMP");
+  b_temp   = find_domain(DN,  "TEMP");
+  b_cirrus = find_domain(DN,  "CIRRUS");
 
   // initialize a brick with general metadata
   qai = copy_brick(DN, 1, _DT_SHORT_);
@@ -183,7 +184,7 @@ int tvalid = 0;
   alloc((void**)&off_, nc, sizeof(small));
 
 
-  #pragma omp parallel private(b) shared(b_temp, nb, nc, dn_, off_, qai, meta) reduction(+:tvalid) default(none) 
+  #pragma omp parallel private(b) shared(b_temp, b_cirrus, nb, nc, dn_, off_, qai, meta) reduction(+:tvalid) default(none) 
   {
 
     #pragma omp for schedule(static)
@@ -191,8 +192,8 @@ int tvalid = 0;
 
       for (b=0; b<nb; b++){
 
-        // if first layer void --> boundary
-        if (dn_[b][p] == 0){ off_[p] = true; break;}
+        // if any layer void --> boundary
+        if (b != b_cirrus && dn_[b][p] == 0){ off_[p] = true; break;}
 
         // if any (non-temp) layer saturated
         if (b != b_temp && dn_[b][p] >= meta->sat){ set_saturation(qai, p, true); break;}
@@ -343,7 +344,7 @@ brick_t  *TOA  = NULL;
 ushort **dn_  = NULL;
 short  **toa_ = NULL;
 float    *sun_ = NULL;
-int b, b_temp, nb, nc, p, g;
+int b, b_temp, b_cirrus, nb, nc, p, g;
 short nodata;
 float A, rad, dsun, pi_dsun2, tmp;
 float dn_scale, toa_scale;
@@ -361,7 +362,8 @@ float dn_scale, toa_scale;
   TOA = copy_brick(DN, nb, _DT_SHORT_);
   
   // temperature band?
-  b_temp = find_domain(TOA, "TEMP");
+  b_temp   = find_domain(TOA, "TEMP");
+  b_cirrus = find_domain(DN,  "CIRRUS");
 
   // update metadata
   set_brick_name(TOA, "FORCE TOA brick");
@@ -418,7 +420,7 @@ float dn_scale, toa_scale;
       A = (meta->cal[b].lmax-meta->cal[b].lmin) / 
           (meta->cal[b].qmax-meta->cal[b].qmin);
 
-      #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
+      #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
       {
 
         #pragma omp for schedule(guided)
@@ -453,11 +455,14 @@ float dn_scale, toa_scale;
             }
 
             if (tmp < FLT_MIN){
-              toa_[b][p] = (short)nodata;
-              set_off(QAI, p, true);
+              if (b == b_cirrus){
+                toa_[b][p] = (short)0;
+              } else {
+                toa_[b][p] = (short)nodata;
+                set_off(QAI, p, true);
+              }
             } else {
               toa_[b][p] = (short)(tmp*toa_scale);
-              
             }
 
           }
