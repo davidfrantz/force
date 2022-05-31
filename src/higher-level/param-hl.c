@@ -669,6 +669,14 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_GREEN_] = v[_WVL_RED_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "CCI");
         break;
+      case _IDX_EV2_:
+        v[_WVL_RED_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "EV2");
+        break;
+      case _IDX_CSW_:
+        v[_WVL_NIR_] = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CSW");
+        break;
       default:
         printf("unknown INDEX\n");
         break;
@@ -1087,6 +1095,22 @@ int *band_ptr[_WVL_LENGTH_] = {
   &sen->blue, &sen->green, &sen->red, &sen->rededge1, &sen->rededge2,
   &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
   &sen->vv, &sen->vh };
+
+
+  // set appr. wavelength
+  sen->w_blue     = 0.492;
+  sen->w_green    = 0.559;
+  sen->w_red      = 0.665;
+  sen->w_rededge1 = 0.704;
+  sen->w_rededge2 = 0.739;
+  sen->w_rededge3 = 0.780;
+  sen->w_bnir     = 0.833;
+  sen->w_nir      = 0.864;
+  sen->w_swir0    = 1.240;
+  sen->w_swir1    = 1.610;
+  sen->w_swir2    = 2.186;
+  sen->w_vv       = 554657630000;
+  sen->w_vh       = 554657630000;
 
 
   // match available sensors with requested sensors

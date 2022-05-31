@@ -93,6 +93,20 @@ typedef struct {
   int swir2;
   int vv;
   int vh;
+
+  float w_blue;
+  float w_green;
+  float w_red;
+  float w_rededge1;
+  float w_rededge2;
+  float w_rededge3;
+  float w_bnir;
+  float w_nir;
+  float w_swir0;
+  float w_swir1;
+  float w_swir2;
+  float w_vv;
+  float w_vh;
 } par_sen_t;
 
 // BAP scoring
