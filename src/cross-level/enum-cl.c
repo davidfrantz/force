@@ -65,21 +65,21 @@ const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_SLP_,      "SLOPED"       }, { _QAI_WVP_,      "WVP_NONE"     }};
   
 const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
-  { _IDX_BLU_, "BLUE"   }, { _IDX_GRN_, "GREEN"     }, { _IDX_RED_, "RED"      },
-  { _IDX_NIR_, "NIR"    }, { _IDX_SW1_, "SWIR1"     }, { _IDX_SW2_, "SWIR2"    },
-  { _IDX_RE1_, "RE1"    }, { _IDX_RE2_, "RE2"       }, { _IDX_RE3_, "RE3"      },
-  { _IDX_BNR_, "BNIR"   }, { _IDX_NDV_, "NDVI"      }, { _IDX_EVI_, "EVI"      },
-  { _IDX_NBR_, "NBR"    }, { _IDX_ARV_, "ARVI"      }, { _IDX_SAV_, "SAVI"     },
-  { _IDX_SRV_, "SARVI"  }, { _IDX_TCB_, "TC-BRIGHT" }, { _IDX_TCG_, "TC-GREEN" },
-  { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"     },
-  { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"     },
-  { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"       },
-  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"    },
-  { _IDX_KNV_, "kNDVI"  }, { _IDX_ND1_, "NDRE1"     }, { _IDX_ND2_, "NDRE2"    },
-  { _IDX_CRE_, "CIre"   }, { _IDX_NR1_, "NDVIre1"   }, { _IDX_NR2_, "NDVIre2"  },
-  { _IDX_NR3_, "NDVIre3"}, { _IDX_N1n_, "NDVIre1n"  }, { _IDX_N2n_, "NDVIre2n" },
-  { _IDX_N3n_, "NDVIre3n"},{ _IDX_Mre_, "MSRre"     }, { _IDX_Mrn_, "MSRren"   },
-  { _IDX_CCI_, "CCI"    }};
+  { _IDX_BLU_, "BLUE"   }, { _IDX_GRN_, "GREEN"     }, { _IDX_RED_, "RED"          },
+  { _IDX_NIR_, "NIR"    }, { _IDX_SW1_, "SWIR1"     }, { _IDX_SW2_, "SWIR2"        },
+  { _IDX_RE1_, "RE1"    }, { _IDX_RE2_, "RE2"       }, { _IDX_RE3_, "RE3"          },
+  { _IDX_BNR_, "BNIR"   }, { _IDX_NDV_, "NDVI"      }, { _IDX_EVI_, "EVI"          },
+  { _IDX_NBR_, "NBR"    }, { _IDX_ARV_, "ARVI"      }, { _IDX_SAV_, "SAVI"         },
+  { _IDX_SRV_, "SARVI"  }, { _IDX_TCB_, "TC-BRIGHT" }, { _IDX_TCG_, "TC-GREEN"     },
+  { _IDX_TCW_, "TC-WET" }, { _IDX_TCD_, "TC-DI"     }, { _IDX_NDB_, "NDBI"         },
+  { _IDX_NDW_, "NDWI"   }, { _IDX_MNW_, "MNDWI"     }, { _IDX_NDS_, "NDSI"         },
+  { _IDX_SMA_, "SMA"    }, { _IDX_BVV_, "VV"        }, { _IDX_BVH_, "VH"           },
+  { _IDX_NDT_, "NDTI"   }, { _IDX_NDM_, "NDMI"      }, { _IDX_SW0_, "SWIR0"        },
+  { _IDX_KNV_, "kNDVI"  }, { _IDX_ND1_, "NDRE1"     }, { _IDX_ND2_, "NDRE2"        },
+  { _IDX_CRE_, "CIre"   }, { _IDX_NR1_, "NDVIre1"   }, { _IDX_NR2_, "NDVIre2"      },
+  { _IDX_NR3_, "NDVIre3"}, { _IDX_N1n_, "NDVIre1n"  }, { _IDX_N2n_, "NDVIre2n"     },
+  { _IDX_N3n_, "NDVIre3n"},{ _IDX_Mre_, "MSRre"     }, { _IDX_Mrn_, "MSRren"       },
+  { _IDX_CCI_, "CCI"    }, { _IDX_EV2_, "EVI2"      }, { _IDX_CSW_, "CRemoveSWIR1" }};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
   { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },

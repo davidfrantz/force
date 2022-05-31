@@ -388,6 +388,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Hollinger, D.Y., Noormets, A. Peñuelas, J., 2016. A remotely sensed pigment index "
     "reveals photosynthetic phenology in evergreen conifers. Proc. Natl. Acad. Sci. "
     "113(46), 13087-13092. https://doi.org/10.1073/pnas.1606162113",
+    false },
+  { "EVI2",
+    "Jiang, Z.; Huete, A. R.; Didan, K.; Miura, T., 2008. Development of a two-band "
+    "enhanced vegetation index without a blue band. Remote Sensing of Environment, "
+    "112, 3833-3845",
     false }
 };
 

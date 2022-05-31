@@ -136,6 +136,62 @@ float tmp, ind, scale = 10000.0;
 }
 
 
+/** This function computes a spectral index time series, with Continuum
++++ Removal method
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b_:     band for continuum removal
+--- b1:     left band
+--- b2:     right band
+--- w_:     wavelength for continuum removal
+--- w1:     left wavelength
+--- w2:     right wavelength
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_cont_remove(ard_t *ard, small *mask_, tsa_t *ts, int b_, int b1, int b2, float w_, float w1, float w2, int nc, int nt, short nodata){
+int p, t;
+float tmp;
+
+
+  #pragma omp parallel private(t,tmp) shared(ard,mask_,ts,b_,b1,b2,w_,w1,w2,nc,nt,nodata) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+      
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+
+
+          tmp = (ard[t].dat[b1][p] * (w2 - w_) + 
+                 ard[t].dat[b2][p] * (w_ - w1)) / 
+                (w2 - w1);
+
+          ts->tss_[t][p] = (short)(ard[t].dat[b_][p] - tmp);
+
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
 /** This function computes a spectral index time series, with a Ratio - 1,
 +++ e.g. CIre: (b1/b2)-1
 --- ard:    ARD
@@ -856,11 +912,11 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
                        2.5, 6.0, 7.5, 1.0, false, nc, nt, nodata);
       break;
     case _IDX_NBR_:
-    cite_me(_CITE_NBR_);
+       cite_me(_CITE_NBR_);
       index_differenced(ard, mask_, ts, sen->nir, sen->swir2, nc, nt, nodata);
       break;
     case _IDX_ARV_:
-        cite_me(_CITE_SARVI_);
+      cite_me(_CITE_SARVI_);
       index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->blue, 
                        1.0, 1.0, 0.0, 0.0, true, nc, nt, nodata);
       break;
@@ -979,6 +1035,15 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
     case _IDX_CCI_:
       cite_me(_CITE_CCI_);
       index_differenced(ard, mask_, ts, sen->green, sen->red, nc, nt, nodata);
+      break;
+    case _IDX_EV2_:
+      cite_me(_CITE_EV2_);
+      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->red, 
+                       2.4, 1.0, 0.0, 1.0, false, nc, nt, nodata);
+      break;
+    case _IDX_CSW_:
+      index_cont_remove(ard, mask_, ts, sen->swir1, sen->nir, sen->swir2, 
+                        sen->w_swir1, sen->w_nir, sen->w_swir2, nc, nt, nodata);
       break;
     default:
       printf("unknown INDEX\n");
