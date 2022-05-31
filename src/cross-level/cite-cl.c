@@ -393,6 +393,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Jiang, Z.; Huete, A. R.; Didan, K.; Miura, T., 2008. Development of a two-band "
     "enhanced vegetation index without a blue band. Remote Sensing of Environment, "
     "112, 3833-3845",
+    false },
+  { "Harmonic models",
+    "Zhu, Z., Woodcock, C. E., Holden, C., & Yang, Z. (2015). Generating synthetic "
+    "Landsat images based on all available Landsat data: Predicting Landsat surface "
+    "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
+    "http://dx.doi.org/10.1016/j.rse.2015.02.009",
     false }
 };
 

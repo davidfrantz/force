@@ -147,7 +147,7 @@ enum { _INF_QAI_,  _INF_NUM_, _INF_DOY_, _INF_YEAR_,
        _INF_DIFF_, _INF_SEN_, _INF_LENGTH_ };
 
 // interpolation method
-enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_LENGTH_ };
+enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
 
 // spectral indices
 enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_, 
