@@ -82,8 +82,9 @@ const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_] = {
   { _IDX_CCI_, "CCI"    }};
 
 const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_] = {
-  { _INT_NONE_,   "NONE"   }, { _INT_LINEAR_, "LINEAR" },
-  { _INT_MOVING_, "MOVING" }, { _INT_RBF_,    "RBF"    }};
+  { _INT_NONE_,     "NONE"    }, { _INT_LINEAR_, "LINEAR" },
+  { _INT_MOVING_,   "MOVING"  }, { _INT_RBF_,    "RBF"    },
+  { _INT_HARMONIC_, "HARMONIC"}};
 
 const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_] = {
   { _STA_MIN_, "MIN" }, { _STA_MAX_, "MAX" }, { _STA_RNG_, "RNG" }, { _STA_IQR_, "IQR" },

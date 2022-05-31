@@ -388,6 +388,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Hollinger, D.Y., Noormets, A. Peñuelas, J., 2016. A remotely sensed pigment index "
     "reveals photosynthetic phenology in evergreen conifers. Proc. Natl. Acad. Sci. "
     "113(46), 13087-13092. https://doi.org/10.1073/pnas.1606162113",
+    false },
+  { "Harmonic models",
+    "Zhu, Z., Woodcock, C. E., Holden, C., & Yang, Z. (2015). Generating synthetic "
+    "Landsat images based on all available Landsat data: Predicting Landsat surface "
+    "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
+    "http://dx.doi.org/10.1016/j.rse.2015.02.009",
     false }
 };
 

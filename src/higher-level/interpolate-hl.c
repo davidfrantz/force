@@ -31,6 +31,9 @@ This file contains functions for time series interpolation
 
 #include "interpolate-hl.h"
 
+/** GNU Scientific Library (GSL) **/
+#include <gsl/gsl_multifit.h> // Linear Least Squares Fitting
+
 
 int interpolate_none(tsa_t *ts, small *mask_, int nc, int nt);
 int interpolate_linear(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata);
@@ -438,6 +441,150 @@ void free_rbf(rbf_t *rbf){
 }
 
 
+int irls_fit(const gsl_matrix *X, const gsl_vector *y,
+             gsl_vector *c, gsl_matrix *cov){
+int s;
+
+
+  gsl_multifit_robust_workspace *work = 
+    gsl_multifit_robust_alloc(gsl_multifit_robust_bisquare, X->size1, X->size2);
+
+  //gsl_multifit_robust_maxiter(1000, work);
+
+  s = gsl_multifit_robust(X, y, c, cov, work);
+
+  //if (s == GSL_EMAXITER) printf("max iter reached.\n");
+
+  gsl_multifit_robust_free(work);
+
+  return s;
+}
+
+
+/** This function interpolates the time series using harmonic models
+--- ts:     pointer to instantly useable TSA image arrays
+--- mask:   mask image
+--- nc:     number of cells
+--- nt:     number of time steps
+--- ni:     number of interpolation steps
+--- nodata: nodata value
+--- tsi:    interpolation parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int interpolate_harmonic(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi){
+int t, i, k, nk, p;
+int ncoef;
+double y_pred, y_err;
+gsl_matrix *x = NULL, *cov = NULL;
+gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
+
+
+  if ((ncoef = tsi->harm_nmodes*2 + 2) < 4){
+      printf("not enough coefficients for harmonic fitting. "
+             "Something is wrong. Abort.\n");
+      return FAILURE;
+  }
+
+  gsl_set_error_handler_off();
+
+  #pragma omp parallel private(i,t,k,nk,x,cov,y,c,x_pred,y_pred,y_err) shared(mask_,ts,nc,nt,ni,tsi,nodata,ncoef) default(none)
+  {
+
+    c = gsl_vector_alloc (ncoef);
+    cov = gsl_matrix_alloc (ncoef, ncoef);
+    x_pred = gsl_vector_alloc(ncoef);
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (i=0; i<ni; i++) ts->tsi_[i][p] = nodata;
+        continue;
+      }
+
+      for (t=0, nk=0; t<nt; t++){
+
+        if (ts->tss_[t][p] == nodata || 
+            ts->d_tss[t].ce < tsi->harm_fit_range[_MIN_].ce ||
+            ts->d_tss[t].ce > tsi->harm_fit_range[_MAX_].ce){
+          continue;
+        } else {
+          nk++;
+        }
+
+      }
+
+      //if (nk == 0){
+      if (nk < ncoef){
+        for (i=0; i<ni; i++) ts->tsi_[i][p] = nodata;
+        continue;
+      }
+
+//printf("nk: %d\n", nk);
+      x = gsl_matrix_alloc(nk, ncoef);
+      y = gsl_vector_alloc(nk);
+
+
+      for (t=0, k=0; t<nt; t++){
+
+        if (ts->tss_[t][p] == nodata || 
+            ts->d_tss[t].ce < tsi->harm_fit_range[_MIN_].ce ||
+            ts->d_tss[t].ce > tsi->harm_fit_range[_MAX_].ce){
+          continue;
+        } else {
+          gsl_matrix_set(x, k, 0, 1.0);
+          gsl_matrix_set(x, k, 1, ts->d_tss[t].ce);
+          gsl_matrix_set(x, k, 2, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
+          gsl_matrix_set(x, k, 3, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
+          if (ncoef > 4) gsl_matrix_set(x, k, 4, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
+          if (ncoef > 5) gsl_matrix_set(x, k, 5, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
+          if (ncoef > 6) gsl_matrix_set(x, k, 6, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
+          if (ncoef > 7) gsl_matrix_set(x, k, 7, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+          gsl_vector_set(y, k, ts->tss_[t][p]);
+          k++;
+        }
+
+
+      }
+
+      // Iteratively Reweighted Least Squares (IRLS)
+      irls_fit(x, y, c, cov);
+
+      // interpolate for each equidistant timestep
+      for (i=0; i<ni; i++){
+
+        gsl_vector_set(x_pred, 0, 1.0);
+        gsl_vector_set(x_pred, 1, ts->d_tsi[i].ce);
+        gsl_vector_set(x_pred, 2, cos(2 * M_PI / 365 * ts->d_tsi[i].ce));
+        gsl_vector_set(x_pred, 3, sin(2 * M_PI / 365 * ts->d_tsi[i].ce));
+        if (ncoef > 4) gsl_vector_set(x_pred, 4, cos(4 * M_PI / 365 * ts->d_tsi[i].ce));
+        if (ncoef > 5) gsl_vector_set(x_pred, 5, sin(4 * M_PI / 365 * ts->d_tsi[i].ce));
+        if (ncoef > 6) gsl_vector_set(x_pred, 6, cos(6 * M_PI / 365 * ts->d_tsi[i].ce));
+        if (ncoef > 7) gsl_vector_set(x_pred, 7, sin(6 * M_PI / 365 * ts->d_tsi[i].ce));
+
+        gsl_multifit_robust_est(x_pred, c, cov, &y_pred, &y_err);
+        ts->tsi_[i][p] = (short)y_pred;
+
+      }
+      
+
+      gsl_matrix_free (x);
+      gsl_vector_free (y);
+
+    }
+
+    gsl_vector_free (c);
+    gsl_matrix_free (cov);
+    gsl_vector_free (x_pred);
+
+  }
+
+  gsl_set_error_handler(NULL);
+  
+  return SUCCESS;
+}
+
+
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -471,6 +618,10 @@ int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nod
     case _INT_RBF_:
       cite_me(_CITE_RBF_);
       interpolate_rbf(ts, mask_, nc, nt, ni, nodata, tsi);
+      break;
+    case _INT_HARMONIC_:
+      cite_me(_CITE_HARMONIC_);
+      interpolate_harmonic(ts, mask_, nc, nt, ni, nodata, tsi);
       break;
     default:
       printf("unknown INTERPOLATE\n");
