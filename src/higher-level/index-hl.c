@@ -206,7 +206,7 @@ float tmp;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void index_ratio_minus1(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata){
 int p, t;
-float ind, scale = 10000.0;
+float ind, scale = 1000.0;
 
 
   #pragma omp parallel private(t,ind) shared(ard,mask_,ts,b1,b2,nc,nt,nodata,scale) default(none)
