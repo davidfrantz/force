@@ -185,6 +185,7 @@ typedef struct {
   date_t *harm_fit_range; // date range for fitting harmonic
   int harm_fit_nrange; // number of dates for fitting harmonic
   int otsi;           // flag: output time series interpolation
+  int onrt;           // flag: output near-real time product
   int standard;
 } par_tsi_t;
 

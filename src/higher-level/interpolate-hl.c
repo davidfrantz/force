@@ -471,7 +471,7 @@ int s;
 --- tsi:    interpolation parameters
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int interpolate_harmonic(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi){
+int interpolate_harmonic(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, short nodata, par_tsi_t *tsi){
 int t, i, k, nk, p;
 int ncoef;
 double y_pred, y_err;
@@ -487,7 +487,7 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
 
   gsl_set_error_handler_off();
 
-  #pragma omp parallel private(i,t,k,nk,x,cov,y,c,x_pred,y_pred,y_err) shared(mask_,ts,nc,nt,ni,tsi,nodata,ncoef) default(none)
+  #pragma omp parallel private(i,t,k,nk,x,cov,y,c,x_pred,y_pred,y_err) shared(mask_,ts,nc,nt,nr,ni,tsi,nodata,ncoef) default(none)
   {
 
     c = gsl_vector_alloc (ncoef);
@@ -566,6 +566,40 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
         ts->tsi_[i][p] = (short)y_pred;
 
       }
+
+
+      if (tsi->onrt){
+
+        for (t=0, k=0; t<nt; t++){
+
+          if (ts->d_tss[t].ce <= tsi->harm_fit_range[_MAX_].ce) continue;
+
+          if (ts->tss_[t][p] == nodata){
+
+            ts->nrt_[k][p] = (short)nodata;
+
+          } else {
+
+            gsl_vector_set(x_pred, 0, 1.0);
+            gsl_vector_set(x_pred, 1, ts->d_tss[t].ce);
+            gsl_vector_set(x_pred, 2, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
+            gsl_vector_set(x_pred, 3, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
+            if (ncoef > 4) gsl_vector_set(x_pred, 4, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
+            if (ncoef > 5) gsl_vector_set(x_pred, 5, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
+            if (ncoef > 6) gsl_vector_set(x_pred, 6, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
+            if (ncoef > 7) gsl_vector_set(x_pred, 7, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+
+            gsl_multifit_robust_est(x_pred, c, cov, &y_pred, &y_err);
+            ts->nrt_[k][p] = (short)(ts->tss_[t][p] - y_pred);
+
+          }
+
+          k++;
+
+        }
+
+      }
+
       
 
       gsl_matrix_free (x);
@@ -599,7 +633,7 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
 --- tsi:    interpolation parameters
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi){
+int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, short nodata, par_tsi_t *tsi){
 
 
   if (ts->tsi_ == NULL) return CANCEL;
@@ -621,7 +655,7 @@ int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nod
       break;
     case _INT_HARMONIC_:
       cite_me(_CITE_HARMONIC_);
-      interpolate_harmonic(ts, mask_, nc, nt, ni, nodata, tsi);
+      interpolate_harmonic(ts, mask_, nc, nt, nr, ni, nodata, tsi);
       break;
     default:
       printf("unknown INTERPOLATE\n");
