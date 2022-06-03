@@ -198,6 +198,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
+  register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);
 
   // STM parameters
   register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
@@ -1601,6 +1602,18 @@ double tol = 5e-3;
 
     if ((strcmp(phl->tsa.sma.f_emb, "NULL") == 0) && phl->tsa.sma.v){
      printf("FILE_ENDMEM cannot be NULL if INDEX = SMA."); return FAILURE;}
+
+
+    if (phl->tsa.tsi.onrt && phl->tsa.tsi.method != _INT_HARMONIC_){
+      phl->tsa.tsi.onrt = false;
+      printf("Warning: will not output NRT product as interpolation method is not harmonic. Proceed.\n");
+    }
+
+    if (phl->tsa.tsi.onrt && 
+        phl->tsa.tsi.harm_fit_range[_MIN_].ce == phl->tsa.tsi.harm_fit_range[_MAX_].ce){
+      phl->tsa.tsi.onrt = false;
+      printf("Warning: will not output NRT product as harmonic does not include a forecast period. Proceed.\n");
+    }
 
     if (phl->tsa.tsi.harm_fit_range[_MIN_].ce == phl->tsa.tsi.harm_fit_range[_MAX_].ce){
       set_date(&phl->tsa.tsi.harm_fit_range[_MIN_], 1900,  1,  1);

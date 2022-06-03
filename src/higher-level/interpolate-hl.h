@@ -49,7 +49,7 @@ typedef struct {
   float   *max_w;
 } rbf_t;
 
-int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi);
+int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, short nodata, par_tsi_t *tsi);
 
 #ifdef __cplusplus
 }
