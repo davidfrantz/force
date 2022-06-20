@@ -6,9 +6,9 @@ Develop version
 FORCE-dev
 ---------
 
-* **General**
+- **General**
 
-  * FORCE comes with some default output file formats, 
+  - FORCE comes with some default output file formats, 
     most noteably the striped GTiff default format with LZW compression.
 
     It is now possible that users can define their own output file format with custom GDAL options.
@@ -36,9 +36,9 @@ FORCE-dev
 
     Thanks to Max Freudenberg for suggesting and testing this feature.
 
-* **FORCE L2PS**
+- **FORCE L2PS**
 
-  * scattered nodata pixels occured in Sentinel-2 imagery at random locations.
+  - scattered nodata pixels occured in Sentinel-2 imagery at random locations.
     This is because the cirrus band TOA reflectance can be 0 or negative over dark surfaces (e.g. water or shadow).
     As this is physically impossible (and we cannot recover from this during atmospheric correction), FORCE screens
     for *bad* pixels and masks them out.
@@ -46,19 +46,19 @@ FORCE-dev
     This condition was now relaxed for the cirrus band.
     Thanks to Max Helleis for bringing this up.
 
-  * Added a small hiccup when parsing sensor ID. 
+  - Added a small hiccup when parsing sensor ID. 
     Was only relevant when it failed by giving wrong input data.
 
-* **FORCE HLPS**
+- **FORCE HLPS**
 
-  * in ``force-higher-level``: 
+  - in ``force-higher-level``: 
     since compiling against python for developing the UDF sub-module,
     ``force-higher-level`` did not honor ``ctrl+c`` anymore to abort the
     processing, and the program needed to be killed explicitly.
     Florian Katerndahl provided a fix for this! 
     ``ctrl+c`` works again.
 
-  * in ``force-higher-level``, TSA sub-module:
+  - in ``force-higher-level``, TSA sub-module:
     New indices were added:
     
     - CCI (provided by J. Antonio Guzmán Q.)
@@ -69,13 +69,13 @@ FORCE-dev
 
     J. Antonio Guzmán Q. additionally changed the scaling factor for simple ratio indices like CIre (was 10000, is 1000).
 
-  * in ``force-higher-level``, TSA sub-module:
+  - in ``force-higher-level``, TSA sub-module:
     added the harmonic interpolation method from Zhu et al. 2015 (http://dx.doi.org/10.1016/j.rse.2015.02.009).
     This can be used with ``INTERPOLATE = HARMONIC``.
     ``HARMONIC_MODES = 3`` defines how many modes per season are used, 
     i.e. uni-modal (1), bi-modal (2), or tri-modal (3).
 
-  * in ``force-higher-level``, TSA sub-module:
+  - in ``force-higher-level``, TSA sub-module:
     added a simple near-real time monitoring component.
     When using the harmonic interpolation, the user can fit the harmonic to a subset of the time period with
     ``HARMONIC_FIT_RANGE``.
@@ -89,24 +89,24 @@ FORCE-dev
     This can be used to identify changes in the present relative to the "usual" seasonality observed in the past.
 
 
-  * in ``force-higher-level``, TSA sub-module (and probably others):
+  - in ``force-higher-level``, TSA sub-module (and probably others):
     Stefan Ernst noted that the TSA submodule did not produce any output when using Landsat 7, Landsat 9 and Sentinel-2 simultaneously.
     This gives us the unusual situation that we have >= 3 observations per day.
 
     This caused a divide-by-0 error in the linear interpolation that is used for detecting remaining noise in the time series.
     This is now fixed by simply computing the average when we have more then 2 obs/day.
 
-  * in ``force-higher-level``, ML sub-module:
+  - in ``force-higher-level``, ML sub-module:
     a stack smashing bug occured when using more than 8 modelsets.
     This is now fixed. Thanks to Fabian Thiel for finding this.
 
-* **FORCE AUX**
+- **FORCE AUX**
 
-  * in ``force-qai-inflate``:
+  - in ``force-qai-inflate``:
     changed output nodata from 1 (which is a valid value) to 255.
     Thanks to Fabian Thiel for bringing this up.
 
-  * in ``force-lut-modis``: 
+  - in ``force-lut-modis``: 
     Vincent Schut reportet that the program does not properly detect a 504 response from the server,
     and hangs infinitely.
     Thanks to Florian Katerndahl for adding a fix that catches HTTP responses >= 400.
