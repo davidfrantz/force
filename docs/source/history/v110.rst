@@ -7,79 +7,54 @@ Release: 11.02.2018
 
 - **FORCE L1AS**
 
-  Download and management support for Sentinel-2B, higher level support was already implemented in v. 1.0 beta.
-  
-  The Sentinel-2 downloader/archiver has 4 new mandatory arguments/filters: sensing-start-time sensing-end-time min-cloud-cover max-cloud-cover.
-  
-  Fixed a bug when importing Landsat images with white-space characters in the directory name; now, this throws an error.
+  - Download and management support for Sentinel-2B, higher level support was already implemented in v. 1.0 beta.
+  - The Sentinel-2 downloader/archiver has 4 new mandatory arguments/filters: sensing-start-time sensing-end-time min-cloud-cover max-cloud-cover.
+  - Fixed a bug when importing Landsat images with white-space characters in the directory name; now, this throws an error.
 
   
 - **FORCE L2PS**
 
-  Reduced memory requirements for holding TOA reflectance internally by ~0.72GB (Landsat 4-7), ~0.95GB (Landsat 8), ~2.92GB (Sentinel-2)
-  
-  Reduced memory requirements when correcting for adjacency effects by ~1.20GB (Landsat 4-8), ~2.24GB (Sentinel-2)
-  
-  Fixed a bug in the BRDF correction of the Landsat 8 SWIR-2 band.
-  
-  BRDF correction is now available for Sentinel-2.
-  
-  Relative Spectral Response Function of Sentinel-2B is now included. 
-  
-  Relative Spectral Response Function of Landsat 4 TM was updated. 
-  
-  Improved gaseous vapor transmittance calculations. The water vapor absorption spectrum was updated to the HITRAN 2016 database (obtained from `HITRAN on the Web <http://hitran.iao.ru/>`_) The computation of water vapor absorption and water vapor and ozone transmittance was corrected: a numerical error in calculating transmittance resulted in increased SWIR-1 reflectance in Landsat-TM data.
-  
-  The spectral resolution of all tables was reduced from 0.1 nm to 1 nm.
-  
-  Added bandnames to all output products.
-  
-  Cloud shadow matching for Sentinel-2 images is now performed on the 20m resolution, which significantly speeds up the work, especially for poorly illuminated winter images where the base height is iterated in small vertical increments.
+  - Reduced memory requirements for holding TOA reflectance internally by ~0.72GB (Landsat 4-7), ~0.95GB (Landsat 8), ~2.92GB (Sentinel-2)
+  - Reduced memory requirements when correcting for adjacency effects by ~1.20GB (Landsat 4-8), ~2.24GB (Sentinel-2)
+  - Fixed a bug in the BRDF correction of the Landsat 8 SWIR-2 band.
+  - BRDF correction is now available for Sentinel-2.
+  - Relative Spectral Response Function of Sentinel-2B is now included. 
+  - Relative Spectral Response Function of Landsat 4 TM was updated. 
+  - Improved gaseous vapor transmittance calculations. The water vapor absorption spectrum was updated to the HITRAN 2016 database (obtained from `HITRAN on the Web <http://hitran.iao.ru/>`_) The computation of water vapor absorption and water vapor and ozone transmittance was corrected: a numerical error in calculating transmittance resulted in increased SWIR-1 reflectance in Landsat-TM data.
+  - The spectral resolution of all tables was reduced from 0.1 nm to 1 nm.
+  - Added bandnames to all output products.
+  - Cloud shadow matching for Sentinel-2 images is now performed on the 20m resolution, which significantly speeds up the work, especially for poorly illuminated winter images where the base height is iterated in small vertical increments.
 
   
 - **FORCE L3PS**
 
-  Added new parameter OFF_SEASON, which allows the compositing algorithm to select clear-sky observations that are not within the prime season of interest. This may be advantageous if gap-free images are needed. This parameter also affects the temporal-spectral metrics. If enabled, the statistics will be derived over the complete year, instead of the prime season of interest.
-  
-  Added new parameters OUTPUT_Q25, OUTPUT_Q50, OUTPUT_Q75 and OUTPUT_IQR that allow the computation of 25%/50%/75% quantiles and interquartile range, defined as Q75 - Q25.
-  
-  Added new parameter LSP_START, which allows you to input LSP data with a custom starting point. Previously, the LSP data had to be provided as YEAR*365+DOY. The new parameter specifies an offset as Y*365+DOY. Thus, if the LSP are provided as before, LSP_START = 1. If the LSP data would be provided relative to January 1 2000, LSP_START = 730001, i.e. 2000*365+1.
-  
-  Fixed a bug, which resulted in no data when using the phenology-adaptive compositing with only one year of LSP data.
-  
-  Removed unused parameter LSP_NUM_YEAR.
-  
-  Added new program force-level3-mosaic, which generates virtual mosaics from tiled Level 3 products in Virtual Dataset format. Due to performance considerations, it is advised to enable tiled output in force-level3, and if necessary, use this new tool to create mosaics. force--quicklook-level3 was updated to generate quicklooks from the vrt mosaics.
-  
-  Added bandnames to all output products.
-  
-  Negative tile numbers are now allowed.
+  - Added new parameter OFF_SEASON, which allows the compositing algorithm to select clear-sky observations that are not within the prime season of interest. This may be advantageous if gap-free images are needed. This parameter also affects the temporal-spectral metrics. If enabled, the statistics will be derived over the complete year, instead of the prime season of interest.
+  - Added new parameters OUTPUT_Q25, OUTPUT_Q50, OUTPUT_Q75 and OUTPUT_IQR that allow the computation of 25%/50%/75% quantiles and interquartile range, defined as Q75 - Q25.
+  - Added new parameter LSP_START, which allows you to input LSP data with a custom starting point. Previously, the LSP data had to be provided as YEAR*365+DOY. The new parameter specifies an offset as Y*365+DOY. Thus, if the LSP are provided as before, LSP_START = 1. If the LSP data would be provided relative to January 1 2000, LSP_START = 730001, i.e. 2000*365+1.
+  - Fixed a bug, which resulted in no data when using the phenology-adaptive compositing with only one year of LSP data.
+  - Removed unused parameter LSP_NUM_YEAR.
+  - Added new program force-level3-mosaic, which generates virtual mosaics from tiled Level 3 products in Virtual Dataset format. Due to performance considerations, it is advised to enable tiled output in force-level3, and if necessary, use this new tool to create mosaics. force--quicklook-level3 was updated to generate quicklooks from the vrt mosaics.
+  - Added bandnames to all output products.
+  - Negative tile numbers are now allowed.
 
   
 - **FORCE TSA**
 
-  Added product id as metadata for time series stack output.
-  
-  Parallel processing can be used. New parameter was added to parameter file. Computation of TC-DI is currently not parallelized.
-  
-  Added bandnames to all output products.
-  
-  Negative tile numbers are now allowed.
+  - Added product id as metadata for time series stack output.
+  - Parallel processing can be used. New parameter was added to parameter file. Computation of TC-DI is currently not parallelized.
+  - Added bandnames to all output products.
+  - Negative tile numbers are now allowed.
 
   
 - **FORCE WVDB**
 
-  Collection 5 geometa tables were removed from LAADS' FTP server, leaving force-lut-modis nonfunctional. The code was updated to make use of collection 6.
-  
-  Discovered a randomly occurring bug, seemingly related to a data race in localtime(): the function timer was set to tomorrow, resulting in a never-ending while loop. Measures were implemented to avoid this data race.
+  - Collection 5 geometa tables were removed from LAADS' FTP server, leaving force-lut-modis nonfunctional. The code was updated to make use of collection 6.
+  - Discovered a randomly occurring bug, seemingly related to a data race in localtime(): the function timer was set to tomorrow, resulting in a never-ending while loop. Measures were implemented to avoid this data race.
 
   
 - **FORCE AUX**
 
-  Added a new program force, which prints the version number and a short disclaimer.
-  
-  Fixed a bug of missing resolution in force-qai-inflate outputs.
-  
-  force-tabulate-grid was completely overworked. Instead of a table with coordinates, a shapefile is directly generated, which let's you easily relate to the processing grid.
-  
-  Added bandnames to all output products (force-qai-inflate).
+  - Added a new program force, which prints the version number and a short disclaimer.
+  - Fixed a bug of missing resolution in force-qai-inflate outputs.
+  - force-tabulate-grid was completely overworked. Instead of a table with coordinates, a shapefile is directly generated, which let's you easily relate to the processing grid.
+  - Added bandnames to all output products (force-qai-inflate).
