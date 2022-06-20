@@ -9,28 +9,20 @@ FORCE uses a three-level versioning scheme, e.g. v. 3.0.1.
 It is highly recommended to update once a new release is available.
 
 
-1st level = major release
--------------------------
+- 1st level = major release:
+  Disruptive changes will result in a new major release.
 
-Disruptive changes will result in a new major release.
+- 2nd level = major release:
+  Major changes like completely new features will result in a new major release.
 
-
-2nd level = major release
--------------------------
-
-Major changes like completely new features will result in a new major release.
-
-
-3rd level = patch level
------------------------
-
-Incremental patches, additions, and bugfixes will result in a new patch level release.
+- 3rd level = patch level: 
+  Incremental patches, additions, and bugfixes will result in a new patch level release.
 
 
 .. toctree::
    :maxdepth: 1
 
    vdev.rst
-   v3*.rst
-   v2*.rst
-   v1*.rst
+   v3/*.rst
+   v2/*.rst
+   v1/*.rst
