@@ -3,9 +3,6 @@
 Develop version
 ===============
 
-FORCE-dev
----------
-
 - **General**
 
   - FORCE comes with some default output file formats, 

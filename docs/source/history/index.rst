@@ -20,10 +20,11 @@ It is highly recommended to update once a new release is available.
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :caption: Releases
    :glob:
 
    vdev.rst
-   v3/*.rst
-   v2/*.rst
-   v1/*.rst
+   v3/v*
+   v2/*
+   v1/*
