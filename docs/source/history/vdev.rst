@@ -59,15 +59,15 @@ FORCE-dev
     ``ctrl+c`` works again.
 
   - in ``force-higher-level``, TSA sub-module:
-    New indices were added:
     
-    - CCI (provided by J. Antonio Guzmán Q.)
-    - EVI2 (suggested by Jonas Ardo)
-    - Continuum Removal of SWIR1
+    - New indices were added:
+    
+      - CCI (provided by J. Antonio Guzmán Q.)
+      - EVI2 (suggested by Jonas Ardo)
+      - Continuum Removal of SWIR1
 
-    A recipe for adding a new index was added to the repository in order to facilitate users the implementation of additional indices.
-
-    J. Antonio Guzmán Q. additionally changed the scaling factor for simple ratio indices like CIre (was 10000, is 1000).
+    - A recipe for adding a new index was added to the repository in order to facilitate users the implementation of additional indices.
+    - J. Antonio Guzmán Q. additionally changed the scaling factor for simple ratio indices like CIre (was 10000, is 1000).
 
   - in ``force-higher-level``, TSA sub-module:
     added the harmonic interpolation method from Zhu et al. 2015 (http://dx.doi.org/10.1016/j.rse.2015.02.009).
