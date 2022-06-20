@@ -25,7 +25,7 @@ It is highly recommended to update once a new release is available.
    :glob:
    :reversed:
 
-   vdev.rst
-   v3/v*
-   v2/*
    v1/*
+   v2/*
+   v3/v*
+   vdev.rst
