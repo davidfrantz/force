@@ -1,5 +1,25 @@
 .. _v3:
 
+FORCE v. 3.7.7
+--------------
+
+Release: 03.03.2022
+
+* **FORCE L2PS**
+
+  * Some smaller parts of S2 imagery on the left side of the swath were set to nodata.
+    This version improves the angle parsing of the Sentinel-2 metadata.
+    Thanks to Fabian Thiel for noting this issue.
+
+* **FORCE AUX**
+
+  * ``force-procmask``: small fix when -d is given
+
+  * ``force-synthmix`` in Docker stopped working at some point due to changes in the Docker base image.
+    The python shebang was adapted to account for that.
+    Thanks to Fabian Thiel for noting this issue.
+
+
 FORCE v. 3.7.6
 --------------
 
