@@ -23,6 +23,7 @@ It is highly recommended to update once a new release is available.
    :maxdepth: 2
    :caption: Releases
    :glob:
+   :reversed:
 
    vdev.rst
    v3/v*
