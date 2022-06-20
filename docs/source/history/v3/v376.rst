@@ -1,0 +1,43 @@
+.. _v376:
+
+FORCE v. 3.7.6
+==============
+
+Release: 14.02.2022
+
+- **General**
+
+  - Landsat 9 support has been implemented for Level 2 and Higher Level Processing.
+    
+    - Level 2: processing a Landsat 9 image is the same as processing Landsat 8
+    - Higher Level: a new sensor tag has been added: ``LND09``
+
+- **FORCE HLPS**
+
+  - in ``force-higher-level``, UDF sub-module:
+    Fixed a bug that occured when using long time series.
+    An integer overflow occured in the indexing variable when copying data from the 
+    C arrays to Python objects.
+
+  - in ``force-higher-level``, feature-based sub-modules:
+    Fixed a bug that occured when using many features of the same multiband image.
+    Before, there was a 1024 character limitation for reading lines from the parameter file.
+    This was now increased to 65536 characters.
+    Thanks to Jan Hemmerling for reporting this issue.
+
+  - in ``force-higher-level``, TSA sub-module:
+    Daniel Scheffler fixed a bug in MSRre-like indices to prevent truncation.
+
+- **FORCE L2PS**
+
+  - added some new plots to ``force-level2-report`` and fixed the issue of "empty" sensors.
+
+
+- **FORCE L1AS**
+
+  - Stefan Ernst fixed an issue in ``force-level1-csd`` that coordinates were reversed when using vector geometries as AOI.
+    Instead of WFS-querying a remote server, a local copy of the MGRS/WRS-2 grids will be downloaded now.
+
+- **FORCE AUX**
+
+  - ``force-procmask`` was changed to Unix-Stype usage.

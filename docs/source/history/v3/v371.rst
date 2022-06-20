@@ -1,0 +1,16 @@
+.. _v371:
+
+FORCE v. 3.7.1
+==============
+
+Release: 11.10.2021
+
+- **General changes**
+
+  - Added debug Docker image
+
+
+- **FORCE WVDB**
+
+  - Added constraints to prevent download attempts of future data.
+    Thanks to Florian Katerndahl for noticing and working on this issue.

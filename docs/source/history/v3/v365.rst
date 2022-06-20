@@ -1,0 +1,16 @@
+.. _v365:
+
+FORCE v. 3.6.5
+==============
+
+Release: 19.03.2021
+
+- **General changes**
+
+  - GitHub discussions
+    GitHub discussions is the new place for discussing and asking for help from the FORCE community.
+    The Google group is not used anymore.
+
+- **FORCE L2PS**
+
+  - fixed bug introduced with 3.6.4

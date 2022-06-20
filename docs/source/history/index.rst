@@ -21,6 +21,7 @@ It is highly recommended to update once a new release is available.
 
 .. toctree::
    :maxdepth: 1
+   :glob:
 
    vdev.rst
    v3/*.rst

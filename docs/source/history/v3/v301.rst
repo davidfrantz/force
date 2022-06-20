@@ -1,0 +1,16 @@
+.. _v301:
+
+FORCE v. 3.0.1
+==============
+
+Release: 12.03.2020
+
+- **FORCE HIGHER LEVEL**
+
+  - in force-higher-level:
+  
+    fixed GDAL PAM warning messages.
+    
+  - in force-higher-level:
+  
+    fixed nodata warning messages when no processing mask is available in block.

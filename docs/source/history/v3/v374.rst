@@ -1,0 +1,22 @@
+.. _v374:
+
+FORCE v. 3.7.4
+==============
+
+Release: 12.11.2021
+
+- **FORCE L1AS**
+
+  - Stefan Ernst fixed some issues in force-level1-csd regarding checks for coorindate ranges and quotes.
+
+- **FORCE HLPS**
+
+  - in force-higher-level, all sub-modules:
+    Implemented a fix to prevent a segfault when we have many good cluster in the
+    spectral adjustment.
+
+- **FORCE AUX**
+
+  - fixed an error in ``force-tile-extent``, which still used the *old* syntax of
+    ``force-cube`` in its call.
+    Thanks to Fabian Thiel for the notification.

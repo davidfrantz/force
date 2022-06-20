@@ -1,0 +1,12 @@
+.. _v321:
+
+FORCE v. 3.2.1
+==============
+
+Release: 14.04.2020
+
+- **FORCE HIGHER LEVEL**
+
+  - in force-higher-level: 
+  
+    fixed a small issue when the processing mask included nodata values.

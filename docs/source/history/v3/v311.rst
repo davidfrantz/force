@@ -1,0 +1,16 @@
+.. _v311:
+
+FORCE v. 3.1.1
+==============
+
+Release: 26.03.2020
+
+- **General changes**
+
+  - Added a small bash script to increase the version number.
+
+- **FORCE HIGHER LEVEL**
+
+  - in force-higher-level: 
+  
+    fixed a small issue that prevented outlier detection if we have a very low data availability.
