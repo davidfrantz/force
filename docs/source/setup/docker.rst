@@ -125,7 +125,7 @@ For an alias, add a line to ``$HOME/.bashrc`` (log off and on to take effect):
 
   .. code-block:: bash
 
-    alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\ --env FORCE_CREDENTIALS=/app/credentials -v $HOME:/app/credentials davidfrantz/force"
+    alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\" --env FORCE_CREDENTIALS=/app/credentials -v $HOME:/app/credentials davidfrantz/force"
 
 After defining the alias, you can call FORCE with correct user and mounted volume - but less Docker boilerplate commands:
 
