@@ -400,7 +400,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Integer. Valid range: [1,365]
     | ``MOVING_MAX = 16``
-    
+      
   * Sigma (width of the Gaussian bell) for the RBF filter in days.
     For each interpolation date, a Gaussian kernel is used to smooth the observations.
     The smoothing effect is stronger with larger kernels and the chance of having nodata values is lower.
@@ -529,6 +529,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
   .. note::
      The Land Surface Phenology (LSP) options are only available if FORCE was compiled with SPLITS (see :ref:`install` section).
+     This method is deprecated and won't be available anymore.
 
   * For estimating LSP for one year, some data from the previous/next year need to be considered to find the seasonal minima, which define a season.
     The parameters are given in DOY, i.e. LSP_DOY_PREV_YEAR = 273, and LSP_DOY_NEXT_YEAR = 91 will use all observations from October (Year-1) to March (Year+1)

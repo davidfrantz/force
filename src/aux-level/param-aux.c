@@ -1394,7 +1394,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# Interpolation method. You can choose between no, linear, moving average\n");
     fprintf(fp, "# or Radial Basis Function Interpolation.\n");
-    fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF}\n");
+    fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF,HARMONIC}\n");
   }
   fprintf(fp, "INTERPOLATE = RBF\n");
 
