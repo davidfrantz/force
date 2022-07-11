@@ -48,6 +48,13 @@ Develop version
 
 - **FORCE HLPS**
 
+  - deprecation note:
+
+    The option to use the SPLITS algorithm to derive LSP metrics in ``force-higher-level``
+    will be deprecated in with version 3.7.9.
+
+    Please use the polar-based LSP retrieval method instead (recommended anyway).
+
   - in ``force-higher-level``: 
     since compiling against python for developing the UDF sub-module,
     ``force-higher-level`` did not honor ``ctrl+c`` anymore to abort the
