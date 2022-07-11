@@ -114,13 +114,3 @@ Related Links
    refs.rst
    refs-applied.rst
 
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Other
-   :hidden:
-
-   proj.rst
-   issues.rst
-   contact.rst
-
