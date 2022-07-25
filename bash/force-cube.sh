@@ -150,7 +150,7 @@ function cubethis(){
 
     VALID=$($RASTER_INFO_EXE -stats "$FOUT" | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
     rm "$FOUT.aux.xml"
-    debug "max: $VALID"
+    debug "valid: $VALID"
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
@@ -174,6 +174,16 @@ function cubethis(){
     if [ $? -ne 0 ]; then
       echoerr "warping failed."; exit 1
     fi
+
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
+    rm "$FOUT.aux.xml"
+    debug "valid: $VALID"
+
+    if [ $VALID -eq 0 ]; then
+      rm "$FOUT"
+      exit 1
+    fi
+
 
     if [ "$EXIST" == "true" ]; then
       debug "building mosaic"
