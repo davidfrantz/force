@@ -148,7 +148,7 @@ function cubethis(){
       echoerr "rasterizing failed."; exit 1
     fi
 
-    VALID=$($RASTER_INFO_EXE -stats "$FOUT" | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" 2>/dev/null | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
     rm "$FOUT.aux.xml"
     debug "valid: $VALID"
 
@@ -175,7 +175,7 @@ function cubethis(){
       echoerr "warping failed."; exit 1
     fi
 
-    VALID=$($RASTER_INFO_EXE -stats "$FOUT" | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" 2>/dev/null | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
     rm "$FOUT.aux.xml"
     debug "valid: $VALID"
 
