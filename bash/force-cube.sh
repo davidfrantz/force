@@ -148,11 +148,11 @@ function cubethis(){
       echoerr "rasterizing failed."; exit 1
     fi
 
-    MAX=$($RASTER_INFO_EXE -stats "$FOUT" | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
     rm "$FOUT.aux.xml"
-    debug "max: $MAX"
+    debug "max: $VALID"
 
-    if [ $MAX -lt 1 ]; then
+    if [ $VALID -eq 0 ]; then
       rm "$FOUT"
       exit 1
     fi
