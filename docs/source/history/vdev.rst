@@ -115,5 +115,10 @@ Develop version
     and hangs infinitely.
     Thanks to Florian Katerndahl for adding a fix that catches HTTP responses >= 400.
 
+  - in ``force-cube``:
+    If a resulting image is completely nodata, it will automatically be removed.
+    This works now for both raster-to-raster and vector-to-raster.
+    Thanks for László Henits for bringing this up. 
+    Thanks to Stefan Ernst for suggesting a fix.
 
 #-- No further changes yet.
