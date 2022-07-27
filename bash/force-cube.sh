@@ -154,6 +154,9 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
+      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
+        rmdir "$DOUT/$TILE"
+      fi
       exit 1
     fi
 
@@ -181,6 +184,9 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
+      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
+        rmdir "$DOUT/$TILE"
+      fi
       exit 1
     fi
 
