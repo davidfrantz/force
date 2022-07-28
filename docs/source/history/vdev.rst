@@ -118,6 +118,7 @@ Develop version
   - in ``force-cube``:
     If a resulting image is completely nodata, it will automatically be removed.
     This works now for both raster-to-raster and vector-to-raster.
+    Empty tiles will be removed as well.
     Thanks for László Henits for bringing this up. 
     Thanks to Stefan Ernst for suggesting a fix.
 
