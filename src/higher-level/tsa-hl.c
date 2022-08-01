@@ -70,7 +70,7 @@ int info_nrt(brick_compile_info_t *info, int o, int nr, tsa_t *ts, par_hl_t *phl
   info[o].bandname = NULL;
   info[o].date     = NULL;
   info[o].prodtype = _nrt_;
-  info[o].enable   = true;
+  info[o].enable   = phl->tsa.tsi.onrt;
   info[o].write    = phl->tsa.tsi.onrt;
   info[o].ptr      = &ts->nrt_;
 
