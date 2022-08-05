@@ -223,6 +223,9 @@ if [ $# -ne 4 ]; then
 fi
 
 which_satellite
+if [ $LANDSAT -eq 1 ]; then
+  printf "%s\n" "" "Warning: Google Cloud Storage only hosts Landsat Collection 1 data." "It is strongly recommended to use Collection 2 data: https://www.usgs.gov/landsat-missions/landsat-collection-2" "Collection 2 data is provided by the USGS, you may use https://github.com/ernstste/landsatlinks to query the catalogue and create download links."
+fi
 
 # ============================================================
 # Check user input and set up variables
