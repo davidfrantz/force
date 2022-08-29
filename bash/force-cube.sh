@@ -64,7 +64,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -v = show version
   -i = show program's purpose
   -r = resampling method
-       any GDAL resampling method for raster data, e.g. cubic (default)
+       any GDAL resampling method for raster data, e.g. near (default)
        is ignored for vector data
   -s = pixel resolution of cubed data, defaults to 10
   -a = optional attribute name for vector data. $PROG will burn these values 
@@ -216,7 +216,7 @@ ARGS=`getopt -o hvir:s:o:b:j:a:n:t:l: --long help,version,info,resample:,resolut
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
-RESAMPLE="cubic"
+RESAMPLE="near"
 RES=10
 DOUT=$PWD
 BASE="DEFAULT"
