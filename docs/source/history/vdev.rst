@@ -122,4 +122,8 @@ Develop version
     Thanks for László Henits for bringing this up. 
     Thanks to Stefan Ernst for suggesting a fix.
 
+  - in ``force-cube``:
+    Changed the default resampling to nearest neighbor in accordance with the gdalwarp utility.
+    Thanks to Marcel Schwieder for suggesting and modifying.
+
 #-- No further changes yet.
