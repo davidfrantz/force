@@ -586,6 +586,7 @@ GDALDatasetH fp_;
     }
   }
 
+  set_brick_parentname(DN, pl2->d_temp);
   set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
   set_brick_dirname(DN, pl2->d_level1);
@@ -1173,6 +1174,7 @@ int svgrid = 5000;
     set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
   }
 
+  set_brick_parentname(DN, pl2->d_temp);
   set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
   set_brick_dirname(DN, pl2->d_level1);
