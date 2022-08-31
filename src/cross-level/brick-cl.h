@@ -51,6 +51,7 @@ extern "C" {
 typedef struct {
   char name[NPOW_10];    // name of brick
   char product[NPOW_03]; // product short name
+  char pname[NPOW_10];   // dirpath  for parent folder
   char dname[NPOW_10];   // dirpath  for product
   char fname[NPOW_10];   // filename for product
   int sid;               // sensor ID
@@ -126,6 +127,8 @@ void     set_brick_name(brick_t *brick, const char *name);
 void     get_brick_name(brick_t *brick, char name[], size_t size);
 void     set_brick_product(brick_t *brick, const char *product);
 void     get_brick_product(brick_t *brick, char product[], size_t size);
+void     set_brick_parentname(brick_t *brick, const char *pname);
+void     get_brick_parentname(brick_t *brick, char pname[], size_t size);
 void     set_brick_dirname(brick_t *brick, const char *dname);
 void     get_brick_dirname(brick_t *brick, char dname[], size_t size);
 void     set_brick_filename(brick_t *brick, const char *fname);

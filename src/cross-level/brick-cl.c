@@ -145,6 +145,7 @@ int b;
 
   set_brick_name(brick, from->name);
   set_brick_product(brick, from->product);
+  set_brick_parentname(brick, from->pname);
   set_brick_dirname(brick, from->dname);
   set_brick_filename(brick, from->fname);
   set_brick_sensorid(brick, from->sid);
@@ -496,6 +497,7 @@ int i;
 
   copy_string(brick->name,      NPOW_10, "NA");
   copy_string(brick->product,   NPOW_03, "NA");
+  copy_string(brick->pname,     NPOW_10, "NA");
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
 
@@ -774,7 +776,7 @@ int i = 0;
   CPLUnlockFile(lock);
   lock = NULL;
 
-  
+
   for (f=0; f<nfiles; f++){
     
     if (brick->explode){
@@ -1765,6 +1767,35 @@ void get_brick_product(brick_t *brick, char product[], size_t size){
 
 
   copy_string(product, size, brick->product);
+
+  return;
+}
+
+
+/** This function sets the parent directory-name of a brick
+--- brick:  brick
+--- pname:  parent directory-name
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_parentname(brick_t *brick, const char *pname){
+
+
+  copy_string(brick->pname, NPOW_10, pname);
+
+  return;
+}
+
+
+/** This function gets the parent directory-name of a brick
+--- brick:  brick
+--- pname:  parent directory-name (modified)
+--- size:   length of the buffer for pname
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_brick_parentname(brick_t *brick, char pname[], size_t size){
+
+
+  copy_string(pname, size, brick->pname);
 
   return;
 }
