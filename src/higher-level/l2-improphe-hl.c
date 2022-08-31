@@ -115,6 +115,7 @@ int nchar;
     get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
+  set_brick_parentname(brick, phl->d_higher);
   set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, prodname);
