@@ -33,6 +33,8 @@ Develop version
 
     Thanks to Max Freudenberg for suggesting and testing this feature.
 
+  - A new feature was added to write a provenance table to the output directory to trace input-output relations
+
 - **FORCE L2PS**
 
   - scattered nodata pixels occured in Sentinel-2 imagery at random locations.
