@@ -2,7 +2,7 @@ name: Docker-debug
 
 on:
   push:
-    branches: [master, develop]
+    branches: [main, develop]
   release:
     types: [published]
   repository_dispatch:
@@ -29,7 +29,7 @@ jobs:
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "main" ] && VERSION=latest
           [ "$VERSION" == "develop" ] && VERSION=dev
           echo VERSION=$VERSION
           echo DOCKER=$DOCKER_USER/$IMAGE_NAME:$VERSION-debug

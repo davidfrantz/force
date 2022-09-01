@@ -20,7 +20,7 @@ If asking a question, please tell us who you are, and what your background is.
 And super-important, please report back whether the answer was helpful, and make sure to mark useful responses as ``answered``.
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
-For more information, see our [code of conduct](https://github.com/davidfrantz/force/blob/master/CODE_OF_CONDUCT.md).
+For more information, see our [code of conduct](https://github.com/davidfrantz/force/blob/main/CODE_OF_CONDUCT.md).
 
 Contributors should ideally subscribe to these channels and follow them in order to keep up to date on what's happening in FORCE.
 Answering questions is an excellent and visible way to help our community, and also demonstrates your expertise.
@@ -115,5 +115,5 @@ if (a > 0){
 New files must include the appropriate license header boilerplate and the author name(s) and contact email(s).
 
 Please pay special attention to citing research and properly acknowledging code that you may adapt for inclusion in FORCE.
-See this [example](https://github.com/davidfrantz/force/blob/master/src/lower-level/equi7-ll.c).
-If applicable, make use of the [citeme](https://github.com/davidfrantz/force/blob/master/src/cross-level/cite-cl.c) functionality, e.g. ``cite_me(_CITE_EQUI7_);``
+See this [example](https://github.com/davidfrantz/force/blob/main/src/lower-level/equi7-ll.c).
+If applicable, make use of the [citeme](https://github.com/davidfrantz/force/blob/main/src/cross-level/cite-cl.c) functionality, e.g. ``cite_me(_CITE_EQUI7_);``
