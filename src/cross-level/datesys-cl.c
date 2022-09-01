@@ -51,6 +51,10 @@ struct tm *timeinfo;
   d->doy   = md2doy(d->month,d->day);
   d->week  = doy2week(d->doy);
   d->ce    = doy2ce(d->doy,d->year);
+  d->hh    = timeinfo->tm_hour;
+  d->mm    = timeinfo->tm_min;
+  d->ss    = timeinfo->tm_sec;
+  d->tz    = 99;
 
   return;
 }
