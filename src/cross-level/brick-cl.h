@@ -34,6 +34,7 @@ Image header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/date-cl.h"
+#include "../cross-level/datesys-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/warp-cl.h"
 #include "../cross-level/dir-cl.h"
@@ -54,6 +55,8 @@ typedef struct {
   char pname[NPOW_10];   // dirpath  for parent folder
   char dname[NPOW_10];   // dirpath  for product
   char fname[NPOW_10];   // filename for product
+  char  **provenance;    // input data
+  int nprovenance;       // number of input data
   int sid;               // sensor ID
   int open;              // open mode
   int explode;           // explode to single-bands?
@@ -133,6 +136,10 @@ void     set_brick_dirname(brick_t *brick, const char *dname);
 void     get_brick_dirname(brick_t *brick, char dname[], size_t size);
 void     set_brick_filename(brick_t *brick, const char *fname);
 void     get_brick_filename(brick_t *brick, char fname[], size_t size);
+void     set_brick_nprovenance(brick_t *brick, int n);
+int      get_brick_nprovenance(brick_t *brick);
+void     set_brick_provenance(brick_t *brick, int id, const char *pname);
+void     get_brick_provenance(brick_t *brick, int id, char pname[], size_t size);
 void     set_brick_sensorid(brick_t *brick, int sid);
 int      get_brick_sensorid(brick_t *brick);
 void     set_brick_format(brick_t *brick, gdalopt_t *gdalopt);

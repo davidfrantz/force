@@ -134,7 +134,7 @@ int datatype = get_brick_datatype(brick);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
-int b;
+int b, p;
 
   if (from->chunk < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
@@ -149,6 +149,11 @@ int b;
   set_brick_dirname(brick, from->dname);
   set_brick_filename(brick, from->fname);
   set_brick_sensorid(brick, from->sid);
+
+  set_brick_nprovenance(brick, from->nprovenance);
+  for (p=0; p<from->nprovenance; p++){
+    set_brick_provenance(brick, p, from->provenance[p]);
+  }
 
   set_brick_geotran(brick, from->geotran);
   set_brick_nbands(brick, nb);
@@ -200,7 +205,10 @@ int nb;
   brick->scale       = NULL;
   brick->wavelength  = NULL;
   brick->date        = NULL;
-  
+
+  if (brick->provenance != NULL) free_2D((void**)brick->provenance, brick->nprovenance);
+  brick->provenance = NULL;
+
   if (brick->unit     != NULL) free_2D((void**)brick->unit,     nb);
   if (brick->domain   != NULL) free_2D((void**)brick->domain,   nb);
   if (brick->bandname != NULL) free_2D((void**)brick->bandname, nb);
@@ -501,6 +509,9 @@ int i;
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
 
+  brick->nprovenance = 0;
+  brick->provenance  = NULL;
+
   brick->sid = -1;
   default_gdaloptions(_FMT_GTIFF_, &brick->format);
   brick->open = OPEN_FALSE;
@@ -578,7 +589,7 @@ int b;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_brick_info(brick_t *brick){
-int b;
+int b, p;
 
 
   printf("\nbrick info for %s - %s - SID %d\n", brick->name, brick->product, brick->sid);
@@ -588,6 +599,7 @@ int b;
   printf("datatype %d with %d bytes\n", 
     brick->datatype, brick->byte);
   printf("filename: %s/%s\n", brick->dname, brick->fname);
+  for (p=0; p<brick->nprovenance; p++) printf("input #%04d: %s\n", brick->nprovenance+1, brick->provenance[p]);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
     brick->nx, brick->ny, brick->nc, 
     brick->res, brick->nb);
@@ -651,12 +663,19 @@ float *buf = NULL;
 float now, old;
 int xoff_write, yoff_write, nx_write, ny_write;
 
+FILE *fprov = NULL;
+char provname[NPOW_10];
+
 char bname[NPOW_10];
 char fname[NPOW_10];
 int nchar;
 
 char ldate[NPOW_05];
+char lwritetime[NPOW_05];
+date_t today;
 
+char c_update[2][NPOW_04] = { "create", "update" };
+bool update;
 
 GDALDataType file_datatype;
 
@@ -776,6 +795,13 @@ int i = 0;
   CPLUnlockFile(lock);
   lock = NULL;
 
+  // provenance file
+  current_date(&today);
+  nchar = snprintf(provname, NPOW_10, "%s/provenance_%04d%02d%02d.csv", 
+    brick->pname, today.year, today.month, today.day);
+  if (nchar < 0 || nchar >= NPOW_10){ 
+    printf("Buffer Overflow in assembling provenance file\n"); return FAILURE;}     
+
 
   for (f=0; f<nfiles; f++){
     
@@ -800,6 +826,8 @@ int i = 0;
     // mosaicking into existing file
     // read and rewrite brick (safer when using compression)
     if (brick->open != OPEN_CREATE && brick->open != OPEN_BLOCK && fileexist(fname)){
+
+      update = true;
 
       // read brick
       #ifdef FORCE_DEBUG
@@ -858,6 +886,8 @@ int i = 0;
 
       free((void*)buf);
 
+    } else {
+      update = false;
     }
 
 
@@ -997,7 +1027,44 @@ int i = 0;
 
   
     CPLUnlockFile(lock);
-    
+
+    // write provenance info
+    if (brick->nprovenance > 0){
+
+      if ((lock = (char*)CPLLockFile(provname, timeout)) == NULL){
+        printf("Unable to lock file %s (timeout: %fs). ", provname, timeout);
+        return FAILURE;}
+
+      if (fileexist(provname)){
+
+        if ((fprov = fopen(provname, "a")) == NULL){
+          printf("Unable to re-open provenance file!\n"); 
+          return FAILURE;}
+
+      } else {
+
+        if ((fprov = fopen(provname, "w")) == NULL){
+          printf("Unable to create provenance file!\n"); 
+          return FAILURE;}
+
+        fprintf(fprov, "%s,%s,%s,%s\n", "file", "origin", "mode", "creation");
+
+      }
+
+      current_date(&today);
+      long_date(today.year, today.month, today.day, today.hh, today.mm, today.ss, today.tz, lwritetime, NPOW_05);
+
+      fprintf(fprov, "%s,", fname);
+      for (p=0; p<(brick->nprovenance-1); p++) fprintf(fprov, "%s;", brick->provenance[p]);
+      fprintf(fprov, "%s,%s,%s\n", brick->provenance[p], c_update[update], lwritetime);
+
+      fclose(fprov);
+
+      CPLUnlockFile(lock);
+
+    }
+  
+
   }
 
   if (options   != NULL){ CSLDestroy(options);                      options   = NULL;}
@@ -1854,6 +1921,70 @@ void get_brick_filename(brick_t *brick, char fname[], size_t size){
 
 
   copy_string(fname, size, brick->fname);
+
+  return;
+}
+
+
+/** This function sets the number of input images for provenance, and 
++++ allocates provenance array
+--- brick:  brick
+--- n:      number
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_nprovenance(brick_t *brick, int n){
+  
+
+  if (brick->nprovenance > 0 && brick->nprovenance != n && brick->provenance != NULL){
+    free_2D((void**)brick->provenance, brick->nprovenance);
+  }
+
+  if (brick->provenance == NULL){
+    alloc_2D((void***)&brick->provenance, n, NPOW_10, sizeof(char));
+  }
+
+  brick->nprovenance = n;
+
+  return;
+}
+
+
+/** This function gets the number of input images for provenance
+--- brick:  brick
++++ Return: number
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_nprovenance(brick_t *brick){
+  
+  return brick->nprovenance;
+}
+
+
+/** This function sets the input provenance of a brick
+--- brick:  brick
+--- id:     input number
+--- pname:  input name
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_provenance(brick_t *brick, int id, const char *pname){
+
+
+  copy_string(brick->provenance[id], NPOW_10, pname);
+
+  return;
+}
+
+
+/** This function gets the input provenance of a brick
+--- brick:  brick
+--- id:     input number
+--- pname:  input name (modified)
+--- size:   length of the buffer for pname
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_brick_provenance(brick_t *brick, int id, char pname[], size_t size){
+
+
+  copy_string(pname, size, brick->provenance[id]);
 
   return;
 }
