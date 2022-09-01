@@ -56,7 +56,7 @@ Develop version
   - deprecation note:
 
     The option to use the SPLITS algorithm to derive LSP metrics in ``force-higher-level``
-    will be deprecated in with version 3.7.9.
+    will be deprecated with version 3.7.9.
 
     Please use the polar-based LSP retrieval method instead (recommended anyway).
 
