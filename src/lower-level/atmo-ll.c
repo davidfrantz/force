@@ -1275,9 +1275,13 @@ enum { R, G, B };
   ny = get_brick_nrows(QAI);
   res = get_brick_res(QAI);
 
-  res_ = 150;
-  nx_ = nx*res/res_;
-  ny_ = ny*res/res_;
+  if (res < 1){
+    res_ = 0.0015;
+  } else {
+    res_ = 150;
+  }
+  nx_ = nx*(res/res_);
+  ny_ = ny*(res/res_);
   nc_ = nx_*ny_;
 
   step = res_/res;
