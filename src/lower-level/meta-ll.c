@@ -325,6 +325,8 @@ GDALDatasetH fp_;
         }
 
         DN = allocate_brick(nb, 0, _DT_NONE_);
+        set_brick_nprovenance(DN, 1);
+        set_brick_provenance(DN, 0, pl2->d_level1);
 
         nchar = snprintf(sensor, NPOW_04, "LND%02d", lid);
         if (nchar < 0 || nchar >= NPOW_04){
@@ -681,6 +683,8 @@ int svgrid = 5000;
   nb = 13; // number of bands
   nd = 12; // number of detectors
   DN = allocate_brick(nb, 0, _DT_NONE_);
+  set_brick_nprovenance(DN, 1);
+  set_brick_provenance(DN, 0, pl2->d_level1);
 
   set_brick_res(DN, INT_MAX);
   set_brick_ncols(DN, 1);
