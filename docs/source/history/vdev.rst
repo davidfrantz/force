@@ -5,6 +5,8 @@ Develop version
 
 - **General**
 
+  - *master* branch was renamed to *main*
+
   - FORCE comes with some default output file formats, 
     most noteably the striped GTiff default format with LZW compression.
 
