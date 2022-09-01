@@ -255,7 +255,7 @@ int nchar;
     printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
   
   for (prod=0; prod<nprod; prod++){
-    set_brick_parentname(CUBED[prod], pl2->d_level2);
+    set_brick_parentname(LEVEL2[prod], pl2->d_level2);
     set_brick_dirname(LEVEL2[prod], dname);
     if (write_brick(LEVEL2[prod]) == FAILURE){
       printf("error flushing L2 products. \n"); return FAILURE;}
