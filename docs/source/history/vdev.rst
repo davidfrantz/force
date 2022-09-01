@@ -48,6 +48,9 @@ Develop version
   - Added a small hiccup when parsing sensor ID. 
     Was only relevant when it failed by giving wrong input data.
 
+  - Fixed an issue when outputting overview thumbnails (OVV) AND using a geographic output projection (i.e. resolution < 1).
+    Thanks to GitHub user dkczk for bringing this up.
+
 - **FORCE HLPS**
 
   - deprecation note:
