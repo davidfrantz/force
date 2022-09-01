@@ -1029,7 +1029,7 @@ int i = 0;
     CPLUnlockFile(lock);
 
     // write provenance info
-    if (brick->nprovenance > 0){
+    if (brick->nprovenance > 0 && brick->chunk == 0){
 
       if ((lock = (char*)CPLLockFile(provname, timeout)) == NULL){
         printf("Unable to lock file %s (timeout: %fs). ", provname, timeout);
@@ -1937,6 +1937,7 @@ void set_brick_nprovenance(brick_t *brick, int n){
 
   if (brick->nprovenance > 0 && brick->nprovenance != n && brick->provenance != NULL){
     free_2D((void**)brick->provenance, brick->nprovenance);
+    brick->provenance = NULL;
   }
 
   if (brick->provenance == NULL){
