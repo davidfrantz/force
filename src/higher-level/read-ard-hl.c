@@ -974,6 +974,14 @@ bool level3 = false;
 
   }
   
+  // copy all provenance to 1st date
+  get_brick_provenance(ard[0].DAT, 0, temp, NPOW_10);
+  set_brick_nprovenance(ard[0].DAT, dir.n);
+  set_brick_provenance(ard[0].DAT, 0, temp);
+  for (t=1; t<dir.n; t++){
+    get_brick_provenance(ard[t].DAT, 0, temp, NPOW_10);
+    set_brick_provenance(ard[0].DAT, t, temp);
+  }
 
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
   free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
@@ -1020,6 +1028,7 @@ short   *brick_short_ = NULL;
 small   *brick_small_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
+gdalopt_t format;
 
 short *read_buf  = NULL;
 short *psf_buf   = NULL;
@@ -1279,13 +1288,20 @@ double tol = 5e-3;
   set_brick_tiley(brick,      ty);
 
   set_brick_filename(brick, "DONOTOUTPUT");
+  set_brick_parentname(brick, "DONOTOUTPUT");
   set_brick_dirname(brick, "DONOTOUTPUT");
   set_brick_product(brick, prd);
   set_brick_sensorid(brick, sid);
   set_brick_name(brick, "FORCE Level 2 ARD");
 
+  set_brick_nprovenance(brick, 1);
+  set_brick_provenance(brick, 0, file);
+
+  default_gdaloptions(_FMT_GTIFF_, &format);
+  update_gdaloptions_blocksize(_FMT_GTIFF_, &format, cube->cx, cube->cy);
+
   set_brick_open(brick,   OPEN_FALSE);
-  set_brick_format(brick, _FMT_GTIFF_);
+  set_brick_format(brick, &format);
   
   //printf("some of the ARD metadata should be read from disc. TBI\n");
   for (b=0; b<nb; b++) set_brick_nodata(brick, b, nodata);

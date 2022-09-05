@@ -36,6 +36,7 @@ Higher Level Processing paramater header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
+#include "../cross-level/gdalopt-cl.h"
 
 
 #ifdef __cplusplus
@@ -92,6 +93,20 @@ typedef struct {
   int swir2;
   int vv;
   int vh;
+
+  float w_blue;
+  float w_green;
+  float w_red;
+  float w_rededge1;
+  float w_rededge2;
+  float w_rededge3;
+  float w_bnir;
+  float w_nir;
+  float w_swir0;
+  float w_swir1;
+  float w_swir2;
+  float w_vv;
+  float w_vh;
 } par_sen_t;
 
 // BAP scoring
@@ -166,7 +181,11 @@ typedef struct {
   int rbf_nk;                 // number of kernels for RBF fit
   int *rbf_sigma; // sigmas for RBF fit
   float rbf_cutoff;           // cutoff for RBF fit
+  int harm_nmodes; // number of modes for harmonic
+  date_t *harm_fit_range; // date range for fitting harmonic
+  int harm_fit_nrange; // number of dates for fitting harmonic
   int otsi;           // flag: output time series interpolation
+  int onrt;           // flag: output near-real time product
   int standard;
 } par_tsi_t;
 
@@ -474,7 +493,9 @@ typedef struct {
   int nd, nw, nm, nq, ny;
 
   // miscellaneous
-  int format;                // output format
+  char *f_gdalopt;   // file for GDAL options
+  gdalopt_t gdalopt; // GDAL output options
+  int format;        // output format
   int explode;
   int owr;             // flag: overwrite output
   int ithread;

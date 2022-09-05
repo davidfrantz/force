@@ -81,7 +81,7 @@ enum { _DT_NONE_,  _DT_SHORT_, _DT_SMALL_,
        _DT_FLOAT_, _DT_INT_,   _DT_USHORT_ };
 
 // output formats
-enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_JPEG_, _FMT_LENGTH_ };
+enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_CUSTOM_, _FMT_LENGTH_ };
 
 // t-test tailtype
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };
@@ -147,7 +147,7 @@ enum { _INF_QAI_,  _INF_NUM_, _INF_DOY_, _INF_YEAR_,
        _INF_DIFF_, _INF_SEN_, _INF_LENGTH_ };
 
 // interpolation method
-enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_LENGTH_ };
+enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
 
 // spectral indices
 enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_, 
@@ -157,7 +157,7 @@ enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_,
        _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_SW0_,
        _IDX_KNV_, _IDX_ND1_, _IDX_ND2_, _IDX_CRE_, _IDX_NR1_, _IDX_NR2_,
        _IDX_NR3_, _IDX_N1n_, _IDX_N2n_, _IDX_N3n_, _IDX_Mre_, _IDX_Mrn_,
-       _IDX_LENGTH_};
+       _IDX_CCI_, _IDX_EV2_, _IDX_CSW_, _IDX_LENGTH_};
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
@@ -276,6 +276,8 @@ enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 // user-defined function type
 enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
 
+// tag and value
+enum { _TV_TAG_, _TV_VAL_, _TV_LENGTH_ };
 
 // projection
 enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };

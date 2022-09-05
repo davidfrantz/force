@@ -48,13 +48,29 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Output options**
 
-  * Output format, which is either uncompressed flat binary image format aka ENVI Standard or GeoTiff.
+  * Output format, which is either uncompressed flat binary image format aka ENVI Standard, GeoTiff, or COG. 
     GeoTiff images are compressed with LZW and horizontal differencing; BigTiff support is enabled; the Tiff is structured with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) specifications.
     Metadata are written to the ENVI header or directly into the Tiff to the FORCE domain.
     If the size of the metadata exceeds the Tiff's limit, an external .aux.xml file is additionally generated.
 
-    | *Type:* Character. Valid values: {ENVI,GTiff}
+    | *Type:* Character. Valid values: {ENVI,GTiff,COG}
     | ``OUTPUT_FORMAT = GTiff``
+
+  * File that contains custom GDAL output options. 
+    This is only used if OUTPUT_FORMAT = CUSTOM. 
+    If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
+    The file should be written in tag and value notation. 
+    The first two lines are mandatory and specify GDAL driver and file extension, 
+    e.g. DRIVER = GTiff and EXTENSION = tif. 
+    The driver name refers to the GDAL short driver names. 
+    Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).
+    Please note: with opening output options up to the user, it is now possible to
+    give invalid or conflicting options that result in the failure of creating files.
+    Type: full file path
+
+    | *Type:* full file path
+    | ``FILE_OUTPUT_OPTIONS = NULL``
+
 
 * **Parallel processing**
 
@@ -216,10 +232,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     Only necessary bands will be input.
     You will be alerted if the index cannot be computed based on the requested SENSORS.
     The index SMA is a linear spectral mixture analysis and is dependent on the parameters specified in the SPECTRAL MIXTURE ANALYSIS section below.
+    Note: CIre is scaled to 1000, other indices are scaled to 10000.
 
-    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}
+    | *Type:* Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren,CCI}
     | ``INDEX = NDVI EVI NBR``
-
 
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
     + Index     + Name                                       + Formula                                                                                  + Reference                +
@@ -323,8 +339,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     + MSRren    + Modified Simple Ratio red edge narrow      + ((NIR / REDEDGE1) - 1) / sqrt((NIR / REDEDGE1) + 1)                                      + Fernandez-Manso et al.   +
     +           +                                            +                                                                                          + 2016                     +
     +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
+    + CCI    + chlorophyll/carotenoid index                  + (GREEN - RED) / (GREEN +RED)                                                             + Gamon et al.             +
+    +           +                                            +                                                                                          + 2016                     +
+    +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
 
-    
   * Standardize the TSS time series with pixel mean and/or standard deviation?
 
     | *Type:* Logical. Valid values: {NONE,NORMALIZE,CENTER}
@@ -382,7 +400,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
     | *Type:* Integer. Valid range: [1,365]
     | ``MOVING_MAX = 16``
-    
+      
   * Sigma (width of the Gaussian bell) for the RBF filter in days.
     For each interpolation date, a Gaussian kernel is used to smooth the observations.
     The smoothing effect is stronger with larger kernels and the chance of having nodata values is lower.
@@ -423,10 +441,10 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
     You can skip this by setting ``FILE_PYTHON = NULL``, but this requires ``OUTPUT_PYP = FALSE``.
     Two functions are required to communicate with FORCE:
 
-    0) The global space can be used to import modules etc.
-    1) An initialization function that defines the number and names of output bands:
+    1) The global space can be used to import modules etc.
+    2) An initialization function that defines the number and names of output bands:
        ``def forcepy_init():``
-    2) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
+    3) A function that implements the user-defined functionality, see ``PYTHON_TYPE``
 
     | *Type:* full file path
     | ``FILE_PYTHON = NULL``
@@ -511,6 +529,7 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
   .. note::
      The Land Surface Phenology (LSP) options are only available if FORCE was compiled with SPLITS (see :ref:`install` section).
+     This method is deprecated and won't be available anymore.
 
   * For estimating LSP for one year, some data from the previous/next year need to be considered to find the seasonal minima, which define a season.
     The parameters are given in DOY, i.e. LSP_DOY_PREV_YEAR = 273, and LSP_DOY_NEXT_YEAR = 91 will use all observations from October (Year-1) to March (Year+1)

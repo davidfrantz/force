@@ -64,7 +64,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -v = show version
   -i = show program's purpose
   -r = resampling method
-       any GDAL resampling method for raster data, e.g. cubic (default)
+       any GDAL resampling method for raster data, e.g. near (default)
        is ignored for vector data
   -s = pixel resolution of cubed data, defaults to 10
   -a = optional attribute name for vector data. $PROG will burn these values 
@@ -148,12 +148,15 @@ function cubethis(){
       echoerr "rasterizing failed."; exit 1
     fi
 
-    MAX=$($RASTER_INFO_EXE -stats "$FOUT" | grep Maximum | head -n 1 | sed 's/[=,]/ /g' | tr -s ' ' | cut -d ' ' -f 5 | sed 's/\..*//' )
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" 2>/dev/null | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
     rm "$FOUT.aux.xml"
-    debug "max: $MAX"
+    debug "valid: $VALID"
 
-    if [ $MAX -lt 1 ]; then
+    if [ $VALID -eq 0 ]; then
       rm "$FOUT"
+      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
+        rmdir "$DOUT/$TILE"
+      fi
       exit 1
     fi
 
@@ -174,6 +177,19 @@ function cubethis(){
     if [ $? -ne 0 ]; then
       echoerr "warping failed."; exit 1
     fi
+
+    VALID=$($RASTER_INFO_EXE -stats "$FOUT" 2>/dev/null | grep STATISTICS_VALID_PERCENT | sed 's/ //g; s/[=,]/ /g' | cut -d ' ' -f2 | awk '{sum +=$1} END {print sum != 0}' )
+    rm "$FOUT.aux.xml"
+    debug "valid: $VALID"
+
+    if [ $VALID -eq 0 ]; then
+      rm "$FOUT"
+      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
+        rmdir "$DOUT/$TILE"
+      fi
+      exit 1
+    fi
+
 
     if [ "$EXIST" == "true" ]; then
       debug "building mosaic"
@@ -200,7 +216,7 @@ ARGS=`getopt -o hvir:s:o:b:j:a:n:t:l: --long help,version,info,resample:,resolut
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
-RESAMPLE="cubic"
+RESAMPLE="near"
 RES=10
 DOUT=$PWD
 BASE="DEFAULT"

@@ -601,15 +601,28 @@ void write_par_ll_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard or GeoTiff. GeoTiff images are compressed with LZW and hori-\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
     fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
     fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
+
+  if (verbose){
+    fprintf(fp, "# File that contains custom GDAL output options. This is only used if \n");
+    fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
+    fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
+    fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
+    fprintf(fp, "# and EXTENSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
+    fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
+    fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
 
   if (verbose){
     fprintf(fp, "# Output the cloud/cloud shadow/snow distance output? Note that this is NOT\n");
@@ -965,15 +978,28 @@ void write_par_hl_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard or GeoTiff. GeoTiff images are compressed with LZW and hori-\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
     fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
     fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
     fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
-    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff}\n");
+    fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
+
+  if (verbose){
+    fprintf(fp, "# File that contains custom GDAL output options. This is only used if \n");
+    fprintf(fp, "# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.\n");
+    fprintf(fp, "# The file should be written in tag and value notation. The first two lines \n");
+    fprintf(fp, "# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff\n");
+    fprintf(fp, "# and EXTENSION = tif. The driver name refers to the GDAL short driver names. \n");
+    fprintf(fp, "# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).\n");
+    fprintf(fp, "# Please note: with opening output options up to the user, it is now possible to\n");
+    fprintf(fp, "# give invalid or conflicting options that result in the failure of creating files.\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
 
   if (verbose){
     fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
@@ -1275,7 +1301,7 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
     fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
     fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
-    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren}\n");
+    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren,CCI}\n");
   }
   fprintf(fp, "INDEX = NDVI EVI NBR\n");
 
@@ -1368,7 +1394,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# Interpolation method. You can choose between no, linear, moving average\n");
     fprintf(fp, "# or Radial Basis Function Interpolation.\n");
-    fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF}\n");
+    fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF,HARMONIC}\n");
   }
   fprintf(fp, "INTERPOLATE = RBF\n");
 

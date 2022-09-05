@@ -154,6 +154,7 @@ int nchar;
     get_brick_tilex(brick), get_brick_tiley(brick));
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
+  set_brick_parentname(brick, phl->d_higher);
   set_brick_dirname(brick, dname);
 
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d-%02d_HL_CSO_%s_%s", 
@@ -170,7 +171,7 @@ int nchar;
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }
-  set_brick_format(brick, phl->format);
+  set_brick_format(brick, &phl->gdalopt);
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 

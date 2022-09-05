@@ -44,13 +44,28 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 * **Output options**
 
-  * Output format, which is either uncompressed flat binary image format aka ENVI Standard or GeoTiff.
+  * Output format, which is either uncompressed flat binary image format aka ENVI Standard, GeoTiff, or COG. 
     GeoTiff images are compressed with LZW and horizontal differencing; BigTiff support is enabled; the Tiff is structured with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) specifications.
     Metadata are written to the ENVI header or directly into the Tiff to the FORCE domain.
     If the size of the metadata exceeds the Tiff's limit, an external .aux.xml file is additionally generated.
 
-    | *Type:* Character. Valid values: {ENVI,GTiff}
+    | *Type:* Character. Valid values: {ENVI,GTiff,COG}
     | ``OUTPUT_FORMAT = GTiff``
+
+  * File that contains custom GDAL output options. 
+    This is only used if OUTPUT_FORMAT = CUSTOM. 
+    If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
+    The file should be written in tag and value notation. 
+    The first two lines are mandatory and specify GDAL driver and file extension, 
+    e.g. DRIVER = GTiff and EXTENSION = tif. 
+    The driver name refers to the GDAL short driver names. 
+    Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).
+    Please note: with opening output options up to the user, it is now possible to
+    give invalid or conflicting options that result in the failure of creating files.
+    Type: full file path
+
+    | *Type:* full file path
+    | ``FILE_OUTPUT_OPTIONS = NULL``
 
   * This parameter controls whether the output is written as multi-band image, or if the stack will be exploded into single-band files.
   

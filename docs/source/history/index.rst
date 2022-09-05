@@ -5,28 +5,27 @@ Version History
 
 This section displays the changelogs for each published FORCE version.
 
-FORCE uses a three-level versioning scheme:
+FORCE uses a three-level versioning scheme, e.g. v. 3.0.1.
+It is highly recommended to update once a new release is available.
 
 
-v. 3.0.1
+- 1st level = major release:
+  Disruptive changes will result in a new major release.
 
-* 1st level: major release
-  Significant changes will result in a new major release.
-  
-* 2nd level: minor release
-  Minor changes like new features, or critical bugfixes will result in a new minor release.
+- 2nd level = major release:
+  Major changes like completely new features will result in a new major release.
 
-* 3rd level: patch level
-  Small, non-critical patches will result in a new patch level release.
-
-  
-It is highly recommended to update once a new major or minor release is available.
+- 3rd level = patch level: 
+  Incremental patches, additions, and bugfixes will result in a new patch level release.
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :caption: Releases
+   :glob:
+   :reversed:
 
+   v1/*
+   v2/*
+   v3/v*
    vdev.rst
-   v3.rst
-   v2.rst
-   v1.rst

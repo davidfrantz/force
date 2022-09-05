@@ -1,0 +1,19 @@
+.. _v330:
+
+FORCE v. 3.3.0
+==============
+
+Release: 24.06.2020
+
+- **FORCE WVDB**
+
+  - Fixed a critical bug in force-lut-modis.
+  
+    An incorrect array index was used causing a memory error.
+    Thanks to Hailu Hu for the bugfix.
+
+- **FORCE AUX**
+
+  - In force-train: 
+  
+    added a small fix that enables compilation with OpenCV-3.4.1 under CentOS-8 as suggested by github user kemnitzs.

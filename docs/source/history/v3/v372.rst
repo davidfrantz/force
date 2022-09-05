@@ -1,0 +1,24 @@
+.. _v372:
+
+FORCE v. 3.7.2
+==============
+
+Release: 20.10.2021
+
+- **FORCE L2PS**
+
+  - ESA made major changes in their Sentinel-2 products, which will become effective as of October 26, 2021.
+    Specifically, ESA introduced additive scaling factors to convert the DNs to TOA reflectance.
+    Older FORCE versions will fail!
+    Update to FORCE >= 3.7.2!
+    Thanks to Vincent Schut and Patrick Griffiths for the heads-up!
+
+- **General changes**
+
+  - Docker containers will only be published to Docker Hub, if working in the original repository.
+    This solves failed GitHub Actions for users that have forked the repository.
+    Thanks to Florian Katerndahl for implementing a fix!
+
+- **New Program**
+
+  - There is now a new program ``force-cube-init``, which can generate a ``datacube-definition.prj`` file without needing to process Level 2 data.

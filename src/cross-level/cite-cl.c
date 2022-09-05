@@ -382,6 +382,23 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Fernández-Manso, A., Fernández-Manso, O., Quintano, C., 2016. Sentinel-2A "
     "red-edge spectral indices suitability for discriminating burn severity. Int. J. "
     "Appl. Earth Obs. Geoinf. 50, 170175. https://doi.org/10.1016/j.jag.2016.03.005",
+    false },
+  { "CCI",
+    "Gamon, J.A., Huemmrich, K.F., Wong, C.Y., Ensminger, I., Garrity, S., "
+    "Hollinger, D.Y., Noormets, A. Peñuelas, J., 2016. A remotely sensed pigment index "
+    "reveals photosynthetic phenology in evergreen conifers. Proc. Natl. Acad. Sci. "
+    "113(46), 13087-13092. https://doi.org/10.1073/pnas.1606162113",
+    false },
+  { "EVI2",
+    "Jiang, Z.; Huete, A. R.; Didan, K.; Miura, T., 2008. Development of a two-band "
+    "enhanced vegetation index without a blue band. Remote Sensing of Environment, "
+    "112, 3833-3845",
+    false },
+  { "Harmonic models",
+    "Zhu, Z., Woodcock, C. E., Holden, C., & Yang, Z. (2015). Generating synthetic "
+    "Landsat images based on all available Landsat data: Predicting Landsat surface "
+    "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
+    "http://dx.doi.org/10.1016/j.rse.2015.02.009",
     false }
 };
 

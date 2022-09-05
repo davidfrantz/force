@@ -168,6 +168,7 @@ progress_t  pro;
   // update datacube with parameters
   update_datacube_extent(cube, phl->tx[_MIN_], phl->tx[_MAX_], phl->ty[_MIN_], phl->ty[_MAX_]);
   update_datacube_res(cube, phl->res);
+  update_gdaloptions_blocksize(phl->format, &phl->gdalopt, cube->cx, cube->cy);
 
   // compile active tiles
   if (tile_active(phl->f_tile, cube) == FAILURE){

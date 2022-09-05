@@ -76,6 +76,7 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
   register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
+  register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &phl->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
@@ -188,13 +189,16 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params, "OUTPUT_RMS",     &phl->tsa.sma.orms);
 
   // interpolation parameters
-  register_enum_par(params,   "INTERPOLATE", _TAGGED_ENUM_INT_, _INT_LENGTH_, &phl->tsa.tsi.method);
-  register_int_par(params,    "MOVING_MAX",  1, 365, &phl->tsa.tsi.mov_max);
-  register_intvec_par(params, "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
-  register_float_par(params,  "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
-  register_int_par(params,    "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
-  register_enum_par(params,   "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
-  register_bool_par(params,   "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
+  register_enum_par(params,    "INTERPOLATE", _TAGGED_ENUM_INT_, _INT_LENGTH_, &phl->tsa.tsi.method);
+  register_int_par(params,     "MOVING_MAX",  1, 365, &phl->tsa.tsi.mov_max);
+  register_intvec_par(params,  "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
+  register_float_par(params,   "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
+  register_int_par(params,     "HARMONIC_MODES",  1, 3, &phl->tsa.tsi.harm_nmodes);
+  register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
+  register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
+  register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
+  register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
+  register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);
 
   // STM parameters
   register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
@@ -664,6 +668,18 @@ int *band_ptr[_WVL_LENGTH_] = {
         v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "MRN");
         break;
+      case _IDX_CCI_:
+        v[_WVL_GREEN_] = v[_WVL_RED_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CCI");
+        break;
+      case _IDX_EV2_:
+        v[_WVL_RED_] = v[_WVL_NIR_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "EV2");
+        break;
+      case _IDX_CSW_:
+        v[_WVL_NIR_] = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
+        copy_string(tsa->index_name[idx], NPOW_02, "CSW");
+        break;
       default:
         printf("unknown INDEX\n");
         break;
@@ -1082,6 +1098,22 @@ int *band_ptr[_WVL_LENGTH_] = {
   &sen->blue, &sen->green, &sen->red, &sen->rededge1, &sen->rededge2,
   &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
   &sen->vv, &sen->vh };
+
+
+  // set appr. wavelength
+  sen->w_blue     = 0.492;
+  sen->w_green    = 0.559;
+  sen->w_red      = 0.665;
+  sen->w_rededge1 = 0.704;
+  sen->w_rededge2 = 0.739;
+  sen->w_rededge3 = 0.780;
+  sen->w_bnir     = 0.833;
+  sen->w_nir      = 0.864;
+  sen->w_swir0    = 1.240;
+  sen->w_swir1    = 1.610;
+  sen->w_swir2    = 2.186;
+  sen->w_vv       = 554657630000;
+  sen->w_vh       = 554657630000;
 
 
   // match available sensors with requested sensors
@@ -1572,6 +1604,22 @@ double tol = 5e-3;
      printf("FILE_ENDMEM cannot be NULL if INDEX = SMA."); return FAILURE;}
 
 
+    if (phl->tsa.tsi.onrt && phl->tsa.tsi.method != _INT_HARMONIC_){
+      phl->tsa.tsi.onrt = false;
+      printf("Warning: will not output NRT product as interpolation method is not harmonic. Proceed.\n");
+    }
+
+    if (phl->tsa.tsi.onrt && 
+        phl->tsa.tsi.harm_fit_range[_MIN_].ce == phl->tsa.tsi.harm_fit_range[_MAX_].ce){
+      phl->tsa.tsi.onrt = false;
+      printf("Warning: will not output NRT product as harmonic does not include a forecast period. Proceed.\n");
+    }
+
+    if (phl->tsa.tsi.harm_fit_range[_MIN_].ce == phl->tsa.tsi.harm_fit_range[_MAX_].ce){
+      set_date(&phl->tsa.tsi.harm_fit_range[_MIN_], 1900,  1,  1);
+      set_date(&phl->tsa.tsi.harm_fit_range[_MAX_], 2100, 12, 31);
+    }
+
     if (phl->tsa.lsp.ospl || phl->tsa.lsp.olsp || phl->tsa.lsp.otrd || phl->tsa.lsp.ocat){
       
       #ifndef SPLITS
@@ -1674,6 +1722,17 @@ double tol = 5e-3;
     if (phl->mcl.orfm && phl->mcl.method != _ML_RFC_){
       phl->mcl.orfm = false;
       printf("Random Forest Classifcation Margin cannot be computed. Ignored and continue.\n");
+    }
+  }
+
+  if (phl->format != _FMT_CUSTOM_){
+    default_gdaloptions(phl->format, &phl->gdalopt);
+  } else {
+    if (strcmp(phl->f_gdalopt, "NULL") == 0 || !fileexist(phl->f_gdalopt)){
+      printf("If OUTPUT_FORMAT = CUSTOM, FILE_OUTPUT_OPTIONS needs to be given. "); 
+      return FAILURE;
+    } else {
+      parse_gdaloptions(phl->f_gdalopt, &phl->gdalopt);
     }
   }
 

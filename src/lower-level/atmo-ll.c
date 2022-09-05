@@ -1092,6 +1092,7 @@ brick_t *BOA = TOA;
   set_brick_filename(BOA, fname);
   set_brick_open(BOA, OPEN_MERGE);
   set_brick_explode(BOA, false);
+  set_brick_format(BOA, &pl2->gdalopt);
 
   if ((b_nir = find_domain(BOA, "NIR"))   < 0) return NULL;
   if ((b_sw1 = find_domain(BOA, "SWIR1")) < 0) return NULL;
@@ -1161,6 +1162,7 @@ short *qa_ = NULL;
   set_brick_filename(QA, fname);
   set_brick_open(QA, OPEN_UPDATE);
   set_brick_explode(QA, false);
+  set_brick_format(QA, &pl2->gdalopt);
   set_brick_nodata(QA, 0, 1);
   set_brick_scale(QA, 0, 1);
   set_brick_wavelength(QA, 0, 1);
@@ -1225,6 +1227,7 @@ short  *dst_ = NULL;
   set_brick_filename(DST, fname);
   set_brick_open(DST, OPEN_MERGE);
   set_brick_explode(DST, false);
+  set_brick_format(DST, &pl2->gdalopt);
   set_brick_scale(DST, 0, 1);
   set_brick_wavelength(DST, 0, 1);
   set_brick_unit(DST, 0, "unknown");
@@ -1250,6 +1253,7 @@ brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI){
 int i, j, p, i_, j_, p_, b;
 int nx, ny, nx_, ny_, nc_;
 double res, res_, step, scale;
+gdalopt_t format;
 char fname[NPOW_10];
 char product[NPOW_02];
 char sensor[NPOW_04];
@@ -1262,6 +1266,7 @@ short  *green_ = NULL;
 short  *blue_ = NULL;
 enum { R, G, B };
 
+
   #ifdef FORCE_CLOCK 
   time_t TIME; time(&TIME);
   #endif
@@ -1270,16 +1275,21 @@ enum { R, G, B };
   ny = get_brick_nrows(QAI);
   res = get_brick_res(QAI);
 
-  res_ = 150;
-  nx_ = nx*res/res_;
-  ny_ = ny*res/res_;
+  if (res < 1){
+    res_ = 0.0015;
+  } else {
+    res_ = 150;
+  }
+  nx_ = nx*(res/res_);
+  ny_ = ny*(res/res_);
   nc_ = nx_*ny_;
 
   step = res_/res;
   scale = 2500;
 
   OVV = copy_brick(QAI, 3, _DT_NONE_);
-  set_brick_format(OVV, _FMT_JPEG_);
+  default_gdaloptions(_FMT_JPEG_, &format);
+  set_brick_format(OVV, &format);
   set_brick_res(OVV, res_);
   set_brick_ncols(OVV, nx_);
   set_brick_nrows(OVV, ny_);
@@ -1557,6 +1567,7 @@ GDALDataType eOutputType = GDT_Float64;
   set_brick_filename(VZN, fname);
   set_brick_open(VZN, OPEN_MERGE);
   set_brick_explode(VZN, false);
+  set_brick_format(VZN, &pl2->gdalopt);
   set_brick_scale(VZN, 0, 100);
   set_brick_wavelength(VZN, 0, 1);
   set_brick_unit(VZN, 0, "unknown");
@@ -1648,6 +1659,7 @@ short *hot_ = NULL;
   set_brick_filename(HOT, fname);
   set_brick_open(HOT, OPEN_MERGE);
   set_brick_explode(HOT, false);
+  set_brick_format(HOT, &pl2->gdalopt);
   set_brick_wavelength(HOT, 0, 1);
   set_brick_unit(HOT, 0, "unknown");
   set_brick_domain(HOT, 0, product);
@@ -1760,6 +1772,7 @@ float **xy_aod_ = NULL;
   set_brick_filename(AOD, fname);
   set_brick_open(AOD, OPEN_MERGE);
   set_brick_explode(AOD, false);
+  set_brick_format(AOD, &pl2->gdalopt);
   set_brick_scale(AOD, 0, 1000);
   set_brick_wavelength(AOD, 0, wvl);
   set_brick_unit(AOD, 0, "micrometers");
@@ -1849,6 +1862,7 @@ short *wvp_ = NULL;
   set_brick_filename(WV, fname);
   set_brick_open(WV, OPEN_MERGE);
   set_brick_explode(WV, false);
+  set_brick_format(WV, &pl2->gdalopt);
   set_brick_scale(WV, 0, 1000);
   set_brick_wavelength(WV, 0, 1);
   set_brick_unit(WV, 0, "unknown");

@@ -223,6 +223,9 @@ if [ $# -ne 4 ]; then
 fi
 
 which_satellite
+if [ $LANDSAT -eq 1 ]; then
+  printf "%s\n" "" "Warning: Google Cloud Storage only hosts Landsat Collection 1 data." "It is strongly recommended to use Collection 2 data: https://www.usgs.gov/landsat-missions/landsat-collection-2" "Collection 2 data is provided by the USGS, you may use https://github.com/ernstste/landsatlinks to query the catalogue and create download links."
+fi
 
 # ============================================================
 # Check user input and set up variables
@@ -350,7 +353,7 @@ if [ -z $AOITYPE ]; then
       if $(echo $ENTRY | grep -q -E "[0-2][0-9]{2}[0-2][0-9]{2}"); then
         LSPATH="${ENTRY:0:3}"
         LSROW="${ENTRY:3:6}"
-        if [ $(is_in_range $LSPATH 1 233) -eq 0 ] || [ $(is_in_range $LSPATH 1 248) -eq 0 ]; then
+        if [ $(is_in_range $LSPATH 1 233) -eq 0 ] || [ $(is_in_range $LSROW 1 248) -eq 0 ]; then
           show_help "$(printf "%s\n       " "Landsat PATH / ROW out of range. PATH not in range 1 to 233 or ROW not in range 1 to 248." "PATH / ROW received: $ENTRY")"
         fi
         continue

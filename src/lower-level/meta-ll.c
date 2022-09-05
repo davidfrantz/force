@@ -325,6 +325,8 @@ GDALDatasetH fp_;
         }
 
         DN = allocate_brick(nb, 0, _DT_NONE_);
+        set_brick_nprovenance(DN, 1);
+        set_brick_provenance(DN, 0, pl2->d_level1);
 
         nchar = snprintf(sensor, NPOW_04, "LND%02d", lid);
         if (nchar < 0 || nchar >= NPOW_04){
@@ -562,7 +564,7 @@ GDALDatasetH fp_;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -586,6 +588,7 @@ GDALDatasetH fp_;
     }
   }
 
+  set_brick_parentname(DN, pl2->d_temp);
   set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
   set_brick_dirname(DN, pl2->d_level1);
@@ -680,6 +683,8 @@ int svgrid = 5000;
   nb = 13; // number of bands
   nd = 12; // number of detectors
   DN = allocate_brick(nb, 0, _DT_NONE_);
+  set_brick_nprovenance(DN, 1);
+  set_brick_provenance(DN, 0, pl2->d_level1);
 
   set_brick_res(DN, INT_MAX);
   set_brick_ncols(DN, 1);
@@ -1154,7 +1159,7 @@ int svgrid = 5000;
 
   set_brick_name(DN, "FORCE Digital Number brick");
   set_brick_open(DN, false);
-  set_brick_format(DN, pl2->format);
+  set_brick_format(DN, &pl2->gdalopt);
   set_brick_datatype(DN, _DT_USHORT_);
   set_brick_product(DN, "DN_");
 
@@ -1173,6 +1178,7 @@ int svgrid = 5000;
     set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
   }
 
+  set_brick_parentname(DN, pl2->d_temp);
   set_brick_dirname(DN, pl2->d_temp);
   #ifdef CMIX_FAS
   set_brick_dirname(DN, pl2->d_level1);
@@ -1464,17 +1470,17 @@ char metaname[NPOW_10];
 --- dn:       Digital Number brick
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN){
-int mission;
+int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission){
+int mission_id;
 meta_t *meta = NULL;
 
   meta = allocate_metadata();
 #ifdef FORCE_DEBUG
 printf("there are still some things to do int meta. checking etc\n");
 #endif
-  if ((mission = parse_metadata_mission(pl2)) == _UNKNOWN_) return FAILURE;
+  if ((mission_id = parse_metadata_mission(pl2)) == _UNKNOWN_) return FAILURE;
 
-  switch (mission){
+  switch (mission_id){
     case LANDSAT:
       if (parse_metadata_landsat(pl2, meta, DN)  != SUCCESS) return FAILURE;
       break;
@@ -1487,6 +1493,7 @@ printf("there are still some things to do int meta. checking etc\n");
   }
 
   *metadata = meta;
-  return mission;
+  *mission = mission_id;
+  return SUCCESS;
 }
 

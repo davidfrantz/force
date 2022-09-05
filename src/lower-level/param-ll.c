@@ -86,6 +86,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_bool_par(params,    "PARALLEL_READS",        &pl2->ithread);
   register_int_par(params,     "DELAY",                 0, INT_MAX, &pl2->delay);
   register_int_par(params,     "TIMEOUT_ZIP",           0, INT_MAX, &pl2->timeout);
+  register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &pl2->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",         _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &pl2->format);
   register_bool_par(params,    "OUTPUT_DST",            &pl2->odst);
   register_bool_par(params,    "OUTPUT_AOD",            &pl2->oaod);
@@ -240,6 +241,16 @@ char  bname[NPOW_10] = "\0";
   if (pl2->dotopo && !fileexist(pl2->fdem)){
     printf("FILE_DEM does not exist in the file system. Give a DEM, or use DOTOPO = FALSE + FILE_DEM = NULL (surface will be assumed flat, z = 0m). "); return FAILURE;}
 
+  if (pl2->format != _FMT_CUSTOM_){
+    default_gdaloptions(pl2->format, &pl2->gdalopt);
+  } else {
+    if (strcmp(pl2->f_gdalopt, "NULL") == 0 || !fileexist(pl2->f_gdalopt)){
+      printf("If OUTPUT_FORMAT = CUSTOM, FILE_OUTPUT_OPTIONS needs to be given. "); 
+      return FAILURE;
+    } else {
+      parse_gdaloptions(pl2->f_gdalopt, &pl2->gdalopt);
+    }
+  }
 
   return SUCCESS;
 }

@@ -354,7 +354,7 @@ int nchar;
 
 
 /** This function formats a date using long date convention:
-+++ YYYY-MM-DDTHH:MM:SS.MSZ
++++ YYYY-MM-DDTHH:MM:SS.MSZ or YYYY-MM-DDTHH:MM:SS if tz == 99
 --- y:         year
 --- m:         month
 --- d:         day
@@ -370,12 +370,20 @@ void long_date(int y, int m, int d, int hh, int mm, int ss, int tz, char formatt
 int nchar;
 
 
-  nchar = snprintf(formatted, size, "%04d-%02d-%02dT%02d:%02d:%02d.%dZ", 
-    y, m, d, hh, mm, ss, tz);
 
-  if (nchar < 0 || nchar >= size){ 
-    printf("Buffer Overflow in assembling long date %04d-%02d-%02dT%02d:%02d:%02d.%dZ\n", 
-      y, m, d, hh, mm, ss, tz); exit(1);}
+  if (tz != 99){
+    nchar = snprintf(formatted, size, "%04d-%02d-%02dT%02d:%02d:%02d.%dZ", 
+      y, m, d, hh, mm, ss, tz);
+    if (nchar < 0 || nchar >= size){ 
+      printf("Buffer Overflow in assembling long date %04d-%02d-%02dT%02d:%02d:%02d.%dZ\n", 
+        y, m, d, hh, mm, ss, tz); exit(1);}
+  } else {
+    nchar = snprintf(formatted, size, "%04d-%02d-%02dT%02d:%02d:%02d", 
+      y, m, d, hh, mm, ss);
+    if (nchar < 0 || nchar >= size){ 
+      printf("Buffer Overflow in assembling long date %04d-%02d-%02dT%02d:%02d:%02d\n", 
+        y, m, d, hh, mm, ss); exit(1);}
+  }
 
   return;
 }

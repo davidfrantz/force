@@ -1,0 +1,16 @@
+.. _v320:
+
+FORCE v. 3.2.0
+==============
+
+Release: 08.04.2020
+
+- **FORCE HIGHER LEVEL**
+
+  - in force-higher-level, Continuous Field ImproPhe sub-module: 
+  
+    included a safety check when attempting to predict a year outside of the DATE_RANGE. Before, this caused a memory error.
+
+  - in force-higher-level, both ImproPhe sub-modules: 
+  
+    fixed a critical bug when no valid high-res pixel was found in a processing block.

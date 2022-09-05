@@ -1,0 +1,16 @@
+.. _v375:
+
+FORCE v. 3.7.5
+==============
+
+Release: 04.01.2022
+
+- **FORCE HLPS**
+
+  - in force-higher-level, TSA sub-module:
+    Added a fix to prevent truncation of the Chlorophyll Index red-edge (Clre) index.
+    Thanks to Dirk Pflugmacher for the notification.
+
+  - in force-higher-level, ML sub-module:
+    Fixed a bug that resulted in a segfault when using RF classification, but
+    not with RF probability output.
