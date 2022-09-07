@@ -43,7 +43,7 @@ void int2bit(int integer, bool *bin, int start, int size);
 void get_laads_key(char auth[], int size){
 char user[NPOW_10];
 char fkey[NPOW_10];
-char  key[NPOW_10];
+char  key[NPOW_12];
 int nchar;
 FILE *fk = NULL;
 char *CRED = NULL;
@@ -77,7 +77,7 @@ char *CRED = NULL;
     if ((fk = fopen(fkey, "r")) == NULL){
     printf("Unable to open LAADS authentification: %s\n", fkey);  exit(1);}
 
-  if (fgets(key, NPOW_10, fk) == NULL){
+  if (fgets(key, NPOW_12, fk) == NULL){
     printf("Unable to read LAADS authentification from %s\n", fkey);  exit(1);}
     
   nchar = snprintf(auth, size, "Authorization: Bearer %s", key);
