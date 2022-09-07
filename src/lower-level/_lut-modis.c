@@ -204,14 +204,14 @@ float    *WVP = NULL;
 double ***AVG = NULL;
 int m, c, nc;
 char tablename[NPOW_10];
-char  key[NPOW_10];
+char  key[NPOW_12];
 int nchar;
 
 
   parse_args(argc, argv, &args);
 
   // get app key / token
-  get_laads_key(key, NPOW_08);
+  get_laads_key(key, NPOW_12);
 
 
   /** parse coordinates **/
