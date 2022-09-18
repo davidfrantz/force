@@ -202,7 +202,7 @@ ROUT=$(perl -e 'use File::Spec; print File::Spec->abs2rel(@ARGV) . "\n"' "$FINP"
 export ROUT
 debug "relative output path: $ROUT"
 
-find -L "$ROUT" \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
+find -L "$ROUT" \( -name '*.dat' -o -name '*.tif' \) | xargs basename -a | sort | uniq > $PRODUCTS
 NPROD=$(wc -l $PRODUCTS | cut -d " " -f 1)
 
 echo "mosaicking $NPROD products:"
