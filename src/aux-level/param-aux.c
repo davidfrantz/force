@@ -1429,10 +1429,10 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   }
   fprintf(fp, "RBF_CUTOFF = 0.95\n");
   
-    if (verbose){
+  if (verbose){
     fprintf(fp, "# Definition of how many modes per season are used for harmonic interpolation,\n");
     fprintf(fp, "# i.e. uni-modal (1), bi-modal (2), or tri-modal (3).\n");
-    fprintf(fp, "# Type: Integer. Valid range: [1,2,3]\n");
+    fprintf(fp, "# Type: Integer. Valid range: {1,2,3}\n");
   }
   fprintf(fp, "HARMONIC_MODES = 3\n");
               
@@ -1449,6 +1449,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
     fprintf(fp, "# Output of the near-real time product?\n");
     fprintf(fp, "# The product will contain the residual between the extrapolated harmonic and the actual data\n");
     fprintf(fp, "# following the defined end of the harmonic fit range.\n");
+    fprintf(fp, "# This option requires harmonic interpolation (INTERPOLATE) and a forecast period (HARMONIC_FIT_RANGE).\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_NRT = FALSE\n");
