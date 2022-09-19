@@ -65,7 +65,6 @@ float z, cir_thr;
 small *dem_     = NULL;
 short *cirrus_  = NULL;
 small *fcir_    = NULL;
-small *fcir_buf = NULL;
 int cld_buf, cir_buf, shd_buf;
 
   #ifdef FORCE_CLOCK
@@ -86,7 +85,6 @@ int cld_buf, cir_buf, shd_buf;
   #endif
 
   alloc((void**)&fcir_,    nc, sizeof(small));
-  alloc((void**)&fcir_buf, nc, sizeof(small));
 
   /** set confident cloud **/
   #pragma omp parallel shared(nc, QAI, fcld_) default(none)
@@ -129,9 +127,8 @@ int cld_buf, cir_buf, shd_buf;
   if (pl2->cldbuf > 0) buffer_(fcld_, nx, ny, cld_buf);
 
   /** buffer cirrus **/
-  memcpy(fcir_buf, fcir_, nc * sizeof(small));
   cir_buf = pl2->cirbuf/res;
-  if (cirrus_ != NULL && pl2->cirbuf > 0) buffer_(fcir_buf, nx, ny, cir_buf);
+  if (cirrus_ != NULL && pl2->cirbuf > 0) buffer_(fcir_, nx, ny, cir_buf);
 
 
   /** buffer shadows **/
@@ -141,7 +138,7 @@ int cld_buf, cir_buf, shd_buf;
   #endif
   if (pl2->shdbuf > 0) buffer_(fshd_, nx, ny, shd_buf);
 
-  #pragma omp parallel private(z, cir_thr) shared(nc, atc, QAI, dem_, fcld_, fshd_, fcir_, fcir_buf) reduction(+: k) default(none)
+  #pragma omp parallel private(z, cir_thr) shared(nc, atc, QAI, dem_, fcld_, fshd_, fcir_) reduction(+: k) default(none)
   {
 
     #pragma omp for
@@ -151,8 +148,6 @@ int cld_buf, cir_buf, shd_buf;
         if (get_cloud(QAI, p) == 0) set_cloud(QAI, p, 1); 
       } else if (fcir_[p]){
         set_cloud(QAI, p, 3);
-      } else if (fcir_buf[p]){
-        set_cloud(QAI, p, 1);
       }
       if (fshd_[p]) set_shadow(QAI, p, true);
       if (get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) k++;
@@ -206,7 +201,6 @@ int cld_buf, cir_buf, shd_buf;
   #endif
 
   free((void*)fcir_);
-  free((void*)fcir_buf);
 
   #ifdef FORCE_CLOCK
   proctime_print("finalized cloud mask", TIME);
