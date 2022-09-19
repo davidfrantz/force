@@ -126,14 +126,12 @@ int cld_buf, cir_buf, shd_buf;
   #ifdef CMIX_FAS_2
   cld_buf = 80/res;
   #endif
-  buffer_(fcld_, nx, ny, cld_buf);
+  if (pl2->cldbuf > 0) buffer_(fcld_, nx, ny, cld_buf);
 
   /** buffer cirrus **/
   memcpy(fcir_buf, fcir_, nc * sizeof(small));
-  if (cirrus_ != NULL){
-    cir_buf = pl2->cirbuf/res;
-    buffer_(fcir_buf, nx, ny, cir_buf);
-  }
+  cir_buf = pl2->cirbuf/res;
+  if (cirrus_ != NULL && pl2->cirbuf > 0) buffer_(fcir_buf, nx, ny, cir_buf);
 
 
   /** buffer shadows **/
@@ -141,7 +139,7 @@ int cld_buf, cir_buf, shd_buf;
   #ifdef CMIX_FAS_2
   shd_buf = 40/res;
   #endif
-  buffer_(fshd_, nx, ny, shd_buf);
+  if (pl2->shdbuf > 0) buffer_(fshd_, nx, ny, shd_buf);
 
   #pragma omp parallel private(z, cir_thr) shared(nc, atc, QAI, dem_, fcld_, fshd_, fcir_, fcir_buf) reduction(+: k) default(none)
   {
@@ -357,7 +355,7 @@ int snw_buf;
   #ifdef CMIX_FAS_2
   snw_buf = 20/get_brick_res(QAI);
   #endif
-  buffer_(snw_, nx, ny, snw_buf);
+  if (pl2->snwbuf > 0) buffer_(snw_, nx, ny, snw_buf);
 
   #pragma omp parallel shared(nc, QAI, pcp_, snw_, clr_, lnd_) reduction(+: nwtr, nsnw, non, nclr, nlnd) default(none)
   {
