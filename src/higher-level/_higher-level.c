@@ -244,6 +244,7 @@ off_t ibytes = 0, obytes = 0;
            "  OUTPUT_***\n"
            "and make sure that your input file type\n"
            "  is one of .dat .bsq .bil .tif .vrt\n");
+    printf("________________________________________\n");
   }
 
   cite_push(phl->d_higher);
