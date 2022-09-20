@@ -240,7 +240,8 @@ off_t ibytes = 0, obytes = 0;
            "  SENSORS\n"
            "  DATE_RANGE\n"
            "  DOY_RANGE\n"
-           "  OUTPUT_***\n");
+           "  OUTPUT_***\n"
+           "and make sure that your input file type is one of .dat .bsq .bil .tif .vrt\n");
   }
 
   cite_push(phl->d_higher);
