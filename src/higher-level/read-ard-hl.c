@@ -456,6 +456,7 @@ int n;
 
 /** This function reads the processing mask (if given).
 --- success: success of the mask retrieval
+--- ibytes:  bytes read
 --- tx:      tile X-ID
 --- ty:      tile Y-ID
 --- chunk:   block number
@@ -463,7 +464,7 @@ int n;
 --- phl:     HL parameters
 +++ Return: image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+brick_t *read_mask(int *success, off_t *ibytes, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
 brick_t *MASK = NULL;
 small *mask_ = NULL;
 int nc, p;
@@ -524,6 +525,8 @@ int n = 0;
     free_brick(MASK);
     *success = FAILURE; return NULL;}
 
+  (*ibytes) += get_brick_size(MASK);
+
   // count and make sure that mask_ is binary
   for (p=0; p<nc; p++){
     if (mask_[p] == 1){
@@ -550,6 +553,7 @@ int n = 0;
 
 
 /** This function reads the features.
+--- ibytes: bytes read
 --- nt:     number of features read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
@@ -558,12 +562,13 @@ int n = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_features(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+ard_t *read_features(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
 int f, p, nc;
 char fname[NPOW_10];
 int nchar;
 ard_t *features = NULL;
 int error = 0;
+off_t bytes = 0;
 
 
   #ifdef FORCE_CLOCK
@@ -593,7 +598,7 @@ int error = 0;
   alloc((void**)&features, phl->ftr.nfeature, sizeof(ard_t));
 
 
-  #pragma omp parallel private(fname,p,nchar) shared(features,phl,cube,chunk,tx,ty,nc) reduction(+: error) default(none)
+  #pragma omp parallel private(fname,p,nchar) shared(features,phl,cube,chunk,tx,ty,nc) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
@@ -613,6 +618,7 @@ int error = 0;
             (features[f].dat = get_bands_short(features[f].DAT)) == NULL){
           printf("Error adding feature %s. ", fname); error++;}
       }
+      bytes += get_brick_size(features[f].DAT);
       
       // compile a 0-filled QAI brick, processing must continue..
       if ((features[f].QAI = copy_brick(features[f].DAT, 1, _DT_SHORT_)) == NULL || 
@@ -647,12 +653,14 @@ int error = 0;
   proctime_print("read features", TIME);
   #endif
 
+  (*ibytes) += bytes;
   *nt = phl->ftr.nfeature;
   return features;
 }
 
 
 /** This function reads continuous field images, e.g. LSP.
+--- ibytes: bytes read
 --- nt:     number of images read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
@@ -661,12 +669,13 @@ int error = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_confield(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+ard_t *read_confield(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
 int f;
 char fname[NPOW_10];
 int nchar;
 ard_t *con = NULL;
 int error = 0;
+off_t bytes = 0;
 
 
   #ifdef FORCE_CLOCK
@@ -696,7 +705,7 @@ int error = 0;
   alloc((void**)&con, phl->con.n, sizeof(ard_t));
 
 
-  #pragma omp parallel private(fname,nchar) shared(con,phl,cube,chunk,tx,ty) reduction(+: error) default(none)
+  #pragma omp parallel private(fname,nchar) shared(con,phl,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
@@ -715,7 +724,8 @@ int error = 0;
             (con[f].dat = get_bands_short(con[f].DAT)) == NULL){
           printf("Error adding continuous field products %s. ", fname); error++;}
       }
-      
+      bytes += get_brick_size(con[f].DAT);
+
       // compile a 0-filled QAI brick, processing must continue..
       if ((con[f].QAI = copy_brick(con[f].DAT, 1, _DT_SHORT_)) == NULL || 
           (con[f].qai = get_band_short(con[f].QAI, 0)) == NULL){
@@ -744,6 +754,7 @@ int error = 0;
   proctime_print("read con", TIME);
   #endif
 
+  (*ibytes) += bytes;
   *nt = phl->con.n;
   return con;
 }
@@ -751,6 +762,7 @@ int error = 0;
 
 /** This function reads all L2 ARD, which are needed to do the required
 +++ processing.
+--- ibytes: bytes read
 --- nt:     number of datasets read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
@@ -760,7 +772,7 @@ int error = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_ard(int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl){
+ard_t *read_ard(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl){
 int t, b, p, nb, nc;
 char fname[NPOW_10], *pch = NULL;
 char temp[NPOW_10];
@@ -770,6 +782,7 @@ ard_t *ard = NULL;
 int error = 0;
 bool radar  = false;
 bool level3 = false;
+off_t bytes = 0;
 
 
   #ifdef FORCE_CLOCK
@@ -796,7 +809,7 @@ bool level3 = false;
   // open threads
   //omp_set_num_threads(par.cpu); --> should be done in main
 //printf("alert. nodata was changed to 0. remove again..\n");
-  #pragma omp parallel private(fname,nchar,temp,pch,p,b,nc,nb) firstprivate(radar,level3) shared(ard,dir,phl,sen,cube,chunk,tx,ty) reduction(+: error) default(none)
+  #pragma omp parallel private(fname,nchar,temp,pch,p,b,nc,nb) firstprivate(radar,level3) shared(ard,dir,phl,sen,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
@@ -836,6 +849,7 @@ bool level3 = false;
               (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
             printf("Error adding main products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].DAT);
       } else {
         ard[t].DAT = NULL;
         ard[t].dat = NULL;
@@ -859,6 +873,7 @@ bool level3 = false;
                 (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
               printf("Error adding QAI products %s. ", fname); error++;}
           }
+          bytes += get_brick_size(ard[t].QAI);
         } else {
           if ((ard[t].QAI = copy_brick(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
@@ -895,6 +910,7 @@ bool level3 = false;
               (ard[t].dst = get_band_short(ard[t].DST, 0)) == NULL){
             printf("Error adding DST products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].DST);
       } else {
         ard[t].DST = NULL;
         ard[t].dst = NULL;
@@ -917,6 +933,7 @@ bool level3 = false;
               (ard[t].aod = get_band_short(ard[t].AOD, 0)) == NULL){
             printf("Error adding AOD products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].AOD);
       } else {
         ard[t].AOD = NULL;
         ard[t].aod = NULL;
@@ -933,6 +950,7 @@ bool level3 = false;
               (ard[t].hot = get_band_short(ard[t].HOT, 0)) == NULL){
             printf("Error adding HOT products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].HOT);
       } else {
         ard[t].HOT = NULL;
         ard[t].hot = NULL;
@@ -949,6 +967,7 @@ bool level3 = false;
               (ard[t].vzn = get_band_short(ard[t].VZN, 0)) == NULL){
             printf("Error adding VZN products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].VZN);
       } else {
         ard[t].VZN = NULL;
         ard[t].vzn = NULL;
@@ -965,6 +984,7 @@ bool level3 = false;
               (ard[t].wvp = get_band_short(ard[t].WVP, 0)) == NULL){
             printf("Error adding WVP products %s. ", fname); error++;}
         }
+        bytes += get_brick_size(ard[t].WVP);
       } else {
         ard[t].WVP = NULL;
         ard[t].wvp = NULL;
@@ -997,6 +1017,7 @@ bool level3 = false;
   proctime_print("read ARD", TIME);
   #endif
 
+  (*ibytes) += bytes;
   *nt = dir.n;
   return ard;
 }

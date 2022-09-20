@@ -138,6 +138,7 @@ brick_t     ***OUTPUT = NULL;
 int         *nprod    = NULL;
 GDALDriverH driver;
 progress_t  pro;
+off_t ibytes = 0, obytes = 0;
 
 
   /** INITIALIZING
@@ -208,21 +209,39 @@ progress_t  pro;
 
   while (progress(&pro)){
 
-    #pragma omp parallel num_threads(3) shared(ARD1,ARD2,MASK,OUTPUT,aux,nprod,nt1,nt2,pro,cube,phl) default(none)
+    #pragma omp parallel num_threads(3) shared(ARD1,ARD2,MASK,OUTPUT,aux,nprod,nt1,nt2,pro,cube,phl) reduction(+: ibytes, obytes) default(none)
     {
 
       if (omp_get_thread_num() == 0){
-        read_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
+        read_higher_level(&pro, &ibytes, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
       } else if (omp_get_thread_num() == 1){
         compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
       } else {
-        output_higher_level(&pro, OUTPUT, nprod, phl);
+        output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
       }
 
     }
 
   }
 
+  printf("________________________________________\n");
+  printf("bytes read    (uncompressed): "); print_humanreadable_bytes(ibytes);
+  printf("bytes written (uncompressed): "); print_humanreadable_bytes(obytes);
+
+  if (ibytes == 0 || obytes == 0){
+    printf("________________________________________\n");
+    printf("Warning: no input or output detected.\n"
+           "If unintentional, triple-check for mismatching entries in\n"
+           "  DIR_MASK\n"
+           "  BASE_MASK\n"
+           "  X_TILE_RANGE\n"
+           "  Y_TILE_RANGE\n"
+           "  FILE_TILE\n"
+           "  SENSORS\n"
+           "  DATE_RANGE\n"
+           "  DOY_RANGE\n"
+           "  OUTPUT_***\n");
+  }
 
   cite_push(phl->d_higher);
 

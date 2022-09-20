@@ -35,6 +35,7 @@ Utility functions header
 #include <stdbool.h> // boolean data type
 #include <float.h>   // macro constants of the floating-point library
 
+#include "../cross-level/enum-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,7 @@ double proctime(time_t start);
 void proctime_print(const char *string, time_t start);
 void fproctime_print(FILE *fp, const char *string, time_t start);
 bool fequal(float a, float b);
+void print_humanreadable_bytes(off_t bytes);
 
 #ifdef __cplusplus
 }

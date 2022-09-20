@@ -161,3 +161,22 @@ float diff, max, A, B;
   return false;
 }
 
+
+/** Print bytes as human-readable string
+--- bytes:  bytes
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_humanreadable_bytes(off_t bytes){
+double dbytes = (double)bytes;
+char unit[9][NPOW_02] = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+int i = 0;
+
+  while (dbytes >= 1024 && i < 8){
+      dbytes /= 1024;
+      i++;
+  }
+
+  printf("%.2f %s\n", dbytes, unit[i]);
+
+  return;
+}

@@ -2252,7 +2252,7 @@ int b = 0;
 size_t size = 0;
 
   for (b=0; b<brick->nb; b++){
-    if (get_brick_save(brick, b)) size += brick->nc*brick->byte;
+    size += brick->nc*brick->byte;
   }
 
   return size;
