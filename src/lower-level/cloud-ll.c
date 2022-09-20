@@ -62,10 +62,10 @@ float finalize_cloud(par_ll_t *pl2, int npix, atc_t *atc, brick_t *TOA, brick_t 
 int p, nx, ny, nc, k = 0;
 float res, pct;
 float z, cir_thr;
-small *dem_    = NULL;
-short *blue_   = NULL;
-short *cirrus_ = NULL;
-int cld_buf, shd_buf;
+small *dem_     = NULL;
+short *cirrus_  = NULL;
+small *fcir_    = NULL;
+int cld_buf, cir_buf, shd_buf;
 
   #ifdef FORCE_CLOCK
   time_t TIME; time(&TIME);
@@ -78,15 +78,15 @@ int cld_buf, shd_buf;
   res = get_brick_res(QAI);
 
   if ((dem_   = get_band_small(DEM, 0)) == NULL) return FAILURE;
-  if ((blue_  = get_domain_short(TOA, "BLUE")) == NULL) return FAILURE;
   cirrus_     = get_domain_short(TOA, "CIRRUS");
 
   #ifdef FORCE_DEBUG
   small *cir_ = NULL; alloc((void**)&cir_, nc, sizeof(small));
   #endif
 
-  /** set confident cloud **/
+  alloc((void**)&fcir_,    nc, sizeof(small));
 
+  /** set confident cloud **/
   #pragma omp parallel shared(nc, QAI, fcld_) default(none)
   {
 
@@ -97,21 +97,48 @@ int cld_buf, shd_buf;
     }
   }
 
+  /** set cirrus **/
+  if (cirrus_ != NULL){
+
+    #pragma omp parallel shared(nc, QAI, dem_, cirrus_, fcir_, atc) private(z, cir_thr) default(none)
+    {
+
+      #pragma omp for
+      for (p=0; p<nc; p++){
+
+        if (get_off(QAI, p)) continue;
+
+        if (!get_snow(QAI, p) && cirrus_[p] > 100){
+          z = atc->dem.min+atc->dem.step/2.0 + dem_[p]*atc->dem.step;
+          if ((cir_thr = 70 + 70*z*z) < 100) cir_thr = 100; // Baetens et al. 2019
+          if (cirrus_[p] > cir_thr) fcir_[p] = true;
+        }
+
+      }
+    }
+
+  }
+
   /** buffer clouds **/
   cld_buf = pl2->cldbuf/res;
   #ifdef CMIX_FAS_2
   cld_buf = 80/res;
   #endif
-  buffer_(fcld_, nx, ny, cld_buf);
+  if (pl2->cldbuf > 0) buffer_(fcld_, nx, ny, cld_buf);
+
+  /** buffer cirrus **/
+  cir_buf = pl2->cirbuf/res;
+  if (cirrus_ != NULL && pl2->cirbuf > 0) buffer_(fcir_, nx, ny, cir_buf);
+
 
   /** buffer shadows **/
   shd_buf = pl2->shdbuf/res;
   #ifdef CMIX_FAS_2
   shd_buf = 40/res;
   #endif
-  buffer_(fshd_, nx, ny, shd_buf);
+  if (pl2->shdbuf > 0) buffer_(fshd_, nx, ny, shd_buf);
 
-  #pragma omp parallel private(z, cir_thr) shared(nc, atc, QAI, dem_, fcld_, fshd_, cirrus_, blue_) reduction(+: k) default(none)
+  #pragma omp parallel private(z, cir_thr) shared(nc, atc, QAI, dem_, fcld_, fshd_, fcir_) reduction(+: k) default(none)
   {
 
     #pragma omp for
@@ -119,10 +146,8 @@ int cld_buf, shd_buf;
       if (get_off(QAI, p)) continue;
       if (fcld_[p]){
         if (get_cloud(QAI, p) == 0) set_cloud(QAI, p, 1); 
-      } else if (cirrus_  != NULL && !get_snow(QAI, p) && cirrus_[p] > 100){
-        z = atc->dem.min+atc->dem.step/2.0 + dem_[p]*atc->dem.step;
-        if ((cir_thr = 70 + 70*z*z) < 100) cir_thr = 100; // Baetens et al. 2019
-        if (cirrus_[p] > cir_thr) set_cloud(QAI, p, 3);
+      } else if (fcir_[p]){
+        set_cloud(QAI, p, 3);
       }
       if (fshd_[p]) set_shadow(QAI, p, true);
       if (get_cloud(QAI, p) > 0 || get_shadow(QAI, p)) k++;
@@ -174,6 +199,8 @@ int cld_buf, shd_buf;
   }
   set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
   #endif
+
+  free((void*)fcir_);
 
   #ifdef FORCE_CLOCK
   proctime_print("finalized cloud mask", TIME);
@@ -322,7 +349,7 @@ int snw_buf;
   #ifdef CMIX_FAS_2
   snw_buf = 20/get_brick_res(QAI);
   #endif
-  buffer_(snw_, nx, ny, snw_buf);
+  if (pl2->snwbuf > 0) buffer_(snw_, nx, ny, snw_buf);
 
   #pragma omp parallel shared(nc, QAI, pcp_, snw_, clr_, lnd_) reduction(+: nwtr, nsnw, non, nclr, nlnd) default(none)
   {
