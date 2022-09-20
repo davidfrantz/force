@@ -230,8 +230,9 @@ off_t ibytes = 0, obytes = 0;
 
   if (ibytes == 0 || obytes == 0){
     printf("________________________________________\n");
-    printf("Warning: no input or output detected.\n"
-           "If unintentional, triple-check for mismatching entries in\n"
+    printf("Warning: no input or output detected. If\n"
+           "unintentional, triple-check for mis-\n"
+           "matching entries in\n"
            "  DIR_MASK\n"
            "  BASE_MASK\n"
            "  X_TILE_RANGE\n"
@@ -241,7 +242,8 @@ off_t ibytes = 0, obytes = 0;
            "  DATE_RANGE\n"
            "  DOY_RANGE\n"
            "  OUTPUT_***\n"
-           "and make sure that your input file type is one of .dat .bsq .bil .tif .vrt\n");
+           "and make sure that your input file type\n"
+           "  is one of .dat .bsq .bil .tif .vrt\n");
   }
 
   cite_push(phl->d_higher);
