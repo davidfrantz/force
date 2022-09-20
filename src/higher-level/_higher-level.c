@@ -225,8 +225,8 @@ off_t ibytes = 0, obytes = 0;
   }
 
   printf("________________________________________\n");
-  printf("bytes read    (uncompressed): "); print_humanreadable_bytes(ibytes);
-  printf("bytes written (uncompressed): "); print_humanreadable_bytes(obytes);
+  printf("data read    (uncompressed): "); print_humanreadable_bytes(ibytes);
+  printf("data written (uncompressed): "); print_humanreadable_bytes(obytes);
 
   if (ibytes == 0 || obytes == 0){
     printf("________________________________________\n");
