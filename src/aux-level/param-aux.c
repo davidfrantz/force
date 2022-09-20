@@ -1393,8 +1393,9 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
-    fprintf(fp, "# Interpolation method. You can choose between no, linear, moving average\n");
-    fprintf(fp, "# or Radial Basis Function Interpolation.\n");
+    fprintf(fp, "# Interpolation method. You can choose between no, linear, moving average,\n");
+    fprintf(fp, "# Radial Basis Function or harmonic Interpolation.\n");
+    fprintf(fp, "# Harmonic interpolation can be used as a simple near-real time monitoring component.\n");
     fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF,HARMONIC}\n");
   }
   fprintf(fp, "INTERPOLATE = RBF\n");
@@ -1428,6 +1429,31 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Float. Valid range: ]0,1]\n");
   }
   fprintf(fp, "RBF_CUTOFF = 0.95\n");
+  
+  if (verbose){
+    fprintf(fp, "# Definition of how many modes per season are used for harmonic interpolation,\n");
+    fprintf(fp, "# i.e. uni-modal (1), bi-modal (2), or tri-modal (3).\n");
+    fprintf(fp, "# Type: Integer. Valid range: {1,2,3}\n");
+  }
+  fprintf(fp, "HARMONIC_MODES = 3\n");
+              
+  if (verbose){
+    fprintf(fp, "# Subset of the time period to which the harmonic should be fitted.\n");
+    fprintf(fp, "# For example, if the analysis timeframe is DATE_RANGE = 2015-01-01 2022-06-20,\n");
+    fprintf(fp, "# all data from 2015-2022 will be considered. If HARMONIC_FIT_RANGE = 2015-01-01 2017-12-31,\n");
+    fprintf(fp, "# the harmonic will only be fitted to the first 3 years of data.\n");
+    fprintf(fp, "# Type: Date list. Format: YYYY-MM-DD\n");
+  }
+  fprintf(fp, "HARMONIC_FIT_RANGE = 2015-01-01 2017-12-31\n");
+    
+  if (verbose){
+    fprintf(fp, "# Output of the near-real time product?\n");
+    fprintf(fp, "# The product will contain the residual between the extrapolated harmonic and the actual data\n");
+    fprintf(fp, "# following the defined end of the harmonic fit range.\n");
+    fprintf(fp, "# This option requires harmonic interpolation (INTERPOLATE) and a forecast period (HARMONIC_FIT_RANGE).\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_NRT = FALSE\n");
 
   if (verbose){
     fprintf(fp, "# This parameter gives the interpolation step in days.\n");

@@ -154,9 +154,6 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
-      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
-        rmdir "$DOUT/$TILE"
-      fi
       exit 1
     fi
 
@@ -184,9 +181,6 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
-      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
-        rmdir "$DOUT/$TILE"
-      fi
       exit 1
     fi
 
@@ -410,6 +404,8 @@ for i in "$@"; do
 
   # remove the temporary file
   rm "$FTMP"
+  # remove empty folders in datacube
+  find $DOUT -type d -regextype grep -regex ".*X[0-9-]\{4\}_Y[0-9-]\{4\}" -empty -delete
 
 done
 
