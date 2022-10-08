@@ -52,13 +52,14 @@ RUN echo "building FORCE" && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
   force && \
-# clone FORCE UDF
+  # clone FORCE UDF
   git clone https://github.com/davidfrantz/force-udf.git
 
 FROM davidfrantz/base:latest as force
 
 COPY --chown=docker:docker --from=force_builder $HOME/bin $HOME/bin
 COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
+COPY --chown=docker:docker --from=force_builder /usr/local/bin/landsatlinks $HOME/bin/force-level1-landsat
 
 WORKDIR /home/docker
 
