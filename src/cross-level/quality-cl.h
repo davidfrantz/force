@@ -1,7 +1,7 @@
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -468,7 +468,7 @@ int i;
   fprintf(_cite_fp_, "FORCE - Framework for Operational Radiometric "
                      "Correction for Environmental monitoring\n");
   fprintf(_cite_fp_, "Version %s\n", _VERSION_);
-  fprintf(_cite_fp_, "Copyright (C) 2013-2020 David Frantz, "
+  fprintf(_cite_fp_, "Copyright (C) 2013-2022 David Frantz, "
                      "david.frantz@geo.hu-berlin.de\n");
 
   fprintf(_cite_fp_, "\nFORCE is free software under the terms of the "
