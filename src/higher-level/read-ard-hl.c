@@ -995,12 +995,14 @@ off_t bytes = 0;
   }
   
   // copy all provenance to 1st date
-  get_brick_provenance(ard[0].DAT, 0, temp, NPOW_10);
-  set_brick_nprovenance(ard[0].DAT, dir.n);
-  set_brick_provenance(ard[0].DAT, 0, temp);
-  for (t=1; t<dir.n; t++){
-    get_brick_provenance(ard[t].DAT, 0, temp, NPOW_10);
-    set_brick_provenance(ard[0].DAT, t, temp);
+  if (phl->prd.ref){
+    get_brick_provenance(ard[0].DAT, 0, temp, NPOW_10);
+    set_brick_nprovenance(ard[0].DAT, dir.n);
+    set_brick_provenance(ard[0].DAT, 0, temp);
+    for (t=1; t<dir.n; t++){
+      get_brick_provenance(ard[t].DAT, 0, temp, NPOW_10);
+      set_brick_provenance(ard[0].DAT, t, temp);
+    }
   }
 
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
