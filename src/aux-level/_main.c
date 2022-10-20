@@ -107,7 +107,7 @@ char user[NPOW_10];
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
   printf("Copyright (C) 2013-2022 David Frantz, "
-         "david.frantz@geo.hu-berlin.de\n");
+         "david.frantz@uni-trier.de\n");
   printf("+ many community contributions.\n");
 
   printf("\nFORCE is free software under the terms of the "

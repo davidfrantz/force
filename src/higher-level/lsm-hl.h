@@ -24,7 +24,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 Landscape metrics header
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Copyright (C) 2013-2022 Franz Schug, David Frantz
-Contact: franz.schug@geo.hu-berlin.de
+Contact: fschug@wisc.edu
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 

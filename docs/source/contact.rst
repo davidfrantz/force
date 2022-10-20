@@ -15,4 +15,4 @@ Contact
 | `davidfrantz.github.io <https://davidfrantz.github.io>`_
 
 | **e-Mail:**
-| david.frantz@geo.hu-berlin.de
+| david.frantz@uni-trier.de

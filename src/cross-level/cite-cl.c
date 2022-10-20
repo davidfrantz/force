@@ -469,7 +469,7 @@ int i;
                      "Correction for Environmental monitoring\n");
   fprintf(_cite_fp_, "Version %s\n", _VERSION_);
   fprintf(_cite_fp_, "Copyright (C) 2013-2022 David Frantz, "
-                     "david.frantz@geo.hu-berlin.de\n");
+                     "david.frantz@uni-trier.de\n");
 
   fprintf(_cite_fp_, "\nFORCE is free software under the terms of the "
                      "GNU General Public License as published by the "

@@ -25,7 +25,7 @@
 # This script generates synthetic mixtures from endmember feature vectors
 
 # Copyright (C) 2020 Andreas Rabe
-# Contact: andreas.rabe@geo.hu-berlin.de
+# Contact: andreas.janz@geo.hu-berlin.de
 
 
 import argparse
