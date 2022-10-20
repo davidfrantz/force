@@ -36,6 +36,7 @@ This file contains functions for higher level tasks
 
 /** This function handles the reading tasks
 --- pro:      progress handle
+--- ibytes:   number of bytes read
 --- MASK:     mask image
 --- ARD1:     primary   ARD
 --- ARD2:     secondary ARD
@@ -45,8 +46,9 @@ This file contains functions for higher level tasks
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void read_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl){
+void read_higher_level (progress_t *pro, off_t *ibytes, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl){
 int mask_status;
+off_t bytes = 0;
 
 
   if (!read_this_chunk(pro)) return;
@@ -62,7 +64,7 @@ int mask_status;
 
   omp_set_num_threads(phl->ithread);
 
-  MASK[pro->pu_next] = read_mask(&mask_status,
+  MASK[pro->pu_next] = read_mask(&mask_status, &bytes,
     pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
 
   if (MASK[pro->pu_next] == NULL && mask_status != SUCCESS){
@@ -78,13 +80,13 @@ int mask_status;
 
 
   if (phl->input_level1 == _INP_FTR_){
-    ARD1[pro->pu_next] = read_features(&nt1[pro->pu_next], 
+    ARD1[pro->pu_next] = read_features(&bytes, &nt1[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
   } else if (phl->input_level1 == _INP_CON_){
-    ARD1[pro->pu_next] = read_confield(&nt1[pro->pu_next], 
+    ARD1[pro->pu_next] = read_confield(&bytes, &nt1[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
   } else if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-    ARD1[pro->pu_next] = read_ard(&nt1[pro->pu_next], 
+    ARD1[pro->pu_next] = read_ard(&bytes, &nt1[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, &phl->sen, phl);
   } else if (phl->input_level1 != _INP_NONE_) {
     printf("unknown input level\n");
@@ -99,13 +101,13 @@ int mask_status;
 
 
   if (phl->input_level2 == _INP_FTR_){
-    ARD2[pro->pu_next] = read_features(&nt2[pro->pu_next], 
+    ARD2[pro->pu_next] = read_features(&bytes, &nt2[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
   } else if (phl->input_level2 == _INP_CON_){
-    ARD2[pro->pu_next] = read_confield(&nt2[pro->pu_next], 
+    ARD2[pro->pu_next] = read_confield(&bytes, &nt2[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
   } else if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-    ARD2[pro->pu_next] = read_ard(&nt2[pro->pu_next], 
+    ARD2[pro->pu_next] = read_ard(&bytes, &nt2[pro->pu_next], 
       pro->tx_next, pro->ty_next, pro->chunk_next, cube, &phl->sen2, phl);
   } else if (phl->input_level2 != _INP_NONE_){
     printf("unknown input level\n");
@@ -117,6 +119,9 @@ int mask_status;
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
   }
+
+
+  *ibytes = bytes;
 
   measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
 
@@ -242,16 +247,18 @@ bool error = false;
 
 /** This function handles the output tasks
 --- pro:      progress handle
+--- obytes:   number of bytes written
 --- OUTPUT:   OUTPUT bricks
 --- nproduct: number of output bricks
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void output_higher_level (progress_t *pro, brick_t ***OUTPUT, int *nprod, par_hl_t *phl){
+void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, par_hl_t *phl){
 char dname[NPOW_10]; 
 int nchar;
 char *lock = NULL;
 bool error = false;
+off_t bytes = 0;
 int o;
 
 
@@ -278,7 +285,7 @@ int o;
 
     omp_set_num_threads(phl->othread);
   
-    #pragma omp parallel shared(OUTPUT,pro,nprod,phl) default(none)
+    #pragma omp parallel shared(OUTPUT,pro,nprod,phl) reduction(+: bytes) default(none)
     {
 
       CPLPushErrorHandler(CPLQuietErrorHandler);
@@ -289,6 +296,10 @@ int o;
         if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_brick(
           OUTPUT[pro->pu_prev][o], phl->radius);
         write_brick(OUTPUT[pro->pu_prev][o]);
+        if (OUTPUT[pro->pu_prev][o] != NULL && 
+            get_brick_open(OUTPUT[pro->pu_prev][o]) != OPEN_FALSE){
+            bytes += get_brick_size(OUTPUT[pro->pu_prev][o]);
+        }
       }
 
       CPLPopErrorHandler();
@@ -303,6 +314,7 @@ int o;
   free((void*)OUTPUT[pro->pu_prev]);
   OUTPUT[pro->pu_prev] = NULL;
 
+  *obytes = bytes;
 
   measure_progress(pro, _TASK_OUTPUT_, _CLOCK_TOCK_);
 
