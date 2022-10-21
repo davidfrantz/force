@@ -652,12 +652,17 @@ int b_brick, b_file, nbands, nfiles;
 int ***bands = NULL;
 char *lock = NULL;
 double timeout;
-GDALDatasetH fp_physical = NULL;
+GDALDatasetH fp_copy = NULL;
+GDALDatasetH fp_finish = NULL;
 GDALDatasetH fp = NULL;
 GDALDatasetH fo = NULL;
 GDALRasterBandH band = NULL;
 GDALDriverH driver_physical = NULL;
-GDALDriverH driver = NULL;
+GDALDriverH driver_memory   = NULL;
+GDALDriverH driver_create   = NULL;
+GDALDataType file_datatype;
+int create;
+char **driver_metadata = NULL;
 char **options = NULL;
 float *buf = NULL;
 float now, old;
@@ -677,7 +682,6 @@ date_t today;
 char c_update[2][NPOW_04] = { "create", "update" };
 bool update;
 
-GDALDataType file_datatype;
 
 char **fp_meta = NULL;
 char **band_meta = NULL;
@@ -754,8 +758,26 @@ int i = 0;
   // get driver
   if ((driver_physical = GDALGetDriverByName(brick->format.driver)) == NULL){
     printf("%s driver not found\n", brick->format.driver); return FAILURE;}
-  if ((driver = GDALGetDriverByName("MEM")) == NULL){
+  if ((driver_memory   = GDALGetDriverByName("MEM")) == NULL){
     printf("%s driver not found\n", "MEM"); return FAILURE;}
+
+  driver_metadata = GDALGetMetadata(driver_physical, NULL);
+  //CSLPrint(driver_metadata, NULL);
+
+  create = CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATE, false);
+  if (!create && !CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATECOPY, false)){
+    printf("%s driver does not support creating, nor create-copying datasets\n", brick->format.driver);
+    return FAILURE;
+  }
+
+  if (create){
+    driver_create = driver_physical;
+  } else {
+    driver_create = driver_memory;
+  }
+
+  //CSLDestroy(driver_metadata);
+  driver_metadata   = NULL;
 
   // set GDAL output options
   for (o=0; o<brick->format.n; o+=2){
@@ -896,8 +918,8 @@ int i = 0;
       if ((fp = GDALOpen(fname, GA_Update)) == NULL){
         printf("Unable to open %s. ", fname); return FAILURE;}
     } else {
-      if ((fp = GDALCreate(driver, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
-        printf("Error creating memory file %s. ", fname); return FAILURE;}
+      if ((fp = GDALCreate(driver_create, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
+        printf("Error creating file %s. ", fname); return FAILURE;}
     }
       
     if (brick->open == OPEN_BLOCK){
@@ -973,17 +995,18 @@ int i = 0;
       GDALSetProjection(fp,   brick->proj);
     }
 
-    // in case of ENVI, update description
-    //if (format == _FMT_ENVI_) 
-    //GDALSetDescription(fp, brick->name);
 
-    
     // copy to physical file. This is needed for drivers that do not support CREATE
-    if ((fp_physical = GDALCreateCopy(driver_physical, fname, fp, FALSE, options, NULL, NULL)) == NULL){
+    if (!create){
+      if ((fp_copy = GDALCreateCopy(driver_physical, fname, fp, FALSE, options, NULL, NULL)) == NULL){
         printf("Error creating file %s. ", fname); return FAILURE;}
+      fp_finish = fp_copy;
+    } else {
+      fp_finish = fp;
+    }
 
-    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp_physical, sys_meta[i], sys_meta[i+1], "FORCE");
-    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp_physical, fp_meta[i],  fp_meta[i+1],  "FORCE");
+    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp_finish, sys_meta[i], sys_meta[i+1], "FORCE");
+    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp_finish, fp_meta[i],  fp_meta[i+1],  "FORCE");
 
     for (b=0; b<nbands; b++){
 
@@ -1016,18 +1039,18 @@ int i = 0;
       copy_string(band_meta[i++], NPOW_14, ldate);
 
 
-      band = GDALGetRasterBand(fp_physical, b_file);
+      band = GDALGetRasterBand(fp_finish, b_file);
 
       for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
 
     }
-    
-    GDALClose(fp_physical);
+ 
+    if (!create) GDALClose(fp_copy);
     GDALClose(fp);
 
   
     CPLUnlockFile(lock);
-
+  
     // write provenance info
     if (brick->nprovenance > 0 && brick->chunk == 0){
 
