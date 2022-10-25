@@ -14,7 +14,7 @@ The ``++PARAM_LEVEL3_START++`` and ``++PARAM_LEVEL3_END++`` keywords enclose the
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
 .. include:: ../../../_static/parameter-files/parameter_LEVEL3.prm
-  :code: bash
+  :code: shell
 
 ------
 
