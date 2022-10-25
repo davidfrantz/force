@@ -1794,6 +1794,8 @@ void write_par_hl_pol(FILE *fp, bool verbose){
 
   fprintf(fp, "\n# LAND SURFACE PHENOLOGY PARAMETERS - POLAR-BASED\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
+  fprintf(fp, "# Please note that these only work well with non-negative indices.--------\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
 
 
   if (verbose){
