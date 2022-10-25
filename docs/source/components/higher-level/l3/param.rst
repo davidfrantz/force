@@ -5,10 +5,9 @@ Parameterization
 
 A parameter file is mandatory for the Level 3 Compositing submodule of FORCE HLPS.
 
-The file extension is ‘.prm’.
 All parameters must be given, even if they are not used.
 All parameters follow common tag-value notation.
-Rudimentary checks are performed by the software components using this file.
+Rudimentary checks are performed when using this file.
 
 The ``++PARAM_LEVEL3_START++`` and ``++PARAM_LEVEL3_END++`` keywords enclose the parameter file.
 
@@ -16,6 +15,8 @@ The following parameter descriptions are a print-out of ``force-parameter``, whi
 
 .. include:: ../../../_static/parameter-files/parameter_LEVEL3.prm
   code: bash
+
+------
 
 * **Input/output directories**
 
