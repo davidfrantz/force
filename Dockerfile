@@ -3,7 +3,7 @@
 # This file is part of FORCE - Framework for Operational Radiometric 
 # Correction for Environmental monitoring.
 # 
-# Copyright (C) 2013-2021 David Frantz
+# Copyright (C) 2013-2022 David Frantz
 # 
 # FORCE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 # 
 ##########################################################################
 
-# Copyright (C) 2020-2021 Gergely Padányi-Gulyás (github user fegyi001),
+# Copyright (C) 2020-2022 Gergely Padányi-Gulyás (github user fegyi001),
 #                         David Frantz
 #                         Fabian Lehmann
 

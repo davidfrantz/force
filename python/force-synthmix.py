@@ -5,7 +5,7 @@
 # This file is part of FORCE - Framework for Operational Radiometric 
 # Correction for Environmental monitoring.
 # 
-# Copyright (C) 2013-2020 David Frantz
+# Copyright (C) 2013-2022 David Frantz
 # 
 # FORCE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # This script generates synthetic mixtures from endmember feature vectors
 
 # Copyright (C) 2020 Andreas Rabe
-# Contact: andreas.rabe@geo.hu-berlin.de
+# Contact: andreas.janz@geo.hu-berlin.de
 
 
 import argparse

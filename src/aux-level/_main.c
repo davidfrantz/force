@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -106,8 +106,8 @@ char user[NPOW_10];
          user, _VERSION_);
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
-  printf("Copyright (C) 2013-2021 David Frantz, "
-         "david.frantz@geo.hu-berlin.de\n");
+  printf("Copyright (C) 2013-2022 David Frantz, "
+         "david.frantz@uni-trier.de\n");
   printf("+ many community contributions.\n");
 
   printf("\nFORCE is free software under the terms of the "
@@ -144,8 +144,8 @@ char user[NPOW_10];
          "\nLevel 1 Archiving System (L1AS)\n"
          "+ force-level1-csd       Download from cloud storage + maintenance of Level 1 "
          "Landsat and Sentinel-2 data pool\n"
-         "+ force-level1-landsat   Maintenance of Level 1 Landsat "
-         "data pool (deprecated)\n"
+         "+ force-level1-landsat   Download Landsat data using the USGS M2M API "
+         "+ maintenance of Level 1 data pool\n"
          "+ force-level1-sentinel2 Download from ESA + maintenance of Level 1 "
          "Sentinel-2 data pool (deprecated)\n"
          "\nLevel 2 Processing System (L2PS)\n"

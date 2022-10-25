@@ -103,6 +103,7 @@ The CAT transform was applied to the Value of Base Level (VBL) annual time serie
    :maxdepth: 2
 
    param.rst
+   indices.rst
    endmember.rst
    format.rst
 

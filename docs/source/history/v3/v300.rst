@@ -523,7 +523,7 @@ Release: 09.03.2020
     The parameter FEATURE_EXCLUDE controls wheter a sample is taken if one of the features has a nodata value.
     The output of this file can serve as input for force-train to train machine learning modules.
 
-  - A new module was added: the landscape metrics module (C) Franz Schug, franz.schug@geo.hu-berlin.de.
+  - A new module was added: the landscape metrics module (C) Franz Schug, fschug@wisc.edu.
     This module allows for the computation of landscape metrics with a moving window strategy, as well as some focal statistics.
     The metrics can be computed on any feature provided with the INPUT_FEATURE parameters, which can be given multiple times.
 

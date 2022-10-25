@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -64,10 +64,10 @@ typedef struct {
   //date_t  date; // acquisition date
 } ard_t;
 
-brick_t *read_mask(int *success, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_features(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_confield(int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_ard(int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl);
+brick_t *read_mask(int *success, off_t *ibytes, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
+ard_t *read_features(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
+ard_t *read_confield(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
+ard_t *read_ard(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl);
 brick_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y);
 brick_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, brick_t *ARD);
 int free_ard(ard_t *ard, int nt);

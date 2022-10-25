@@ -5,7 +5,7 @@
 # This file is part of FORCE - Framework for Operational Radiometric 
 # Correction for Environmental monitoring.
 # 
-# Copyright (C) 2013-2020 David Frantz
+# Copyright (C) 2013-2022 David Frantz
 # 
 # FORCE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -154,9 +154,6 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
-      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
-        rmdir "$DOUT/$TILE"
-      fi
       exit 1
     fi
 
@@ -184,9 +181,6 @@ function cubethis(){
 
     if [ $VALID -eq 0 ]; then
       rm "$FOUT"
-      if [ -z "$(ls -A "$DOUT/$TILE")" ]; then
-        rmdir "$DOUT/$TILE"
-      fi
       exit 1
     fi
 
@@ -410,6 +404,8 @@ for i in "$@"; do
 
   # remove the temporary file
   rm "$FTMP"
+  # remove empty folders in datacube
+  find $DOUT -type d -regextype grep -regex ".*X[0-9-]\{4\}_Y[0-9-]\{4\}" -empty -delete
 
 done
 

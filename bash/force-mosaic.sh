@@ -5,7 +5,7 @@
 # This file is part of FORCE - Framework for Operational Radiometric 
 # Correction for Environmental monitoring.
 # 
-# Copyright (C) 2013-2020 David Frantz
+# Copyright (C) 2013-2022 David Frantz
 # 
 # FORCE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -202,7 +202,7 @@ ROUT=$(perl -e 'use File::Spec; print File::Spec->abs2rel(@ARGV) . "\n"' "$FINP"
 export ROUT
 debug "relative output path: $ROUT"
 
-find -L "$ROUT" \( -name '*.dat' -o -name '*.tif' \) -exec basename {} \; | sort | uniq > $PRODUCTS
+find -L "$ROUT" \( -name '*.dat' -o -name '*.tif' \) | xargs basename -a | sort | uniq > $PRODUCTS
 NPROD=$(wc -l $PRODUCTS | cut -d " " -f 1)
 
 echo "mosaicking $NPROD products:"

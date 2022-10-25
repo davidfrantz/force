@@ -6,7 +6,7 @@ Citation and Acknowledgement
 Proper acknowledgement, and the citation of the scientific publications are kindly requested. 
 Co-authorship of scientific articles should be offered in case I provide substantial help in setting up, modifying or running the software, or if the generated data are an integral part of your research. 
 
-Please address questions to David Frantz, Humboldt-University Berlin (david.frantz@geo.hu-berlin.de). 
+Please address questions to David Frantz, Humboldt-University Berlin (david.frantz@uni-trier.de). 
 
 I will try my best to answer your query within a reasonable amount of time. 
 However, please note that I cannot guarantee user support or an immediate answer, as this is not part of my full-time job. 

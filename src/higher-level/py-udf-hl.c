@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 This file contains functions for plugging-in python UDFs into FORCE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Copyright (C) 2020-2021 David Frantz, Andreas Rabe
+Copyright (C) 2020-2022 David Frantz, Andreas Rabe
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 

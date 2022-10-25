@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2020 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
   register_float_par(params,   "MAX_CLOUD_COVER_TILE",  1, 100, &pl2->maxtc);
   register_float_par(params,   "CLOUD_BUFFER",          0, 10000, &pl2->cldbuf);
+  register_float_par(params,   "CIRRUS_BUFFER",         0, 10000, &pl2->cirbuf);
   register_float_par(params,   "SHADOW_BUFFER",         0, 10000, &pl2->shdbuf);
   register_float_par(params,   "SNOW_BUFFER",           0, 10000, &pl2->snwbuf);
   register_float_par(params,   "CLOUD_THRESHOLD",       0, 1, &pl2->cldprob);
