@@ -1,0 +1,61 @@
+.. _v379:
+
+FORCE v. 3.7.9
+==============
+
+Release: 25.10.2022
+
+
+- **FORCE L1AS**
+
+  - The previously deprecated program force-level1-landsat was replaced by an overhauled version of landsatlinks.
+    Downloading Landsat data through FORCE is now possible again!
+    USGS/M2M credentials are required for this.
+    A big shoutout to Stefan Ernst for enabling this!!!
+
+- **FORCE L2PS**
+
+  - Added the option to buffer cirrus clouds.
+    Cirrus clouds are quite hard to detect reliably (see CMIX paper).
+    As such, buffering cirrus clouds often results in flagging out huge areas.
+    To avoid that, we somewhen took the decision to not go for a cirrus buffer.
+    This remains the standard behaviour.
+
+    However, it is now possible to enable a buffer by using a buffer size > 0 for the new parameter ``CIRRUS_BUFFER``.
+    Note, that both the cirrus buffer won't be represented in the "cloud buffer" QAI bit, but will be subsumed in the cirrus cloud bit (similar to snow buffer).
+    This is because the bit structure would need to be disruptively changed to accomodate for a dsitinction.
+    
+    Thanks to Max Freudenberg for bringing this up.
+
+- **FORCE WVDB**
+
+  - Increased the maximum number of characters to read the LAADS app key.
+    Thanks to Fabian Thiel for bringing this up.
+
+
+- **FORCE HLPS**
+
+  - When implementing custom GDAL options, a bug was unknowingly introduced into FORCE HLPS.
+    To be flexible with regards to as many output drivers as possible, 
+    i.e. both drivers with create and copy capabilities, the following strategy was implemented:
+    a memory-resident image was compiled with the MEM driver, 
+    which was then copied to disc with the requested driver.
+    Apparently, this results in 0-values (although nodata value is different) being written into the image if the top-blocks are skipped, 
+    e.g. because of processing masks being used.
+    This was fixed by only create-MEM/copying when the requested driver does not have create capabilities.
+    
+    As a note (and this was likely the case before, too), create-MEM/copying does not seem to work with block-output (like in HLPS).
+    If full files are written, it works, however (like the OVV images in L2PS, where the same routine is used).
+
+    Thanks to Stefan Ernst for bringin my attention to this.
+
+  - force-higher-level will now print the number of bytes that were input and output at the end of the runtime.
+    This might help to identify why processes might end quickly without producing expected data.
+    Thanks to Max Freudenberg and Stefan Ernst for suggestions and discussions.
+
+  - Marcel Schwieder added missing Interpolation parameters to the parameterfile skeleton, thanks!
+
+- **FORCE AUX**
+
+  - Max Freudenberg increased the speed of force-mosaic when many files are present, thanks!
+  - Stefan Ernst fixed empty tiles after running force-cube, thanks!
