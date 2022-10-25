@@ -6,7 +6,7 @@ on:
   release:
     types: [published]
   repository_dispatch:
-    types: [udf-dispatch]
+    types: [udf-dispatch,base-dispatch]
 
 env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
