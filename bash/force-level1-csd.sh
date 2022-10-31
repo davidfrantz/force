@@ -81,7 +81,7 @@ exit 1
 show_progress() {
   SIZEDONE=$(awk -v done=$SIZEDONE -v fsize=$FILESIZE 'BEGIN { print (done + fsize) }' )
   PERCDONE=$(awk -v total=$TOTALSIZE -v done=$SIZEDONE 'BEGIN { printf( "%.2f\n", (100 / total * done) )}')
-  local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | cut -d"." -f1) + 1 ))
+  local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | sed "s/,/./" | cut -d"." -f1) + 1 ))
   if [ $ITER -eq 1 ]; then local PERCINT=0; fi
   printf -v INCREMENT "%*s" "$(( $PERCINT*$WIDTH/100 ))" ""; INCREMENT=${INCREMENT// /=}
   printf "\r\e[K|%-*s| %3d %% %s" "$WIDTH" "$INCREMENT" "$PERCINT" "$*"
