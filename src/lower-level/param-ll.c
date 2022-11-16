@@ -44,6 +44,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_char_par(params,    "DIR_LEVEL2",            _CHAR_TEST_EXIST_, &pl2->d_level2);
   register_char_par(params,    "DIR_TEMP",              _CHAR_TEST_EXIST_, &pl2->d_temp);
   register_char_par(params,    "DIR_LOG",               _CHAR_TEST_EXIST_, &pl2->d_log);
+  register_char_par(params,    "DIR_PROVENANCE",        _CHAR_TEST_EXIST_, &pl2->d_prov);
   register_char_par(params,    "FILE_QUEUE",            _CHAR_TEST_NULL_OR_EXIST_, &pl2->f_queue);
   register_char_par(params,    "DIR_WVPLUT",            _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_wvp);
   register_char_par(params,    "DIR_AOD",               _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_aod);

@@ -145,11 +145,11 @@ int b, p;
 
   set_brick_name(brick, from->name);
   set_brick_product(brick, from->product);
-  set_brick_parentname(brick, from->pname);
   set_brick_dirname(brick, from->dname);
   set_brick_filename(brick, from->fname);
   set_brick_sensorid(brick, from->sid);
 
+  set_brick_provdir(brick, from->provdir);
   set_brick_nprovenance(brick, from->nprovenance);
   for (p=0; p<from->nprovenance; p++){
     set_brick_provenance(brick, p, from->provenance[p]);
@@ -505,9 +505,9 @@ int i;
 
   copy_string(brick->name,      NPOW_10, "NA");
   copy_string(brick->product,   NPOW_03, "NA");
-  copy_string(brick->pname,     NPOW_10, "NA");
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
+  copy_string(brick->provdir,   NPOW_10, "NA");
 
   brick->nprovenance = 0;
   brick->provenance  = NULL;
@@ -820,7 +820,7 @@ int i = 0;
   // provenance file
   current_date(&today);
   nchar = snprintf(provname, NPOW_10, "%s/provenance_%04d%02d%02d.csv", 
-    brick->pname, today.year, today.month, today.day);
+    brick->provdir, today.year, today.month, today.day);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling provenance file\n"); return FAILURE;}     
 
@@ -1052,7 +1052,7 @@ int i = 0;
     CPLUnlockFile(lock);
   
     // write provenance info
-    if (brick->nprovenance > 0 && brick->chunk == 0){
+    if (brick->nprovenance > 0 && brick->chunk <= 0){
 
       if ((lock = (char*)CPLLockFile(provname, timeout)) == NULL){
         printf("Unable to lock file %s (timeout: %fs). ", provname, timeout);
@@ -1862,30 +1862,30 @@ void get_brick_product(brick_t *brick, char product[], size_t size){
 }
 
 
-/** This function sets the parent directory-name of a brick
---- brick:  brick
---- pname:  parent directory-name
-+++ Return: void
+/** This function sets the provenance directory of a brick
+--- brick:   brick
+--- provdir: provenance directory
++++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_parentname(brick_t *brick, const char *pname){
+void set_brick_provdir(brick_t *brick, const char *provdir){
 
 
-  copy_string(brick->pname, NPOW_10, pname);
+  copy_string(brick->provdir, NPOW_10, provdir);
 
   return;
 }
 
 
-/** This function gets the parent directory-name of a brick
---- brick:  brick
---- pname:  parent directory-name (modified)
---- size:   length of the buffer for pname
-+++ Return: void
+/** This function gets the provenance directory of a brick
+--- brick:   brick
+--- provdir: provenance directory (modified)
+--- size:    length of the buffer for provdir
++++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_brick_parentname(brick_t *brick, char pname[], size_t size){
+void get_brick_provdir(brick_t *brick, char provdir[], size_t size){
 
 
-  copy_string(pname, size, brick->pname);
+  copy_string(provdir, size, brick->provdir);
 
   return;
 }

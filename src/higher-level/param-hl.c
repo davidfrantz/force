@@ -69,6 +69,7 @@ void register_higher(params_t *params, par_hl_t *phl){
 
   register_char_par(params,    "DIR_LOWER",  _CHAR_TEST_EXIST_,         &phl->d_lower);
   register_char_par(params,    "DIR_HIGHER", _CHAR_TEST_EXIST_,         &phl->d_higher);
+  register_char_par(params,    "DIR_PROVENANCE", _CHAR_TEST_EXIST_,     &phl->d_prov);
   register_char_par(params,    "DIR_MASK",   _CHAR_TEST_NULL_OR_EXIST_, &phl->d_mask);
   register_char_par(params,    "BASE_MASK",  _CHAR_TEST_NULL_OR_BASE_,  &phl->b_mask);
   register_char_par(params,    "FILE_TILE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->f_tile);
