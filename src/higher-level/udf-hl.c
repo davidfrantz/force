@@ -166,7 +166,7 @@ int nchar;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
   set_brick_dirname(brick, dname);
-  set_brick_provdir(brick, phl->d_higher);
+  set_brick_provdir(brick, phl->d_prov);
 
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_UDF_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 

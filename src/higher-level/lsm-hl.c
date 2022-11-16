@@ -135,7 +135,7 @@ int nchar;
   if (nchar < 0 || nchar >= NPOW_10){
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
   set_brick_dirname(brick, dname);
-  set_brick_provdir(brick, phl->d_higher);
+  set_brick_provdir(brick, phl->d_prov);
 
   nchar = snprintf(fname, NPOW_10, "%s_HL_LSM_%s", phl->lsm.base, prodname);
   if (nchar < 0 || nchar >= NPOW_10){
