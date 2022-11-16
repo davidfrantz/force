@@ -52,9 +52,9 @@ extern "C" {
 typedef struct {
   char name[NPOW_10];    // name of brick
   char product[NPOW_03]; // product short name
-  char pname[NPOW_10];   // dirpath  for parent folder
   char dname[NPOW_10];   // dirpath  for product
   char fname[NPOW_10];   // filename for product
+  char provdir[NPOW_10]; // dirpath  for provenance folder
   char  **provenance;    // input data
   int nprovenance;       // number of input data
   int sid;               // sensor ID
