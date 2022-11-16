@@ -1311,8 +1311,8 @@ double tol = 5e-3;
   set_brick_tiley(brick,      ty);
 
   set_brick_filename(brick, "DONOTOUTPUT");
-  set_brick_parentname(brick, "DONOTOUTPUT");
   set_brick_dirname(brick, "DONOTOUTPUT");
+  set_brick_provdir(brick, "DONOTOUTPUT");
   set_brick_product(brick, prd);
   set_brick_sensorid(brick, sid);
   set_brick_name(brick, "FORCE Level 2 ARD");
