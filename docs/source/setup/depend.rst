@@ -119,7 +119,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
   .. code-block:: bash
 
-    pip install numpy gsutil
+    pip install numpy gsutil git+https://github.com/ernstste/landsatlinks.git
 
 * **pandoc** is used to convert from markdown to html.
   The software can be installed with:
@@ -165,3 +165,9 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
      make -j
      sudo make install
      make clean
+
+* **aria2** is used to download Landsat Level 1 product bundles with ``force-level1-landsat``
+
+  .. code-block:: bash
+
+    sudo apt install aria2

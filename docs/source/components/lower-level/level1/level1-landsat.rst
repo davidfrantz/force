@@ -3,59 +3,133 @@
 force-level1-landsat
 ====================
 
-FORCE can process Level 1 Landsat data, generated using the Level 1 Product Generation System (LPGS) of the U.S. Geological Survey (USGS). 
+``force-level1-landsat`` offers a simple command line interface to communicate with the USGS/EROS machine-to-machine API. The tool can be used to search for Landsat Collection 2 Level 1 product bundles, create download links for the results and/or directly download the data.
 
-At the time of writing, pre-collection, collection 1, and collection 2 data were successfully digested by FORCE. Following Landsat sensors are supported:
+Requirements
+^^^^^^^^^^^^
+User credentials to log in to the USGS EarthExplorer interface are required. Your user account needs to have access to the machine-to-machine API, which can be requested through the user profile page `here <https://ers.cr.usgs.gov/profile/access>`_.
 
-* Landsat 4 Thematic Mapper
-* Landsat 5 Thematic Mapper
-* Landsat 7 Enhanced Thematic Mapper+
-* Landsat 8 Operational Land Imager
+aria2 is required to download product bundles. You can still create links and download them manually if aria2 is not available. Also see :ref:`depend`
 
-Before getting started, the full resolution Landsat images must be acquired from the USGS archive, e.g. through EarthExplorer or GloVis. FORCE currently does not provide functionality to download Landsat data. 
-
-Both tasks can be handled by ``force-level1-landsat``. Extraction of the \*.tar.gz archives is not necessary at this point as this is done on the fly during Level 2 processing.
-
-.. note::
-   If you need to bypass ``force-level1-landsat``, it is recommended to store the compressed images in a consistent data pool without duplicates or different processing versions.
-   You will need to prepare a :ref:`queue`. 
-
-   
 Usage
 ^^^^^
+| There are two subprogams, ``search`` and ``download``:
+| ``search`` can be used to search the Landsat archive, generate download links, and also download the product bundles right away. \
+| ``download`` can be used to download product bundles for which a list of download links was generated using ``search`` before.
 
-.. code-block:: bash
+force-level1-landsat search
++++++++++++++++++++++++++++
 
-  force-level1-landsat
+.. code-block::
 
-  Usage: force-level1-landsat from to queue cp/mv [dry]
+  force-level1-landsat search
+  usage: force-level1-landsat search [-h] [-s SENSOR] [-d DATERANGE] [-c CLOUDCOVER]
+    [-m MONTHS] [-t {T1,T2}] [-l {L1TP,L1GT,L1GS}] [--download | -n] [-f FORCELOGS]
+    [-q QUEUE_FILE] [--secret SECRET] aoi output_dir
 
-* from
-  
-  | The input directory (1st argument) is recursively scanned for \*.tar.gz files. The Path/Row is extracted from the file paths. 
-  | Note that the input directory should not be a parent of the target directory. The input directory is scanned recursively, thus files already in the L1 data pool will be moved again if the target is a child of the input (this is unnecessary and might take a while).
-  | *White-space characters are not allowed in the file path, e.g. when using the Bulk Download Application from USGS. This needs to be taken care of before running this program.* 
-  
-* to
+* aoi
+    | The area of interest. Valid input:
+    | (1) .txt - text file containing one tile per line in the format ``PPPRRR``
+    |     (``P`` = path, ``R`` = row)
+    |     Keep padding zeroes. Correct: ``194023``, incorrect: ``19432``
+    | (2) .shp, .gpkg, .geojson - vector file containing point, line, or polygon geometries.
 
-  | A subdirectory for every Path/Row is created in the target directory. 
-  | The files from the input directoty are imported in the corresponding Path/Row folders. 
-  | Files are not imported if they are duplicates of already existing files. 
-  | Existing files are replaced by files with a newer production number.
+* output-dir
+    | The directory where the file containing the download URLs or downloaded products will be stored.
+    | The ``--download`` option will deactivate saving of URLs.
 
-* queue
+* -s | \--sensor
+    | Restrict results to specific sensor(s).
+    | choices = ``TM``, ``ETM``, ``OLI`` (Landsat 4/5, Landsat 7, Landsat 8/9)
+    | Default: All sensors
 
-  | A file queue (e.g. a file named ``level1-landsat-germany.txt``) needs to be given. 
-  | If it does not exist, it will be created. 
-  | If it exists, new imports are appended to this file. 
-  | Outdated files (older production number) are removed from this queue, and the new imports are appended to the end. 
-  | This queue is needed for Level 2 processing. All images with ``QUEUED`` status will be processed, then set to ``DONE``.
+* -d | \--daterange
+    | Start date and end date = date range to be considered.
+    | Format: ``YYYYMMDD,YYYYMMDD``
+    | Default: full archive until today.
 
-* cp/mv
+* -c | \--cloudcover
+    | Percent (land) cloud cover range to be considered.
+    | Default: ``0,100``
 
-  | The Level 1 archives are moved (``mv``, recommended) or copied (``cp``) from input to target directory.
+* -m | \--months
+    | Seasonal filter: define the months to be considered.
+    | Default: ``1,2,3,4,5,6,7,8,9,10,11,12``
 
-* [dry]
+* -t | \--tier
+    | Landsat collection tier level.
+    | Valid tiers: ``T1,T2,RT``
+    | Default: ``T1``
 
-  | This argument is optional, and if ``dry`` is specified, no files are moved/copied. The program only prints what it would do.
+* -l | \--level
+    | Landsat level of processing.
+    | Valid levels: ``L1TP,L1GT,L1GS``
+    | Default: ``L1TP``
 
+* \--download
+    | Download the product bundles directly after creating the download links.
+
+* -n | \--no-action
+    | Only search for product bundles and print info about search results without generating links or downloading.
+
+* -f | \--forcelogs
+    | Path to FORCE log file directory (Level-2 processing logs, directory will be searched recursively)
+    | Links will only be generated for products that haven't been processed by FORCE yet.
+
+* -q | \--queue-file
+    | Path to FORCE queue file.
+    | Downloaded product bundle file paths will be appended to the queue.
+
+* \--secret
+    | Path to the file containing the username and password for M2MApi access (EarthExplorer login).
+    | Avoids having to enter credentials every time the tool is run.
+    | First line: ``user``, second line: ``password``
+
+.. code-block:: None
+
+    force-level1-landsat search ~/berlin.shp ~/level1 -s OLI -d 20180101,20201231 -m 10,11 -c 0,70 --secret ~/.m2m.txt --no-action
+
+    Sensor(s): OLI
+    Tile(s): 192023,192024,193023,193024
+    Date range: 2018-01-01 to 2020-12-31
+    Included months: 10,11
+    Cloud cover: 0% to 70%
+
+    20 Landsat Level 1 scenes matching criteria found
+    22.13 GB data volume found
+
+.. note::
+
+    The M2M API is rate limited to 15,000 requests/15min. If you exceed this limit, force-level1-landsat will wait for 15 minutes and continue afterwards. Checking for existing product bundles in the output directory happens before generating download URLs to reduce unnecessary requests.
+
+force-level1-landsat download
++++++++++++++++++++++++++++++
+
+.. code-block:: None
+
+    force-level1-landsat download
+    usage: force-level1-landsat download [-h] [-q QUEUE_FILE] url_file output_dir
+
+* url-file
+    | Path to the file containing the download links.
+
+* output-dir
+    | The directory where the product bundles will be stored.
+
+* -q | \--queue-file
+    | Path to FORCE queue file. Downloaded product bundle file paths will be appended to the queue.
+
+.. code-block:: None
+
+    force-level1-landsat download ~/urls_landsat_TM_ETM_OLI_20221001T174038.txt ~/level-1
+
+    Loading urls from ~/urls_landsat_TM_ETM_OLI_20221001T174038.txt
+
+    6 of 116 product bundles found in filesystem, 110 left to download.
+
+    Downloading: 5%|===>                                    | 6/110 [08:36<2:29:13, 100.97s/product bundle/s]
+
+
+.. note::
+
+    The output directory will be checked recursively (i.e. including all subfolders) for existing product bundles and download URLs are only created for product bundles that were not found in the filesystem. All directories, .tar files, and .tar.gz files that match the Landsat Collections Level-1 naming convention are considered. Partial downloads (product bundles that are accompanied by .aria2 files) will be continued.
