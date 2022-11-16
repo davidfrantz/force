@@ -67,6 +67,12 @@ void write_par_ll_dirs(FILE *fp, bool verbose){
   fprintf(fp, "DIR_LOG = NULL\n");
 
   if (verbose){
+    fprintf(fp, "# This is the directory where provenance files should be saved.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_PROVENANCE = NULL\n");
+
+  if (verbose){
     fprintf(fp, "# This is a temporary directory that is used to extract compressed images\n");
     fprintf(fp, "# for force-level2. Note that images already need to be extracted when using\n");
     fprintf(fp, "# force-l2ps directly. The extracted data will be deleted once they were\n");
@@ -697,6 +703,12 @@ void write_par_hl_dirs(FILE *fp, bool verbose){
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_HIGHER = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This is the directory where provenance files should be saved.\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_PROVENANCE = NULL\n");
 
   return;
 }

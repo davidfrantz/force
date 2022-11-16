@@ -46,7 +46,7 @@ check_params() {
   # make sure we have two comma-separated arguments to optional params
   if ! echo "$1" | grep -q ","; then show_help "$(printf "%s\n       " "Only one ""$2"" specified or ""$2""s not separated by comma")"; fi
   local secondarg=$(echo "$1" | cut -d"," -f2)
-  if ! [ -n $secondarg ]; then show_help "$(printf "%s\n       " "Only one ""$2"" specified." "Provide exactly two arguments separated by a comma ,")"; fi
+  if [ -z "$secondarg" ]; then show_help "$(printf "%s\n       " "Only one ""$2"" specified." "Provide exactly two arguments separated by a comma ,")"; fi
 }
 
 is_in_range() {
@@ -81,7 +81,7 @@ exit 1
 show_progress() {
   SIZEDONE=$(awk -v done=$SIZEDONE -v fsize=$FILESIZE 'BEGIN { print (done + fsize) }' )
   PERCDONE=$(awk -v total=$TOTALSIZE -v done=$SIZEDONE 'BEGIN { printf( "%.2f\n", (100 / total * done) )}')
-  local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | cut -d"." -f1) + 1 ))
+  local WIDTH=$(($(tput cols) - 9)) PERCINT=$(( $(echo $PERCDONE | sed "s/,/./" | cut -d"." -f1) + 1 ))
   if [ $ITER -eq 1 ]; then local PERCINT=0; fi
   printf -v INCREMENT "%*s" "$(( $PERCINT*$WIDTH/100 ))" ""; INCREMENT=${INCREMENT// /=}
   printf "\r\e[K|%-*s| %3d %% %s" "$WIDTH" "$INCREMENT" "$PERCINT" "$*"
@@ -237,6 +237,15 @@ AOI="$4"
 # check for empty arguments
 if [[ -z $CHECKLOGS || -z $METADIR || -z $POOL || -z $QUEUE || -z $AOI || -z $CCMIN || -z $CCMAX || -z $DATEMIN || -z $DATEMAX || -z $SENSIN || -z $TIER ]]; then
   show_help "$(printf "%s\n       " "One or more arguments are undefined, please check the following" "" "Metadata directory: $METADIR" "Level-1 pool: $POOL" "Queue: $QUEUE" "AOI: $AOI" "Sensors: $SENSIN" "Start date: $DATEMIN, End date: $DATEMAX" "Cloud cover minimum: $CCMIN, cloud cover maximum: $CCMAX" "Tier (Landsat only): $TIER")"
+fi
+
+# make sure path to queue is a file, path to pool is a directory
+if [ -d "$QUEUE" ]; then
+  show_help "$(printf "%s\n       " "The specified path for the queue file seems to be a directory." "$QUEUE")"
+fi
+
+if ! [ -d "$POOL" ]; then
+  show_help "$(printf "%s\n       " "The specified path for the Level 1 data pool does not seem to be a directory." "$POOL")"
 fi
 
 # check for correct tier

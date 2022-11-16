@@ -1,0 +1,19 @@
+.. _v3710:
+
+FORCE v. 3.7.10
+==============
+
+Release: 16.11.2022
+
+
+- **General**
+
+  - Added a new parameter to L2PS and HLPS to output provenance traces into a designated directory:
+    ``DIR_PROVENANCE``. 
+    There is still one issue to solve in the future: 
+    in HLPS, the provenance table wont be generated if blocks are skipped at the top of the file, e.g. when masks are used.
+
+- **FORCE L1AS**
+
+  - Stefan Ernst improved sanity checks in force-level1-csd.
+
