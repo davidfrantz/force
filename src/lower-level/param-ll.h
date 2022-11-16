@@ -50,6 +50,7 @@ typedef struct {
   char *d_level2;         // output Level-2 directory
   char *d_log;            // logfile directory
   char *d_temp;           // temporary directory
+  char *d_prov;           // provenance directory
   char *d_out;            // exact output directory
   char *fdem;             // Digital Elevation Model
   char *d_coreg;         // Master image for coregistration

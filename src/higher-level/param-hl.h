@@ -452,6 +452,7 @@ typedef struct {
   char  f_par[NPOW_10];    // parameter file
   char *d_lower;  // Lower  Level directory
   char *d_higher; // Higher Level directory
+  char *d_prov;   // provenance directory
   char *d_mask;   // mask directory
   char *b_mask;   // mask basename
   char *f_tile;   // tile allow-list
