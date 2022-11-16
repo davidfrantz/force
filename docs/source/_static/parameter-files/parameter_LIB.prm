@@ -8,6 +8,9 @@ DIR_LOWER = NULL
 # Higher Level datapool (parent directory of tiled output data)
 # Type: full directory path
 DIR_HIGHER = NULL
+# This is the directory where provenance files should be saved.
+# Type: full directory path
+DIR_PROVENANCE = NULL
 
 # MASKING
 # ------------------------------------------------------------------------

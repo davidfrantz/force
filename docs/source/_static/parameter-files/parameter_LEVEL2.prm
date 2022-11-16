@@ -19,6 +19,9 @@ DIR_LEVEL2 = NULL
 # This is the directory where logfiles should be saved.
 # Type: full directory path
 DIR_LOG = NULL
+# This is the directory where provenance files should be saved.
+# Type: full directory path
+DIR_PROVENANCE = NULL
 # This is a temporary directory that is used to extract compressed images
 # for force-level2. Note that images already need to be extracted when using
 # force-l2ps directly. The extracted data will be deleted once they were
