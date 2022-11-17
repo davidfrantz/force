@@ -73,7 +73,8 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-magic-parameters force-mdcp force-mosaic force-parameter \
             force-procmask force-pyramid force-qai-inflate force-stack \
             force-synthmix force-tabulate-grid force-tile-extent \
-            force-tile-finder force-train force-level2-report force-cube-init
+            force-tile-finder force-train force-level2-report force-cube-init \
+			force-init
 
 FORCE_MISC = force-level2-report.Rmd
 
@@ -450,6 +451,7 @@ bash: temp
 	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
 	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
 	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
+	cp $(DB)/force-init.sh $(TB)/force-init
 
 external: temp
 	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
