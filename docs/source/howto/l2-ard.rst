@@ -98,6 +98,7 @@ So, let’s start by creating some directories, e.g.
    mkdir /data/force/log
    mkdir /data/force/misc
    mkdir /data/force/temp
+   mkdir /data/force/provenance
 
 
 The parameter file
