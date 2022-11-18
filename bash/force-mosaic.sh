@@ -149,7 +149,7 @@ CPU=0
 while :; do
   case "$1" in
     -h) help ;;
-    -v) echo "this should print the version. todo"; exit 0 ;;
+    -v) "$BIN"/force -v; exit 0 ;;
     -i) echo "Mosaicking of image chips"; exit 0 ;;
     -j) CPU="$2"; shift ;;
     -m) MOSAIC="$2"; shift ;;

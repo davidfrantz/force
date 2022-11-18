@@ -223,7 +223,7 @@ LAYER="DEFAULT"
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) echo "version-print to be implemented"; exit 0;;
+    -v|--version) "$BIN"/force -v; exit 0;;
     -i|--info) echo "Ingestion of auxiliary data into datacube format"; exit 0;;
     -r|--resample) RESAMPLE="$2"; shift ;;
     -s|--resolution) RES="$2"; shift ;;

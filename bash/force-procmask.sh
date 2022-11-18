@@ -126,7 +126,7 @@ NJOB=0
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) echo "version-print to be implemented"; exit 0;;
+    -v|--version) "$BIN"/force -v; exit 0;;
     -i|--info) echo "Processing masks from raster images"; exit 0;;
     -s|--resolution) RES="$2"; shift ;;
     -l|--layer) LAYER="$2"; shift;;
