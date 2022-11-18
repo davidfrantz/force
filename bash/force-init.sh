@@ -33,7 +33,7 @@ MANDATORY_ARGS=1
 echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
 export -f echoerr
 
-export DEBUG=true # display debug messages?
+export DEBUG=false # display debug messages?
 debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
 export -f debug
 
@@ -68,7 +68,7 @@ eval set -- "$ARGS"
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) echo "version-print to be implemented"; exit 0;;
+    -v|--version) "$BIN"/force -v; exit 0;;
     -i|--info) echo "Initialization of a new project"; exit 0;;
     -- ) shift; break ;;
     * ) break ;;
