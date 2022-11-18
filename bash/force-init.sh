@@ -116,6 +116,7 @@ mkdir "$DOUT"/misc/wvp
 
 mkdir "$DOUT"/assets
 mkdir "$DOUT"/assets/mask
+mkdir "$DOUT"/assets/tiles
 mkdir "$DOUT"/assets/endmember
 mkdir "$DOUT"/assets/labels
 mkdir "$DOUT"/assets/samples
