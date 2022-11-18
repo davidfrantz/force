@@ -8,4 +8,6 @@ for m in $MOD; do
   temp-bin/force-parameter docs/source/_static/parameter-files/parameter_$m.prm $m
 done
 
+make clean
+
 exit
