@@ -207,7 +207,7 @@ cube_t *cube = NULL;
   wkt = cube->proj;
 
   // Output name
-  nchar = snprintf(fname, NPOW_10, "%s/%s", args.dcube, args.format);
+  nchar = snprintf(fname, NPOW_10, "%s/grid.%s", args.dcube, args.format);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
 
