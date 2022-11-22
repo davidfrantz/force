@@ -55,7 +55,7 @@ void usage(char *exe, int exit_code){
   printf("  -v  = show version\n");
   printf("  -i  = show program's purpose\n");
   printf("\n");
-  printf("  -p lon/lat  = point of interest\n");
+  printf("  -p lon,lat  = point of interest\n");
   printf("     use geographic coordinates!\n");
   printf("     longitude is X!\n");
   printf("     latitude  is Y!\n");
