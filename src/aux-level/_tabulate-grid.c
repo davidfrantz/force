@@ -51,6 +51,8 @@ typedef struct {
   int n;
   double bbox[4]; // bottom,top,left,right
   char dcube[NPOW_10];
+  char bout[NPOW_10];
+  char fname[NPOW_10];
   char format[NPOW_10];
 } args_t;
 
@@ -66,6 +68,8 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  -b bottom,top,left,right  = bounding box\n");
   printf("     use geographic coordinates! 4 comma-separated numbers\n");
+  printf("  -o output-file  = output file without extension,\n");
+  printf("     defaults to 'datacube-dir/grid'\n");
   printf("\n");
   printf("  -f format  = output format: shp or kml (default)\n");
   printf("\n");
@@ -83,7 +87,9 @@ int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
 const char *separator = "/,";
+int nchar;
 int i;
+bool o;
 
 
   opterr = 0;
@@ -93,10 +99,13 @@ int i;
   args->bbox[_top_]    =   90;
   args->bbox[_left_]   = -180;
   args->bbox[_right_]  =  180;
+  o = false;
   copy_string(args->format, NPOW_10, "kml");
+  copy_string(args->bout,   NPOW_10, "NULL");
+  copy_string(args->fname,  NPOW_10, "NULL");
 
   // optional parameters
-  while ((opt = getopt(argc, argv, "hvit:b:f:")) != -1){
+  while ((opt = getopt(argc, argv, "hvit:b:o:f:")) != -1){
     switch(opt){
       case 'h':
         usage(argv[0], SUCCESS);
@@ -119,6 +128,10 @@ int i;
           fprintf(stderr, "Bounding box must have 4 numbers.\n");
           usage(argv[0], FAILURE);
         } 
+        break;
+      case 'o':
+        copy_string(args->bout, NPOW_10, optarg);
+        o = true;
         break;
       case 'f':
         copy_string(args->format, NPOW_10, optarg);
@@ -155,13 +168,26 @@ int i;
     usage(argv[0], FAILURE);
   }
 
+  if (o){
+    nchar = snprintf(args->fname, NPOW_10, "%s.%s", args->bout, args->format);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); usage(argv[0], FAILURE);}
+  } else {
+    nchar = snprintf(args->fname, NPOW_10, "%s/grid.%s", args->dcube, args->format);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling filename\n"); usage(argv[0], FAILURE);}
+  }
+
+  if (fileexist(args->fname)){
+    fprintf(stderr, "Grid already exists: %s.\n", args->fname); usage(argv[0], FAILURE);}
+
+
   return;
 }
 
 
 int main(int argc, char *argv[]){
 args_t args;
-char fname[NPOW_10];
 char tile_id[NPOW_10];
 int nchar;
 int px, py, x0, y0, x1, y1, c;
@@ -206,14 +232,6 @@ cube_t *cube = NULL;
     fprintf(stderr, "Reading datacube definition failed.\n"); usage(argv[0], FAILURE);}
   wkt = cube->proj;
 
-  // Output name
-  nchar = snprintf(fname, NPOW_10, "%s/grid.%s", args.dcube, args.format);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
-
-  if (fileexist(fname)){
-    fprintf(stderr, "Grid already exists: %s.\n", fname); usage(argv[0], FAILURE);}
-
   // get border coordinates in target css coordinates
   for (c=0; c<4; c++){
     if ((warp_geo_to_any(geo[c].x,  geo[c].y, &map[c].x, &map[c].y, 
@@ -231,7 +249,7 @@ cube_t *cube = NULL;
 
 
   // create file
-  if ((fp = OGR_Dr_CreateDataSource(driver, fname, NULL)) == NULL){
+  if ((fp = OGR_Dr_CreateDataSource(driver, args.fname, NULL)) == NULL){
     printf("Error creating output file.\n"); return FAILURE;}
     
 
