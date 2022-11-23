@@ -98,7 +98,8 @@ if [ $# -lt $MANDATORY_ARGS ] ; then
   echoerr "Mandatory argument is missing."; help
 fi
 
-export LOGDIR=$1
+LOGDIR=$(readlink -f $1) # absolute directory path
+export LOGDIR
 
 if [ ! -d $LOGDIR ]; then
   echoerr "$LOGDIR does not exist."; help
@@ -115,7 +116,7 @@ if [ -z "$OUTPUT" ]; then
   TIME=$(date +"%Y%m%d-%H%M%S")
   OUTPUT="$LOGDIR/FORCE_L2PS_$TIME.html"
 fi
-export OUTPUT
+export OUTPUT=$(readlink -f $OUTPUT) # absolute directory path
 export OUTDIR=`dirname $OUTPUT`;
 
 debug "binary directory: $BIN"
