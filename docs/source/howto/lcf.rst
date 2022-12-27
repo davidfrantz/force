@@ -95,7 +95,7 @@ Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/la
 
 Info
 
---FORCE is also able to co-register Sentinel-2 data with Landsat time series data (Tutorial provided here, https://force-eo.readthedocs.io/en/latest/howto/coreg.html). However, this workflow will not make use of this because it uniquely relies on Sentinel-2 data.
+--FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_. However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
 
 
 Clear-Sky Observations
