@@ -44,3 +44,27 @@ We first download all image acquisitions with less than 70% cloud cover accordin
    
 Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html#level1-csd>`_. and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_. to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
 
+
+Clear-Sky Observations
+-----------------------------------
+
+Data Pre-Processing
+-----------------------------------
+
+Data Aggregation / Spectral-Temporal Metrics
+
+
+Sampling
+-----------------------------------
+
+Synthetically Mixed Training Data
+-----------------------------------
+
+Library Completeness
+-----------------------------------
+
+Model Training
+-----------------------------------
+
+Model Prediction
+-----------------------------------
