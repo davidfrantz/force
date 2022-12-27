@@ -100,7 +100,7 @@ Info
 --FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_. However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
 
 
-Clear-Sky Observations
+Clear-Sky Observations (optional)
 -----------------------------------
 
 At this point of the workflow, we can optionally check clear-sky observation (CSO) statistics for our data. Data availability in our study area and period will have a great impact on the quality of derived aggregated data, i.e., spectral-temporal metrics, and, ultimately, on land cover fraction mapping results. CSO statistics can be derived using the FORCE HLPS:
@@ -133,7 +133,7 @@ Sampling
 Synthetically Mixed Training Data
 -----------------------------------
 
-Library Completeness
+Library Completeness (optional)
 -----------------------------------
 
 Model Training
