@@ -115,7 +115,7 @@ We compute two CSO statistics, the number of observations and the maximum tempor
 
 	CSO = NUM MAX
 	
-You can access the parameter file `here </./_static/parameter-files/tutorials/11_lcf_cso.prm>`_ or use the one provided in the data repository.
+You can access the parameter file `here <../_static/parameter-files/tutorials/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
 
 
