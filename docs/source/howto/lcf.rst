@@ -74,11 +74,13 @@ You can access the parameter file `here <./_static/parameter-files/tutorials/10_
 It is highly recommended to use a Digital Elevation Model (DEM) for topographic correction purposes. We here use a global SRTM/ASTER composite that we cannot provide for download. However, you can use any DEM of your choice here, for example the one provided by the `Copernicus Land Monitoring Service <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_. The use of a DEM is, however, not required to continue data processing, and as our example region is rather flat, the impact of missing topographic correction might be acceptable.
 
 .. code-block:: bash
+
    FILE_DEM = /path/to/dem/global_srtm-aster.vrt
 
 As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035). The following aspects of the workflow will be limited to a single image tile for reasons of simplicity.
 
 .. code-block:: bash
+
 	DO_REPROJ = TRUE
 	…
 	DO_TILE = TRUE
@@ -100,6 +102,20 @@ Info
 
 Clear-Sky Observations
 -----------------------------------
+
+At this point of the workflow, we can optionally check clear-sky observation (CSO) statistics for our data. Data availability in our study area and period will have a great impact on the quality of derived aggregated data, i.e., spectral-temporal metrics, and, ultimately, on land cover fraction mapping results. CSO statistics can be derived using the FORCE HLPS:
+
+.. code-block:: bash
+
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/ 11_lcf_cso.prm
+
+We compute two CSO statistics, the number of observations and the maximum temporal difference between observations, for the complete study period, as both are good, but simple indicators for data quantity and distribution.
+
+.. code-block:: bash
+
+	CSO = NUM MAX
+	
+You can access the parameter file `here <./_static/parameter-files/tutorials/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
 
 
