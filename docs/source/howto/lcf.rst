@@ -47,8 +47,10 @@ We first download all image acquisitions with less than 70% cloud cover accordin
    force-level1-csd -s S2A,S2B -d 20180101,20181231 -c 0,70 /path/to/metadata/directory/ /path/to/datapool / /path/to/datapool/pool.txt T33UUU
 
 We do not provide these data in the downloadable data because of file size, and as they can be downloaded again anytime.
-   
-Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html#level1-csd>`_. and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_. to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
+
+Tip
+  
+Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html>`_ and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_ to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
 
 
 Data Pre-Processing
@@ -61,15 +63,40 @@ FORCE provides all functionalities to convert all downloaded Level 1 data (i.e.,
 - BRDF correction,
 - resolution merging (from 20m bands to 10m, Sentinel-2 only).
 
-
+For processing, we use
 
 .. code-block:: bash
 
-   force-level2 /path/to/parametertile/directory/ 	-s S2A,S2B -d 20180101,20181231 -c 0,70 /path/to/metadata/directory/ /path/to/datapool / /path/to/datapool/pool.txt T33UUU
+   force-level2 /path/to/parametertile/directory/10_lcf_level_2.prm
+
+You can access the parameter file `here <./_static/parameter-files/tutorials/10_lcf_level_2.prm>`_ or use the one provided in the data repository. 	
+
+It is highly recommended to use a Digital Elevation Model (DEM) for topographic correction purposes. We here use a global SRTM/ASTER composite that we cannot provide for download. However, you can use any DEM of your choice here, for example the one provided by the `Copernicus Land Monitoring Service <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_. The use of a DEM is, however, not required to continue data processing, and as our example region is rather flat, the impact of missing topographic correction might be acceptable.
+
+.. code-block:: bash
+   FILE_DEM = /path/to/dem/global_srtm-aster.vrt
+
+As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035).
+
+.. code-block:: bash
+	DO_REPROJ = TRUE
+	…
+	DO_TILE = TRUE
+	…
+	ORIGIN_LON = -25
+	ORIGIN_LAT = 60
+	…
+	PROJECTION = PROJCS["ETRS89 / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AUTHORITY["EPSG","3035"]]
 
 
+Tip
 
-Please refer to the Level 1 Cloud Storage Downloader Documentation. and Tutorial. to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
+Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/latest/howto/l2-ard.html>`_ for further information about generating ARD in FORCE.
+
+Info
+
+--FORCE is also able to co-register Sentinel-2 data with Landsat time series data (Tutorial provided here, https://force-eo.readthedocs.io/en/latest/howto/coreg.html). However, this workflow will not make use of this because it uniquely relies on Sentinel-2 data.
+
 
 Clear-Sky Observations
 -----------------------------------
