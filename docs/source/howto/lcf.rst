@@ -118,7 +118,7 @@ We compute two CSO statistics, the number of observations and the maximum tempor
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
 .. figure:: img/tutorial-lcf-cso.jpg
-   :height: 606
+   :height: 300
 
    *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
 
