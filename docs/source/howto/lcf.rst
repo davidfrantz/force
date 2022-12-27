@@ -69,7 +69,7 @@ For processing, we use
 
    force-level2 /path/to/parametertile/directory/10_lcf_level_2.prm
 
-You can access the parameter file `here <./_static/parameter-files/tutorials/10_lcf_level_2.prm>`_ or use the one provided in the data repository. 	
+You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/10_lcf_level_2.prm>`_ or use the one provided in the data repository. 	
 
 It is highly recommended to use a Digital Elevation Model (DEM) for topographic correction purposes. We here use a global SRTM/ASTER composite that we cannot provide for download. However, you can use any DEM of your choice here, for example the one provided by the `Copernicus Land Monitoring Service <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_. The use of a DEM is, however, not required to continue data processing, and as our example region is rather flat, the impact of missing topographic correction might be acceptable.
 
@@ -115,7 +115,7 @@ We compute two CSO statistics, the number of observations and the maximum tempor
 
 	CSO = NUM MAX
 	
-You can access the parameter file `here <../_static/parameter-files/tutorials/11_lcf_cso.prm>`_ or use the one provided in the data repository.
+You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
 
 
