@@ -30,7 +30,11 @@ This workflow is reproducible, as all commands, parameter files and intermediate
    :height: 400
 
    *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
-   
+
+Note
+
+Please note that FORCE parameter files require absolute file paths. This is why path names in the provided parameter files are placeholders and should be adapted according to your folder structure when you would like to replicate the workflow yourself.
+
 Data Acquisition
 -----------------------------------
 
@@ -41,18 +45,39 @@ We first download all image acquisitions with less than 70% cloud cover accordin
 .. code-block:: bash
 
    force-level1-csd -s S2A,S2B -d 20180101,20181231 -c 0,70 /path/to/metadata/directory/ /path/to/datapool / /path/to/datapool/pool.txt T33UUU
+
+We do not provide these data in the downloadable data because of file size, and as they can be downloaded again anytime.
    
 Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html#level1-csd>`_. and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_. to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
 
 
-Clear-Sky Observations
------------------------------------
-
 Data Pre-Processing
 -----------------------------------
 
-Data Aggregation / Spectral-Temporal Metrics
+FORCE provides all functionalities to convert all downloaded Level 1 data (i.e., radiometrically calibrated and georectified) into Analysis-Ready Data (ARD), or Level 2 data. ARD are data that are readily usable for any application without much further processing. In FORCE, this includes 
 
+- cloud and cloud shadow detection,
+- radiometric, atmospheric, and topographic correction,
+- BRDF correction,
+- resolution merging (from 20m bands to 10m, Sentinel-2 only).
+
+
+
+.. code-block:: bash
+
+   force-level2 /path/to/parametertile/directory/ 	-s S2A,S2B -d 20180101,20181231 -c 0,70 /path/to/metadata/directory/ /path/to/datapool / /path/to/datapool/pool.txt T33UUU
+
+
+
+Please refer to the Level 1 Cloud Storage Downloader Documentation. and Tutorial. to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
+
+Clear-Sky Observations
+-----------------------------------
+
+
+
+Data Aggregation / Spectral-Temporal Metrics
+-----------------------------------
 
 Sampling
 -----------------------------------
