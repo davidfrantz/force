@@ -76,7 +76,7 @@ It is highly recommended to use a Digital Elevation Model (DEM) for topographic 
 .. code-block:: bash
    FILE_DEM = /path/to/dem/global_srtm-aster.vrt
 
-As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035).
+As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035). The following aspects of the workflow will be limited to a single image tile for reasons of simplicity.
 
 .. code-block:: bash
 	DO_REPROJ = TRUE
