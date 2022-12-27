@@ -154,6 +154,6 @@ MONTH_STEP = 12
 # minimum, maximum, range, skewness, kurtosis, any quantile from 1-99%, and
 # interquartile range. Note that median is Q50.
 # Type: Character list. Valid values: {NUM,MIN,Q01-Q99,MAX,AVG,STD,RNG,IQR,SKW,KRT}
-CSO = NUM MAX
+CSO = NUM MAX AVG
 
 ++PARAM_CSO_END++
