@@ -219,7 +219,7 @@ In the parameter file, we will need to provide a list of features that the spect
 The Sampling submodule will produce four individual text files that contain feature and response information as well as a list of coordinates of the reference points.
 
 .. figure:: img/tutorial-lcf-smp.jpg
-   :height: 160
+   :height: 260
    
    
    
