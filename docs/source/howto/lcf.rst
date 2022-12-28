@@ -140,30 +140,34 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 
 
 +-----+------------------------------------------------+
-+Band + Description                                    +
++Band + Spectral-Temporal Metrics                      +
 +=====+================================================+
-+ AVG + Average                                        +
++ Blue + Q25, Q50, Q75                                        +
 +-----+------------------------------------------------+
-+ STD + Standard deviation                             +
++ Green + Standard deviation                             +
 +-----+------------------------------------------------+
-+ MIN + Minimum                                        +
++ Red + Minimum                                        +
 +-----+------------------------------------------------+
-+ MAX + Maximum                                        +
++ Red Edge 1 + Maximum                                        +
 +-----+------------------------------------------------+
-+ RNG + Range                                          +
++ Red Edge 2 + Range                                          +
 +-----+------------------------------------------------+
-+ QXX + Quantiles, replace XX with any 2-digit number, +
++ Red Edge 3 + Quantiles, replace XX with any 2-digit number, +
 +     + e.g. Q50 for the median.                       +
 +     + Multiple quantiles can be given                +
 +-----+------------------------------------------------+
-+ IQR + Inter-quartile range                           +
++ Broad NIR + Inter-quartile range                           +
 +-----+------------------------------------------------+
-+ SKW + Skewness                                       +
++ NIR + Skewness                                       +
 +-----+------------------------------------------------+
-+ KRT + Kurtosis                                       +
++ SWIR 1 + Kurtosis                                       +
 +-----+------------------------------------------------+
-+ NUM + Number of observations                         +
++ SWIR 2 + Number of observations                         +
 +     +(after outlier detection and interpolation)     +
++-----+------------------------------------------------+
++ Tasseled Cap Greenness   +(after outlier detection and interpolation)     +
++-----+------------------------------------------------+
++ NDVI    +(after outlier detection and interpolation)     +
 +-----+------------------------------------------------+
 
 
