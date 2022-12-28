@@ -120,9 +120,9 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 .. figure:: img/tutorial-lcf-cso.jpg
    :height: 330
 
-   *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
+   *Number of observations (A), average (B) and maximum (C) temporal distance in days between observations for our study period 01 Mar. 2018 and 30 Oct. 2018. Scale represents 96% of values.* |copy| *Franz Schug*
 
-
+Based on CSO statistics, we assume that in most places of our study area, the number of observations (range from 10 to 42) and their temporal distance seems sufficient for generating robust spectral-temporal metrics.
 
 Data Aggregation / Spectral-Temporal Metrics
 -----------------------------------
