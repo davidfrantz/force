@@ -179,11 +179,13 @@ Sampling
 
 Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
 
-Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels covering only a single land cover type, for five classes: Built-up surfaces (182 samples), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23). 
+Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels of 10x10 m that cover only a single land cover type, for five classes: Built-up surfaces (182 reference points), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23).
+
+The number of reference points per class varies based on spectral intra-class variability (which is, e.g., higher for non-woody vegetation than for vegetation) and surface availability (e.g., few available reference points for bare soil).
 
 Info
 
-
+In this tutorial we focus on a single 30x30km image tile. However, we also want the example to be reproducible, which means that all reference points were sampled within that tile. There is a chance that this will produce a highly local model not well transferable to other (even closer) regions. This is fine for illustration purposes, but using this approach for larger area mapping, make sure that reference data is representative of the whole area.
 
 
 
