@@ -286,7 +286,7 @@ In this case, it is important that no other parameter file is in the given folde
 
 Tip
 
-Please refer to the OpenCV `Support Vecor Machine documentatio <https://docs.opencv.org/3.4/d1/d73/tutorial_introduction_to_svm.html>`_ to learn more about model parametrization, or refer to the parameter file descriptions.
+Please refer to the OpenCV `Support Vecor Machine documentation <https://docs.opencv.org/3.4/d1/d73/tutorial_introduction_to_svm.html>`_ to learn more about model parametrization, or refer to the parameter file descriptions.
 
 Model Prediction
 -----------------------------------
