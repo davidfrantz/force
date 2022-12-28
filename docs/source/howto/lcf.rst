@@ -221,7 +221,9 @@ The Sampling submodule will produce four individual text files that contain feat
 .. figure:: img/tutorial-lcf-smp.jpg
    :height: 260
    
-   
+*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+
+
    
 Tip
 
@@ -247,6 +249,11 @@ TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 .. figure:: img/tutorial-lcf-lib.jpg
    :height: 330
    
+*Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
+
+   
+   
+   Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.
 
 Model Training
 -----------------------------------
