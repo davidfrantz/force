@@ -148,7 +148,7 @@ Sampling
 
 Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
 
-Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels covering only a single land cover type, for five classes: Built-up surfaces (182 samples), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23).
+Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels covering only a single land cover type, for five classes: Built-up surfaces (182 samples), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23). 
 
 
 
@@ -160,7 +160,8 @@ We use
 
 	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/30_lcf_sampling.prm
 
-to extract spectral information from spectral-temporal metrics at the locations given. 
+to extract spectral information from spectral-temporal metrics at the locations given. You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/30_lcf_sampling.prm>`_ or use the one provided in the data repository.
+
 
 
 
