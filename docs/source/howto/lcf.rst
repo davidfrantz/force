@@ -244,10 +244,49 @@ Model Training
 
 We use *force-train* with synthetically created training data to train regression-based machine learning models of land cover fraction.
 
+For each set of synthetically mixed training data and for each class, we will need to train one model, which means that we need to create one individual training parameter file for each case. This sums up to 15 parameter files, as we use three target classes and five iterations.
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+As we do not want to manually create 15 parameter files, force-magic-parameter will help with this. We create one reference parameter file that contains all the information that is identical in each individual parameter file, as well as two vectors holding replacement values for classes (SET) and iterations (IT) at the very beginning of the file:
 
-magic aprameters
+.. code-block:: bash
+
+	%SET%: 001 002 003
+	%IT%: 001 002 003 004 005
+
+In the following, we use SET and IT as a placeholder for classes and iterations:
+
+.. code-block:: bash
+
+	FILE_FEATURES = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_FEATURES_CLASS-{%SET%}_ITERATION-{%IT%}.txt
+	FILE_RESPONSE = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_RESPONSE_CLASS-{%SET%}_ITERATION-{%IT%}.txt
+
+Now use
+ 
+.. code-block:: bash
+	
+	force-magic-parameters -o /train /data/FS_spatial_model_generalization/090_scripts/parameterfiles/50_lcf_training.prm
+	
+to conveniently generate 15 parameter files (five per target class) representing all possible value combinations of the two replacement variables.
+
+We use a Support Vector Regression approach with a random 70/30 data split for training and internal model validation.
+
+.. code-block:: bash
+
+	PERCENT_TRAIN = 70
+	RANDOM_SPLIT = TRUE
+	ML_METHOD = SVR
+
+We now need to train 15 models by calling all 15 parameter files, which we can do using a simple command line loop:
+
+.. code-block:: bash
+
+	for f in /train/*.prm; do dforce force-train $f; done 
+
+In this case, it is important that no other parameter file is in the given folder.
+
+Tip
+
+Please refer to the OpenCV `Support Vecor Machine documentatio <https://docs.opencv.org/3.4/d1/d73/tutorial_introduction_to_svm.html>`_ to learn more about model parametrization, or refer to the parameter file descriptions.
 
 Model Prediction
 -----------------------------------
