@@ -77,7 +77,7 @@ It is highly recommended to use a Digital Elevation Model (DEM) for topographic 
 
    FILE_DEM = /path/to/dem/global_srtm-aster.vrt
 
-As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035). The following aspects of the workflow will be limited to a single image tile for reasons of simplicity.
+As we want to subsequently use the ARD generated here in different higher-level submodules, we organize data in a data cube and in image tiles. We defined tiles to be 30x30km in size, so considerably smaller than MGRS tiles. The data cube parameters can be defined in the Level 2 parameter file. We use ETRS89-extended/LAEA Europe projection (EPSG: 3035). The following aspects of the workflow will be limited to a single image tile for reasons of simplicity.
 
 .. code-block:: bash
 
@@ -138,6 +138,37 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 
 
 
++-----+------------------------------------------------+
++ ID  + Description                                    +
++=====+================================================+
++ AVG + Average                                        +
++-----+------------------------------------------------+
++ STD + Standard deviation                             +
++-----+------------------------------------------------+
++ MIN + Minimum                                        +
++-----+------------------------------------------------+
++ MAX + Maximum                                        +
++-----+------------------------------------------------+
++ RNG + Range                                          +
++-----+------------------------------------------------+
++ QXX + Quantiles, replace XX with any 2-digit number, +
++     + e.g. Q50 for the median.                       +
++     + Multiple quantiles can be given                +
++-----+------------------------------------------------+
++ IQR + Inter-quartile range                           +
++-----+------------------------------------------------+
++ SKW + Skewness                                       +
++-----+------------------------------------------------+
++ KRT + Kurtosis                                       +
++-----+------------------------------------------------+
++ NUM + Number of observations                         +
++     +(after outlier detection and interpolation)     +
++-----+------------------------------------------------+
+
+
+
+
+
 Tip
 
 Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS).
@@ -149,6 +180,8 @@ Sampling
 Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
 
 Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels covering only a single land cover type, for five classes: Built-up surfaces (182 samples), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23). 
+
+Info
 
 
 
@@ -163,7 +196,7 @@ We use
 to extract spectral information from spectral-temporal metrics at the locations given. You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/30_lcf_sampling.prm>`_ or use the one provided in the data repository.
 
 
-
+describe?
 
 
 Tip
