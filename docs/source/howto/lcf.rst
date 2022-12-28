@@ -218,6 +218,11 @@ In the parameter file, we will need to provide a list of features that the spect
 
 The Sampling submodule will produce four individual text files that contain feature and response information as well as a list of coordinates of the reference points.
 
+.. figure:: img/tutorial-lcf-smp.png
+   :height: 160
+   
+   
+   
 Tip
 
 Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/smp/index.html#smp>`_ for further information about parametrizing the FORCE Sampling submodule.
@@ -238,6 +243,10 @@ Library Completeness (optional)
 
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
+
+.. figure:: img/tutorial-lcf-lib.png
+   :height: 330
+   
 
 Model Training
 -----------------------------------
