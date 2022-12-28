@@ -46,7 +46,7 @@ We first download all image acquisitions with less than 70% cloud cover accordin
 
    force-level1-csd -s S2A,S2B -d 20180101,20181231 -c 0,70 /path/to/metadata/directory/ /path/to/datapool / /path/to/datapool/pool.txt T33UUU
 
-We do not provide these data in the downloadable data because of file size, and as they can be downloaded again anytime.
+We do not provide these data in the downloadable data because of file size, and as they can be downloaded again anytime using the above command.
 
 Tip
   
@@ -107,7 +107,7 @@ At this point of the workflow, we can optionally check clear-sky observation (CS
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/ 11_lcf_cso.prm
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/11_lcf_cso.prm
 
 We compute two CSO statistics, the number of observations and the maximum temporal difference between observations, for the complete study period, as both are good, but simple indicators for data quantity and distribution.
 
@@ -127,8 +127,49 @@ Based on CSO statistics, we assume that in most places of our study area, the nu
 Data Aggregation / Spectral-Temporal Metrics
 -----------------------------------
 
+
+.. code-block:: bash
+
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/11_lcf_cso.prm
+
+20_lcf_stm_reflectance.prm
+20_lcf_stm_vegetation.prm
+You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
+
+
+
+Tip
+
+Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS).
+
+
 Sampling
 -----------------------------------
+
+Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
+
+Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels covering only a single land cover type, for five classes: Built-up surfaces (182 samples), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23).
+
+
+
+
+
+We use
+
+.. code-block:: bash
+
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/30_lcf_sampling.prm
+
+to extract spectral information from spectral-temporal metrics at the locations given. 
+
+
+
+
+Tip
+
+Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/smp/index.html#smp>`_ for further information about parametrizing the FORCE Sampling submodule.
+
+
 
 Synthetically Mixed Training Data
 -----------------------------------
