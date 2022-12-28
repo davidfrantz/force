@@ -27,7 +27,7 @@ This tutorial illustrates the potential of FORCE to be used along the complete i
 This workflow is reproducible, as all commands, parameter files and intermediate data will be provided. Parameter files will be directly available for download throughout the workflow, while intermediate data will only be available in a data repository due to file size (Download data from Zenodo, doi: xxxxx)
 
 .. figure:: img/tutorial-lcf-workflow.jpg
-   :height: 300
+   :height: 200
 
    *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
 
