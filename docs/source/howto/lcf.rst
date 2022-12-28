@@ -162,9 +162,9 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 +--------------------+------------------------------------------------+
 + SWIR 2             + Q25, Q50, Q75                                  +
 +--------------------+------------------------------------------------+
-+ Tass. Cap Green.   +(after outlier detection and interpolation)     +
++ Tass. Cap Green.   + Q90, STD                                       +
 +--------------------+------------------------------------------------+
-+ NDVI               +(after outlier detection and interpolation)     +
++ NDVI               +Q90, STD                                        +
 +--------------------+------------------------------------------------+
 
 
