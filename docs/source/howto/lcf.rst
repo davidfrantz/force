@@ -187,6 +187,7 @@ Info
 
 In this tutorial we focus on a single 30x30km image tile. However, we also want the example to be reproducible, which means that all reference points were sampled within that tile. There is a chance that this will produce a highly local model not well transferable to other (even closer) regions. This is fine for illustration purposes, but using this approach for larger area mapping, make sure that reference data is representative of the whole area.
 
+You can download these reference points as a text file `here <../_static/files/tutorials/lcf/samples.txt>`_, or as a shape file from this dataset on Zenodo. The data come in a WGS84 projection (EPSG: 4326) and are resampled on-the-fly when used with data from the data cube.   
 
 
 We use
@@ -197,14 +198,28 @@ We use
 
 to extract spectral information from spectral-temporal metrics at the locations given. You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/30_lcf_sampling.prm>`_ or use the one provided in the data repository.
 
+In the parameter file, we will need to provide a list of features that the spectral information will be drawn from. These files and bands correspond to the spectral-temporal metrics previously created: 
 
-describe?
+.. code-block:: bash
 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_BLU_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_GRN_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_RED_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_RE1_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_RE2_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_RE3_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_BNR_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_NIR_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_SW1_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_SW2_STM.tif 1 2 3 
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_TCG_STM.tif 1 2
+	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_NDV_STM.tif 1 2
+
+The Sampling submodule will produce four individual text files that contain feature and response information as well as a list of coordinates of the reference points.
 
 Tip
 
 Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/smp/index.html#smp>`_ for further information about parametrizing the FORCE Sampling submodule.
-
 
 
 Synthetically Mixed Training Data
