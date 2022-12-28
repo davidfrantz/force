@@ -140,7 +140,7 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 
 
 +-----+------------------------------------------------+
-+ ID  + Description                                    +
++Band + Description                                    +
 +=====+================================================+
 + AVG + Average                                        +
 +-----+------------------------------------------------+
@@ -189,7 +189,6 @@ Info
 In this tutorial we focus on a single 30x30km image tile. However, we also want the example to be reproducible, which means that all reference points were sampled within that tile. There is a chance that this will produce a highly local model not well transferable to other (even closer) regions. This is fine for illustration purposes, but using this approach for larger area mapping, make sure that reference data is representative of the whole area.
 
 You can download these reference points as a text file `here <../_static/files/tutorials/lcf/samples.txt>`_, or as a shape file from this dataset on Zenodo. The data come in a WGS84 projection (EPSG: 4326) and are resampled on-the-fly when used with data from the data cube.   
-
 
 We use
 
