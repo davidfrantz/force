@@ -222,8 +222,6 @@ The Sampling submodule will produce four individual text files that contain feat
    :height: 260
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
-
-
    
 Tip
 
@@ -243,17 +241,29 @@ Illustration: concept of synth mix
 Library Completeness (optional)
 -----------------------------------
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+At this point, we can optionally assess the completeness of our library compared to our image data. 
 
+We use 
+
+.. code-block:: bash
+
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/41_lcf_lib_complete.prm
+
+to compare every set of synthetically mixed training data to every pixel in the image data (access the parameter file `here <../_static/parameter-files/tutorials/lcf/41_lcf_lib_complete.prm>`_). The image features given in the parameter file have to correspond to the features used during sampling and have to be in the same order.
+
+Library completeness is measured using the Mean Absolute Error (MAE) across all features. The submodule provides the lowest MAE between each training feature set (here: 1,000) and each pixel, both per target class and overall.
 
 .. figure:: img/tutorial-lcf-lib.jpg
    :height: 330
    
 *Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
 
-   
-   
-   Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.
+Library completeness is not an established way to assess the quality of our training data library. However, it is a rough, but good indicator to show what surface types in the image might be under-represented in our training data, and, thus, in our reference points. In our example, we see that our training data represents forests really well (low values, dark areas). It seems like our training data does not as well represent some agricultural areas in the western part of our scene (higher values, brighter areas). Still, the maximum of our minimum MAE values in the image is ca. 150, which we consider low knowing that reflectance values can range from 0 to 10,000. Based on this, we do not see the necessity to identify further reference points.
+
+Info
+
+Note that low MAE values do not necessarily mean that the image pixels are correctly represented in the library. For example, in the case of spectral similarity of two different surface types, this algorithm cannot distinguish between correct and incorrect but similar spectral class representation.
+
 
 Model Training
 -----------------------------------
