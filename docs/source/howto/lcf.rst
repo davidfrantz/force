@@ -173,7 +173,7 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 
 Tip
 
-Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS).
+Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS). Here, the concept of spectral-temporal metrics is explained and illustrated.
 
 
 Sampling
