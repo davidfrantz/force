@@ -176,15 +176,12 @@ We use
 
 to compute spectral-temporal metrics of reflectance and vegetation components.
 
-You can access the parameter files `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
-
+You can access the parameter files `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_ or use the ones provided in the data repository.
 
 .. figure:: img/tutorial-lcf-stm.jpg
    :height: 330
 
-   *Number of observations (A), average (B) and maximum (C) temporal distance in days between observations for our study period 01 Mar. 2018 and 30 Oct. 2018. Scale represents 96% of values.* |copy| *Franz Schug*
-
-
+   *First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
 Tip
 
