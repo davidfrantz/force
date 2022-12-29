@@ -259,7 +259,7 @@ Figure with 4 spectra, 100, 0, 80, 30
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
-of course, we need to translate this concept to our data, where we use 30 reflectance feautres from spectral-temporal metrics as well as 4 features from vegetation index statistics
+of course, we need to translate this concept to our data, where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
 
  .. figure:: img/tutorial-lcf-mix-stm.jpg
    :height: 260
@@ -274,9 +274,17 @@ without a problem, this idea can be expanded to combinations of 3 or more surfac
 *a: 3 surface types, B: same surface type 2 agricultural areas 
 Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
+This means that in principle, an indefinite number of trainig data can be synthetically created.
 
+pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. and that the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures.
 
+We call the synthetic training data generation using
 
+.. code-block:: bash
+
+	force-synthmix /data/FS_spatial_model_generalization/090_scripts/parameterfiles/40_lcf_synthmix.prm
+
+The parameter file offers 
 
 
 cooper 2020
@@ -287,13 +295,17 @@ okujeni 2013
 https://www.sciencedirect.com/science/article/pii/S0034425713002009
 
 
+end up using SYNTHETIC_MIXTURES = 1000 per target class, with a maximum mixing complexity of 3 surface types. most synth mixtures are 2-class mixtures (50%)
 
-
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+we use three target classes (built up, woody, non woody). water and soil used as background classes. This means that their spectra are used as a counterpart when creating training data for target classes, but no training data will be generated for them (hence, also no fraction models and predictions). this is because the number of reference points for pure water and bare soil surfaces in our study area is rather low (23 and 15) compared to other classes (see Sampling section).
 
 5 different sets all used to train individual models. multiple models per class will allow us, in a later step, for higher prediction robustness
 use of multiple sets, models and predictions is an ensemble approach as described in okujeni 2017
 https://ieeexplore.ieee.org/abstract/document/7792573
+
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+
+
 
 
 
