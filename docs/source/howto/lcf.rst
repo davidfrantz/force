@@ -254,21 +254,21 @@ the approach described here synthetically generates fractional reference data fo
 
 Figure with 4 spectra, 100, 0, 80, 30
 
- .. figure:: img/tutorial-lcf-mix-s2.jpg
+ .. figure:: img/tutorial-lcf-mix-s2.png
    :height: 260
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
 of course, we need to translate this concept to our data, where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
 
- .. figure:: img/tutorial-lcf-mix-stm.jpg
+ .. figure:: img/tutorial-lcf-mix-stm.png
    :height: 260
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
 without a problem, this idea can be expanded to combinations of 3 or more surface types, or different surfaces of the same surface type when intra-class spectral variability is high
 
-  .. figure:: img/tutorial-lcf-mix-stm-complexity.jpg
+  .. figure:: img/tutorial-lcf-mix-stm-complexity.png
    :height: 260
    
 *a: 3 surface types, B: same surface type 2 agricultural areas 
