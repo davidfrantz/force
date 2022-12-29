@@ -268,13 +268,7 @@ This idea can be expanded to further combinations of three or more surface types
    
 *Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
-
-
-
-
-This means that in principle, an indefinite number of trainig data can be synthetically created.
-
-pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. and that the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures.
+In principle, an indefinite number of training data can be synthetically created this way. However, note that the sampled pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. Also, the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures
 
 We call the synthetic training data generation using
 
@@ -282,15 +276,13 @@ We call the synthetic training data generation using
 
 	force-synthmix /data/FS_spatial_model_generalization/090_scripts/parameterfiles/40_lcf_synthmix.prm
 
+
+
 The parameter file offers 
 
 
 cooper 2020
 https://www.sciencedirect.com/science/article/pii/S0034425720302261
-
-
-okujeni 2013
-https://www.sciencedirect.com/science/article/pii/S0034425713002009
 
 
 end up using SYNTHETIC_MIXTURES = 1000 per target class, with a maximum mixing complexity of 3 surface types. most synth mixtures are 2-class mixtures (50%)
