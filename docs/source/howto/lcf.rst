@@ -107,7 +107,7 @@ At this point of the workflow, we can optionally check clear-sky observation (CS
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/11_lcf_cso.prm
+	force-higher-level parameterfiles/11_lcf_cso.prm
 
 We compute two CSO statistics, the number of observations and the maximum temporal difference between observations, for the complete study period, as both are good, but simple indicators for data quantity and distribution.
 
@@ -171,8 +171,8 @@ We use
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_reflectance.prm
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_vegetation.prm
+	force-higher-level parameterfiles/20_lcf_stm_reflectance.prm
+	force-higher-level parameterfiles/20_lcf_stm_vegetation.prm
 
 to compute spectral-temporal metrics of reflectance and vegetation components.
 
@@ -207,7 +207,7 @@ We use
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/30_lcf_sampling.prm
+	force-higher-level parameterfiles/30_lcf_sampling.prm
 
 to extract spectral information from spectral-temporal metrics at the locations given. You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/30_lcf_sampling.prm>`_ or use the one provided in the data repository.
 
@@ -274,7 +274,7 @@ We call the synthetic training data generation using
 
 .. code-block:: bash
 
-	force-synthmix /data/FS_spatial_model_generalization/090_scripts/parameterfiles/40_lcf_synthmix.prm
+	force-synthmix parameterfiles/40_lcf_synthmix.prm
 
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/60_lcf_ml_predict.prm>`_ or use the one provided in the data repository. 	
 
@@ -315,7 +315,7 @@ We use
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/41_lcf_lib_complete.prm
+	force-higher-level parameterfiles/41_lcf_lib_complete.prm
 
 to compare every set of synthetically mixed training data to every pixel in the image data (access the parameter file `here <../_static/parameter-files/tutorials/lcf/41_lcf_lib_complete.prm>`_). The image features given in the parameter file have to correspond to the features used during sampling and have to be in the same order.
 
@@ -351,14 +351,14 @@ In the following, we use SET and IT as a placeholder for classes and iterations:
 
 .. code-block:: bash
 
-	FILE_FEATURES = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_FEATURES_CLASS-{%SET%}_ITERATION-{%IT%}.txt
-	FILE_RESPONSE = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_RESPONSE_CLASS-{%SET%}_ITERATION-{%IT%}.txt
+	FILE_FEATURES = /data/40_lcf_synthmix/SYNTHMIX_FEATURES_CLASS-{%SET%}_ITERATION-{%IT%}.txt
+	FILE_RESPONSE = /data/40_lcf_synthmix/SYNTHMIX_RESPONSE_CLASS-{%SET%}_ITERATION-{%IT%}.txt
 
 Now use
  
 .. code-block:: bash
 	
-	force-magic-parameters -o /train /data/FS_spatial_model_generalization/090_scripts/parameterfiles/50_lcf_training.prm
+	force-magic-parameters -o /train parameterfiles/50_lcf_training.prm
 	
 to conveniently generate 15 parameter files (five per target class) representing all possible value combinations of the two replacement variables.
 
@@ -389,7 +389,7 @@ We apply all previously trained models using
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/60_lcf_ml_predict.prm
+	force-higher-level parameterfiles/60_lcf_ml_predict.prm
 
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/60_lcf_ml_predict.prm>`_ or use the one provided in the data repository. 	
 
