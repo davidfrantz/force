@@ -335,13 +335,13 @@ Please refer to the Machine Learning `documentation <https://force-eo.readthedoc
 
 ------------
 
-.. |author-pic| image:: profile/dfrddddantz.jpg
+.. |author-pic| image:: profile/fschug.jpg
 
-+--------------+--------------------------------------------------------------------------------+
-+ |author-pic| + This tutorial was written by                                                   +
-+              + Franz Schug,                                                                   +
-+              + postdoc researcher at `EOL <https://silvis.forest.wisc.edu/staff/schug-franz/>`_. +
-+              + *Views are his own.*                                                           +
-+--------------+--------------------------------------------------------------------------------+
-+ **EO**, **ARD**, **Data Science**, **Open Science**                                           +
-+--------------+--------------------------------------------------------------------------------+
++--------------+------------------------------------------------------------------------------------------+
++ |author-pic| + This tutorial was written by                                                             +
++              + Franz Schug,                                                                             +
++              + postdoc researcher at `SILVIS Lab <https://silvis.forest.wisc.edu/staff/schug-franz/>`_. +
++              + *Views are his own.*                                                                     +
++--------------+------------------------------------------------------------------------------------------+
++ **EO**, **ARD**, **Data Science**, **Open Science**                                                     +
++--------------+------------------------------------------------------------------------------------------+
