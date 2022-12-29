@@ -364,6 +364,15 @@ In the parameter file, models can be referred to in lines and columns. One line 
 	FILE_MODEL = MODEL_CLASS_002_ITERATION_001.xml MODEL_CLASS_002_ITERATION_002.xml MODEL_CLASS_002_ITERATION_003.xml MODEL_CLASS_002_ITERATION_004.xml MODEL_CLASS_002_ITERATION_005.xml
 	FILE_MODEL = MODEL_CLASS_003_ITERATION_001.xml MODEL_CLASS_003_ITERATION_002.xml MODEL_CLASS_003_ITERATION_003.xml MODEL_CLASS_003_ITERATION_004.xml MODEL_CLASS_003_ITERATION_005.xml
 
+Please be aware that more models per target class go along with higher computing time. By setting
+
+.. code-block:: bash
+
+	ML_CONVERGENCE = 0.025
+
+in the parameter file, FORCE, however, helps us to reduce computing time as far as possible.
+
+
 
 marginal change of each model prediciton is less than...
 ML_CONVERGENCE = 0.025
