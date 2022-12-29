@@ -243,12 +243,63 @@ Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/
 Synthetically Mixed Training Data
 -----------------------------------
 
+many spectral unmixing approaches, which should not be a part of this tutorial. 
+
+okujeni et al 2013 describes the approach presented here as opposed to multiple endmember spectral mixture analysis (MESMA
+but we recommend referring to some of the many others more technical and more applied publications about methods of spectral unmixing.
+
+regression-based unmixing to map lc fractions requires reference data about fractional cover. this can be, for example, achieved by digitizing all surface area types within one pixel and use fractional reference cover as input to model training. this approach is very accurate, but also time and labour intensive.
+
+the approach described here synthetically generates fractional reference data for training based on known spectral information from pixels that represent pure surface types. Let's say we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image, we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a piuxel with 30% tree cover and 70% road cover.
+
+Figure with 4 spectra, 100, 0, 80, 30
+
+ .. figure:: img/tutorial-lcf-mix-s2.jpg
+   :height: 260
+   
+*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+
+of course, we need to translate this concept to our data, where we use 30 reflectance feautres from spectral-temporal metrics as well as 4 features from vegetation index statistics
+
+ .. figure:: img/tutorial-lcf-mix-stm.jpg
+   :height: 260
+   
+*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+
+without a problem, this idea can be expanded to combinations of 3 or more surface types, or different surfaces of the same surface type when intra-class spectral variability is high
+
+  .. figure:: img/tutorial-lcf-mix-stm-complexity.jpg
+   :height: 260
+   
+*a: 3 surface types, B: same surface type 2 agricultural areas 
+Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+
+
+
+
+
+
+cooper 2020
+https://www.sciencedirect.com/science/article/pii/S0034425720302261
+
+
+okujeni 2013
+https://www.sciencedirect.com/science/article/pii/S0034425713002009
+
+
+
+
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 5 different sets all used to train individual models. multiple models per class will allow us, in a later step, for higher prediction robustness
+use of multiple sets, models and predictions is an ensemble approach as described in okujeni 2017
+https://ieeexplore.ieee.org/abstract/document/7792573
 
 
-Illustration: concept of synth mix
+
+Tip
+
+Take a look at `this tutorial <https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html>`_, where concepts of regression-based unmixing of urban land cover were described and illustrated using the EnMAP Box and hyperspectral imagery.
 
 Library Completeness (optional)
 -----------------------------------
