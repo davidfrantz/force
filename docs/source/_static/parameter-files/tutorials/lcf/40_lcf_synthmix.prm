@@ -56,7 +56,7 @@ CLASS_LIKELIHOOD = EQUALIZED
 # Number of iterations. This parameter allows to repeat the mixing multiple 
 # times. If set to 10, 10 different sets of random mixtures will be generated.
 # Type: Integer. Valid values: [1,...
-ITERATIONS = 10
+ITERATIONS = 5
 # What is the target class for generating the mixtures? Example: class 1, 
 # class 2, and class 3 are vegetation, soil, and water. A 70-30% mixture of 
 # a beach and ocean endmember would result in 70%, 0% and 30% fractions for 
