@@ -253,14 +253,14 @@ regression-based unmixing to map lc fractions requires reference data about frac
 the approach described here synthetically generates fractional reference data for training based on known spectral information from pixels that represent pure surface types. Let's say we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image, we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a piuxel with 30% tree cover and 70% road cover.
 
  .. figure:: img/tutorial-lcf-mix-s2.png
-   :height: 330
+   :height: 360
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
 of course, we need to translate this concept to our data, where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
 
  .. figure:: img/tutorial-lcf-mix-stm.png
-   :height: 260
+   :height: 360
    
 *Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
 
