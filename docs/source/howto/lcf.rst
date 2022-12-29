@@ -127,7 +127,6 @@ Based on CSO statistics, we assume that in most places of our study area, the nu
 Data Aggregation / Spectral-Temporal Metrics
 -----------------------------------
 
-
 Previous research showed that sub-pixel fraction mapping of land cover with synthetically mixed training data can be performed using spectral-temporal metrics (STM) as input data.
  
 Spectral-temporal metrics are band-wise descriptive statistics, which summarize image reflectance (or an index derived thereof) of all valid observations within a defined time period, such as mean reflectance. They can be computed using the FORCE TSA submodule (tutorial).
@@ -135,7 +134,6 @@ Spectral-temporal metrics are band-wise descriptive statistics, which summarize 
 Compared to single observations, spectral-temporal metrics are able to increase model robustness across large areas as differences in acquisition dates across orbits has lower effects on the data. Spectral-temporal metrics are, in addition, able to represent phenological variation.
 
 In this tutorial, we use the first, second, and third quartile of reflectance of all clear-sky Sentinel-2 observations within our study period, as well as the 90th quantile and the standard deviation of two indicators of vegetation, Tasseled Cap Greenness and Normalized Difference Vegetation Index (NDVI).
-
 
 
 	*Spectral-temporal metrics of reflectance and vegetation indices (34 features) used in this example workflow.* |copy| *Franz Schug*
@@ -181,7 +179,7 @@ to compute spectral-temporal metrics of reflectance and vegetation components.
 You can access the parameter files `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
 
 
-.. figure:: img/tutorial-lcf-cso.jpg
+.. figure:: img/tutorial-lcf-stm.jpg
    :height: 330
 
    *Number of observations (A), average (B) and maximum (C) temporal distance in days between observations for our study period 01 Mar. 2018 and 30 Oct. 2018. Scale represents 96% of values.* |copy| *Franz Schug*
