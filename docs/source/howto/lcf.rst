@@ -165,7 +165,7 @@ In this tutorial, we use the first, second, and third quartile of reflectance of
 + NDVI               + Q90, STD                                       +
 +--------------------+------------------------------------------------+
 
-The selection of these features was shown to result in accurate land cover fraction maps in previous studies (e.g., Schug et al. 2020). It is, however, possible that mapping land cover fractions in world regions with different phenological regimes or land cover characteristics might require different feature combinations.
+The selection of these features was shown to result in accurate land cover fraction maps in previous studies (e.g., `Schug et al. (2020) <https://doi.org/10.1016/j.rse.2020.111810>`_). It is, however, possible that mapping land cover fractions in world regions with different phenological regimes or land cover characteristics might require different feature combinations.
 
 We use 
 
@@ -354,11 +354,32 @@ In the parameter file, it is important that the features to be used for predicti
 	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_TCG_STM.tif 1 2
 	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_NDV_STM.tif 1 2
 
-The machine learning submodule of FORCE allows us to provide multiple models per class to generate a single land cover fraction prediction. 
+The machine learning submodule of FORCE allows us to provide multiple models per class to generate a single land cover fraction prediction. Remember that in previous steps, we generated five sets of synthetically mixed training data, and euqally created five models per target class.
 
-..remember 5 iterations were trained based on different synthetic mixt...
-averaged.., higher robustness
+In the parameter file, models can be referred to in lines and columns. One line corresponds to one target class (i.e., one band in the model output file). Per line, an undefined number of models can be provided. For each model, this submodule will create one prediction. When using regression-based prediction, the results of all predictions will be averaged to generate the final land cover fraction output.
 
+.. code-block:: bash
+
+	FILE_MODEL = MODEL_CLASS_001_ITERATION_001.xml MODEL_CLASS_001_ITERATION_002.xml MODEL_CLASS_001_ITERATION_003.xml MODEL_CLASS_001_ITERATION_004.xml MODEL_CLASS_001_ITERATION_005.xml
+	FILE_MODEL = MODEL_CLASS_002_ITERATION_001.xml MODEL_CLASS_002_ITERATION_002.xml MODEL_CLASS_002_ITERATION_003.xml MODEL_CLASS_002_ITERATION_004.xml MODEL_CLASS_002_ITERATION_005.xml
+	FILE_MODEL = MODEL_CLASS_003_ITERATION_001.xml MODEL_CLASS_003_ITERATION_002.xml MODEL_CLASS_003_ITERATION_003.xml MODEL_CLASS_003_ITERATION_004.xml MODEL_CLASS_003_ITERATION_005.xml
+
+
+marginal change of each model prediciton is less than...
+ML_CONVERGENCE = 0.025
+# This parameter is a scaling factor to scale the prediction to fit into a
+# 16bit signed integer. This parameter should be set in dependence on the
+# scale used for training the model.
+# Type: Float. Valid range: ]0,...
+ML_SCALE = 10000
+
+
+OUTPUT_MLI = TRUE
+# Output the uncertainty of the blended prediction? This is the standard
+# deviation of all predictions that are blended into the final prediction.
+# Only makes sense when multiple models are given in a modelset.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_MLU = TRUE
 
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
@@ -370,7 +391,7 @@ TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 Tip
 
-Please refer to the Machine Learning `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/ml/index.html#ml>`_ for further information about generating maps with regression-based machine learning models.
+Please refer to the Machine Learning `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/ml/index.html#ml>`_ for further information about generating maps with regression-based machine learning models. 
 
 
 ------------
