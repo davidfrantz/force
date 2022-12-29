@@ -193,7 +193,7 @@ Sampling
 
 Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
 
-Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels of 10x10 m that cover only a single land cover type, for five classes: Built-up surfaces (182 reference points), woody vegetation (70), non-woody vegetation (98), soil (15), and water (23).
+Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels of 10x10 m that cover only a single land cover type, for five classes: Built-up surfaces (182 reference points), woody vegetation (70), non-woody vegetation (98), bare soil (15), and water (23).
 
 The number of reference points per class varies based on spectral intra-class variability (which is, e.g., higher for non-woody vegetation than for vegetation) and surface availability (e.g., few available reference points for bare soil).
 
@@ -276,28 +276,31 @@ We call the synthetic training data generation using
 
 	force-synthmix /data/FS_spatial_model_generalization/090_scripts/parameterfiles/40_lcf_synthmix.prm
 
+You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/60_lcf_ml_predict.prm>`_ or use the one provided in the data repository. 	
 
+The parameter file offers some customization of the synthetic mixing procedure. The default settings have been refined over the years, but feel free to experiment with some of them, as they might each affect model outcomes. A more detailed description of the mixing process can be found in `Cooper et al. (2020) <https://www.sciencedirect.com/science/article/pii/S0034425720302261>`_
 
-The parameter file offers 
+Here, we generate a total number of 1,000 synthetic mixtures per target class at random mixing ratios. Additionally, all feature sets from pure surfaces are included as a 100%/0% reference. We use a maximum mixing complexity of three classes with most mixtures being two-class mixtures (50%). We also allow within-class mixing as described above.
 
+.. code-block:: bash
 
-cooper 2020
-https://www.sciencedirect.com/science/article/pii/S0034425720302261
+	SYNTHETIC_MIXTURES = 1000
+	INCLUDE_ORIGINAL = TRUE
+	MIXING_COMPLEXITY = 1 2 3
+	MIXING_LIKELIHOOD = 0.2 0.5 0.3
+	WITHIN_CLASS_MIXING = TRUE
 
+We use three target classes: Built-up surfaces, woody vegetation and non-woody vegetation. Water and bare soil are uniquely used as background classes. This means that their spectral information is used as a counterpart during synthetic mixing, but no training data will be generated for them. Hence, no fraction models will be trained and no land cover fraction will be predicted for them. This is because the number of reference points for pure water and bare soil surfaces in our study area is rather low (23 and 15) compared to other classes (see Sampling section).
 
-end up using SYNTHETIC_MIXTURES = 1000 per target class, with a maximum mixing complexity of 3 surface types. most synth mixtures are 2-class mixtures (50%)
+.. code-block:: bash
 
-we use three target classes (built up, woody, non woody). water and soil used as background classes. This means that their spectra are used as a counterpart when creating training data for target classes, but no training data will be generated for them (hence, also no fraction models and predictions). this is because the number of reference points for pure water and bare soil surfaces in our study area is rather low (23 and 15) compared to other classes (see Sampling section).
+	TARGET_CLASS = 1 2 3
 
-5 different sets all used to train individual models. multiple models per class will allow us, in a later step, for higher prediction robustness
-use of multiple sets, models and predictions is an ensemble approach as described in okujeni 2017
-https://ieeexplore.ieee.org/abstract/document/7792573
+We generate five separate synthetically mixed training datasets for each of the three target classes (i.e., 15 training datasets). This means that for each target class, we can train up to five regression models, and use up to five predicitions per pixel and target class. This approach is referred to as an ensemble approach in `Okujeni et al. (2017) <https://ieeexplore.ieee.org/abstract/document/7792573>`_ and has been shown to provide higher prediction robustness. Continue reading through the following sections to know how this workflow deals with multiple target class models throughout the process.
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+.. code-block:: bash
 
-
-
-
+	ITERATIONS = 5
 
 Tip
 
