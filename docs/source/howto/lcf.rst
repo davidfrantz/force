@@ -243,14 +243,11 @@ Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/
 Synthetically Mixed Training Data
 -----------------------------------
 
-many spectral unmixing approaches, which should not be a part of this tutorial. 
+The approach used in this tutorial is described in `Okujeni et al. 2013 <https://www.sciencedirect.com/science/article/pii/S0034425713002009>`_, who compared it to results generated with multiple endmember spectral mixture analysis (MESMA). For a more encompassing overview over spectral unmixing techniques, such as further technical and applied publications, as they will not be a subject of this tutorial.
 
-okujeni et al 2013 describes the approach presented here as opposed to multiple endmember spectral mixture analysis (MESMA
-but we recommend referring to some of the many others more technical and more applied publications about methods of spectral unmixing.
+Regression-based spectral unmixing for land cover fraction mapping requires reference information about fractional land cover. This can be achieved, for example, by digitizing surface area types within a given pixel and use resulting fractional reference cover as input to regression model training. While this approach is very accurate, it is also time and labour intensive.
 
-regression-based unmixing to map lc fractions requires reference data about fractional cover. this can be, for example, achieved by digitizing all surface area types within one pixel and use fractional reference cover as input to model training. this approach is very accurate, but also time and labour intensive.
-
-the approach described here synthetically generates fractional reference data for training based on known spectral information from pixels that represent pure surface types. Let's say we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image, we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a piuxel with 30% tree cover and 70% road cover.
+We here use synthetically genererated fractional reference data for regression model training. These synthetically mixed data are based on known spectral information that represen pure surface types. For example, when we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image , we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a piuxel with 30% tree cover and 70% road cover.
 
  .. figure:: img/tutorial-lcf-mix-s2.png
    :height: 360
