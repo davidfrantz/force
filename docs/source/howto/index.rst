@@ -32,6 +32,8 @@ There are several tutorials available that showcase how to use the FORCE.
 +              +        + :ref:`tut-mask`     + Speed up Higher Level Processing using masks                            +
 +              +        +---------------------+-------------------------------------------------------------------------+
 +              +        + :ref:`tut-udf`      + How to customize your processing using User-Defined Functions (UDF)     +
++              +        +---------------------+-------------------------------------------------------------------------+
++              +        + :ref:`tut-lcf`      + How to map land cover fractions with synthetically mixed training data  +
 +--------------+--------+---------------------+-------------------------------------------------------------------------+
 
 
