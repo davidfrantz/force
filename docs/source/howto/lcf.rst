@@ -254,16 +254,14 @@ We here use synthetically genererated fractional reference data for regression m
    
 *Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI.* |copy| *Franz Schug*
 
-This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Instead of 10 spectral bands and two
-
-where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
+This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Please not that the number of features increases from 12 to 34, while the idea is the same. In this following case, the synthetic mixtures produce training data for 80% and 30% tree-covered surfaces, as well as, potentially 100% and 0% tree-covered surfaces.
 
  .. figure:: img/tutorial-lcf-mix-stm.png
    :height: 360
    
-*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI.* |copy| *Franz Schug*
 
-without a problem, this idea can be expanded to combinations of 3 or more surface types, or different surfaces of the same surface type when intra-class spectral variability is high
+This idea can be expanded to further combinations of three or more surface types, as well as to different surfaces of the same surface type when intra-class spectral variability is high. In this following case, we produce training data for 80% and 30% tree-covered surfaces (left), as well as 80% and 30% built-up area (right). In the second case, we mix spectral-temporal metrics from two pure surface types of the same target class (built-up), but from spectrally different surfaces, i.e., a road and a rooftop.
 
   .. figure:: img/tutorial-lcf-mix-stm-complexity.png
    :height: 360
