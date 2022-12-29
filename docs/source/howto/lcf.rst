@@ -140,11 +140,10 @@ TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 .. code-block:: bash
 
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/11_lcf_cso.prm
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_reflectance.prm
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_vegetation.prm
 
-20_lcf_stm_reflectance.prm
-20_lcf_stm_vegetation.prm
-You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
+You can access the parameter files for reflectance and vegetation components `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
 
 
 
