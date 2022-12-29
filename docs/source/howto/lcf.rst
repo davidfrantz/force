@@ -127,6 +127,15 @@ Based on CSO statistics, we assume that in most places of our study area, the nu
 Data Aggregation / Spectral-Temporal Metrics
 -----------------------------------
 
+
+Previous research showed that sub-pixel fraction mapping of land cover with synthetically mixed training data can be performed using spectral-temporal metrics (STM) as input data.
+ 
+Spectral-temporal metrics are band-wise descriptive statistics, which summarize image reflectance (or an index derived thereof) of all valid observations within a defined time period, such as mean reflectance. They can be computed using the FORCE TSA submodule (tutorial).
+
+Compared to single observations, spectral-temporal metrics are able to increase model robustness across large areas as differences in acquisition dates across orbits has lower effects on the data. Spectral-temporal metrics are, in addition, able to represent phenological variation.
+
+
+
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 .. code-block:: bash
@@ -331,7 +340,7 @@ Please refer to the Machine Learning `documentation <https://force-eo.readthedoc
 +--------------+--------------------------------------------------------------------------------+
 + |author-pic| + This tutorial was written by                                                   +
 +              + Franz Schug,                                                                   +
-+              + postdoc researcher at `EOL <https://www.geographie.hu-berlin.de/en/professorships/eol>`_. +
++              + postdoc researcher at `EOL <https://silvis.forest.wisc.edu/staff/schug-franz/>`_. +
 +              + *Views are his own.*                                                           +
 +--------------+--------------------------------------------------------------------------------+
 + **EO**, **ARD**, **Data Science**, **Open Science**                                           +
