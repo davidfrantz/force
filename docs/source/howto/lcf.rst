@@ -167,18 +167,24 @@ In this tutorial, we use the first, second, and third quartile of reflectance of
 + NDVI               + Q90, STD                                       +
 +--------------------+------------------------------------------------+
 
+The selection of these features was shown to result in accurate land cover fraction maps in previous studies (e.g., Schug et al. 2020). It is, however, possible that mapping land cover fractions in world regions with different phenological regimes or land cover characteristics might require different feature combinations.
 
+We use 
 
 .. code-block:: bash
 
 	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_reflectance.prm
 	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_vegetation.prm
 
-You can access the parameter files for reflectance and vegetation components `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
+to compute spectral-temporal metrics of reflectance and vegetation components.
+
+You can access the parameter files `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
 
 
+.. figure:: img/tutorial-lcf-cso.jpg
+   :height: 330
 
-
+   *Number of observations (A), average (B) and maximum (C) temporal distance in days between observations for our study period 01 Mar. 2018 and 30 Oct. 2018. Scale represents 96% of values.* |copy| *Franz Schug*
 
 
 
