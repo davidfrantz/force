@@ -5,7 +5,7 @@ Land Cover Fraction Mapping
 
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
-**How to use FORCE submodules in a workflow to map sub-pixel fractions of land cover with synthetically mixed training data**
+**How to map land cover fractions with synthetically mixed training data**
 
 This tutorial demonstrates a workflow that uses a series of submodules of the FORCE Higher Level Processing system (HLPS) to map sub-pixel fractions of land cover with Sentinel-2 imagery.
 
