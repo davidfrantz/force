@@ -134,19 +134,11 @@ Spectral-temporal metrics are band-wise descriptive statistics, which summarize 
 
 Compared to single observations, spectral-temporal metrics are able to increase model robustness across large areas as differences in acquisition dates across orbits has lower effects on the data. Spectral-temporal metrics are, in addition, able to represent phenological variation.
 
-
-
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-
-.. code-block:: bash
-
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_reflectance.prm
-	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_vegetation.prm
-
-You can access the parameter files for reflectance and vegetation components `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
+In this tutorial, we use the first, second, and third quartile of reflectance of all clear-sky Sentinel-2 observations within our study period, as well as the 90th quantile and the standard deviation of two indicators of vegetation, Tasseled Cap Greenness and Normalized Difference Vegetation Index (NDVI).
 
 
 
+	*Spectral-temporal metrics of reflectance and vegetation indices (34 features) used in this example workflow.* |copy| *Franz Schug*
 +--------------------+------------------------------------------------+
 +Band                + Spectral-Temporal Metrics                      +
 +====================+================================================+
@@ -174,6 +166,17 @@ You can access the parameter files for reflectance and vegetation components `he
 +--------------------+------------------------------------------------+
 + NDVI               + Q90, STD                                       +
 +--------------------+------------------------------------------------+
+
+
+
+.. code-block:: bash
+
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_reflectance.prm
+	force-higher-level /data/FS_spatial_model_generalization/090_scripts/parameterfiles/20_lcf_stm_vegetation.prm
+
+You can access the parameter files for reflectance and vegetation components `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_or use the ones provided in the data repository.
+
+
 
 
 
