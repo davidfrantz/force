@@ -4,13 +4,13 @@
 # ------------------------------------------------------------------------
 # Lower Level datapool (parent directory of tiled input data)
 # Type: full directory path
-DIR_LOWER = /data/FS_spatial_model_generalization/011_data/sentinel/stm
+DIR_LOWER = /data/20_lcf_spectral_temporal_metrics
 # Higher Level datapool (parent directory of tiled output data)
 # Type: full directory path
-DIR_HIGHER = /data/FS_spatial_model_generalization/011_data/sentinel/lib
+DIR_HIGHER = /data/41_lcf_lib_complete
 # This is the directory where provenance files should be saved.
 # Type: full directory path
-DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provenance
+DIR_PROVENANCE = /data/temp
 
 # MASKING
 # ------------------------------------------------------------------------
@@ -113,7 +113,7 @@ FEATURE_EXCLUDE = FALSE
 # ------------------------------------------------------------------------
 # Directory containing the libraries.
 # Type: full directory path
-DIR_LIBRARY = /data/FS_spatial_model_generalization/011_data/sentinel/mixes
+DIR_LIBRARY = /data/40_lcf_synthmix
 # This parameter specifies the libraries which should be tested against the 
 # features. The basename(s) must be given. One or multiple libraries can be
 # given. The output files will have as many bands (+1 overall band) as there

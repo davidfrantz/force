@@ -8,22 +8,22 @@
 # for each sample. Do not include a header. The samples need to match the
 # response file.
 # Type: full file path
-FILE_FEATURES = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_FEATURES_CLASS-001_ITERATION-004.txt
+FILE_FEATURES = /data/40_lcf_synthmix/SYNTHMIX_FEATURES_CLASS-001_ITERATION-004.txt
 # File that is holding the response for training (class labels or numeric
 # values). The file needs to be a table with one column, and samples in rows.
 # Do not include a header. The samples need to match the feature file.
 # Type: full file path
-FILE_RESPONSE = /data/FS_spatial_model_generalization/011_data/sentinel/mixes/SYNTHMIX_RESPONSE_CLASS-001_ITERATION-004.txt
+FILE_RESPONSE = /data/40_lcf_synthmix/SYNTHMIX_RESPONSE_CLASS-001_ITERATION-004.txt
 
 # OUTPUT
 # ------------------------------------------------------------------------
 # File for storing the Machine Learning model in xml format. This file
 # will be overwritten if it exists.
 # Type: full file path
-FILE_MODEL = /data/FS_spatial_model_generalization/011_data/sentinel/models/MODEL_CLASS_001_ITERATION_004.xml
+FILE_MODEL = /data/50_lcf_models/MODEL_CLASS_001_ITERATION_004.xml
 # File for storing the logfile. This file will be overwritten if it exists.
 # Type: full file path
-FILE_LOG = /data/FS_spatial_model_generalization/011_data/sentinel/models/FILE_LOG_001_ITERATION_004.log
+FILE_LOG = /data/50_lcf_models/FILE_LOG_001_ITERATION_004.log
 
 # TRAINING
 # ------------------------------------------------------------------------

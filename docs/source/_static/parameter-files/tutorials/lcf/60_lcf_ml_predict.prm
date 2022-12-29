@@ -4,13 +4,13 @@
 # ------------------------------------------------------------------------
 # Lower Level datapool (parent directory of tiled input data)
 # Type: full directory path
-DIR_LOWER = /data/FS_spatial_model_generalization/011_data/sentinel/stm
+DIR_LOWER = /data/20_lcf_spectral_temporal_metrics
 # Higher Level datapool (parent directory of tiled output data)
 # Type: full directory path
-DIR_HIGHER = /data/FS_spatial_model_generalization/011_data/sentinel/predictions
+DIR_HIGHER = /data/60_lcf_predictions
 # This is the directory where provenance files should be saved.
 # Type: full directory path
-DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provenance
+DIR_PROVENANCE = /data/temp
 
 # MASKING
 # ------------------------------------------------------------------------
@@ -114,7 +114,7 @@ FEATURE_EXCLUDE = FALSE
 # Directory containing the machine learning model(s). Models can be trained
 # with force-train
 # Type: full directory path
-DIR_MODEL = /data/FS_spatial_model_generalization/011_data/sentinel/models
+DIR_MODEL = /data/50_lcf_models
 # This parameter specifies the modelset used for prediction. The basename
 # of the machine learning model(s) (.xml) must be given. One or multiple
 # models can be given. The predictions of the models are aggregated into

@@ -4,13 +4,13 @@
 # ------------------------------------------------------------------------
 # Lower Level datapool (parent directory of tiled input data)
 # Type: full directory path
-DIR_LOWER = /data/FS_spatial_model_generalization/011_data/sentinel/stm
+DIR_LOWER = data/20_lcf_spectral_temporal_metrics
 # Higher Level datapool (parent directory of tiled output data)
 # Type: full directory path
-DIR_HIGHER = /data/FS_spatial_model_generalization/011_data/sentinel/samples
+DIR_HIGHER = /data/30_lcf_samples
 # This is the directory where provenance files should be saved.
 # Type: full directory path
-DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provenance
+DIR_PROVENANCE = /data/temp
 
 # MASKING
 # ------------------------------------------------------------------------
@@ -114,18 +114,18 @@ FEATURE_EXCLUDE = FALSE
 # File with coordinates, at which the features should be sampled.
 # 1st column: x-coordinate, 2nd column: y-coordinate, 3rd column: response
 # Type: full file path
-FILE_POINTS = /data/FS_spatial_model_generalization/011_data/sentinel/samples/samples.txt
+FILE_POINTS = /data/30_lcf_samples/samples.txt
 # File with sampled features. This file should not exist.
 # Type: full file path
-FILE_SAMPLE = /data/FS_spatial_model_generalization/011_data/sentinel/samples/features.txt
+FILE_SAMPLE = /data/30_lcf_samples/features.txt
 # File with the response variable corresponding to the sampled features.
 # This file should not exist.
 # Type: full file path
-FILE_RESPONSE = /data/FS_spatial_model_generalization/011_data/sentinel/samples/response.txt
+FILE_RESPONSE = /data/30_lcf_samples/response.txt
 # File with the coordinates corresponding to the sampled features.
 # This file should not exist.
 # Type: full file path
-FILE_COORDINATES = /data/FS_spatial_model_generalization/011_data/sentinel/samples/coordinates.txt
+FILE_COORDINATES = /data/30_lcf_samples/coordinates.txt
 # Are the coordinates in FILE_POINTS in the projection of the datacube
 # (X/Y: TRUE)? Or are they geographic coordinates (Lon/Lat: FALSE)
 # Type: Logical. Valid values: {TRUE,FALSE}

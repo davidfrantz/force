@@ -8,12 +8,12 @@
 # for each sample. Do not include a header. The samples need to match the
 # response file.
 # Type: full file path
-FILE_FEATURES = /data/FS_spatial_model_generalization/011_data/sentinel/samples/features.txt
+FILE_FEATURES = /data/30_lcf_samples/features.txt
 # File that is holding the class labels. The file needs to be a table with
 # one column, and samples in rows. Do not include a header. The samples need 
 # to match the feature file.
 # Type: full file path
-FILE_RESPONSE = /data/FS_spatial_model_generalization/011_data/sentinel/samples/response.txt
+FILE_RESPONSE = /data/30_lcf_samples/response.txt
 
 # SYNTHETIC MIXING
 # ------------------------------------------------------------------------
@@ -75,7 +75,7 @@ USE_CLASSES = ALL
 # Directory for storing the generated mixtures. Output files will be 
 # overwritten if they exist.
 # Type: full directory path
-DIR_MIXES = /data/FS_spatial_model_generalization/011_data/sentinel/mixes
+DIR_MIXES = /data/40_lcf_synthmix
 # This parameter defines the basename for the output files. The basename will
 # be appended by class ID, and iteration, e.g. 
 # SYNTHMIX_FEATURES_CLASS-001_ITERATION-001.txt.

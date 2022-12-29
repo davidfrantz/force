@@ -7,7 +7,7 @@
 # into the parameter file. The file queue is mandatory for force-level2, but
 # may be NULL for force-l2ps.
 # Type: full file path
-FILE_QUEUE = /data/FS_spatial_model_generalization/010_raw_data/sentinel/level1/pool.txt
+FILE_QUEUE = /path/to/level1/pool.txt
 # This is the output directory where the Level 2 data will be stored. Note
 # that data will be overwritten/mosaicked if you reprocess images. It is
 # safe and recommended to use a single Level 2 data pool for different
@@ -15,13 +15,13 @@ FILE_QUEUE = /data/FS_spatial_model_generalization/010_raw_data/sentinel/level1/
 # programs of FORCE can handle different spatial resolutions (e.g. 30m
 # Landsat and 10m Sentinel-2).
 # Type: full directory path
-DIR_LEVEL2 = /data/FS_spatial_model_generalization/011_data/sentinel/level2/
+DIR_LEVEL2 = /data/10_lcf_level_2
 # This is the directory where logfiles should be saved.
 # Type: full directory path
-DIR_LOG = /data/FS_spatial_model_generalization/011_data/sentinel/log
+DIR_LOG = /path/to/level1/log
 # This is the directory where provenance files should be saved.
 # Type: full directory path
-DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provenance
+DIR_PROVENANCE = /data/temp
 # This is a temporary directory that is used to extract compressed images
 # for force-level2. Note that images already need to be extracted when using
 # force-l2ps directly. The extracted data will be deleted once they were
@@ -31,7 +31,7 @@ DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provena
 # level2 is running. Note that the effect is not immediate, as the load is
 # only adjusted after one of the running jobs (images) is finished. 
 # Type: full directory path
-DIR_TEMP = /data/FS_spatial_model_generalization/011_data/sentinel/temp
+DIR_TEMP = /data/temp
 
 # DIGITAL ELEVATION MODEL
 # ------------------------------------------------------------------------
@@ -45,7 +45,7 @@ DIR_TEMP = /data/FS_spatial_model_generalization/011_data/sentinel/temp
 # spheric correction and cloud /cloud shadow detection will suffer without
 # a DEM.
 # Type: full file path
-FILE_DEM = /data/global_dem/global_srtm-aster.vrt
+FILE_DEM = /path/to/dem/dem.vrt
 # Nodata value of the DEM.
 # Type: Integer. Valid range: [-32768,32767]
 DEM_NODATA = -32767

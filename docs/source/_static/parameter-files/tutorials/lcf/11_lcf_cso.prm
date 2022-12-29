@@ -4,13 +4,13 @@
 # ------------------------------------------------------------------------
 # Lower Level datapool (parent directory of tiled input data)
 # Type: full directory path
-DIR_LOWER = /data/FS_spatial_model_generalization/011_data/sentinel/level2/
+DIR_LOWER = /data/10_lcf_level_2
 # Higher Level datapool (parent directory of tiled output data)
 # Type: full directory path
-DIR_HIGHER = /data/FS_spatial_model_generalization/011_data/sentinel/cso/
+DIR_HIGHER = /data/11_lcf_cso
 # This is the directory where provenance files should be saved.
 # Type: full directory path
-DIR_PROVENANCE = /data/FS_spatial_model_generalization/011_data/sentinel/provenance
+DIR_PROVENANCE = /data/temp
 
 # MASKING
 # ------------------------------------------------------------------------
