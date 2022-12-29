@@ -267,7 +267,7 @@ of course, we need to translate this concept to our data, where we use 30 reflec
 without a problem, this idea can be expanded to combinations of 3 or more surface types, or different surfaces of the same surface type when intra-class spectral variability is high
 
   .. figure:: img/tutorial-lcf-mix-stm-complexity.png
-   :height: 260
+   :height: 360
    
 *a: 3 surface types, B: same surface type 2 agricultural areas 
 Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
