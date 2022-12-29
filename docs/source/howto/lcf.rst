@@ -370,17 +370,13 @@ Please be aware that more models per target class go along with higher computing
 
 	ML_CONVERGENCE = 0.025
 
-in the parameter file, FORCE, however, helps us to reduce computing time as far as possible.
+in the parameter file, FORCE, however, helps us to reduce computing time as far as possible. This parameter only applies if multiple models are given for a modelset, and if the machine learning method is regression. This parameter sets a convergence threshold, knowing that with an increasing number of models, the averaged predicted values will converge. If the predictions differ less than this value after adding another model, no more model will be predicted (tested on a pixel level). The threshold should be adapted based on the application.
 
+Be aware that training response values for fractions after synthetic mixing range from 0 to 1. As FORCE will not save floating-point numbers, we set a scaling factor of 10,000 in order toobtain values between 0 and 10,000 in 16bit signed integer files.
 
+.. code-block:: bash
 
-marginal change of each model prediciton is less than...
-ML_CONVERGENCE = 0.025
-# This parameter is a scaling factor to scale the prediction to fit into a
-# 16bit signed integer. This parameter should be set in dependence on the
-# scale used for training the model.
-# Type: Float. Valid range: ]0,...
-ML_SCALE = 10000
+	ML_SCALE = 10000
 
 
 OUTPUT_MLI = TRUE
