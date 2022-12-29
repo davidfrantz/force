@@ -378,21 +378,19 @@ Be aware that training response values for fractions after synthetic mixing rang
 
 	ML_SCALE = 10000
 
+We can optionally set
 
-OUTPUT_MLI = TRUE
-# Output the uncertainty of the blended prediction? This is the standard
-# deviation of all predictions that are blended into the final prediction.
-# Only makes sense when multiple models are given in a modelset.
-# Type: Logical. Valid values: {TRUE,FALSE}
-OUTPUT_MLU = TRUE
+.. code-block:: bash
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+	OUTPUT_MLI = TRUE
+	OUTPUT_MLU = TRUE
 
+which outputs the number of models used when applying a convergence threshold (as we did) and the uncertainty of the averaged prediction, i.e., the standard deviation of all predictions blended into the final output file.
+	
 .. figure:: img/tutorial-lcf-ml.jpg
    :height: 330
    
 *Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
-
 
 Tip
 
