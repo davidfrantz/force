@@ -252,9 +252,11 @@ We here use synthetically genererated fractional reference data for regression m
  .. figure:: img/tutorial-lcf-mix-s2.png
    :height: 360
    
-*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI.* |copy| *Franz Schug*
 
-of course, we need to translate this concept to our data, where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
+This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Instead of 10 spectral bands and two
+
+where we use 30 reflectance features from spectral-temporal metrics as well as 4 features from vegetation index statistics
 
  .. figure:: img/tutorial-lcf-mix-stm.png
    :height: 360
