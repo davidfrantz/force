@@ -365,7 +365,7 @@ TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 .. figure:: img/tutorial-lcf-ml.jpg
    :height: 330
    
-*Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
+*Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
 
 
 Tip
