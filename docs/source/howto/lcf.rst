@@ -26,6 +26,8 @@ This tutorial illustrates the potential of FORCE to be used along the complete i
 
 This workflow is reproducible, as all commands, parameter files and intermediate data will be provided. Parameter files will be directly available for download throughout the workflow, while intermediate data will only be available in a data repository due to file size (Download data from Zenodo, doi: xxxxx)
 
+This workflow can be used for image classification applications as well as regression-based mapping with any other kind of suitable training data making a few adaptations to the example parameter files. You might be able to skip chapters on data aggregation, sampling, or synthethic training data genereation depending on your desired input data and processing method.
+
 .. figure:: img/tutorial-lcf-workflow.png
    :height: 160
 
