@@ -115,7 +115,7 @@ We compute two CSO statistics, the number of observations and the maximum tempor
 
 .. code-block:: bash
 
-	CSO = NUM MAX
+	CSO = NUM AVG MAX
 	
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
@@ -131,14 +131,14 @@ Data Aggregation / Spectral-Temporal Metrics
 
 Previous research showed that sub-pixel fraction mapping of land cover with synthetically mixed training data can be performed using spectral-temporal metrics (STM) as input data.
  
-Spectral-temporal metrics are band-wise descriptive statistics, which summarize image reflectance (or an index derived thereof) of all valid observations within a defined time period, such as mean reflectance. They can be computed using the FORCE TSA submodule (tutorial).
+Spectral-temporal metrics are band-wise descriptive statistics, which summarize image reflectance (or an index derived thereof) of all valid observations within a defined time period, such as mean reflectance. They can be computed using the FORCE TSA submodule (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/tsi.html>`_). 
 
 Compared to single observations, spectral-temporal metrics are able to increase model robustness across large areas as differences in acquisition dates across orbits has lower effects on the data. Spectral-temporal metrics are, in addition, able to represent phenological variation.
 
 In this tutorial, we use the first, second, and third quartile of reflectance of all clear-sky Sentinel-2 observations within our study period, as well as the 90th quantile and the standard deviation of two indicators of vegetation, Tasseled Cap Greenness and Normalized Difference Vegetation Index (NDVI).
 
 
-	*Spectral-temporal metrics of reflectance and vegetation indices (34 features) used in this example workflow.* |copy| *Franz Schug*
+*Spectral-temporal metrics of reflectance and vegetation indices (34 features) used in this example workflow.*
 +--------------------+------------------------------------------------+
 +Band                + Spectral-Temporal Metrics                      +
 +====================+================================================+
@@ -183,7 +183,7 @@ You can access the parameter files `here <../_static/parameter-files/tutorials/l
 .. figure:: img/tutorial-lcf-stm.jpg
    :height: 330
 
-   *First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
+*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
 Tip
 
@@ -197,7 +197,7 @@ Land cover fraction mapping with synthetically mixed training data requires spec
 
 Here, we are using reference information directly from the imagery (as opposed to, e.g., data from external spectral libraries or ground sampling). We identified 388 reference surfaces, i.e., pixels of 10x10 m that cover only a single land cover type, for five classes: Built-up surfaces (182 reference points), woody vegetation (70), non-woody vegetation (98), bare soil (15), and water (23).
 
-The number of reference points per class varies based on spectral intra-class variability (which is, e.g., higher for non-woody vegetation than for vegetation) and surface availability (e.g., few available reference points for bare soil).
+The number of reference points per class varies based on spectral intra-class variability (which is, e.g., higher for non-woody vegetation than for woody vegetation) and surface availability (e.g., few available reference points for bare soil).
 
 Info
 
@@ -245,11 +245,11 @@ Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/
 Synthetically Mixed Training Data
 -----------------------------------
 
-The approach used in this tutorial is described in `Okujeni et al. 2013 <https://www.sciencedirect.com/science/article/pii/S0034425713002009>`_, who compared it to results generated with multiple endmember spectral mixture analysis (MESMA). For a more encompassing overview over spectral unmixing techniques, such as further technical and applied publications, as they will not be a subject of this tutorial.
+The approach used in this tutorial is described in `Okujeni et al. 2013 <https://www.sciencedirect.com/science/article/pii/S0034425713002009>`_, who compared it to results generated with multiple endmember spectral mixture analysis (MESMA). Please refer to the literature (e.g., `Quintano et al. 2012 <https://www.tandfonline.com/doi/abs/10.1080/01431161.2012.661095>`_) for a more encompassing overview over spectral unmixing techniques, as they will not be a subject of this tutorial.
 
 Regression-based spectral unmixing for land cover fraction mapping requires reference information about fractional land cover. This can be achieved, for example, by digitizing surface area types within a given pixel and use resulting fractional reference cover as input to regression model training. While this approach is very accurate, it is also time and labour intensive.
 
-We here use synthetically genererated fractional reference data for regression model training. These synthetically mixed data are based on known spectral information that represen pure surface types. For example, when we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image , we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a piuxel with 30% tree cover and 70% road cover.
+We here use synthetically generated fractional reference data for regression model training. These synthetically mixed data are based on known spectral information that represent pure surface types. For example, when we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image , we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a pixel with 30% tree cover and 70% road cover.
 
  .. figure:: img/tutorial-lcf-mix-s2.png
    :height: 360
