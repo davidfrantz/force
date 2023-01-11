@@ -183,7 +183,7 @@ You can access the parameter files `here <../_static/parameter-files/tutorials/l
 .. figure:: img/tutorial-lcf-stm.jpg
    :height: 330
 
-*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
+	*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
 Tip
 
@@ -235,7 +235,7 @@ The Sampling submodule will produce four individual text files that contain feat
 .. figure:: img/tutorial-lcf-smp.jpg
    :height: 260
    
-*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
+	*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
    
 Tip
 
@@ -254,21 +254,21 @@ We here use synthetically generated fractional reference data for regression mod
  .. figure:: img/tutorial-lcf-mix-s2.png
    :height: 360
    
-*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
-This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Please not that the number of features increases from 12 to 34, while the idea is the same. In this following case, the synthetic mixtures produce training data for 80% and 30% tree-covered surfaces, as well as, potentially 100% and 0% tree-covered surfaces.
+This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Please not that the number of features increases from 12 to 34, while the idea is the same. In this following case, the synthetic mixtures produce training data for 80% and 30% tree-covered surfaces, as well as 100% and 0% tree-covered surfaces.
 
  .. figure:: img/tutorial-lcf-mix-stm.png
    :height: 360
    
-*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
 This idea can be expanded to further combinations of three or more surface types, as well as to different surfaces of the same surface type when intra-class spectral variability is high. In this following case, we produce training data for 80% and 30% tree-covered surfaces (left), as well as 80% and 30% built-up area (right). In the second case, we mix spectral-temporal metrics from two pure surface types of the same target class (built-up), but from spectrally different surfaces, i.e., a road and a rooftop.
 
   .. figure:: img/tutorial-lcf-mix-stm-complexity.png
    :height: 360
    
-*Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
 In principle, an indefinite number of training data can be synthetically created this way. However, note that the sampled pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. Also, the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures
 
@@ -326,7 +326,7 @@ Library completeness is measured using the Mean Absolute Error (MAE) across all 
 .. figure:: img/tutorial-lcf-lib.jpg
    :height: 330
    
-*Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
+	*Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
 
 Library completeness is not an established way to assess the quality of our training data library. However, it is a rough, but good indicator to show what surface types in the image might be under-represented in our training data, and, thus, in our reference points. In our example, we see that our training data represents forests really well (low values, dark areas). It seems like our training data does not as well represent some agricultural areas in the western part of our scene (higher values, brighter areas). Still, the maximum of our minimum MAE values in the image is ca. 150, which we consider low knowing that reflectance values can range from 0 to 10,000. Based on this, we do not see the necessity to identify further reference points.
 
@@ -379,6 +379,10 @@ We now need to train 15 models by calling all 15 parameter files, which we can d
 	for f in /train/*.prm; do dforce force-train $f; done 
 
 In this case, it is important that no other parameter file is in the given folder.
+
+After model training, validation information (performed with 30% of the data) can be found in the corresponding log file next to the generated model.
+
+The base parameter file before applying replacement variables can be accessed the parameter file `here <../_static/parameter-files/tutorials/lcf/50_lcf_training.prm>`_.
 
 Tip
 
@@ -448,7 +452,7 @@ which outputs the number of models used when applying a convergence threshold (a
 .. figure:: img/tutorial-lcf-ml.jpg
    :height: 330
    
-*Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
+	*Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
 
 Tip
 
@@ -465,5 +469,5 @@ Please refer to the Machine Learning `documentation <https://force-eo.readthedoc
 +              + postdoc researcher at `SILVIS Lab <https://silvis.forest.wisc.edu/>`_.                   +
 +              + *Views are his own.*                                                                     +
 +--------------+------------------------------------------------------------------------------------------+
-+ **EO**, **ARD**, **Data Science**, **Open Science**                                                     +
++ **Earth Observation**, **Urban remote sensing**, **Data Science**, **Open Science**                                                     +
 +--------------+------------------------------------------------------------------------------------------+
