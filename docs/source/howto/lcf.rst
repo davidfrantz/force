@@ -73,7 +73,7 @@ For processing, we use
 
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/10_lcf_level_2.prm>`_ or use the one provided in the data repository. 	
 
-It is highly recommended to use a Digital Elevation Model (DEM) for topographic correction purposes. We here use a global SRTM/ASTER composite that we cannot provide for download. However, you can use any DEM of your choice here, for example the one provided by the `Copernicus Land Monitoring Service <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_. The use of a DEM is, however, not required to continue data processing, and as our example region is rather flat, the impact of missing topographic correction might be acceptable.
+It is highly recommended to use a Digital Elevation Model (DEM) for topographic correction purposes. We here use a global SRTM/ASTER composite that we cannot provide for download due to file sizes. However, you can use any DEM of your choice here, for example the one provided for Europe by the `Copernicus Land Monitoring Service <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_, or the `global Copernicu DEM <https://portal.opentopography.org/raster?opentopoID=OTSDEM.032021.4326.3>`_. The use of a DEM is, however, not required to continue data processing, and as our example region is rather flat, the impact of missing topographic correction might be acceptable. Please refer to `this tutorial <https://force-eo.readthedocs.io/en/latest/howto/dem.html>`_ for more information about making use of a DEM in FORCE.
 
 .. code-block:: bash
 
@@ -99,7 +99,7 @@ Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/la
 
 Info
 
---FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_. However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
+FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_). However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
 
 
 Clear-Sky Observations (optional)
