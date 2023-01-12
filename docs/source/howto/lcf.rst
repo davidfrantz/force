@@ -29,7 +29,7 @@ Some of these submodules have been described in other places of the FORCE docume
 
 This tutorial illustrates the potential of FORCE to be used along the complete image processing chain, from downloading and pre-processing image acquisitions to producing meaningful spatial data. Its chapters correspond to the seven steps (and two optional steps) of the following workflow.
 
-This workflow is reproducible, as all commands, parameter files and intermediate data will be provided. Parameter files will be directly available for download throughout the workflow, while intermediate data will only be available in a data repository due to file size (Download data from Zenodo, doi: xxxxx)
+This workflow is reproducible, as all commands, parameter files and intermediate data will be provided. Parameter files will be directly available for download throughout the workflow, while intermediate data will only be available in a data repository due to file size (`Download data from Zenodo <https://doi.org/10.5281/zenodo.7529763>`_, doi: 10.5281/zenodo.7529763)
 
 This workflow can be used for image classification applications as well as regression-based mapping with any other kind of suitable training data making a few adaptations to the example parameter files. You might be able to skip chapters on data aggregation, sampling, or synthethic training data genereation depending on your desired input data and processing method.
 
