@@ -21,7 +21,6 @@ The Workflow
 The workflow in this tutorial uses a series of submodules of the FORCE Higher Level Processing system (HLPS) to map sub-pixel fractions of land cover with Sentinel-2 imagery and synthetically mixed training data. 
 
 .. figure:: img/tutorial-lcf-ml.jpg
-   :height: 330
    
 	*Land cover fraction maps. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
 
@@ -34,7 +33,6 @@ This workflow is reproducible, as all commands, parameter files and intermediate
 This workflow can be used for image classification applications as well as regression-based mapping with any other kind of suitable training data making a few adaptations to the example parameter files. You might be able to skip chapters on data aggregation, sampling, or synthethic training data genereation depending on your desired input data and processing method.
 
 .. figure:: img/tutorial-lcf-workflow.png
-   :height: 160
 
    *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
 
@@ -126,7 +124,6 @@ We compute two CSO statistics, the number of observations and the maximum tempor
 You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/11_lcf_cso.prm>`_ or use the one provided in the data repository.
 
 .. figure:: img/tutorial-lcf-cso.jpg
-   :height: 330
 
    *Number of observations (A), average (B) and maximum (C) temporal distance in days between observations for our study period 01 Mar. 2018 and 30 Oct. 2018. Scale represents 96% of values.* |copy| *Franz Schug*
 
@@ -188,7 +185,6 @@ to compute spectral-temporal metrics of reflectance and vegetation components.
 You can access the parameter files `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_reflectance.prm>`_ and `here <../_static/parameter-files/tutorials/lcf/20_lcf_stm_vegetation.prm>`_ or use the ones provided in the data repository.
 
 .. figure:: img/tutorial-lcf-stm.jpg
-   :height: 330
 
 	*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
@@ -241,7 +237,6 @@ In the parameter file, we will need to provide a list of features that the spect
 The Sampling submodule will produce four individual text files that contain feature and response information as well as a list of coordinates of the reference points.
 
 .. figure:: img/tutorial-lcf-smp.jpg
-   :height: 260
    
 	*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
    
@@ -260,21 +255,18 @@ Regression-based spectral unmixing for land cover fraction mapping requires refe
 We here use synthetically generated fractional reference data for regression model training. These synthetically mixed data are based on known spectral information that represent pure surface types. For example, when we know what both a tree-covered surface and a road-covered surface spectrally look like in a Sentinel-2 image , we theoretically know what any kind of linear mixture between both surface look like, e.g., a pixel with 80% tree cover and 20% road cover, or a pixel with 30% tree cover and 70% road cover.
 
  .. figure:: img/tutorial-lcf-mix-s2.png
-   :height: 360
    
 	*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
 This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Please not that the number of features increases from 12 to 34, while the idea is the same. In this following case, the synthetic mixtures produce training data for 80% and 30% tree-covered surfaces, as well as 100% and 0% tree-covered surfaces.
 
  .. figure:: img/tutorial-lcf-mix-stm.png
-   :height: 360
    
 	*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
 This idea can be expanded to further combinations of three or more surface types, as well as to different surfaces of the same surface type when intra-class spectral variability is high. In this following case, we produce training data for 80% and 30% tree-covered surfaces (left), as well as 80% and 30% built-up area (right). In the second case, we mix spectral-temporal metrics from two pure surface types of the same target class (built-up), but from spectrally different surfaces, i.e., a road and a rooftop.
 
   .. figure:: img/tutorial-lcf-mix-stm-complexity.png
-   :height: 360
    
 	*Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
@@ -333,7 +325,6 @@ to compare every set of synthetically mixed training data to every pixel in the 
 Library completeness is measured using the Mean Absolute Error (MAE) across all features. The submodule provides the lowest MAE between each training feature set (here: 1,000) and each pixel, both per target class and overall.
 
 .. figure:: img/tutorial-lcf-lib.jpg
-   :height: 330
    
 	*Minimum Mean Absolute Error between each training feature set of the synthetically mixed data and every image pixel across all three target classes.* |copy| *Franz Schug*
 
@@ -460,7 +451,6 @@ We can optionally set
 which outputs the number of models used when applying a convergence threshold (as we did) and the uncertainty of the averaged prediction, i.e., the standard deviation of all predictions blended into the final output file.
 	
 .. figure:: img/tutorial-lcf-ml.jpg
-   :height: 330
    
 	*Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
 
