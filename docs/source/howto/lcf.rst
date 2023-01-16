@@ -1,7 +1,7 @@
 .. _tut-lcf:
 
 Land Cover Fraction Mapping
-=========================
+===========================
 
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
@@ -16,7 +16,7 @@ While spectral unmixing has been used for decades in different contexts, with di
    *This tutorial uses FORCE v. 3.7.9*
 
 The Workflow
------------------------------------
+------------
 
 The workflow in this tutorial uses a series of submodules of the FORCE Higher Level Processing system (HLPS) to map sub-pixel fractions of land cover with Sentinel-2 imagery and synthetically mixed training data. 
 
@@ -38,12 +38,13 @@ This workflow can be used for image classification applications as well as regre
 
    *FORCE HLPS workflow for land cover fraction mapping with regression-based unmixing and syhnthetically mixed training data* |copy| *Franz Schug*
 
-Note
+.. admonition:: Note
 
-Please note that FORCE parameter files require absolute file paths. This is why path names in the provided parameter files are placeholders and should be adapted according to your folder structure when you would like to replicate the workflow yourself. Also note that most parameter files have parameters for the number of threads to be used for parallel processing. Please adapt the number of threads according to the maximum number of threads available in your machine.
+	Please note that FORCE parameter files require absolute file paths. This is why path names in the provided parameter files are placeholders and should be adapted according to your folder structure when you would like to replicate the workflow yourself. Also note that most parameter files have parameters for the number of threads to be used for parallel processing. Please adapt the number of threads according to the maximum number of threads available in your machine.
+
 
 Data Acquisition
------------------------------------
+----------------
 
 This workflow requires spatially explicit Earth Observation raster data to start with. It will technically work with any multi- or hyperspectral image data. This tutorial has been created with spectral-temporal metrics aggregated from all clear-sky Sentinel-2 observations in 2018 over Berlin, Germany (MGRS Tile 33UUU).
 
@@ -55,13 +56,13 @@ We first download all image acquisitions with less than 70% cloud cover accordin
 
 We do not provide these data in the downloadable data because of file size, and as they can be downloaded again anytime using the above command.
 
-Tip
+.. admonition:: Tip
   
-Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html>`_ and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_ to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
+	Please refer to the Level 1 Cloud Storage Downloader `Documentation <https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html>`_ and `Tutorial <https://force-eo.readthedocs.io/en/latest/howto/level1-csd.html>`_ to know more about Sentinel-2 data downloads and about retrieving and updating the metadata catalogue required to download raw image data.
 
 
 Data Pre-Processing
------------------------------------
+-------------------
 
 FORCE provides all functionalities to convert all downloaded Level 1 data (i.e., radiometrically calibrated and georectified) into Analysis-Ready Data (ARD), or Level 2 data. ARD are data that are readily usable for any application without much further processing. In FORCE, this includes 
 
@@ -98,17 +99,17 @@ As we want to subsequently use the ARD generated here in different higher-level 
 	PROJECTION = PROJCS["ETRS89 / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AUTHORITY["EPSG","3035"]]
 
 
-Tip
+.. admonition:: Tip
 
-Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/latest/howto/l2-ard.html>`_ for further information about generating ARD in FORCE, and to the Digital Elevation Model `tutorial <https://force-eo.readthedocs.io/en/latest/howto/dem.html>_ for information on how to prepare a DEM for the FORCE processing system.
+	Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/latest/howto/l2-ard.html>`_ for further information about generating ARD in FORCE, and to the Digital Elevation Model `tutorial <https://force-eo.readthedocs.io/en/latest/howto/dem.html>_ for information on how to prepare a DEM for the FORCE processing system.
 
-Info
+.. admonition:: Info
 
-FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_). However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
+	FORCE is also able to co-register Sentinel-2 data with Landsat time series data (`Tutorial <https://force-eo.readthedocs.io/en/latest/howto/coreg.html>`_). However, this workflow does not make use of this because it uniquely relies on Sentinel-2 data.
 
 
 Clear-Sky Observations (optional)
------------------------------------
+---------------------------------
 
 At this point of the workflow, we can optionally check clear-sky observation (CSO) statistics for our data. Data availability in our study area and period will have a great impact on the quality of derived aggregated data, i.e., spectral-temporal metrics, and, ultimately, on land cover fraction mapping results. CSO statistics can be derived using the FORCE HLPS:
 
@@ -132,7 +133,7 @@ You can access the parameter file `here <../_static/parameter-files/tutorials/lc
 Based on CSO statistics, we assume that in most places of our study area, the number of observations (range from 10 to 42) and their temporal distance seems sufficient for generating robust spectral-temporal metrics.
 
 Data Aggregation / Spectral-Temporal Metrics
------------------------------------
+--------------------------------------------
 
 Previous research showed that sub-pixel fraction mapping of land cover with synthetically mixed training data can be performed using spectral-temporal metrics (STM) as input data.
  
@@ -144,6 +145,7 @@ In this tutorial, we use the first, second, and third quartile of reflectance of
 
 
 *Spectral-temporal metrics of reflectance and vegetation indices (34 features) used in this example workflow.*
+
 +--------------------+------------------------------------------------+
 +Band                + Spectral-Temporal Metrics                      +
 +====================+================================================+
@@ -190,13 +192,13 @@ You can access the parameter files `here <../_static/parameter-files/tutorials/l
 
 	*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
-Tip
+.. admonition:: Tip
 
-Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS). Here, the concept of spectral-temporal metrics is explained and illustrated.
+	Please refer to the Spectral Temporal Metrics `tutorial <https://force-eo.readthedocs.io/en/latest/howto/stm.html>`_ for further information about generating spectral-temporal metrics using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS). Here, the concept of spectral-temporal metrics is explained and illustrated.
 
 
 Sampling
------------------------------------
+--------
 
 Land cover fraction mapping with synthetically mixed training data requires spectral information from pure land cover surfaces to begin with, i.e., spectral reference data that can eventually be used to train a model that understands inter- and intra-class spectral variability. 
 
@@ -204,9 +206,10 @@ Here, we are using reference information directly from the imagery (as opposed t
 
 The number of reference points per class varies based on spectral intra-class variability (which is, e.g., higher for non-woody vegetation than for woody vegetation) and surface availability (e.g., few available reference points for bare soil).
 
-Info
+.. admonition:: Info
 
-In this tutorial we focus on a single 30x30km image tile. However, we also want the example to be reproducible, which means that all reference points were sampled within that tile. There is a chance that this will produce a highly local model not well transferable to other (even closer) regions. This is fine for illustration purposes, but using this approach for larger area mapping, make sure that reference data is representative of the whole area.
+	In this tutorial we focus on a single 30x30km image tile. However, we also want the example to be reproducible, which means that all reference points were sampled within that tile. There is a chance that this will produce a highly local model not well transferable to other (even closer) regions. This is fine for illustration purposes, but using this approach for larger area mapping, make sure that reference data is representative of the whole area.
+
 
 You can download these reference points as a text file `here <../_static/files/tutorials/lcf/samples.txt>`_, or as a shape file from this dataset on Zenodo. The data come in a WGS84 projection (EPSG: 4326) and are resampled on-the-fly when used with data from the data cube.   
 
@@ -242,13 +245,13 @@ The Sampling submodule will produce four individual text files that contain feat
    
 	*Spectral information for all reference points of pure built-up surfaces (A), woody vegetation (B) and non-woody vegetation (C). The features correspond to the features in the above table, in that order.* |copy| *Franz Schug*
    
-Tip
+.. admonition:: Tip
 
-Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/smp/index.html#smp>`_ for further information about parametrizing the FORCE Sampling submodule.
+	Please refer to the Sampling `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/smp/index.html#smp>`_ for further information about parametrizing the FORCE Sampling submodule.
 
 
 Synthetically Mixed Training Data
------------------------------------
+---------------------------------
 
 The approach used in this tutorial is described in `Okujeni et al. 2013 <https://www.sciencedirect.com/science/article/pii/S0034425713002009>`_, who compared it to results generated with multiple endmember spectral mixture analysis (MESMA). Please refer to the literature (e.g., `Quintano et al. 2012 <https://www.tandfonline.com/doi/abs/10.1080/01431161.2012.661095>`_) for a more encompassing overview over spectral unmixing techniques, as they will not be a subject of this tutorial.
 
@@ -309,12 +312,13 @@ We generate five separate synthetically mixed training datasets for each of the 
 
 	ITERATIONS = 5
 
-Tip
+.. admonition:: Tip
 
-Take a look at `this tutorial <https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html>`_, where concepts of regression-based unmixing of urban land cover were described and illustrated using the EnMAP Box and hyperspectral imagery.
+	Take a look at `this tutorial <https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html>`_, where concepts of regression-based unmixing of urban land cover were described and illustrated using the EnMAP Box and hyperspectral imagery.
+
 
 Library Completeness (optional)
------------------------------------
+-------------------------------
 
 At this point, we can optionally assess the completeness of our library compared to our image data. 
 
@@ -335,13 +339,13 @@ Library completeness is measured using the Mean Absolute Error (MAE) across all 
 
 Library completeness is not an established way to assess the quality of our training data library. However, it is a rough, but good indicator to show what surface types in the image might be under-represented in our training data, and, thus, in our reference points. In our example, we see that our training data represents forests really well (low values, dark areas). It seems like our training data does not as well represent some agricultural areas in the western part of our scene (higher values, brighter areas). Still, the maximum of our minimum MAE values in the image is ca. 150, which we consider low knowing that reflectance values can range from 0 to 10,000. Based on this, we do not see the necessity to identify further reference points.
 
-Info
+.. admonition:: Info
 
-Note that low MAE values do not necessarily mean that the image pixels are correctly represented in the library. For example, in the case of spectral similarity of two different surface types, this algorithm cannot distinguish between correct and incorrect but similar spectral class representation.
+	Note that low MAE values do not necessarily mean that the image pixels are correctly represented in the library. For example, in the case of spectral similarity of two different surface types, this algorithm cannot distinguish between correct and incorrect but similar spectral class representation.
 
 
 Model Training
------------------------------------
+--------------
 
 We use *force-train* with synthetically created training data to train regression-based machine learning models of land cover fraction.
 
@@ -389,12 +393,13 @@ After model training, validation information (performed with 30% of the data) ca
 
 The base parameter file before applying replacement variables can be accessed the parameter file `here <../_static/parameter-files/tutorials/lcf/50_lcf_training.prm>`_.
 
-Tip
+.. admonition:: Tip
 
-Please refer to the OpenCV `Support Vecor Machine documentation <https://docs.opencv.org/3.4/d1/d73/tutorial_introduction_to_svm.html>`_ to learn more about model parametrization, or refer to the parameter file descriptions.
+	Please refer to the OpenCV `Support Vecor Machine documentation <https://docs.opencv.org/3.4/d1/d73/tutorial_introduction_to_svm.html>`_ to learn more about model parametrization, or refer to the parameter file descriptions.
+
 
 Model Prediction
------------------------------------
+----------------
 
 We apply all previously trained models using
 
@@ -459,9 +464,9 @@ which outputs the number of models used when applying a convergence threshold (a
    
 	*Land cover fraction predictions. A: Built-up surfaces, woody and non-woody vegetation in an RGB representation. B: Fraction of built-up surfaces. C: Fraction of woody vegetation.* |copy| *Franz Schug*
 
-Tip
+.. admonition:: Tip
 
-Please refer to the Machine Learning `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/ml/index.html#ml>`_ for further information about generating maps with regression-based machine learning models. 
+	Please refer to the Machine Learning `documentation <https://force-eo.readthedocs.io/en/latest/components/higher-level/ml/index.html#ml>`_ for further information about generating maps with regression-based machine learning models. 
 
 
 ------------
@@ -474,5 +479,5 @@ Please refer to the Machine Learning `documentation <https://force-eo.readthedoc
 +              + postdoc researcher at `SILVIS Lab <https://silvis.forest.wisc.edu/>`_.                   +
 +              + *Views are his own.*                                                                     +
 +--------------+------------------------------------------------------------------------------------------+
-+ **Earth Observation**, **Urban remote sensing**, **Data Science**, **Open Science**                                                     +
++ **Earth Observation**, **Urban remote sensing**, **Data Science**, **Open Science**                     +
 +--------------+------------------------------------------------------------------------------------------+

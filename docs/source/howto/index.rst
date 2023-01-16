@@ -55,3 +55,5 @@ There are several tutorials available that showcase how to use the FORCE.
    tsi.rst
    stm.rst
    udf.rst
+   lcf.rst
+   
