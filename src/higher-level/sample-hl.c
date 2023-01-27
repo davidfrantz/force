@@ -34,59 +34,6 @@ This file contains functions for sampling of features
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
-double **parse_coord_list(char *fname, size_t *ncoord);
-
-
-/** This function reads coordinates from a text file. Put X-coords in 1st
-+++ column and Y-coords in 2nd column. Coordinates must be in geographic 
-+++ decimal degree notation (South and West coordinates are negative). Do
-+++ not use a header.
---- fname:  text file containing the coordinates
---- ncoord: number of coordinate pairs (returned)
-+++ Return: array with coordinates
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-/**double **parse_coord_list(char *fname, size_t *ncoord){
-FILE *fp;
-char  buffer[NPOW_10] = "\0";
-char *tag = NULL;
-const char *separator = " \t";
-double **coords = NULL;
-size_t k = 0;
-size_t bufsize = NPOW_10;
-
-
-  alloc_2D((void***)&coords, 3, bufsize, sizeof(double));
-
-  // open file
-  if (!(fp = fopen(fname, "r"))){
-    printf("unable to open coordinate file. "); return NULL;}
-
-  // process line by line
-  while (fgets(buffer, NPOW_10, fp) != NULL){
-    
-    tag = strtok(buffer, separator);
-
-    coords[0][k] = atof(tag); tag = strtok(NULL, separator);
-    coords[1][k] = atof(tag); tag = strtok(NULL, separator);
-    coords[2][k] = atof(tag); tag = strtok(NULL, separator);
-    k++;
-
-    // if extremely large size, attempt to increase buffer size
-    if (k >= bufsize) {
-      //printf("reallocate.. %lu %lu\n", k, bufsize);
-      re_alloc_2D((void***)&coords, 3, bufsize, 3, bufsize*2, sizeof(coord_t));
-      bufsize *= 2;
-    }
-
-  }
-
-  fclose(fp);
-
-
-  *ncoord = k;
-  return coords;
-}**/
-
 
 void append_table(char *fname, bool *allow, double **tab, int nrow, int ncol, int decimals);
 
