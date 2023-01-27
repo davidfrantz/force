@@ -321,3 +321,59 @@ int o;
   return;
 }
 
+
+/** This function prints a warning if no input or output was detected
++++ Special behaviour when sampling module is used
+--- ibytes:   number of bytes read
+--- obytes:   number of bytes written
+--- phl:      HL parameters
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void warn_if_no_io(int ibytes, int obytes, par_hl_t *phl){
+bool warn_i = true;
+bool warn_o = true;
+
+
+  if (phl->type == _HL_SMP_){
+    
+    if (fileexist(phl->smp.f_sample)   &&
+        fileexist(phl->smp.f_response) &&
+        fileexist(phl->smp.f_coord)){
+
+      warn_o = false;
+
+    }
+  }
+
+
+  printf("________________________________________\n");
+  if (warn_i){
+    printf("data read    (uncompressed): "); print_humanreadable_bytes(ibytes);
+  }
+  if (warn_o){
+    printf("data written (uncompressed): "); print_humanreadable_bytes(obytes);
+  }
+
+  if ((warn_i && ibytes == 0) || (warn_o && obytes == 0)){
+    printf("________________________________________\n");
+    printf("Warning: no input or output detected. If\n"
+           "unintentional, triple-check for mis-\n"
+           "matching entries in\n"
+           "  DIR_MASK\n"
+           "  BASE_MASK\n"
+           "  X_TILE_RANGE\n"
+           "  Y_TILE_RANGE\n"
+           "  FILE_TILE\n"
+           "  SENSORS\n"
+           "  DATE_RANGE\n"
+           "  DOY_RANGE\n"
+           "  OUTPUT_***\n"
+           "and make sure that your input file type\n"
+           "  is one of .dat .bsq .bil .tif .vrt\n");
+    printf("________________________________________\n");
+  }
+
+
+  return;
+}
+
