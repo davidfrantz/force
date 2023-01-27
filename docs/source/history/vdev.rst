@@ -3,6 +3,14 @@
 Develop version
 ===============
 
+- **FORCE HLPS**
+
+  - Removed warning message that no output is produced when using the sampling submodule.
+    It is now checked whether the files are actually written and will only warn if 
+    no input was detected or if no files were written. 
+    The behaviour for all other submodules stays the same.
+  
+
 - **FORCE AUX**
 
   - new auxilliary program `force-init`.
