@@ -159,8 +159,10 @@ off_t ibytes = 0, obytes = 0;
   if ((aux = read_aux(phl)) == NULL){
     printf("Reading aux file failed!\n"); return FAILURE;}
 
-  // register python UDF plug-in
+  // register UDF plug-ins
   register_python(phl);
+  register_rstats(phl);
+  
 
   // copy and read datacube definition
   if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher, phl->blocksize)) == NULL){
@@ -243,6 +245,7 @@ off_t ibytes = 0, obytes = 0;
   free_param_higher(phl);
 
   deregister_python(phl);
+  deregister_rstats(phl);
 
   CPLPopErrorHandler();
 

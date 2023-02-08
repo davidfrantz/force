@@ -21,36 +21,26 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-User-defined function header
+R UDF plug-in header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef UDF_HL_H
-#define UDF_HL_H
+#ifndef RSP_HL_H
+#define RSP_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
-#include "../higher-level/param-hl.h"
-#include "../higher-level/read-ard-hl.h"
+#include "../higher-level/tsa-hl.h"
+#include "../higher-level/udf-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-  short **pyp_;
-  short **rsp_;
-} udf_t;
-
-#include "../higher-level/py-udf-hl.h"
-#include "../higher-level/r-udf-hl.h"
-
-brick_t **udf_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
-
+void register_rstats(par_hl_t *phl);
+void deregister_rstats(par_hl_t *phl);
 
 #ifdef __cplusplus
 }
