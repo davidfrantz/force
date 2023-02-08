@@ -462,9 +462,9 @@ void register_udf(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "OUTPUT_PYP",    &phl->udf.pyp.out);
 
   // R UDF plug-in parameters
-  //register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
-  //register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
-  //register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
+  register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
+  register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
+  register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
 
   return;
 }
