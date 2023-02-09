@@ -261,6 +261,11 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.pyp.type);
   register_bool_par(params,    "OUTPUT_PYP",    &phl->tsa.pyp.out);
 
+  // R UDF plug-in parameters
+  register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->tsa.rsp.f_code);
+  register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->tsa.rsp.type);
+  register_bool_par(params,    "OUTPUT_RSP",   &phl->tsa.rsp.out);
+
   return;
 }
 
@@ -1683,6 +1688,14 @@ double tol = 5e-3;
       copy_string(phl->tsa.pyp.f_code, NPOW_10, "NULL");
       printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
 
+    if (phl->tsa.rsp.out && strcmp(phl->tsa.rsp.f_code, "NULL") == 0){
+      phl->tsa.rsp.out = false;
+      printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
+
+    if (!phl->tsa.rsp.out && strcmp(phl->tsa.rsp.f_code, "NULL") != 0){
+      copy_string(phl->tsa.rsp.f_code, NPOW_10, "NULL");
+      printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
+
   }
 
   if (phl->type == _HL_UDF_){
@@ -1695,7 +1708,6 @@ double tol = 5e-3;
       copy_string(phl->udf.pyp.f_code, NPOW_10, "NULL");
       printf("Warning: python code provided, but OUTPUT_PYP = FALSE. Ignore Python UDF plug-in. Proceed.\n");}
 
-    /**
     if (phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") == 0){
       phl->udf.rsp.out = false;
       printf("Warning: no R code provided. OUTPUT_RSP ignored. Proceed.\n");}
@@ -1703,7 +1715,6 @@ double tol = 5e-3;
     if (!phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") != 0){
       copy_string(phl->udf.rsp.f_code, NPOW_10, "NULL");
       printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
-      **/
 
   }
 
