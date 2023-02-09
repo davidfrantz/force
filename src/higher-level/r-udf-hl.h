@@ -41,6 +41,8 @@ extern "C" {
 
 void register_rstats(par_hl_t *phl);
 void deregister_rstats(par_hl_t *phl);
+void init_rsp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void term_rsp(par_udf_t *udf);
 
 #ifdef __cplusplus
 }
