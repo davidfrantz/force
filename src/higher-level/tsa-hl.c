@@ -1016,8 +1016,9 @@ short nodata;
     // generate data arrays
     compile_ts_dates(ard, &ts, phl, nt, nr, ni);
 
-    // initialize python udf
+    // initialize UDFs
     init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
+    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.rsp);
 
     // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, nr, ni, idx, &nprod)) == NULL || nprod == 0){
@@ -1053,8 +1054,9 @@ short nodata;
     // clean date arrays
     free_ts_dates(&ts);
 
-    // terminate python udf
+    // terminate UDFs
     term_pyp(&phl->tsa.pyp);
+    term_rsp(&phl->tsa.rsp);
 
   }
   
