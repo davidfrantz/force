@@ -59,7 +59,7 @@ typedef struct {
   short **pol_[_POL_LENGTH_];
   short **tro_[_POL_LENGTH_];
   short **cao_[_POL_LENGTH_];
-  short **pyp_, **nrt_;
+  short **pyp_, **rsp_, **nrt_;
   date_t *d_tss, *d_nrt, *d_tsi;
   date_t *d_fby, *d_fbq, *d_fbm, *d_fbw, *d_fbd;
   date_t *d_lsp, *d_pol;

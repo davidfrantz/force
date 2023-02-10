@@ -39,7 +39,7 @@ typedef struct {
   short ***ptr;
 } brick_compile_info_t;
 
-enum { _full_, _stats_, _inter_, _nrt_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _pyp_};
+enum { _full_, _stats_, _inter_, _nrt_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _udf_};
 
 
 void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
@@ -426,10 +426,26 @@ int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
   info[o].prodlen  = phl->tsa.pyp.nb;
   info[o].bandname = phl->tsa.pyp.bandname;
   info[o].date     = phl->tsa.pyp.date;
-  info[o].prodtype = _pyp_;
+  info[o].prodtype = _udf_;
   info[o].enable   = phl->tsa.pyp.out;
   info[o].write    = phl->tsa.pyp.out;
   info[o].ptr      = &ts->pyp_;
+
+  return o+1;
+}
+
+
+int info_rsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
+
+
+  copy_string(info[o].prodname, NPOW_02, "PYP");
+  info[o].prodlen  = phl->tsa.rsp.nb;
+  info[o].bandname = phl->tsa.rsp.bandname;
+  info[o].date     = phl->tsa.rsp.date;
+  info[o].prodtype = _udf_;
+  info[o].enable   = phl->tsa.rsp.out;
+  info[o].write    = phl->tsa.rsp.out;
+  info[o].ptr      = &ts->rsp_;
 
   return o+1;
 }
@@ -633,7 +649,8 @@ brick_compile_info_t *info = NULL;
           _POL_LENGTH_ +   // polarmetrics
           _POL_LENGTH_ +   // trend on polarmetrics
           _POL_LENGTH_ +   // cat on polarmetrics
-          1;               // python UDF metrics
+          1 +              // python UDF metrics
+          1;               // R UDF metrics
 
   //printf("%d potential products.\n", nprod);
 
@@ -653,6 +670,7 @@ brick_compile_info_t *info = NULL;
   o = info_lsp(info, o,     ts, phl);
   o = info_pol(info, o, ni, ts, phl);
   o = info_pyp(info, o,     ts, phl);
+  o = info_rsp(info, o,     ts, phl);
 
 
   alloc((void**)&TSA, nprod, sizeof(brick_t*));
@@ -676,7 +694,7 @@ brick_compile_info_t *info = NULL;
         set_date(&date, 2000, 1, 1);
 
         // dates should be set within compile_tsa_brick !!!
-        // as done in compile_udf_brick, and as done with the pyp product
+        // as done in compile_pyp_brick, and as done with the pyp product
         // This here can be much simpler
 
         for (t=0, k=1; t<info[o].prodlen; t++){
@@ -821,7 +839,7 @@ brick_compile_info_t *info = NULL;
               set_brick_bandname(TSA[o], t, _TAGGED_ENUM_CAT_[t].tag);
               set_brick_date(TSA[o], t, date);
               break;
-            case _pyp_:
+            case _udf_:
               set_brick_sensor(TSA[o], t, "BLEND");
               break;
             default:
@@ -1035,6 +1053,9 @@ short nodata;
 
     python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
       nx, ny, nc, 1, ni, nodata, &phl->tsa.pyp, phl->cthread);
+
+    rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+      nx, ny, nc, 1, ni, nodata, &phl->tsa.rsp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     

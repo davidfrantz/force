@@ -123,12 +123,13 @@ char *r_argv[] = { "R", "--silent" };
   findFun(install("force_rstats_init"), R_GlobalEnv);
 
   parse_rstats(
-    "force_rstats_init_ <- function(){                       \n"
-    "  dates_str <- paste(years, months, days, sep='-')      \n"
-    "  dates <- as.Date(dates_str, format='%Y-%m-%d')        \n"
-    "  bands <- force_rstats_init(dates, sensors, bandnames) \n"
-    "  return(as.character(bands))                           \n"
-    "}                                                       \n"
+    "force_rstats_init_ <- function(){                             \n"
+    "  dates_str <- paste(years, months, days, sep='-')            \n"
+    "  dates <- as.Date(dates_str, format='%Y-%m-%d')              \n"
+    "  bands <- force_rstats_init(dates, sensors, bandnames)       \n"
+    "  if (class(bands) == 'Date') bands <- format(bands, '%Y%m%d')\n"
+    "  return(as.character(bands))                                 \n"
+    "}                                                             \n"
   );
   findFun(install("force_rstats_init_"), R_GlobalEnv); // make sure parsing worked
 
@@ -141,7 +142,17 @@ char *r_argv[] = { "R", "--silent" };
     // wrapper fun
    } else if (udf->type == _UDF_BLOCK_){
     findFun(install("force_rstats_block"), R_GlobalEnv);
-    // wrapper fun
+    parse_rstats(
+      "force_rstats_ <- function(array){                             \n"
+      "  dates_str <- paste(years, months, days, sep='-')            \n"
+      "  dates <- as.Date(dates_str, format='%Y-%m-%d')              \n"
+      "  result <- force_rstats_block(array, dates, sensors, bandnames, na_value, ncpu)       \n"
+      "  print(str(result))\n"
+//      "  if (class(bands) == 'Date') bands <- format(bands, '%Y%m%d')\n"
+      "  return(result)                                 \n"
+      "}                                                             \n"
+    );
+    findFun(install("force_rstats_"), R_GlobalEnv);
   } else {
     printf("unknown UDF type.\n"); 
     exit(FAILURE);
@@ -200,13 +211,7 @@ par_udf_t *udf;
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_rsp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
-
-//PyObject *py_fun      = NULL;
-//PyObject *py_return   = NULL;
-//PyObject *py_bandname = NULL;
-//PyObject *py_encoded  = NULL;
 SEXP bandnames;
-char *bandname = NULL;
 date_t date;
 int b;
 
@@ -224,47 +229,28 @@ int b;
     return;
   }
 
-printf("here?\n");
+
   rstats_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
-printf("here2?\n");
+
 
   PROTECT(bandnames = R_tryEval(lang1(install("force_rstats_init_")), R_GlobalEnv, NULL));
 
+  if (isNull(bandnames) || length(bandnames) < 1){
+    printf("no bandnames returnded (NULL). Check R UDF code!\n");
+    exit(FAILURE);
+  } 
+
   R_tryEval(lang2(install("print"), bandnames), R_GlobalEnv, NULL);
 
-
-  UNPROTECT(1);
-
-
-
-/**
-
-  if (py_return == Py_None){
-    printf("None returned from forcepy_init_. Check the R UDF code!\n");
-    exit(FAILURE);}
-
-  if (!PyList_Check(py_return)){
-    printf("forcepy_init_ did not return a list. Check the R UDF code!\n");
-    exit(FAILURE);}
-
-
-  udf->nb = (int)PyList_Size(py_return);
-
+  udf->nb = length(bandnames);
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
   alloc((void**)&udf->date, udf->nb, sizeof(date_t));
 
   for (b=0; b<udf->nb; b++){
 
-    py_bandname = PyList_GetItem(py_return, b);
-    py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
-    if ((bandname = PyBytes_AsString(py_encoded)) == NULL){
-      printf("forcepy_init_ did not return a list of strings. Check the R UDF code!\n");
-      exit(FAILURE);}
-    Py_DECREF(py_encoded);
+    copy_string(udf->bandname[b], NPOW_10, CHAR(STRING_ELT(bandnames, b)));
 
-    copy_string(udf->bandname[b], NPOW_10, bandname);
-    
-    date_from_bandname(&date, bandname);
+    date_from_string(&date, udf->bandname[b]);
     copy_date(&date, &udf->date[b]);
 
     #ifdef FORCE_DEBUG
@@ -274,7 +260,8 @@ printf("here2?\n");
 
   }
 
-  **/
+  UNPROTECT(1);
+
 
   #ifdef FORCE_DEBUG
   printf("finished to initialize R interface\n");
@@ -394,5 +381,138 @@ SEXP sensors, bandnames;
 
 
   return;
+}
+
+/** This function connects FORCE to plug-in R UDFs
+--- ard:       pointer to instantly useable ARD image arrays
+--- udf:       pointer to instantly useable UDF image arrays
+--- ts:        pointer to instantly useable TSA image arrays
+--- mask:      mask image
+--- submodule: HLPS submodule
+--- idx_name:  name of index for TSA submodule
+--- nx:        number of columns
+--- ny:        number of rows
+--- nc:        number of cells
+--- nb:        number of bands
+--- nt:        number of time steps
+--- nodata:    nodata value
+--- p_udf:     user-defined code parameters
+--- cthread:   number of computing threads
++++ Return:    SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
+int b, t, p;
+size_t k;
+int *array_ = NULL, value;
+SEXP na_value, ncpu;
+SEXP dim, array;
+SEXP rstats_return;
+int *rstats_return_ = NULL;
+
+
+  if (submodule == _HL_UDF_ && udf_->rsp_ == NULL) return CANCEL;
+  if (submodule == _HL_TSA_ &&   ts->rsp_ == NULL) return CANCEL;
+
+
+  #ifdef FORCE_DEBUG
+  printf("starting to run R interface\n");
+  #endif
+
+  rstats_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+
+
+  PROTECT(na_value = allocVector(INTSXP, 1));
+  INTEGER(na_value)[0] = nodata;
+  defineVar(install("na_value"), na_value, R_GlobalEnv);
+  UNPROTECT(1);
+
+  PROTECT(ncpu = allocVector(INTSXP, 1));
+  INTEGER(ncpu)[0] = cthread;
+  defineVar(install("ncpu"), ncpu, R_GlobalEnv);
+  UNPROTECT(1);
+
+
+
+
+  PROTECT(dim = allocVector(INTSXP, 4));
+  INTEGER(dim)[0] = nt;
+  INTEGER(dim)[1] = nb;
+  INTEGER(dim)[2] = ny;
+  INTEGER(dim)[3] = nx;
+
+  PROTECT(array = allocArray(INTSXP, dim));
+  array_ = INTEGER(array);
+
+  // copy C data to R objects
+  if (submodule == _HL_UDF_){
+
+    for (t=0, k=0; t<nt; t++){
+      for (b=0; b<nb; b++){
+        for (p=0; p<nc; p++){
+
+          if (!ard[t].msk[p]){
+            value = nodata;
+          } else {
+            value = ard[t].dat[b][p];
+          }
+
+          array_[k++] = value;
+
+        }
+      }
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (t=0, k=0; t<nt; t++){
+      for (p=0; p<nc; p++){
+        array_[k++] = ts->tsi_[t][p];
+      }
+    }
+
+  } else {
+    printf("unknown submodule. ");
+    exit(FAILURE);
+  }
+
+
+
+
+  // fire up R
+  PROTECT(rstats_return = R_tryEval(lang2(install("force_rstats_"), array), R_GlobalEnv, NULL));
+  UNPROTECT(1);
+
+  // copy to output brick
+  rstats_return_ = INTEGER(rstats_return);
+
+  if (submodule == _HL_UDF_){
+
+    for (b=0, k=0; b<udf->nb; b++){
+      for (p=0; p<nc; p++){
+        udf_->pyp_[b][p] = rstats_return_[k++];
+      }
+    }
+
+  } else if (submodule == _HL_TSA_){
+
+    for (b=0, k=0; b<udf->nb; b++){
+      for (p=0; p<nc; p++){
+        ts->pyp_[b][p] = rstats_return_[k++];
+      }
+    }
+
+  } else {
+    printf("unknown submodule.\n");
+    exit(FAILURE);
+  }
+
+  UNPROTECT(2);
+
+
+  #ifdef FORCE_DEBUG
+  printf("finished to run R interface\n");
+  #endif
+
+  return SUCCESS;
 }
 
