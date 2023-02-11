@@ -438,7 +438,7 @@ int info_pyp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 int info_rsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "PYP");
+  copy_string(info[o].prodname, NPOW_02, "RSP");
   info[o].prodlen  = phl->tsa.rsp.nb;
   info[o].bandname = phl->tsa.rsp.bandname;
   info[o].date     = phl->tsa.rsp.date;

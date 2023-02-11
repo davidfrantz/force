@@ -146,8 +146,11 @@ char *r_argv[] = { "R", "--silent" };
       "force_rstats_ <- function(array){                             \n"
       "  dates_str <- paste(years, months, days, sep='-')            \n"
       "  dates <- as.Date(dates_str, format='%Y-%m-%d')              \n"
+      "  array <- replace(array, array == -9999, NA)\n"
       "  result <- force_rstats_block(array, dates, sensors, bandnames, na_value, ncpu)       \n"
-      "  print(str(result))\n"
+      "  result <- replace(result, is.na(result), -9999)\n"
+      "  storage.mode(result) <- 'integer'       \n"
+      "  #print(str(result))\n"
 //      "  if (class(bands) == 'Date') bands <- format(bands, '%Y%m%d')\n"
       "  return(result)                                 \n"
       "}                                                             \n"
@@ -401,7 +404,7 @@ SEXP sensors, bandnames;
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
-int b, t, p;
+int b, t, i, j, p;
 size_t k;
 int *array_ = NULL, value;
 SEXP na_value, ncpu;
@@ -444,67 +447,70 @@ int *rstats_return_ = NULL;
   array_ = INTEGER(array);
 
   // copy C data to R objects
-  if (submodule == _HL_UDF_){
 
-    for (t=0, k=0; t<nt; t++){
-      for (b=0; b<nb; b++){
-        for (p=0; p<nc; p++){
+  k = 0;
 
-          if (!ard[t].msk[p]){
-            value = nodata;
-          } else {
-            value = ard[t].dat[b][p];
-          }
+  for (j=0; j<nx; j++){
+  for (i=0; i<ny; i++){
+  for (b=0; b<nb; b++){
+  for (t=0; t<nt; t++){
 
-          array_[k++] = value;
+    p = nx*i + j;
 
-        }
+    if (submodule == _HL_UDF_){
+      if (!ard[t].msk[p]){
+        value = nodata;
+      } else {
+        value = ard[t].dat[b][p];
       }
+    } else if (submodule == _HL_TSA_){
+      value = ts->tsi_[t][p];
     }
 
-  } else if (submodule == _HL_TSA_){
+    array_[k++] = value;
 
-    for (t=0, k=0; t<nt; t++){
-      for (p=0; p<nc; p++){
-        array_[k++] = ts->tsi_[t][p];
-      }
-    }
-
-  } else {
-    printf("unknown submodule. ");
-    exit(FAILURE);
   }
+  }
+  }
+  }
+
+
 
 
 
 
   // fire up R
+printf("-1\n");
   PROTECT(rstats_return = R_tryEval(lang2(install("force_rstats_"), array), R_GlobalEnv, NULL));
+printf("0\n");
+  //R_tryEval(lang2(install("print"), rstats_return), R_GlobalEnv, NULL);
+printf("0.5\n");
   UNPROTECT(1);
-
+printf("1\n");
+  //R_tryEval(lang2(install("print"), rstats_return), R_GlobalEnv, NULL);
   // copy to output brick
   rstats_return_ = INTEGER(rstats_return);
+printf("2\n");
 
-  if (submodule == _HL_UDF_){
 
-    for (b=0, k=0; b<udf->nb; b++){
-      for (p=0; p<nc; p++){
-        udf_->pyp_[b][p] = rstats_return_[k++];
+  k =  0;
+
+  for (j=0; j<nx; j++){
+  for (i=0; i<ny; i++){
+  for (b=0; b<udf->nb; b++){
+
+      p = nx*i + j;
+
+      if (submodule == _HL_UDF_){
+        udf_->rsp_[b][p] = rstats_return_[k++];
+      } else if (submodule == _HL_TSA_){
+        ts->rsp_[b][p] = rstats_return_[k++];
       }
-    }
 
-  } else if (submodule == _HL_TSA_){
-
-    for (b=0, k=0; b<udf->nb; b++){
-      for (p=0; p<nc; p++){
-        ts->pyp_[b][p] = rstats_return_[k++];
-      }
-    }
-
-  } else {
-    printf("unknown submodule.\n");
-    exit(FAILURE);
   }
+  }
+  }
+
 
   UNPROTECT(2);
 
