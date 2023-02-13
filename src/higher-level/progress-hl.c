@@ -68,6 +68,8 @@ void measure_progress(progress_t *pro, int task, int clock){
 void init_progess(progress_t *pro, cube_t *cube, par_hl_t *phl){
 
 
+  pro->pretty_progress = phl->pretty_progress;
+
   measure_progress(pro, _TASK_RUNTIME_, _CLOCK_TICK_);
   
   pro->thread[_TASK_INPUT_]   = phl->ithread;
@@ -154,6 +156,9 @@ void init_progess(progress_t *pro, cube_t *cube, par_hl_t *phl){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void rewind_stdout(progress_t *pro){
   
+  
+  if (!pro->pretty_progress) return;
+
 #ifndef FORCE_DEBUG
 
 int line, nline = 12;
