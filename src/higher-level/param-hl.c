@@ -84,6 +84,8 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
   register_int_par(params,     "NTHREAD_WRITE",   1, INT_MAX, &phl->othread);
   register_int_par(params,     "NTHREAD_COMPUTE", 1, INT_MAX, &phl->cthread);
+  register_bool_par(params,    "STREAMING", &phl->stream);
+  register_bool_par(params,    "PRETTY_PROGRESS", &phl->pretty_progress)
 
   return;
 }

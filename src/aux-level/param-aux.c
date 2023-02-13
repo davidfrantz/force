@@ -1050,11 +1050,32 @@ void write_par_hl_thread(FILE *fp, bool verbose){
     fprintf(fp, "# from Block 3 are already being input and results from Block 1 are being\n");
     fprintf(fp, "# output. Each team can have multiple sub-threads to speed up the work. The\n");
     fprintf(fp, "# number of threads to use for each team is given by following parameters.\n");
+    fprintf(fp, "# Use STREAMING = FALSE to disable streaming. This will perform reading, \n");
+    fprintf(fp, "# computing and writing after one another in sequential mode.\n");
     fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
   }
   fprintf(fp, "NTHREAD_READ = 8\n");
   fprintf(fp, "NTHREAD_COMPUTE = 22\n");
   fprintf(fp, "NTHREAD_WRITE = 4\n");
+  fprintf(fp, "STREAMING = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# Use STREAMING = FALSE to disable streaming. This will perform reading, \n");
+    fprintf(fp, "# computing and writing after one another in sequential mode.\n");
+    fprintf(fp, "# Each operation will still be parallelized with above settings.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "STREAMING = TRUE\n");
+
+  if (verbose){
+    fprintf(fp, "# This module will display progress information on screen. By default, the\n");
+    fprintf(fp, "# progress information overwrites itself to produce a pretty displayal. \n");
+    fprintf(fp, "# However, this can cause error messages (or printing in UDFs) to be overwritten.\n");
+    fprintf(fp, "# If disabled (FALSE), the progress information will be simply be appended\n");
+    fprintf(fp, "# on screen (stdout).\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "PRETTY_PROGRESS = TRUE\n");
 
   return;
 }

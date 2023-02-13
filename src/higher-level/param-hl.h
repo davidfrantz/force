@@ -503,6 +503,8 @@ typedef struct {
   int ithread;
   int othread;
   int cthread;
+  int stream;
+  int pretty_progress;
 
   // products
   par_prd_t prd;
