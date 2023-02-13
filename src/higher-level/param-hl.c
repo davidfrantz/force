@@ -1698,6 +1698,11 @@ double tol = 5e-3;
       copy_string(phl->tsa.rsp.f_code, NPOW_10, "NULL");
       printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
 
+    if (phl->tsa.rsp.out && phl->stream){
+      phl->stream = false;
+      printf("Warning: R code provided. STREAMING is forced to FALSE. Proceed.\n");
+    }
+
   }
 
   if (phl->type == _HL_UDF_){
@@ -1717,6 +1722,11 @@ double tol = 5e-3;
     if (!phl->udf.rsp.out && strcmp(phl->udf.rsp.f_code, "NULL") != 0){
       copy_string(phl->udf.rsp.f_code, NPOW_10, "NULL");
       printf("Warning: R code provided, but OUTPUT_RSP = FALSE. Ignore R UDF plug-in. Proceed.\n");}
+
+    if (phl->udf.rsp.out && phl->stream){
+      phl->stream = false;
+      printf("Warning: R code provided. STREAMING is forced to FALSE. Proceed.\n");
+    }
 
   }
 

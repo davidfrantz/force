@@ -1057,12 +1057,13 @@ void write_par_hl_thread(FILE *fp, bool verbose){
   fprintf(fp, "NTHREAD_READ = 8\n");
   fprintf(fp, "NTHREAD_COMPUTE = 22\n");
   fprintf(fp, "NTHREAD_WRITE = 4\n");
-  fprintf(fp, "STREAMING = TRUE\n");
 
   if (verbose){
     fprintf(fp, "# Use STREAMING = FALSE to disable streaming. This will perform reading, \n");
     fprintf(fp, "# computing and writing after one another in sequential mode.\n");
     fprintf(fp, "# Each operation will still be parallelized with above settings.\n");
+    fprintf(fp, "# Disabling streaming might be necessary for some UDFs that otherwise\n");
+    fprintf(fp, "# produce threading conflicts with the internally used OpenMP functionality.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "STREAMING = TRUE\n");
@@ -1570,6 +1571,9 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
 
 
   fprintf(fp, "\n# R UDF PARAMETERS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+  fprintf(fp, "# Note: due to OpenMP threading conflicts, the usage of R UDFs will trigger\n");
+  fprintf(fp, "# the internal disabling of the streaming functionality (STREAMING = FALSE)\n");
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
