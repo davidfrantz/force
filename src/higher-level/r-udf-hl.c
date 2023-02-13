@@ -32,13 +32,20 @@ This file contains functions for plugging-in R UDFs into FORCE
 #include <R_ext/Parse.h>
 
 
+void init_snowfall(int n);
+void parse_rstats(const char *string);
 void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
-//int date_from_bandname(date_t *date, char *bandname);
+
 
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
+
+/** This function initializes a snowfall cluster in R
+--- n:      number of CPUs
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_snowfall(int n){
 SEXP parallel;
 SEXP ncpu;
@@ -62,6 +69,10 @@ SEXP ncpu;
 }
 
 
+/** This function parses an R file from disc (UDF)
+--- fname:  filename of R UDF
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void source_rstats(const char *fname){
 
 
@@ -71,6 +82,10 @@ void source_rstats(const char *fname){
 }
 
 
+/** This function parses a string containing R code
+--- string:  string
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void parse_rstats(const char *string){
 ParseStatus status;
 SEXP cmdexpr;
