@@ -120,8 +120,9 @@ char *r_argv[] = { "R", "--silent" };
 
   // parse once to make sure that functions are available
   source_rstats(udf->f_code);
-  findFun(install("force_rstats_init"), R_GlobalEnv);
 
+  // wrapper for 'force_rstats_init'
+  findFun(install("force_rstats_init"), R_GlobalEnv);
   parse_rstats(
     "force_rstats_init_ <- function(){                             \n"
     "  dates_str <- paste(years, months, days, sep='-')            \n"
@@ -133,29 +134,46 @@ char *r_argv[] = { "R", "--silent" };
   );
   findFun(install("force_rstats_init_"), R_GlobalEnv); // make sure parsing worked
 
-  R_tryEval(lang1(install("force_rstats_init")), R_GlobalEnv, NULL);
-
 
   if (udf->type == _UDF_PIXEL_){
+    // create snowfall cluster
     init_snowfall(phl->cthread);
+    // wrapper for 'force_rstats_pixel'
     findFun(install("force_rstats_pixel"), R_GlobalEnv);
+    parse_rstats(
+      "force_rstats_ <- function(array){                                     \n"
+      "  dates_str <- paste(years, months, days, sep='-')                    \n"
+      "  dates <- as.Date(dates_str, format='%Y-%m-%d')                      \n"
+      "  array <- replace(array, array == na_value, NA)                      \n"
+      "  if (ncpu > 1){                                                      \n"
+      "   result <- sfApply(array, c(3,4), force_rstats_pixel,               \n"
+      "                     dates, sensors, bandnames, 1)                    \n"
+      "  } else {                                                            \n"
+      "   result <- apply(array, c(3,4), force_rstats_pixel,                 \n"
+      "                     dates, sensors, bandnames, 1)                    \n"
+      "  }                                                                   \n"
+      "  result <- replace(result, is.na(result), na_value)                  \n"
+      "  storage.mode(result) <- 'integer'                                   \n"
+      "  return(result)                                                      \n"
+      "}                                                                     \n"
+    );
+    findFun(install("force_rstats_"), R_GlobalEnv); // make sure parsing worked
     // wrapper fun
    } else if (udf->type == _UDF_BLOCK_){
+    // wrapper for 'force_rstats_block'
     findFun(install("force_rstats_block"), R_GlobalEnv);
     parse_rstats(
-      "force_rstats_ <- function(array){                             \n"
-      "  dates_str <- paste(years, months, days, sep='-')            \n"
-      "  dates <- as.Date(dates_str, format='%Y-%m-%d')              \n"
-      "  array <- replace(array, array == -9999, NA)\n"
-      "  result <- force_rstats_block(array, dates, sensors, bandnames, na_value, ncpu)       \n"
-      "  result <- replace(result, is.na(result), -9999)\n"
-      "  storage.mode(result) <- 'integer'       \n"
-      "  #print(str(result))\n"
-//      "  if (class(bands) == 'Date') bands <- format(bands, '%Y%m%d')\n"
-      "  return(result)                                 \n"
-      "}                                                             \n"
+      "force_rstats_ <- function(array){                                     \n"
+      "  dates_str <- paste(years, months, days, sep='-')                    \n"
+      "  dates <- as.Date(dates_str, format='%Y-%m-%d')                      \n"
+      "  array <- replace(array, array == na_value, NA)                      \n"
+      "  result <- force_rstats_block(array, dates, sensors, bandnames, ncpu)\n"
+      "  result <- replace(result, is.na(result), na_value)                  \n"
+      "  storage.mode(result) <- 'integer'                                   \n"
+      "  return(result)                                                      \n"
+      "}                                                                     \n"
     );
-    findFun(install("force_rstats_"), R_GlobalEnv);
+    findFun(install("force_rstats_"), R_GlobalEnv); // make sure parsing worked
   } else {
     printf("unknown UDF type.\n"); 
     exit(FAILURE);
@@ -427,14 +445,12 @@ int *rstats_return_ = NULL;
   PROTECT(na_value = allocVector(INTSXP, 1));
   INTEGER(na_value)[0] = nodata;
   defineVar(install("na_value"), na_value, R_GlobalEnv);
-  UNPROTECT(1);
+  UNPROTECT(1); // na_value
 
   PROTECT(ncpu = allocVector(INTSXP, 1));
   INTEGER(ncpu)[0] = cthread;
   defineVar(install("ncpu"), ncpu, R_GlobalEnv);
-  UNPROTECT(1);
-
-
+  UNPROTECT(1); // ncpu
 
 
   PROTECT(dim = allocVector(INTSXP, 4));
@@ -444,6 +460,7 @@ int *rstats_return_ = NULL;
   INTEGER(dim)[3] = nx;
 
   PROTECT(array = allocArray(INTSXP, dim));
+  UNPROTECT(1); // dim
   array_ = INTEGER(array);
 
   // copy C data to R objects
@@ -475,23 +492,11 @@ int *rstats_return_ = NULL;
   }
 
 
-
-
-
-
   // fire up R
-printf("-1\n");
   PROTECT(rstats_return = R_tryEval(lang2(install("force_rstats_"), array), R_GlobalEnv, NULL));
-printf("0\n");
-  //R_tryEval(lang2(install("print"), rstats_return), R_GlobalEnv, NULL);
-printf("0.5\n");
-  UNPROTECT(1);
-printf("1\n");
-  //R_tryEval(lang2(install("print"), rstats_return), R_GlobalEnv, NULL);
+
   // copy to output brick
   rstats_return_ = INTEGER(rstats_return);
-printf("2\n");
-
 
   k =  0;
 
@@ -511,8 +516,7 @@ printf("2\n");
   }
   }
 
-
-  UNPROTECT(2);
+  UNPROTECT(2); // array, rstats_return
 
 
   #ifdef FORCE_DEBUG
