@@ -398,7 +398,7 @@ force-train: temp cross aux $(DA)/_train.cpp
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) -o $(TB)/force-train $(DA)/_train.cpp $(TC)/*.o $(TA)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV)
  
 force-qai-inflate: temp cross higher $(DA)/_quality-inflate.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) -o $(TB)/force-qai-inflate $(DA)/_quality-inflate.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(RSTATS) -o $(TB)/force-qai-inflate $(DA)/_quality-inflate.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
  
 force-l2ps: temp cross lower $(DL)/_level2.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-l2ps $(DL)/_level2.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
