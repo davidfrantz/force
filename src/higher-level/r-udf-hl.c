@@ -102,8 +102,8 @@ int r_argc = 2;
 char *r_argv[] = { "R", "--silent" };
 
 
-  printf("starting to register R interface\n");
   #ifdef FORCE_DEBUG
+  printf("starting to register R interface\n");
   #endif
 
   // choose module
@@ -237,8 +237,8 @@ date_t date;
 int b;
 
 
-  printf("starting to initialize R interface\n");
   #ifdef FORCE_DEBUG
+  printf("starting to initialize R interface\n");
   #endif
 
   //make sure bandnames and dates are NULL-initialized
@@ -261,7 +261,7 @@ int b;
     exit(FAILURE);
   } 
 
-  R_tryEval(lang2(install("print"), bandnames), R_GlobalEnv, NULL);
+  //R_tryEval(lang2(install("print"), bandnames), R_GlobalEnv, NULL);
 
   udf->nb = length(bandnames);
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
