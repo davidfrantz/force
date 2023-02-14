@@ -9,7 +9,16 @@ Develop version
     the TSA and UDF submodules. Three new parameters were added: ``FILE_RSTATS``, ``RSTATS_TYPE``,
     ``OUTPUT_RSP``. At least two functions must be present in the UDF: ``force_rstats_init``, as well as
     ``force_rstats_pixel`` or ``force_rstats_block`` (depending whether ``RSTATS_TYPE`` is set to PIXEL
-    or BLOCK).
+    or BLOCK). To run PIXEL-type functions, you need to install the ``snow`` and ``snowfall`` packages. 
+    To run the FORCE components that are now compiled against the R API (mostly force-higher-level, 
+    but also force-qai-inflate), you need to provide two environment variables, i.e.
+    ``R_HOME`` and ``LD_LIBRARY_PATH``. You can do it like this:
+
+    - export R_HOME=$(R RHOME)
+    - export LD_LIBRARY_PATH=$R_HOME/lib
+    - force-higher-level parameters.prm
+
+    In the pre-built Docker container, everything is pre-configured already.
 
   - Added a new parameter: ``STREAMING = FALSE`` can disable the streaming strategy of FORCE HLPS.
     When TRUE (previous behaviour, and still the default), FORCE will perform reading, computing and 
