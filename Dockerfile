@@ -62,4 +62,7 @@ COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
 
 WORKDIR /home/docker
 
+ENV R_HOME=/usr/lib/R
+ENV LD_LIBRARY_PATH=$R_HOME/lib
+
 CMD ["force"]
