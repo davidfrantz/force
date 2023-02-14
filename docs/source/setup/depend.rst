@@ -145,6 +145,8 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
     Rscript -e 'install.packages("stringi",   repos="https://cloud.r-project.org")'
     Rscript -e 'install.packages("knitr",     repos="https://cloud.r-project.org")'
     Rscript -e 'install.packages("dplyr",     repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("snow",      repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("snowfall",  repos="https://cloud.r-project.org")'
 
 * **OpenCV** is used for machine learning and image processing tasks
   We developed the code using OpenCV v. 4.1. 
