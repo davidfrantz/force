@@ -57,10 +57,26 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
+# Use STREAMING = FALSE to disable streaming. This will perform reading, 
+# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
 NTHREAD_WRITE = 4
+# Use STREAMING = FALSE to disable streaming. This will perform reading, 
+# computing and writing after one another in sequential mode.
+# Each operation will still be parallelized with above settings.
+# Disabling streaming might be necessary for some UDFs that otherwise
+# produce threading conflicts with the internally used OpenMP functionality.
+# Type: Logical. Valid values: {TRUE,FALSE}
+STREAMING = TRUE
+# This module will display progress information on screen. By default, the
+# progress information overwrites itself to produce a pretty displayal. 
+# However, this can cause error messages (or printing in UDFs) to be overwritten.
+# If disabled (FALSE), the progress information will be simply be appended
+# on screen (stdout).
+# Type: Logical. Valid values: {TRUE,FALSE}
+PRETTY_PROGRESS = TRUE
 
 # PROCESSING EXTENT AND RESOLUTION
 # ------------------------------------------------------------------------
@@ -193,5 +209,21 @@ PYTHON_TYPE = PIXEL
 # Output the results provided by the python UDF? If TRUE, FILE_PYTHON must exist.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_PYP = FALSE
+
+# R UDF PARAMETERS
+# ------------------------------------------------------------------------
+# Note: due to OpenMP threading conflicts, the usage of R UDFs will trigger
+# the internal disabling of the streaming functionality (STREAMING = FALSE)
+# ------------------------------------------------------------------------
+# This file specifies the file holding user-provided R code. You can skip this
+# by setting FILE_RSTATS = NULL, but this requires OUTPUT_RSP = FALSE.
+# Type: full file path
+FILE_RSTATS = NULL
+# TBD
+# Type: Character. Valid values: {PIXEL,BLOCK}
+RSTATS_TYPE = PIXEL
+# Output the results provided by the R UDF? If TRUE, FILE_RSTATS must exist.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_RSP = FALSE
 
 ++PARAM_UDF_END++
