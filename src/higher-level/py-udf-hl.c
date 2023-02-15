@@ -214,59 +214,6 @@ par_udf_t *udf;
 }
 
 
-/** This function extracts the date from the bandname
-+++ If no date was detected, a dummy date is delivered
---- date:     date struct (returned)
---- bandname: basename of ARD image
-+++ Return:   SUCCESS/FAILURE/CANCEL
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int date_from_bandname(date_t *date, char *bandname){
-char buffer[NPOW_10];
-char *ptr = NULL;
-const char *separator = " ,;-_.";
-char cy[5], cm[3], cd[3];
-date_t d;
-
-
-  copy_string(buffer, NPOW_10, bandname);
-  buffer[strcspn(buffer, "\r\n#")] = 0;
-  ptr = strtok(buffer, separator);
-
-  init_date(&d);
-
-  if (strlen(ptr) != 8){
-    *date = d;
-    return CANCEL;
-  }
-
-  strncpy(cy, ptr,   4); cy[4] = '\0';
-  strncpy(cm, ptr+4, 2); cm[2] = '\0';
-  strncpy(cd, ptr+6, 2); cd[2] = '\0';
-
-  set_date(&d, atoi(cy), atoi(cm), atoi(cd));
-
-  #ifdef FORCE_DEBUG
-  printf("date from pyp bandname 1: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
-    d.year, d.month, d.day, d.doy, d.week, d.ce);
-  #endif
-
-  if (d.year < 1900   || d.year > 2100){   init_date(&d); return CANCEL; }
-  if (d.month < 1     || d.month > 12){    init_date(&d); return CANCEL; }
-  if (d.day < 1       || d.day > 31){      init_date(&d); return CANCEL; }
-  if (d.doy < 1       || d.doy > 365){     init_date(&d); return CANCEL; }
-  if (d.week < 1      || d.week > 52){     init_date(&d); return CANCEL; }
-  if (d.ce < 1900*365 || d.ce > 2100*365){ init_date(&d); return CANCEL; }
-
-  #ifdef FORCE_DEBUG
-  printf("date from pyp bandname 2: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
-    d.year, d.month, d.day, d.doy, d.week, d.ce);
-  #endif
-
-  *date = d;
-  return SUCCESS;
-}
-
-
 /** This function initializes the python udf
 --- ard:       ARD
 --- ts:        pointer to instantly useable TSA image arrays
@@ -351,7 +298,7 @@ int b;
 
     copy_string(udf->bandname[b], NPOW_10, bandname);
     
-    date_from_bandname(&date, bandname);
+    date_from_string(&date, bandname);
     copy_date(&date, &udf->date[b]);
 
     #ifdef FORCE_DEBUG

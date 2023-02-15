@@ -309,6 +309,7 @@ typedef struct {
   par_pol_t pol;
   par_trd_t trd;
   par_udf_t pyp;
+  par_udf_t rsp;
 } par_tsa_t;
 
 // features
@@ -502,6 +503,8 @@ typedef struct {
   int ithread;
   int othread;
   int cthread;
+  int stream;
+  int pretty_progress;
 
   // products
   par_prd_t prd;

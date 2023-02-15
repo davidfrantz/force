@@ -60,6 +60,7 @@ typedef struct {
   date_t eta, runtime, saved;
   date_t bound[_TASK_LENGTH_];
   date_t sequential[_TASK_LENGTH_];
+  int pretty_progress;
 } progress_t;
 
 void measure_progress(progress_t *pro, int task, int clock);

@@ -21,36 +21,29 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-User-defined function header
+R UDF plug-in header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef UDF_HL_H
-#define UDF_HL_H
+#ifndef RSP_HL_H
+#define RSP_HL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 
-#include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
-#include "../higher-level/param-hl.h"
-#include "../higher-level/read-ard-hl.h"
+#include "../higher-level/tsa-hl.h"
+#include "../higher-level/udf-hl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-  short **pyp_;
-  short **rsp_;
-} udf_t;
-
-#include "../higher-level/py-udf-hl.h"
-#include "../higher-level/r-udf-hl.h"
-
-brick_t **udf_plugin(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, cube_t *cube, int *nproduct);
-
+void register_rstats(par_hl_t *phl);
+void deregister_rstats(par_hl_t *phl);
+void init_rsp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void term_rsp(par_udf_t *udf);
+int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread);
 
 #ifdef __cplusplus
 }

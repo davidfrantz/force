@@ -159,8 +159,10 @@ off_t ibytes = 0, obytes = 0;
   if ((aux = read_aux(phl)) == NULL){
     printf("Reading aux file failed!\n"); return FAILURE;}
 
-  // register python UDF plug-in
+  // register UDF plug-ins
   register_python(phl);
+  register_rstats(phl);
+  
 
   // copy and read datacube definition
   if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher, phl->blocksize)) == NULL){
@@ -209,16 +211,26 @@ off_t ibytes = 0, obytes = 0;
 
   while (progress(&pro)){
 
-    #pragma omp parallel num_threads(3) shared(ARD1,ARD2,MASK,OUTPUT,aux,nprod,nt1,nt2,pro,cube,phl) reduction(+: ibytes, obytes) default(none)
-    {
+    if (phl->stream){
 
-      if (omp_get_thread_num() == 0){
-        read_higher_level(&pro, &ibytes, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
-      } else if (omp_get_thread_num() == 1){
-        compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
-      } else {
-        output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
+      #pragma omp parallel num_threads(3) shared(ARD1,ARD2,MASK,OUTPUT,aux,nprod,nt1,nt2,pro,cube,phl) reduction(+: ibytes, obytes) default(none)
+      {
+
+        if (omp_get_thread_num() == 0){
+          read_higher_level(&pro, &ibytes, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
+        } else if (omp_get_thread_num() == 1){
+          compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
+        } else {
+          output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
+        }
+
       }
+
+    } else {
+
+      read_higher_level(&pro, &ibytes, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
+      compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
+      output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
 
     }
 
@@ -243,6 +255,7 @@ off_t ibytes = 0, obytes = 0;
   free_param_higher(phl);
 
   deregister_python(phl);
+  deregister_rstats(phl);
 
   CPLPopErrorHandler();
 

@@ -250,7 +250,7 @@ FILE *fp;
     write_par_hl_sma(fp, args.comments);
     write_par_hl_tsi(fp, args.comments);
     write_par_hl_pyp(fp, args.comments);
-    //write_par_hl_rsp(fp, args.comments);
+    write_par_hl_rsp(fp, args.comments);
     write_par_hl_stm(fp, args.comments);
     write_par_hl_fold(fp, args.comments);
     write_par_hl_lsp(fp, args.comments);
@@ -264,7 +264,7 @@ FILE *fp;
 
   if (args.module == _HL_UDF_){
     write_par_hl_pyp(fp, args.comments);
-    //write_par_hl_rsp(fp, args.comments);
+    write_par_hl_rsp(fp, args.comments);
   }
 
   if (args.module == _HL_CFI_){

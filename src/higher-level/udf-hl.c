@@ -232,8 +232,9 @@ short nodata;
       printf("Error getting processing mask."); return NULL;}
   }
 
-  // initialize python udf
+  // initialize python and R udf
   init_pyp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.pyp);
+  init_rsp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.rsp);
 
   // compile products + bricks
   if ((UDF = compile_udf(ard, &udf_, phl, cube, nt, &nprod)) == NULL || nprod == 0){
@@ -244,14 +245,15 @@ short nodata;
   }
 
 
-
   python_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
     nx, ny, nc, nb, nt, nodata, &phl->udf.pyp, phl->cthread);
-  //rstats_udf(ard, NULL, &udf, mask_, nx, ny, nc, nb, nt, nodata, phl);
 
+  rstats_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
+    nx, ny, nc, nb, nt, nodata, &phl->udf.rsp, phl->cthread);
 
-  // terminate python udf
+  // terminate python and R udf
   term_pyp(&phl->udf.pyp);
+  term_rsp(&phl->udf.rsp);
 
 
   *nproduct = nprod;

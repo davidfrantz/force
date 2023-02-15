@@ -59,7 +59,7 @@ typedef struct {
   short **pol_[_POL_LENGTH_];
   short **tro_[_POL_LENGTH_];
   short **cao_[_POL_LENGTH_];
-  short **pyp_, **nrt_;
+  short **pyp_, **rsp_, **nrt_;
   date_t *d_tss, *d_nrt, *d_tsi;
   date_t *d_fby, *d_fbq, *d_fbm, *d_fbw, *d_fbd;
   date_t *d_lsp, *d_pol;
@@ -74,6 +74,7 @@ typedef struct {
 #include "../higher-level/polar-hl.h"
 #include "../higher-level/standardize-hl.h"
 #include "../higher-level/py-udf-hl.h"
+#include "../higher-level/r-udf-hl.h"
 
 brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
 
