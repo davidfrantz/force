@@ -1,13 +1,13 @@
-.. _tut-udf:
+.. _tut-udf_py:
  
-User-Defined Functions
-======================
+User-Defined Functions (Python)
+===============================
  
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
 **How to customize your processing**
  
-This tutorial introduces User-Defined Functions in the FORCE Higher Level Processing system (HLPS).
+This tutorial introduces User-Defined Functions (Python) in the FORCE Higher Level Processing system (HLPS).
  
 .. admonition:: Info
 
