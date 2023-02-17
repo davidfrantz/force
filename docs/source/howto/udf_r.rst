@@ -49,8 +49,8 @@ Entry points
 FORCE currently provides two entry points for UDFs, both in the Higher Level Processing module.
 
 1) **The generic entry point for ARD**: 
-   Entry point 1 is used through the ``UDF`` submodule and gives you flexible access to the complete 
-   reflectance profile of multi-temporal and multi-sensor FORCE data collections. 
+    Entry point 1 is used through the ``UDF`` submodule and gives you flexible access to the complete 
+    reflectance profile of multi-temporal and multi-sensor FORCE data collections. 
    
 2) **Time series analysis entry point**:
     Entry point 2 is within the ``TSA`` submodule. 
@@ -86,14 +86,13 @@ There are three DHIs:
 
 
 For this, we will use entry point 2 (``TSA``), and set some suitable settings in the parameter file.
-This will give us harmonized Landsat/Sentinel-2 data for 2018.
+This will give us Landsat data for 2022.
 The 16-day interpolated kNDVI time series will be made available to the R UDF that we are about to write.
 
 .. code-block:: none
 
-   SENSORS = LND07 LND08 SEN2A SEN2B
-   SPECTRAL_ADJUST = TRUE
-   DATE_RANGE = 2018-01-01 2018-12-31
+   SENSORS = LND08 LND09
+   DATE_RANGE = 2022-01-01 2022-12-31
    INDEX = kNDVI
    INTERPOLATE = RBF
    RBF_SIGMA = 8 16 32 64
@@ -111,7 +110,7 @@ The R UDFs are configured with three simple parameters:
 
 ``FILE_RSTATS`` defines the UDF script that should be plugged into FORCE.
 ``RSTATS_TYPE`` is either a ``PIXEL`` or a ``BLOCK`` function.
-``OUTPUT_RSP`` is a flag that activates UDF processing and outputs the designated product (``RSP`` - **R** **Stats** **P**lugin that is).
+``OUTPUT_RSP`` is a flag that activates UDF processing and outputs the designated product (``RSP`` - **R** **Stats** **P** lugin that is).
 
 
 The UDF
@@ -303,7 +302,7 @@ The returned object must be a 3D-array with following dimensions:
 The usage of BLOCK-functions is most helpful if you manage to implement your UDF with matrix computations.
 
 **If you find yourself looping over the pixels, either with a for-loop, apply or sfApply function: stop it and just use the PIXEL-function!**
-*PIXEL-functions are easier to write and FORCE will internally use sfApply to loop over the pixels anyway. *
+*PIXEL-functions are easier to write and FORCE will internally use sfApply to loop over the pixels anyway.*
 
 This is the function signature of the BLOCK-function:
 
