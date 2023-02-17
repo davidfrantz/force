@@ -56,6 +56,7 @@ There are several tutorials available that showcase how to use the FORCE.
    masks.rst
    tsi.rst
    stm.rst
-   udf.rst
+   udf_py.rst
+   udf_r.rst
    lcf.rst
    
