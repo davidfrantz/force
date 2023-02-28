@@ -45,41 +45,22 @@ This program is for testing small things. Needs to be compiled on demand
 #include "cross-level/brick-cl.h"
 #include "cross-level/warp-cl.h"
 
-#include "higher-level/read-ard-hl.h"
+//#include "higher-level/read-ard-hl.h"
 
 
 /** Geospatial Data Abstraction Library (GDAL) **/
-#include "cpl_conv.h"       // various convenience functions for CPL
-#include "gdalwarper.h"     // GDAL warper related entry points and defs
-#include "ogr_spatialref.h" // coordinate systems services
+//#include "cpl_conv.h"       // various convenience functions for CPL
+//#include "gdalwarper.h"     // GDAL warper related entry points and defs
+//#include "ogr_spatialref.h" // coordinate systems services
 
 
 
 int main ( int argc, char *argv[] ){
+char test[44] = "The quick brown fox jumps over the lazy dog";
 
-// EQUI7 Asia
-char proj[NPOW_10] = "PROJCS[\"Azimuthal_Equidistant\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Azimuthal_Equidistant\"],PARAMETER[\"false_easting\",4340913.84808],PARAMETER[\"false_northing\",4812712.92347],PARAMETER[\"longitude_of_center\",94.0],PARAMETER[\"latitude_of_center\",47.0],UNIT[\"Meter\",1.0]]";
-
-double x0, y0;
-double x1, y1;
-double x2, y2;
-
-  for (x0=0; x0<=180; x0+=45){
-  for (y0=-20;  y0<=80;  y0+=20){
-
-    printf("warp (%.0f/%.0f) to ", x0, y0);
-
-    if ((warp_geo_to_any(x0, y0,&x1, &y1, proj)) == FAILURE) return 1;
-
-    printf("(%.0f/%.0f) to ", x1, y1);
-
-    if ((warp_any_to_geo(x1, y1,&x2, &y2, proj)) == FAILURE) return 1;
-
-    printf("(%.0f/%.0f), delta = (%.0f/%.0f)\n", x2, y2, x2-x0, y2-y0);
-
-  }
-  }
-
+  printf("Before: %s\n", test);
+  replace_string(test, "fox", "koal", 44);
+  printf("After:  %s\n", test);
 
   return 0; 
 }
