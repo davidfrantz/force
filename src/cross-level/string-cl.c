@@ -51,6 +51,130 @@ void copy_string(char *dst, size_t size, const char *src){
 }
 
 
+/** Concatenate strings (2)
++++ This function concatenates several strings into a destination buffer.
++++ It is checked that the buffer doesn't overflow; error if so.
+--- dst:    destination buffer
+--- size:   size of destination buffer
+--- src1:    source string 1
+--- src2:    source string 2
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void concat_string_2(char *dst, size_t size, const char *src1, const char *src2){
+int nchar;
+
+  nchar = snprintf(dst, NPOW_10, "%s%s", src1, src2);
+  if (nchar < 0 || nchar >= size){ 
+    printf("Buffer Overflow in assembling string\n"); 
+    exit(1);
+  }
+
+  return;
+}
+
+
+/** Concatenate strings (3)
++++ This function concatenates several strings into a destination buffer.
++++ It is checked that the buffer doesn't overflow; error if so.
+--- dst:    destination buffer
+--- size:   size of destination buffer
+--- src1:    source string 1
+--- src2:    source string 2
+--- src3:    source string 3
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void concat_string_3(char *dst, size_t size, const char *src1, const char *src2, const char *src3){
+int nchar;
+
+  nchar = snprintf(dst, NPOW_10, "%s%s%s", src1, src2, src3);
+  if (nchar < 0 || nchar >= size){ 
+    printf("Buffer Overflow in assembling string\n"); 
+    exit(1);
+  }
+
+  return;
+}
+
+
+/** Search/Replace string
++++ This function searches for a pattern and replaces its first 
++++ occurence with the replacement string. If no match is found, 
++++ nothing happens. Otherwise, the source string will be modified.
++++ It is checked that the buffer doesn't overflow; error if so.
+--- source:     source string
+--- search:     search pattern
+--- replace:    replacement string
+--- buffer_len: length of buffer holding source
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void replace_string(char *source, const char *search, const char *replace, size_t buffer_len){
+char *buffer = NULL;
+char *match = NULL;
+char *suffix = NULL;
+char *insert_point = NULL;
+size_t search_len;
+size_t source_len;
+size_t replace_len;
+size_t prefix_len;
+size_t suffix_len;
+
+
+  source_len  = strlen(source);
+  search_len  = strlen(search);
+  replace_len = strlen(replace);
+
+  //printf("length buffer:  %lu\n", buffer_len);
+  //printf("length source:  %lu\n", source_len);
+  //printf("length search:  %lu\n", search_len);
+  //printf("length replace: %lu\n", replace_len);
+
+  if (source_len - search_len + replace_len >= buffer_len){
+    printf("Error: Insufficient buffer size for replacing.\n");
+    exit(1);
+  }
+
+  alloc((void**)&buffer, buffer_len, sizeof(char**));
+  insert_point = buffer;
+
+  // search for pattern
+  match = strstr(source, search);
+
+  // no match, stop
+  if (match == NULL) return;
+
+  // length before match
+  prefix_len = match - source;
+
+  // length after match
+  suffix = source + prefix_len + search_len;
+  suffix_len = source_len - prefix_len - search_len;
+
+  //printf("length prefix: %lu\n", prefix_len);
+  //printf("length suffix: %lu\n", suffix_len);
+
+  // copy prefix
+  memcpy(insert_point, source, prefix_len);
+  insert_point += prefix_len;
+
+  // copy replacement
+  memcpy(insert_point, replace, replace_len);
+  insert_point += replace_len;
+
+  // copy suffix
+  memcpy(insert_point, suffix, suffix_len);
+  insert_point += suffix_len;
+
+  // terminate
+  *insert_point = '\0';
+
+  // copy back and free memory
+  strcpy(source, buffer);
+  free((void*)buffer);
+
+  return;
+}
+
+
 int char_to_int(const char *src, int *val){
 long int temp_val;
 char *temp;
