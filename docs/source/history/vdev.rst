@@ -48,6 +48,9 @@ Develop version
     means prescriptive or mandatory.
     This tool is especially meant for beginners.
 
+  - new auxilliary program `force-datacube-size`.
+    This program prints the size of your datacube, per sensor and in total.
+
   - ``force-tabulate-grid`` has been updated to produce a properly named output file.
 
   - The CLI help of `force-tile-finder` has been corrected concerning the separator for the coordinates.
