@@ -319,7 +319,7 @@ dir_t d;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir){
-int t, s;
+int i, s;
 bool vs;
 date_t date;
 dir_t d;
@@ -341,16 +341,16 @@ int nchar;
     return FAILURE;}
 
   #ifdef FORCE_DEBUG
-  printf("found %d files, filtering now\n");
+  printf("found %d files, filtering now\n", d.N);
   #endif
 
   // reflectance products
   alloc_2D((void***)&d.list, d.N, NPOW_10, sizeof(char));
 
-  for (t=0, d.n=0; t<d.N; t++){
+  for (i=0, d.n=0; i<d.N; i++){
 
     // filter expected extensions    
-    extension(d.LIST[t]->d_name, ext, NPOW_10);
+    extension(d.LIST[i]->d_name, ext, NPOW_10);
     if (strcmp(ext, ".dat") != 0 &&
         strcmp(ext, ".bsq") != 0 &&
         strcmp(ext, ".bil") != 0 &&
@@ -358,11 +358,11 @@ int nchar;
         strcmp(ext, ".vrt") != 0) continue;
 
     // filter product type
-    if (strstr(d.LIST[t]->d_name, sen->main_product) == NULL) continue;
+    if (strstr(d.LIST[i]->d_name, sen->main_product) == NULL) continue;
 
     // filter sensor list
     for (s=0, vs=false; s<sen->n; s++){
-      if (strstr(d.LIST[t]->d_name, sen->sensor[s]) != NULL){
+      if (strstr(d.LIST[i]->d_name, sen->sensor[s]) != NULL){
         #ifdef FORCE_DEBUG
         printf("sensor is: %s\n", sen->sensor[s]);
         #endif
@@ -374,13 +374,13 @@ int nchar;
 
 
     // filter dates
-    date_ard(&date, d.LIST[t]->d_name);
+    date_ard(&date, d.LIST[i]->d_name);
     if (date.ce < phl->date_range[_MIN_].ce) continue;
     if (date.ce > phl->date_range[_MAX_].ce) continue;
     if (!phl->date_doys[date.doy]) continue;
 
     // if we are still here, copy
-    copy_string(d.list[d.n++], NPOW_10, d.LIST[t]->d_name);
+    copy_string(d.list[d.n++], NPOW_10, d.LIST[i]->d_name);
 
   }
 
@@ -496,7 +496,7 @@ int n = 0;
 
 
   // read mask
-  concat_string_3(fname, NPOW_10, dir.name, "/", dir.list[0]);
+  concat_string_2(fname, NPOW_10, dir.name, dir.list[0], "/");
   if ((MASK = read_block(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, chunk, tx, ty, cube, false, 0, 0)) == NULL){
       printf("Error reading mask %s. ", fname); *success = FAILURE; return NULL;}
   if (phl->radius > 0){
@@ -803,7 +803,7 @@ off_t bytes = 0;
       // read main product
       if (phl->prd.ref){
         copy_string(bname, 1024, dir.list[t]);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DAT = read_block(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
           printf("Error reading main product %s. ", fname); error++;}
@@ -823,7 +823,7 @@ off_t bytes = 0;
       if (phl->prd.qai){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, sen->quality_product, NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if (strcmp(sen->quality_product, "NULL") != 0){
           if ((ard[t].QAI = read_block(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, chunk, tx, ty, cube, false, 0, 0)) == NULL ||
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
@@ -859,7 +859,7 @@ off_t bytes = 0;
       if (phl->prd.dst){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, "DST", NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DST = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].dst = get_band_short(ard[t].DST, 0)) == NULL){
           printf("Error reading DST product %s. ", fname); error++;}
@@ -879,7 +879,7 @@ off_t bytes = 0;
       if (phl->prd.aod){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, "AOD", NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].AOD = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].aod = get_band_short(ard[t].AOD, 0)) == NULL){
           printf("Error reading AOD product %s. ", fname); error++;}
@@ -899,7 +899,7 @@ off_t bytes = 0;
       if (phl->prd.hot){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, "HOT", NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].HOT = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].hot = get_band_short(ard[t].HOT, 0)) == NULL){
           printf("Error reading HOT product %s. ", fname); error++;}
@@ -919,7 +919,7 @@ off_t bytes = 0;
       if (phl->prd.vzn){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, "VZN", NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].VZN = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].vzn = get_band_short(ard[t].VZN, 0)) == NULL){
           printf("Error reading VZN product %s. ", fname); error++;}
@@ -938,7 +938,7 @@ off_t bytes = 0;
       if (phl->prd.wvp){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, "WVP", NPOW_10);
-        concat_string_3(fname, NPOW_10, dir.name, "/", bname);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].WVP = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].wvp = get_band_short(ard[t].WVP, 0)) == NULL){
           printf("Error reading WVP product %s. ", fname); error++;}
