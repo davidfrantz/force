@@ -56,14 +56,15 @@ void copy_string(char *dst, size_t size, const char *src){
 +++ It is checked that the buffer doesn't overflow; error if so.
 --- dst:    destination buffer
 --- size:   size of destination buffer
---- src1:    source string 1
---- src2:    source string 2
+--- src1:   source string 1
+--- src2:   source string 2
+--- delim:  deliminator (string)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void concat_string_2(char *dst, size_t size, const char *src1, const char *src2){
+void concat_string_2(char *dst, size_t size, const char *src1, const char *src2, const char *delim){
 int nchar;
 
-  nchar = snprintf(dst, NPOW_10, "%s%s", src1, src2);
+  nchar = snprintf(dst, NPOW_10, "%s%s%s", src1, delim, src2);
   if (nchar < 0 || nchar >= size){ 
     printf("Buffer Overflow in assembling string\n"); 
     exit(1);
@@ -81,12 +82,13 @@ int nchar;
 --- src1:    source string 1
 --- src2:    source string 2
 --- src3:    source string 3
+--- delim:  deliminator (string)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void concat_string_3(char *dst, size_t size, const char *src1, const char *src2, const char *src3){
+void concat_string_3(char *dst, size_t size, const char *src1, const char *src2, const char *src3, const char *delim){
 int nchar;
 
-  nchar = snprintf(dst, NPOW_10, "%s%s%s", src1, src2, src3);
+  nchar = snprintf(dst, NPOW_10, "%s%s%s%s%s", src1, delim, src2, delim, src3);
   if (nchar < 0 || nchar >= size){ 
     printf("Buffer Overflow in assembling string\n"); 
     exit(1);
