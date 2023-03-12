@@ -1,4 +1,4 @@
-.. _stack:
+.. _aux-stack:
 
 force-stack
 ===========

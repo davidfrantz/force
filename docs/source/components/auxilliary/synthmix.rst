@@ -1,4 +1,4 @@
-.. _synthmix:
+.. _aux-synthmix:
 
 force-synthmix
 ==============

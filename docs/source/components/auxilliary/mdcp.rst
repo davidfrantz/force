@@ -1,4 +1,4 @@
-.. _mdcp:
+.. _aux-mdcp:
 
 force-mdcp
 ==========

@@ -1,4 +1,4 @@
-.. _procmask:
+.. _aux-procmask:
 
 force-procmask
 ==============
