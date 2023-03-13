@@ -1,0 +1,119 @@
+.. _synthmix-param:
+
+Parameterization
+================
+
+The file extension is ‘.prm’.
+All parameters must be given, even if they are not used.
+All parameters follow common tag-value notation.
+Rudimentary checks are performed by the software components using this file.
+
+The ``++PARAM_SYNTHMIX_START++`` and ``++PARAM_SYNTHMIX_END++`` keywords enclose the parameter file.
+
+The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
+
+
+* **Input**
+    
+  * File that is holding the features, which should be mixed.
+    The file needs to be a table with features in columns, and samples in rows.
+    Column delimiter is whitespace. The same number of features must be given
+    for each sample. Do not include a header. The samples need to match the
+    response file.
+    
+    | *Type:* full file path
+    | ``FILE_FEATURES = NULL``
+
+  * File that is holding the class labels. The file needs to be a table with
+    one column, and samples in rows. Do not include a header. The samples need
+    to match the feature file.
+
+    | *Type:* full file path
+    | ``FILE_RESPONSE = NULL``
+
+* **Synthetic Mixing**
+
+  * How many mixtures should be generated?
+    
+    | *Type:* Integer. Valid range: [1,...]
+    | ``SYNTHETIC_MIXTURES = 1000``
+
+  * Additional to the generated mixtures: include the original features as
+    0% or 100% "mixtures", too?
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``INCLUDE_ORIGINAL = FALSE``
+
+  * Mixing complexity, i.e. how many endmembers should be mixed together?
+    Multiple complexities can be given as list. E.g. to allow mixtures of
+    one, two, three, and four endmembers, use MIXING_COMPLEXITY = 1 2 3 4.
+    The complexity cannot exceed the number of classes given in the response
+    file (FILE_RESPONSE).
+
+    | *Type:* Integer list. Valid values: [1,n-classes]
+    | ``MIXING_COMPLEXITY = 1 2 3 4``
+
+  * Likelihood of mixing complexity, i.e. what is the statistical likelihood
+    to generate a mixture of a given mixing complexity? Multiple likelihoods
+    can be given as list, and the number and order need to match the mixing
+    complexities given with MIXING_COMPLEXITY. The sum of all likelihoods
+    should be 1.
+
+    | *Type:* Float list. Valid values: [0,1]
+    | ``MIXING_LIKELIHOOD = 0.2 0.4 0.2 0.2``
+
+  * Allow mixing endmembers of the same class? If FALSE, a two endmember mix-
+    ture will always mix endmembers from different classes. If TRUE, a two
+    endmember mixture might mix endmembers from the same class, too.
+
+    | *Type:* Logical. Valid values: {TRUE,FALSE}
+    | ``WITHIN_CLASS_MIXING = TRUE``
+
+  * Class likelihood, i.e. what is the statitical likelihood of drawing an
+    endmember from a specific class. This parameter can be set to PROPORTIONAL
+    or EQUALIZED. If PROPORTIONAL, the likelihood is based on the number of
+    samples given for each class. If EQUALIZED, the same likelihhod is given
+    to all classes. Alternatively, custom likelihhods can be defined. In this
+    case, a likelihood needs to be given for each class given in the response
+    file (FILE_RESPONSE), and the sum needs to be 1.
+
+    | *Type:* Character. Valid values: {PROPORTIONAL,EQUALIZED} OR
+    | *Type:* Float list. Valid values: [0,1]
+    | ``CLASS_LIKELIHOOD = PROPORTIONAL``
+
+  * Number of iterations. This parameter allows to repeat the mixing multiple
+    times. If set to 10, 10 different sets of random mixtures will be generated.
+
+    | *Type:* Integer. Valid values: [1,...
+    | ``ITERATIONS = 10``
+
+  * What is the target class for generating the mixtures? Example: class 1,
+    class 2, and class 3 are vegetation, soil, and water. A 70-30% mixture of
+    a beach and ocean endmember would result in 70%, 0% and 30% fractions for
+    target classes 1, 2, and 3, respectively. Multiple classes can be given,
+    i.e. output tables will be generated for each target class.
+
+    | *Type:* Integer list. Valid values: [1,n-class]
+    | ``TARGET_CLASS = 1 2 3 4``
+
+  * What classes should be considered for mixing? Default: use all classes.
+    You can however select individual classes. If custom likelihoods are defined
+    in CLASS_LIKELIHOOD, the explicit definition of classes is mandatory here
+    (in the same order as in CLASS_LIKELIHOOD).
+
+    | ``USE_CLASSES = ALL``
+
+* **Output**
+
+  * Directory for storing the generated mixtures. Output files will be
+    overwritten if they exist.
+
+    | *Type:* full directory path
+    | ``DIR_MIXES = NULL``
+
+  * This parameter defines the basename for the output files. The basename will
+    be appended by class ID, and iteration, e.g.
+    SYNTHMIX_FEATURES_CLASS-001_ITERATION-001.txt.
+
+    | *Type:* Character.
+    | ``BASE_MIXES = SYNTHMIX``

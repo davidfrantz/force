@@ -3,14 +3,14 @@
 force-stack
 ===========
 
-...
+force-stack creates a `GDAL virtual format <https://gdal.org/drivers/raster/vrt.html>`_layer-stack of several bands from different physical files.
 
 Usage
 ^^^^^
 
 .. code-block:: bash
     
-    force-stack [-h] [-v] [-i] {-o output-file} src-files
+  force-stack [-h] [-v] [-i] {-o output-file} src-files
 
   -h  = show this help
   -v  = show version
