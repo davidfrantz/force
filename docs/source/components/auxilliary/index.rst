@@ -46,7 +46,7 @@ The FORCE Auxiliary Functionality (FORCE AUX) component is intended to provide s
 
 A glimpse of what you get:
 
-.. figure:: /docs/source/howto/img/tutorial-datacube-google-grid.jpg
+.. figure:: ../../howto/img/tutorial-datacube-google-grid.jpg
    
    *ARD processing grid. 
    This figure shows a Google Earth screenshot with ARD grid overlay. The grid cells are 30 x 30km in EPSG:3035. 
