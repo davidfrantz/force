@@ -10,19 +10,19 @@ Usage
 
 .. code-block:: bash
     
-    force-tile-finder [-h] [-v] [-i] [-p lon/lat] [-r resolution] datacube-dir
+   force-tile-finder [-h] [-v] [-i] [-p lon/lat] [-r resolution] datacube-dir
 
-  -h  = show this help
-  -v  = show version
-  -i  = show program's purpose
+   -h  = show this help
+   -v  = show version
+   -i  = show program's purpose
 
-  -p lon/lat  = point of interest
-     use geographic coordinates!
-     longitude is X!
-     latitude  is Y!
+   -p lon/lat  = point of interest
+      use geographic coordinates!
+      longitude is X!
+      latitude  is Y!
 
-  -r resolution  = target resolution
-     this is needed to compute the pixel number
+   -r resolution  = target resolution
+      this is needed to compute the pixel number
 
-  Positional arguments:
-  - 'datacube-dir': directory of existing datacube
+   Positional arguments:
+   - 'datacube-dir': directory of existing datacube

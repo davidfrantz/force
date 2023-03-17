@@ -16,10 +16,8 @@ Usage
 ^^^^^
 
 .. code-block:: bash
-
-  force-magic-parameters
-
-  Usage: $PROG [-h] [-c {all,paired}] [-o] parameter-file
+  
+    force-magic-parameters [-h] [-c {all,paired}] [-o] parameter-file
 
     optional:
     -h = show this help

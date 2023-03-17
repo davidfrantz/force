@@ -1,3 +1,5 @@
+.. _aux-qai-inflate:
+
 force-qai-inflate
 =================
 
@@ -10,11 +12,11 @@ Usage
     
     force-qai-inflate [-h] [-v] [-i] input-file output-dir
 
-  -h  = show this help
-  -v  = show version
-  -i  = show program's purpose
+    -h  = show this help
+    -v  = show version
+    -i  = show program's purpose
 
-  Positional arguments:
-  - 'input-file': QAI file
-  - 'output-dir': Output directory for QIM files.'
+    Positional arguments:
+    - 'input-file': QAI file
+    - 'output-dir': Output directory for QIM files.'
   
