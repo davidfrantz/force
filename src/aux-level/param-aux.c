@@ -876,6 +876,27 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
   fprintf(fp, "SENSORS = LND08 LND09 SEN2A SEN2B\n");
 
   if (verbose){
+    fprintf(fp, "# Main product type to be used. Usually, this is a reflectance product like BOA.\n");
+    fprintf(fp, "# When using composites, you may use BAP. This can be anything, but make sure that\n");
+    fprintf(fp, "# the string can uniquely identify your product. As an example, do not use LEVEL2.\n");
+    fprintf(fp, "# Note that the product should contain the bands that are to be expected with the\n");
+    fprintf(fp, "# sensor used, e.g. 10 bands when sensor is SEN2A.\n");
+    fprintf(fp, "# Type: Character. Valid values: {BOA,TOA,IMP,BAP,SIG,...}\n");
+  }
+  fprintf(fp, "PRODUCT_TYPE_MAIN = BOA\n");
+
+  if (verbose){
+    fprintf(fp, "# Quality product type to be used. This should be a bit flag product like QAI.\n");
+    fprintf(fp, "# When using composites, you may use INF. This can be anything, but make sure that\n");
+    fprintf(fp, "# the product should contain quality bit flags as outputted by FORCE L2PS.\n");
+    fprintf(fp, "# As an exception, it is also possible to give NULL if you don't have any quality masks.\n");
+    fprintf(fp, "# In this case, FORCE will only be able to filter nodata values, but no other quality\n");
+    fprintf(fp, "# flags as defined with SCREEN_QAI.\n");
+    fprintf(fp, "# Type: Character. Valid values: {QAI,INF,NULL,...}\n");
+  }
+  fprintf(fp, "PRODUCT_TYPE_QUALITY = QAI\n");
+
+  if (verbose){
     fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
     fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, \n");
     fprintf(fp, "# LND08, LND09, MOD01, MOD02.\n");

@@ -319,7 +319,7 @@ dir_t d;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir){
-int t, s;
+int i, s;
 bool vs;
 date_t date;
 dir_t d;
@@ -341,47 +341,46 @@ int nchar;
     return FAILURE;}
 
   #ifdef FORCE_DEBUG
-  printf("found %d files, filtering now\n");
+  printf("found %d files, filtering now\n", d.N);
   #endif
 
   // reflectance products
   alloc_2D((void***)&d.list, d.N, NPOW_10, sizeof(char));
 
-  for (t=0, d.n=0; t<d.N; t++){
-    
-    extension(d.LIST[t]->d_name, ext, NPOW_10);
+  for (i=0, d.n=0; i<d.N; i++){
 
-    if ((strcmp(ext, ".dat") == 0 ||
-         strcmp(ext, ".bsq") == 0 ||
-         strcmp(ext, ".bil") == 0 ||
-         strcmp(ext, ".tif") == 0 ||
-         strcmp(ext, ".vrt") == 0) &&
-        (strstr(d.LIST[t]->d_name, "BOA")  != NULL ||
-         strstr(d.LIST[t]->d_name, "TOA")  != NULL ||
-         strstr(d.LIST[t]->d_name, "BAP")  != NULL ||
-         strstr(d.LIST[t]->d_name, "SIG")  != NULL)){
+    // filter expected extensions    
+    extension(d.LIST[i]->d_name, ext, NPOW_10);
+    if (strcmp(ext, ".dat") != 0 &&
+        strcmp(ext, ".bsq") != 0 &&
+        strcmp(ext, ".bil") != 0 &&
+        strcmp(ext, ".tif") != 0 &&
+        strcmp(ext, ".vrt") != 0) continue;
 
-      // check against sensor list
-      for (s=0, vs=false; s<sen->n; s++){
-        if (strstr(d.LIST[t]->d_name, sen->sensor[s]) != NULL){
-          #ifdef FORCE_DEBUG
-          printf("sensor is: %s\n", sen->sensor[s]);
-          #endif
-          vs = true; 
-          break;
-        }
+    // filter product type
+    if (strstr(d.LIST[i]->d_name, sen->main_product) == NULL) continue;
+
+    // filter sensor list
+    for (s=0, vs=false; s<sen->n; s++){
+      if (strstr(d.LIST[i]->d_name, sen->sensor[s]) != NULL){
+        #ifdef FORCE_DEBUG
+        printf("sensor is: %s\n", sen->sensor[s]);
+        #endif
+        vs = true; 
+        break;
       }
-
-      // extract and filter date
-      date_ard(&date, d.LIST[t]->d_name);
-      if (date.ce < phl->date_range[_MIN_].ce) vs = false;
-      if (date.ce > phl->date_range[_MAX_].ce) vs = false;
-      if (!phl->date_doys[date.doy])  vs = false;
-
-      // allow-list image
-      if (vs) copy_string(d.list[d.n++], NPOW_10, d.LIST[t]->d_name);
-
     }
+    if (!vs) continue;
+
+
+    // filter dates
+    date_ard(&date, d.LIST[i]->d_name);
+    if (date.ce < phl->date_range[_MIN_].ce) continue;
+    if (date.ce > phl->date_range[_MAX_].ce) continue;
+    if (!phl->date_doys[date.doy]) continue;
+
+    // if we are still here, copy
+    copy_string(d.list[d.n++], NPOW_10, d.LIST[i]->d_name);
 
   }
 
@@ -469,7 +468,6 @@ brick_t *MASK = NULL;
 small *mask_ = NULL;
 int nc, p;
 char fname[NPOW_10];
-int nchar;
 dir_t dir;
 int n = 0;
 
@@ -497,16 +495,8 @@ int n = 0;
   }
 
 
-  // filename
-  nchar = snprintf(fname, NPOW_10, "%s/%s", dir.name, dir.list[0]);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); 
-    *success = FAILURE; 
-    return NULL;
-  }
-  
-
   // read mask
+  concat_string_2(fname, NPOW_10, dir.name, dir.list[0], "/");
   if ((MASK = read_block(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, chunk, tx, ty, cube, false, 0, 0)) == NULL){
       printf("Error reading mask %s. ", fname); *success = FAILURE; return NULL;}
   if (phl->radius > 0){
@@ -606,24 +596,24 @@ off_t bytes = 0;
       
       nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tx, ty, phl->ftr.bname[f]);
       if (nchar < 0 || nchar >= NPOW_10){ 
-        printf("Buffer Overflow in assembling filename\n"); error++;}
+        printf("Buffer Overflow in assembling filename\n"); error++; continue;}
   
 
       // read feature
       if ((features[f].DAT = read_block(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
           (features[f].dat = get_bands_short(features[f].DAT)) == NULL){
-        printf("Error reading feature %s. ", fname); error++;}
+        printf("Error reading feature %s. ", fname); error++; continue;}
       if (phl->radius > 0){
         if ((features[f].DAT = add_blocks(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, features[f].DAT)) == NULL ||
             (features[f].dat = get_bands_short(features[f].DAT)) == NULL){
-          printf("Error adding feature %s. ", fname); error++;}
+          printf("Error adding feature %s. ", fname); error++; continue;}
       }
       bytes += get_brick_size(features[f].DAT);
       
       // compile a 0-filled QAI brick, processing must continue..
       if ((features[f].QAI = copy_brick(features[f].DAT, 1, _DT_SHORT_)) == NULL || 
           (features[f].qai = get_band_short(features[f].QAI, 0)) == NULL){
-        printf("Error compiling feature %s.", fname); error++;}
+        printf("Error compiling feature %s.", fname); error++; continue;}
         
       nc = get_brick_chunkncells(features[f].DAT);
       
@@ -713,23 +703,23 @@ off_t bytes = 0;
 
       nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tx, ty, phl->con.fname[f]);
       if (nchar < 0 || nchar >= NPOW_10){ 
-        printf("Buffer Overflow in assembling filename\n"); error++;}
+        printf("Buffer Overflow in assembling filename\n"); error++; continue;}
 
       // read continuous field
       if ((con[f].DAT = read_block(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, chunk, tx, ty, cube, false, 0, 0)) == NULL ||
           (con[f].dat = get_bands_short(con[f].DAT)) == NULL){
-        printf("Error reading continuous field %s. ", fname); error++;}
+        printf("Error reading continuous field %s. ", fname); error++; continue;}
       if (phl->radius > 0){
         if ((con[f].DAT = add_blocks(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, chunk, tx, ty, cube, false, phl->radius, con[f].DAT)) == NULL ||
             (con[f].dat = get_bands_short(con[f].DAT)) == NULL){
-          printf("Error adding continuous field products %s. ", fname); error++;}
+          printf("Error adding continuous field products %s. ", fname); error++; continue;}
       }
       bytes += get_brick_size(con[f].DAT);
 
       // compile a 0-filled QAI brick, processing must continue..
       if ((con[f].QAI = copy_brick(con[f].DAT, 1, _DT_SHORT_)) == NULL || 
           (con[f].qai = get_band_short(con[f].QAI, 0)) == NULL){
-        printf("Error compiling continuous field %s.", fname); error++;}
+        printf("Error compiling continuous field %s.", fname); error++; continue;}
 
 
       con[f].DST = NULL; con[f].dst = NULL;
@@ -774,14 +764,12 @@ off_t bytes = 0;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 ard_t *read_ard(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl){
 int t, b, p, nb, nc;
-char fname[NPOW_10], *pch = NULL;
+char fname[NPOW_10];
+char bname[NPOW_10];
 char temp[NPOW_10];
-int nchar;
 dir_t dir;
 ard_t *ard = NULL;
 int error = 0;
-bool radar  = false;
-bool level3 = false;
 off_t bytes = 0;
 
 
@@ -806,48 +794,23 @@ off_t bytes = 0;
 
   alloc((void**)&ard, dir.n, sizeof(ard_t));
 
-  // open threads
-  //omp_set_num_threads(par.cpu); --> should be done in main
-//printf("alert. nodata was changed to 0. remove again..\n");
-  #pragma omp parallel private(fname,nchar,temp,pch,p,b,nc,nb) firstprivate(radar,level3) shared(ard,dir,phl,sen,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
+  #pragma omp parallel private(bname,fname,temp,p,b,nc,nb) shared(ard,dir,phl,sen,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
     for (t=0; t<dir.n; t++){
 
-      // filename
-      nchar = snprintf(fname, NPOW_10, "%s/%s", dir.name, dir.list[t]);
-      if (nchar < 0 || nchar >= NPOW_10){ 
-        printf("Buffer Overflow in assembling filename\n"); error++;}
-      
-
-      // use improphed product?
-      if (phl->prd.imp){
-        
-        // backup filename
-        copy_string(temp, NPOW_10, fname);
-
-
-        // new filename
-        if (strstr(fname, "BOA")  != NULL) pch = strstr(fname, "BOA");
-        if (strstr(fname, "TOA")  != NULL) pch = strstr(fname, "TOA");
-        if (strstr(fname, "BAP")  != NULL) pch = strstr(fname, "BAP");
-        strncpy(pch, "IMP", 3);
-
-        // if no improphed product exists, use normal one
-        if (!fileexist(fname)) copy_string(fname, NPOW_10, temp);
-
-      }
-
-      // read BOA / TOA / IMP reflectance // SIG backscatter
-      if (phl->prd.ref){
+      // read main product
+      if (phl->prd.ref && error == 0){
+        copy_string(bname, 1024, dir.list[t]);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DAT = read_block(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
-          printf("Error reading main product %s. ", fname); error++;}
+          printf("Error reading main product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].DAT = add_blocks(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].DAT)) == NULL ||
               (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
-            printf("Error adding main products %s. ", fname); error++;}
+            printf("Error adding main products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].DAT);
       } else {
@@ -855,29 +818,26 @@ off_t bytes = 0;
         ard[t].dat = NULL;
       }
 
-      // read Quality Assurance Information
-      if (strstr(fname, "BOA")  != NULL) pch = strstr(fname, "BOA");
-      if (strstr(fname, "TOA")  != NULL) pch = strstr(fname, "TOA");
-      if (strstr(fname, "BAP")  != NULL){ pch = strstr(fname, "BAP"); level3 = true;}
-      if (strstr(fname, "IMP")  != NULL) pch = strstr(fname, "IMP");
-      if (strstr(fname, "SIG")  != NULL){ pch = strstr(fname, "SIG"); radar = true;}
-      if (level3) strncpy(pch, "INF", 3); else strncpy(pch, "QAI", 3);
 
-      if (phl->prd.qai){
-        if (!radar){
+      // read quality product
+      if (phl->prd.qai && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, sen->quality_product, NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
+        if (strcmp(sen->quality_product, "NULL") != 0){
           if ((ard[t].QAI = read_block(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, chunk, tx, ty, cube, false, 0, 0)) == NULL ||
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-            printf("Error reading QAI product %s. ", fname); error++;}
+            printf("Error reading QAI product %s. ", fname); error++; continue;}
           if (phl->radius > 0){
             if ((ard[t].QAI = add_blocks(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, chunk, tx, ty, cube, false, phl->radius, ard[t].QAI)) == NULL ||
                 (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-              printf("Error adding QAI products %s. ", fname); error++;}
+              printf("Error adding QAI products %s. ", fname); error++; continue;}
           }
           bytes += get_brick_size(ard[t].QAI);
         } else {
           if ((ard[t].QAI = copy_brick(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-            printf("Error compiling feature %s.", fname); error++;}
+            printf("Error compiling feature %s.", fname); error++; continue;}
             
           nc = get_brick_chunkncells(ard[t].DAT);
           nb = get_brick_nbands(ard[t].DAT);
@@ -894,21 +854,19 @@ off_t bytes = 0;
         ard[t].qai = NULL;
       }
 
-      // read Cloud distance
-      if (level3) pch = strstr(fname, "INF"); else pch = strstr(fname, "QAI");
-      strncpy(pch, "DST", 3);
 
-      // backward compatibility
-      if (!fileexist(fname)) strncpy(pch, "CLD", 3);
-      
-      if (phl->prd.dst){
+      // read Cloud distance
+      if (phl->prd.dst && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, "DST", NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DST = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].dst = get_band_short(ard[t].DST, 0)) == NULL){
-          printf("Error reading DST product %s. ", fname); error++;}
+          printf("Error reading DST product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].DST = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].DST)) == NULL ||
               (ard[t].dst = get_band_short(ard[t].DST, 0)) == NULL){
-            printf("Error adding DST products %s. ", fname); error++;}
+            printf("Error adding DST products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].DST);
       } else {
@@ -916,22 +874,19 @@ off_t bytes = 0;
         ard[t].dst = NULL;
       }
 
-      // read Aerosol Optical Depth
-      pch = strstr(fname, "DST"); 
-      
-      // backward compatibility
-      if (pch == NULL) pch = strstr(fname, "CLD"); 
 
-      strncpy(pch, "AOD", 3);
-      
-      if (phl->prd.aod){
+      // read Aerosol Optical Depth
+      if (phl->prd.aod && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, "AOD", NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].AOD = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].aod = get_band_short(ard[t].AOD, 0)) == NULL){
-          printf("Error reading AOD product %s. ", fname); error++;}
+          printf("Error reading AOD product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].AOD = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].AOD)) == NULL ||
               (ard[t].aod = get_band_short(ard[t].AOD, 0)) == NULL){
-            printf("Error adding AOD products %s. ", fname); error++;}
+            printf("Error adding AOD products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].AOD);
       } else {
@@ -939,16 +894,19 @@ off_t bytes = 0;
         ard[t].aod = NULL;
       }
 
+
       // read Haze Optimized Transformation
-      pch = strstr(fname, "AOD"); strncpy(pch, "HOT", 3);
-      if (phl->prd.hot){
+      if (phl->prd.hot && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, "HOT", NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].HOT = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].hot = get_band_short(ard[t].HOT, 0)) == NULL){
-          printf("Error reading HOT product %s. ", fname); error++;}
+          printf("Error reading HOT product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].HOT = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].HOT)) == NULL ||
               (ard[t].hot = get_band_short(ard[t].HOT, 0)) == NULL){
-            printf("Error adding HOT products %s. ", fname); error++;}
+            printf("Error adding HOT products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].HOT);
       } else {
@@ -956,16 +914,19 @@ off_t bytes = 0;
         ard[t].hot = NULL;
       }
 
+
       // read View Zenith Angle
-      pch = strstr(fname, "HOT"); strncpy(pch, "VZN", 3);
-      if (phl->prd.vzn){
+      if (phl->prd.vzn && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, "VZN", NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].VZN = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].vzn = get_band_short(ard[t].VZN, 0)) == NULL){
-          printf("Error reading VZN product %s. ", fname); error++;}
+          printf("Error reading VZN product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].VZN = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].VZN)) == NULL ||
               (ard[t].vzn = get_band_short(ard[t].VZN, 0)) == NULL){
-            printf("Error adding VZN products %s. ", fname); error++;}
+            printf("Error adding VZN products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].VZN);
       } else {
@@ -974,15 +935,17 @@ off_t bytes = 0;
       }
 
       // read Water Vapor
-      pch = strstr(fname, "VZN"); strncpy(pch, "WVP", 3);
-      if (phl->prd.wvp){
+      if (phl->prd.wvp && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, "WVP", NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].WVP = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
             (ard[t].wvp = get_band_short(ard[t].WVP, 0)) == NULL){
-          printf("Error reading WVP product %s. ", fname); error++;}
+          printf("Error reading WVP product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
           if ((ard[t].WVP = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].WVP)) == NULL ||
               (ard[t].wvp = get_band_short(ard[t].WVP, 0)) == NULL){
-            printf("Error adding WVP products %s. ", fname); error++;}
+            printf("Error adding WVP products %s. ", fname); error++; continue;}
         }
         bytes += get_brick_size(ard[t].WVP);
       } else {

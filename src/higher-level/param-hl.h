@@ -77,6 +77,8 @@ typedef struct {
   char **domain; 
   char **sensor;
   char   target[NPOW_10];
+  char  *main_product;
+  char  *quality_product;
 
   int spec_adjust; // spectral band adjustment to S2A?
 

@@ -61,7 +61,7 @@ extern "C" {
 void read_higher_level (progress_t *pro, off_t *ibytes, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl);
 void compute_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, brick_t ***OUTPUT, int *nprod);
 void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, par_hl_t *phl);
-void warn_if_no_io(int ibytes, int obytes, par_hl_t *phl);
+void warn_if_no_io(off_t ibytes, off_t obytes, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

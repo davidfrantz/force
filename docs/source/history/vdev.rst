@@ -36,7 +36,18 @@ Develop version
     It is now checked whether the files are actually written and will only warn if 
     no input was detected or if no files were written. 
     The behaviour for all other submodules stays the same.
-  
+
+  - It is now possible to specify the product types that should be used. This is to give the user more freedom
+    with respect to data sources to be used. 
+    There are two new parameters:
+    ``PRODUCT_TYPE_MAIN`` and ``PRODUCT_TYPE_QUALITY``. The main product is usually a reflectance product like ``BOA``.
+    When using composites, you may use BAP. This can be anything, but make sure that the string can uniquely 
+    identify your product. As an example, do not use ``LEVEL2`` as this will not filter products apropriately.
+    Note that the product should contain the bands that are to be expected with the sensor used, e.g. 10 bands 
+    when sensor is SEN2A. The quality product type should be a bit flag product like ``QAI``. When using composites, 
+    you may use INF. This can be anything, but make sure that the product contains quality bit flags as outputted 
+    by FORCE L2PS. As an exception, it is also possible to give ``NULL`` if you don't have any quality masks.
+    In this case, FORCE will only be able to filter nodata values, but no other quality flags as defined with ``SCREEN_QAI``.
 
 - **FORCE AUX**
 
