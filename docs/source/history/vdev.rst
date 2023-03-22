@@ -48,6 +48,7 @@ Develop version
     you may use INF. This can be anything, but make sure that the product contains quality bit flags as outputted 
     by FORCE L2PS. As an exception, it is also possible to give ``NULL`` if you don't have any quality masks.
     In this case, FORCE will only be able to filter nodata values, but no other quality flags as defined with ``SCREEN_QAI``.
+    Feature requested by Marcel Schwieder and Felix Lobert.
 
 - **FORCE AUX**
 
