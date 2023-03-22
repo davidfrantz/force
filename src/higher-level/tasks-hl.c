@@ -329,7 +329,7 @@ int o;
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void warn_if_no_io(int ibytes, int obytes, par_hl_t *phl){
+void warn_if_no_io(off_t ibytes, off_t obytes, par_hl_t *phl){
 bool warn_i = true;
 bool warn_o = true;
 
