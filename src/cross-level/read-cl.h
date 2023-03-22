@@ -36,6 +36,7 @@ Reading all-purpose files
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/string-cl.h"
+#include "../cross-level/stats-cl.h"
 
 
 #ifdef __cplusplus
@@ -50,6 +51,10 @@ typedef struct {
   char **row_names;
   char **col_names;
   double **data;
+  bool *mask;
+  int n_active;
+  double *mean;
+  double *sd;
 } table_t;
 
 table_t read_table(char *fname, bool has_row_names, bool has_col_names);

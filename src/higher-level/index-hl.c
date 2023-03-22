@@ -39,7 +39,7 @@ void index_differenced(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int 
 void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
 void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
-void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember);
+void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, table_t *endmember);
 
 
 /** This function computes a spectral index time series, with band method,
@@ -489,13 +489,13 @@ float tc[3][6] = {
 --- endmember: endmember (if SMA was selected)
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember){
+void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, table_t *endmember){
 int p, t;
 int i, j, ik, jk;
 int it, itmax;
 int m, nP, sign;
-int M = endmember->ne;
-int L = endmember->nb;
+int M = endmember->ncol; // number of endmembers
+int L = endmember->nrow; // number of bands
 double tol = FLT_MIN;
 double s_min, alpha;
 double f = 1.0;
@@ -514,7 +514,7 @@ gsl_vector *w   =  NULL;
 gsl_vector *a   =  NULL;
 
 
-  if (endmember->nb != get_brick_nbands(ard[0].DAT)){
+  if (endmember->nrow != get_brick_nbands(ard[0].DAT)){
     printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
     
 
@@ -528,9 +528,9 @@ gsl_vector *a   =  NULL;
 
 
   // copy endmember to GSL matrix
-  for (i=0; i<endmember->nb; i++){
+  for (i=0; i<endmember->nrow; i++){
   for (j=0; j<M; j++){
-    gsl_matrix_set(Z, i, j, endmember->tab[i][j]);
+    gsl_matrix_set(Z, i, j, endmember->data[i][j]);
   }
   }
   if (sma->sto){ // append a row of 1
@@ -586,7 +586,7 @@ gsl_vector *a   =  NULL;
           it = 0;
 
           // copy spectrum to GSL vector
-          for (i=0; i<endmember->nb; i++) gsl_vector_set(x, i, (double)(ard[t].dat[i][p]/scale));
+          for (i=0; i<endmember->nrow; i++) gsl_vector_set(x, i, (double)(ard[t].dat[i][p]/scale));
 
           // compute crossproduct of Z and x_: t(Z)x
           gsl_blas_dgemv(CblasTrans, 1.0, Z, x, 0.0, Ztx);
@@ -865,7 +865,7 @@ gsl_vector *a   =  NULL;
 --- endmember: endmember (if SMA was selected)
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, aux_emb_t *endmember){
+int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, table_t *endmember){
 
 
   switch (tsa->index[idx]){

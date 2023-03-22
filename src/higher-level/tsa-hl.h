@@ -42,12 +42,6 @@ extern "C" {
 #endif
 
 typedef struct {
-  double **tab; // table
-  int nb;       // number of bands
-  int ne;       // number of endmembers
-} aux_emb_t;
-
-typedef struct {
   short **tss_, **rms_, **stm_, **tsi_, **spl_;
   short **fby_, **fbq_, **fbm_, **fbw_, **fbd_;
   short **try_, **trq_, **trm_, **trw_, **trd_;
@@ -76,7 +70,7 @@ typedef struct {
 #include "../higher-level/py-udf-hl.h"
 #include "../higher-level/r-udf-hl.h"
 
-brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
+brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, table_t *endmember, cube_t *cube, int *nproduct);
 
 
 #ifdef __cplusplus

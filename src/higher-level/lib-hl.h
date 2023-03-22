@@ -41,21 +41,12 @@ Library completeness header
 extern "C" {
 #endif
 
-typedef struct {
-  double ***tab; // table
-  int n;         // number of tables
-  int *ns;       // number of samples
-  int nf;        // number of features
-  bool scaled; // flag if table was cleaned
-  double **mean; // mean per table and feature
-  double **sd;   // sd   per table and feature
-} aux_lib_t;
 
 typedef struct {
   short **mae_;
 } lib_t;
 
-brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t **libraries, int n_libraries, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

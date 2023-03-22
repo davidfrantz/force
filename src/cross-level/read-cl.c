@@ -44,6 +44,7 @@ int row = 0;
 int col = 0;
 int nrow_buf = NPOW_00;
 int ncol_buf = NPOW_00;
+double mx, vx, k;
 
 
   // allocate table data
@@ -160,6 +161,33 @@ int ncol_buf = NPOW_00;
     re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, table.ncol, NPOW_10, sizeof(char));
   }
 
+  alloc((void**)&table.mask, table.nrow, sizeof(bool));
+  memset(table.mask, 1, table.nrow);
+  table.n_active = table.nrow;
+
+  alloc((void**)&table.mean, table.ncol, sizeof(double));
+  alloc((void**)&table.sd,   table.ncol, sizeof(double));
+
+  for (col=0; col<table.ncol; col++){
+
+    mx = vx = k = 0;
+
+    for (row=0; row<table.nrow; row++){
+
+      k++;
+      if (k == 1){
+        mx = table.data[row][col];
+      } else {
+        var_recurrence(table.data[row][col], &mx, &vx, k);
+      }
+
+    }
+ 
+    table.mean[col] = mx;
+    table.sd[col]   = standdev(vx, k);
+
+  }
+
 
   return table;
 }
@@ -184,7 +212,25 @@ void free_table(table_t *table){
     free_2D((void**)table->col_names, table->ncol);
   }
 
-  free_2D((void**)table->data, table->nrow);
+  if (table->data != NULL){
+    free_2D((void**)table->data, table->nrow);
+    table->data = NULL;
+  }
+
+  if (table->mask != NULL){
+    free((void*)table->mask);
+    table->mask = NULL;
+  }
+
+  if (table->mean != NULL){
+    free((void*)table->mean);
+    table->mean = NULL;
+  }
+
+  if (table->sd != NULL){
+    free((void*)table->sd);
+    table->sd = NULL;
+  }
 
   return;
 }

@@ -35,10 +35,7 @@ Reading aux files
 #include "../cross-level/stats-cl.h"
 #include "../cross-level/read-cl.h"
 #include "../higher-level/param-hl.h"
-#include "../higher-level/tsa-hl.h"
-#include "../higher-level/lib-hl.h"
 #include "../higher-level/ml-hl.h"
-#include "../higher-level/sample-hl.h"
 
 
 #ifdef __cplusplus
@@ -46,10 +43,11 @@ extern "C" {
 #endif
 
 typedef struct {
-  aux_emb_t endmember;
-  aux_lib_t library;
+  table_t endmember;
+  table_t sample;
+  table_t *libraries;
+  int n_libraries;
   aux_ml_t  ml;
-  aux_smp_t sample;
 } aux_t;
 
 aux_t *read_aux(par_hl_t *phl);

@@ -118,11 +118,10 @@ int opt;
 int main ( int argc, char *argv[] ){
 args_t args;
 par_train_t *train = NULL;
-int f = 0, s, k, j, n_feature, n_sample, n_sample2;
+int f = 0, s, k, j;
 int n_sample_train, n_sample_val;
-int n_response_vars;
-double **t_features  = NULL;
-double **t_response  = NULL;
+table_t t_features;
+table_t t_response;
 float   *r_response  = NULL;
 int     *c_response  = NULL;
 float **features_train  = NULL;
@@ -160,73 +159,68 @@ time_t TIME;
 
 
   // read response variable
-  if ((t_response = read_table(train->f_response, 
-      &n_sample, &n_response_vars)) == NULL){
-    printf("unable to read response file. "); return FAILURE;}
+  t_response = read_table(train->f_response, false, false);
 
-  if (n_sample < 1){
+  if (t_response.nrow < 1){
     printf("no sample in response file. "); return FAILURE;}
     
-  if (n_response_vars < train->response_var){
+  if (t_response.ncol < train->response_var){
     printf("requested response variable is "
            "larger than columns in response file. ");
     return FAILURE;}
 
-  alloc((void**)&c_response, n_sample, sizeof(int));
-  alloc((void**)&r_response, n_sample, sizeof(float));
+  alloc((void**)&c_response, t_response.nrow, sizeof(int));
+  alloc((void**)&r_response, t_response.nrow, sizeof(float));
 
-  for (s=0; s<n_sample; s++){
+  for (s=0; s<t_response.nrow; s++){
 
-    c_response[s] = (int)t_response[s][train->response_var-1];
-    r_response[s] = (float)t_response[s][train->response_var-1];
+    c_response[s] = (int)t_response.data[s][train->response_var-1];
+    r_response[s] = (float)t_response.data[s][train->response_var-1];
 
   }
 
-  n_sample_train = n_sample*train->per_train/100;
-  n_sample_val   = n_sample-n_sample_train;
+  n_sample_train = t_response.nrow*train->per_train/100;
+  n_sample_val   = t_response.nrow-n_sample_train;
 
 
   // read features
-  if ((t_features = read_table(train->f_feature, 
-    &n_sample2, &n_feature)) == NULL){
-  printf("unable to read feature file. "); return FAILURE;}
+  t_features = read_table(train->f_feature, false, false);
 
-
-  if (n_sample2 != n_sample){
+  if (t_features.nrow != t_response.nrow){
     printf("number of samples in feature (%d) and response (%d) files are different..\n",
-      n_sample2, n_sample); return FAILURE;}
+      t_features.nrow, t_response.nrow); return FAILURE;}
 
 
 
-  alloc_2DC((void***)&features_train, n_sample_train, n_feature, sizeof(float));
+  alloc_2DC((void***)&features_train, n_sample_train, t_features.ncol, sizeof(float));
   alloc((void**)&c_response_train, n_sample_train, sizeof(int));
   alloc((void**)&r_response_train, n_sample_train, sizeof(float));
 
-  alloc_2DC((void***)&features_val, n_sample_val, n_feature, sizeof(float));
+  alloc_2DC((void***)&features_val, n_sample_val, t_features.ncol, sizeof(float));
   alloc((void**)&c_response_val, n_sample_val, sizeof(int));
   alloc((void**)&r_response_val, n_sample_val, sizeof(float));
 
-  alloc((void**)&is_train, n_sample, sizeof(bool));
+  alloc((void**)&is_train, t_response.nrow, sizeof(bool));
 
   srand(time(NULL));
   for (k=0; k<n_sample_train; k++){
     if (train->random_split){
       do {
-        s = rand() % n_sample;
+        s = rand() % t_response.nrow;
       } while (is_train[s]);
     } else s = k;
     is_train[s] = true;
   }
 
-  for (s=0, k=0, j=0; s<n_sample; s++){
+  for (s=0, k=0, j=0; s<t_response.nrow; s++){
     fprintf(flog, "sample: %d, train: %d\n", s, is_train[s]);
     if (is_train[s]){
-      for (f=0; f<n_feature; f++) features_train[k][f] = t_features[s][f]/10000.0;
+      for (f=0; f<t_features.ncol; f++) features_train[k][f] = t_features.data[s][f]/10000.0;
       r_response_train[k] = r_response[s];
       c_response_train[k] = c_response[s];
       k++;
     } else {
-      for (f=0; f<n_feature; f++) features_val[j][f] = t_features[s][f]/10000.0;
+      for (f=0; f<t_features.ncol; f++) features_val[j][f] = t_features.data[s][f]/10000.0;
       r_response_val[j] = r_response[s];
       c_response_val[j] = c_response[s];
       j++;
@@ -235,16 +229,16 @@ time_t TIME;
 
 
   fprintf(flog, "\n");
-  fprintf(flog, "Loaded %d samples and %d features\n", n_sample, n_feature);
+  fprintf(flog, "Loaded %d samples and %d features\n", t_response.nrow, t_features.ncol);
   fprintf(flog, "Training model with %d samples\n", n_sample_train);
   fprintf(flog, "Validating model with %d samples\n", n_sample_val);
 
 
   // get class priors
-  class_priors(c_response, n_sample, train);
+  class_priors(c_response, t_response.nrow, train);
 
 
-  Mat trainingDataMat(n_sample_train, n_feature, CV_32F, features_train[0]);
+  Mat trainingDataMat(n_sample_train, t_features.ncol, CV_32F, features_train[0]);
   Mat r_labelsMat(n_sample_train, 1, CV_32F, r_response_train);
   Mat c_labelsMat(n_sample_train, 1, CV_32S, c_response_train);
   
@@ -272,25 +266,25 @@ time_t TIME;
 
 
   if (train->method == _ML_SVR_ || train->method == _ML_RFR_){
-    predict_regression(features_train, r_response_train, model, n_sample_train, n_feature, flog);
+    predict_regression(features_train, r_response_train, model, n_sample_train, t_features.ncol, flog);
     fprintf(flog, "Self-prediction [THIS IS NOT A VALIDATION!]\n");
     if (train->per_train < 100){
-      predict_regression(features_val, r_response_val, model, n_sample_val, n_feature, flog);
+      predict_regression(features_val, r_response_val, model, n_sample_val, t_features.ncol, flog);
       fprintf(flog, "Validation with %.2f%% of sample\n", 100-train->per_train);
     }
   } else if (train->method == _ML_SVC_ || train->method == _ML_RFC_){
-    predict_classification(features_train, c_response_train, model, n_sample_train, n_feature, flog);
+    predict_classification(features_train, c_response_train, model, n_sample_train, t_features.ncol, flog);
     fprintf(flog, "Self-prediction [THIS IS NOT A VALIDATION!]\n");
     if (train->per_train < 100){
-      predict_classification(features_val, c_response_val, model, n_sample_val, n_feature, flog);
+      predict_classification(features_val, c_response_val, model, n_sample_val, t_features.ncol, flog);
       fprintf(flog, "Validation with %.2f%% of sample\n", 100-train->per_train);
     }
   }
   fprintf(flog, "____________________________________________________________________\n");
 
 
-  free_2D((void**)t_features, n_sample);
-  free_2D((void**)t_response, n_sample);
+  free_table(&t_features);
+  free_table(&t_response);
   free((void*)c_response);
   free((void*)r_response);
   free_2DC((void**)features_train);
