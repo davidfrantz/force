@@ -31,6 +31,7 @@ Reading all-purpose files
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
+#include <stdbool.h> // boolean data type
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
@@ -41,7 +42,18 @@ Reading all-purpose files
 extern "C" {
 #endif
 
-double **read_table(char *fname, int *nrows, int *ncols);
+typedef struct {
+  int nrow;
+  int ncol;
+  bool has_row_names;
+  bool has_col_names;
+  char **row_names;
+  char **col_names;
+  double **data;
+} table_t;
+
+table_t read_table(char *fname, bool has_row_names, bool has_col_names);
+void free_table(table_t *table);
 char ***read_tagvalue(char *fname, int *nrows);
 
 #ifdef __cplusplus

@@ -29,32 +29,45 @@ This file contains functions for reading all-purpose files
 
 
 /** This function reads a table.
---- fname:  text file
---- nrows: number of rows (returned)
---- ncols: number of cols (returned)
-+++ Return: table
+--- fname:         text file
+--- has_row_names: Has the table row    names? true/false
+--- has_col_names: Has the table column names? true/false
++++ Return:        table
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double **read_table(char *fname, int *nrows, int *ncols){
+table_t read_table(char *fname, bool has_row_names, bool has_col_names){
 FILE *fp;
+table_t table;
 char  buffer[NPOW_16] = "\0";
 char *ptr = NULL;
 const char *separator = " ,\t";
-double **tab = NULL;
-int ni = 0;
-int nj = 0;
-int nj_first = 0;
-int ni_buf = NPOW_00;
-int nj_buf = NPOW_00;
+int row = 0;
+int col = 0;
+int nrow_buf = NPOW_00;
+int ncol_buf = NPOW_00;
 
 
-  alloc_2D((void***)&tab, ni_buf, nj_buf, sizeof(double));
+  // allocate table data
+  alloc_2D((void***)&table.data, nrow_buf, ncol_buf, sizeof(double));
+
+  // allocate row names
+  if ((table.has_row_names = has_row_names)){
+    alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, sizeof(char));
+  } else {
+    table.row_names = NULL;
+  }
+
+  // allocate column names
+  if ((table.has_col_names = has_col_names)){
+    alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, sizeof(char));
+  } else {
+    table.col_names = NULL;
+  }
+
 
   // open file
   if (!(fp = fopen(fname, "r"))){
-    printf("unable to open table %s. ", fname); return NULL;}
+    printf("unable to open table %s. ", fname); exit(FAILURE);}
 
-  ni       = 0;
-  nj_first = 0;
     
   // read line by line
   while (fgets(buffer, NPOW_16, fp) != NULL){
@@ -62,52 +75,118 @@ int nj_buf = NPOW_00;
     buffer[strcspn(buffer, "\r\n")] = 0;
 
     ptr = strtok(buffer, separator);
-    nj = 0;
+    col = 0;
 
     // parse one line
     while (ptr != NULL){
-      tab[ni][nj] = atof(ptr); ptr = strtok(NULL, separator);
-      nj++;
 
-      // if too many cols, add twice of previous cols to buffer
-      if (nj >= nj_buf){
-        re_alloc_2D((void***)&tab, ni_buf, nj_buf, ni_buf, nj_buf*2, sizeof(double));
-        nj_buf *= 2;
+      // parse column names
+      if (row == 0 && has_col_names){
+
+        // skip 1st item if there are row names
+        // if there is no other item after, exit with error
+        if (has_row_names){
+          if ((ptr = strtok(NULL, separator)) == NULL){
+            printf("unable to read table %s. malformed colnames.\n", fname);
+            exit(FAILURE);
+          }
+        }
+
+        copy_string(table.col_names[col], NPOW_10, ptr);
+        ptr = strtok(NULL, separator);
+        col++;
+
+        // if too many cols, add twice of previous cols to buffer
+        if (col >= ncol_buf){
+          re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, ncol_buf*2, NPOW_10, sizeof(char));
+          ncol_buf *= 2;
+        }
+
+      } else {
+
+        // parse row name
+        // if there is no other item after, exit with error
+        if (has_row_names){
+          copy_string(table.row_names[row], NPOW_10, ptr);
+          if ((ptr = strtok(NULL, separator)) == NULL){
+            printf("unable to read table %s. malformed rownames.\n", fname);
+            exit(FAILURE);
+          }
+        }
+
+        table.data[row][col] = atof(ptr); 
+        ptr = strtok(NULL, separator);
+        col++;
+
+        // if too many cols, add twice of previous cols to buffer
+        if (col >= ncol_buf){
+          re_alloc_2D((void***)&table.data, nrow_buf, ncol_buf, nrow_buf, ncol_buf*2, sizeof(double));
+          ncol_buf *= 2;
+        }
+
       }
 
     }
 
     // number of cols in 1st row
-    if (ni == 0) nj_first = nj;
-    ni++;
+    if (row == 0) table.ncol = col;
+    row++;
 
     // table is regular?
-    if (ni > 0 && nj != nj_first){
-      printf("unable to read table %s. Different number of cols found in line %d", fname, ni); 
-      return NULL;
+    if (row > 0 && col != table.ncol){
+      printf("unable to read table %s. Different number of cols found in line %d", fname, row); 
+      exit(FAILURE);
     }
 
     // if too many rows, add twice of previous rows to buffer
-    if (ni >= (int)ni_buf){
-      re_alloc_2D((void***)&tab, ni_buf, nj_buf, ni_buf*2, nj_buf, sizeof(double));
-      ni_buf *= 2;
+    if (row >= (int)nrow_buf){
+      re_alloc_2D((void***)&table.data, nrow_buf, ncol_buf, nrow_buf*2, ncol_buf, sizeof(double));
+      re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, nrow_buf*2, NPOW_10, sizeof(char));
+      nrow_buf *= 2;
     }
 
   }
 
+  table.nrow = row;
   fclose(fp);
 
 
+
   // re-shape buffer to actual dimensions, 1st rows, then cols
-  if (ni != ni_buf || nj != nj_buf){
-    re_alloc_2D((void***)&tab, ni_buf, nj_buf, ni, nj_buf, sizeof(double));
-    re_alloc_2D((void***)&tab, ni,     nj_buf, ni, nj,     sizeof(double));
+  if (table.nrow != nrow_buf || table.ncol != ncol_buf){
+    re_alloc_2D((void***)&table.data, nrow_buf,   ncol_buf, table.nrow, ncol_buf,   sizeof(double));
+    re_alloc_2D((void***)&table.data, table.nrow, ncol_buf, table.nrow, table.ncol, sizeof(double));
+    re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, table.nrow, NPOW_10, sizeof(char));
+    re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, table.ncol, NPOW_10, sizeof(char));
   }
 
 
-  *nrows = ni;
-  *ncols = nj;
-  return tab;
+  return table;
+}
+
+
+/** This function frees a table.
+--- table:  table
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void free_table(table_t *table){
+
+  if (table->nrow < 1 || table->ncol < 1){
+    printf("wrong dimensions (%d, %d). cannot free table.\n", table->nrow, table->ncol);
+    exit(FAILURE);
+  }
+
+  if (table->has_row_names && table->row_names != NULL){
+    free_2D((void**)table->row_names, table->nrow);
+  }
+
+  if (table->has_col_names && table->col_names != NULL){
+    free_2D((void**)table->col_names, table->ncol);
+  }
+
+  free_2D((void**)table->data, table->nrow);
+
+  return;
 }
 
 
