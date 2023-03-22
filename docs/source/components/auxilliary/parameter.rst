@@ -14,25 +14,20 @@ Usage
 
     force-parameter [-h] [-v] [-i] [-m] [-c] parameter-file module
 
-optional arguments
-""""""""""""""""""
+    optional:
+    -h  = show this help
+    -v  = show version
+    -i  = show program's purpose
+    -m  = show available modules
+    -c  = generate more compact parameter files without comments
 
-* ``-h`` show help page
+    Positional arguments:
+    - 'parameter-file': output file
+    - 'module': FORCE module. Use -m to show available modules.
 
-* ``-v`` show version of FORCE
 
-* ``-i`` show program's purpose
 
-* ``-m`` show available modules
-
-* ``-c`` generate more compact parameter files without comments
-
-mandatory arguments
-"""""""""""""""""""
-
-* ``parameter-file`` File path as well as the file name, can be either relative or absolute.
-
-* ``module`` Name of FORCE module. Currently available modules are:
+Currently available modules are:
 
     +----------+-------------------------------------------+
     | LEVEL2   | :ref:`Level 2 Processing System <l2ps>`   |
@@ -53,7 +48,7 @@ mandatory arguments
     +----------+-------------------------------------------+
     | TRAIN    | :ref:`Train Machine Learner <aux-train>`  |
     +----------+-------------------------------------------+
-    | SYNTHMIX | Synthetic Mixing                          |
+    | SYNTHMIX | :ref:`Synthetic Mixing <aux-synthmix>`                          |
     +----------+-------------------------------------------+
     | ML       | :ref:`Machine Learning <ml>`              |
     +----------+-------------------------------------------+
