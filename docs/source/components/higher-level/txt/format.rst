@@ -20,9 +20,10 @@ Data Cube definition
 The spatial data cube definition is appended to each data cube, i.e. to each directory containing tiled datasets, see :ref:`datacube-def`.
 
 
-Naming convention
-^^^^^^^^^^^^^^^^^
+# Naming convention
+# ^^^^^^^^^^^^^^^^^
 
+# TEXT!!!
 
 
 File format
@@ -59,7 +60,7 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
   gdalinfo -mdd all 20160823_LEVEL2_SEN2A_BOA.tif
 
 
-Product type
-^^^^^^^^^^^^
+# Product type
+# ^^^^^^^^^^^^
 
-
+# TEXT!!!
