@@ -37,6 +37,7 @@ Reading all-purpose files
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/stats-cl.h"
+#include "../cross-level/utils-cl.h"
 
 
 #ifdef __cplusplus
@@ -58,6 +59,7 @@ typedef struct {
 } table_t;
 
 table_t read_table(char *fname, bool has_row_names, bool has_col_names);
+void print_table(table_t *table, bool truncate);
 void free_table(table_t *table);
 char ***read_tagvalue(char *fname, int *nrows);
 

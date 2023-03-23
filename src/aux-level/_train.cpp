@@ -169,6 +169,10 @@ time_t TIME;
            "larger than columns in response file. ");
     return FAILURE;}
 
+  #ifdef FORCE_DEBUG
+  print_table(&t_response, true);
+  #endif
+
   alloc((void**)&c_response, t_response.nrow, sizeof(int));
   alloc((void**)&r_response, t_response.nrow, sizeof(float));
 
@@ -190,6 +194,9 @@ time_t TIME;
     printf("number of samples in feature (%d) and response (%d) files are different..\n",
       t_features.nrow, t_response.nrow); return FAILURE;}
 
+  #ifdef FORCE_DEBUG
+  print_table(&t_features, true);
+  #endif
 
 
   alloc_2DC((void***)&features_train, n_sample_train, t_features.ncol, sizeof(float));

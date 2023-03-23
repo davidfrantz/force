@@ -62,6 +62,10 @@ float scale = 10000.0;
   }
   }
 
+  #ifdef FORCE_DEBUG
+  print_table(&aux->endmember, false);
+  #endif
+
   return SUCCESS;
 }
 
@@ -172,6 +176,11 @@ char fname[NPOW_10];
       }
     }
 
+    #ifdef FORCE_DEBUG
+    print_table(&aux->libraries[i], true);
+    #endif
+
+
   }
 
   return SUCCESS;
@@ -192,6 +201,10 @@ int read_samples(par_hl_t *phl, aux_t *aux){
 
 
   aux->sample = read_table(phl->smp.f_coord, false, false);
+
+  #ifdef FORCE_DEBUG
+  print_table(&aux->sample, true);
+  #endif
 
   if (aux->sample.ncol < 3){
     printf("Less than 3 columns. "); return FAILURE;}

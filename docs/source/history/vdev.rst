@@ -50,6 +50,11 @@ Develop version
     In this case, FORCE will only be able to filter nodata values, but no other quality flags as defined with ``SCREEN_QAI``.
     Feature requested by Marcel Schwieder and Felix Lobert.
 
+  - endmember, sampling, feature and response tables can be a csv now, i.e. "," has become an allowed column separator. 
+    Tab and whitespace are still allowed, too.
+    @German users, take care to use English csv settings!
+
+
 - **FORCE AUX**
 
   - new auxilliary program `force-init`.

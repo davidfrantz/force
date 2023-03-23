@@ -88,7 +88,7 @@ double mx, vx, k;
         // if there is no other item after, exit with error
         if (has_row_names){
           if ((ptr = strtok(NULL, separator)) == NULL){
-            printf("unable to read table %s. malformed colnames.\n", fname);
+            printf("unable to read table %s. malformed col_names.\n", fname);
             exit(FAILURE);
           }
         }
@@ -110,7 +110,7 @@ double mx, vx, k;
         if (has_row_names){
           copy_string(table.row_names[row], NPOW_10, ptr);
           if ((ptr = strtok(NULL, separator)) == NULL){
-            printf("unable to read table %s. malformed rownames.\n", fname);
+            printf("unable to read table %s. malformed row_names.\n", fname);
             exit(FAILURE);
           }
         }
@@ -142,7 +142,7 @@ double mx, vx, k;
     // if too many rows, add twice of previous rows to buffer
     if (row >= (int)nrow_buf){
       re_alloc_2D((void***)&table.data, nrow_buf, ncol_buf, nrow_buf*2, ncol_buf, sizeof(double));
-      re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, nrow_buf*2, NPOW_10, sizeof(char));
+      if (has_row_names) re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, nrow_buf*2, NPOW_10, sizeof(char));
       nrow_buf *= 2;
     }
 
@@ -157,8 +157,8 @@ double mx, vx, k;
   if (table.nrow != nrow_buf || table.ncol != ncol_buf){
     re_alloc_2D((void***)&table.data, nrow_buf,   ncol_buf, table.nrow, ncol_buf,   sizeof(double));
     re_alloc_2D((void***)&table.data, table.nrow, ncol_buf, table.nrow, table.ncol, sizeof(double));
-    re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, table.nrow, NPOW_10, sizeof(char));
-    re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, table.ncol, NPOW_10, sizeof(char));
+    if (has_row_names) re_alloc_2D((void***)&table.row_names, nrow_buf, NPOW_10, table.nrow, NPOW_10, sizeof(char));
+    if (has_col_names) re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, table.ncol, NPOW_10, sizeof(char));
   }
 
   alloc((void**)&table.mask, table.nrow, sizeof(bool));
@@ -193,11 +193,77 @@ double mx, vx, k;
 }
 
 
+/** This function prints a table.
+--- table:  table
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_table(table_t *table, bool truncate){
+int row, col;
+int nrow_print = 6, ncol_print = 6;
+int width, *max_width = NULL;
+
+
+  if (!truncate || nrow_print > table->nrow) nrow_print = table->nrow;
+  if (!truncate || ncol_print > table->ncol) ncol_print = table->ncol;
+  
+  alloc((void**)&max_width, table->ncol + 1, sizeof(int));
+
+  if (table->has_row_names){
+    for (row=0; row<table->nrow; row++){
+      width = strlen(table->row_names[row]);
+      if (width > max_width[0]) max_width[0] = width;
+    }
+  }
+
+  for (col=0; col<table->ncol; col++){
+
+    if (table->has_col_names){
+        width = strlen(table->col_names[col]);
+        if (width > max_width[col+1]) max_width[col+1] = width;
+    }
+
+    for (row=0; row<table->nrow; row++){
+        width = num_decimal_places((int)table->data[row][col]) + 4; // + 2 decimal digits, + decimal point, + sign
+        if (width > max_width[col+1]) max_width[col+1] = width;
+    }
+
+  }
+
+
+  if (table->has_col_names){
+
+    if (table->has_row_names) printf("%*s ", max_width[0], "+");
+
+    for (col=0; col<ncol_print; col++) printf("%*s ", max_width[col+1], table->col_names[col]);
+    if (truncate && col < table->ncol) printf("...");
+    printf("\n");
+
+  }
+
+  for (row=0; row<nrow_print; row++){
+
+    if (table->has_row_names) printf("%*s ", max_width[0], table->row_names[row]);
+    for (col=0; col<ncol_print; col++) printf("%+*.2f ", max_width[col+1], table->data[row][col]);
+    if (truncate && col < table->ncol) printf("...");
+    printf("\n");
+
+  }
+  if (truncate && row < table->nrow) printf("...\n");
+  printf("\n");
+
+
+  free((void*)max_width);
+
+  return;
+}
+
+
 /** This function frees a table.
 --- table:  table
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void free_table(table_t *table){
+
 
   if (table->nrow < 1 || table->ncol < 1){
     printf("wrong dimensions (%d, %d). cannot free table.\n", table->nrow, table->ncol);

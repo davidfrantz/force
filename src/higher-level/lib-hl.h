@@ -46,7 +46,7 @@ typedef struct {
   short **mae_;
 } lib_t;
 
-brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t **libraries, int n_libraries, cube_t *cube, int *nproduct);
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *libraries, int n_libraries, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }
