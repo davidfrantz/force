@@ -42,6 +42,7 @@ extern "C" {
 #endif
 
 char **system_info(int *n);
+void get_install_path(char *path, size_t size);
 
 #ifdef __cplusplus
 }
