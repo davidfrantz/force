@@ -98,7 +98,7 @@ double minx, maxx, miny, maxy;
 
 
   // if no sample is left, skip all
-  if (smp->n_active == 0){
+  if (smp->n_active_rows == 0){
     *nproduct = 0;
     return NULL;
   }
@@ -173,7 +173,7 @@ double minx, maxx, miny, maxy;
     #pragma omp for
     for (s=0; s<smp->nrow; s++){
 
-      if (!smp->mask[s]) continue;
+      if (!smp->row_mask[s]) continue;
 
       if (smp->data[s][_X_] < minx) continue;
       if (smp->data[s][_X_] > maxx) continue;
@@ -229,7 +229,7 @@ double minx, maxx, miny, maxy;
 
 
       // we are done with this sample
-      smp->mask[s] = false;
+      smp->row_mask[s] = false;
       found++;
 
       if (!valid) continue;
@@ -243,7 +243,7 @@ double minx, maxx, miny, maxy;
 
   if (error > 0) printf("there were %d errors in coordinate conversion..\n", error);
 
-  smp->n_active -= found;
+  smp->n_active_rows -= found;
 
 
   if (added > 0){

@@ -40,8 +40,9 @@ table_t table;
 char  buffer[NPOW_16] = "\0";
 char *ptr = NULL;
 const char *separator = " ,\t";
-int row = 0;
-int col = 0;
+int line = 0;
+int row  = 0;
+int col  = 0;
 int nrow_buf = NPOW_00;
 int ncol_buf = NPOW_00;
 double mx, vx, k;
@@ -67,7 +68,9 @@ double mx, vx, k;
 
   // open file
   if (!(fp = fopen(fname, "r"))){
-    printf("unable to open table %s. ", fname); exit(FAILURE);}
+    printf("unable to open table %s\n", fname); 
+    exit(FAILURE);
+  }
 
     
   // read line by line
@@ -82,11 +85,11 @@ double mx, vx, k;
     while (ptr != NULL){
 
       // parse column names
-      if (row == 0 && has_col_names){
+      if (row == 0 && has_col_names && table.ncol == 0){
 
         // skip 1st item if there are row names
         // if there is no other item after, exit with error
-        if (has_row_names){
+        if (has_row_names && col == 0){
           if ((ptr = strtok(NULL, separator)) == NULL){
             printf("unable to read table %s. malformed col_names.\n", fname);
             exit(FAILURE);
@@ -100,6 +103,7 @@ double mx, vx, k;
         // if too many cols, add twice of previous cols to buffer
         if (col >= ncol_buf){
           re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, ncol_buf*2, NPOW_10, sizeof(char));
+          re_alloc_2D((void***)&table.data, nrow_buf, ncol_buf, nrow_buf, ncol_buf*2, sizeof(double));
           ncol_buf *= 2;
         }
 
@@ -107,7 +111,7 @@ double mx, vx, k;
 
         // parse row name
         // if there is no other item after, exit with error
-        if (has_row_names){
+        if (has_row_names && col == 0){
           copy_string(table.row_names[row], NPOW_10, ptr);
           if ((ptr = strtok(NULL, separator)) == NULL){
             printf("unable to read table %s. malformed row_names.\n", fname);
@@ -131,11 +135,11 @@ double mx, vx, k;
 
     // number of cols in 1st row
     if (row == 0) table.ncol = col;
-    row++;
+    if (!has_col_names || line > 0) row++;
 
     // table is regular?
     if (row > 0 && col != table.ncol){
-      printf("unable to read table %s. Different number of cols found in line %d", fname, row); 
+      printf("unable to read table %s. Different number of cols found in line %d\n", fname, row); 
       exit(FAILURE);
     }
 
@@ -146,13 +150,14 @@ double mx, vx, k;
       nrow_buf *= 2;
     }
 
+    line++;
+
   }
 
   table.nrow = row;
   fclose(fp);
 
-
-
+  
   // re-shape buffer to actual dimensions, 1st rows, then cols
   if (table.nrow != nrow_buf || table.ncol != ncol_buf){
     re_alloc_2D((void***)&table.data, nrow_buf,   ncol_buf, table.nrow, ncol_buf,   sizeof(double));
@@ -161,9 +166,14 @@ double mx, vx, k;
     if (has_col_names) re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, table.ncol, NPOW_10, sizeof(char));
   }
 
-  alloc((void**)&table.mask, table.nrow, sizeof(bool));
-  memset(table.mask, 1, table.nrow);
-  table.n_active = table.nrow;
+  alloc((void**)&table.row_mask, table.nrow, sizeof(bool));
+  memset(table.row_mask, 1, table.nrow);
+  table.n_active_rows = table.nrow;
+
+  alloc((void**)&table.col_mask, table.ncol, sizeof(bool));
+  memset(table.col_mask, 1, table.ncol);
+  table.n_active_cols = table.ncol;
+
 
   alloc((void**)&table.mean, table.ncol, sizeof(double));
   alloc((void**)&table.sd,   table.ncol, sizeof(double));
@@ -232,7 +242,7 @@ int width, *max_width = NULL;
 
   if (table->has_col_names){
 
-    if (table->has_row_names) printf("%*s ", max_width[0], "+");
+    if (table->has_row_names) printf("%*s ", max_width[0], "");
 
     for (col=0; col<ncol_print; col++) printf("%*s ", max_width[col+1], table->col_names[col]);
     if (truncate && col < table->ncol) printf("...");
@@ -283,9 +293,14 @@ void free_table(table_t *table){
     table->data = NULL;
   }
 
-  if (table->mask != NULL){
-    free((void*)table->mask);
-    table->mask = NULL;
+  if (table->row_mask != NULL){
+    free((void*)table->row_mask);
+    table->row_mask = NULL;
+  }
+
+  if (table->col_mask != NULL){
+    free((void*)table->col_mask);
+    table->col_mask = NULL;
   }
 
   if (table->mean != NULL){

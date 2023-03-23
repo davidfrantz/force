@@ -56,11 +56,13 @@ This program is for testing small things. Needs to be compiled on demand
 
 
 int main ( int argc, char *argv[] ){
-char test[44] = "The quick brown fox jumps over the lazy dog";
+char path[1024];
 
-  printf("Before: %s\n", test);
-  replace_string(test, "fox", "koal", 44);
-  printf("After:  %s\n", test);
+    ssize_t len = readlink("/proc/self/exe", path, sizeof(path)-1);
+    if (len != -1) {
+        path[len] = '\0';
+        printf("Path: %s\n", path);
+    }
 
   return 0; 
 }

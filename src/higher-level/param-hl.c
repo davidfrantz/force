@@ -56,6 +56,7 @@ int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
 int parse_quality(par_qai_t *qai);
 int parse_sensor(par_sen_t *sen);
+int parse_sensor2(par_sen_t *sen);
 
 
 /** This function registers common higher level parameters that are parsed
@@ -99,7 +100,7 @@ void register_higher(params_t *params, par_hl_t *phl){
 void register_ard1(params_t *params, par_hl_t *phl){
 
 
-  register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
+  register_charvec_par(params, "SENSORS", _CHAR_TEST_NONE_, &phl->sen.sensor, &phl->sen.n);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
   register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
@@ -1051,6 +1052,115 @@ int i;
 }
 
 
+int parse_sensor2(par_sen_t *sen){
+char d_exe[NPOW_10];
+char f_sensor[NPOW_10];
+table_t sensor_table;
+int s_req, s_def, s_adj;
+int band, n_matched_bands = 0;
+bool found;
+
+int n_adjustable_sensors = 10;
+const char adjustable_sensors[10][NPOW_10] = {
+  "LND04", "LND05", "LND07",
+  "LND08", "LND09", 
+  "SEN2A", "SEN2B", "SEN2L", 
+  "MOD01", "MOD02" };
+
+
+
+  get_install_directory(d_exe, NPOW_10);
+  concat_string_3(f_sensor, NPOW_10, d_exe, "force-misc", "sensor-bandlist.csv", "/");
+
+  sensor_table = read_table(f_sensor, true, true);
+  memset(sensor_table.row_mask, 0, sensor_table.nrow);
+
+  #ifdef FORCE_DEBUG
+  #endif
+  print_table(&sensor_table, false);
+
+
+  // match requested vs defined sensors
+  // exit if undefined sensor requested
+  for (s_req=0; s_req<sen->n; s_req++){
+
+    found = false;
+
+    for (s_def=0; s_def<sensor_table.nrow; s_def++){
+      if (strcmp(sen->sensor[s_req], sensor_table.row_names[s_def]) == 0){
+        sensor_table.row_mask[s_def] = true;
+        found = true;
+      }
+    }
+
+    if (!found){
+      printf("Requested an undefined sensor: %s\n", sen->sensor[s_req]);
+      printf("Check SENSORS or provide sensor definition\n");
+      exit(FAILURE);
+    }
+
+  }
+
+
+  // check if spectral band adjustment is possible
+  if (sen->spec_adjust){
+
+    for (s_req=0; s_req<sen->n; s_req++){
+
+      found = false;
+
+      for (s_adj=0; s_adj<n_adjustable_sensors; s_adj++){
+        if (strcmp(sen->sensor[s_req], adjustable_sensors[s_adj]) == 0){
+          found = true;
+        }
+      }
+
+      if (!found){
+        printf("Spectral adjustment is not implemented for sensor: %s\n", sen->sensor[s_req]);
+        printf("Check SENSORS or turn of SPECTRAL_ADJUST\n");
+        exit(FAILURE);
+      }
+
+    }
+
+  }
+
+
+  // check for overlapping bands
+  for (band=0; band<sensor_table.ncol; band++){
+
+    for (s_def=0; s_def<sensor_table.nrow; s_def++){
+
+
+      if (!sensor_table.row_mask[s_def]) continue;
+
+      if (sensor_table.data[s_def][band] == 0){
+        sensor_table.col_mask[band] = false;
+        break;
+      }
+
+    }
+
+    if (sensor_table.col_mask[band]) n_matched_bands++;
+
+  }
+
+  if (n_matched_bands == 0){
+    printf("No overlapping bands found\n");
+    printf("Check SENSORS\n");
+    exit(FAILURE);
+  }
+
+  #ifdef FORCE_DEBUG
+  #endif
+  printf("matched bands: %d\n", n_matched_bands);
+
+
+  exit(SUCCESS);
+  return SUCCESS;
+}
+
+
 /** This function reparses sensor parameters (special para-
 +++ meter that cannot be parsed with the general parser).
 +++ This function builds a Level 2 sensor dictionary, which is needed to
@@ -1431,12 +1541,14 @@ double tol = 5e-3;
 
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&
-    parse_sensor(&phl->sen) != SUCCESS){
+    //parse_sensor(&phl->sen) != SUCCESS){
+    parse_sensor2(&phl->sen) != SUCCESS){
     printf("Compiling sensors failed.\n"); return FAILURE;}
     
   if ((phl->input_level2 == _INP_QAI_ ||
        phl->input_level2 == _INP_ARD_) &&
-    parse_sensor(&phl->sen2) != SUCCESS){
+    //parse_sensor(&phl->sen2) != SUCCESS){
+    parse_sensor2(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
     
   if (phl->type == _HL_TSA_ && check_bandlist(&phl->tsa, &phl->sen) == FAILURE){

@@ -52,8 +52,10 @@ typedef struct {
   char **row_names;
   char **col_names;
   double **data;
-  bool *mask;
-  int n_active;
+  bool *row_mask;
+  bool *col_mask;
+  int n_active_cols;
+  int n_active_rows;
   double *mean;
   double *sd;
 } table_t;

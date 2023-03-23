@@ -101,15 +101,15 @@ int i = 0, num = 6*2;
 
 
 /** Get installation path of the executable
---- path:   destination buffer holding path
+--- buf:    destination buffer holding path
 --- size:   length of buffer
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void get_install_path(char *path, size_t size){
+void get_install_path(char *buf, size_t size){
 ssize_t len;
 
 
-  len = readlink("/proc/self/exe", path, size-1);
+  len = readlink("/proc/self/exe", buf, size-1);
   if (len == -1){
     printf("Could not get installation path.\n");
     exit(FAILURE);
@@ -120,10 +120,30 @@ ssize_t len;
     exit(FAILURE);
   }
   
-  path[len] = '\0';
+  buf[len] = '\0';
 
+  printf("Installation path: %s\n", buf);
   #ifdef FORCE_DEBUG
-  printf("Installation path: %s\n", d_exe);
+  #endif
+
+  return;
+}
+
+
+/** Get installation directory of the executable
+--- buf:    destination buffer holding directory
+--- size:   length of buffer
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_install_directory(char *buf, size_t size){
+char path[NPOW_10];
+
+
+  get_install_path(path, NPOW_10);
+  directoryname(path, buf, size);
+
+  printf("Installation directory: %s\n", buf);
+  #ifdef FORCE_DEBUG
   #endif
 
   return;
