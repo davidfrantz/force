@@ -203,6 +203,51 @@ double mx, vx, k;
 }
 
 
+/** This function allocates an empty table.
+--- nrow:          number of rows
+--- ncol:          number of columns
+--- has_row_names: Has the table row    names? true/false
+--- has_col_names: Has the table column names? true/false
++++ Return:        table
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+table_t allocate_table(int nrow, int ncol, bool has_row_names, bool has_col_names){
+table_t table;
+
+
+  // allocate table data
+  alloc_2D((void***)&table.data, nrow, ncol, sizeof(double));
+
+  // allocate row names
+  if ((table.has_row_names = has_row_names)){
+    alloc_2D((void***)&table.row_names, nrow, NPOW_10, sizeof(char));
+  } else {
+    table.row_names = NULL;
+  }
+
+  // allocate column names
+  if ((table.has_col_names = has_col_names)){
+    alloc_2D((void***)&table.col_names, ncol, NPOW_10, sizeof(char));
+  } else {
+    table.col_names = NULL;
+  }
+
+
+  alloc((void**)&table.row_mask, table.nrow, sizeof(bool));
+  memset(table.row_mask, 1, table.nrow);
+  table.n_active_rows = table.nrow;
+
+  alloc((void**)&table.col_mask, table.ncol, sizeof(bool));
+  memset(table.col_mask, 1, table.ncol);
+  table.n_active_cols = table.ncol;
+
+
+  alloc((void**)&table.mean, table.ncol, sizeof(double));
+  alloc((void**)&table.sd,   table.ncol, sizeof(double));
+
+  return table;
+}
+
+
 /** This function prints a table.
 --- table:  table
 +++ Return: void

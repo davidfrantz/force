@@ -101,9 +101,9 @@ void register_ard1(params_t *params, par_hl_t *phl){
 
 
   register_charvec_par(params, "SENSORS", _CHAR_TEST_NONE_, &phl->sen.sensor, &phl->sen.n);
+  register_char_par(params,    "SENSOR_OUTPUT", _CHAR_TEST_NONE_, &phl->sen.target);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
-  register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
   register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
   register_intvec_par(params,  "DOY_RANGE", 1, 365, &phl->doy_range, &phl->ndoy);
@@ -121,6 +121,7 @@ void register_ard1(params_t *params, par_hl_t *phl){
 void register_ard2(params_t *params, par_hl_t *phl){
 
 
+  register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
   register_bool_par(params,    "REDUCE_PSF",      &phl->psf);
   register_bool_par(params,    "USE_L2_IMPROPHE", &phl->prd.imp);
   register_float_par(params,   "ABOVE_NOISE", 0, FLT_MAX, &phl->qai.above_noise);
@@ -1057,7 +1058,9 @@ char d_exe[NPOW_10];
 char f_sensor[NPOW_10];
 table_t sensor_table;
 int s_req, s_def, s_adj;
-int band, n_matched_bands = 0;
+int s_cpy, b_cpy;
+int c;
+int band;
 bool found;
 
 int n_adjustable_sensors = 10;
@@ -1127,6 +1130,9 @@ const char adjustable_sensors[10][NPOW_10] = {
 
 
   // check for overlapping bands
+  
+  sen->nb = 0;
+  
   for (band=0; band<sensor_table.ncol; band++){
 
     for (s_def=0; s_def<sensor_table.nrow; s_def++){
@@ -1134,18 +1140,25 @@ const char adjustable_sensors[10][NPOW_10] = {
 
       if (!sensor_table.row_mask[s_def]) continue;
 
-      if (sensor_table.data[s_def][band] == 0){
-        sensor_table.col_mask[band] = false;
-        break;
+      if (sen->spec_adjust){
+        if (sensor_table.data[s_def][band] == 0){
+          sensor_table.col_mask[band] = false;
+          break;
+        }
+      } else {
+        if (sensor_table.data[s_def][band]  < 1){
+          sensor_table.col_mask[band] = false;
+          break;
+        }
       }
 
     }
 
-    if (sensor_table.col_mask[band]) n_matched_bands++;
+    if (sensor_table.col_mask[band]) sen->nb++;
 
   }
 
-  if (n_matched_bands == 0){
+  if (sen->nb == 0){
     printf("No overlapping bands found\n");
     printf("Check SENSORS\n");
     exit(FAILURE);
@@ -1153,8 +1166,46 @@ const char adjustable_sensors[10][NPOW_10] = {
 
   #ifdef FORCE_DEBUG
   #endif
-  printf("matched bands: %d\n", n_matched_bands);
+  printf("matched bands: %d\n", sen->nb);
 
+
+  // compile final sensor struct
+  alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
+  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
+
+  for (s_def=0, s_cpy=0; s_def<sensor_table.nrow; s_def++){
+
+    if (!sensor_table.row_mask[s_def]) continue;
+
+    for (c=0; c<strlen(sensor_table.row_names[s_def]); c++) sen->sensor[s_cpy][c] = toupper(sensor_table.row_names[s_def][c]);
+    sen->sensor[s_cpy][c] = '\0';
+
+    printf("upped and copied sensor: %s\n", sen->sensor[s_cpy]);
+
+    for (band=0, b_cpy=0; band<sensor_table.ncol; band++){
+      if (sensor_table.col_mask[band]) sen->band[s_cpy][b_cpy++] = (int)sensor_table.data[s_def][band];
+    }
+
+    s_cpy++;
+
+  }
+
+  for (band=0, b_cpy=0; band<sensor_table.ncol; band++){
+    if (sensor_table.col_mask[band]) copy_string(sen->domain[b_cpy++], NPOW_10, sensor_table.col_names[band]);
+  }
+
+
+
+  #ifdef FORCE_DEBUG
+  #endif
+  printf("waveband mapping:\n");
+  for (s_req=0; s_req<sen->n; s_req++){
+    printf("Sensor # %02d: %s - %d bands\n", s_req, sen->sensor[s_req], sen->nb);
+    for (band=0; band<sen->nb; band++){
+      printf("  %s (%02d)", sen->domain[band], sen->band[s_req][band]);
+    }
+    printf("\n");
+  }
 
   exit(SUCCESS);
   return SUCCESS;

@@ -74,10 +74,11 @@ typedef struct {
   int    n;
   int    *senid;
   int    nb;
+  table_t table;
   int  **band;
   char **domain; 
   char **sensor;
-  char   target[NPOW_10];
+  char  *target;
   char  *main_product;
   char  *quality_product;
 
