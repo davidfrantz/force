@@ -90,7 +90,7 @@ GPP=g++
 G11=g++ -std=c++11
 
 CFLAGS=-O3 -Wall -fopenmp
-#CFLAGS=-g -Wall -fopenmp
+CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
@@ -98,6 +98,7 @@ CFLAGS=-O3 -Wall -fopenmp
 DB=bash
 DP=python
 DR=rstats
+DD=misc
 DM=force-misc
 DC=src/cross-level
 DL=src/lower-level
@@ -119,7 +120,7 @@ lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll r
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl rsp_hl udf_hl
 aux: param_aux param_train_aux train_aux
 exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init
-.PHONY: temp all install install_ bash python external clean build check
+.PHONY: temp all install install_ bash python misc external clean build check
 
 ### TEMP
 
@@ -403,7 +404,7 @@ force-qai-inflate: temp cross higher $(DA)/_quality-inflate.c
 force-l2ps: temp cross lower $(DL)/_level2.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-l2ps $(DL)/_level2.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
-force-higher-level: temp cross higher $(DH)/_higher-level.c
+force-higher-level: temp misc cross higher $(DH)/_higher-level.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
 
 force-lut-modis: temp cross lower $(DL)/_lut-modis.c
@@ -441,10 +442,13 @@ check:
       $(if $(shell which $(BINDIR)/$(exec)), \
 	    $(info $(exec) installed), \
 		$(error $(exec) was not installed properly!))) 
-	$(foreach misc,$(FORCE_MISC),\
-      $(if $(shell ls $(BINDIR)/$(DM)/$(misc) 2> /dev/null), \
-	    $(info $(misc) installed), \
-		$(error $(misc) was not installed properly!)))
+	$(foreach miscfiles,$(FORCE_MISC),\
+      $(if $(shell ls $(BINDIR)/$(DM)/$(miscfiles) 2> /dev/null), \
+	    $(info $(miscfiles) installed), \
+		$(error $(miscfiles) was not installed properly!)))
+
+misc: temp
+	cp $(DD)/sensor-bandlist.csv $(TM)/sensor-bandlist.csv
 
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
@@ -470,9 +474,9 @@ python: temp
 rstats: temp
 	cp $(DR)/force-level2-report.Rmd $(TM)/force-level2-report.Rmd
 
-install: bash python rstats external install_ clean check
+install: bash python rstats misc external install_ clean check
 
 build:
 	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
 	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
-	tar -czf force_v$(V)_$(T).tar.gz src bash python rstats external images docs Makefile LICENSE README.md
+	tar -czf force_v$(V)_$(T).tar.gz src bash python rstats misc external images docs Makefile LICENSE README.md
