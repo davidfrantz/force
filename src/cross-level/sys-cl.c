@@ -99,3 +99,33 @@ int i = 0, num = 6*2;
   return stringlist;
 }
 
+
+/** Get installation path of the executable
+--- path:   destination buffer holding path
+--- size:   length of buffer
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_install_path(char *path, size_t size){
+ssize_t len;
+
+
+  len = readlink("/proc/self/exe", path, size-1);
+  if (len == -1){
+    printf("Could not get installation path.\n");
+    exit(FAILURE);
+  }
+
+  if (len == size-1){
+    printf("Installation path is too long for buffer.\n");
+    exit(FAILURE);
+  }
+  
+  path[len] = '\0';
+
+  #ifdef FORCE_DEBUG
+  printf("Installation path: %s\n", d_exe);
+  #endif
+
+  return;
+}
+
