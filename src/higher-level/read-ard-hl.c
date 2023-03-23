@@ -957,6 +957,13 @@ off_t bytes = 0;
 
   }
   
+  if (error > 0){
+    printf("%d reading errors. ", error); 
+    free_ard(ard, dir.n);
+    *nt = -1;
+    return NULL;
+  }
+
   // copy all provenance to 1st date
   if (phl->prd.ref){
     get_brick_provenance(ard[0].DAT, 0, temp, NPOW_10);
@@ -971,12 +978,6 @@ off_t bytes = 0;
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
   free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
   
-  if (error > 0){
-    printf("%d reading errors. ", error); 
-    free_ard(ard, dir.n);
-    *nt = -1;
-    return NULL;
-  }
 
   #ifdef FORCE_CLOCK
   proctime_print("read ARD", TIME);
