@@ -106,6 +106,6 @@ Following indices / bands are available in the TSA submodule:
 + MSRren    + Modified Simple Ratio red edge narrow      + ((NIR / REDEDGE1) - 1) / sqrt((NIR / REDEDGE1) + 1)                                      + Fernandez-Manso et al.   +
 +           +                                            +                                                                                          + 2016                     +
 +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+
-+ CCI    + chlorophyll/carotenoid index                  + (GREEN - RED) / (GREEN +RED)                                                             + Gamon et al.             +
++ CCI       + chlorophyll/carotenoid index               + (GREEN - RED) / (GREEN +RED)                                                             + Gamon et al.             +
 +           +                                            +                                                                                          + 2016                     +
 +-----------+--------------------------------------------+------------------------------------------------------------------------------------------+--------------------------+

@@ -332,23 +332,17 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
 Product type
 ^^^^^^^^^^^^
 
+* Time Series
+  Time Series products have as many bands as there are available or requested time steps. If no temporal subset was specified:
+  the TSS product contains one band per available acquisition (this may vary between the tiles), 
+  the RMS product contains one band per available acquisition (this may vary between the tiles), 
+  the TSI product contains one band per interpolation step,
+  the FBY product contains one band per year (do not overdo YEAR_MIN/MAX, this will give many useless bands), 
+  the FBM product contains one band per month (up to 12, depends on MONTH_MIN/MAX and DOY_MIN/MAX),
+  the FBW contains one band per week (up to 52, depends on MONTH_MIN/MAX and DOY_MIN/MAX), 
+  the FBD product contains one band per DOY (up to 365, depends on MONTH_MIN/MAX and DOY_MIN/MAX),
+  the 26 LSP products contain one band per year (do not overdo YEAR_MIN/MAX, this will give many useless bands).
 
-
-
-
-
-
-Product type
-Time Series
-Time Series products have as many bands as there are available or requested time steps. If no temporal subset was specified:
-the TSS product contains one band per available acquisition (this may vary between the tiles), 
-the RMS product contains one band per available acquisition (this may vary between the tiles), 
-the TSI product contains one band per interpolation step,
-the FBY product contains one band per year (do not overdo YEAR_MIN/MAX, this will give many useless bands), 
-the FBM product contains one band per month (up to 12, depends on MONTH_MIN/MAX and DOY_MIN/MAX),
-the FBW contains one band per week (up to 52, depends on MONTH_MIN/MAX and DOY_MIN/MAX), 
-the FBD product contains one band per DOY (up to 365, depends on MONTH_MIN/MAX and DOY_MIN/MAX),
-the 26 LSP products contain one band per year (do not overdo YEAR_MIN/MAX, this will give many useless bands).
 
 **Trend Analysis**
 
