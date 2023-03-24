@@ -486,6 +486,7 @@ char d_exe[NPOW_10];
 char f_index[NPOW_10];
 table_t index_table;
 int request, given, available, required, used;
+int number;
 bool *used_bands = NULL;
 bool found_index;
 bool found_band;
@@ -504,17 +505,35 @@ bool found_band;
 
   alloc((void**)&used_bands, sen->nb, sizeof(bool));
 
+  alloc((void**)&tsa->index_type, tsa->n, sizeof(int));
+  alloc_3D((void****)&tsa->domain, tsa->n, sen->nb, NPOW_10, sizeof(char));
+  alloc((void**)&tsa->n_domain, tsa->n, sizeof(int));
+
 
   for (request=0; request<tsa->n; request++){
 
     found_index = false;
 
+    for (available=0; available<sen->nb; available++){
+      if (strcmp(tsa->indices[request], sen->domain[available]) == 0){
+        found_index = true;
+        tsa->index_type[request] = _IDX_BAND_;
+        copy_string(tsa->domain[request][0], NPOW_10, sen->domain[available]);
+        tsa->n_domain[request] = 1;
+        used_bands[available] = true;
+        break;
+      }
+    }
+
     for (given=0; given<index_table.nrow; given++){
+
       if (strcmp(tsa->indices[request], index_table.row_names[given]) == 0){
-//        index_table.row_mask[given] = true;
+
+        index_table.row_mask[given] = true;
 
         for (required=0; required<index_table.ncol; required++){
           if (index_table.data[given][required] > 0){
+
             found_band = false;
             for (available=0; available<sen->nb; available++){
               if (strcmp(index_table.col_names[required], sen->domain[available]) == 0){
@@ -528,26 +547,43 @@ bool found_band;
               printf("Check INDEX and SENSOR or provide another index or sensor definition\n");
               exit(FAILURE);
             }
+
+            number = index_table.data[given][required] - 1;
+            if (number >= sen->nb){
+              printf("number of inputs for index %s is greater than number of matched bands.\n", tsa->indices[request]);
+              printf("Check index definition\n");
+              exit(FAILURE);
+            }
+
+            copy_string(tsa->domain[request][number], NPOW_10, index_table.col_names[required]);
+            tsa->n_domain[request]++;
+
+          }
+        }
+
+        for (number=0; number<tsa->n_domain[request]; number++){
+          if (strlen(tsa->domain[request][number]) == 0){
+              printf("something wrong with input numbers for index %s.\n", tsa->indices[request]);
+              printf("Check index definition\n");
+              exit(FAILURE);
           }
         }
 
         found_index = true;
+        tsa->index_type[request] = _IDX_EQUATION_;
         break;
-      }
-    }
 
-    for (available=0; available<sen->nb; available++){
-      if (strcmp(tsa->indices[request], sen->domain[available]) == 0){
-        found_index = true;
-        used_bands[available] = true;
-        break;
       }
+
     }
 
     if (strcmp(tsa->indices[request], "SMA") == 0){
+
       found_index = true;
+      tsa->index_type[request] = _IDX_SMA_;
+      copy_string(tsa->domain[request][0], NPOW_10, "ALL_BANDS");
+      tsa->n_domain[request] = 1;
       for (available=0; available<sen->nb; available++) used_bands[available] = true;
-      break;
     }
 
     if (!found_index){
@@ -555,6 +591,10 @@ bool found_band;
       printf("Check INDEX and SENSOR\n");
       exit(FAILURE);
     }
+
+    printf("INDEX %s uses %d input(s):", tsa->indices[request], tsa->n_domain[request]);
+    for (number=0; number<tsa->n_domain[request]; number++) printf(" %s", tsa->domain[request][number]);
+    printf("\n");
 
   }
 
@@ -570,8 +610,9 @@ bool found_band;
       }
     }
 
-    re_alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sen->n, used,    sizeof(int));
-    re_alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, used,   NPOW_10, sizeof(char));
+    re_alloc_2D((void***)&sen->band,    sen->n,  sen->nb, sen->n, used,    sizeof(int));
+    re_alloc_2D((void***)&sen->domain,  sen->nb, NPOW_10, used,   NPOW_10, sizeof(char));
+    re_alloc_3D((void****)&tsa->domain, tsa->n, sen->nb, NPOW_10, tsa->n, used, NPOW_10, sizeof(char));
     sen->nb = used;
   }
 
@@ -590,8 +631,6 @@ bool found_band;
   free((void*)used_bands);
   free_table(&index_table);
 
-
-  exit(SUCCESS);
   return SUCCESS;
 }
 

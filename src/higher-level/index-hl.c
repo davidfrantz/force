@@ -867,7 +867,7 @@ gsl_vector *a   =  NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, table_t *endmember){
 
-
+/**
   switch (tsa->index[idx]){
     case _IDX_BLU_:
       index_band(ard, mask_, ts, sen->blue, nc, nt, nodata);
@@ -1049,7 +1049,7 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
       printf("unknown INDEX\n");
       break;      
   }
-
+**/
   
   return SUCCESS;
 }

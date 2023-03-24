@@ -273,6 +273,9 @@ typedef struct {
 typedef struct {
   int n;              // number of indices
   char **indices;     // indices
+  int *index_type;    // index type
+  char ***domain;     // domains required per index
+  int *n_domain;       // number of domains required per index
   int otss;           // flag: output time series brick
   int standard;
 

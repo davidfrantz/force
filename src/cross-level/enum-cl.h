@@ -286,6 +286,9 @@ enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };
 enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_, 
        _CONTINENT_NA_, _CONTINENT_OC_, _CONTINENT_SA_, _CONTINENT_LENGTH_ };
 
+// index type
+enum { _IDX_BAND_, _IDX_EQUATION_, _IDX_SMA_, _IDX_LEN_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
