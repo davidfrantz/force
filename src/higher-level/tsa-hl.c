@@ -942,7 +942,7 @@ int nchar;
   nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_TSA_%s_%s_%s", 
     phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
     phl->doy_range[_MIN_], phl->doy_range[_MAX_], 
-    phl->sen.target, phl->tsa.index_name[idx], info->prodname);
+    phl->sen.target, phl->tsa.indices[idx], info->prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
@@ -956,7 +956,7 @@ int nchar;
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 
-  sprintf(domain, "%s_%s", phl->tsa.index_name[idx], info->prodname);
+  sprintf(domain, "%s_%s", phl->tsa.indices[idx], info->prodname);
 
   for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
@@ -1035,8 +1035,8 @@ short nodata;
     compile_ts_dates(ard, &ts, phl, nt, nr, ni);
 
     // initialize UDFs
-    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
-    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.rsp);
+    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.indices[idx], 1, ni, &phl->tsa.pyp);
+    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.indices[idx], 1, ni, &phl->tsa.rsp);
 
     // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, nr, ni, idx, &nprod)) == NULL || nprod == 0){
@@ -1051,10 +1051,10 @@ short nodata;
     
     tsa_interpolation(&ts, mask_, nc, nt, nr, ni, nodata, &phl->tsa.tsi);
 
-    python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+    python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.indices[idx], 
       nx, ny, nc, 1, ni, nodata, &phl->tsa.pyp, phl->cthread);
 
-    rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+    rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.indices[idx], 
       nx, ny, nc, 1, ni, nodata, &phl->tsa.rsp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
