@@ -43,7 +43,8 @@ void register_smp(params_t *params, par_hl_t *phl);
 void register_txt(params_t *params, par_hl_t *phl);
 void register_lsm(params_t *params, par_hl_t *phl);
 void register_lib(params_t *params, par_hl_t *phl);
-int check_bandlist(par_tsa_t *tsa, par_sen_t *sen);
+//int check_bandlist(par_tsa_t *tsa, par_sen_t *sen);
+int check_indices(par_tsa_t *tsa, par_sen_t *sen);
 void alloc_ftr(par_ftr_t *ftr);
 void free_ftr(par_ftr_t *ftr);
 void alloc_mcl(par_mcl_t *mcl);
@@ -56,7 +57,6 @@ int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
 int parse_quality(par_qai_t *qai);
 int parse_sensor(par_sen_t *sen);
-int parse_sensor2(par_sen_t *sen);
 
 
 /** This function registers common higher level parameters that are parsed
@@ -183,7 +183,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
 
   // TS parameters
-  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, &phl->tsa.index, &phl->tsa.n);
+  register_charvec_par(params, "INDEX", _CHAR_TEST_NONE_, &phl->tsa.indices, &phl->tsa.n);
   register_enum_par(params,    "STANDARDIZE_TSS", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.standard);
   register_bool_par(params,    "OUTPUT_TSS", &phl->tsa.otss);
 
@@ -335,7 +335,7 @@ void register_l2i(params_t *params, par_hl_t *phl){
 
   
   register_imp(params, phl);
-  register_enumvec_par(params, "SENSORS_LOWRES", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen2.senid, &phl->sen2.n);
+  register_charvec_par(params, "SENSORS_LOWRES", _CHAR_TEST_NONE_, &phl->sen2.sensor, &phl->sen2.n);
 
   return;
 }
@@ -481,12 +481,128 @@ void register_udf(params_t *params, par_hl_t *phl){
 }
 
 
+int check_indices(par_tsa_t *tsa, par_sen_t *sen){
+char d_exe[NPOW_10];
+char f_index[NPOW_10];
+table_t index_table;
+int request, given, available, required, used;
+bool *used_bands = NULL;
+bool found_index;
+bool found_band;
+
+
+  get_install_directory(d_exe, NPOW_10);
+  concat_string_3(f_index, NPOW_10, d_exe, "force-misc", "index-bandlist.csv", "/");
+
+  index_table = read_table(f_index, true, true);
+//  memset(index_table.row_mask, 0, index_table.nrow);
+
+  #ifdef FORCE_DEBUG
+  #endif
+  print_table(&index_table, false);
+
+
+  alloc((void**)&used_bands, sen->nb, sizeof(bool));
+
+
+  for (request=0; request<tsa->n; request++){
+
+    found_index = false;
+
+    for (given=0; given<index_table.nrow; given++){
+      if (strcmp(tsa->indices[request], index_table.row_names[given]) == 0){
+//        index_table.row_mask[given] = true;
+
+        for (required=0; required<index_table.ncol; required++){
+          if (index_table.data[given][required] > 0){
+            found_band = false;
+            for (available=0; available<sen->nb; available++){
+              if (strcmp(index_table.col_names[required], sen->domain[available]) == 0){
+                used_bands[available] = true;
+                found_band = true;
+              }
+            }
+            if (!found_band){
+              printf("Requested an index that cannot be computed: %s\n", tsa->indices[request]);
+              printf("It requires the %s band\n", index_table.col_names[required]);
+              printf("Check INDEX and SENSOR or provide another index or sensor definition\n");
+              exit(FAILURE);
+            }
+          }
+        }
+
+        found_index = true;
+        break;
+      }
+    }
+
+    for (available=0; available<sen->nb; available++){
+      if (strcmp(tsa->indices[request], sen->domain[available]) == 0){
+        found_index = true;
+        used_bands[available] = true;
+        break;
+      }
+    }
+
+    if (strcmp(tsa->indices[request], "SMA") == 0){
+      found_index = true;
+      for (available=0; available<sen->nb; available++) used_bands[available] = true;
+      break;
+    }
+
+    if (!found_index){
+      printf("Requested an undefined index or unavailable band: %s\n", tsa->indices[request]);
+      printf("Check INDEX and SENSOR\n");
+      exit(FAILURE);
+    }
+
+  }
+
+
+  // remove unused bands
+  // only if not using spectral adjustment as we need all bands then
+  if (!sen->spec_adjust){
+    for (available=0, used=0; available<sen->nb; available++){
+      if (used_bands[available]){
+        for (request=0; request<tsa->n; request++) sen->band[request][used] = sen->band[request][available];
+        copy_string(sen->domain[used], NPOW_10, sen->domain[available]);
+        used++;
+      }
+    }
+
+    re_alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sen->n, used,    sizeof(int));
+    re_alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, used,   NPOW_10, sizeof(char));
+    sen->nb = used;
+  }
+
+  #ifdef FORCE_DEBUG
+  #endif
+  printf("updated waveband mapping:\n");
+  for (request=0; request<sen->n; request++){
+    printf("Sensor # %02d: %s - %d bands\n", request, sen->sensor[request], sen->nb);
+    for (used=0; used<sen->nb; used++){
+      printf("  %s (%02d)", sen->domain[used], sen->band[request][used]);
+    }
+    printf("\n");
+  }
+
+
+  free((void*)used_bands);
+  free_table(&index_table);
+
+
+  exit(SUCCESS);
+  return SUCCESS;
+}
+
+
 /** This function checks that each index can be computed with the given
 +++ set of sensors. It also kicks out unused bands to remove I/O
 --- tsa:    TSA parameters
 --- sen:    sensor parameters
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+/**
 int check_bandlist(par_tsa_t *tsa, par_sen_t *sen){
 int idx, b, nb = _WVL_LENGTH_, k, s;
 bool v[_WVL_LENGTH_] = { 
@@ -506,7 +622,7 @@ int *band_ptr[_WVL_LENGTH_] = {
   // set short index name for filename
   for (idx=0; idx<tsa->n; idx++){
 
-    switch (tsa->index[idx]){
+    switch (tsa->indices[idx]){
       case _IDX_BLU_:
         v[_WVL_BLUE_] = true;
         copy_string(tsa->index_name[idx], NPOW_02, "BLU");
@@ -735,9 +851,9 @@ int *band_ptr[_WVL_LENGTH_] = {
   printf("bnir  %02d, nir   %02d, swir1 %02d\n", sen->bnir, sen->nir, sen->swir1);
   printf("swir2 %02d  vv    %02d, vh    %02d\n", sen->swir2, sen->vv, sen->vh);
   #endif
-
   return SUCCESS;
 }
+**/
 
 
 /** This function allocates the feature parameters
@@ -1053,7 +1169,16 @@ int i;
 }
 
 
-int parse_sensor2(par_sen_t *sen){
+/** This function reparses sensor parameters (special para-
++++ meter that cannot be parsed with the general parser).
++++ This function builds a Level 2 sensor dictionary, which is needed to
++++ generate multi-sensor products. It computes the most restrictive over-
++++ lap between matching bands, determine rules how to read these.
+--- sen:    sensor parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+
+int parse_sensor(par_sen_t *sen){
 char d_exe[NPOW_10];
 char f_sensor[NPOW_10];
 table_t sensor_table;
@@ -1093,6 +1218,7 @@ const char adjustable_sensors[10][NPOW_10] = {
       if (strcmp(sen->sensor[s_req], sensor_table.row_names[s_def]) == 0){
         sensor_table.row_mask[s_def] = true;
         found = true;
+        break;
       }
     }
 
@@ -1120,7 +1246,7 @@ const char adjustable_sensors[10][NPOW_10] = {
 
       if (!found){
         printf("Spectral adjustment is not implemented for sensor: %s\n", sen->sensor[s_req]);
-        printf("Check SENSORS or turn of SPECTRAL_ADJUST\n");
+        printf("Check SENSORS or turn off SPECTRAL_ADJUST\n");
         exit(FAILURE);
       }
 
@@ -1141,12 +1267,12 @@ const char adjustable_sensors[10][NPOW_10] = {
       if (!sensor_table.row_mask[s_def]) continue;
 
       if (sen->spec_adjust){
-        if (sensor_table.data[s_def][band] == 0){
+        if (sensor_table.data[s_def][band] < 0){
           sensor_table.col_mask[band] = false;
           break;
         }
       } else {
-        if (sensor_table.data[s_def][band]  < 1){
+        if (sensor_table.data[s_def][band] < 1){
           sensor_table.col_mask[band] = false;
           break;
         }
@@ -1194,6 +1320,7 @@ const char adjustable_sensors[10][NPOW_10] = {
     if (sensor_table.col_mask[band]) copy_string(sen->domain[b_cpy++], NPOW_10, sensor_table.col_names[band]);
   }
 
+  free_table(&sensor_table);
 
 
   #ifdef FORCE_DEBUG
@@ -1206,178 +1333,6 @@ const char adjustable_sensors[10][NPOW_10] = {
     }
     printf("\n");
   }
-
-  exit(SUCCESS);
-  return SUCCESS;
-}
-
-
-/** This function reparses sensor parameters (special para-
-+++ meter that cannot be parsed with the general parser).
-+++ This function builds a Level 2 sensor dictionary, which is needed to
-+++ generate multi-sensor products. It computes the most restrictive over-
-+++ lap between matching bands, determine rules how to read these, and de-
-+++ fines commonly used wavelengths.
---- sen:    sensor parameters
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_sensor(par_sen_t *sen){
-int s, ss, b, bb, c;
-char upper[NPOW_10] = "UPPER";
-const int  ns = _SEN_LENGTH_, nb = _WVL_LENGTH_;
-const char sensor[_SEN_LENGTH_][NPOW_10] = {
-  "LND04", "LND05", "LND07",
-  "LND08", "LND09", "SEN2A", 
-  "SEN2B", "sen2a", "sen2b", 
-  "LNDLG", "SEN2L", "SEN2H", 
-  "R-G-B", "S1AIA", "S1AID", 
-  "S1BIA", "S1BID", "VVVHP", 
-  "MOD01", "MOD02", "MODIS" };
-bool adjustable[_SEN_LENGTH_] = {
-  true,  true,  true,  true,  true,  true,  
-  true,  false, false, false, false, false, 
-  false, false, false, false, false, false, 
-  true,  true,  false };
-const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 9 OLI  (legacy bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat legacy bands
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
-  { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0 },  // VIS bands
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // VV/VH polarized
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Terra
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Aqua
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 }}; // MODIS
-char domains[_WVL_LENGTH_][NPOW_10] = {
-  "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
-  "REDEDGE3", "BROADNIR", "NIR", "SWIR0", "SWIR1", "SWIR2",
-  "VV", "VH" };
-bool vs[_SEN_LENGTH_], vb[_WVL_LENGTH_];
-int *band_ptr[_WVL_LENGTH_] = {
-  &sen->blue, &sen->green, &sen->red, &sen->rededge1, &sen->rededge2,
-  &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
-  &sen->vv, &sen->vh };
-
-
-  // set appr. wavelength
-  sen->w_blue     = 0.492;
-  sen->w_green    = 0.559;
-  sen->w_red      = 0.665;
-  sen->w_rededge1 = 0.704;
-  sen->w_rededge2 = 0.739;
-  sen->w_rededge3 = 0.780;
-  sen->w_bnir     = 0.833;
-  sen->w_nir      = 0.864;
-  sen->w_swir0    = 1.240;
-  sen->w_swir1    = 1.610;
-  sen->w_swir2    = 2.186;
-  sen->w_vv       = 554657630000;
-  sen->w_vh       = 554657630000;
-
-
-  // match available sensors with requested sensors
-  for (s=0; s<ns; s++) vs[s] = false;
-  for (s=0; s<sen->n; s++) vs[sen->senid[s]] = true;
-
-  // check if spectral band adjustment is possible
-  for (s=0; s<sen->n; s++){
-    if (sen->spec_adjust && !adjustable[sen->senid[s]]){
-      printf("Spectral adjustment not implemented for sensor %s.\n", sensor[sen->senid[s]]); 
-      return FAILURE;
-    }
-  }
-
-  // kick out bands that are incomplete
-  for (b=0, bb=0; b<nb; b++){
-
-    for (s=0, vb[b]=true; s<ns; s++){
-      if (vs[s] && band[s][b] == 0) vb[b] = false;
-    }
-
-    if (sen->spec_adjust && !vb[b] && band[_SEN_SEN2A_][b] > 0) vb[b] = true;
-
-    if (vb[b]){
-      *band_ptr[b] = bb++;
-    } else {
-      *band_ptr[b] = -1;
-    }
-
-  }
-
-  if ((sen->nb = bb) == 0){ printf("no band overlap for requested sensors.\n"); return FAILURE;}
-
-
-  // set target sensor
-  if (sen->nb == 6){
-    copy_string(sen->target, NPOW_10, "LNDLG");
-  } else if (sen->nb == 10){
-    copy_string(sen->target, NPOW_10, "SEN2L");
-  } else if (sen->nb == 4){
-    copy_string(sen->target, NPOW_10, "SEN2H");
-  } else if (sen->nb == 3){
-    copy_string(sen->target, NPOW_10, "R-G-B");
-  } else if (sen->nb == 7){
-    copy_string(sen->target, NPOW_10, "MODIS");
-  } else if (sen->nb == 2){
-    copy_string(sen->target, NPOW_10, "VVVHP");
-  } else {
-    printf("unknown sensors.\n"); return FAILURE;
-  }
-
-
-  // build sensor struct
-  alloc_2D((void***)&sen->sensor, sen->n,  NPOW_10, sizeof(char));
-  alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
-  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
-
-  for (b=0, bb=0; b<nb; b++){
-    if (!vb[b]) continue;
-    copy_string(sen->domain[bb], NPOW_10, domains[b]);
-    for (s=0, ss=0; s<ns; s++){
-      if (!vs[s]) continue;
-      for (c=0; c<5; c++) upper[c] = toupper(sensor[s][c]);
-      copy_string(sen->sensor[ss], NPOW_10, upper);
-      sen->band[ss][bb] = band[s][b];
-      ss++;
-    }
-    bb++;
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
-  printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
-  printf("bnir  %02d, nir   %02d, swir0 %02d\n", sen->bnir, sen->nir, sen->swir0);
-  printf("swir1 %02d, swir2 %02d\n", sen->swir1, sen->swir2); 
-  printf("vv    %02d, vh    %02d\n", sen->vv, sen->vh);
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("waveband mapping:\n");
-  for (b=0; b<nb; b++) printf("%s %d\n", domains[b], vb[b]);
-  printf("\n");
-  printf("%d bands, target sensor: %s\n", sen->nb, sen->target);
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("processing with %d sensors and %d bands\n", sen->n, sen->nb);
-  for (s=0; s<sen->n; s++){
-    printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
-    printf("\n");
-  }
-  #endif
 
   return SUCCESS;
 }
@@ -1423,8 +1378,6 @@ void free_param_higher(par_hl_t *phl){
     free_2D((void**)phl->sen2.band,   phl->sen2.n);
     free_2D((void**)phl->sen2.domain, phl->sen2.nb);
   }
-
-  if (phl->type == _HL_TSA_) free_2D((void**)phl->tsa.index_name, phl->tsa.n); 
 
   if (phl->type == _HL_ML_) free_mcl(&phl->mcl);
 
@@ -1592,17 +1545,16 @@ double tol = 5e-3;
 
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&
-    //parse_sensor(&phl->sen) != SUCCESS){
-    parse_sensor2(&phl->sen) != SUCCESS){
+    parse_sensor(&phl->sen) != SUCCESS){
     printf("Compiling sensors failed.\n"); return FAILURE;}
     
   if ((phl->input_level2 == _INP_QAI_ ||
        phl->input_level2 == _INP_ARD_) &&
-    //parse_sensor(&phl->sen2) != SUCCESS){
-    parse_sensor2(&phl->sen2) != SUCCESS){
+    parse_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
     
-  if (phl->type == _HL_TSA_ && check_bandlist(&phl->tsa, &phl->sen) == FAILURE){
+  if (phl->type == _HL_TSA_ && check_indices(&phl->tsa, &phl->sen) == FAILURE){
+  //if (phl->type == _HL_TSA_ && check_bandlist(&phl->tsa, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}
 
   if (phl->type == _HL_TSA_) parse_sta(&phl->tsa.stm.sta);

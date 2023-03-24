@@ -83,34 +83,6 @@ typedef struct {
   char  *quality_product;
 
   int spec_adjust; // spectral band adjustment to S2A?
-
-  int blue;
-  int green;
-  int red;
-  int rededge1;
-  int rededge2;
-  int rededge3;
-  int bnir;
-  int nir;
-  int swir0;
-  int swir1;
-  int swir2;
-  int vv;
-  int vh;
-
-  float w_blue;
-  float w_green;
-  float w_red;
-  float w_rededge1;
-  float w_rededge2;
-  float w_rededge3;
-  float w_bnir;
-  float w_nir;
-  float w_swir0;
-  float w_swir1;
-  float w_swir2;
-  float w_vv;
-  float w_vh;
 } par_sen_t;
 
 // BAP scoring
@@ -299,9 +271,8 @@ typedef struct {
 
 // general TSA
 typedef struct {
-  int n;                 // number of indices
-  int  *index;           // index type
-  char **index_name;     // short name index type
+  int n;              // number of indices
+  char **indices;     // indices
   int otss;           // flag: output time series brick
   int standard;
 
