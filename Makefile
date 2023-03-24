@@ -80,7 +80,7 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-tile-finder force-train force-level2-report force-cube-init \
 			force-init force-datacube-size
 
-FORCE_MISC = force-level2-report.Rmd
+FORCE_MISC = force-level2-report.Rmd sensor-bandlist.csv index-bandlist.csv
 
 
 ### COMPILER
@@ -449,6 +449,7 @@ check:
 
 misc: temp
 	cp $(DD)/sensor-bandlist.csv $(TM)/sensor-bandlist.csv
+	cp $(DD)/index-bandlist.csv $(TM)/index-bandlist.csv
 
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
