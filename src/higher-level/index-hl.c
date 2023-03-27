@@ -40,6 +40,8 @@ void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int n
 void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
 void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, table_t *endmember);
+int band_for_index(brick_t *ard, char *request_band);
+void check_nbands_for_index(char *index, int needed, int defined);
 
 
 /** This function computes a spectral index time series, with band method,
@@ -515,7 +517,10 @@ gsl_vector *a   =  NULL;
 
 
   if (endmember->nrow != get_brick_nbands(ard[0].DAT)){
-    printf("number of bands in endmember file and ARD is different.\n"); exit(1);}
+    printf("number of bands in endmember file (%d) and ARD (%d) is different.\n", 
+      endmember->nrow, get_brick_nbands(ard[0].DAT)); 
+    exit(FAILURE);
+  }
     
 
   itmax = 30*M;
@@ -848,6 +853,44 @@ gsl_vector *a   =  NULL;
 }
 
 
+/** Find band for index
++++ This is a wrapper around find_domain, but exits on FAILURE
++++ Return: band number
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int band_for_index(brick_t *ard, char *request_band){
+int band = 0;
+
+  if ((band = find_domain(ard, request_band)) < 0){
+    printf("Could not retrieve band %s.\n", request_band);
+    printf("When you see this, some earlier checks have failed.\n");
+    exit(FAILURE);
+  }
+
+  return band;
+}
+
+
+/** Ceck if number of inputs is OK
++++ This function checks if number of defined inputs for index
++++ matches the number of inputs as implemented
+--- index:   Index
+--- needed:  Number of inputs needed (as implemented)
+--- defined: Number of inputs defined (see table)
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void check_nbands_for_index(char *index, int needed, int defined){
+
+
+  if (needed != defined){
+    printf("Index %s needs %d inputs, but %d inputs are defined in index definition.\n",
+      index, needed, defined);
+    exit(FAILURE);
+  }
+
+  return;
+}
+
+
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -867,190 +910,276 @@ gsl_vector *a   =  NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, table_t *endmember){
 
-/**
-  switch (tsa->index[idx]){
-    case _IDX_BLU_:
-      index_band(ard, mask_, ts, sen->blue, nc, nt, nodata);
+
+  switch (tsa->index_type[idx]){
+
+    case _IDX_BAND_:
+
+      index_band(ard, mask_, ts, band_for_index(ard[0].DAT, tsa->domain[idx][0]), nc, nt, nodata);
       break;
-    case _IDX_GRN_:
-      index_band(ard, mask_, ts, sen->green, nc, nt, nodata);
+
+    case _IDX_EQUATION_:
+
+      if (strcmp(tsa->indices[idx], "NDVI") == 0){
+        cite_me(_CITE_NDVI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+    } else if (strcmp(tsa->indices[idx], "EVI") == 0){
+        cite_me(_CITE_EVI_);
+        check_nbands_for_index(tsa->indices[idx], 3, tsa->n_domain[idx]);
+        index_resistance(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          2.5, 6.0, 7.5, 1.0, false, nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NBR") == 0){
+        cite_me(_CITE_NBR_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDTI") == 0){
+        cite_me(_CITE_NDTI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "ARVI") == 0){
+        cite_me(_CITE_SARVI_);
+        check_nbands_for_index(tsa->indices[idx], 3, tsa->n_domain[idx]);
+        index_resistance(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          1.0, 1.0, 0.0, 0.0, true, nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "SAVI") == 0){
+        cite_me(_CITE_SARVI_);
+        check_nbands_for_index(tsa->indices[idx], 3, tsa->n_domain[idx]);
+        index_resistance(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          1.5, 1.0, 0.0, 0.5, false, nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "SARVI") == 0){
+        cite_me(_CITE_SARVI_);
+        check_nbands_for_index(tsa->indices[idx], 3, tsa->n_domain[idx]);
+        index_resistance(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          1.5, 1.0, 0.0, 0.5, true, nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "TC-BRIGHT") == 0){
+        cite_me(_CITE_TCAP_);
+        check_nbands_for_index(tsa->indices[idx], 6, tsa->n_domain[idx]);
+        index_tasseled(ard, mask_, ts, TCB, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][3]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][4]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][5]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "TC-GREEN") == 0){
+        cite_me(_CITE_TCAP_);
+        check_nbands_for_index(tsa->indices[idx], 6, tsa->n_domain[idx]);
+        index_tasseled(ard, mask_, ts, TCG, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][3]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][4]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][5]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "TC-WET") == 0){
+        cite_me(_CITE_TCAP_);
+        check_nbands_for_index(tsa->indices[idx], 6, tsa->n_domain[idx]);
+        index_tasseled(ard, mask_, ts, TCW, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][3]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][4]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][5]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "TC-DI") == 0){
+        cite_me(_CITE_DISTURBANCE_);
+        check_nbands_for_index(tsa->indices[idx], 6, tsa->n_domain[idx]);
+        index_tasseled(ard, mask_, ts, TCD, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][3]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][4]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][5]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDBI") == 0){
+        cite_me(_CITE_NDBI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDWI") == 0){
+        cite_me(_CITE_NDWI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "MNDWI") == 0){
+        cite_me(_CITE_MNDWI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDMI") == 0){
+        cite_me(_CITE_NDMI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDSI") == 0){
+        cite_me(_CITE_NDSI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "kNDVI") == 0){
+        cite_me(_CITE_KNDVI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_kernelized(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDRE1") == 0){
+        cite_me(_CITE_NDRE1_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDRE2") == 0){
+        cite_me(_CITE_NDRE2_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "CIre") == 0){
+        cite_me(_CITE_CIre_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_ratio_minus1(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIre1") == 0){
+        cite_me(_CITE_NDVIre1_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIre2") == 0){
+        cite_me(_CITE_NDVIre2_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIre3") == 0){
+        cite_me(_CITE_NDVIre3_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIren") == 0){
+        cite_me(_CITE_NDVIre1n_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIre2n") == 0){
+        cite_me(_CITE_NDVIre2n_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "NDVIre3n") == 0){
+        cite_me(_CITE_NDVIre3n_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "MSRre") == 0){
+        cite_me(_CITE_MSRre_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_msrre(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "MSRren") == 0){
+        cite_me(_CITE_MSRren_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_msrre(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "CCI") == 0){
+        cite_me(_CITE_CCI_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_differenced(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "EVI2") == 0){
+        cite_me(_CITE_EV2_);
+        check_nbands_for_index(tsa->indices[idx], 2, tsa->n_domain[idx]);
+        index_resistance(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          2.4, 1.0, 0.0, 1.0, false, nc, nt, nodata);
+      } else if (strcmp(tsa->indices[idx], "ContRemSWIR") == 0){
+      check_nbands_for_index(tsa->indices[idx], 3, tsa->n_domain[idx]);
+        index_cont_remove(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, tsa->domain[idx][0]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][1]), 
+          band_for_index(ard[0].DAT, tsa->domain[idx][2]), 
+          1.610, 0.864, 2.186, nc, nt, nodata);
+      } else {
+        printf("There is no implementation for INDEX %s\n", tsa->indices[idx]);      
+        exit(FAILURE);
+      }
+
       break;
-    case _IDX_RED_:
-      index_band(ard, mask_, ts, sen->red, nc, nt, nodata);
-      break;
-    case _IDX_NIR_:
-      index_band(ard, mask_, ts, sen->nir, nc, nt, nodata);
-      break;
-    case _IDX_SW0_:
-      index_band(ard, mask_, ts, sen->swir0, nc, nt, nodata);
-      break;
-    case _IDX_SW1_:
-      index_band(ard, mask_, ts, sen->swir1, nc, nt, nodata);
-      break;
-    case _IDX_SW2_:
-      index_band(ard, mask_, ts, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_RE1_:
-      index_band(ard, mask_, ts, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_RE2_:
-      index_band(ard, mask_, ts, sen->rededge2, nc, nt, nodata);
-      break;
-    case _IDX_RE3_:
-      index_band(ard, mask_, ts, sen->rededge3, nc, nt, nodata);
-      break;
-    case _IDX_BNR_:
-      index_band(ard, mask_, ts, sen->bnir, nc, nt, nodata);
-      break;
-    case _IDX_NDV_:
-      cite_me(_CITE_NDVI_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
-      break;
-    case _IDX_EVI_:
-      cite_me(_CITE_EVI_);
-      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->blue, 
-                       2.5, 6.0, 7.5, 1.0, false, nc, nt, nodata);
-      break;
-    case _IDX_NBR_:
-       cite_me(_CITE_NBR_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_ARV_:
-      cite_me(_CITE_SARVI_);
-      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->blue, 
-                       1.0, 1.0, 0.0, 0.0, true, nc, nt, nodata);
-      break;
-    case _IDX_SAV_:
-      cite_me(_CITE_SARVI_);
-      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->blue, 
-                       1.5, 1.0, 0.0, 0.5, false, nc, nt, nodata);
-      break;
-    case _IDX_SRV_:
-      cite_me(_CITE_SARVI_);
-      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->blue, 
-                       1.5, 1.0, 0.0, 0.5, true, nc, nt, nodata);
-      break;
-    case _IDX_TCB_:
-      cite_me(_CITE_TCAP_);
-      index_tasseled(ard, mask_, ts, TCB, sen->blue, sen->green, sen->red, 
-                     sen->nir, sen->swir1, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_TCG_:
-      cite_me(_CITE_TCAP_);
-      index_tasseled(ard, mask_, ts, TCG, sen->blue, sen->green, sen->red, 
-                     sen->nir, sen->swir1, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_TCW_:
-      cite_me(_CITE_TCAP_);
-      index_tasseled(ard, mask_, ts, TCW, sen->blue, sen->green, sen->red, 
-                     sen->nir, sen->swir1, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_TCD_:
-      cite_me(_CITE_DISTURBANCE_);
-      index_tasseled(ard, mask_, ts, TCD, sen->blue, sen->green, sen->red, 
-                     sen->nir, sen->swir1, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_NDB_:
-      cite_me(_CITE_NDBI_);
-      index_differenced(ard, mask_, ts, sen->swir1, sen->nir, nc, nt, nodata);
-      break;
-    case _IDX_NDW_:
-      cite_me(_CITE_NDWI_);
-      index_differenced(ard, mask_, ts, sen->green, sen->nir, nc, nt, nodata);
-      break;
-    case _IDX_MNW_:
-      cite_me(_CITE_MNDWI_);
-      index_differenced(ard, mask_, ts, sen->green, sen->swir1, nc, nt, nodata);
-      break;
-    case _IDX_NDS_:
-      cite_me(_CITE_NDSI_);
-      index_differenced(ard, mask_, ts, sen->green, sen->swir1, nc, nt, nodata);
-      break;
+
     case _IDX_SMA_:
+
       cite_me(_CITE_SMA_);
       index_unmixed(ard, mask_, ts, nc, nt, nodata, &tsa->sma, endmember);
+
       break;
-    case _IDX_BVV_:
-      index_band(ard, mask_, ts, sen->vv, nc, nt, nodata);
-      break;
-    case _IDX_BVH_:
-      index_band(ard, mask_, ts, sen->vh, nc, nt, nodata);
-      break;
-    case _IDX_NDT_:
-      cite_me(_CITE_NDTI_);
-      index_differenced(ard, mask_, ts, sen->swir1, sen->swir2, nc, nt, nodata);
-      break;
-    case _IDX_NDM_:
-      cite_me(_CITE_NDMI_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->swir1, nc, nt, nodata);
-      break;
-    case _IDX_KNV_:
-      cite_me(_CITE_KNDVI_);
-      index_kernelized(ard, mask_, ts, sen->nir, sen->red, nc, nt, nodata);
-      break;
-    case _IDX_ND1_:
-      cite_me(_CITE_NDRE1_);
-      index_differenced(ard, mask_, ts, sen->rededge2, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_ND2_:
-      cite_me(_CITE_NDRE2_);
-      index_differenced(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_CRE_:
-      cite_me(_CITE_CIre_);
-      index_ratio_minus1(ard, mask_, ts, sen->rededge3, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_NR1_:
-      cite_me(_CITE_NDVIre1_);
-      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_NR2_:
-      cite_me(_CITE_NDVIre2_);
-      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge2, nc, nt, nodata);
-      break;
-    case _IDX_NR3_:
-      cite_me(_CITE_NDVIre3_);
-      index_differenced(ard, mask_, ts, sen->bnir, sen->rededge3, nc, nt, nodata);
-      break;
-    case _IDX_N1n_:
-      cite_me(_CITE_NDVIre1n_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_N2n_:
-      cite_me(_CITE_NDVIre2n_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->rededge2, nc, nt, nodata);
-      break;
-    case _IDX_N3n_:
-      cite_me(_CITE_NDVIre3n_);
-      index_differenced(ard, mask_, ts, sen->nir, sen->rededge3, nc, nt, nodata);
-      break;
-    case _IDX_Mre_:
-      cite_me(_CITE_MSRre_);
-      index_msrre(ard, mask_, ts, sen->bnir, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_Mrn_:
-      cite_me(_CITE_MSRren_);
-      index_msrre(ard, mask_, ts, sen->nir, sen->rededge1, nc, nt, nodata);
-      break;
-    case _IDX_CCI_:
-      cite_me(_CITE_CCI_);
-      index_differenced(ard, mask_, ts, sen->green, sen->red, nc, nt, nodata);
-      break;
-    case _IDX_EV2_:
-      cite_me(_CITE_EV2_);
-      index_resistance(ard, mask_, ts, sen->nir, sen->red, sen->red, 
-                       2.4, 1.0, 0.0, 1.0, false, nc, nt, nodata);
-      break;
-    case _IDX_CSW_:
-      index_cont_remove(ard, mask_, ts, sen->swir1, sen->nir, sen->swir2, 
-                        sen->w_swir1, sen->w_nir, sen->w_swir2, nc, nt, nodata);
-      break;
+
     default:
-      printf("unknown INDEX\n");
-      break;      
+
+      printf("No implementation for unknown INDEX type found.\n");
+      exit(FAILURE);
+
   }
-**/
-  
+
+
   return SUCCESS;
 }
 
