@@ -67,6 +67,7 @@ typedef struct {
   int nx, ny, nc, res;   // number and resolution of coarse grid cells
   float nodata;
   view_t view;               // viewing geometry
+  table_t rsr;               // relative spectral response
   float *wvl, *lwvl, *lwvl2; // wavelengths, log of wvl, square of log of wvl
   float *E0;                 // solar irradiance
   float cc;                  // cloud cover
