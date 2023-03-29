@@ -370,8 +370,8 @@ const char band_id_oli[9][NPOW_03] = {
         for (b=0; b<nb; b++) parse_metadata_band(pl2->d_level1, tag, tokenptr, &meta->cal[b], lid, 0);
 
       // product type
-      } else if (strcmp(tag, "DATA_TYPE") == 0 ||
-                 strcmp(tag, "PRODUCT_TYPE") == 0){
+      } else if (strcmp(tag, "DATA_TYPE") == 0 ||       // collection 1
+                 strcmp(tag, "PROCESSING_LEVEL") == 0){ // collection 2
         if (strstr(tokenptr, "L1T")  != NULL ||
             strstr(tokenptr, "L1TP") != NULL){
           meta->tier = 1;
@@ -383,34 +383,27 @@ const char band_id_oli[9][NPOW_03] = {
         if (strstr(tokenptr, "RT") != NULL) meta->tier = 3;
 
       // dimension variables
-      } else if (strcmp(tag, "PRODUCT_SAMPLES_REF") == 0 ||
-                 strcmp(tag, "REFLECTIVE_SAMPLES") == 0){
+      } else if (strcmp(tag, "REFLECTIVE_SAMPLES") == 0){
         set_brick_ncols(DN, atoi(tokenptr));
-      } else if (strcmp(tag, "PRODUCT_LINES_REF") == 0 ||
-                 strcmp(tag, "REFLECTIVE_LINES") == 0){
+      } else if (strcmp(tag, "REFLECTIVE_LINES") == 0){
         set_brick_nrows(DN, atoi(tokenptr));
 
       // resolution variables
-      } else if (strcmp(tag, "GRID_CELL_SIZE_REF") == 0 ||
-                 strcmp(tag, "GRID_CELL_SIZE_REFLECTIVE") == 0){
+      } else if (strcmp(tag, "GRID_CELL_SIZE_REFLECTIVE") == 0){
         set_brick_res(DN, atoi(tokenptr));
 
       // bounding box variables: map
-      } else if (strcmp(tag, "PRODUCT_UL_CORNER_MAPX") == 0 ||
-          strcmp(tag, "CORNER_UL_PROJECTION_X_PRODUCT") == 0){
+      } else if (strcmp(tag, "CORNER_UL_PROJECTION_X_PRODUCT") == 0){
         set_brick_ulx(DN, atof(tokenptr)-15);
-      } else if (strcmp(tag, "PRODUCT_UL_CORNER_MAPY") == 0 ||
-          strcmp(tag, "CORNER_UL_PROJECTION_Y_PRODUCT") == 0){
+      } else if (strcmp(tag, "CORNER_UL_PROJECTION_Y_PRODUCT") == 0){
         set_brick_uly(DN, atof(tokenptr)+15);
 
       // acquisition variables
       } else if (strcmp(tag, "WRS_PATH") == 0){
         path = atoi(tokenptr);
-      } else if (strcmp(tag, "WRS_ROW") == 0 ||
-                 strcmp(tag, "STARTING_ROW") == 0){
+      } else if (strcmp(tag, "WRS_ROW") == 0){
         row = atoi(tokenptr);
-      } else if (strcmp(tag, "ACQUISITION_DATE") == 0 ||
-                 strcmp(tag, "DATE_ACQUIRED") == 0){
+      } else if (strcmp(tag, "DATE_ACQUIRED") == 0){
         tokenptr2 = strtok(tokenptr, separator2);
         date.year = atoi(tokenptr2);
         tokenptr2 = strtok(NULL, separator2);
@@ -420,8 +413,7 @@ const char band_id_oli[9][NPOW_03] = {
         date.doy = md2doy(date.month, date.day);
         date.week = doy2week(date.doy);
         date.ce  = doy2ce(date.doy, date.year);
-      } else if (strcmp(tag, "SCENE_CENTER_TIME") == 0 ||
-                 strcmp(tag, "SCENE_CENTER_SCAN_TIME") == 0){
+      } else if (strcmp(tag, "SCENE_CENTER_TIME") == 0){
         date.hh = atoi(tokenptr);
         tokenptr = strtok(NULL, separator);
         date.mm = atoi(tokenptr);
@@ -430,19 +422,13 @@ const char band_id_oli[9][NPOW_03] = {
         date.tz = 0;
 
       // calibration variables
-      } else if (strstr(tag, "Q") == NULL &&
-                (strstr(tag, "LMAX_") != NULL ||
-                 strstr(tag, "RADIANCE_MAXIMUM_") != NULL)){
+      } else if (strstr(tag, "RADIANCE_MAXIMUM_") != NULL){
         for (b=0; b<nb; b++) parse_metadata_band(pl2->d_level1, tag, tokenptr, &meta->cal[b], lid, 1);
-      } else if (strstr(tag, "Q") == NULL &&
-                (strstr(tag, "LMIN_") != NULL ||
-                 strstr(tag, "RADIANCE_MINIMUM_") != NULL)){
+      } else if (strstr(tag, "RADIANCE_MINIMUM_") != NULL){
         for (b=0; b<nb; b++) parse_metadata_band(pl2->d_level1, tag, tokenptr, &meta->cal[b], lid, 2);
-      } else if (strstr(tag, "QCALMAX_") != NULL ||
-                 strstr(tag, "QUANTIZE_CAL_MAX_") != NULL){
+      } else if (strstr(tag, "QUANTIZE_CAL_MAX_") != NULL){
         for (b=0; b<nb; b++) parse_metadata_band(pl2->d_level1, tag, tokenptr, &meta->cal[b], lid, 3);
-      } else if (strstr(tag, "QCALMIN_") != NULL ||
-                 strstr(tag, "QUANTIZE_CAL_MIN_") != NULL){
+      } else if (strstr(tag, "QUANTIZE_CAL_MIN_") != NULL){
         for (b=0; b<nb; b++) parse_metadata_band(pl2->d_level1, tag, tokenptr, &meta->cal[b], lid, 4);
       } else if (strstr(tag, "REFLECTANCE_MULT_") != NULL){
         for (b=0; b<nb; b++){
@@ -507,22 +493,6 @@ const char band_id_oli[9][NPOW_03] = {
   nchar = snprintf(meta->refsys, NPOW_04, "%03d%03d", path, row);
   if (nchar < 0 || nchar >= NPOW_04){
     printf("Buffer Overflow in assembling WRS-2\n"); return FAILURE;}
-
-
-  // if K1 was not given in MTL
-  if (meta->cal[b_temp].k1 == meta->cal[b_temp].fill){
-    if (lid == 7) meta->cal[b_temp].k1 =  666.09;
-    if (lid == 5) meta->cal[b_temp].k1 =  607.76;
-    if (lid == 4) meta->cal[b_temp].k1 =  671.62;
-  }
-
-  // if K2 was not given in MTL
-  if (meta->cal[b_temp].k2 == meta->cal[b_temp].fill){
-    if (lid == 7) meta->cal[b_temp].k2 =  1282.71;
-    if (lid == 5) meta->cal[b_temp].k2 =  1260.56;
-    if (lid == 4) meta->cal[b_temp].k2 =  1284.30;
-  }
-
 
 
   #ifdef FORCE_DEBUG
@@ -1045,88 +1015,59 @@ const char band_id[13][NPOW_03] = {
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type){
-char str1[NPOW_10], add1[NPOW_10];
-char str2[NPOW_10], add2[NPOW_10];
+char string[NPOW_10], suffix[NPOW_10];
 
 
   if (lid == 7 && strcmp(cal->orig_band, "6") == 0){
-    copy_string(add1, NPOW_10, "_VCID_1");
-    copy_string(add2, NPOW_10, "1");
+    copy_string(suffix, NPOW_10, "_VCID_1");
   } else {
-    add1[0] = '\0';
-    add1[0] = '\0';
+    suffix[0] = '\0';
   }
 
   if (type == 0){
     if (strcmp(cal->fname, "NULL") == 0){
-      concat_string_3(str1, NPOW_10, "FILE_NAME_BAND_", cal->orig_band, add1, "");
-      concat_string_4(str2, NPOW_10, "BAND", cal->orig_band, add2, "_FILE_NAME", "");
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        concat_string_2(cal->fname, NPOW_10, d_level1, value, "/");
-      }
+      concat_string_3(string, NPOW_10, "FILE_NAME_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) concat_string_2(cal->fname, NPOW_10, d_level1, value, "/");
     }
   } else if (type == 1){
     if (cal->lmax ==  cal->fill){
-      concat_string_3(str1, NPOW_10, "RADIANCE_MAXIMUM_BAND_", cal->orig_band, add1, "");
-      concat_string_3(str2, NPOW_10, "LMAX_BAND", cal->orig_band, add2, "");
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        concat_string_2(cal->fname, NPOW_10, d_level1, value, "/");
-      }
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        cal->lmax = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "RADIANCE_MAXIMUM_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->lmax = atof(value);
     }
   } else if (type == 2){
     if (cal->lmin == cal->fill){
-      concat_string_3(str1, NPOW_10, "RADIANCE_MINIMUM_BAND_", cal->orig_band, add1, "");
-      concat_string_3(str2, NPOW_10, "LMIN_BAND", cal->orig_band, add2, "");
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        cal->lmin = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "RADIANCE_MINIMUM_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->lmin = atof(value);
     }
   } else if (type == 3){
     if (cal->qmax == cal->fill){
-      concat_string_3(str1, NPOW_10, "QUANTIZE_CAL_MAX_BAND_", cal->orig_band, add1, "");
-      concat_string_3(str2, NPOW_10, "QCALMAX_BAND", cal->orig_band, add2, "");
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        cal->qmax = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "QUANTIZE_CAL_MAX_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->qmax = atof(value);
     }
   } else if (type == 4){
     if (cal->qmin == cal->fill){
-      concat_string_3(str1, NPOW_10, "QUANTIZE_CAL_MIN_BAND_", cal->orig_band, add1, "");
-      concat_string_3(str2, NPOW_10, "QCALMIN_BAND", cal->orig_band, add2, "");
-      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        cal->qmin = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "QUANTIZE_CAL_MIN_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->qmin = atof(value);
     }
   } else if (type == 5){
     if (cal->rmul == cal->fill){
-      concat_string_3(str1, NPOW_10, "REFLECTANCE_MULT_BAND_", cal->orig_band, add1, "");
-      if (strcmp(tag, str1) == 0){
-        cal->rmul = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "REFLECTANCE_MULT_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->rmul = atof(value);
     }
   } else if (type == 6){
     if (cal->radd == cal->fill){
-      concat_string_3(str1, NPOW_10, "REFLECTANCE_ADD_BAND_", cal->orig_band, add1, "");
-      if (strcmp(tag, str1) == 0){
-        cal->radd = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "REFLECTANCE_ADD_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->radd = atof(value);
     }
   } else if (type == 7){
     if (cal->k1 == cal->fill){
-      concat_string_3(str1, NPOW_10, "K1_CONSTANT_BAND_", cal->orig_band, add1, "");
-      if (strcmp(tag, str1) == 0){
-        cal->k1 = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "K1_CONSTANT_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->k1 = atof(value);
     }
   } else if (type == 8){
     if (cal->k2 == cal->fill){
-      concat_string_3(str1, NPOW_10, "K2_CONSTANT_BAND_", cal->orig_band, add1, "");
-      if (strcmp(tag, str1) == 0){
-        cal->k2 = atof(value);
-      }
+      concat_string_3(string, NPOW_10, "K2_CONSTANT_BAND_", cal->orig_band, suffix, "");
+      if (strcmp(tag, string) == 0) cal->k2 = atof(value);
     }
   }
 
