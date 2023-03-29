@@ -21,20 +21,22 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Global definition of tables
+Compilation of tables needed for preprocessing
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
 #ifndef TABLE_H
 #define TABLE_H
 
+#include "../cross-level/brick-cl.h"
+#include "../cross-level/table-cl.h"
+#include "../lower-level/atc-ll.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-float wavelength(int b_rsr);
-float E0(int b_rsr);
+int compile_tables(atc_t *atc, brick_t *DN);
 
 #ifdef __cplusplus
 }

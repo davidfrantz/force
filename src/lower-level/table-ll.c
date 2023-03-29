@@ -28,67 +28,127 @@ Tables for radiometric processing
 #include "table-ll.h"
 
 
-/** This function computes the main wavelength based on the bands' 
-+++ relative spectral response.
---- b_rsr:  ID in relative spectral response array
-+++ Return: wavelength
+float weighted_average(table_t *values, int value_col, table_t *weights, int weight_col);
+
+
+/** This function computes weighted averages.
++++ Both values and weights are expected to come in a table struct
+--- values:     table holding the values
+--- value_col:  column of values
+--- weights:    table holding the weights
+--- weight_col: column of weights
++++ Return:     weighted average
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float wavelength(int b_rsr){
-int w;
-float wvl;
-double v = 0, s = 0;
+float weighted_average(table_t *values, int value_col, table_t *weights, int weight_col){
+int i;
+double value_sum = 0, weight_sum = 0;
+float average;
 
 
-  for (w=0; w<_WVL_DIM_; w++){
-    v += _RSR_[b_rsr][w]*_WVL_[w];
-    s += _RSR_[b_rsr][w];
+  if (values->nrow != weights->nrow){
+    printf("Cannot compute weighted average. Number of rows do not match.\n");
+    exit(FAILURE);
   }
 
-  if (s > 0) wvl = (float)(v/s); else wvl = 0;
+  for (i=0; i<values->nrow; i++){
+    value_sum  += values->data[i][value_col]*weights->data[i][weight_col];
+    weight_sum += weights->data[i][weight_col];
+  }
 
-  return wvl;
+  if (weight_sum > 0){
+    average = (float)(value_sum / weight_sum);
+  } else {
+    average = 0;
+  }
+
+  return average;
+}
+
+
+/** This function reads tables and compiles that information needed for
++++ the atmospheric correction
+--- atc:    atmospheric correction factors
+--- DN:     Digital Numbers
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int compile_tables(atc_t *atc, brick_t *DN){
+char dname_exe[NPOW_10];
+char bname_rsr[NPOW_10];
+char fname_rsr[NPOW_10];
+char fname_E0[NPOW_10];
+char sensor[NPOW_04];
+char domain[NPOW_10];
+int b_rsr, nbands_rsr;
+int b_dn,  nbands_dn;
+table_t E0;
+
+
+  get_brick_sensor(DN, 0, sensor, NPOW_04);
+
+  get_install_directory(dname_exe, NPOW_10);
+  concat_string_3(bname_rsr, NPOW_10, "spectral-response_", sensor, ".csv", "");
+  concat_string_3(fname_rsr, NPOW_10, dname_exe, "force-misc", bname_rsr, "/");
+  concat_string_3(fname_E0,  NPOW_10, dname_exe, "force-misc", "E0.csv", "/");
+
+  atc->rsr = read_table(fname_rsr, false, true);
+  E0       = read_table(fname_E0,  false, true);
+
+  if (strcmp(atc->rsr.col_names[0], "wavelength") != 0){
+    printf("1st column in RSR needs to be 'wavelength'\n");
+    return FAILURE;
+  }
+
+  if (strcmp(E0.col_names[0], "wavelength") != 0){
+    printf("1st column in RSR needs to be 'wavelength'\n");
+    return FAILURE;
+  }
+
+  if (strcmp(E0.col_names[1], "E0") != 0){
+    printf("2nd column in RSR needs to be 'E0'\n");
+    return FAILURE;
+  }
+
+
+  nbands_rsr = atc->rsr.ncol - 1; // wavelength is 1st column
+  nbands_dn = get_brick_nbands(DN);
+
+
+  if (nbands_dn != nbands_rsr){
+    printf("number of bands in RSR and expected bands do not match\n");
+    return FAILURE;
+  }
+
+  for (b_dn=0, b_rsr=1; b_dn<nbands_dn; b_dn++){
+    get_brick_domain(DN, b_dn, domain, NPOW_10);
+    if (strcmp(domain, atc->rsr.col_names[b_rsr]) != 0){
+      printf("columns (spectral domains) in RSR do not match expectation\n");
+      return FAILURE;
+    }
+
+    atc->E0[b_dn] = weighted_average(&E0, 1, &atc->rsr, b_rsr);
+
+    set_brick_wavelength(DN, b_dn, weighted_average(&atc->rsr, 0, &atc->rsr, b_rsr));
+
+  }
+
+  return SUCCESS;
 }
 
 
 
-/** This function computes Exoatmospheric solar irradianceE0 values based
-+++ on the bands' relative spectral response and E0 spectrum.
---- b_rsr:  ID in relative spectral response array
-+++ Return: E0
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float E0(int b_rsr){
-int w;
-float E0;
-double e = 0, s = 0;
-
-
-  for (w=0; w<_WVL_DIM_; w++){
-    e += _RSR_[b_rsr][w]*_E0_[w];
-    s += _RSR_[b_rsr][w];
-  }
-
-  if (s > 0) E0 = (float)(e/s); else E0 = 0;
-
-  return E0;
-}
 
 
 /** Exoatmospheric irradiance
 +++ Thuillier spectrum @1nm [410-2400] in W/m^2/µm
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-
 /** Water vapor absorption coefficients
 +++ Water vapor absorption from HITRAN 2016 @1nm [240-2400] in 1/cm
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-
 /** Ozone absorption coefficients
 +++ Bird & Riordan 1986 @1nm [410-2400] (interpolated to match other tables)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-
-
-
 
 /** Water spectral library
 +++ Spectra @1nm [410-900] obtained from WASI (Gege 2004)
