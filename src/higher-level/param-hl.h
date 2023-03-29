@@ -38,6 +38,7 @@ Higher Level Processing paramater header
 #include "../cross-level/param-cl.h"
 #include "../cross-level/gdalopt-cl.h"
 #include "../cross-level/sys-cl.h"
+#include "../cross-level/table-cl.h"
 
 
 #ifdef __cplusplus
