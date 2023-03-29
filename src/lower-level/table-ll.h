@@ -32,24 +32,6 @@ Global definition of tables
 extern "C" {
 #endif
 
-extern const float _E0_[1991];
-extern const float _AW_[1991];
-extern const float _AO_[1991];
-extern const float _WVL_[1991];
-extern const int   _WVL_DIM_;
-extern const int _RSR_START_LND04_;
-extern const int _RSR_START_LND05_;
-extern const int _RSR_START_LND07_;
-extern const int _RSR_START_LND08_;
-extern const int _RSR_START_LND09_;
-extern const int _RSR_START_SEN2A_;
-extern const int _RSR_START_SEN2B_;
-extern const float _RSR_[56][1991];
-extern const int   _RSR_DIM_;
-extern const int   _AERO_WATERLIB_DIM_[2];
-extern const float _AERO_WATERLIB_[26][491];
-extern const int   _AERO_LANDLIB_DIM_[2];
-extern const float _AERO_LANDLIB_[34][1991];
 
 float wavelength(int b_rsr);
 float E0(int b_rsr);
