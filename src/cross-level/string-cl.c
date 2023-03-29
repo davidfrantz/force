@@ -98,6 +98,31 @@ int nchar;
 }
 
 
+/** Concatenate strings (4)
++++ This function concatenates several strings into a destination buffer.
++++ It is checked that the buffer doesn't overflow; error if so.
+--- dst:    destination buffer
+--- size:   size of destination buffer
+--- src1:    source string 1
+--- src2:    source string 2
+--- src3:    source string 3
+--- src4:    source string 4
+--- delim:  deliminator (string)
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void concat_string_4(char *dst, size_t size, const char *src1, const char *src2, const char *src3, const char *src4, const char *delim){
+int nchar;
+
+  nchar = snprintf(dst, NPOW_10, "%s%s%s%s%s%s%s", src1, delim, src2, delim, src3, delim, src4);
+  if (nchar < 0 || nchar >= size){ 
+    printf("Buffer Overflow in assembling string\n"); 
+    exit(1);
+  }
+
+  return;
+}
+
+
 /** Search/Replace string
 +++ This function searches for a pattern and replaces its first 
 +++ occurence with the replacement string. If no match is found, 
