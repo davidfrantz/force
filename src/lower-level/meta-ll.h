@@ -34,7 +34,6 @@ Level 1 metadata header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/brick-cl.h"
-#include "../lower-level/table-ll.h"
 #include "../lower-level/param-ll.h"
 
 
@@ -46,7 +45,6 @@ typedef struct {
   char  orig_band[NPOW_03];   // Band ID in original file name
   char  fname[NPOW_10]; // file name
   int   fill;           // fill value
-  int   rsr_band;       // ID in RSR table
   float lmax, lmin;     // radiance min/max
   float qmax, qmin;     // quantized DN min/msx
   float rmul, radd;     // reflectance scaling factor
