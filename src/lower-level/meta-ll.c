@@ -275,11 +275,24 @@ char *tokenptr2 = NULL;
 char *separator = " =\":";
 char *separator2 = "-";
 char sensor[NPOW_04];
-char domain[NPOW_10];
 int nchar;
-int b, b_temp = 0, nb = 0, b_rsr, lid = 0, path = 0, row = 0;
+int b, b_temp = 0, nb = 0, lid = 0, path = 0, row = 0;
 date_t date;
 GDALDatasetH fp_;
+char domain[NPOW_10];
+const char domains_tm[7][NPOW_10] = {
+  "BLUE", "GREEN", "RED", 
+  "NIR", "SWIR1", "SWIR2", "TEMP"
+};
+const char domains_oli[9][NPOW_10] = {
+  "ULTRABLUE", "BLUE", "GREEN", "RED", 
+  "NIR", "CIRRUS", "SWIR1", "SWIR2", "TEMP"
+};
+const char band_id_tm[7][NPOW_03] = {
+  "1", "2", "3", "4", "5", "7", "6" };
+const char band_id_oli[9][NPOW_03] = {
+  "1", "2", "3", "4", "5", "9", "6", "7", "10" };
+
 
   #ifdef FORCE_DEBUG
   printf("reading Landsat metadata\n");
@@ -332,131 +345,25 @@ GDALDatasetH fp_;
         if (nchar < 0 || nchar >= NPOW_04){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
-        for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
-
 
         meta->cal = allocate_calibration(nb);
 
 
-        // set start of Relative Spectral Response Array
-        switch (lid){
-          case 4:
-            b_rsr = _RSR_START_LND04_;
-            break;
-          case 5:
-            b_rsr = _RSR_START_LND05_;
-            break;
-          case 7:
-            b_rsr = _RSR_START_LND07_;
-            break;
-          case 8:
-            b_rsr = _RSR_START_LND08_;
-            break;
-          case 9:
-            b_rsr = _RSR_START_LND09_;
-            break;
-          default:
-            printf("unknown satellite. ");
-            return FAILURE;
-        }
+        for (b=0; b<nb; b++){
 
-        #ifdef FORCE_DEBUG
-        printf("Start of RSR array: %d\n", b_rsr);
-        #endif
-
-        b = 0;
-        if (lid >= 8){
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "ULTRABLUE");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "BLUE");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "GREEN");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "RED");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "NIR");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "9");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "CIRRUS");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "SWIR1");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "SWIR2");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "10");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "TEMP");
-          b++;
-
-        } else {
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "BLUE");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "GREEN");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "RED");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "NIR");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "SWIR1");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "SWIR2");
-          b++;
-
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
-          meta->cal[b].rsr_band = b_rsr++;
-          set_brick_domain(DN, b, "TEMP");
-          b++;
+          set_brick_sensor(DN, b, sensor);
+          if (lid >= 8){
+            copy_string(meta->cal[b].orig_band, NPOW_03, band_id_oli[b]);
+            set_brick_domain(DN, b, domains_oli[b]);
+          } else {
+            copy_string(meta->cal[b].orig_band, NPOW_03, band_id_tm[b]);
+            set_brick_domain(DN, b, domains_tm[b]);
+          }
 
         }
 
         b_temp = find_domain(DN, "TEMP");
 
-
-        //#ifdef FORCE_DEBUG
-        //printf("%d input bands, %d output bands.\n", _NB_, _NO_);
-        //#endif
 
       // file names
       } else if (strstr(tag, "FILE_NAME") != NULL){
@@ -596,6 +503,7 @@ GDALDatasetH fp_;
   set_brick_filename(DN, "DIGITAL-NUMBERS");
   set_brick_par(DN, pl2->params->log);
 
+
   nchar = snprintf(meta->refsys, NPOW_04, "%03d%03d", path, row);
   if (nchar < 0 || nchar >= NPOW_04){
     printf("Buffer Overflow in assembling WRS-2\n"); return FAILURE;}
@@ -651,7 +559,7 @@ char *separator2 = "-";
 char *separator3 = "-T:.";
 char d_top_1[NPOW_10];
 char d_top_2[NPOW_10];
-int b, nb, b_rsr;
+int b, nb;
 int i = 0, j = 0, ii, jj;
 int left, right;
 int top, bottom;
@@ -663,11 +571,20 @@ bool s = false, v = false, z = false, a = false;
 char d_img[NPOW_10];
 char id_img[NPOW_10];
 char sensor[NPOW_04];
-char domain[NPOW_10];
-int nchar;
 date_t date;
 GDALDatasetH fp_;
 int svgrid = 5000;
+char domain[NPOW_10];
+const char domains[13][NPOW_10] = {
+  "ULTRABLUE", "BLUE", "GREEN", "RED", 
+  "REDEDGE1", "REDEDGE2", "REDEDGE3", 
+  "BROADNIR", "NIR", "WVP", "CIRRUS", 
+  "SWIR1","SWIR2"
+};
+const char band_id[13][NPOW_03] = {
+  "01", "02", "03", "04", "05", "06", 
+  "07", "08", "8A", "09", "10", "11", "12", 
+};
 
 
   /** initialize **/
@@ -740,104 +657,18 @@ int svgrid = 5000;
           printf("unknown/unsupported sensor ID! "); return FAILURE;
         }
 
-        nchar = snprintf(sensor, NPOW_04, "SEN%s", tokenptr2);
-        if (nchar < 0 || nchar >= NPOW_04){
-          printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
-
-        for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
-
-        // set start of Relative Spectral Response Array
-        if (strcmp(sensor, "SEN2A") == 0){
-          b_rsr = _RSR_START_SEN2A_;
-        } else if (strcmp(sensor, "SEN2B") == 0){
-          b_rsr = _RSR_START_SEN2B_;
-        } else {
-          printf("unknown/unsupported Sentinel-2! "); return FAILURE;
-        }
-
-        #ifdef FORCE_DEBUG
-        printf("Start of RSR array: %d\n", b_rsr);
-        #endif
-
-        b = 0;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "01");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "ULTRABLUE");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "02");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "BLUE");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "03");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "GREEN");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "04");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "RED");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "05");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "REDEDGE1");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "06");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "REDEDGE2");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "07");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "REDEDGE3");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "08");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "BROADNIR");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "8A");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "NIR");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "09");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "VAPOR");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "10");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "CIRRUS");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "11");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "SWIR1");
-        b++;
-
-        copy_string(meta->cal[b].orig_band, NPOW_03, "12");
-        meta->cal[b].rsr_band = b_rsr++;
-        set_brick_domain(DN, b, "SWIR2");
-        b++;
-
-        nchar = snprintf(d_img, NPOW_10, "%s/IMG_DATA", pl2->d_level1);
-        if (nchar < 0 || nchar >= NPOW_10){
-          printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
+        concat_string_2(sensor, NPOW_04, "SEN", tokenptr2, "");
+        concat_string_2(id_img, NPOW_10, pl2->d_level1, "IMG_DATA", "/");
 
         // get filename
         for (b=0; b<nb; b++){
 
-          //if (pl2->use.refbands[b]) _NO_++;
+          set_brick_sensor(DN, b, sensor);
 
-          nchar = snprintf(id_img, NPOW_10, "_B%s.jp2", meta->cal[b].orig_band);
-          if (nchar < 0 || nchar >= NPOW_10){
-            printf("Buffer Overflow in assembling image ID\n"); return FAILURE;}
+          copy_string(meta->cal[b].orig_band, NPOW_03, band_id[b]);
+          set_brick_domain(DN, b, domains[b]);
+
+          concat_string_3(id_img, NPOW_10, "_B", meta->cal[b].orig_band, ".jp2", "");
 
           if (findfile(d_img, id_img, NULL, meta->cal[b].fname, NPOW_10) == FAILURE){
             printf("Unable to find image %s. ", id_img); return FAILURE;}
@@ -1216,7 +1047,6 @@ int svgrid = 5000;
 void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type){
 char str1[NPOW_10], add1[NPOW_10];
 char str2[NPOW_10], add2[NPOW_10];
-int nchar;
 
 
   if (lid == 7 && strcmp(cal->orig_band, "6") == 0){
@@ -1229,98 +1059,71 @@ int nchar;
 
   if (type == 0){
     if (strcmp(cal->fname, "NULL") == 0){
-      nchar = snprintf(str1, NPOW_10, "FILE_NAME_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      nchar = snprintf(str2, NPOW_10, "BAND%s%s_FILE_NAME",  cal->orig_band, add2);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "FILE_NAME_BAND_", cal->orig_band, add1, "");
+      concat_string_4(str2, NPOW_10, "BAND", cal->orig_band, add2, "_FILE_NAME", "");
       if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
-        nchar = snprintf(cal->fname, NPOW_10, "%s/%s", d_level1, value);
-        if (nchar < 0 || nchar >= NPOW_10){
-          printf("Buffer Overflow in assembling filename\n"); exit(1);}
+        concat_string_2(cal->fname, NPOW_10, d_level1, value, "/");
       }
     }
   } else if (type == 1){
     if (cal->lmax ==  cal->fill){
-      nchar = snprintf(str1, NPOW_10, "RADIANCE_MAXIMUM_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      nchar = snprintf(str2, NPOW_10, "LMAX_BAND%s%s",              cal->orig_band, add2);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "RADIANCE_MAXIMUM_BAND_", cal->orig_band, add1, "");
+      concat_string_3(str2, NPOW_10, "LMAX_BAND", cal->orig_band, add2, "");
+      if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
+        concat_string_2(cal->fname, NPOW_10, d_level1, value, "/");
+      }
       if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
         cal->lmax = atof(value);
       }
     }
   } else if (type == 2){
     if (cal->lmin == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "RADIANCE_MINIMUM_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      nchar = snprintf(str2, NPOW_10, "LMIN_BAND%s%s",              cal->orig_band, add2);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "RADIANCE_MINIMUM_BAND_", cal->orig_band, add1, "");
+      concat_string_3(str2, NPOW_10, "LMIN_BAND", cal->orig_band, add2, "");
       if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
         cal->lmin = atof(value);
       }
     }
   } else if (type == 3){
     if (cal->qmax == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "QUANTIZE_CAL_MAX_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      nchar = snprintf(str2, NPOW_10, "QCALMAX_BAND%s%s",           cal->orig_band, add2);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "QUANTIZE_CAL_MAX_BAND_", cal->orig_band, add1, "");
+      concat_string_3(str2, NPOW_10, "QCALMAX_BAND", cal->orig_band, add2, "");
       if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
         cal->qmax = atof(value);
       }
     }
   } else if (type == 4){
     if (cal->qmin == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "QUANTIZE_CAL_MIN_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      nchar = snprintf(str2, NPOW_10, "QCALMIN_BAND%s%s",           cal->orig_band, add2);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "QUANTIZE_CAL_MIN_BAND_", cal->orig_band, add1, "");
+      concat_string_3(str2, NPOW_10, "QCALMIN_BAND", cal->orig_band, add2, "");
       if (strcmp(tag, str1) == 0 || strcmp(tag, str2) == 0){
         cal->qmin = atof(value);
       }
     }
   } else if (type == 5){
     if (cal->rmul == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "REFLECTANCE_MULT_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      if (strcmp(tag, str1) == 0){// || strcmp(tag, str2) == 0){
+      concat_string_3(str1, NPOW_10, "REFLECTANCE_MULT_BAND_", cal->orig_band, add1, "");
+      if (strcmp(tag, str1) == 0){
         cal->rmul = atof(value);
       }
     }
   } else if (type == 6){
     if (cal->radd == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "REFLECTANCE_ADD_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
-      if (strcmp(tag, str1) == 0){// || strcmp(tag, str2) == 0){
+      concat_string_3(str1, NPOW_10, "REFLECTANCE_ADD_BAND_", cal->orig_band, add1, "");
+      if (strcmp(tag, str1) == 0){
         cal->radd = atof(value);
       }
     }
   } else if (type == 7){
     if (cal->k1 == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "K1_CONSTANT_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "K1_CONSTANT_BAND_", cal->orig_band, add1, "");
       if (strcmp(tag, str1) == 0){
         cal->k1 = atof(value);
       }
     }
   } else if (type == 8){
     if (cal->k2 == cal->fill){
-      nchar = snprintf(str1, NPOW_10, "K2_CONSTANT_BAND_%s%s", cal->orig_band, add1);
-      if (nchar < 0 || nchar >= NPOW_10){
-        printf("Buffer Overflow in assembling basename\n"); exit(1);}
+      concat_string_3(str1, NPOW_10, "K2_CONSTANT_BAND_", cal->orig_band, add1, "");
       if (strcmp(tag, str1) == 0){
         cal->k2 = atof(value);
       }
