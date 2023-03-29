@@ -21,26 +21,48 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Reading all-purpose files
+Handle tables (csv-styled)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef READ_CL_H
-#define READ_CL_H
+#ifndef TABLE_CL_H
+#define TABLE_CL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
+#include <stdbool.h> // boolean data type
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/string-cl.h"
+#include "../cross-level/stats-cl.h"
+#include "../cross-level/utils-cl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char ***read_tagvalue(char *fname, int *nrows);
+typedef struct {
+  int nrow;
+  int ncol;
+  bool has_row_names;
+  bool has_col_names;
+  char **row_names;
+  char **col_names;
+  double **data;
+  bool *row_mask;
+  bool *col_mask;
+  int n_active_cols;
+  int n_active_rows;
+  double *mean;
+  double *sd;
+} table_t;
+
+table_t read_table(char *fname, bool has_row_names, bool has_col_names);
+table_t allocate_table(int nrow, int ncol, bool has_row_names, bool has_col_names);
+void print_table(table_t *table, bool truncate);
+void free_table(table_t *table);
 
 #ifdef __cplusplus
 }
