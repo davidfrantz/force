@@ -228,6 +228,12 @@ GDALDriverH driver;
       printf("Allocating atc failed.\n"); return FAILURE;}
 
 
+    /** read and compile tables
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+    if (compile_tables(atc, DN) == FAILURE){
+      printf("Compiling tables failed.\n"); return FAILURE;}
+
+
     /** initialize Quality Assurance Information
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (bounds_level1(meta, DN, &QAI, pl2) == FAILURE){
