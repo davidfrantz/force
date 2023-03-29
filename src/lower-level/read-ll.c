@@ -346,7 +346,7 @@ short  **toa_ = NULL;
 float    *sun_ = NULL;
 int b, b_temp, b_cirrus, nb, nc, p, g;
 short nodata;
-float A, rad, dsun, pi_dsun2, tmp;
+float A, rad, tmp;
 float dn_scale, toa_scale;
 
 
@@ -410,9 +410,6 @@ float dn_scale, toa_scale;
   /** digital numbers to TOA reflectance and brightness temperature (Landsat) **/
   } else {
 
-    dsun = doy2dsun(get_brick_doy(TOA, 0));
-    pi_dsun2  = M_PI*dsun*dsun;
-
     for (b=0; b<nb; b++){
 
       toa_scale = get_brick_scale(TOA, b);
@@ -420,7 +417,7 @@ float dn_scale, toa_scale;
       A = (meta->cal[b].lmax-meta->cal[b].lmin) / 
           (meta->cal[b].qmax-meta->cal[b].qmin);
 
-      #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
+      #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A,  meta, atc) default(none) 
       {
 
         #pragma omp for schedule(guided)
@@ -428,12 +425,11 @@ float dn_scale, toa_scale;
 
           if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
 
-          // dn to radiance
-          rad = A * (dn_[b][p]-meta->cal[b].qmin) + meta->cal[b].lmin;
 
-          // radiance to brightness temperature in kelvin
+          // DN to radiance to brightness temperature in kelvin
           if (b == b_temp){
 
+            rad = A * (dn_[b][p]-meta->cal[b].qmin) + meta->cal[b].lmin;
             tmp = meta->cal[b].k2/log((meta->cal[b].k1/rad)+1)*toa_scale;
             if (tmp < SHRT_MAX){
               toa_[b][p] = (short)tmp;
@@ -441,18 +437,11 @@ float dn_scale, toa_scale;
               toa_[b][p] = SHRT_MAX;
             }
 
-          // radiance to reflectance
+          // DN to reflectance
           } else {
 
             g = convert_brick_p2p(QAI, atc->xy_sun, p);
-
-            if (meta->cal[b].rmul == meta->cal[b].fill){
-              // old-style DN -> radiance -> reflectance conversion
-              tmp = rad*pi_dsun2 / (atc->E0[b]*sun_[g]);
-            } else {
-              // new DN -> reflectance conversion
-              tmp = (meta->cal[b].radd + meta->cal[b].rmul*dn_[b][p]) / sun_[g];
-            }
+            tmp = (meta->cal[b].radd + meta->cal[b].rmul*dn_[b][p]) / sun_[g];
 
             if (tmp < FLT_MIN){
               if (b == b_cirrus){
