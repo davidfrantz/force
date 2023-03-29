@@ -23,6 +23,7 @@ The spatial data cube definition is appended to each data cube, i.e. to each dir
 Naming convention
 ^^^^^^^^^^^^^^^^^
 
+The basename of the output files can be defined in the parameter-file. The basename will be appended by Module ID, product ID, and the file extension.
 
 
 File format
@@ -62,4 +63,7 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
 Product type
 ^^^^^^^^^^^^
 
-
+* Landscape Metrics
+  
+  Currently available metrics are unique patch ID, weighted mean patch area, weighted mean fractal dimension index, edge density, number of patches and
+  effective mesh size. Additionally, arithmetic mean, geometric mean, standard deviation, maximum value and the area of the foreground class within the kernel are available.
