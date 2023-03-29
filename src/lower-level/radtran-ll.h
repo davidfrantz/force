@@ -31,8 +31,6 @@ Radiative transfer computations header
 #include <stdbool.h> // boolean data type
 #include <math.h>    // common mathematical functions
 
-#include "../lower-level/table-ll.h"
-
 
 #ifdef __cplusplus
 extern "C" {
