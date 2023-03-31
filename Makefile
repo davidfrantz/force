@@ -80,8 +80,11 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-tile-finder force-train force-level2-report force-cube-init \
 			force-init force-datacube-size
 
-FORCE_MISC = force-level2-report.Rmd sensor-bandlist.csv index-bandlist.csv
-
+FORCE_MISC = force-level2-report.Rmd sensor-bandlist.csv index-bandlist.csv \
+			 E0.csv absorption_water_vapor.csv absorption_ozone.csv library_water.csv \
+			 spectral-response_LND04.csv spectral-response_LND05.csv \
+			 spectral-response_LND07.csv spectral-response_LND08.csv spectral-response_LND09.csv \
+			 spectral-response_SEN2A.csv spectral-response_SEN2B.csv
 
 ### COMPILER
 
@@ -453,6 +456,18 @@ check:
 misc: temp
 	cp $(DD)/sensor-bandlist.csv $(TM)/sensor-bandlist.csv
 	cp $(DD)/index-bandlist.csv $(TM)/index-bandlist.csv
+	cp $(DD)/E0.csv $(TM)/E0.csv 
+	cp $(DD)/absorption_water_vapor.csv $(TM)/absorption_water_vapor.csv 
+	cp $(DD)/absorption_ozone.csv $(TM)/absorption_ozone.csv 
+	cp $(DD)/library_water.csv $(TM)/library_water.csv 
+	cp $(DD)/spectral-response_LND04.csv $(TM)/spectral-response_LND04.csv
+	cp $(DD)/spectral-response_LND05.csv $(TM)/spectral-response_LND05.csv
+	cp $(DD)/spectral-response_LND07.csv $(TM)/spectral-response_LND07.csv
+	cp $(DD)/spectral-response_LND08.csv $(TM)/spectral-response_LND08.csv
+	cp $(DD)/spectral-response_LND09.csv $(TM)/spectral-response_LND09.csv
+	cp $(DD)/spectral-response_SEN2A.csv $(TM)/spectral-response_SEN2A.csv
+	cp $(DD)/spectral-response_SEN2B.csv $(TM)/spectral-response_SEN2B.csv
+
 
 bash: temp
 	cp $(DB)/force-cube.sh $(TB)/force-cube
