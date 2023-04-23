@@ -6,6 +6,10 @@ Level 1 Cloud Storage Downloader
 
 **How to download Landsat and Sentinel-2 Level-1 data from cloud services**
 
+.. note:: 
+    
+    FORCE Level 1 CSD only provide Sentinel-2 and `Landsat Collection 1 <https://www.usgs.gov/landsat-missions/landsat-collection-1>`_ data. For downloading of `Landsat Collection 2 <https://www.usgs.gov/landsat-missions/landsat-collection-2>`_ data use :ref:`force-level1-landsat <level1-landsat>`.
+
 This tutorial covers the process of querying and downloading Landsat and Sentinel-2 Level 1 data from cloud services (currently Google Cloud Storage).
 FORCE Level 1 CSD offers a high level of detail in requesting data and creates a consistent Level 1 data pool, as well as queue files that can be used for Level 2 processing.
 

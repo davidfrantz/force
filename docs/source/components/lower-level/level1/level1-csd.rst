@@ -3,6 +3,10 @@
 force-level1-csd
 ================
 
+.. note:: 
+    
+    FORCE Level 1 CSD only provide Sentinel-2 and `Landsat Collection 1 <https://www.usgs.gov/landsat-missions/landsat-collection-1>`_ data. For downloading of `Landsat Collection 2 <https://www.usgs.gov/landsat-missions/landsat-collection-2>`_ data use :ref:`force-level1-landsat <level1-landsat>`.
+
 FORCE can download Landsat and Sentinel-2 data from cloud storage providers (currently Google Cloud Storage).
 
 ``force-level1-csd`` allows to search for image acquisitions that precisely match the user's requirements, manages data pool, and prepares/updates the file queue required for level 2 procesing.
