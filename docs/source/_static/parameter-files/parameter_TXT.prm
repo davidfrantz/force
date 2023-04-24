@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -57,8 +57,6 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
-# Use STREAMING = FALSE to disable streaming. This will perform reading, 
-# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
@@ -103,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: ]0,BLOCK_SIZE]
+# Type: Double. Valid range: [0,BLOCK_SIZE]
 RESOLUTION = 10
 
 # FEATURES
@@ -130,14 +128,14 @@ FEATURE_EXCLUDE = FALSE
 # ------------------------------------------------------------------------
 # This parameter defines the radius of the kernel used for computing the
 # texture metrics (in projection units, commonly in meters).
-# Type: Double. Valid values: ]0,BLOCK_SIZE]
+# Type: Double. Valid values: [0,BLOCK_SIZE]
 TXT_RADIUS = 50
 # This parameter defines the number of iterations for running the morpho-.
 # logical operations.
 # Type: Integer. Valid values: [1,1000]
 TXT_ITERATION = 1
 # Which Texture Metrics should be computed? There will be one TXT output file
-# for each metric with as many bands as there are features(in the same order).
+# for each metric with as many bands as there are features (in the same order).
 # Currently available metrics are dilation, erosion, opening, closing, gradient,
 # blackhat and tophat.
 # Type: Character list. Valid values: {DIL,ERO,OPN,CLS,GRD,BHT,THT}

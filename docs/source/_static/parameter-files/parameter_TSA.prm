@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -57,8 +57,6 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
-# Use STREAMING = FALSE to disable streaming. This will perform reading, 
-# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
@@ -103,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: ]0,BLOCK_SIZE]
+# Type: Double. Valid range: [0,BLOCK_SIZE]
 RESOLUTION = 10
 # How to reduce spatial resolution for cases when the image resolution is higher
 # than the analysis resolution. If FALSE, the resolution is degraded using Nearest
@@ -121,7 +119,7 @@ USE_L2_IMPROPHE = FALSE
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
-# Sensors to be used in the analysis. Multi-sensor analyses are restricted
+# Sensors to be used in the analysis. Multi-sensor analysis are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
 # LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
@@ -131,7 +129,7 @@ USE_L2_IMPROPHE = FALSE
 # (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
 # (7-band Aqua MODIS).
 # The resulting outputs are named according to their band designation, i.e. 
-# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
+# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
 # bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or
 # VVVHP (VV/VH polarized), MODIS (7-band MODIS).
 # BAP Composites with such a band designation can be input again (e.g. 
@@ -156,7 +154,7 @@ SPECTRAL_ADJUST = FALSE
 #   SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}
 SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION
 # Threshold for removing outliers. Triplets of observations are used to determine
-# the overall noise in the time series by computinglinearly interpolating between
+# the overall noise in the time series by computing linearly interpolating between
 # the bracketing observations. The RMSE of the residual between the middle value
 # and the interpolation is the overall noise. Any observations, which have a
 # residual larger than a multiple of the noise are iteratively filtered out
@@ -177,7 +175,7 @@ BELOW_NOISE = 1
 DATE_RANGE = 2010-01-01 2019-12-31
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
-# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
+# 2019-12-31, DOY_RANGE = 91 273 will use all April-September observations from
 # 2010-2019. If you want to extend this window over years give DOY min > 
 # DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 
 # will use all October-March observations from 2010-2019.
@@ -257,7 +255,7 @@ RBF_SIGMA = 8 16 32
 # that are way too distant (in terms of time) are considered. Thus, the
 # tails of the kernel are cut off. This parameter specifies, which percen-
 # tage of the area under the Gaussian should be used.
-# Type: Float. Valid range: ]0,1]
+# Type: Float. Valid range: [0,1]
 RBF_CUTOFF = 0.95
 # Definition of how many modes per season are used for harmonic interpolation,
 # i.e. uni-modal (1), bi-modal (2), or tri-modal (3).
@@ -351,7 +349,7 @@ STM = Q25 Q50 Q75 AVG STD
 # mum, maximum, range, skewness, kurtosis, median, 10/25/75/90% quantiles,
 # and interquartile range
 # Type: Character. Valid values: {MIN,Q10,Q25,Q50,Q75,Q90,MAX,AVG,STD,
-#   RNG,IQR,SKW,KRT,NUM
+#   RNG,IQR,SKW,KRT,NUM}
 FOLD_TYPE = AVG
 # Standardize the FB* time series with pixel mean and/or standard deviation?
 # Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}
@@ -408,7 +406,7 @@ LSP_HEMISPHERE = NORTH
 LSP_N_SEGMENT = 4
 # Amplitude threshold for detecing Start, and End of Season, i.e. the date,
 # at which xx% of the amplitude is observed
-# Type: Float. Valid range: ]0,1[
+# Type: Float. Valid range: [0,1]
 LSP_AMP_THRESHOLD = 0.2
 # LSP won't be derived if the seasonal index values do not exceed following
 # value. This is useful to remove unvegetated surfaces.
@@ -426,7 +424,7 @@ LSP_MIN_AMPLITUDE = 500
 # minimum, start of season, rising inflection, peak of season, falling 
 # inflection, end of season, late minimum, base level, seasonal amplitude;
 # integrals of the total season, base level, base+total, green season; rates
-# of averahe rising, average falling, maximum rising, maximum falling.
+# of average rising, average falling, maximum rising, maximum falling.
 # Type: Character list. Valid values: {DEM,DSS,DRI,DPS,DFI,DES,DLM,LTS,LGS,
 #   VEM,VSS,VRI,VPS,VFI,VES,VLM,VBL,VSA,IST,IBL,IBT,IGS,RAR,RAF,RMR,RMF}
 LSP = VSS VPS VES VSA RMR IGS
@@ -438,7 +436,7 @@ STANDARDIZE_LSP = NONE
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_SPL = FALSE
 # Output the Phenometrics? These are layer stacks per phenometric with as many
-# bands as years (excluding one year at the beginning/end of the time series.
+# bands as years (excluding one year at the beginning/end of the time series).
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_LSP = FALSE
 # Compute and output a linear trend analysis on the requested Phenometric time
@@ -458,13 +456,13 @@ OUTPUT_CAP = FALSE
 # Please note that these only work well with non-negative indices.--------
 # ------------------------------------------------------------------------
 # Threshold for detecing Start of Season in the cumulative time series.
-# Type: Float. Valid range: ]0,1[
+# Type: Float. Valid range: [0,1]
 POL_START_THRESHOLD = 0.2
 # Threshold for detecing Mid of Season in the cumulative time series.
-# Type: Float. Valid range: ]0,1[
+# Type: Float. Valid range: [0,1]
 POL_MID_THRESHOLD = 0.5
 # Threshold for detecing End of Season in the cumulative time series.
-# Type: Float. Valid range: ]0,1[
+# Type: Float. Valid range: [0,1]
 POL_END_THRESHOLD = 0.8
 # Should the start of each phenological year be adapated?
 # If FALSE, the start is static, i.e. Date of Early Minimum and Date of Late

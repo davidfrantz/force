@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -57,8 +57,6 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
-# Use STREAMING = FALSE to disable streaming. This will perform reading, 
-# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
@@ -103,12 +101,12 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: ]0,BLOCK_SIZE]
+# Type: Double. Valid range: [0,BLOCK_SIZE]
 RESOLUTION = 10
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
-# Sensors to be used in the analysis. Multi-sensor analyses are restricted
+# Sensors to be used in the analysis. Multi-sensor analysis are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
 # LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
@@ -118,7 +116,7 @@ RESOLUTION = 10
 # (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
 # (7-band Aqua MODIS).
 # The resulting outputs are named according to their band designation, i.e. 
-# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
+# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
 # bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or
 # VVVHP (VV/VH polarized), MODIS (7-band MODIS).
 # BAP Composites with such a band designation can be input again (e.g. 
@@ -151,7 +149,7 @@ SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUB
 DATE_RANGE = 2010-01-01 2019-12-31
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
-# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
+# 2019-12-31, DOY_RANGE = 91 273 will use all April-September observations from
 # 2010-2019. If you want to extend this window over years give DOY min > 
 # DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 
 # will use all October-March observations from 2010-2019.
@@ -165,10 +163,10 @@ DOY_RANGE = 1 365
 # Type: Integer. Valid values: [1,12]
 MONTH_STEP = 3
 # Which statistics should be computed? Currently available statistics are
-# the number of observations, and aggregate statistics of the temporal
+# the number of observations and aggregate statistics of the temporal
 # difference between observations (available are average, standard deviation,
 # minimum, maximum, range, skewness, kurtosis, any quantile from 1-99%, and
-# interquartile range. Note that median is Q50.
+# interquartile range. Note that median is Q50).
 # Type: Character list. Valid values: {NUM,MIN,Q01-Q99,MAX,AVG,STD,RNG,IQR,SKW,KRT}
 CSO = NUM AVG STD
 
