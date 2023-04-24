@@ -71,7 +71,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
        into the output raster. default: no attribute is used; a binary mask 
        with geometry presence (1) or absence (0) is generated
   -l = layer name for vector data (default: basename of input, without extension)
-  -n = output nodate value (defaults to 255) 
+  -n = output nodata value (defaults to 255) 
   -t = output data type (defaults to Byte; see GDAL for datatypes; 
        but note that FORCE HLPS only understands Int16 and Byte types correctly)
   -o = output directory: the directory where you want to store the cubes

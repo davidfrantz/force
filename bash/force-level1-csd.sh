@@ -72,6 +72,15 @@ Usage: force-level1-csd [-c min,max] [-d starttime,endtime] [-n] [-k] [-s sensor
                         [-t tier] [-u]
                         metadata-dir level-1-datapool queue aoi
 
+  optional:
+  -c = cloudcover
+  -d = daterange
+  -n = no-act
+  -k = keep metadata
+  -s = sensor list
+  -t = tier
+  -u = update metadata
+
 Error: `printf "$1"`
 HELP
 
