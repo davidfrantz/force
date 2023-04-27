@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 
 # FEATURES

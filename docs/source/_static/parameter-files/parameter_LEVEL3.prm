@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 # How to reduce spatial resolution for cases when the image resolution is higher
 # than the analysis resolution. If FALSE, the resolution is degraded using Nearest
@@ -204,7 +204,7 @@ Y_FACTOR = 0.75
 #   Gaussian           s0 < s1 > s2
 #   Descending sigmoid s0 > s1 > s2
 #   Ascending sigmoid  s0 < s1 < s2
-# Type: Float list, 3 values. Valid values: [0,1]
+# Type: Float list, 3 values. Valid values: ]0,1[
 DOY_SCORE = 0.01 0.99 0.01
 # These parameters specify the DOYs used for fitting the DOY scoring
 # functions in case of the static compositing. They are not used for the 

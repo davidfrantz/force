@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 # How to reduce spatial resolution for cases when the image resolution is higher
 # than the analysis resolution. If FALSE, the resolution is degraded using Nearest
@@ -195,14 +195,14 @@ SEASONAL_WINDOW = 1 91 181 271 365
 # This parameter defines the radius of the prediction kernel (in projection
 # units, commonly in meters). A larger kernel increases the chance of finding
 # a larger number of within-class pixels, but increases prediction time
-# Type: Double. Valid values: [0,BLOCK_SIZE]
+# Type: Double. Valid values: ]0,BLOCK_SIZE]
 KERNEL_SIZE = 2500
 # This parameter defines the radius of the kernel used for computing the
 # heterogeneity proxies (in projection units, commonly in meters). The
 # heterogeneity proxies are derived from a focal standard deviation filter.
 # The width of the kernel should reflect the scale difference between the
 # coarse and medium resolution data.
-# Type: Double. Valid values: [0,BLOCK_SIZE]
+# Type: Double. Valid values: ]0,BLOCK_SIZE]
 KERNEL_TEXT = 330
 
 # Level 2 ImproPhe PARAMETERS

@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no anal<sis mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 
 # FEATURES
@@ -162,7 +162,7 @@ ML_CONVERGENCE = 0
 # This parameter is a scaling factor to scale the prediction to fit into a
 # 16bit signed integer. This parameter should be set in dependence on the
 # scale used for training the model.
-# Type: Float. Valid range: [0,...
+# Type: Float. Valid range: [1,...
 ML_SCALE = 10000
 # This parameter defines the basename for the output files. The basename will
 # be appended by Module ID, product ID, and the file extension.

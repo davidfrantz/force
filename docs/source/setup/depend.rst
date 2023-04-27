@@ -22,7 +22,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
     sudo apt-get install parallel
 
 
-  Parallel has to use ``--gnu mode``, not ``--tollef``. If ``--tollef`` is your default (occurred on older installations), fix this permanently by deleting the ``--tollef`` flag in ``/etc/parallel/config``. Refer to the mainpage of parallel for details.
+  Parallel has to use ``--gnu mode``, not ``--tollef``. If ``--tollef`` is your default (occurred on older installations), fix this permanently by deleting the ``--tollef`` flag in ``/etc/parallel/config``. Refer to the manpage of parallel for details.
   Parallel will display a citation request. To silence this citation notice run this code here once:
   
   .. code-block:: bash

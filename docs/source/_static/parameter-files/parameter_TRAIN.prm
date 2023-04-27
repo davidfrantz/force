@@ -34,7 +34,7 @@ RESPONSE_VARIABLE = 1
 # This parameter specifies how many samples (in %) should be used for
 # training the model. The other samples are left out, and used to vali-
 # date the model.
-# Type: Float. Valid range: [0,100]
+# Type: Float. Valid range: ]0,100]
 PERCENT_TRAIN = 70
 # This parameter specifies whether the samples should be randomly drawn (TRUE)
 # or if the first n samples (FALSE) should be used for training.

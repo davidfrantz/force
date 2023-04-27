@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 # How to reduce spatial resolution for cases when the image resolution is higher
 # than the analysis resolution. If FALSE, the resolution is degraded using Nearest
@@ -255,7 +255,7 @@ RBF_SIGMA = 8 16 32
 # that are way too distant (in terms of time) are considered. Thus, the
 # tails of the kernel are cut off. This parameter specifies, which percen-
 # tage of the area under the Gaussian should be used.
-# Type: Float. Valid range: [0,1]
+# Type: Float. Valid range: ]0,1]
 RBF_CUTOFF = 0.95
 # Definition of how many modes per season are used for harmonic interpolation,
 # i.e. uni-modal (1), bi-modal (2), or tri-modal (3).
@@ -406,7 +406,7 @@ LSP_HEMISPHERE = NORTH
 LSP_N_SEGMENT = 4
 # Amplitude threshold for detecing Start, and End of Season, i.e. the date,
 # at which xx% of the amplitude is observed
-# Type: Float. Valid range: [0,1]
+# Type: Float. Valid range: ]0,1[
 LSP_AMP_THRESHOLD = 0.2
 # LSP won't be derived if the seasonal index values do not exceed following
 # value. This is useful to remove unvegetated surfaces.
@@ -456,13 +456,13 @@ OUTPUT_CAP = FALSE
 # Please note that these only work well with non-negative indices.--------
 # ------------------------------------------------------------------------
 # Threshold for detecing Start of Season in the cumulative time series.
-# Type: Float. Valid range: [0,1]
+# Type: Float. Valid range: ]0,1[
 POL_START_THRESHOLD = 0.2
 # Threshold for detecing Mid of Season in the cumulative time series.
-# Type: Float. Valid range: [0,1]
+# Type: Float. Valid range: ]0,1[
 POL_MID_THRESHOLD = 0.5
 # Threshold for detecing End of Season in the cumulative time series.
-# Type: Float. Valid range: [0,1]
+# Type: Float. Valid range: ]0,1[
 POL_END_THRESHOLD = 0.8
 # Should the start of each phenological year be adapated?
 # If FALSE, the start is static, i.e. Date of Early Minimum and Date of Late

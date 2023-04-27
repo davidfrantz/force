@@ -101,7 +101,7 @@ FILE_TILE = NULL
 BLOCK_SIZE = 0
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: [0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
 RESOLUTION = 10
 
 # FEATURES
@@ -128,12 +128,12 @@ FEATURE_EXCLUDE = FALSE
 # ------------------------------------------------------------------------
 # This parameter defines the radius of the kernel used for computing the
 # landscape metrics (in projection units, commonly in meters).
-# Type: Double. Valid values: [0,BLOCK_SIZE]
+# Type: Double. Valid values: ]0,BLOCK_SIZE]
 LSM_RADIUS = 50
 # This parameter defines the minimum size (in pixels) of an area to be considered as a patch.
 # Patches with fewer pixels will be omitted. Mind that this parameter has an effect on
 # all metrics, inlcuding arithmetic mean, maximum value, ...
-# Type: Integer. Valid values: [1,BLOCK_SIZE]
+# Type: Integer. Valid values: ]1,BLOCK_SIZE]
 LSM_MIN_PATCHSIZE = 3
 # This parameter determines if the kernel for landscape metrics calculation
 # is circular or squared.

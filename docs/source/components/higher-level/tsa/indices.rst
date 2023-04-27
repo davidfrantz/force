@@ -1,5 +1,8 @@
 .. _tsa-indices:
 
+Indices
+=======
+
 Following indices / bands are available in the TSA submodule:
 
 
