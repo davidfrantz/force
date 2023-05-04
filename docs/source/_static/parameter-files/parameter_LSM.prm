@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -57,8 +57,6 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
-# Use STREAMING = FALSE to disable streaming. This will perform reading, 
-# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
@@ -134,7 +132,7 @@ FEATURE_EXCLUDE = FALSE
 LSM_RADIUS = 50
 # This parameter defines the minimum size (in pixels) of an area to be considered as a patch.
 # Patches with fewer pixels will be omitted. Mind that this parameter has an effect on
-# all metrics, inlcuding garithmetic mean, maximum value, ...
+# all metrics, inlcuding arithmetic mean, maximum value, ...
 # Type: Integer. Valid values: ]1,BLOCK_SIZE]
 LSM_MIN_PATCHSIZE = 3
 # This parameter determines if the kernel for landscape metrics calculation

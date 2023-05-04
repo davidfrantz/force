@@ -6,11 +6,11 @@ Optional dependencies
 Some FORCE functionality is dependent on additional open-source software. In order to allow a baseline installation, these dependencies are optional and are not required for the default installation. If you want to enable this functionality, you need to install following software, and follow the optional steps in section F.
 
 * **SPLITS (Spline analysis of Time Series)**, developed by Dr. Sebastian Mader, Trier University, is a standalone software/API, which can be used to fit splines to dense time series in order to interpolate time series and to derive Land Surface Phenology.
-  Some SPLITS-dependent features are implemented in force-tsa (see section VII.E). You only need to install SPLITS if you want to use these features; all other functionality of force-tsa can be used without installing SPLITS.
+  Some SPLITS-dependent features are implemented in force-tsa (see :ref:`tsa`). You only need to install SPLITS if you want to use these features; all other functionality of force-tsa can be used without installing SPLITS.
 
   SPLITS is distributed under the terms of the GNU General Public License, and can be downloaded from `<http://sebastian-mader.net/splits/>`_. SPLITS is itself dependent on GDAL (required for FORCE, see last section), Armadillo and FLTK.
 
-  Installation instructions can be found `here <http://sebastian-mader.net/splits/>`_, or you can try the following steps (Ubuntu). Make sure to change the path to your own home directory. If the `--prefix` is omitted, SPLITS will be installed into a system-wide directory, which is preferably if the code shoould be accessed by multiple users. Note that the GDAL include directory might also be in a different path on your machine (check with `gdal-confif`).
+  Installation instructions can be found `here <http://sebastian-mader.net/splits/>`_, or you can try the following steps (Ubuntu). Make sure to change the path to your own home directory. If the `--prefix` is omitted, SPLITS will be installed into a system-wide directory, which is preferably if the code should be accessed by multiple users. Note that the GDAL include directory might also be in a different path on your machine (check with `gdal-confif`).
 
   **Some changes in SPLITS code!!!**
   

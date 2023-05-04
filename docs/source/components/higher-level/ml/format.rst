@@ -23,6 +23,7 @@ The spatial data cube definition is appended to each data cube, i.e. to each dir
 Naming convention
 ^^^^^^^^^^^^^^^^^
 
+The basename for the output files can be defined in the parameter file. The basename will be appended by module ID, product ID and the file extension.
 
 
 File format
@@ -62,4 +63,6 @@ FORCE-specific metadata will be written to the FORCE domain, and thus are probab
 Product type
 ^^^^^^^^^^^^
 
+* Regression
 
+* Classification
