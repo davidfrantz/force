@@ -400,11 +400,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
     "http://dx.doi.org/10.1016/j.rse.2015.02.009",
     false }
-  { "BCR",
-    "",
-    false }
   { "RVI",
-    "",
+    "Agapiou, A. (2020). Estimating Proportion of Vegetation Cover at the Vicinity "
+    "of Archaeological Sites Using Sentinel-1 and -2 Data, Supplemented by Crowdsourced "
+    "OpenStreetMap Geodata. Applied Sciences, 10, 4764."
+    "https://doi.org/10.3390/app10144764",
     false }
 };
 

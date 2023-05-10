@@ -1156,7 +1156,6 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
                         sen->w_swir1, sen->w_nir, sen->w_swir2, nc, nt, nodata);
       break;
     case _IDX_BCR_:
-      cite_me(_CITE_BCR_);
       index_simple_difference(ard, mask_, ts, sen->vh, sen->vv, nc, nt, nodata);
       break;
     case _IDX_RVI_:
