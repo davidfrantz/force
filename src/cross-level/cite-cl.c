@@ -400,6 +400,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
     "http://dx.doi.org/10.1016/j.rse.2015.02.009",
     false }
+  { "BCR",
+    "",
+    false }
+  { "RVI",
+    "",
+    false }
 };
 
 

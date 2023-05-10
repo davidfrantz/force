@@ -60,7 +60,8 @@ enum { _CITE_FORCE_,       _CITE_L2PS_,       _CITE_ATMVAL_,
        _CITE_NDVIre2_,     _CITE_NDVIre3_,    _CITE_NDVIre1n_,
        _CITE_NDVIre2n_,    _CITE_NDVIre3n_,   _CITE_MSRre_,
        _CITE_MSRren_,      _CITE_CCI_,        _CITE_EV2_,
-       _CITE_HARMONIC_,    _CITE_LENGTH_ };
+       _CITE_HARMONIC_,    _CITE_BCR_,        _CITE_RVI_,
+       _CITE_LENGTH_ };
 
 typedef struct {
   char description[NPOW_10];
