@@ -568,7 +568,7 @@ void write_par_ll_thread(FILE *fp, bool verbose){
     fprintf(fp, "# images are read sequentially or in parallel. Note that we observed two kinds\n");
     fprintf(fp, "# of GDAL installation: (1) the JPEG driver reads each band parallely, but \n");
     fprintf(fp, "# separated images in sequence - we recommend to disable PARALLEL_READS in this\n");
-    fprintf(fp, "# case (for Sentinel-2). (2) The GDAL JPEG drived does not do anything in \n");
+    fprintf(fp, "# case (for Sentinel-2). (2) The GDAL JPEG driver does not do anything in \n");
     fprintf(fp, "# parallel - use PARALLEL_READ to speed up the work (also use it for Landsat).\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
@@ -648,20 +648,20 @@ void write_par_ll_output(FILE *fp, bool verbose){
   fprintf(fp, "OUTPUT_AOD = FALSE\n");
 
   if (verbose){
-    fprintf(fp, "# Output the Water Wapor map? No higher-level FORCE module is using this.\n");
+    fprintf(fp, "# Output the Water Vapor map? No higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_WVP = FALSE\n");
 
   if (verbose){
-    fprintf(fp, "# Output the view zenith map? This product can be used in force-level3; no\n");
+    fprintf(fp, "# Output the View Zenith map? This product can be used in force-level3; no\n");
     fprintf(fp, "# other higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_VZN = FALSE\n");
 
   if (verbose){
-    fprintf(fp, "# Output the  Haze Optimzed Transformation output? This product can be\n");
+    fprintf(fp, "# Output the Haze Optimzed Transformation output? This product can be\n");
     fprintf(fp, "# used in force-level3; no other higher-level FORCE module is using this.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
@@ -728,7 +728,7 @@ void write_par_hl_mask(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Analysis Mask datapool (parent directory of tiled analysis masks)\n");
-    fprintf(fp, "# If no analsys mask should be applied, give NULL.\n");
+    fprintf(fp, "# If no analysis mask should be applied, give NULL.\n");
     fprintf(fp, "# Type: full directory path\n");
   }
   fprintf(fp, "DIR_MASK = NULL\n");
@@ -865,7 +865,7 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
     fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.\n");
     fprintf(fp, "# (7-band Aqua MODIS).\n");
     fprintf(fp, "# The resulting outputs are named according to their band designation, i.e. \n");
-    fprintf(fp, "# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface\n");
+    fprintf(fp, "# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface\n");
     fprintf(fp, "# bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or\n");
     fprintf(fp, "# VVVHP (VV/VH polarized), MODIS (7-band MODIS).\n");
     fprintf(fp, "# BAP Composites with such a band designation can be input again (e.g. \n");
@@ -946,7 +946,7 @@ void write_par_hl_noise(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Threshold for removing outliers. Triplets of observations are used to determine\n");
-    fprintf(fp, "# the overall noise in the time series by computinglinearly interpolating between\n");
+    fprintf(fp, "# the overall noise in the time series by computing linearly interpolating between\n");
     fprintf(fp, "# the bracketing observations. The RMSE of the residual between the middle value\n");
     fprintf(fp, "# and the interpolation is the overall noise. Any observations, which have a\n");
     fprintf(fp, "# residual larger than a multiple of the noise are iteratively filtered out\n");
@@ -986,7 +986,7 @@ void write_par_hl_time(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# DOY range for filtering the time extent. Day-of-Years that are outside of\n");
     fprintf(fp, "# the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 \n");
-    fprintf(fp, "# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from\n");
+    fprintf(fp, "# 2019-12-31, DOY_RANGE = 91 273 will use all April-September observations from\n");
     fprintf(fp, "# 2010-2019. If you want to extend this window over years give DOY min > \n");
     fprintf(fp, "# DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 \n");
     fprintf(fp, "# will use all October-March observations from 2010-2019.\n");
@@ -1071,9 +1071,6 @@ void write_par_hl_thread(FILE *fp, bool verbose){
     fprintf(fp, "# from Block 3 are already being input and results from Block 1 are being\n");
     fprintf(fp, "# output. Each team can have multiple sub-threads to speed up the work. The\n");
     fprintf(fp, "# number of threads to use for each team is given by following parameters.\n");
-    fprintf(fp, "# Use STREAMING = FALSE to disable streaming. This will perform reading, \n");
-    fprintf(fp, "# computing and writing after one another in sequential mode.\n");
-    fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
   }
   fprintf(fp, "NTHREAD_READ = 8\n");
   fprintf(fp, "NTHREAD_COMPUTE = 22\n");
@@ -1122,7 +1119,7 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "YEAR_TARGET = 2018\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter specifies thenumber of bracketing years (target year +- \n");
+    fprintf(fp, "# This parameter specifies the number of bracketing years (target year +- \n");
     fprintf(fp, "# bracketing years), i.e. the compositing period. A value of 2 would result\n");
     fprintf(fp, "# in a five-year compositing period.\n");
     fprintf(fp, "# Type: Integer. Valid values: [0,100]\n");
@@ -1299,7 +1296,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
   fprintf(fp, "BASE_LSP = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter defines year, which corresponds to he 1st band of the\n");
+    fprintf(fp, "# This parameter defines year, which corresponds to the 1st band of the\n");
     fprintf(fp, "# LSP.\n");
     fprintf(fp, "# Type: Integer. Valid values: [1900,2100]\n");
   }
@@ -1349,7 +1346,7 @@ void write_par_hl_index(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Perform the time series analysis using the specified band or index.\n");
-    fprintf(fp, "# Multiple indices can be processed ar once to avoid multiple reads of the\n");
+    fprintf(fp, "# Multiple indices can be processed at once to avoid multiple reads of the\n");
     fprintf(fp, "# same file. Only necessary bands will be input. You will be alerted if the\n");
     fprintf(fp, "# index cannot be computed based on the requested SENSORS. The index SMA is\n");
     fprintf(fp, "# a linear spectral mixture analysis and is dependent on the parameters\n");
@@ -1673,7 +1670,7 @@ void write_par_hl_fold(FILE *fp, bool verbose){
     fprintf(fp, "# mum, maximum, range, skewness, kurtosis, median, 10/25/75/90%% quantiles,\n");
     fprintf(fp, "# and interquartile range\n");
     fprintf(fp, "# Type: Character. Valid values: {MIN,Q10,Q25,Q50,Q75,Q90,MAX,AVG,STD,\n");
-    fprintf(fp, "#   RNG,IQR,SKW,KRT,NUM\n");
+    fprintf(fp, "#   RNG,IQR,SKW,KRT,NUM}\n");
   }
   fprintf(fp, "FOLD_TYPE = AVG\n");
 
@@ -1794,7 +1791,7 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
     fprintf(fp, "# minimum, start of season, rising inflection, peak of season, falling \n");
     fprintf(fp, "# inflection, end of season, late minimum, base level, seasonal amplitude;\n");
     fprintf(fp, "# integrals of the total season, base level, base+total, green season; rates\n");
-    fprintf(fp, "# of averahe rising, average falling, maximum rising, maximum falling.\n");
+    fprintf(fp, "# of average rising, average falling, maximum rising, maximum falling.\n");
     fprintf(fp, "# Type: Character list. Valid values: {DEM,DSS,DRI,DPS,DFI,DES,DLM,LTS,LGS,\n");
     fprintf(fp, "#   VEM,VSS,VRI,VPS,VFI,VES,VLM,VBL,VSA,IST,IBL,IBT,IGS,RAR,RAF,RMR,RMF}\n");
   }
@@ -1815,7 +1812,7 @@ void write_par_hl_lsp(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output the Phenometrics? These are layer stacks per phenometric with as many\n");
-    fprintf(fp, "# bands as years (excluding one year at the beginning/end of the time series.\n");
+    fprintf(fp, "# bands as years (excluding one year at the beginning/end of the time series).\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_LSP = FALSE\n");
@@ -1889,7 +1886,7 @@ void write_par_hl_pol(FILE *fp, bool verbose){
     fprintf(fp, "# each metric (with years as bands).\n");
     fprintf(fp, "# Currently available are the dates of the early minimum, late minimum, peak of season,\n");
     fprintf(fp, "# start of season, mid of season, end of season, early average vector, average vector,\n");
-    fprintf(fp, "# late average vector; lengths of the total season, green season, between averge vectors;\n");
+    fprintf(fp, "# late average vector; lengths of the total season, green season, between average vectors;\n");
     fprintf(fp, "# values of the early minimum, late minimum, peak of season, start of season, mid of season,\n");
     fprintf(fp, "# end of season, early average vector, average vector, late average vector, base level,\n");
     fprintf(fp, "# green amplitude, seasonal amplitude, peak amplitude, green season mean , green season\n");
@@ -2091,7 +2088,7 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
   fprintf(fp, "BASE_COARSE = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter defines year, which corresponds to he 1st band of the\n");
+    fprintf(fp, "# This parameter defines year, which corresponds to the 1st band of the\n");
     fprintf(fp, "# continuous fields.\n");
     fprintf(fp, "# Type: Integer. Valid values: [1900,2100]\n");
   }
@@ -2215,7 +2212,7 @@ void write_par_hl_txt(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Which Texture Metrics should be computed? There will be one TXT output file\n");
-    fprintf(fp, "# for each metric with as many bands as there are features(in the same order).\n");
+    fprintf(fp, "# for each metric with as many bands as there are features (in the same order).\n");
     fprintf(fp, "# Currently available metrics are dilation, erosion, opening, closing, gradient,\n");
     fprintf(fp, "# blackhat and tophat.\n");
     fprintf(fp, "# Type: Character list. Valid values: {DIL,ERO,OPN,CLS,GRD,BHT,THT}\n");
@@ -2256,7 +2253,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter defines the minimum size (in pixels) of an area to be considered as a patch.\n");
     fprintf(fp, "# Patches with fewer pixels will be omitted. Mind that this parameter has an effect on\n");
-    fprintf(fp, "# all metrics, inlcuding garithmetic mean, maximum value, ...\n");
+    fprintf(fp, "# all metrics, inlcuding arithmetic mean, maximum value, ...\n");
     fprintf(fp, "# Type: Integer. Valid values: ]1,BLOCK_SIZE]\n");
   }
   fprintf(fp, "LSM_MIN_PATCHSIZE = 3\n");
@@ -2826,8 +2823,8 @@ void write_par_aux_synthmix(FILE *fp, bool verbose){
     fprintf(fp, "# Class likelihood, i.e. what is the statitical likelihood of drawing an\n");
     fprintf(fp, "# endmember from a specific class. This parameter can be set to PROPORTIONAL\n");
     fprintf(fp, "# or EQUALIZED. If PROPORTIONAL, the likelihood is based on the number of \n");
-    fprintf(fp, "# samples given for each class. If EQUALIZED, the same likelihhod is given \n");
-    fprintf(fp, "# to all classes. Alternatively, custom likelihhods can be defined. In this \n");
+    fprintf(fp, "# samples given for each class. If EQUALIZED, the same likelihood is given \n");
+    fprintf(fp, "# to all classes. Alternatively, custom likelihoods can be defined. In this \n");
     fprintf(fp, "# case, a likelihood needs to be given for each class given in the response \n");
     fprintf(fp, "# file (FILE_RESPONSE), and the sum needs to be 1.\n");
     fprintf(fp, "# Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR\n");
