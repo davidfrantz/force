@@ -16,11 +16,10 @@ This tutorial explains how to use the FORCE Level 1 Archiving Suite (FORCE L1AS)
 
 
 ----------
-Overview**
+**Overview**
 ESA provides an application programming interface (API) for data query and automatic download (see `here <https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/BatchScripting?redirectedfrom=SciHubUserGuide.8BatchScripting>`_).
 Based on some user-defined parameters (coordinates etc.) FORCE L1AS pulls a metadata report from the Copernicus API Hub.
-Each hit is compared
-with the local data holdings you already downloaded.
+Each hit is compared with the local data holdings you already downloaded.
 If a new file is sitting on ESA's end, the missing image is downloaded.
 A file queue is generated and updated accordingly - which is the main input to the FORCE Level 2 Processing System.
 
@@ -31,7 +30,7 @@ A file queue is generated and updated accordingly - which is the main input to t
 
 
 ----------
-Setup**
+**Setup**
 Now, the first step is to get access to ESA's data and services.
 For that, you need an account.
 If you don't have one, register `here <https://scihub.copernicus.eu/dhus/#/self-registration>`_.
@@ -46,9 +45,9 @@ Please note that special characters might be problematic.
 Also note, if you generate this file from a Windows machine, the Windows EOL character will cause problems.
 
 ----------
-Download some data**
-""""""""""
-Instructions**
+Download data
+"""""""""""""
+**Instructions**
 After setting up your account, you should be able to download Sentinel-2 data via FORCE L1AS.
 As with any other FORCE program, you can display short usage instructions by executing the program without any parameters.
 
@@ -93,7 +92,7 @@ As with any other FORCE program, you can display short usage instructions by exe
 
 
 """"""""""
-Dry run**
+**Dry run**
 Please note that FORCE won't check that there is enough space on your hard disc.
 If you don't dare to download all data straight away, there is a dry run option implemented that only checks how much data would be downloaded with the parameters you provided.
 This is given by the optional ``dry`` keyword at the end of the command line.
@@ -118,7 +117,7 @@ If you don't receive any data for your study area, or end up somewhere else enti
 
 
 """"""""""
-Download**
+**Download**
 The actual download is triggered by omitting the ``dry`` option.
 FORCE L1AS downloads all data that match the parameters provided - and which weren't downloaded before.
 Note that the program checks against the files on the disc (not the file queue).
@@ -130,7 +129,7 @@ Do not wonder if FORCE tells you that it has found exactly 100 S2A/B files.
 The ESA API Hub only allows to retrieve metadata for 100 products.
 Thus, FORCE iterates through the pages until no more image can be retrieved.
 
-Please note that download speed varies considerably.. 
+Please note that download speed varies considerably. 
 
 
 .. code-block:: none
@@ -202,7 +201,7 @@ Note that for Sentinel-2, the compression is realized in the image data, not in 
 
 
 The file queue is holding the full filepaths to all ingested images.
-This is the main input to **force-level2**.
+This is the main input to ``force-level2``.
 Each image is in a separate line.
 A processing-state flag determines if the image is enqueued for Level 2 processing - or was already processed and will be ignored next time.
 This flag is either ``QUEUED`` or ``DONE``.
@@ -229,7 +228,7 @@ This flag is either ``QUEUED`` or ``DONE``.
 
 
 ----------
-Download some more data**
+**Download some more data**
 Downloading more data is easy.
 You can use the same datapool, and the same file queue for this.
 Images are only downloaded if they weren't downloaded yet.
@@ -331,7 +330,7 @@ The new files were appended to the file queue, too.
 
 
 ----------
-Setting up a scheduled download**
+**Setting up a scheduled download**
 The same logic can be used to set up a scheduler for downloading your data at regular intervals.
 For example, a daily cronjob can be installed to retrieve all data covering your study area.
 A cronjob is installed by adding lines to the cronjob file.
@@ -355,7 +354,7 @@ Following line will start the download at 3:00 AM each day.
 
 
 ----------
-Long Term Archive**
+**Long Term Archive**
 In September 2019, ESA has activated the Long Term Archive (LTA) to roll out old (and potentially infrequently used) data products from the online storage system to offline storage.
 For details, see `here <https://scihub.copernicus.eu/userguide/LongTermArchive>`_.
 As of now (the following numbers might change in the future), the last year of data shall stay online, and is immediately ready for download.

@@ -3,8 +3,8 @@
 .. role:: bolditalic
     :class: bolditalic
 
-Quality Assurance Information!
-==============================
+Quality Assurance Information
+=============================
 
 **How to deal with the Level 2 quality masks**
 
@@ -47,7 +47,7 @@ From a technical perspective, quality bits save disc space, and reduce the I/O l
 Quality bits in FORCE
 ---------------------
 
-In FORCE, the quality bits are found in the Quality Assurance Information *QAI* product, which is an integral part of each Level 2 dataset, and is alway present next to the reflectance images (``BOA`` or ``TOA``).
+In FORCE, the quality bits are found in the Quality Assurance Information *QAI* product, which is an integral part of each Level 2 dataset, and is always present next to the reflectance images (``BOA`` or ``TOA``).
 
 When generating Best Available Pixel *BAP* composites (Level 3), the bit flags of the selected observation are stored in the first band of the composite information (``INF``) product.
 Currently FORCE implements a 16bit QAI layer with 12 quality bits, some of them as double-bit words:

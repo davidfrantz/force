@@ -152,8 +152,8 @@ Currently available are
 +-----+------------------------------------------------+
 + KRT + Kurtosis                                       +
 +-----+------------------------------------------------+
-+ NUM + Number of observations                         +
-+     +(after outlier detection and interpolation)     +
++ NUM + Number of observations (after outlier          +
++     + detection and interpolation)                   +
 +-----+------------------------------------------------+
 
 
@@ -251,7 +251,7 @@ With ``OUTPUT_EXPLODE = TRUE``, you get one image for each requested index and s
 Visualization
 -------------
 
-Visualizing an RGB color composite in QGIS, wherein the 3 bands come from different physical files, does not work out of the box.. Thus, we need to put the required bands into one file.
+Visualizing an RGB color composite in QGIS, wherein the 3 bands come from different physical files, does not work out of the box. Thus, we need to put the required bands into one file.
 Luckily, a virtual data format suffices.
 This example here stacks the 50% quantiles of the reflectance bands, as well as the 90% quantiles of the indices.
 

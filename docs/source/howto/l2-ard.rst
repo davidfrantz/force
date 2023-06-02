@@ -409,9 +409,7 @@ Basically, for each tile, you get a time series of square image chips that alway
 .. figure:: img/tutorial-l2-ard-results.jpg
 
    *Data Cube of Landsat 7/8 and Sentinel-2 A/B Level 2 ARD*
-
-
-A two-month period of atmospherically corrected imagery acquired over South-East Berlin, Germany, is shown here.*
+   *A two-month period of atmospherically corrected imagery acquired over South-East Berlin, Germany, is shown here.*
 
 Each dataset consists of a *BOA* and *QAI* product, which are Bottom-of-Atmosphere reflectance and Quality Assurance Information.
 Depending on parameterization ,there are more products, e.g. *OVV* for image overviews (quicklooks).

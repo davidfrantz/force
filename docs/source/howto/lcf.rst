@@ -99,7 +99,7 @@ As we want to subsequently use the ARD generated here in different higher-level 
 
 .. admonition:: Tip
 
-	Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/latest/howto/l2-ard.html>`_ for further information about generating ARD in FORCE, and to the Digital Elevation Model `tutorial <https://force-eo.readthedocs.io/en/latest/howto/dem.html>_ for information on how to prepare a DEM for the FORCE processing system.
+	Please refer to the Level 2 ARD `tutorial <https://force-eo.readthedocs.io/en/latest/howto/l2-ard.html>`_ for further information about generating ARD in FORCE, and to the Digital Elevation Model `tutorial <https://force-eo.readthedocs.io/en/latest/howto/dem.html>`_ for information on how to prepare a DEM for the FORCE processing system.
 
 .. admonition:: Info
 
@@ -109,7 +109,7 @@ As we want to subsequently use the ARD generated here in different higher-level 
 Clear-Sky Observations (optional)
 ---------------------------------
 
-At this point of the workflow, we can optionally check clear-sky observation (CSO) statistics for our data. Data availability in our study area and period will have a great impact on the quality of derived aggregated data, i.e., spectral-temporal metrics, and, ultimately, on land cover fraction mapping results. CSO statistics can be derived using the FORCE HLPS:
+At this point of the workflow, we can optionally check Clear-Sky Observation (CSO) statistics for our data. Data availability in our study area and period will have a great impact on the quality of derived aggregated data, i.e., spectral-temporal metrics, and, ultimately, on land cover fraction mapping results. CSO statistics can be derived using the FORCE HLPS:
 
 .. code-block:: bash
 
@@ -186,7 +186,7 @@ You can access the parameter files `here <../_static/parameter-files/tutorials/l
 
 .. figure:: img/tutorial-lcf-stm.jpg
 
-	*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Grenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
+	*First, second, and third quartile of reflectance of all blue (A) and near infrared (B) observations. 90th Quantile and standard deviation (STD) of Tasseled Cap Greenness (TCG) of all observations (C). All stretches contain 96% of the values (2% - 98%).* |copy| *Franz Schug*
 
 .. admonition:: Tip
 
@@ -256,21 +256,23 @@ We here use synthetically generated fractional reference data for regression mod
 
  .. figure:: img/tutorial-lcf-mix-s2.png
    
-	*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 `Sentinel-2 spectral bands <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_ as well as Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Spectral information of a pure tree-covered (green) and road-covered (red) pixel, as well as two different synthetic linear mixtures of both, for 10 Sentinel-2 spectral bands as well as Tasseled Cap Greenness and NDVI. Dashed and dotted lines represent linear mixtures.* |copy| *Franz Schug*
+
+(For informations about Sentinel-2 spectral bands, see `Spatial Resolution <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/resolutions/spatial>`_) 
 
 This concept is, of course, transferable to our case, where we use spectral-temporal metrics instead of single observations. Please not that the number of features increases from 12 to 34, while the idea is the same. In this following case, the synthetic mixtures produce training data for 80% and 30% tree-covered surfaces, as well as 100% and 0% tree-covered surfaces.
 
  .. figure:: img/tutorial-lcf-mix-stm.png
    
-	*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Spectral-temporal metrics of a pure tree-covered (green) and road-covered (red) pixel (1st, 2nd, 3rd quartile) as well as 90th quantile and standard deviation of Tasseled Cap Greenness (TCG) and NDVI. Dashed and dotted lines represent linear mixtures.* |copy| *Franz Schug*
 
 This idea can be expanded to further combinations of three or more surface types, as well as to different surfaces of the same surface type when intra-class spectral variability is high. In this following case, we produce training data for 80% and 30% tree-covered surfaces (left), as well as 80% and 30% built-up area (right). In the second case, we mix spectral-temporal metrics from two pure surface types of the same target class (built-up), but from spectrally different surfaces, i.e., a road and a rooftop.
 
   .. figure:: img/tutorial-lcf-mix-stm-complexity.png
    
-	*Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines repreent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
+	*Left: Spectral-temporal metrics of a pure tree-covered (green), road-covered (red) and crop-covered (yellow) pixel as well as the respective Tasseled Cap Greenness and NDVI. Dashed and dotted lines represent linear mixtures. Right: Spectral-temporal metrics of two pure surface types (road and rooftop/building) from the same target class. Dashed and dotted lines repreent linear mixtures.* |copy| *Franz Schug*
 
-In principle, an indefinite number of training data can be synthetically created this way. However, note that the sampled pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. Also, the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures
+In principle, an indefinite number of training data can be synthetically created this way. However, note that the sampled pure reference surfaces still need to represent the variety of surface types and characteristics of the respective target classes. Also, the more training data we want to create, the more pure reference spectra we need in order to not repeat known synthetic mixtures.
 
 We call the synthetic training data generation using
 
@@ -338,7 +340,7 @@ Library completeness is not an established way to assess the quality of our trai
 Model Training
 --------------
 
-We use *force-train* with synthetically created training data to train regression-based machine learning models of land cover fraction.
+We use ``force-train`` with synthetically created training data to train regression-based machine learning models of land cover fraction.
 
 For each set of synthetically mixed training data and for each class, we will need to train one model, which means that we need to create one individual training parameter file for each case. This sums up to 15 parameter files, as we use three target classes and five iterations.
 
@@ -417,9 +419,9 @@ In the parameter file, it is important that the features to be used for predicti
 	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_TCG_STM.tif 1 2
 	INPUT_FEATURE = 2018-2018_001-365_HL_TSA_SEN2L_NDV_STM.tif 1 2
 
-The machine learning submodule of FORCE allows us to provide multiple models per class to generate a single land cover fraction prediction. Remember that in previous steps, we generated five sets of synthetically mixed training data, and euqally created five models per target class.
+The machine learning submodule of FORCE allows us to provide multiple models per class to generate a single land cover fraction prediction. Remember that in previous steps, we generated five sets of synthetically mixed training data, and equally created five models per target class.
 
-In the parameter file, models can be referred to in lines and columns. One line corresponds to one target class (i.e., one band in the model output file). Per line, an undefined number of models can be provided. For each model, this submodule will create one prediction. When using regression-based prediction, the results of all predictions will be averaged to generate the final land cover fraction output.
+In the parameter file, models can be referred to lines and columns. One line corresponds to one target class (i.e., one band in the model output file). Per line, an undefined number of models can be provided. For each model, this submodule will create one prediction. When using regression-based prediction, the results of all predictions will be averaged to generate the final land cover fraction output.
 
 .. code-block:: bash
 
@@ -435,7 +437,7 @@ Please be aware that more models per target class go along with higher computing
 
 in the parameter file, FORCE, however, helps us to reduce computing time as far as possible. This parameter only applies if multiple models are given for a modelset, and if the machine learning method is regression. This parameter sets a convergence threshold, knowing that with an increasing number of models, the averaged predicted values will converge. If the predictions differ less than this value after adding another model, no more model will be predicted (tested on a pixel level). The threshold should be adapted based on the application.
 
-Be aware that training response values for fractions after synthetic mixing range from 0 to 1. As FORCE will not save floating-point numbers, we set a scaling factor of 10,000 in order toobtain values between 0 and 10,000 in 16bit signed integer files.
+Be aware that training response values for fractions after synthetic mixing range from 0 to 1. As FORCE will not save floating-point numbers, we set a scaling factor of 10,000 in order to obtain values between 0 and 10,000 in 16bit signed integer files.
 
 .. code-block:: bash
 

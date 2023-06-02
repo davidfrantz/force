@@ -92,7 +92,7 @@ FORCE comes with a program to generate processing masks from vector data (e.g. s
 
 
 ``force-cube`` imports raster or vector data into the datacube format needed by FORCE.
-The output directory needs to contain a copy of the datacube definition (see datacube tutorial).
+The output directory needs to contain a copy of the datacube definition (see :ref:`tut-datacube` tutorial).
 
 If used with vector data, the tool rasterizes the polygon vector geometries.
 By default, it burns the occurence of the geometry into a raster image, i.e. it assigns the value *1* to all cells that are covered by a geometry, *0* if not.
