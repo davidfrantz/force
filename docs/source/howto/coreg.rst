@@ -60,7 +60,7 @@ Base images
 For this tutorial, we assume that we already have an existing Level 2 ARD datapool, which contains preprocessed Landsat 8 data (see ARD tutorial here).
 These need to cover the spatial extent of the to-be-coregistered Sentinel-2 images.
 The base images can be readily generated using the Time Series Analysis (TSA) submodule of the FORCE Higher Level Processing system (HLPS).
-To familiarize yourself with the TSA submodule, I suggest taking a detour to the Interpolation tutorial (LINK) before advancing.
+To familiarize yourself with the TSA submodule, I suggest taking a detour to the Interpolation tutorial (see :ref:`tut-tsi` tutorial) before advancing.
 
 .. warning::
 
@@ -197,7 +197,7 @@ Always remember: *trash in, trash out!*
 
 .. figure:: img/tutorial-coreg-ts.png
 
-   *Exemplary Sentinel-2 time series before (top) and after (bottom) co-registration. |copy| Philippe Rufin*
+   *Exemplary Sentinel-2 time series before (top) and after (bottom) co-registration.* |copy| *Philippe Rufin*
 
 
 The logfiles also indicate how good the coregistration performed.

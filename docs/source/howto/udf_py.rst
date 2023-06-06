@@ -13,8 +13,8 @@ This tutorial introduces User-Defined Functions (Python) in the FORCE Higher Lev
 
   *This tutorial uses FORCE v. 3.7.4*.
 
-  We assume that you already have an existing Level 2 ARD data pool, which contains preprocessed data for multiple years (see Level 2 ARD tutorial). 
-  We also assume that you have a basic understanding of the higher-level processing system (see interpolation tutorial).
+  We assume that you already have an existing Level 2 ARD data pool, which contains preprocessed data for multiple years (see :ref:`tut-ard` tutorial). 
+  We also assume that you have a basic understanding of the higher-level processing system (see :ref:`tut-tsi` tutorial).
   *Python* skills are mandatory, too.
 
 .. image:: ../img/force-udf.png

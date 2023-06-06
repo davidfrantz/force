@@ -70,7 +70,7 @@ Prepare the mosaic
 
 The following steps illustrate how to build a virtual mosaic from SRTM data.
 Generally, DEM data come in tiles (datacube style), e.g. each SRTM tile covers 1°.
-The `GDAL Virtual Format <gdal.org/drivers/raster/vrt.html>`_ allows to mosaick data without producing a physical representation, i.e. the virtual mosaic only holds links to the original tiled data, plus some rules on how to combine them into the mosaic.
+The `GDAL Virtual Format <gdal.org/drivers/raster/vrt.html>`_ allows to mosaic data without producing a physical representation, i.e. the virtual mosaic only holds links to the original tiled data, plus some rules on how to combine them into the mosaic.
 
 Assuming you have downloaded some SRTM tiles, we first prepare a text file that holds all the filepaths:
 

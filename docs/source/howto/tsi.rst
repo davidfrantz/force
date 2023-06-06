@@ -65,7 +65,7 @@ The estimates from those kernels are eventually aggregated using a weighted aver
 This gives preference to the kernel with better data coverage.
 
 This tutorial will show you how to generate an RBF-interpolated time series, and how to dynamically look at the data.
-I will demonstrate this for the island of Crete (greece) in the Mediterranean Sea.
+I will demonstrate this for the island of Crete (Greece) in the Mediterranean Sea.
 An interpolated time series looks like this:
 
 .. figure:: img/tutorial-tsi-rbf.jpg
@@ -311,7 +311,7 @@ Please have a detailed look the at the :ref:`hl-compute` of HLPS.
 Most often, generating interpolated time series (without doing anything else) is input-, or output-bound.
 
 However, this strongly varies with data density, the number of requested indices, disc speed (SSD vs HDD, RAID or not, …), CPU clock speed, if you read/write from/to different (or the same) discs etc... 
-The progress bar will tell you how much time is spent for reading, computing, and writing.
+The progress bar will tell you how much time is spent for reading, computing and writing.
 
 This helps you identify if your job is e.g. input-limited.
 You might want to adjust the settings accordingly (also note that you may have more or less CPUs than me).
