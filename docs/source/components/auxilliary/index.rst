@@ -18,9 +18,13 @@ Auxiliary
 +--------+------------------------+-------+---------------------------------------------------------+
 |        | force-tile-finder      | /     | Find the tile, pixel, and chunk of a given coordinate   |
 +--------+------------------------+-------+---------------------------------------------------------+
+|        | force-tile-extent      | /     | Create a tile allow-list from aoi (vector file)         |
++--------+------------------------+-------+---------------------------------------------------------+
 |        | force-tabulate-grid    | /     | Extract the processing grid as shapefile                |
 +--------+------------------------+-------+---------------------------------------------------------+
 |        | force-cube             | /     | Ingestion of auxiliary data into datacube format        |
++--------+------------------------+-------+---------------------------------------------------------+
+|        | force-cube-init        | /     | Generation of datacube from certain projection          |
 +--------+------------------------+-------+---------------------------------------------------------+
 |        | force-procmask         | /     | Generate a processing mask from continuous data         |
 +--------+------------------------+-------+---------------------------------------------------------+
@@ -34,7 +38,7 @@ Auxiliary
 +--------+------------------------+-------+---------------------------------------------------------+
 |        | force-mdcp             |       | Copy FORCE metadata from one file to another            |
 +--------+------------------------+-------+---------------------------------------------------------+
-|        | force-magic-parameters |       | Copy FORCE metadata from one file to another            |
+|        | force-magic-parameters |       | Generate parameterfiles from replacement values         |
 +--------+------------------------+-------+---------------------------------------------------------+
 
 
@@ -60,9 +64,11 @@ A glimpse of what you get:
    parameter.rst
    train.rst
    qai-inflate.rst
-   tile-finder.rst   
+   tile-finder.rst
+   tile-extent.rst   
    tabulate-grid.rst
    cube.rst
+   cube-init.rst
    procmask.rst
    pyramid.rst
    mosaic.rst

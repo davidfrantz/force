@@ -1,0 +1,1 @@
+.. _aux-datacube-size:
