@@ -3,7 +3,7 @@
 force-stack
 ===========
 
-force-stack creates a `GDAL virtual format <https://gdal.org/drivers/raster/vrt.html>`_layer-stack of several bands from different physical files.
+force-stack creates a `GDAL virtual format <https://gdal.org/drivers/raster/vrt.html>`_ layer-stack of several bands from different physical files.
 
 Usage
 ^^^^^
