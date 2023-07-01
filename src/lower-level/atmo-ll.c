@@ -728,10 +728,10 @@ double lon, lat;
       for (b=0; b<nb; b++){
 
         // gaseous transmittance
-        set_brick(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, b));
+        set_brick(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, b));
+        set_brick(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, b));
+        set_brick(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, b));
         
         set_brick(atc->xy_Tg, b, g, gas_transmitt(
           get_brick(atc->xy_Tsw, b, g), get_brick(atc->xy_Tvw, b, g),
@@ -2043,7 +2043,7 @@ brick_t **L2 = NULL;
     /** water vapor and gaseous transmittance estimation
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (mission == SENTINEL2){
-      if ((WVP = water_vapor(meta, atc, TOA, QAI, TOP->dem)) == NULL){
+      if ((WVP = water_vapor(atc, TOA, QAI, TOP->dem)) == NULL){
         printf("error in water vapor estimation. "); return NULL;}
     } else WVP = NULL;
 

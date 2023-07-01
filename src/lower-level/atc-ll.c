@@ -144,12 +144,6 @@ int r = 1, b, nb = get_brick_nbands(DN);
     atc->od[b] = atc->mod[b] = atc->aod[b] = atc->nodata;
     atc->aod_bands[b] = false;
     
-    atc->wvl[b]   = get_brick_wavelength(DN, b);
-    atc->lwvl[b]  = log(atc->wvl[b]);
-    atc->lwvl2[b] = atc->lwvl[b]*atc->lwvl[b];
-    
-    atc->E0[b] = E0(meta->cal[b].rsr_band);
-
   }
 
 

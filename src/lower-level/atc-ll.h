@@ -33,6 +33,7 @@ Atm. correction parameter header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick-cl.h"
+#include "../cross-level/table-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta-ll.h"
 
@@ -67,7 +68,6 @@ typedef struct {
   int nx, ny, nc, res;   // number and resolution of coarse grid cells
   float nodata;
   view_t view;               // viewing geometry
-  table_t rsr;               // relative spectral response
   float *wvl, *lwvl, *lwvl2; // wavelengths, log of wvl, square of log of wvl
   float *E0;                 // solar irradiance
   float cc;                  // cloud cover

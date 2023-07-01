@@ -291,7 +291,7 @@ float Pa;
 +++ the bands' relative spectral response and absorption coefficients
 --- w:      total path water vapor in cm
 --- m:      air mass one path
---- b_rsr:  ID in relative spectral response array
+--- b_rsr:  band in relative spectral response (no check is performed!)
 +++ Return: water vapor transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 float wvp_transmitt(float w, float m, int b_rsr){
@@ -301,11 +301,11 @@ double a, s;
 
   tmp = w/m;
 
-  for (wvl=0, a=0, s=0; wvl<_WVL_DIM_; wvl++){
-    tmp2 = _AW_[wvl]*tmp;
-    a += _RSR_[b_rsr][wvl]*
+  for (wvl=0, a=0, s=0; wvl<_TABLE_RSR_.nrow; wvl++){
+    tmp2 = _TABLE_AW_.data[wvl][1]*tmp;
+    a += _TABLE_RSR_.data[wvl][b_rsr]*
             exp((-1.2110662*tmp2)/pow(1+24.1229127*tmp2, 0.3669996));
-    s += _RSR_[b_rsr][wvl];
+    s += _TABLE_RSR_.data[wvl][b_rsr];
   }
   Tw = a/s;
 
@@ -318,8 +318,8 @@ double a, s;
 +++ the bands' relative spectral response and absorption coefficients
 --- o:      total ozone
 --- m:      air mass one path
---- b_rsr:  ID in relative spectral response array
-+++ Return: water vapor transmittance
+--- b_rsr:  band in relative spectral response (no check is performed!)
++++ Return: ozone transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 float ozone_transmitt(float o, float m, int b_rsr){
 int wvl;
@@ -328,9 +328,9 @@ double a, s;
 
   tmp = -o/m;
 
-  for (wvl=0, a=0, s=0; wvl<_WVL_DIM_; wvl++){
-    a += _RSR_[b_rsr][wvl]*exp(_AO_[wvl]*tmp);
-    s += _RSR_[b_rsr][wvl];
+  for (wvl=0, a=0, s=0; wvl<_TABLE_RSR_.nrow; wvl++){
+    a += _TABLE_RSR_.data[wvl][b_rsr]*exp(_TABLE_AO_.data[wvl][1]*tmp);
+    s += _TABLE_RSR_.data[wvl][b_rsr];
   }
   To = a/s;
 

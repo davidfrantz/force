@@ -48,6 +48,9 @@ int ncol_buf = NPOW_00;
 double mx, vx, k;
 
 
+  // init table to zeros
+  init_table(&table);
+
   // allocate table data
   alloc_2D((void***)&table.data, nrow_buf, ncol_buf, sizeof(double));
 
@@ -125,6 +128,7 @@ double mx, vx, k;
 
         // if too many cols, add twice of previous cols to buffer
         if (col >= ncol_buf){
+          if (has_col_names) re_alloc_2D((void***)&table.col_names, ncol_buf, NPOW_10, ncol_buf*2, NPOW_10, sizeof(char));
           re_alloc_2D((void***)&table.data, nrow_buf, ncol_buf, nrow_buf, ncol_buf*2, sizeof(double));
           ncol_buf *= 2;
         }
@@ -200,6 +204,30 @@ double mx, vx, k;
 
 
   return table;
+}
+
+
+/** This function inits table to zero values
+--- table:  table
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void init_table(table_t *table){
+
+  table->nrow = 0;
+  table->ncol = 0;
+  table->has_row_names = false;
+  table->has_col_names = false;
+  table->row_names = NULL;
+  table->col_names = NULL;
+  table->data = NULL;
+  table->row_mask = NULL;
+  table->col_mask = NULL;
+  table->n_active_cols = 0;
+  table->n_active_rows = 0;
+  table->mean = NULL;
+  table->sd = NULL;
+
+  return;
 }
 
 

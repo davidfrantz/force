@@ -38,11 +38,10 @@ wvp_lut_t _WVLUT_;
 +++ is used for fast estimation of Sentinel-2 water vapor. The function 
 +++ will exit successfully if atmospheric correction is disabled or if not
 +++ Sentinel-2
---- meta:   metadata
 --- atc:    atmospheric correction factors
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int wvp_transmitt_lut(meta_t *meta, atc_t *atc){
+int wvp_transmitt_lut(atc_t *atc){
 int b, nb, km, kw;
 float w, m, m_min, m_max;
 int km_min, km_max;
@@ -81,7 +80,7 @@ int nw = 701;
   printf("m min/max: %.2f %.2f\n", m_min, m_max);
   #endif
 
-  #pragma omp parallel private(b, m, w) shared(nm, nw, nb, km_min, km_max, meta, _WVLUT_) default(none)
+  #pragma omp parallel private(b, m, w) shared(nm, nw, nb, km_min, km_max, atc, _WVLUT_) default(none)
   {
 
     #pragma omp for collapse(2) schedule(guided)
@@ -93,7 +92,7 @@ int nw = 701;
         w = kw*0.01;
     
         for (b=0; b<nb; b++){
-          _WVLUT_.val[b][kw][km] = wvp_transmitt(w, m, meta->cal[b].rsr_band);
+          _WVLUT_.val[b][kw][km] = wvp_transmitt(w, m, b);
         }
 
       }
@@ -120,7 +119,7 @@ double fun_wvp(const gsl_vector *v, void *params){
 float *p = (float *)params;
 float w;
 float nir, wvp;
-int b_nir, b_wvp, b_nir_rsr, b_wvp_rsr;
+int b_nir, b_wvp;
 float ms, mv, To_nir, To_wvp, rho_p_nir, rho_p_wvp;
 float T_nir, T_wvp, s_nir, s_wvp;
 float Tsw_nir, Tvw_nir, Tsw_wvp, Tvw_wvp, Tg_nir, Tg_wvp;
@@ -134,18 +133,16 @@ int kms, kmv, kw;
   wvp       = p[1];
   b_nir     = (int)p[2];
   b_wvp     = (int)p[3];
-  b_nir_rsr = (int)p[4];
-  b_wvp_rsr = (int)p[5];
-  ms        = p[6];
-  mv        = p[7];
-  To_nir    = p[8];
-  To_wvp    = p[9];
-  rho_p_nir = p[10];
-  rho_p_wvp = p[11];
-  T_nir     = p[12];
-  T_wvp     = p[13];
-  s_nir     = p[14];
-  s_wvp     = p[15];
+  ms        = p[4];
+  mv        = p[5];
+  To_nir    = p[6];
+  To_wvp    = p[7];
+  rho_p_nir = p[8];
+  rho_p_wvp = p[9];
+  T_nir     = p[10];
+  T_wvp     = p[11];
+  s_nir     = p[12];
+  s_wvp     = p[13];
 
 
   // negative water vapor values are not allowed
@@ -154,10 +151,10 @@ int kms, kmv, kw;
   // if water vapor > tabulated values, compute
   if (w > 7.0){
 
-    Tsw_nir = wvp_transmitt(w, ms, b_nir_rsr);
-    Tvw_nir = wvp_transmitt(w, mv, b_nir_rsr);
-    Tsw_wvp = wvp_transmitt(w, ms, b_wvp_rsr);
-    Tvw_wvp = wvp_transmitt(w, mv, b_wvp_rsr);
+    Tsw_nir = wvp_transmitt(w, ms, b_nir);
+    Tvw_nir = wvp_transmitt(w, mv, b_nir);
+    Tsw_wvp = wvp_transmitt(w, ms, b_wvp);
+    Tvw_wvp = wvp_transmitt(w, mv, b_wvp);
 
   // use tabulated values
   } else {
@@ -191,24 +188,23 @@ int kms, kmv, kw;
 +++ will only return SUCCESS for Landsat. Note that WVP and Tg won't be 
 +++ allocated in this case. Water vapor is estimated for each 60m pixel
 +++ using the complete radiative transfer assuming that BOA reflectance
-+++ of the NIR reference channel @ 0.865µm and the NIR water vapor channel
++++ of the NIR reference channel @ 0.865Âµm and the NIR water vapor channel
 +++ @ 0.945 should be equal. Nelder-Mead Simplex optimization is used.
 +++ Water and shadow pixels will be set to the scene average, and a QAI
 +++ flag is set in this case.
---- meta:   metadata
 --- atc:    atmospheric correction factors
 --- TOA:    TOA brick
 --- QAI:    QAI brick
 --- DEM:    DEM brick
 +++ Return: Water vapor brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM){
+brick_t *water_vapor(atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM){
 int i, j, ii, jj, p, nx, ny, g, z, k;
 int b_reference, b_measure;
 float reference, measure, dem;
 float w, w_avg;
 double w_sum = 0, num = 0;
-float param[16];
+float param[14];
 const gsl_multimin_fminimizer_type *T = NULL;
 gsl_multimin_fminimizer *s = NULL;
 gsl_vector *ss = NULL, *x = NULL;
@@ -239,7 +235,7 @@ float **xyz_s_m = NULL;
   #endif
 
 
-  if (wvp_transmitt_lut(meta, atc) != SUCCESS){
+  if (wvp_transmitt_lut(atc) != SUCCESS){
     printf("error in water vapor transmittance LUT. "); return NULL;}
 
 
@@ -274,7 +270,7 @@ float **xyz_s_m = NULL;
   if ((xyz_s_m     = atc_get_band_reshaped(atc->xyz_s, b_measure))   == NULL) return NULL;
 
 
-  #pragma omp parallel private(j, ii, jj, p, g, reference, measure, dem, z, k, w, x, T, ss, s, minex_func, param, iter, status, size) shared(nx, ny, b_reference, b_measure, toa_, wvp_, dem_, QAI, xy_ms, xy_mv, xy_Tvo_r, xy_Tvo_m, xy_Tso_r, xy_Tso_m, xyz_rho_p_r, xyz_rho_p_m, xyz_T_r, xyz_T_m, xyz_s_r, xyz_s_m, atc, meta, gsl_multimin_fminimizer_nmsimplex2) reduction(+: w_sum, num) default(none)
+  #pragma omp parallel private(j, ii, jj, p, g, reference, measure, dem, z, k, w, x, T, ss, s, minex_func, param, iter, status, size) shared(nx, ny, b_reference, b_measure, toa_, wvp_, dem_, QAI, xy_ms, xy_mv, xy_Tvo_r, xy_Tvo_m, xy_Tso_r, xy_Tso_m, xyz_rho_p_r, xyz_rho_p_m, xyz_T_r, xyz_T_m, xyz_s_r, xyz_s_m, atc, gsl_multimin_fminimizer_nmsimplex2) reduction(+: w_sum, num) default(none)
   {
 
   
@@ -347,18 +343,16 @@ float **xyz_s_m = NULL;
       param[1]  = measure;
       param[2]  = b_reference;
       param[3]  = b_measure;
-      param[4]  = meta->cal[b_reference].rsr_band;
-      param[5]  = meta->cal[b_measure].rsr_band;
-      param[6]  = xy_ms[g];
-      param[7]  = xy_mv[g];
-      param[8]  = xy_Tso_r[g]*xy_Tvo_r[g];
-      param[9]  = xy_Tso_m[g]*xy_Tvo_m[g];
-      param[10] = xyz_rho_p_r[z][g];
-      param[11] = xyz_rho_p_m[z][g];
-      param[12] = xyz_T_r[z][g];
-      param[13] = xyz_T_m[z][g];
-      param[14] = xyz_s_r[z][g];
-      param[15] = xyz_s_m[z][g];
+      param[4]  = xy_ms[g];
+      param[5]  = xy_mv[g];
+      param[6]  = xy_Tso_r[g]*xy_Tvo_r[g];
+      param[7]  = xy_Tso_m[g]*xy_Tvo_m[g];
+      param[8] = xyz_rho_p_r[z][g];
+      param[9] = xyz_rho_p_m[z][g];
+      param[10] = xyz_T_r[z][g];
+      param[11] = xyz_T_m[z][g];
+      param[12] = xyz_s_r[z][g];
+      param[13] = xyz_s_m[z][g];
 
       gsl_vector_set(x, 0, w);
       gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
@@ -703,7 +697,7 @@ int year, month, day;
 
           dist = sqrt(diff_x*diff_x+diff_y*diff_y);
 
-          // only use fairly near estimates (less than 1.5°)
+          // only use fairly near estimates (less than 1.5ï¿½)
           if (dist < min_dist && dist < 1.5){
             min_dist = dist;
             wvp = atof(tokenptr);

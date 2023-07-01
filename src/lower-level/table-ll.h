@@ -36,6 +36,12 @@ Compilation of tables needed for preprocessing
 extern "C" {
 #endif
 
+// we need these tables in global scope for GSL optimizers
+extern table_t _TABLE_RSR_;
+extern table_t _TABLE_E0_;
+extern table_t _TABLE_AW_;
+extern table_t _TABLE_AO_;
+
 int compile_tables(atc_t *atc, brick_t *DN);
 
 #ifdef __cplusplus

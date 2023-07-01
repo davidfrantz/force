@@ -57,8 +57,8 @@ typedef struct {
 // global instance
 extern wvp_lut_t _WVLUT_;
 
-int wvp_transmitt_lut(meta_t *meta, atc_t *atc);
-brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM);
+int wvp_transmitt_lut(atc_t *atc);
+brick_t *water_vapor(atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM);
 short *gas_transmittance(atc_t *atc, int b, brick_t *WVP, brick_t *QAI);
 void free_wvlut();
 float ozone_amount(float lon, float lat, int doy);

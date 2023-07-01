@@ -135,7 +135,6 @@ int init_calibration(cal_t *cal){
 
   cal->fill     = SHRT_MIN;
 
-  cal->rsr_band = cal->fill;
   cal->lmax     = cal->fill;
   cal->lmin     = cal->fill;
   cal->qmax     = cal->fill;
@@ -474,11 +473,6 @@ const char band_id_oli[9][NPOW_03] = {
     set_brick_unit(DN, b, "micrometers");
     get_brick_domain(DN, b, domain, NPOW_10);
     set_brick_bandname(DN, b, domain);
-    if (b != b_temp){
-      set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
-    } else {
-      set_brick_wavelength(DN, b, 11.0); // approximate wavelength for thermal
-    }
   }
 
   set_brick_dirname(DN, pl2->d_temp);
@@ -976,7 +970,6 @@ const char band_id[13][NPOW_03] = {
     set_brick_unit(DN, b, "micrometers");
     get_brick_domain(DN, b, domain, NPOW_10);
     set_brick_bandname(DN, b, domain);
-    set_brick_wavelength(DN, b, wavelength(meta->cal[b].rsr_band));
   }
 
   set_brick_dirname(DN, pl2->d_temp);
