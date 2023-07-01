@@ -394,7 +394,7 @@ Mosaicking is done on-the-fly, data outside of the display extent are not loaded
 
 .. figure:: img/tutorial-datacube-mosaic.jpg
 
-   *VRT mosaick loaded in QGIS*
+   *VRT mosaic loaded in QGIS*
 
 
 ------------

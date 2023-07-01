@@ -18,7 +18,7 @@ Background
 During atmospheric correction, the effect of water vapor absorption can only be corrected if we know the amount of water vapor in the atmosphere.
 
 If you are using Sentinel-2 data only, you can stop reading.
-Sentinel-2 is equipped with a water vapor channel, and thus, water wapor amount can be estimated from the images.
+Sentinel-2 is equipped with a water vapor channel, and thus, water vapor amount can be estimated from the images.
 
 Landsat, however, doesn't have such a band.
 Therefore, we need to rely on external data, which needs to be precompiled into a water vapor database.

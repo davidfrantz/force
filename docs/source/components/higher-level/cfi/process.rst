@@ -1,11 +1,14 @@
 Processing
 ==========
 
-Processing
-The core module of FORCE ImproPhe is force-improphe, which improves the spatial resolution of coarse continuous fields. The processed images are written to the output directory given in the ImproPhe parameter file (see VII.H for all available options).
-Module	|	force-improphe
+FORCE ImproPhe is a submodule of ``force-higher-level``, which improves the spatial resolution of coarse continuous fields. The processed images are written to the output directory given in the ImproPhe :ref:`parameter file <cfi-param>`.
 
-Usage	|	force-improphe     par-file
+Usage
+^^^^^
 
-The parameter file needs to be given as 1st argument. All options need to be specified in the parameter file (see VII.H for all available options).
+.. code-block:: bash
+
+    force-higher-level  parameter-file
+
+The parameter file needs to be given as sole argument. All options need to be specified in the :ref:`parameter file <cfi-param>`.
 

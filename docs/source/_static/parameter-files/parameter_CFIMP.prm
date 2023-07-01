@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -57,8 +57,6 @@ OUTPUT_EXPLODE = FALSE
 # from Block 3 are already being input and results from Block 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
-# Use STREAMING = FALSE to disable streaming. This will perform reading, 
-# computing and writing after one another in sequential mode.
 # Type: Integer. Valid range: [1,...
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
@@ -131,7 +129,7 @@ USE_L2_IMPROPHE = FALSE
 # (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
 # (7-band Aqua MODIS).
 # The resulting outputs are named according to their band designation, i.e. 
-# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
+# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
 # bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or
 # VVVHP (VV/VH polarized), MODIS (7-band MODIS).
 # BAP Composites with such a band designation can be input again (e.g. 
@@ -156,7 +154,7 @@ SPECTRAL_ADJUST = FALSE
 #   SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}
 SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION
 # Threshold for removing outliers. Triplets of observations are used to determine
-# the overall noise in the time series by computinglinearly interpolating between
+# the overall noise in the time series by computing linearly interpolating between
 # the bracketing observations. The RMSE of the residual between the middle value
 # and the interpolation is the overall noise. Any observations, which have a
 # residual larger than a multiple of the noise are iteratively filtered out
@@ -177,7 +175,7 @@ BELOW_NOISE = 1
 DATE_RANGE = 2010-01-01 2019-12-31
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
-# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
+# 2019-12-31, DOY_RANGE = 91 273 will use all April-September observations from
 # 2010-2019. If you want to extend this window over years give DOY min > 
 # DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 
 # will use all October-March observations from 2010-2019.
@@ -191,7 +189,7 @@ DOY_RANGE = 1 365
 # the window breakpoints. If you specify 5 breakpoints, there will be four
 # windows. The windows can extend to the previous/next year (e.g. 270 30
 # 91 181 270 would extend into the previous year, 1 30 91 181 270 30 would
-# extend into the next year.
+# extend into the next year).
 # Type: Integer list. Valid values: [1,365]
 SEASONAL_WINDOW = 1 91 181 271 365
 # This parameter defines the radius of the prediction kernel (in projection
@@ -220,7 +218,7 @@ DIR_COARSE = NULL
 # the corresponding years, need to be the same for all files.
 # Type: List with basename of files
 BASE_COARSE = NULL
-# This parameter defines year, which corresponds to he 1st band of the
+# This parameter defines year, which corresponds to the 1st band of the
 # continuous fields.
 # Type: Integer. Valid values: [1900,2100]
 COARSE_1ST_YEAR = 2000
