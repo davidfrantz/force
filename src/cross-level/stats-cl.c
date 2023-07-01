@@ -45,7 +45,7 @@ int comp(const void *a, const void *b);
 +++ x and y. This function can also be used to compute one-pass linear re-
 +++ gressions. Use this function in a loop.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -82,7 +82,7 @@ double oldcv = *cv;
 +++ recurrence formulas. It can be used to estimate mean of x and y, and 
 +++ covariance between x and y. Use this function in a loop.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -114,7 +114,7 @@ double oldcv = *cv;
 +++ x, variance or standard deviation of x, skewness of x, kurtosis of x. 
 +++ Use this function in a loop.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -150,7 +150,7 @@ double delta, delta_n, delta_n2, tmp;
 +++ recurrence formulas. It can be used to estimate mean of x, variance or
 +++ standard deviation of x, skewness of x. Use this function in a loop.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -183,7 +183,7 @@ double delta, delta_n, tmp;
 +++ recurrence formulas. It can be used to estimate mean of x, variance or
 +++ standard deviation of x. Use this function in a loop.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -209,7 +209,7 @@ double oldvx = *vx;
 +++ This function computes kurtosis based on the estimates of the recur-
 +++ rence formulas above.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -228,7 +228,7 @@ double kurtosis(double var, double kurt, double n){
 +++ This function computes skewness based on the estimates of the recur-
 +++ rence formulas above.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -247,7 +247,7 @@ double skewness(double var, double skew, double n){
 +++ This function computes variance based on the estimates of the recur-
 +++ rence formulas above.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -265,7 +265,7 @@ double variance(double var, double n){
 +++ This function computes standard deviation based on the estimates of 
 +++ the recurrence formulas above.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -283,7 +283,7 @@ double standdev(double var, double n){
 +++ This function computes covariance based on the estimates of the recur-
 +++ rence formulas above.
 +++-----------------------------------------------------------------------
-+++ P. Pébay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
++++ P. Pï¿½bay. SANDIA REPORT SAND2008-6212 (2008). Formulas for Robust, 
 +++ One-Pass Parallel Computation of Co- variances and Arbitrary-Order 
 +++ Statistical Moments.
 +++-----------------------------------------------------------------------
@@ -691,9 +691,6 @@ float piv;
         r++;
       }
     }
-
-    // if elements are equal, array consists of one unique value
-    if (x[left] == x[right]) return (x[k]);
 
     // if reader was increased, decrese reader
     if (x[r] > piv) r--;
