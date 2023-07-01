@@ -73,17 +73,15 @@ typedef struct {
 // dark target container
 typedef struct {
   darkobj_t *wat;       // water targets
-  darkobj_t *shd;       // shadow targets
   darkobj_t *veg;       // vegetation targets
-  int kwat, kshd, kveg; // number of candidate targets
-  int nwat, nshd, nveg; // number of valid targets
+  int kwat,  kveg; // number of candidate targets
+  int nwat,  nveg; // number of valid targets
 } dark_t;
 
 float *aodfileread(par_ll_t *pl2, atc_t *atc);
 int extract_dark_target(atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP, int type, darkobj_t **DOBJ);
 int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, float res, darkobj_t *dobj, int num, int type);
-speclib_t *water_lib(int nb, meta_t *meta);
-speclib_t *land_lib(int nb, meta_t *meta);
+speclib_t *water_lib(int nb);
 speclib_t *veg_lib(int nb, int blue, int green, int red);
 int aod_lib_to_target(atc_t *atc, float res, bool multi, darkobj_t dobj, speclib_t *lib, int type, float **aodest);
 int aod_linear_fit(atc_t *atc, float *logaod, float *angb, float *angn);

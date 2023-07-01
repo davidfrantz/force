@@ -130,7 +130,7 @@ enum { OPEN_FALSE,   // do not write
 //       _WVL_VH_,       _WVL_LENGTH_ };
 
 // AOD target types
-enum { _AOD_WAT_, _AOD_SHD_, _AOD_VEG_ };
+enum { _AOD_WAT_, _AOD_VEG_ };
 
 // ARD input type
 enum { _ARD_REF_, _ARD_AUX_, _ARD_MSK_, _ARD_FTR_ };
