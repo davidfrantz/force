@@ -305,7 +305,7 @@ else
 fi
 export BOTO_CONFIG
 if [ ! -r $BOTO_CONFIG ]; then
-  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $FORCE_CREDENTIALS.")"
 fi
 
 
