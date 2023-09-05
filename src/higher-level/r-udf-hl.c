@@ -132,6 +132,8 @@ char *r_argv[] = { "R", "--silent" };
 
   Rf_initEmbeddedR(r_argc, r_argv);
 
+  // create snowfall cluster
+  if (udf->type == _UDF_PIXEL_) init_snowfall(phl->cthread);
 
   // parse once to make sure that functions are available
   source_rstats(udf->f_code);
@@ -151,8 +153,6 @@ char *r_argv[] = { "R", "--silent" };
 
 
   if (udf->type == _UDF_PIXEL_){
-    // create snowfall cluster
-    init_snowfall(phl->cthread);
     // wrapper for 'force_rstats_pixel'
     findFun(install("force_rstats_pixel"), R_GlobalEnv);
     parse_rstats(
