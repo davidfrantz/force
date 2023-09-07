@@ -68,6 +68,8 @@ if [ ! -f $PRM ]; then
   echo $PRM "does not exist"; exit
 elif [ ! -r $PRM ]; then
   echo $PRM "is not readable"; exit
+else
+  dos2unix -q $PRM
 fi
 
 

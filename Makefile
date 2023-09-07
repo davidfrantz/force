@@ -59,7 +59,7 @@ EXECUTABLES = gcc g++ \
               gdal_edit.py gdal_calc.py gdal-config \
               ogrinfo ogr2ogr \
               gsl-config curl-config \
-              unzip tar lockfile-create lockfile-remove rename \
+              unzip tar lockfile-create lockfile-remove rename dos2unix \
               python3 pip3 \
 			  R \
 			  landsatlinks \
