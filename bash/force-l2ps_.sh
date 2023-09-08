@@ -35,7 +35,7 @@ if [ $# -ne $EXPECTED_ARGS ]; then
 fi
 
 
-IMAGE=$1
+IMAGE=$(echo $1 | sed 's/\n//') # force newline replacement
 PRM=$2
 LOGDIR=$3
 TEMPDIR=$4
