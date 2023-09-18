@@ -12,5 +12,5 @@ The ``++PARAM_SYNTHMIX_START++`` and ``++PARAM_SYNTHMIX_END++`` keywords enclose
 
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
-.. include:: ../../../_static/parameter-files/parameter_SYNTHMIX.prm
+.. include:: ../../_static/parameter-files/parameter_SYNTHMIX.prm
   :code: shell

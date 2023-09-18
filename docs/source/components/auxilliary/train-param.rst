@@ -12,5 +12,5 @@ The ``++PARAM_TRAIN_START++`` and ``++PARAM_TRAIN_END++`` keywords enclose the p
 
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
-.. include:: ../../../_static/parameter-files/parameter_TRAIN.prm
+.. include:: ../../_static/parameter-files/parameter_TRAIN.prm
   :code: shell
