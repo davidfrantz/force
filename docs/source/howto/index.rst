@@ -42,16 +42,15 @@ There are several tutorials available that showcase how to use the FORCE.
 .. toctree::
    :maxdepth: 1
    :hidden:
+
    datacube.rst
    level1-csd.rst
    sentinel2-l1c.rst
-
    l2-ard.rst
    coreg.rst
    qai.rst
    dem.rst
    wvdb.rst
-
    tsi.rst
    stm.rst
    masks.rst
