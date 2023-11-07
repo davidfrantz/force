@@ -129,6 +129,8 @@ mkdir "$DOUT"/udf/tsa
 mkdir "$DOUT"/schedule
 mkdir "$DOUT"/schedule/cron
 
+mkdir "$DOUT"/provenance
+
 mkdir "$DOUT"/level1
 mkdir "$DOUT"/level1/metadata
 mkdir "$DOUT"/level1/landsat
