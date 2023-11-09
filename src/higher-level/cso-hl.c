@@ -214,7 +214,7 @@ short q25_, q75_;
 double mean, var;
 double skew, kurt;
 double skewscaled, kurtscaled;
-float *q_array = NULL;
+double *q_array = NULL; // need to be double for GSL quantile function
 bool alloc_q_array = false;
 
 
@@ -292,7 +292,7 @@ bool alloc_q_array = false;
   #pragma omp parallel private(o,t,w,minimum,maximum,q,q_array,mean,var,skew,kurt,n,k,skewscaled,kurtscaled,q25_,q75_,d_ce,ce,ce_left) shared(mask_,cs,nc,nw,nt,nodata,alloc_q_array,phl,t0,t1,nprod,ard) default(none)
   {
 
-    if (alloc_q_array) alloc((void**)&q_array, nt+1, sizeof(float));
+    if (alloc_q_array) alloc((void**)&q_array, nt+1, sizeof(double));
 
     #pragma omp for
     for (p=0; p<nc; p++){
