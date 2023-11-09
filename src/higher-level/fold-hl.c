@@ -53,7 +53,7 @@ short minimum, maximum;
 double mean, var;
 double skew, kurt;
 double skewscaled, kurtscaled;
-float *q_array = NULL;
+double *q_array = NULL; // need to be double for GSL quantile function
 bool alloc_q_array = false;
 
 
@@ -67,7 +67,7 @@ bool alloc_q_array = false;
   {
     
     // initialize _STAts
-    if (alloc_q_array) alloc((void**)&q_array, ni, sizeof(float));
+    if (alloc_q_array) alloc((void**)&q_array, ni, sizeof(double));
 
     #pragma omp for
     for (p=0; p<nc; p++){

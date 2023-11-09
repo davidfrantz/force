@@ -33,6 +33,8 @@ This file contains functions for statistics
 
 #include "stats-cl.h"
 
+#include <gsl/gsl_sort.h>         // sort data
+#include <gsl/gsl_statistics.h>   // statistical functions
 
 void quantile_swap(float *x, int from, int to);
 int comp(const void *a, const void *b);
@@ -657,66 +659,21 @@ float abst, tsq, p, z;
 
 /** Quantile
 +++ This function computes a quantile of an array. The quick select algo-
-+++ rithm is used for this purpose. Caution: the array will be screwed up.
++++ rithm is used for to sort the array. Caution: the array will be screwed up.
 +++ Copy the array before calling the quantile function.
 --- x:      array
 --- n:      length of array
 --- p:      probability [0,1]
 +++ Return: quantile
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float quantile(float *x, int n, float p){
-int left = 0, right = n - 1, r, w, k;
-float piv;
+float quantile(double *x, int n, float p){
+double q;
 
+  gsl_sort (x, 1, n);
 
-  // compute position from probability
-  k = (int) (n-1)/(1/p);
+  q = gsl_stats_quantile_from_sorted_data(x, 1, n, p);
 
-  // do until left and right converge at k
-  while (left < right){
-
-    r = left ;        // reader
-    w = right;        // writer
-    piv = x[(r+w)/2]; // pivot
-
-    // do until reader and writer are equal
-    while (r < w){
-
-      if (x[r] >= piv){
-        // if larger than pivot, put value to the end, decrease writer
-        quantile_swap(x, r, w);
-        w--;
-      } else {
-        // if smaller than pivot, skip, increase reader
-        r++;
-      }
-    }
-
-    // if reader was increased, decrese reader
-    if (x[r] > piv) r--;
-
-    // reader is on the end of the first k elements
-    if (k <= r){
-      right = r;
-    } else {
-      left = r + 1;
-    }
-
-  }
-
-  return x[k];
-}
-
-
-/** Function for swapping two array elements
-+++ This function is used in the quick select algorithm for quantiles.
-+++--------------------------------------------------------------------**/
-void quantile_swap(float *x, int from, int to){
-float tmp = x[from];
-
-  x[from] = x[to]; x[to] = tmp;
-
-  return;
+  return (float)q;
 }
 
 
