@@ -431,8 +431,8 @@ float lowtemp = 0.0, hightemp = 0.0;
 float A, B;
 float tempprob;
 float *LANDPROB = NULL;
-float *CLEARLPROB = NULL;
-float *CLEARTEMP = NULL;
+double *CLEARLPROB = NULL; // need to be double for GSL quantile function
+double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
 
   #ifdef FORCE_CLOCK
@@ -444,7 +444,7 @@ float *CLEARTEMP = NULL;
 
   if ((100.0*nland/(float)npix) >= 0.1){
 
-    alloc((void**)&CLEARTEMP, nland, sizeof(float));
+    alloc((void**)&CLEARTEMP, nland, sizeof(double));
 
     for (p=0, k=0; p<nc; p++){
       if (lnd_[p]) CLEARTEMP[k++] = temp_[p];
@@ -455,7 +455,7 @@ float *CLEARTEMP = NULL;
 
   } else {
 
-    alloc((void**)&CLEARTEMP, nclear, sizeof(float));
+    alloc((void**)&CLEARTEMP, nclear, sizeof(double));
 
     for (p=0, k=0; p<nc; p++){
       if (clr_[p]) CLEARTEMP[k++] = temp_[p];
@@ -492,13 +492,14 @@ float *CLEARTEMP = NULL;
 
 
   // dynamic cloud detection threshold over land
-  alloc((void**)&CLEARLPROB, nland, sizeof(float));
+  alloc((void**)&CLEARLPROB, nland, sizeof(double));
 
   for (p=0, k=0; p<nc; p++){
     if (lnd_[p]) CLEARLPROB[k++] = LANDPROB[p];
   }
 
   lclr_max = quantile(CLEARLPROB, nland, hi) + cldprob;
+  
   free((void*)CLEARLPROB);
   
   #ifdef FORCE_CLOCK
@@ -531,8 +532,8 @@ float wtrtemp = 0.0;
 int nCLEARWTR = 0;
 bool  *CLEARWTR = NULL;
 float *WATERPROB = NULL;
-float *CLEARWPROB = NULL;
-float *CLEARTEMP = NULL;
+double *CLEARWPROB = NULL; // need to be double for GSL quantile function
+double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
 
   #ifdef FORCE_CLOCK
@@ -551,7 +552,7 @@ float *CLEARTEMP = NULL;
   // test if there is clear water, if not skip and give water prob = -1
   if (nCLEARWTR > 0){
 
-    alloc((void**)&CLEARTEMP, nCLEARWTR, sizeof(float));
+    alloc((void**)&CLEARTEMP, nCLEARWTR, sizeof(double));
 
     for (p=0, k=0; p<nc; p++){
       if (CLEARWTR[p])CLEARTEMP[k++] = temp_[p];
@@ -575,7 +576,7 @@ float *CLEARTEMP = NULL;
     }
 
     // dynamic cloud detection threshold over water
-    alloc((void**)&CLEARWPROB, nCLEARWTR, sizeof(float));
+    alloc((void**)&CLEARWPROB, nCLEARWTR, sizeof(double));
 
     for (p=0, k=0; p<nc; p++){
       if (CLEARWTR[p]) CLEARWPROB[k++] = WATERPROB[p];
@@ -770,7 +771,7 @@ short *spr_  = NULL;
 short *toa_    = NULL;
 short *mask_   = NULL;
 short *marker_ = NULL;
-float *clear_  = NULL;
+double *clear_  = NULL; // need to be double for GSL quantile function
 ushort *dist_;
 char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
@@ -824,7 +825,7 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
       memmove(mask_, toa_, nc*sizeof(short));
 
-      alloc((void**)&clear_,  nland, sizeof(float));
+      alloc((void**)&clear_,  nland, sizeof(double));
       for (p=0, k=0; p<nc; p++){
         if (lnd_[p]) clear_[k++] = mask_[p];
       }
@@ -1408,7 +1409,7 @@ int i, j, p, nx, ny, nc, nf, ne, g, k;
 int skip, influence = 8;
 int nobj, id, size_max = 0, size;
 int *P = NULL, *best_P = NULL;
-float *qtemp = NULL;
+double *qtemp = NULL; // need to be double for GSL quantile function
 float res, radius, core, basetemp;
 float base_min, base_max, base_step, base;
 float best_match, match, shadow, total;
@@ -1546,7 +1547,7 @@ short  *temp_      = NULL;
   #pragma omp parallel private(k, g, x, y, p, size, radius, core, basetemp, base_min, base_max, base, height, shadow, total, match, best_match, qtemp, P, best_P) shared(nx, ny, res, nobj, influence, lowtemp, hightemp, dlapse, rlapse, wlapse, base_step, size_max, spr_, shdprob, cld_, slp_, atc, sun_, view_, QAI, CCL, shd_, array_x, array_y, array_temp, SIZE, temp_) default(none) 
   {
 
-    if (temp_ != NULL) alloc((void**)&qtemp, size_max, sizeof(float));
+    if (temp_ != NULL) alloc((void**)&qtemp, size_max, sizeof(double));
     alloc((void**)&P,       size_max, sizeof(int));
     alloc((void**)&best_P,  size_max, sizeof(int));
 
