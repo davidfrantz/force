@@ -49,7 +49,7 @@ typedef struct {
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] [-p lon/lat] [-r resolution] datacube-dir\n", exe);
+  printf("Usage: %s [-h] [-v] [-i] [-p lon,lat] [-r resolution] datacube-dir\n", exe);
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");

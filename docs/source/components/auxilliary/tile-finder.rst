@@ -10,7 +10,7 @@ Usage
 
 .. code-block:: bash
     
-   force-tile-finder [-h] [-v] [-i] [-p lon/lat] [-r resolution] datacube-dir
+   force-tile-finder [-h] [-v] [-i] [-p lon,lat] [-r resolution] datacube-dir
 
    -h  = show this help
    -v  = show version
