@@ -463,7 +463,7 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter only applies for Sentinel-2 data. This parameter defines\n");
-    fprintf(fp, "# the path to a directory that contains monthly Landsat NIR base images.\n");
+    fprintf(fp, "# the path to a directory that contains monthly NIR base images.\n");
     fprintf(fp, "# If given, a co-registration is attempted. If it fails (no tie points),\n");
     fprintf(fp, "# the image won't be processed.\n");
     fprintf(fp, "# Type: full directory path\n");
