@@ -35,7 +35,7 @@ This file contains functions for time series interpolation
 #include <gsl/gsl_multifit.h> // Linear Least Squares Fitting
 
 
-int interpolate_none(tsa_t *ts, small *mask_, int nc, int nt);
+int interpolate_none(tsa_t *ts, int nc, int nt);
 int interpolate_linear(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata);
 int interpolate_moving(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi);
 int interpolate_rbf(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi);
@@ -52,17 +52,15 @@ void free_rbf(rbf_t *rbf);
 --- nt:     number of time steps
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int interpolate_none(tsa_t *ts, small *mask_, int nc, int nt){
+int interpolate_none(tsa_t *ts, int nc, int nt){
 int t, p;
 
-  #pragma omp parallel private(t) shared(mask_,ts,nc,nt) default(none)
+  #pragma omp parallel private(t) shared(ts,nc,nt) default(none)
   {
 
     #pragma omp for
     for (p=0; p<nc; p++){
 
-      if (mask_ != NULL && !mask_[p]) continue;
-      
       for (t=0; t<nt; t++) ts->tsi_[t][p] = ts->tss_[t][p];
       
     }
@@ -641,7 +639,7 @@ int tsa_interpolation(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, s
 
   switch (tsi->method){
     case _INT_NONE_:
-      interpolate_none(ts, mask_, nc, nt);
+      interpolate_none(ts, nc, nt);
       break;
     case _INT_LINEAR_:
       interpolate_linear(ts, mask_, nc, nt, ni, nodata);
