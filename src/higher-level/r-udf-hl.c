@@ -161,10 +161,10 @@ char *r_argv[] = { "R", "--silent" };
       "  dates <- as.Date(dates_str, format='%Y-%m-%d')                      \n"
       "  array <- replace(array, array == na_value, NA)                      \n"
       "  if (ncpu > 1){                                                      \n"
-      "   result <- sfApply(array, c(3,4), force_rstats_pixel,               \n"
+      "   result <- sfApply(array, 3, force_rstats_pixel,                    \n"
       "                     dates, sensors, bandnames, 1)                    \n"
       "  } else {                                                            \n"
-      "   result <- apply(array, c(3,4), force_rstats_pixel,                 \n"
+      "   result <- apply(array, 3, force_rstats_pixel,                      \n"
       "                     dates, sensors, bandnames, 1)                    \n"
       "  }                                                                   \n"
       "  result <- replace(result, is.na(result), na_value)                  \n"
@@ -437,9 +437,10 @@ SEXP sensors, bandnames;
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
-int b, t, i, j, p;
+int b, t, p;
 size_t k;
 int *array_ = NULL, value;
+int nvalid = 0;
 SEXP na_value, ncpu;
 SEXP dim, array;
 SEXP rstats_return;
@@ -467,12 +468,29 @@ int *rstats_return_ = NULL;
   defineVar(install("ncpu"), ncpu, R_GlobalEnv);
   UNPROTECT(1); // ncpu
 
+  // how many valid pixels?
+  if (udf->type == _UDF_PIXEL_){
+    for (p=0; p<nc; p++){
+      if (mask_ != NULL && !mask_[p]) continue;
+      nvalid++;
+    }
+  }
 
-  PROTECT(dim = allocVector(INTSXP, 4));
-  INTEGER(dim)[0] = nt;
-  INTEGER(dim)[1] = nb;
-  INTEGER(dim)[2] = ny;
-  INTEGER(dim)[3] = nx;
+  if (udf->type == _UDF_PIXEL_){
+    PROTECT(dim = allocVector(INTSXP, 3));
+    INTEGER(dim)[0] = nt;
+    INTEGER(dim)[1] = nb;
+    INTEGER(dim)[2] = nvalid;
+  } else if (udf->type == _UDF_BLOCK_){
+    PROTECT(dim = allocVector(INTSXP, 4));
+    INTEGER(dim)[0] = nt;
+    INTEGER(dim)[1] = nb;
+    INTEGER(dim)[2] = ny;
+    INTEGER(dim)[3] = nx;
+  } else {
+    printf("unknown UDF type.\n"); 
+    exit(FAILURE);
+  }
 
   PROTECT(array = allocArray(INTSXP, dim));
   UNPROTECT(1); // dim
@@ -482,26 +500,22 @@ int *rstats_return_ = NULL;
 
   k = 0;
 
-  for (j=0; j<nx; j++){
-  for (i=0; i<ny; i++){
+  for (p=0; p<nc; p++){
   for (b=0; b<nb; b++){
   for (t=0; t<nt; t++){
 
-    p = nx*i + j;
+    value = nodata;
 
-    if (submodule == _HL_UDF_){
-      if (!ard[t].msk[p]){
-        value = nodata;
-      } else {
-        value = ard[t].dat[b][p];
-      }
+    if (mask_ != NULL && !mask_[p]){
+      if (udf->type == _UDF_PIXEL_) continue;
+    } else  if (submodule == _HL_UDF_){
+        if (ard[t].msk[p]) value = ard[t].dat[b][p];
     } else if (submodule == _HL_TSA_){
-      value = ts->tsi_[t][p];
+        value = ts->tsi_[t][p];
     }
 
     array_[k++] = value;
 
-  }
   }
   }
   }
@@ -515,19 +529,21 @@ int *rstats_return_ = NULL;
 
   k =  0;
 
-  for (j=0; j<nx; j++){
-  for (i=0; i<ny; i++){
+  for (p=0; p<nc; p++){
   for (b=0; b<udf->nb; b++){
 
-      p = nx*i + j;
+    value = nodata;
 
-      if (submodule == _HL_UDF_){
-        udf_->rsp_[b][p] = rstats_return_[k++];
-      } else if (submodule == _HL_TSA_){
-        ts->rsp_[b][p] = rstats_return_[k++];
-      }
+    if (udf->type == _UDF_BLOCK_ || (mask_ != NULL && mask_[p])){
+      value = rstats_return_[k++];
+    }
 
-  }
+    if (submodule == _HL_UDF_){
+      udf_->rsp_[b][p] = value;
+    } else if (submodule == _HL_TSA_){
+      ts->rsp_[b][p] = value;
+    }
+
   }
   }
 
