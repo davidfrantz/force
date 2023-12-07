@@ -1627,7 +1627,7 @@ int success = FAILURE;
   #endif
 
 
-  if (mission != SENTINEL2 || strcmp(pl2->d_coreg, "NULL") == 0) return SUCCESS;
+  if (strcmp(pl2->d_coreg, "NULL") == 0) return SUCCESS;
 
   
   #ifdef FORCE_DEBUG
@@ -1644,7 +1644,13 @@ int success = FAILURE;
 
   // import target
   if ((target = get_bands_short(TOA)) == NULL) return FAILURE;
-  if ((band = find_domain(TOA, "BROADNIR")) < 0) return FAILURE;
+  if (mission == SENTINEL2){
+    if ((band = find_domain(TOA, "BROADNIR")) < 0) return FAILURE;
+  } else if (mission == LANDSAT){
+    if ((band = find_domain(TOA, "NIR")) < 0) return FAILURE;
+  } else {
+    printf("unknown mission in coreg.\n"); return FAILURE;
+  }
   nodata = get_brick_nodata(TOA, band);
   year  =  get_brick_year(TOA, band);
   month =  get_brick_month(TOA, band);
