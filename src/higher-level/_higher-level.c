@@ -243,6 +243,9 @@ off_t ibytes = 0, obytes = 0;
 
   /** CLEAN
   +**********************************************************************/
+  deregister_python(phl);
+  deregister_rstats(phl);
+
   free((void*)ARD1);
   free((void*)ARD2);
   free((void*)MASK);
@@ -254,8 +257,6 @@ off_t ibytes = 0, obytes = 0;
   free_aux(phl, aux);
   free_param_higher(phl);
 
-  deregister_python(phl);
-  deregister_rstats(phl);
 
   CPLPopErrorHandler();
 
