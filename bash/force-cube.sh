@@ -80,7 +80,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -b = basename of output file (without extension)
        defaults to the basename of the input-file
        cannot be used when multiple input files are given
-  -j = number of jobs, defaults to 'as many as possible'
+  -j = number of jobs, defaults to 1
 
   mandatory:
   input-file(s) = the file(s) you want to cube
@@ -214,7 +214,7 @@ RESAMPLE="near"
 RES=10
 DOUT=$PWD
 BASE="DEFAULT"
-NJOB=0
+NJOB=1
 ATTRIBUTE="DEFAULT"
 DATATYPE="Byte"
 ONODATA=255

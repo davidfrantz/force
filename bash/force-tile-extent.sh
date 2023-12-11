@@ -63,7 +63,7 @@ cp $DIR/datacube-definition.prj $TMP/datacube-definition.prj
 
 # generate masks, use force-cube version relative to this program
 BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-$BINDIR"/"force-cube -s 10 -o $TMP -b force-extent $INP &> /dev/null
+$BINDIR"/"force-cube -j 0 -s 10 -o $TMP -b force-extent $INP &> /dev/null
 
 
 WD=$PWD
