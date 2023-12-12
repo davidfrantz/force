@@ -199,7 +199,9 @@ off_t ibytes = 0, obytes = 0;
 
 
   // make GDAL less verbose
+  #ifndef FORCE_DEBUG
   CPLPushErrorHandler(CPLQuietErrorHandler);
+  #endif
 
   // register GDAL drivers
   GDALAllRegister();
@@ -257,8 +259,9 @@ off_t ibytes = 0, obytes = 0;
   free_aux(phl, aux);
   free_param_higher(phl);
 
-
+  #ifndef FORCE_DEBUG
   CPLPopErrorHandler();
+  #endif
 
 
   return SUCCESS;
