@@ -58,7 +58,7 @@ Usage: $PROG [-h] [-v] [-i] [-j] [-m] datacube-dir
   -v  = show version
   -i  = show program's purpose
 
-  -j  = number of parallel processes, defaults to 1
+  -j  = number of parallel processes, defaults to 100%
 
   -m  = mosaic directory (default: mosaic)
         This should be a directory relative to the tiles
@@ -144,7 +144,7 @@ eval set -- "$ARGS"
 
 # default options
 MOSAIC='mosaic'
-CPU=1
+CPU="100%"
 
 while :; do
   case "$1" in

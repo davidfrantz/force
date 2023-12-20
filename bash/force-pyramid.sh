@@ -53,7 +53,7 @@ Usage: $PROG [-hjrl] image [image]*
 
   -h  = show his help
   -j  = number of jobs
-        defaults to 1
+        defaults to 100%
   -r  = resampling option
         default: nearest
   -l  = levels, comma-separated
@@ -76,7 +76,7 @@ if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
 # default options
-NJOB=1
+NJOB="100%"
 LEVELS="2,4,8,16"
 RESAMPLE="nearest"
 
