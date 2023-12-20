@@ -64,7 +64,7 @@ Usage: $PROG [-sldobj] input-basename calc-expr
   -b = basename of output file (without extension)
        defaults to the basename of the input-file, 
        appended by '_procmask'
-  -j = number of jobs, defaults to 'as many as possible'
+  -j = number of jobs, defaults to 1
 
   Positional arguments:
   - input-basename: basename of input data
@@ -121,7 +121,7 @@ LAYER=1
 DINP=$PWD
 DOUT=$PWD
 OBASE="DEFAULT"
-NJOB=0
+NJOB=1
 
 while :; do
   case "$1" in
