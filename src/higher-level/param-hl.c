@@ -199,6 +199,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_intvec_par(params,  "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
   register_float_par(params,   "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
   register_int_par(params,     "HARMONIC_MODES",  1, 3, &phl->tsa.tsi.harm_nmodes);
+  register_bool_par(params,    "HARMONIC_TREND",  &phl->tsa.tsi.harm_trend);
   register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);

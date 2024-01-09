@@ -50,6 +50,9 @@ Develop version
     In this case, FORCE will only be able to filter nodata values, but no other quality flags as defined with ``SCREEN_QAI``.
     Feature requested by Marcel Schwieder and Felix Lobert.
 
+  - In the TSA submodule, it is now possible to disable fitting a monotonic trend within the harmonic model.
+    The new parameter ``HARMONIC_TREND = TRUE/FALSE`` was added. Default behaviour (as before) is ``TRUE``.
+
 - **FORCE AUX**
 
   - new auxilliary program `force-init`.

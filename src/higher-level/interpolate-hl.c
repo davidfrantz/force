@@ -471,13 +471,48 @@ int s;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int interpolate_harmonic(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, short nodata, par_tsi_t *tsi){
 int t, i, k, nk, p;
-int ncoef;
+int n_coef, i_coef;
 double y_pred, y_err;
 gsl_matrix *x = NULL, *cov = NULL;
 gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
+enum { _TERM_OFF_, _TERM_TREND_, _TERM_UNI_, _TERM_BI_, _TERM_TRI_, _TERM_LEN_ };
+bool model_terms[_TERM_LEN_];
 
 
-  if ((ncoef = tsi->harm_nmodes*2 + 2) < 4){
+  n_coef = 0;
+  memset(model_terms, 0, _TERM_LEN_);
+
+
+  // add offset
+  model_terms[_TERM_OFF_] = true;
+  n_coef++;
+
+  // add trend
+  if (tsi->harm_trend){
+    model_terms[_TERM_TREND_] = true;
+    n_coef++;
+  }
+
+  // add uni-modal frequency
+  if (tsi->harm_nmodes >= 1){
+    model_terms[_TERM_UNI_] = true;
+    n_coef += 2;
+  }
+
+  // add bi-modal frequency
+  if (tsi->harm_nmodes >= 2){
+    model_terms[_TERM_BI_] = true;
+    n_coef += 2;
+  }
+  
+  // add tri-modal frequency
+  if (tsi->harm_nmodes >= 3){
+    model_terms[_TERM_TRI_] = true;
+    n_coef += 2;
+  }
+
+  // at least have offset and uni-modal frequency
+  if (n_coef < 3){
       printf("not enough coefficients for harmonic fitting. "
              "Something is wrong. Abort.\n");
       return FAILURE;
@@ -485,12 +520,12 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
 
   gsl_set_error_handler_off();
 
-  #pragma omp parallel private(i,t,k,nk,x,cov,y,c,x_pred,y_pred,y_err) shared(mask_,ts,nc,nt,nr,ni,tsi,nodata,ncoef) default(none)
+  #pragma omp parallel private(i,t,k,nk,i_coef,x,cov,y,c,x_pred,y_pred,y_err) shared(mask_,ts,nc,nt,nr,ni,tsi,nodata,n_coef,model_terms) default(none)
   {
 
-    c = gsl_vector_alloc (ncoef);
-    cov = gsl_matrix_alloc (ncoef, ncoef);
-    x_pred = gsl_vector_alloc(ncoef);
+    c = gsl_vector_alloc (n_coef);
+    cov = gsl_matrix_alloc (n_coef, n_coef);
+    x_pred = gsl_vector_alloc(n_coef);
 
     #pragma omp for
     for (p=0; p<nc; p++){
@@ -513,13 +548,13 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
       }
 
       //if (nk == 0){
-      if (nk < ncoef){
+      if (nk < n_coef){
         for (i=0; i<ni; i++) ts->tsi_[i][p] = nodata;
         continue;
       }
 
 //printf("nk: %d\n", nk);
-      x = gsl_matrix_alloc(nk, ncoef);
+      x = gsl_matrix_alloc(nk, n_coef);
       y = gsl_vector_alloc(nk);
 
 
@@ -528,18 +563,36 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
         if (ts->tss_[t][p] == nodata || 
             ts->d_tss[t].ce < tsi->harm_fit_range[_MIN_].ce ||
             ts->d_tss[t].ce > tsi->harm_fit_range[_MAX_].ce){
+
           continue;
+
         } else {
-          gsl_matrix_set(x, k, 0, 1.0);
-          gsl_matrix_set(x, k, 1, ts->d_tss[t].ce);
-          gsl_matrix_set(x, k, 2, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
-          gsl_matrix_set(x, k, 3, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
-          if (ncoef > 4) gsl_matrix_set(x, k, 4, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
-          if (ncoef > 5) gsl_matrix_set(x, k, 5, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
-          if (ncoef > 6) gsl_matrix_set(x, k, 6, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
-          if (ncoef > 7) gsl_matrix_set(x, k, 7, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+
+          i_coef = 0;
+
+          if (model_terms[_TERM_OFF_]) gsl_matrix_set(x, k, i_coef++, 1.0);
+
+          if (model_terms[_TERM_TREND_]) gsl_matrix_set(x, k, i_coef++, ts->d_tss[t].ce);
+
+          if (model_terms[_TERM_UNI_]){
+            gsl_matrix_set(x, k, i_coef++, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
+            gsl_matrix_set(x, k, i_coef++, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
+          }
+
+          if (model_terms[_TERM_BI_]){
+            gsl_matrix_set(x, k, i_coef++, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
+            gsl_matrix_set(x, k, i_coef++, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
+          }
+
+          if (model_terms[_TERM_TRI_]){
+            gsl_matrix_set(x, k, i_coef++, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
+            gsl_matrix_set(x, k, i_coef++, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+          }
+
           gsl_vector_set(y, k, ts->tss_[t][p]);
+
           k++;
+
         }
 
 
@@ -551,14 +604,26 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
       // interpolate for each equidistant timestep
       for (i=0; i<ni; i++){
 
-        gsl_vector_set(x_pred, 0, 1.0);
-        gsl_vector_set(x_pred, 1, ts->d_tsi[i].ce);
-        gsl_vector_set(x_pred, 2, cos(2 * M_PI / 365 * ts->d_tsi[i].ce));
-        gsl_vector_set(x_pred, 3, sin(2 * M_PI / 365 * ts->d_tsi[i].ce));
-        if (ncoef > 4) gsl_vector_set(x_pred, 4, cos(4 * M_PI / 365 * ts->d_tsi[i].ce));
-        if (ncoef > 5) gsl_vector_set(x_pred, 5, sin(4 * M_PI / 365 * ts->d_tsi[i].ce));
-        if (ncoef > 6) gsl_vector_set(x_pred, 6, cos(6 * M_PI / 365 * ts->d_tsi[i].ce));
-        if (ncoef > 7) gsl_vector_set(x_pred, 7, sin(6 * M_PI / 365 * ts->d_tsi[i].ce));
+        i_coef = 0;
+        
+        if (model_terms[_TERM_OFF_]) gsl_vector_set(x_pred, i_coef++, 1.0);
+
+        if (model_terms[_TERM_TREND_]) gsl_vector_set(x_pred, i_coef++, ts->d_tsi[i].ce);
+
+        if (model_terms[_TERM_UNI_]){
+          gsl_vector_set(x_pred, i_coef++, cos(2 * M_PI / 365 * ts->d_tsi[i].ce));
+          gsl_vector_set(x_pred, i_coef++, sin(2 * M_PI / 365 * ts->d_tsi[i].ce));
+        }
+
+        if (model_terms[_TERM_BI_]){
+          gsl_vector_set(x_pred, i_coef++, cos(4 * M_PI / 365 * ts->d_tsi[i].ce));
+          gsl_vector_set(x_pred, i_coef++, sin(4 * M_PI / 365 * ts->d_tsi[i].ce));
+        }
+
+        if (model_terms[_TERM_TRI_]){
+          gsl_vector_set(x_pred, i_coef++, cos(6 * M_PI / 365 * ts->d_tsi[i].ce));
+          gsl_vector_set(x_pred, i_coef++, sin(6 * M_PI / 365 * ts->d_tsi[i].ce));
+        }
 
         gsl_multifit_robust_est(x_pred, c, cov, &y_pred, &y_err);
         ts->tsi_[i][p] = (short)y_pred;
@@ -578,14 +643,26 @@ gsl_vector *y = NULL, *c = NULL, *x_pred = NULL;
 
           } else {
 
-            gsl_vector_set(x_pred, 0, 1.0);
-            gsl_vector_set(x_pred, 1, ts->d_tss[t].ce);
-            gsl_vector_set(x_pred, 2, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
-            gsl_vector_set(x_pred, 3, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
-            if (ncoef > 4) gsl_vector_set(x_pred, 4, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
-            if (ncoef > 5) gsl_vector_set(x_pred, 5, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
-            if (ncoef > 6) gsl_vector_set(x_pred, 6, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
-            if (ncoef > 7) gsl_vector_set(x_pred, 7, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+            i_coef = 0;
+
+            if (model_terms[_TERM_OFF_]) gsl_vector_set(x_pred, i_coef++, 1.0);
+
+            if (model_terms[_TERM_TREND_]) gsl_vector_set(x_pred, i_coef++, ts->d_tss[t].ce);
+
+            if (model_terms[_TERM_UNI_]){
+              gsl_vector_set(x_pred, i_coef++, cos(2 * M_PI / 365 * ts->d_tss[t].ce));
+              gsl_vector_set(x_pred, i_coef++, sin(2 * M_PI / 365 * ts->d_tss[t].ce));
+            }
+
+            if (model_terms[_TERM_BI_]){
+              gsl_vector_set(x_pred, i_coef++, cos(4 * M_PI / 365 * ts->d_tss[t].ce));
+              gsl_vector_set(x_pred, i_coef++, sin(4 * M_PI / 365 * ts->d_tss[t].ce));
+            }
+
+            if (model_terms[_TERM_TRI_]){
+              gsl_vector_set(x_pred, i_coef++, cos(6 * M_PI / 365 * ts->d_tss[t].ce));
+              gsl_vector_set(x_pred, i_coef++, sin(6 * M_PI / 365 * ts->d_tss[t].ce));
+            }
 
             gsl_multifit_robust_est(x_pred, c, cov, &y_pred, &y_err);
             ts->nrt_[k][p] = (short)(ts->tss_[t][p] - y_pred);

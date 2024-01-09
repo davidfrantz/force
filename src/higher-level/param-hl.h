@@ -183,6 +183,7 @@ typedef struct {
   int rbf_nk;                 // number of kernels for RBF fit
   int *rbf_sigma; // sigmas for RBF fit
   float rbf_cutoff;           // cutoff for RBF fit
+  int harm_trend; // trend in harmonic model?
   int harm_nmodes; // number of modes for harmonic
   date_t *harm_fit_range; // date range for fitting harmonic
   int harm_fit_nrange; // number of dates for fitting harmonic

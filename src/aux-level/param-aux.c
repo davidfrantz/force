@@ -1483,6 +1483,12 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   fprintf(fp, "RBF_CUTOFF = 0.95\n");
   
   if (verbose){
+    fprintf(fp, "# Should a monotonic trend be considered in the harmonic interpolation?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "HARMONIC_TREND = TRUE\n");
+
+  if (verbose){
     fprintf(fp, "# Definition of how many modes per season are used for harmonic interpolation,\n");
     fprintf(fp, "# i.e. uni-modal (1), bi-modal (2), or tri-modal (3).\n");
     fprintf(fp, "# Type: Integer. Valid range: {1,2,3}\n");
