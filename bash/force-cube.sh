@@ -344,6 +344,14 @@ for i in "$@"; do
     fi
   fi
 
+  # is given layer name present?
+  if [ "$RASTER" == "false" ]; then
+    $VECTOR_INFO_EXE $FINP $LAYER &> /dev/null
+    if [ $? -ne 0 ]; then
+      echoerr "requested layer was not found."; exit 1
+    fi
+  fi
+
   # bounding box
   if [ "$RASTER" == "true" ]; then
     FTMP="$FTMP.vrt"
