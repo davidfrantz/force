@@ -955,10 +955,11 @@ void write_par_hl_noise(FILE *fp, bool verbose){
     fprintf(fp, "# can be restored if its residual is lower than a multiple of the noise\n");
     fprintf(fp, "# (BELOW_NOISE). Higher/Lower values will restore observations more aggres-\n");
     fprintf(fp, "# sively/conservative. Give 0 to both parameters to disable the filtering.\n");
+    fprintf(fp, "# ABOVE_NOISE = 3, BELOW_NOISE = 1 are parameters that have worked in some settings.\n");
     fprintf(fp, "# Type: Float. Valid range: [0,...\n");
   }
-  fprintf(fp, "ABOVE_NOISE = 3\n");
-  fprintf(fp, "BELOW_NOISE = 1\n");
+  fprintf(fp, "ABOVE_NOISE = 0\n");
+  fprintf(fp, "BELOW_NOISE = 0\n");
 
   return;
 }
