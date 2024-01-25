@@ -66,7 +66,11 @@ Develop version
   - new auxilliary program `force-datacube-size`.
     This program prints the size of your datacube, per sensor and in total.
 
-  - ``force-tabulate-grid`` has been updated to produce a properly named output file.
+  - ``force-tabulate-grid`` has been updated to produce properly named output files.
+    The default output file name is ``grid.kml``, created in the current directory, using the ``KML`` format. 
+    ``-o`` can override the output file name (including path and extension).
+    ``-f`` can override the file format, use the GDAL vector drive short name - thus grid can now be 
+    generated in any GDAL vector format. Both need to be given if not using defaults.
 
   - The CLI help of `force-tile-finder` has been corrected concerning the separator for the coordinates.
 
