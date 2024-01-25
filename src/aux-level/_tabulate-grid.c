@@ -51,7 +51,6 @@ typedef struct {
   int n;
   double bbox[4]; // bottom,top,left,right
   char dcube[NPOW_10];
-  char bout[NPOW_10];
   char fname[NPOW_10];
   char format[NPOW_10];
 } args_t;
@@ -68,10 +67,11 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  -b bottom,top,left,right  = bounding box\n");
   printf("     use geographic coordinates! 4 comma-separated numbers\n");
-  printf("  -o output-file  = output file without extension,\n");
-  printf("     defaults to 'datacube-dir/grid'\n");
-  printf("\n");
-  printf("  -f format  = output format: shp or kml (default)\n");
+  printf("     defaults to -90,90,-180,180 (note: global extent might be janky for many CRS)\n");
+  printf("  -o output-file  = output file path with extension,\n");
+  printf("     defaults to './grid.kml'\n");
+  printf("  -f format  = output format (GDAL vector driver short name)\n");
+  printf("     defaults to KML\n");
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - 'datacube-dir': directory of existing datacube\n");
@@ -87,9 +87,8 @@ int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
 const char *separator = "/,";
-int nchar;
 int i;
-bool o;
+bool o, f;
 
 
   opterr = 0;
@@ -100,9 +99,9 @@ bool o;
   args->bbox[_left_]   = -180;
   args->bbox[_right_]  =  180;
   o = false;
-  copy_string(args->format, NPOW_10, "kml");
-  copy_string(args->bout,   NPOW_10, "NULL");
-  copy_string(args->fname,  NPOW_10, "NULL");
+  f = false;
+  copy_string(args->format, NPOW_10, "KML");
+  copy_string(args->fname,  NPOW_10, "grid.kml");
 
   // optional parameters
   while ((opt = getopt(argc, argv, "hvit:b:o:f:")) != -1){
@@ -130,11 +129,12 @@ bool o;
         } 
         break;
       case 'o':
-        copy_string(args->bout, NPOW_10, optarg);
+        copy_string(args->fname, NPOW_10, optarg);
         o = true;
         break;
       case 'f':
         copy_string(args->format, NPOW_10, optarg);
+        f = true;
         break;
       case '?':
         if (isprint(optopt)){
@@ -168,18 +168,13 @@ bool o;
     usage(argv[0], FAILURE);
   }
 
-  if (o){
-    nchar = snprintf(args->fname, NPOW_10, "%s.%s", args->bout, args->format);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); usage(argv[0], FAILURE);}
-  } else {
-    nchar = snprintf(args->fname, NPOW_10, "%s/grid.%s", args->dcube, args->format);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); usage(argv[0], FAILURE);}
+  if ((!o && f) || (!f && o)){
+    fprintf(stderr, "If -f is given, -o need to be given, too.\n"); usage(argv[0], FAILURE);
   }
 
   if (fileexist(args->fname)){
-    fprintf(stderr, "Grid already exists: %s.\n", args->fname); usage(argv[0], FAILURE);}
+    fprintf(stderr, "Grid already exists: %s.\n", args->fname); usage(argv[0], FAILURE);
+  }
 
 
   return;
@@ -217,14 +212,8 @@ cube_t *cube = NULL;
 
 
   // get driver
-  if (strcmp(args.format, "shp") == 0){
-    if ((driver = OGRGetDriverByName("ESRI Shapefile")) == NULL){
-      fprintf(stderr, "%s driver is not available.\n", args.format); usage(argv[0], FAILURE);}
-  } else if (strcmp(args.format, "kml") == 0){
-    if ((driver = OGRGetDriverByName("KML")) == NULL){
-      fprintf(stderr, "%s driver is not available.\n", args.format); usage(argv[0], FAILURE);}
-  } else {
-      fprintf(stderr, "Unknown format %s.\n", args.format); usage(argv[0], FAILURE);
+  if ((driver = OGRGetDriverByName(args.format)) == NULL){
+    fprintf(stderr, "%s driver is not available.\n", args.format); usage(argv[0], FAILURE);
   }
 
   // read datacube definition
