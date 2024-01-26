@@ -78,7 +78,7 @@ FORCE_EXE = force force-cube force-higher-level force-import-modis \
             force-procmask force-pyramid force-qai-inflate force-stack \
             force-synthmix force-tabulate-grid force-tile-extent \
             force-tile-finder force-train force-level2-report force-cube-init \
-			force-init force-datacube-size
+			force-init force-datacube-size force-hist
 
 FORCE_MISC = force-level2-report.Rmd
 
@@ -420,6 +420,9 @@ force-import-modis: temp cross lower $(DL)/_import-modis.c
 
 force-cube-init: temp cross lower  $(DA)/_init-cube.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-cube-init $(DA)/_init-cube.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+
+force-hist: temp cross $(DA)/_hist.c
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-hist $(DA)/_hist.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 ### dummy code for testing stuff  
 
