@@ -66,6 +66,10 @@ Develop version
   - new auxilliary program `force-datacube-size`.
     This program prints the size of your datacube, per sensor and in total.
 
+  - new auxilliary program `force-hist`.
+    This program computes the histogram of image values (can be vrt) and writes a csv table.
+    This is intended to be used in a validation workflow (planned feature).
+
   - ``force-tabulate-grid`` has been updated to produce properly named output files.
     The default output file name is ``grid.kml``, created in the current directory, using the ``KML`` format. 
     ``-o`` can override the output file name (including path and extension).
