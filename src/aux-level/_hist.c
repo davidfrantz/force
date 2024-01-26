@@ -150,6 +150,7 @@ int has_nodata;
 int offset = SHRT_MAX+1;
 int length = USHRT_MAX+1;
 off_t counts[length];
+FILE *fout = NULL;
 
 
   parse_args(argc, argv, &args);
@@ -179,7 +180,7 @@ off_t counts[length];
 
     if (GDALRasterIO(band, GF_Read, 0, i, nx, 1, 
       line, nx, 1, GDT_Int16, 0, 0) == CE_Failure){
-      printf("could not read line %d.\n", i+1); exit(1);}
+      fprintf(stderr, "could not read line %d.\n", i+1); exit(1);}
 
     for (j=0; j<nx; j++){
 
@@ -196,14 +197,23 @@ off_t counts[length];
   free((void*)line);
 
 
+
+    
+  if ((fout = fopen(args.file_output, "w")) == NULL){
+    fprintf(stderr, "Unable to open output file %s\n", args.file_output); 
+    return FAILURE;}
+
+  fprintf(fout, "value,count\n");
+
   for (i=0; i<length; i++){
 
     if (counts[i] == 0) continue;
 
-    printf("%d %lu\n", i - offset , counts[i]);
+    fprintf(fout, "%d,%lu\n", i - offset , counts[i]);
 
   }
 
+  fclose(fout);
 
   return SUCCESS;
 }
