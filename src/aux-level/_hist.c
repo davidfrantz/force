@@ -34,10 +34,6 @@ This program computes a histogram of the given image
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
-//#include "../cross-level/cube-cl.h"
-//#include "../cross-level/warp-cl.h"
-//#include "../lower-level/param-ll.h"
-//#include "../lower-level/cube-ll.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
@@ -77,10 +73,6 @@ void usage(char *exe, int exit_code){
 
 void parse_args(int argc, char *argv[], args_t *args){
 int opt;
-char buffer[NPOW_10];
-char *ptr = NULL;
-const char *separator = ",";
-int i;
 
 
   opterr = 0;
@@ -150,7 +142,7 @@ int main(int argc, char *argv[]){
 args_t args;
 GDALDatasetH  fp;
 GDALRasterBandH band;
-int p, i, j, nx, ny, nc;
+int i, j, nx, ny;
 short *line = NULL;
 short nodata;
 int has_nodata;
@@ -168,7 +160,6 @@ off_t counts[length];
 
   nx  = GDALGetRasterXSize(fp);
   ny  = GDALGetRasterYSize(fp);
-  nc = nx*ny;
   
   alloc((void**)&line, nx, sizeof(short));
 
@@ -182,7 +173,7 @@ off_t counts[length];
 
 
 
-  memset(counts, 0, sizeof(off_t)*(USHRT_MAX+1));
+  memset(counts, 0, sizeof(off_t)*length);
 
   for (i=0; i<ny; i++){
 
@@ -205,7 +196,13 @@ off_t counts[length];
   free((void*)line);
 
 
+  for (i=0; i<length; i++){
 
+    if (counts[i] == 0) continue;
+
+    printf("%d %lu\n", i - offset , counts[i]);
+
+  }
 
 
   return SUCCESS;
