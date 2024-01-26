@@ -34,7 +34,6 @@ Utility functions header
 #include <time.h>    // date and time handling functions
 #include <stdbool.h> // boolean data type
 #include <float.h>   // macro constants of the floating-point library
-#include <limits.h>   // macro constants of the integer types
 
 #include "../cross-level/enum-cl.h"
 
@@ -45,7 +44,6 @@ extern "C" {
 void print_ivector(int    *v, const char *name, int n, int big);
 void print_fvector(float  *v, const char *name, int n, int big, int small);
 void print_dvector(double *v, const char *name, int n, int big, int small);
-int num_decimal_places(int i);
 double proctime(time_t start);
 void proctime_print(const char *string, time_t start);
 void fproctime_print(FILE *fp, const char *string, time_t start);
