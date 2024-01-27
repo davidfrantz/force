@@ -27,7 +27,7 @@ library(getopt)
 # input #############################################################
 
 # usage function in same style as other FORCE tools,
-# do not use getop's built-in for consistency
+# do not use getop's built-in usage function for consistency
 usage <- function(exit){
 
   message <- c(
@@ -48,8 +48,10 @@ usage <- function(exit){
     "     defaults to './sample-size.csv'\n",
     "\n",
     "  -c count-file  = csv table with pixel counts per class\n",
+    "     2 columns named value and count",
     "\n",
     "  -u user_acc-file  = csv table with expected user accuracy per class\n",
+    "     2 columns named value and UA",
     "\n",
 
   )
@@ -66,25 +68,19 @@ usage <- function(exit){
 
 }
 
-version <- function() {
-  cat("Printing function not implemented yet. Sorry.\n")
-  quit(
-    save = "no",
-    status = exit
-  )
-}
-
-info <- function() {
-  cat("Suggest sample size for validation of a classification.\n")
-  quit(
-    save = "no",
-    status = exit
-  )
-}
-
-mandatory_missing <- function(argument) {
+exit_normal <- function(argument) {
   cat(
-    sprintf("%s is missing!\n", argument), 
+    sprintf("%s\n", argument)
+  )
+  quit(
+    save = "no",
+    status = 0
+  )
+}
+
+exit_with_error <- function(argument) {
+  cat(
+    sprintf("%s\n", argument), 
     file = stderr()
   )
   usage(1)
@@ -118,11 +114,11 @@ spec <- matrix(
 opt <- getopt(spec)
 
 if (!is.null(opt$help)) usage()
-if (!is.null(opt$info)) info()
-if (!is.null(opt$version)) version()
+if (!is.null(opt$info)) exit_normal("Suggest sample size for validation of a classification.\n")
+if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.\n")
 
-if (is.null(opt$counts)) mandatory_missing("count-file")
-if (is.null(opt$user_acc)) mandatory_missing("user_acc-file")
+if (is.null(opt$counts)) exit_with_error("count-file is missing!")
+if (is.null(opt$user_acc)) exit_with_error("user_acc-file is missing!")
 
 file_existing(opt$counts)
 file_existing(opt$user_acc)
@@ -132,79 +128,80 @@ if (is.null(opt$min_size)) opt$min_size <- 50
 if (is.null(opt$output)) opt$output <- "sample-size.csv"
 
 
-standard_error <- 0.01
-minsize <- 175
+pixel_counts   <- read.csv(opt$counts)
+users_accuracy <- read.csv(opt$user_acc)
 
-pixel_counts <- data.frame(
-  value = 0:2, 
-  count = c(
-    1868242749,
-    496472240,
-    502851998
-    )
-)
 
-users_accuracy <- data.frame(
-  value = 0:2, 
-  UA = c(
-    0.9,
-    0.9,
-    0.9
-  )
-) 
+# main thing ########################################################
 
-df <- users_accuracy %>% 
+# join input tables
+table <- users_accuracy %>% 
   inner_join(
     pixel_counts,
     by = "value"
   )
 
-if (nrow(df) != nrow(pixel_counts)){
-  "input tables do not match\n"
-  stop()
+# join worked?
+if (nrow(table) != nrow(pixel_counts)){
+  exit_with_error("count and user_acc could not be joined")
 }
 
-df <- df %>% 
-  mutate(proportion = count / sum(count)) %>%
+# compute proportional area, and standard deviation of UA
+table <- table %>% 
+  mutate(area = count / sum(count)) %>%
   mutate(stdev = sqrt(UA*(1-UA))) %>%
-  mutate(WS = proportion * stdev)
+  mutate(areaXstdev = area * stdev)
 
-number <- (sum(df$WS)/standard_error)**2
-number
+# number of recommended samples
+number <- (sum(table$areaXstdev)/standard_error)**2
 
-df <- df %>% 
-  mutate(equal = round(number / nrow(df))) %>%
-  mutate(proportional = round(number * proportion)) %>%
+sprintf("%d samples are suggested.\n", number) %>%
+  cat()
+
+# compute class-wise sample size for equal and proportional allocation
+table <- table %>% 
+  mutate(equal = round(number / nrow(table))) %>%
+  mutate(proportional = round(number * area)) %>%
   mutate(compromise = NA)
 
-if (min(df$proportional) < minsize){
-  
-  rare <- df %>% 
+
+# do we have enough samples in proportional allocation?
+if (min(table$proportional) < minsize){
+
+  cat("Proportional allocation yields too few samples.\n")
+  cat("A compromise between equal and proportional allocation is recommended.\n")
+
+  # first, assign minimum sample size to small classes
+  rare <- table %>% 
     filter(proportional < minsize) %>% 
     mutate(compromise = minsize)
   
   n_rare <- sum(rare$compromise)
   
-  big <- df %>% 
+  # allocate remaining samples to big classes proportionally
+  big <- table %>% 
     filter(proportional >= minsize) %>% 
-    mutate(compromise = (number-n_rare) * proportion)
+    mutate(compromise = (number-n_rare) * area)
 
+  # check if proportionally allocated classes are big enough
   if (any(big$compromise < minsize)){
-    c(
-      "compromising the sample allocation failed...\n",
-      "either decrease minsize or adjust input parameters to \n",
-      "have more samples overall."
-      )
+    exit_with_error("Compromising failed. Adjust input parameters.")
   }
 
-  df <- rbind(rare, big)
+  table <- rbind(rare, big)
 
+} else {
+  cat("Proportional allocation recommended.\n")
 }
 
-df %>%
+# compute deviation of compromised allocation from proportional in percent
+table <- table %>%
     mutate(deviation = (compromise - proportional) / proportional * 100)
 
-write.csv(df, file_output, row.names = FALSE, quote = FALSE)
-
-
-
+# write output
+write.csv(
+  table, 
+  opt$output, 
+  row.names = FALSE, 
+  quote = FALSE
+)
