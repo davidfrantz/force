@@ -33,9 +33,10 @@ usage <- function(exit){
 
   message <- c(
     sprintf(
-      "Usage: %s [-h] [-v] [-i] [-o output-file] -c count-file -m map-file -r reference-file\n", 
+      "Usage: %s [-h] [-v] [-i] [-o output-file] -c count-file \n", 
       get_Rscript_filename()
     ),
+    "       -m map-file -r reference-file -a pixel-area\n",
     "\n",
     "  -h  = show this help\n",
     "  -v  = show version\n",
@@ -52,6 +53,10 @@ usage <- function(exit){
     "\n",
     "  -r reference-file  = csv table with reference class labels\n",
     "     2 columns named ID and reference",
+    "\n",
+    "  -a pixel-area  = area of one pixel in desired reporting unit, e.g.\n",
+    "      100 for a Sentinel-2 based map to be reported in m², or\n",
+    "     0.01 for a Sentinel-2 based map to be reported in ha\n",
     "\n",
 
   )
@@ -98,13 +103,14 @@ file_existing <- function(path) {
 
 spec <- matrix(
   c(
-    "help",      "h", 0, "logical",
-    "version",   "v", 0, "logical",
-    "info",      "i", 0, "logical",
-    "output",    "o", 2, "character",
-    "counts",    "c", 1, "character",
-    "map",       "m", 1, "character",
-    "reference", "r", 1, "character"
+    "help",       "h", 0, "logical",
+    "version",    "v", 0, "logical",
+    "info",       "i", 0, "logical",
+    "output",     "o", 2, "character",
+    "counts",     "c", 1, "character",
+    "map",        "m", 1, "character",
+    "reference",  "r", 1, "character",
+    "pixel_area", "a", 1, "numeric"
   ), 
   byrow = TRUE, 
   ncol = 4
@@ -119,6 +125,7 @@ if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. S
 if (is.null(opt$counts)) exit_with_error("count-file is missing!")
 if (is.null(opt$map)) exit_with_error("map-file is missing!")
 if (is.null(opt$reference)) exit_with_error("reference-file is missing!")
+if (is.null(opt$area)) exit_with_error("pixel-area is missing!")
 
 file_existing(opt$counts)
 file_existing(opt$map)
@@ -143,7 +150,8 @@ if (!"count" %in% colnames(cnt)) exit_with_error("count column in count-file mis
 # main thing ########################################################
 
 # join input tables
-table <- reference %>% 
+table <- 
+  reference %>% 
   inner_join(
     map,
     by = "ID"
@@ -157,7 +165,8 @@ if (nrow(table) != nrow(reference)){
 table <- data.frame(ID = 1:1000, map = round(runif(1000, 8, 12)), reference = round(runif(1000, 8, 12)))
 
 # get all classes
-classes <- c(
+classes <- 
+  c(
     table$map, 
     table$reference
   ) %>%
@@ -167,15 +176,16 @@ n_classes <- length(classes)
 
 
 # initialize confusion matrix
-confusion_counts <- matrix(
-  NA, 
-  n_classes, 
-  n_classes, 
-  dimnames = list(
-    map = classes, 
-    reference = classes
+confusion_counts <- 
+  matrix(
+    NA, 
+    n_classes, 
+    n_classes, 
+    dimnames = list(
+      map = classes, 
+      reference = classes
+    )
   )
-)
 
 # populate confusion matrix
 for (m in 1:n_classes){
@@ -195,26 +205,30 @@ for (m in 1:n_classes){
 
 acc_metrics <- function(confusion_matrix) {
 
-  sum_all <- sum(confusion_matrix)
+  sum_all       <- sum(confusion_matrix)
   sum_map_class <- rowSums(confusion_matrix)
   sum_ref_class <- colSums(confusion_matrix)
 
-  oa <- confusion_matrix %>%
+  # overall accuracy
+  oa <- 
+    confusion_matrix %>%
     diag() %>%
     sum() %>%
     `/`(sum_all)
-  oa
 
-  pa <- confusion_matrix %>%
+  # producer's accuracy
+  pa <- 
+    confusion_matrix %>%
     diag() %>%
     `/`(sum_ref_class)
-  pa
 
-  ua <- confusion_matrix %>%
+  # user's accuracy
+  ua <- 
+    confusion_matrix %>%
     diag() %>%
     `/`(sum_map_class)
-  ua
 
+  # error of omission and commission
   oe <- 1 - pa
   ce <- 1 - ua
 
@@ -234,12 +248,18 @@ acc_metrics <- function(confusion_matrix) {
 
 cnt <- data.frame(class = 12:8, count = runif(5, 1e4, 1e6))
 
-cnt <- cnt %>% 
+# compute propoertional area per class, area in reporting unit, and sort the classes
+cnt <- 
+  cnt %>% 
   arrange(class) %>%
-  mutate(weight = count / sum(count))
+  mutate(weight = count / sum(count)) %>%
+  mutate(area = count * opt$pixel_area)
 
-if (!any(cnt$class == classes)) exit_with_error("classes in file-count do not match with map or reference classes")
+# classes should now align with map/reference dataset
+if (!any(cnt$class == classes))
+  exit_with_error("classes in file-count do not match with map or reference classes")
 
+# Olofsson et al. 2013, eq. 1
 confusion_adjusted <-
   confusion_counts /
   matrix(
@@ -258,5 +278,61 @@ confusion_adjusted <-
 confusion_counts
 confusion_adjusted
 
-acc_metrics(confusion_counts)
-acc_metrics(confusion_adjusted)
+
+# Olofsson et al. 2013, eq. 2
+area_adjusted <-
+  colSums(confusion_adjusted) * sum(cnt$area)
+
+
+
+proportions <- 
+  confusion_counts / 
+  matrix(
+    rowSums(confusion_counts),
+    n_classes,
+    n_classes,
+    byrow = FALSE
+  )
+
+
+# Olofsson et al. 2013, eq. 3-5
+confidence_area_adjusted <-
+{
+proportions * 
+(1 - proportions) / 
+matrix(
+  rowSums(confusion_counts) - 1,
+  n_classes,
+  n_classes,
+  byrow = FALSE
+) *
+matrix(
+  cnt$weight**2,
+  n_classes,
+  n_classes,
+  byrow = FALSE
+)
+ } %>%
+  rowSums() %>%
+  sqrt() %>%
+  `*`(sum(cnt$area)) %>%
+  `*`(1.96)
+confidence_area_adjusted
+
+
+# Olofsson et al. 2013, eq. 6-8
+acc_traditional <- acc_metrics(confusion_counts)
+acc_adjusted    <- acc_metrics(confusion_adjusted)
+
+# Olofsson et al. 2014, eq. 5
+oa_se <- sum(cnt$weight**2 * acc_adjusted$ua * (1 - acc_adjusted$ua) / (rowSums(confusion_counts) - 1)) %>%
+sqrt() %>%
+`*`(1.96)
+
+# Olofsson et al. 2014, eq. 6
+ua_se <- (acc_adjusted$ua * (1 - acc_adjusted$ua) / (rowSums(confusion_counts) - 1)) %>%
+sqrt() %>%
+`*`(1.96)
+
+# Olofsson et al. 2014, eq. 7
+pa_se <- # todo, looks comlicated
