@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
+info <- "Suggest sample size for estimating area and accuracy of a classification.\n"
 
 # load libraries ####################################################
 library(dplyr)
@@ -40,18 +41,18 @@ usage <- function(exit){
     "  -v  = show version\n",
     "  -i  = show program's purpose\n",
     "\n",
-    "  -e error = standard error, defaults to 0.01\n",
+    "  -e error = standard error of the estimated overall accuracy (default: 0.01)\n",
     "\n",
-    "  -s min_size = minimum sample size per class\n",
+    "  -s min_size = minimum sample size per class (default: 50)\n",
     "\n",
     "  -o output-file  = output file path with extension,\n",
     "     defaults to './sample-size.csv'\n",
     "\n",
     "  -c count-file  = csv table with pixel counts per class\n",
-    "     2 columns named value and count",
+    "     2 columns named class and count",
     "\n",
     "  -u user_acc-file  = csv table with expected user accuracy per class\n",
-    "     2 columns named value and UA",
+    "     2 columns named class and UA",
     "\n",
 
   )
@@ -103,9 +104,9 @@ spec <- matrix(
     "info",     "i", 0, "logical",
     "error",    "e", 2, "numeric",
     "min_size", "s", 2, "integer",
+    "output",   "o", 2, "character",
     "counts",   "c", 1, "character",
-    "user_acc", "u", 1, "character",
-    "output",   "o", 1, "character"
+    "user_acc", "u", 1, "character"
   ), 
   byrow = TRUE, 
   ncol = 4
@@ -114,7 +115,7 @@ spec <- matrix(
 opt <- getopt(spec)
 
 if (!is.null(opt$help)) usage()
-if (!is.null(opt$info)) exit_normal("Suggest sample size for validation of a classification.\n")
+if (!is.null(opt$info)) exit_normal(info)
 if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.\n")
 
 if (is.null(opt$counts)) exit_with_error("count-file is missing!")
@@ -131,6 +132,12 @@ if (is.null(opt$output)) opt$output <- "sample-size.csv"
 pixel_counts   <- read.csv(opt$counts)
 users_accuracy <- read.csv(opt$user_acc)
 
+# columns OK?
+if (!"class" %in% colnames(pixel_counts)) exit_with_error("class column in count-file missing")
+if (!"class" %in% colnames(users_accuracy)) exit_with_error("class column in user_acc-file missing")
+if (!"count" %in% colnames(pixel_counts)) exit_with_error("count column in count-file missing")
+if (!"UA" %in% colnames(user_acc)) exit_with_error("UA column in user_acc-file missing")
+
 
 # main thing ########################################################
 
@@ -138,7 +145,7 @@ users_accuracy <- read.csv(opt$user_acc)
 table <- users_accuracy %>% 
   inner_join(
     pixel_counts,
-    by = "value"
+    by = "class"
   )
 
 # join worked?
@@ -155,7 +162,7 @@ table <- table %>%
 # number of recommended samples
 number <- (sum(table$areaXstdev)/standard_error)**2
 
-sprintf("%d samples are suggested.\n", number) %>%
+sprintf("Suggested sample size: %d\n", number) %>%
   cat()
 
 # compute class-wise sample size for equal and proportional allocation
@@ -183,12 +190,13 @@ if (min(table$proportional) < minsize){
     filter(proportional >= minsize) %>% 
     mutate(compromise = (number-n_rare) * area)
 
+  table <- rbind(rare, big)
+
   # check if proportionally allocated classes are big enough
   if (any(big$compromise < minsize)){
+    print(table)
     exit_with_error("Compromising failed. Adjust input parameters.")
   }
-
-  table <- rbind(rare, big)
 
 } else {
   cat("Proportional allocation recommended.\n")

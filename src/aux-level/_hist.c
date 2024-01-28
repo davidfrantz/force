@@ -203,7 +203,7 @@ FILE *fout = NULL;
     fprintf(stderr, "Unable to open output file %s\n", args.file_output); 
     return FAILURE;}
 
-  fprintf(fout, "value,count\n");
+  fprintf(fout, "class,count\n");
 
   for (i=0; i<length; i++){
 
