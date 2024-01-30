@@ -60,12 +60,12 @@ usage <- function(exit){
     "\n",
 
   )
-  
+
   cat(
     message,
     file = if (exit == 0) stdout else stderr()
   )
-  
+
   quit(
     save = "no",
     status = exit
@@ -202,6 +202,22 @@ for (m in 1:n_classes){
   }
 }
 
+classes <- 1:4
+n_classes <- 4
+confusion_counts <- matrix(
+  c(
+    150,	12,	1,	2,
+    32,	100,	21,	3,
+    0,	32,	120,	0,
+    0,	0,	5,	130
+  ), byrow = TRUE,
+  n_classes, 
+    n_classes, 
+    dimnames = list(
+      map = classes, 
+      reference = classes
+    )
+)
 
 acc_metrics <- function(confusion_matrix) {
 
@@ -246,7 +262,8 @@ acc_metrics <- function(confusion_matrix) {
 
 
 
-cnt <- data.frame(class = 12:8, count = runif(5, 1e4, 1e6))
+cnt <- data.frame(class = 1:4, count = c(20000,200000,300000,350000))
+opt <- list(pixel_area = 30^2/10000) # ha
 
 # compute propoertional area per class, area in reporting unit, and sort the classes
 cnt <- 
@@ -313,7 +330,7 @@ matrix(
   byrow = FALSE
 )
  } %>%
-  rowSums() %>%
+  colSums() %>%
   sqrt() %>%
   `*`(sum(cnt$area)) %>%
   `*`(1.96)
@@ -335,4 +352,81 @@ sqrt() %>%
 `*`(1.96)
 
 # Olofsson et al. 2014, eq. 7
-pa_se <- # todo, looks comlicated
+
+
+Nj <-
+  {
+  matrix(
+    cnt$count,
+    n_classes,
+    n_classes,
+    byrow = FALSE
+  ) / 
+  matrix(
+    rowSums(confusion_counts),
+    n_classes,
+    n_classes,
+    byrow = FALSE
+  ) *
+  confusion_counts
+  } %>%
+  colSums()
+
+
+term1 <- cnt$count**2 *
+(1 - acc_adjusted$pa)**2 * 
+acc_adjusted$ua * 
+(1 - acc_adjusted$ua) / 
+(colSums(confusion_counts) - 1)
+
+leave_class_out <- 
+matrix(
+  1,  n_classes,
+    n_classes
+)
+diag(leave_class_out) <- 0
+
+term2 <- {
+matrix(
+  cnt$count**2,
+  n_classes,
+  n_classes,
+  byrow = FALSE
+) *
+confusion_counts /
+matrix(
+  rowSums(confusion_counts),
+   n_classes,
+    n_classes,
+    byrow = FALSE
+) *
+(
+  1 -
+  confusion_counts /
+  matrix(
+    rowSums(confusion_counts),
+    n_classes,
+      n_classes,
+      byrow = FALSE
+  )
+) /
+matrix(
+(rowSums(confusion_counts) - 1),
+   n_classes,
+    n_classes,
+    byrow = FALSE
+) *
+leave_class_out
+} %>%
+colSums() %>%
+`*`(acc_adjusted$pa**2)
+
+
+
+pa_se <- 
+{
+  (1/Nj**2) *
+  (term1 + term2)
+} %>%
+sqrt() %>%
+`*`(1.96)
