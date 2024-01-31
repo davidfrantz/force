@@ -57,6 +57,8 @@ typedef struct {
   int n_active_rows;
   double *mean;
   double *sd;
+  double *min;
+  double *max;
 } table_t;
 
 table_t read_table(char *fname, bool has_row_names, bool has_col_names);
