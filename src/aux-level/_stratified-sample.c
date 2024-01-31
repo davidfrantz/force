@@ -31,6 +31,8 @@ This program computes a histogram of the given image
 #include <ctype.h>   // testing and mapping characters
 #include <unistd.h>  // standard symbolic constants and types 
 
+#include <time.h>
+
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
@@ -152,39 +154,52 @@ short *line = NULL;
 short nodata;
 int has_nodata;
 table_t sample_size;
-int col_size, col_class;
+int col_size, col_class, col_count, row;
 
 int offset = SHRT_MAX+1;
 int length = USHRT_MAX+1;
-enum { _CLASS_, _SIZE_, _PROBABILITY_, _DICT_LENGTH_ };
+double **dictionary = NULL;
+enum { _CLASS_, _SIZE_, _PROBABILITY_, _COUNT_, _DICT_LENGTH_ };
 
   parse_args(argc, argv, &args);
 
   sample_size = read_table(args.file_input_sample_size, false, true);
   if ((col_size = find_table_col(&sample_size, args.column_sample_size)) < 0){
-    printf("could not find column name in file-sample-size\n"); exit(FAILURE);}
+    printf("could not find column name %s in file-sample-size\n", args.column_sample_size); exit(FAILURE);}
   if ((col_class = find_table_col(&sample_size, "class")) < 0){
-    printf("could not find column name in file-sample-size\n"); exit(FAILURE);}
+    printf("could not find column name %s in file-sample-size\n", "class"); exit(FAILURE);}
+  if ((col_count = find_table_col(&sample_size, "count")) < 0){
+    printf("could not find column name %s in file-sample-size\n", "count"); exit(FAILURE);}
 
   print_table(&sample_size, false);
   printf("column %s in column %d\n", "class", col_class);
+  printf("column %s in column %d\n", "count", col_count);
   printf("column %s in column %d\n", args.column_sample_size, col_size);
 
   printf("min/max class: %d/%d\n", (int)sample_size.min[col_class], (int)sample_size.max[col_class]);
 
 
 
-  alloc_2D((void**)&dictionary, length, _DICT_LENGTH_, sizeof(double));
+  alloc_2D((void***)&dictionary, length, _DICT_LENGTH_, sizeof(double));
 
   for (row=0; row<sample_size.nrow; row++){
-    dictionary[(int)sample_size[row][col_class] + offset][_CLASS_] = sample_size.data[row][col_class];
-    dictionary[(int)sample_size[row][col_class] + offset][_SIZE_] = sample_size.data[row][col_size];
-    dictionary[(int)sample_size[row][col_class] + offset][_PROBABILITY_] = sample_size.data[row][col_size] / sample_size.sum[col_size];
+    dictionary[(int)sample_size.data[row][col_class] + offset][_CLASS_] = sample_size.data[row][col_class];
+    dictionary[(int)sample_size.data[row][col_class] + offset][_SIZE_] = sample_size.data[row][col_size];
+    dictionary[(int)sample_size.data[row][col_class] + offset][_PROBABILITY_] = sample_size.data[row][col_size] / sample_size.data[row][col_count];
+
+    printf("%.2f %.2f %.12f\n", 
+      dictionary[(int)sample_size.data[row][col_class] + offset][_CLASS_],
+      dictionary[(int)sample_size.data[row][col_class] + offset][_SIZE_],
+      dictionary[(int)sample_size.data[row][col_class] + offset][_PROBABILITY_]);
   }
 
 
-
-
+  srand(time(NULL)); 
+  printf("random number: %f\n", (double) (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]);
+  printf("random number: %f\n", (double) (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]);
+  printf("random number: %f\n", (double) (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]);
+  printf("random number: %f\n", (double) (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]);
+  printf("random number: %f\n", (double) (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]);
 
 
   GDALAllRegister();
@@ -204,7 +219,17 @@ enum { _CLASS_, _SIZE_, _PROBABILITY_, _DICT_LENGTH_ };
     exit(1);
   }
 
-
+ int cnt = 0;
+double probability;
+ /** FILE *fp_ = NULL;
+  fp_ = fopen("test.txt", "w");
+  for (i=0; i<346589861; i++){
+    probability = (double)rand()/(double)RAND_MAX;
+    fprintf(fp_, "%f\n", probability);
+  }
+  fclose(fp_);
+  exit(0);
+ **/
   for (i=0; i<ny; i++){
 
     if (GDALRasterIO(band, GF_Read, 0, i, nx, 1, 
@@ -215,9 +240,30 @@ enum { _CLASS_, _SIZE_, _PROBABILITY_, _DICT_LENGTH_ };
 
       if (line[j] == nodata) continue;
 
+      //probability = (rand() % (size_t) sample_size.sum[col_count])/sample_size.sum[col_count]*100;
+      probability = (double)rand()/(double)RAND_MAX;
+
+      //printf("probability: %f\n", probability);
+
+      if (dictionary[line[j] + offset][_PROBABILITY_] >= probability){
+        dictionary[line[j] + offset][_COUNT_]++;
+        printf("%d samples selected (row %d, col %d)\n", cnt++, i, j);
+      }
+        
+
     }
 
   }
+
+
+ for (row=0; row<sample_size.nrow; row++){
+    printf("%.2f, %.2f, %.12f, %.0f,\n", 
+      dictionary[(int)sample_size.data[row][col_class] + offset][_CLASS_],
+      dictionary[(int)sample_size.data[row][col_class] + offset][_SIZE_],
+      dictionary[(int)sample_size.data[row][col_class] + offset][_PROBABILITY_],
+      dictionary[(int)sample_size.data[row][col_class] + offset][_COUNT_]);
+  }
+
 
   GDALClose(fp);
 
