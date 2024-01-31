@@ -34,6 +34,7 @@ This program computes a histogram of the given image
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
+#include "../cross-level/table-cl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
@@ -146,11 +147,10 @@ int i, j, nx, ny;
 short *line = NULL;
 short nodata;
 int has_nodata;
-
 int offset = SHRT_MAX+1;
 int length = USHRT_MAX+1;
-off_t counts[length];
-FILE *fout = NULL;
+table_t counts;
+int row;
 
 
   parse_args(argc, argv, &args);
@@ -173,8 +173,10 @@ FILE *fout = NULL;
   }
 
 
-
-  memset(counts, 0, sizeof(off_t)*length);
+  counts = allocate_table(length, 2, false, true);
+  copy_string(counts.col_names[0], NPOW_10, "class");
+  copy_string(counts.col_names[1], NPOW_10, "count");
+  for (row=0; row<counts.nrow; row++) counts.data[row][0] = row - offset;
 
   for (i=0; i<ny; i++){
 
@@ -186,7 +188,8 @@ FILE *fout = NULL;
 
       if (line[j] == nodata) continue;
 
-      counts[line[j] + offset]++;
+      row = line[j] + offset;
+      counts.data[row][1]++;
 
     }
 
@@ -197,23 +200,13 @@ FILE *fout = NULL;
   free((void*)line);
 
 
-
-    
-  if ((fout = fopen(args.file_output, "w")) == NULL){
-    fprintf(stderr, "Unable to open output file %s\n", args.file_output); 
-    return FAILURE;}
-
-  fprintf(fout, "class,count\n");
-
-  for (i=0; i<length; i++){
-
-    if (counts[i] == 0) continue;
-
-    fprintf(fout, "%d,%lu\n", i - offset , counts[i]);
-
+  for (row=0; row<counts.nrow; row++){
+    if (counts.data[row][1] == 0) counts.row_mask[row] = false;
   }
 
-  fclose(fout);
+  write_table(&counts, args.file_output, ",", true);
+
+  free_table(&counts);
 
   return SUCCESS;
 }
