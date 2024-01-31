@@ -151,15 +151,26 @@ int i, j, nx, ny;
 short *line = NULL;
 short nodata;
 int has_nodata;
-
-
 table_t sample_size;
+int col_size, col_class;
 
 
   parse_args(argc, argv, &args);
 
   sample_size = read_table(args.file_input_sample_size, false, true);
+  if ((col_size = find_table_col(&sample_size, args.column_sample_size)) < 0){
+    printf("could not find column name in file-sample-size\n"); exit(FAILURE);}
+  if ((col_class = find_table_col(&sample_size, "class")) < 0){
+    printf("could not find column name in file-sample-size\n"); exit(FAILURE);}
+
   print_table(&sample_size, false);
+  printf("column %s in column %d\n", "class", col_class);
+  printf("column %s in column %d\n", args.column_sample_size, col_size);
+
+  print("min/max class: %d/%d\n", table.min[col_class], table.max[col_class]);
+
+  
+
 //  if (n_column != 3){
 //    fprintf(stderr, "input-size does not have 3 columns %s.\n", args.file_input); exit(1);}
 
