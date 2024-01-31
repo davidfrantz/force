@@ -292,8 +292,6 @@ confusion_adjusted <-
     byrow = FALSE
   )
 
-confusion_counts
-confusion_adjusted
 
 
 # Olofsson et al. 2013, eq. 2
@@ -430,6 +428,23 @@ pa_se <-
 } %>%
 sqrt() %>%
 `*`(1.96)
+
+
+
+confusion_counts
+confusion_adjusted
+
+acc_traditional
+acc_adjusted
+
+cnt$area
+area_adjusted
+confidence_area_adjusted
+
+oa_se
+pa_se
+ua_se
+
 
 fo <- file(opt$output, "w")
 
