@@ -341,6 +341,47 @@ int width, *max_width = NULL;
 }
 
 
+/** This function writes a table.
+--- table:     table
+--- fname:     filename
+--- separator: column separator
++++ Return:    void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_table(table_t *table, char *fname, char *separator){
+int row, col;
+FILE *fp = NULL;
+
+
+  if ((fp = fopen(fname, "w")) == NULL){
+    printf("unable to open file %s\n", fname); 
+    exit(FAILURE);
+  }
+
+ 
+  if (table->has_col_names){
+
+    if (table->has_row_names) printf("rowname%s", separator);
+
+    for (col=0; col<(table->ncol-1); col++) printf("%s%s", table->col_names[col], separator);
+    printf("%s\n", table->col_names[col]);
+
+  }
+
+  for (row=0; row<table->nrow; row++){
+
+    if (table->has_row_names) printf("%s%s", table->row_names[row], separator);
+    for (col=0; col<(table->ncol-1); col++) printf("%.2f%s", table->data[row][col], separator);
+    printf("%.2f\n", table->data[row][col]);
+
+  }
+
+
+  fclose(fp);
+
+  return;
+}
+
+
 /** This function frees a table.
 --- table:  table
 +++ Return: void
