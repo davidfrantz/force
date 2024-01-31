@@ -347,7 +347,7 @@ int width, *max_width = NULL;
 --- separator: column separator
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_table(table_t *table, char *fname, char *separator){
+void write_table(table_t *table, char *fname, const char *separator){
 int row, col;
 FILE *fp = NULL;
 
@@ -360,18 +360,18 @@ FILE *fp = NULL;
  
   if (table->has_col_names){
 
-    if (table->has_row_names) printf("rowname%s", separator);
+    if (table->has_row_names) fprintf(fp, "rowname%s", separator);
 
-    for (col=0; col<(table->ncol-1); col++) printf("%s%s", table->col_names[col], separator);
-    printf("%s\n", table->col_names[col]);
+    for (col=0; col<(table->ncol-1); col++) fprintf(fp, "%s%s", table->col_names[col], separator);
+    fprintf(fp, "%s\n", table->col_names[col]);
 
   }
 
   for (row=0; row<table->nrow; row++){
 
-    if (table->has_row_names) printf("%s%s", table->row_names[row], separator);
-    for (col=0; col<(table->ncol-1); col++) printf("%.2f%s", table->data[row][col], separator);
-    printf("%.2f\n", table->data[row][col]);
+    if (table->has_row_names) fprintf(fp, "%s%s", table->row_names[row], separator);
+    for (col=0; col<(table->ncol-1); col++) fprintf(fp, "%.2f%s", table->data[row][col], separator);
+    fprintf(fp, "%.2f\n", table->data[row][col]);
 
   }
 
