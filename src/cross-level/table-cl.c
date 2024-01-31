@@ -46,6 +46,7 @@ int col  = 0;
 int nrow_buf = NPOW_00;
 int ncol_buf = NPOW_00;
 double mx, vx, k;
+double minimum, maximum;
 
 
   // init table to zeros
@@ -181,10 +182,13 @@ double mx, vx, k;
 
   alloc((void**)&table.mean, table.ncol, sizeof(double));
   alloc((void**)&table.sd,   table.ncol, sizeof(double));
+  alloc((void**)&table.min,  table.ncol, sizeof(double));
+  alloc((void**)&table.max,  table.ncol, sizeof(double));
 
   for (col=0; col<table.ncol; col++){
 
     mx = vx = k = 0;
+    minimum = SHRT_MAX; maximum = SHRT_MIN;
 
     for (row=0; row<table.nrow; row++){
 
@@ -195,10 +199,15 @@ double mx, vx, k;
         var_recurrence(table.data[row][col], &mx, &vx, k);
       }
 
+      if (table.data[row][col] < minimum) minimum = table.data[row][col];
+      if (table.data[row][col] > maximum) maximum = table.data[row][col];
+
     }
  
     table.mean[col] = mx;
     table.sd[col]   = standdev(vx, k);
+    table.min[col]  = minimum;
+    table.max[col]  = maximum;
 
   }
 
@@ -226,6 +235,8 @@ void init_table(table_t *table){
   table->n_active_rows = 0;
   table->mean = NULL;
   table->sd = NULL;
+  table->min = NULL;
+  table->max = NULL;
 
   return;
 }
@@ -274,6 +285,8 @@ table_t table;
 
   alloc((void**)&table.mean, table.ncol, sizeof(double));
   alloc((void**)&table.sd,   table.ncol, sizeof(double));
+  alloc((void**)&table.min,  table.ncol, sizeof(double));
+  alloc((void**)&table.max,  table.ncol, sizeof(double));
 
   return table;
 }
@@ -466,6 +479,16 @@ void free_table(table_t *table){
   if (table->sd != NULL){
     free((void*)table->sd);
     table->sd = NULL;
+  }
+
+  if (table->min != NULL){
+    free((void*)table->min);
+    table->min = NULL;
+  }
+
+  if (table->max != NULL){
+    free((void*)table->max);
+    table->max = NULL;
   }
 
   return;
