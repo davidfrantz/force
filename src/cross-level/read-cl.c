@@ -34,7 +34,7 @@ This file contains functions for reading all-purpose files
 --- ncols: number of cols (returned)
 +++ Return: table
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double **read_table(char *fname, int *nrows, int *ncols){
+double **read_table_deprecated(char *fname, int *nrows, int *ncols){
 FILE *fp;
 char  buffer[NPOW_16] = "\0";
 char *ptr = NULL;

@@ -49,7 +49,7 @@ int b, e = 0;
 float scale = 10000.0;
 
 
-  if ((aux->endmember.tab = read_table(phl->tsa.sma.f_emb, 
+  if ((aux->endmember.tab = read_table_deprecated(phl->tsa.sma.f_emb, 
       &aux->endmember.nb, &aux->endmember.ne)) == NULL){
     printf("unable to read endmembers. "); return FAILURE;}
 
@@ -164,7 +164,7 @@ double mx, vx, k;
     if (nchar < 0 || nchar >= NPOW_10){
       printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
     
-    if ((aux->library.tab[i] = read_table(fname, &nsample, &nfeatures)) == NULL){
+    if ((aux->library.tab[i] = read_table_deprecated(fname, &nsample, &nfeatures)) == NULL){
       printf("unable to read library. "); return FAILURE;}
       
     aux->library.ns[i] = nsample;
@@ -234,7 +234,7 @@ int read_samples(par_hl_t *phl, aux_t *aux){
 int ns, nr;
 
 
-  if ((aux->sample.tab = read_table(phl->smp.f_coord, &ns, &nr)) == NULL){
+  if ((aux->sample.tab = read_table_deprecated(phl->smp.f_coord, &ns, &nr)) == NULL){
     printf("unable to read samples. "); return FAILURE;}
 
   if (nr < 3){
