@@ -61,6 +61,8 @@ typedef struct {
 
 table_t read_table(char *fname, bool has_row_names, bool has_col_names);
 table_t allocate_table(int nrow, int ncol, bool has_row_names, bool has_col_names);
+int find_table_col(table_t *table, const char *name);
+int find_table_row(table_t *table, const char *name);
 void init_table(table_t *table);
 void print_table(table_t *table, bool truncate);
 void write_table(table_t *table, char *fname, const char *separator);
