@@ -347,7 +347,7 @@ int width, *max_width = NULL;
 --- separator: column separator
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_table(table_t *table, char *fname, char *separator){
+void write_table(table_t *table, char *fname, char *separator, bool skip_rows){
 int row, col;
 FILE *fp = NULL;
 
@@ -368,6 +368,8 @@ FILE *fp = NULL;
   }
 
   for (row=0; row<table->nrow; row++){
+
+    if (skip_rows && !table->row_mask[row]) continue;
 
     if (table->has_row_names) printf("%s%s", table->row_names[row], separator);
     for (col=0; col<(table->ncol-1); col++) printf("%.2f%s", table->data[row][col], separator);
