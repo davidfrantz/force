@@ -45,7 +45,7 @@ int row  = 0;
 int col  = 0;
 int nrow_buf = NPOW_00;
 int ncol_buf = NPOW_00;
-double mx, vx, k;
+double mx, vx, k, sum;
 double minimum, maximum;
 
 
@@ -184,10 +184,11 @@ double minimum, maximum;
   alloc((void**)&table.sd,   table.ncol, sizeof(double));
   alloc((void**)&table.min,  table.ncol, sizeof(double));
   alloc((void**)&table.max,  table.ncol, sizeof(double));
+  alloc((void**)&table.sum,  table.ncol, sizeof(double));
 
   for (col=0; col<table.ncol; col++){
 
-    mx = vx = k = 0;
+    mx = vx = k = sum = 0;
     minimum = SHRT_MAX; maximum = SHRT_MIN;
 
     for (row=0; row<table.nrow; row++){
@@ -202,12 +203,15 @@ double minimum, maximum;
       if (table.data[row][col] < minimum) minimum = table.data[row][col];
       if (table.data[row][col] > maximum) maximum = table.data[row][col];
 
+      sum += table.data[row][col];
+
     }
  
     table.mean[col] = mx;
     table.sd[col]   = standdev(vx, k);
     table.min[col]  = minimum;
     table.max[col]  = maximum;
+    table.sum[col]  = sum;
 
   }
 
@@ -237,6 +241,7 @@ void init_table(table_t *table){
   table->sd = NULL;
   table->min = NULL;
   table->max = NULL;
+  table->sum = NULL;
 
   return;
 }
@@ -287,6 +292,7 @@ table_t table;
   alloc((void**)&table.sd,   table.ncol, sizeof(double));
   alloc((void**)&table.min,  table.ncol, sizeof(double));
   alloc((void**)&table.max,  table.ncol, sizeof(double));
+  alloc((void**)&table.sum,  table.ncol, sizeof(double));
 
   return table;
 }
@@ -489,6 +495,11 @@ void free_table(table_t *table){
   if (table->max != NULL){
     free((void*)table->max);
     table->max = NULL;
+  }
+
+  if (table->sum != NULL){
+    free((void*)table->sum);
+    table->sum = NULL;
   }
 
   return;

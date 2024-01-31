@@ -59,6 +59,7 @@ typedef struct {
   double *sd;
   double *min;
   double *max;
+  double *sum;
 } table_t;
 
 table_t read_table(char *fname, bool has_row_names, bool has_col_names);
