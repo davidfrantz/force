@@ -242,19 +242,22 @@ table_t allocate_table(int nrow, int ncol, bool has_row_names, bool has_col_name
 table_t table;
 
 
+  table.nrow = nrow;
+  table.ncol = ncol;
+
   // allocate table data
-  alloc_2D((void***)&table.data, nrow, ncol, sizeof(double));
+  alloc_2D((void***)&table.data, table.nrow, table.ncol, sizeof(double));
 
   // allocate row names
   if ((table.has_row_names = has_row_names)){
-    alloc_2D((void***)&table.row_names, nrow, NPOW_10, sizeof(char));
+    alloc_2D((void***)&table.row_names, table.nrow, NPOW_10, sizeof(char));
   } else {
     table.row_names = NULL;
   }
 
   // allocate column names
   if ((table.has_col_names = has_col_names)){
-    alloc_2D((void***)&table.col_names, ncol, NPOW_10, sizeof(char));
+    alloc_2D((void***)&table.col_names, table.ncol, NPOW_10, sizeof(char));
   } else {
     table.col_names = NULL;
   }
