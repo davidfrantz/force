@@ -21,40 +21,54 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Utility functions header
+Handle tables (csv-styled)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef UTILS_CL_H
-#define UTILS_CL_H
+#ifndef TABLE_CL_H
+#define TABLE_CL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
-#include <math.h>    // common mathematical functions
-#include <time.h>    // date and time handling functions
 #include <stdbool.h> // boolean data type
-#include <float.h>   // macro constants of the floating-point library
-#include <limits.h>   // macro constants of the integer types
 
-#include "../cross-level/enum-cl.h"
+#include "../cross-level/const-cl.h"
+#include "../cross-level/alloc-cl.h"
+#include "../cross-level/string-cl.h"
+#include "../cross-level/stats-cl.h"
+#include "../cross-level/utils-cl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void print_ivector(int    *v, const char *name, int n, int big);
-void print_fvector(float  *v, const char *name, int n, int big, int small);
-void print_dvector(double *v, const char *name, int n, int big, int small);
-int num_decimal_places(int i);
-double proctime(time_t start);
-void proctime_print(const char *string, time_t start);
-void fproctime_print(FILE *fp, const char *string, time_t start);
-bool fequal(float a, float b);
-void print_humanreadable_bytes(off_t bytes);
+typedef struct {
+  int nrow;
+  int ncol;
+  bool has_row_names;
+  bool has_col_names;
+  char **row_names;
+  char **col_names;
+  double **data;
+  bool *row_mask;
+  bool *col_mask;
+  int n_active_cols;
+  int n_active_rows;
+  double *mean;
+  double *sd;
+} table_t;
+
+table_t read_table(char *fname, bool has_row_names, bool has_col_names);
+table_t allocate_table(int nrow, int ncol, bool has_row_names, bool has_col_names);
+void init_table(table_t *table);
+void print_table(table_t *table, bool truncate);
+void free_table(table_t *table);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 

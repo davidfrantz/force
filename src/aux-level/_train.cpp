@@ -160,7 +160,7 @@ time_t TIME;
 
 
   // read response variable
-  if ((t_response = read_table(train->f_response, 
+  if ((t_response = read_table_deprecated(train->f_response, 
       &n_sample, &n_response_vars)) == NULL){
     printf("unable to read response file. "); return FAILURE;}
 
@@ -187,7 +187,7 @@ time_t TIME;
 
 
   // read features
-  if ((t_features = read_table(train->f_feature, 
+  if ((t_features = read_table_deprecated(train->f_feature, 
     &n_sample2, &n_feature)) == NULL){
   printf("unable to read feature file. "); return FAILURE;}
 

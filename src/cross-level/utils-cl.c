@@ -84,6 +84,19 @@ int i;
 }
 
 
+/** Number of decimal places in integer
+--- i:      integer
++++ Return: # decimal places
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int num_decimal_places(int i){
+
+  if (i < 0) return num_decimal_places((i == INT_MIN) ? INT_MAX: -i);
+  if (i < 10) return 1;
+
+  return 1 + num_decimal_places(i/10);
+}
+
+
 /** Measure time
 +++ This function measures the processing time and prints to stdout
 --- start:  start time
