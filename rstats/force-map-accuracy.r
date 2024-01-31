@@ -263,7 +263,7 @@ acc_metrics <- function(confusion_matrix) {
 
 
 cnt <- data.frame(class = 1:4, count = c(20000,200000,300000,350000))
-opt <- list(pixel_area = 30^2/10000) # ha
+opt <- list(pixel_area = 30^2/10000, output = "accuracy-assessment.txt") # ha
 
 # compute propoertional area per class, area in reporting unit, and sort the classes
 cnt <- 
@@ -430,3 +430,10 @@ pa_se <-
 } %>%
 sqrt() %>%
 `*`(1.96)
+
+fo <- file(opt$output, "w")
+
+cat("# Accuracy assessment", file = fo)
+
+close(fo)
+

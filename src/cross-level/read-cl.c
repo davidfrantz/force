@@ -38,7 +38,7 @@ double **read_table(char *fname, int *nrows, int *ncols){
 FILE *fp;
 char  buffer[NPOW_16] = "\0";
 char *ptr = NULL;
-const char *separator = " \t";
+const char *separator = " ,\t";
 double **tab = NULL;
 int ni = 0;
 int nj = 0;
