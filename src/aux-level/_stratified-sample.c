@@ -34,6 +34,7 @@ This program computes a histogram of the given image
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
+#include "../cross-level/table-cl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
@@ -42,8 +43,10 @@ This program computes a histogram of the given image
 typedef struct {
   int n;
   int band;
-  char file_input[NPOW_10];
+  char file_input_image[NPOW_10];
+  char file_input_sample_size[NPOW_10];
   char file_output[NPOW_10];
+  char column_sample_size[NPOW_10];
 } args_t;
 
 
@@ -116,12 +119,14 @@ int opt;
   }
 
   // non-optional parameters
-  args->n = 1;
+  args->n = 3;
 
   if (optind < argc){
     konami_args(argv[optind]);
     if (argc-optind == args->n){
-      copy_string(args->file_input, NPOW_10, argv[optind++]);
+      copy_string(args->file_input_image, NPOW_10, argv[optind++]);
+      copy_string(args->file_input_sample_size, NPOW_10, argv[optind++]);
+      copy_string(args->column_sample_size, NPOW_10, argv[optind++]);
     } else if (argc-optind < args->n){
       fprintf(stderr, "some non-optional arguments are missing.\n");
       usage(argv[0], FAILURE);
@@ -147,24 +152,20 @@ short *line = NULL;
 short nodata;
 int has_nodata;
 
-int offset = SHRT_MAX+1;
-int length = USHRT_MAX+1;
-off_t counts[length];
-FILE *fout = NULL;
 
+table_t sample_size;
 
-double **sample_size = NULL
-int n_class, n_column;
 
   parse_args(argc, argv, &args);
 
-  sample_size = read_table(args.file_size, &n_class, &n_column);
-  if (n_column != 3){
-    fprintf(stderr, "input-size does not have 3 columns %s.\n", args.file_input); exit(1);}
+  sample_size = read_table(args.file_input_sample_size, false, true);
+  print_table(&sample_size, false);
+//  if (n_column != 3){
+//    fprintf(stderr, "input-size does not have 3 columns %s.\n", args.file_input); exit(1);}
 
   GDALAllRegister();
-  if ((fp = GDALOpen(args.file_input, GA_ReadOnly)) == NULL){
-    fprintf(stderr, "could not open %s.\n", args.file_input); exit(1);}
+  if ((fp = GDALOpen(args.file_input_image, GA_ReadOnly)) == NULL){
+    fprintf(stderr, "could not open %s.\n", args.file_input_image); exit(1);}
 
   nx  = GDALGetRasterXSize(fp);
   ny  = GDALGetRasterYSize(fp);
@@ -180,9 +181,6 @@ int n_class, n_column;
   }
 
 
-
-  memset(counts, 0, sizeof(off_t)*length);
-
   for (i=0; i<ny; i++){
 
     if (GDALRasterIO(band, GF_Read, 0, i, nx, 1, 
@@ -192,8 +190,6 @@ int n_class, n_column;
     for (j=0; j<nx; j++){
 
       if (line[j] == nodata) continue;
-
-      counts[line[j] + offset]++;
 
     }
 
@@ -205,25 +201,9 @@ int n_class, n_column;
 
 
 
-    
-  if ((fout = fopen(args.file_output, "w")) == NULL){
-    fprintf(stderr, "Unable to open output file %s\n", args.file_output); 
-    return FAILURE;}
-
-  fprintf(fout, "class,count\n");
-
-  for (i=0; i<length; i++){
-
-    if (counts[i] == 0) continue;
-
-    fprintf(fout, "%d,%lu\n", i - offset , counts[i]);
-
-  }
-
-  fclose(fout);
 
 
-  free_2D((void**)sample_size, n_class);
+  free_table(&sample_size);
 
   return SUCCESS;
 }
