@@ -154,6 +154,9 @@ int has_nodata;
 table_t sample_size;
 int col_size, col_class;
 
+int offset = SHRT_MAX+1;
+int length = USHRT_MAX+1;
+enum { _CLASS_, _SIZE_, _PROBABILITY_, _DICT_LENGTH_ };
 
   parse_args(argc, argv, &args);
 
@@ -167,12 +170,22 @@ int col_size, col_class;
   printf("column %s in column %d\n", "class", col_class);
   printf("column %s in column %d\n", args.column_sample_size, col_size);
 
-  print("min/max class: %d/%d\n", table.min[col_class], table.max[col_class]);
+  printf("min/max class: %d/%d\n", (int)sample_size.min[col_class], (int)sample_size.max[col_class]);
 
-  
 
-//  if (n_column != 3){
-//    fprintf(stderr, "input-size does not have 3 columns %s.\n", args.file_input); exit(1);}
+
+  alloc_2D((void**)&dictionary, length, _DICT_LENGTH_, sizeof(double));
+
+  for (row=0; row<sample_size.nrow; row++){
+    dictionary[(int)sample_size[row][col_class] + offset][_CLASS_] = sample_size.data[row][col_class];
+    dictionary[(int)sample_size[row][col_class] + offset][_SIZE_] = sample_size.data[row][col_size];
+    dictionary[(int)sample_size[row][col_class] + offset][_PROBABILITY_] = sample_size.data[row][col_size] / sample_size.sum[col_size];
+  }
+
+
+
+
+
 
   GDALAllRegister();
   if ((fp = GDALOpen(args.file_input_image, GA_ReadOnly)) == NULL){
@@ -215,6 +228,7 @@ int col_size, col_class;
 
 
   free_table(&sample_size);
+  free_2D((void**)dictionary, length);
 
   return SUCCESS;
 }
