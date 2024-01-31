@@ -279,6 +279,42 @@ table_t table;
 }
 
 
+/** This function returns the column of a given column name
+--- table:  table
+--- name:   column name
++++ Return: column index, or -1 if unsuccessful
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int find_table_col(table_t *table, const char *name){
+int col;
+
+  if (table->has_col_names){
+    for (col=0; col<table->ncol; col++){
+      if (strcmp(table->col_names[col], name) == 0) return col;
+    }
+  }
+  
+  return -1;
+}
+
+
+/** This function returns the row of a given row name
+--- table:  table
+--- name:   row name
++++ Return: row index, or -1 if unsuccessful
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int find_table_row(table_t *table, const char *name){
+int row;
+
+  if (table->has_row_names){
+    for (row=0; row<table->nrow; row++){
+      if (strcmp(table->row_names[row], name) == 0) return row;
+    }
+  }
+  
+  return -1;
+}
+
+
 /** This function prints a table.
 --- table:  table
 +++ Return: void
