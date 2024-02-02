@@ -22,7 +22,14 @@ info <- "Compute map accuracy and area statistics.\n"
 
 # load libraries ####################################################
 library(dplyr)
+library(sf)
 library(getopt)
+
+
+# program name ######################################################
+progname <<-
+  get_Rscript_filename() %>% 
+  basename()
 
 
 # input #############################################################
@@ -33,10 +40,10 @@ usage <- function(exit){
 
   message <- c(
     sprintf(
-      "Usage: %s [-h] [-v] [-i] [-o output-file] -c count-file \n", 
-      get_Rscript_filename()
+      "Usage: %s [-h] [-v] [-i] [-o output-file] \n",
+      progname
     ),
-    "       -m map-file -r reference-file -a pixel-area\n",
+    "       -c count-file -s sample-file -a pixel-area\n",
     "\n",
     "  -h  = show this help\n",
     "  -v  = show version\n",
@@ -44,21 +51,14 @@ usage <- function(exit){
     "\n",
     "  -o output-file  = output file path with extension,\n",
     "     defaults to './accuracy-assessment.txt'\n",
-    "\n",
     "  -c count-file  = csv table with pixel counts per class\n",
-    "     2 columns named class and count",
-    "\n",
-    "  -m map-file  = csv table with predicted class labels\n",
-    "     2 columns named ID and map",
-    "\n",
-    "  -r reference-file  = csv table with reference class labels\n",
-    "     2 columns named ID and reference",
-    "\n",
+    "     2 columns named class and count\n",
+    "  -s sample-file = vector file with predicted and reference class labels\n",
+    "     2 columns named label_map and label_reference\n",
     "  -a pixel-area  = area of one pixel in desired reporting unit, e.g.\n",
     "      100 for a Sentinel-2 based map to be reported in m², or\n",
     "     0.01 for a Sentinel-2 based map to be reported in ha\n",
-    "\n",
-
+    "\n"
   )
 
   cat(
@@ -92,7 +92,7 @@ exit_with_error <- function(argument) {
 }
 
 file_existing <- function(path) {
-  if (!file.exist(path)){
+  if (!file.exists(path)) {
     cat(
       sprintf("file %s does not exist\n", path),
       file = stderr()
@@ -108,11 +108,10 @@ spec <- matrix(
     "info",       "i", 0, "logical",
     "output",     "o", 2, "character",
     "counts",     "c", 1, "character",
-    "map",        "m", 1, "character",
-    "reference",  "r", 1, "character",
+    "sample",     "s", 1, "character",
     "pixel_area", "a", 1, "numeric"
-  ), 
-  byrow = TRUE, 
+  ),
+  byrow = TRUE,
   ncol = 4
 )
 
@@ -120,55 +119,36 @@ opt <- getopt(spec)
 
 if (!is.null(opt$help)) usage()
 if (!is.null(opt$info)) exit_normal(info)
-if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.\n")
+if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.")
 
 if (is.null(opt$counts)) exit_with_error("count-file is missing!")
-if (is.null(opt$map)) exit_with_error("map-file is missing!")
-if (is.null(opt$reference)) exit_with_error("reference-file is missing!")
-if (is.null(opt$area)) exit_with_error("pixel-area is missing!")
+if (is.null(opt$sample)) exit_with_error("sample-file is missing!")
 
 file_existing(opt$counts)
-file_existing(opt$map)
-file_existing(opt$reference)
+file_existing(opt$sample)
 
 if (is.null(opt$output)) opt$output <- "accuracy-assessment.txt"
 
 
-cnt <- read.csv(opt$counts)
-map <- read.csv(opt$map)
-ref <- read.csv(opt$reference)
+# read data
+count <- read.csv(opt$counts)
+sample <- read_sf(opt$sample)
+
 
 # columns OK?
-if (!"ID" %in% colnames(map)) exit_with_error("ID column in map-file missing")
-if (!"ID" %in% colnames(ref)) exit_with_error("ID column in reference-file missing")
-if (!"map" %in% colnames(map)) exit_with_error("map column in map-file missing")
-if (!"reference" %in% colnames(ref)) exit_with_error("reference column in reference-file missing")
-if (!"class" %in% colnames(cnt)) exit_with_error("class column in count-file missing")
-if (!"count" %in% colnames(cnt)) exit_with_error("count column in count-file missing")
+if (!"label_map" %in% colnames(sample)) exit_with_error("label_map column in sample-file missing")
+if (!"label_reference" %in% colnames(sample)) exit_with_error("label_reference column in sample-file missing")
+if (!"class" %in% colnames(count)) exit_with_error("class column in count-file missing")
+if (!"count" %in% colnames(count)) exit_with_error("count column in count-file missing")
 
 
 # main thing ########################################################
 
-# join input tables
-table <- 
-  reference %>% 
-  inner_join(
-    map,
-    by = "ID"
-  )
-
-# join worked?
-if (nrow(table) != nrow(reference)){
-  exit_with_error("map and reference files could not be joined")
-}
-
-table <- data.frame(ID = 1:1000, map = round(runif(1000, 8, 12)), reference = round(runif(1000, 8, 12)))
-
 # get all classes
-classes <- 
+classes <-
   c(
-    table$map, 
-    table$reference
+    sample$label_map,
+    sample$label_reference
   ) %>%
   unique() %>%
   sort()
@@ -176,13 +156,13 @@ n_classes <- length(classes)
 
 
 # initialize confusion matrix
-confusion_counts <- 
+confusion_counts <-
   matrix(
-    NA, 
-    n_classes, 
-    n_classes, 
+    NA,
+    n_classes,
+    n_classes,
     dimnames = list(
-      map = classes, 
+      map = classes,
       reference = classes
     )
   )
@@ -191,33 +171,17 @@ confusion_counts <-
 for (m in 1:n_classes){
   for (r in 1:n_classes){
 
-    confusion_counts[m, r] <- 
-      table %>%
+    confusion_counts[m, r] <-
+      sample %>%
       filter(
-        map == classes[m] & 
-        reference == classes[r]
+        label_map == classes[m] &
+        label_reference == classes[r]
       ) %>%
       nrow()
 
   }
 }
 
-classes <- 1:4
-n_classes <- 4
-confusion_counts <- matrix(
-  c(
-    150,	12,	1,	2,
-    32,	100,	21,	3,
-    0,	32,	120,	0,
-    0,	0,	5,	130
-  ), byrow = TRUE,
-  n_classes, 
-    n_classes, 
-    dimnames = list(
-      map = classes, 
-      reference = classes
-    )
-)
 
 acc_metrics <- function(confusion_matrix) {
 
@@ -261,19 +225,15 @@ acc_metrics <- function(confusion_matrix) {
 }
 
 
-
-cnt <- data.frame(class = 1:4, count = c(20000,200000,300000,350000))
-opt <- list(pixel_area = 30^2/10000, output = "accuracy-assessment.txt") # ha
-
 # compute propoertional area per class, area in reporting unit, and sort the classes
-cnt <- 
-  cnt %>% 
+count <- 
+  count %>% 
   arrange(class) %>%
   mutate(weight = count / sum(count)) %>%
   mutate(area = count * opt$pixel_area)
 
 # classes should now align with map/reference dataset
-if (!any(cnt$class == classes))
+if (!any(count$class == classes))
   exit_with_error("classes in file-count do not match with map or reference classes")
 
 # Olofsson et al. 2013, eq. 1
@@ -286,7 +246,7 @@ confusion_adjusted <-
     byrow = FALSE
   ) *
   matrix(
-    cnt$weight,
+    count$weight,
     n_classes,
     n_classes,
     byrow = FALSE
@@ -296,7 +256,7 @@ confusion_adjusted <-
 
 # Olofsson et al. 2013, eq. 2
 area_adjusted <-
-  colSums(confusion_adjusted) * sum(cnt$area)
+  colSums(confusion_adjusted) * sum(count$area)
 
 
 
@@ -322,7 +282,7 @@ matrix(
   byrow = FALSE
 ) *
 matrix(
-  cnt$weight**2,
+  count$weight**2,
   n_classes,
   n_classes,
   byrow = FALSE
@@ -330,9 +290,8 @@ matrix(
  } %>%
   colSums() %>%
   sqrt() %>%
-  `*`(sum(cnt$area)) %>%
+  `*`(sum(count$area)) %>%
   `*`(1.96)
-confidence_area_adjusted
 
 
 # Olofsson et al. 2013, eq. 6-8
@@ -340,7 +299,7 @@ acc_traditional <- acc_metrics(confusion_counts)
 acc_adjusted    <- acc_metrics(confusion_adjusted)
 
 # Olofsson et al. 2014, eq. 5
-oa_se <- sum(cnt$weight**2 * acc_adjusted$ua * (1 - acc_adjusted$ua) / (rowSums(confusion_counts) - 1)) %>%
+oa_se <- sum(count$weight**2 * acc_adjusted$ua * (1 - acc_adjusted$ua) / (rowSums(confusion_counts) - 1)) %>%
 sqrt() %>%
 `*`(1.96)
 
@@ -355,7 +314,7 @@ sqrt() %>%
 Nj <-
   {
   matrix(
-    cnt$count,
+    count$count,
     n_classes,
     n_classes,
     byrow = FALSE
@@ -371,7 +330,7 @@ Nj <-
   colSums()
 
 
-term1 <- cnt$count**2 *
+term1 <- count$count**2 *
 (1 - acc_adjusted$pa)**2 * 
 acc_adjusted$ua * 
 (1 - acc_adjusted$ua) / 
@@ -386,7 +345,7 @@ diag(leave_class_out) <- 0
 
 term2 <- {
 matrix(
-  cnt$count**2,
+  count$count**2,
   n_classes,
   n_classes,
   byrow = FALSE
@@ -431,24 +390,57 @@ sqrt() %>%
 
 
 
-confusion_counts
-confusion_adjusted
-
-acc_traditional
-acc_adjusted
-
-cnt$area
-area_adjusted
-confidence_area_adjusted
-
-oa_se
-pa_se
-ua_se
-
 
 fo <- file(opt$output, "w")
+sink(file = fo, append = TRUE, type = "output")
 
-cat("# Accuracy assessment", file = fo)
+cat("Traditional Accuracy assessment\n")
+cat("-----------------------------------------------------------------\n")
+cat("\n")
+cat("Traditional confusion matrix, expressed in terms of pixel counts:\n")
+cat("\n")
+print(confusion_counts)
+cat("\n")
+cat(sprintf("Overall Accuracy (OA): %.2f\n", acc_traditional$oa))
+cat("\n")
+print_stats <- cbind(
+  sprintf("%.2f", acc_traditional$pa),
+  sprintf("%.2f", acc_traditional$ua),
+  sprintf("%.2f", acc_traditional$oe),
+  sprintf("%.2f", acc_traditional$ce)
+)
+colnames(print_stats) <- c("Producer's Accuracy", "User's Accuracy", "Error of Omission", "Error of Commission")
+rownames(print_stats) <- classes
+print(print_stats, quote = FALSE)
+cat("\n")
+cat("\n")
+cat("Area-Adjusted Accuracy\n")
+cat("-----------------------------------------------------------------\n")
+cat("\n")
+cat("Confusion matrix, expressed in terms of proportion of area:\n")
+cat("\n")
+print(confusion_adjusted)
+cat("\n")
+cat(sprintf("Overall Accuracy (OA): %.2f \u00b1 %.2f\n", acc_adjusted$oa, oa_se))
+cat("\n")
+print_stats <- cbind(
+  sprintf("%.2f \u00b1 %.2f", acc_adjusted$pa, pa_se),
+  sprintf("%.2f \u00b1 %.2f", acc_adjusted$ua, ua_se),
+  sprintf("%.2f \u00b1 %.2f", acc_adjusted$oe, pa_se),
+  sprintf("%.2f \u00b1 %.2f", acc_adjusted$ce, ua_se)
+)
+colnames(print_stats) <- c("Producer's Accuracy", "User's Accuracy", "Error of Omission", "Error of Commission")
+rownames(print_stats) <- classes
+print(print_stats, quote = FALSE)
+cat("\n")
+print_area <- cbind(
+  sprintf("%.2f \u00b1 %.2f", area_adjusted, confidence_area_adjusted),
+  sprintf("%.2f", count$area)
+)
+colnames(print_area) <- c("Estimated Area", "Mapped Area")
+rownames(print_area) <- classes
+print(print_area, quote = FALSE)
 
+sink(file = NULL)
 close(fo)
 
