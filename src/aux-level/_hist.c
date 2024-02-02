@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2022 David Frantz
+Copyright (C) 2013-2024 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ This program computes a histogram of the given image
 #include "../cross-level/const-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
+#include "../cross-level/table-cl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
@@ -97,7 +98,7 @@ int opt;
         break;
       case 'b':
         args->band = atoi(optarg);
-        if (args->band < 0){
+        if (args->band < 1){
           fprintf(stderr, "Band must be >= 1\n");
           usage(argv[0], FAILURE);  
         }
@@ -142,15 +143,14 @@ int main(int argc, char *argv[]){
 args_t args;
 GDALDatasetH  fp;
 GDALRasterBandH band;
-int i, j, nx, ny;
+int i, j, nx, ny, nbands;
 short *line = NULL;
 short nodata;
 int has_nodata;
-
 int offset = SHRT_MAX+1;
 int length = USHRT_MAX+1;
-off_t counts[length];
-FILE *fout = NULL;
+table_t counts;
+int row;
 
 
   parse_args(argc, argv, &args);
@@ -159,11 +159,14 @@ FILE *fout = NULL;
   if ((fp = GDALOpen(args.file_input, GA_ReadOnly)) == NULL){
     fprintf(stderr, "could not open %s.\n", args.file_input); exit(1);}
 
-  nx  = GDALGetRasterXSize(fp);
-  ny  = GDALGetRasterYSize(fp);
-  
+  nx     = GDALGetRasterXSize(fp);
+  ny     = GDALGetRasterYSize(fp);
+  nbands = GDALGetRasterCount(fp);
+
   alloc((void**)&line, nx, sizeof(short));
 
+  if (args.band > nbands){
+    fprintf(stderr, "Input image has %d band(s), band %d was requested.\n", nbands, args.band); exit(1);}
   band = GDALGetRasterBand(fp, args.band);
 
   nodata = (short)GDALGetRasterNoDataValue(band, &has_nodata);
@@ -173,8 +176,10 @@ FILE *fout = NULL;
   }
 
 
-
-  memset(counts, 0, sizeof(off_t)*length);
+  counts = allocate_table(length, 2, false, true);
+  copy_string(counts.col_names[0], NPOW_10, "class");
+  copy_string(counts.col_names[1], NPOW_10, "count");
+  for (row=0; row<counts.nrow; row++) counts.data[row][0] = row - offset;
 
   for (i=0; i<ny; i++){
 
@@ -186,7 +191,8 @@ FILE *fout = NULL;
 
       if (line[j] == nodata) continue;
 
-      counts[line[j] + offset]++;
+      row = line[j] + offset;
+      counts.data[row][1]++;
 
     }
 
@@ -197,23 +203,13 @@ FILE *fout = NULL;
   free((void*)line);
 
 
-
-    
-  if ((fout = fopen(args.file_output, "w")) == NULL){
-    fprintf(stderr, "Unable to open output file %s\n", args.file_output); 
-    return FAILURE;}
-
-  fprintf(fout, "value,count\n");
-
-  for (i=0; i<length; i++){
-
-    if (counts[i] == 0) continue;
-
-    fprintf(fout, "%d,%lu\n", i - offset , counts[i]);
-
+  for (row=0; row<counts.nrow; row++){
+    if (counts.data[row][1] == 0) counts.row_mask[row] = false;
   }
 
-  fclose(fout);
+  write_table(&counts, args.file_output, ",", true);
+
+  free_table(&counts);
 
   return SUCCESS;
 }

@@ -68,7 +68,20 @@ Develop version
 
   - new auxilliary program `force-hist`.
     This program computes the histogram of image values (can be vrt) and writes a csv table.
-    This is intended to be used in a validation workflow (planned feature).
+    This is intended to be used in a validation workflow.
+
+  - new auxilliary program `force-sample-size`.
+    This program computes the required sample size following Olofsson et al. 2013/2014, 
+    which should be used to properly validate a classification map.
+    This is intended to be used in a validation workflow.
+
+  - new auxilliary program `force-stratified-sample`.
+    This program draws a stratified random sample based on a classification map and sample size computations.
+    This is intended to be used in a validation workflow.
+
+  - new auxilliary program `force-map-accuracy`.
+    This program computes area-adjusted accuracies following Olofsson et al. 2013/2014.
+    This is intended to be used in a validation workflow.
 
   - ``force-tabulate-grid`` has been updated to produce properly named output files.
     The default output file name is ``grid.kml``, created in the current directory, using the ``KML`` format. 

@@ -338,7 +338,7 @@ int row;
 --- table:  table
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_table(table_t *table, bool truncate){
+void print_table(table_t *table, bool truncate, bool skip_rows){
 int row, col;
 int nrow_print = 6, ncol_print = 6;
 int width, *max_width = NULL;
@@ -383,6 +383,8 @@ int width, *max_width = NULL;
 
   for (row=0; row<nrow_print; row++){
 
+    if (skip_rows && !table->row_mask[row]) continue;
+
     if (table->has_row_names) printf("%*s ", max_width[0], table->row_names[row]);
     for (col=0; col<ncol_print; col++) printf("%+*.2f ", max_width[col+1], table->data[row][col]);
     if (truncate && col < table->ncol) printf("...");
@@ -405,7 +407,7 @@ int width, *max_width = NULL;
 --- separator: column separator
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void write_table(table_t *table, char *fname, const char *separator){
+void write_table(table_t *table, char *fname, const char *separator, bool skip_rows){
 int row, col;
 FILE *fp = NULL;
 
@@ -426,6 +428,8 @@ FILE *fp = NULL;
   }
 
   for (row=0; row<table->nrow; row++){
+
+    if (skip_rows && !table->row_mask[row]) continue;
 
     if (table->has_row_names) fprintf(fp, "%s%s", table->row_names[row], separator);
     for (col=0; col<(table->ncol-1); col++) fprintf(fp, "%.2f%s", table->data[row][col], separator);
