@@ -119,7 +119,7 @@ lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll r
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl rsp_hl udf_hl
 aux: param_aux param_train_aux train_aux
 exe: force force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
-.PHONY: temp all install install_ bash python external clean build check
+.PHONY: temp all install install_ bash python rstats external clean build check
 
 ### TEMP
 
@@ -478,6 +478,8 @@ python: temp
 
 rstats: temp
 	cp $(DR)/force-level2-report.Rmd $(TM)/force-level2-report.Rmd
+	cp $(DR)/force-sample-size.r $(TB)/force-sample-size
+	cp $(DR)/force-map-accuracy.r $(TB)/force-map-accuracy
 
 install: bash python rstats external install_ clean check
 
