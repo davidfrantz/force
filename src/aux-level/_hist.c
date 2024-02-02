@@ -98,7 +98,7 @@ int opt;
         break;
       case 'b':
         args->band = atoi(optarg);
-        if (args->band < 0){
+        if (args->band < 1){
           fprintf(stderr, "Band must be >= 1\n");
           usage(argv[0], FAILURE);  
         }
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
 args_t args;
 GDALDatasetH  fp;
 GDALRasterBandH band;
-int i, j, nx, ny;
+int i, j, nx, ny, nbands;
 short *line = NULL;
 short nodata;
 int has_nodata;
@@ -159,11 +159,14 @@ int row;
   if ((fp = GDALOpen(args.file_input, GA_ReadOnly)) == NULL){
     fprintf(stderr, "could not open %s.\n", args.file_input); exit(1);}
 
-  nx  = GDALGetRasterXSize(fp);
-  ny  = GDALGetRasterYSize(fp);
-  
+  nx     = GDALGetRasterXSize(fp);
+  ny     = GDALGetRasterYSize(fp);
+  nbands = GDALGetRasterCount(fp);
+
   alloc((void**)&line, nx, sizeof(short));
 
+  if (args.band > nbands){
+    fprintf(stderr, "Input image has %d band(s), band %d was requested.\n", nbands, args.band); exit(1);}
   band = GDALGetRasterBand(fp, args.band);
 
   nodata = (short)GDALGetRasterNoDataValue(band, &has_nodata);
