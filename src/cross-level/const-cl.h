@@ -28,7 +28,6 @@ Named constant definitions
 #ifndef CONSTANT_CL_H
 #define CONSTANT_CL_H
 
-#include "../cross-level/_version-cl.h"
 #include "../cross-level/enum-cl.h"
 
 #ifdef __cplusplus
