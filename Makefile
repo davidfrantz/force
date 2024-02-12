@@ -71,7 +71,7 @@ OK := $(foreach exec,$(EXECUTABLES),\
 
 ### EXECUTABLES AND MISC FILES TO BE CHECKED
 
-FORCE_EXE = force force-cube force-higher-level force-import-modis \
+FORCE_EXE = force force-info force-cube force-higher-level force-import-modis \
             force-l2ps force-l2ps_ force-level1-csd force-level1-landsat \
             force-level2 force-lut-modis \
             force-magic-parameters force-mdcp force-mosaic force-parameter \
@@ -462,6 +462,7 @@ misc: temp
 	  $(shell cp $(DD)/$(miscfiles) -t $(TM)))
 
 bash: temp
+	cp $(DB)/force-info.sh $(TB)/force-info
 	cp $(DB)/force-cube.sh $(TB)/force-cube
 	cp $(DB)/force-l2ps_.sh $(TB)/force-l2ps_
 	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
