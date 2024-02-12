@@ -18,20 +18,26 @@
 # You should have received a copy of the GNU General Public License
 # along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
-info <- "Suggest sample size for estimating area and accuracy of a classification.\n"
-
-# load libraries ####################################################
-library(dplyr)
-library(getopt)
+info <- "Suggest sample size for estimating area and accuracy of a classification"
 
 
 # program name ######################################################
-progname <<-
-  get_Rscript_filename() %>% 
-  basename()
+library(getopt)
+progpath <<- get_Rscript_filename()
+progname <<- basename(progpath)
+progdir  <<- dirname(progpath)
+
+
+# shared R functions ################################################
+source(sprintf("%s/force-misc/force-rstats-library.r", progdir))
+
+
+# more R libraries ##################################################
+silent_library("dplyr")
 
 
 # input #############################################################
+
 # usage function in same style as other FORCE tools,
 # do not use getop's built-in usage function for consistency
 usage <- function(exit){
@@ -69,33 +75,6 @@ usage <- function(exit){
 
 }
 
-exit_normal <- function(argument) {
-  cat(
-    sprintf("%s\n", argument)
-  )
-  quit(
-    save = "no",
-    status = 0
-  )
-}
-
-exit_with_error <- function(argument) {
-  cat(
-    sprintf("%s\n", argument),
-    file = stderr()
-  )
-  usage(1)
-}
-
-file_existing <- function(path) {
-  if (!file.exists(path)) {
-    cat(
-      sprintf("file %s does not exist\n", path),
-      file = stderr()
-    )
-    usage(1)
-  }
-}
 
 spec <- matrix(
   c(
@@ -116,7 +95,7 @@ opt <- getopt(spec)
 
 if (!is.null(opt$help)) usage(0)
 if (!is.null(opt$info)) exit_normal(info)
-if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.\n")
+if (!is.null(opt$version)) print_version(progdir)
 
 if (is.null(opt$counts)) exit_with_error("count-file is missing!")
 if (is.null(opt$user_acc)) exit_with_error("user_acc-file is missing!")

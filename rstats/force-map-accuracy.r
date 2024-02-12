@@ -18,18 +18,23 @@
 # You should have received a copy of the GNU General Public License
 # along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
-info <- "Compute map accuracy and area statistics.\n"
-
-# load libraries ####################################################
-library(dplyr)
-library(sf)
-library(getopt)
+info <- "Compute map accuracy and area statistics"
 
 
 # program name ######################################################
-progname <<-
-  get_Rscript_filename() %>% 
-  basename()
+library(getopt)
+progpath <<- get_Rscript_filename()
+progname <<- basename(progpath)
+progdir  <<- dirname(progpath)
+
+
+# shared R functions ################################################
+source(sprintf("%s/force-misc/force-rstats-library.r", progdir))
+
+
+# more R libraries ##################################################
+silent_library("dplyr")
+silent_library("sf")
 
 
 # input #############################################################
@@ -73,33 +78,6 @@ usage <- function(exit){
 
 }
 
-exit_normal <- function(argument) {
-  cat(
-    sprintf("%s\n", argument)
-  )
-  quit(
-    save = "no",
-    status = 0
-  )
-}
-
-exit_with_error <- function(argument) {
-  cat(
-    sprintf("%s\n", argument), 
-    file = stderr()
-  )
-  usage(1)
-}
-
-file_existing <- function(path) {
-  if (!file.exists(path)) {
-    cat(
-      sprintf("file %s does not exist\n", path),
-      file = stderr()
-    )
-    usage(1)
-  }
-}
 
 spec <- matrix(
   c(
@@ -119,7 +97,7 @@ opt <- getopt(spec)
 
 if (!is.null(opt$help)) usage()
 if (!is.null(opt$info)) exit_normal(info)
-if (!is.null(opt$version)) exit_normal("Printing function not implemented yet. Sorry.")
+if (!is.null(opt$version)) print_version(progdir)
 
 if (is.null(opt$counts)) exit_with_error("count-file is missing!")
 if (is.null(opt$sample)) exit_with_error("sample-file is missing!")
