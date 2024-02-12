@@ -91,4 +91,10 @@ Develop version
 
   - The CLI help of `force-tile-finder` has been corrected concerning the separator for the coordinates.
 
+- **FORCE L1AS*
+
+  - force-level1-sentinel2 was finally removed after being deprecated for a while now.
+    Use force-level1-csd. Contributions to substitute this program using the 
+    Copernicus Data Space Ecosystem endpoint are welcome and appreciated!
+
   .. -- No further changes yet.
