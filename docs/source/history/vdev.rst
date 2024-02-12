@@ -55,6 +55,11 @@ Develop version
 
 - **FORCE AUX**
 
+  - new auxilliary program `force-info`, which replaces `force` effective immediately.
+    The new program has the same functionality, but does not hardcode the available tools.
+    Tools that are still missing the ``-i`` option are currently not listed though. This
+    still needs to be done.
+
   - new auxilliary program `force-init`.
     This program will create a new project with reasonably named folders that
     can be used as a starting point for a new project with some suggestions 
