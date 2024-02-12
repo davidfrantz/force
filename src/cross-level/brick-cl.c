@@ -675,6 +675,8 @@ char bname[NPOW_10];
 char fname[NPOW_10];
 int nchar;
 
+char version[NPOW_10];
+
 char ldate[NPOW_05];
 char lwritetime[NPOW_05];
 date_t today;
@@ -705,9 +707,9 @@ int i = 0;
   alloc_2DC((void***)&band_meta, n_band_meta, NPOW_14, sizeof(char));
   sys_meta = system_info(&n_sys_meta);
 
-
+  get_version(version, NPOW_10);
   copy_string(fp_meta[i++], NPOW_14, "FORCE_version");
-  copy_string(fp_meta[i++], NPOW_14, _VERSION_);
+  copy_string(fp_meta[i++], NPOW_14, version);
   
   copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
   copy_string(fp_meta[i++], NPOW_14, brick->name);

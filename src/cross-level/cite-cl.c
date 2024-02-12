@@ -446,12 +446,15 @@ void cite_me(int i){
 void cite_push(char *dname){
 unsigned int crc;
 char fname[NPOW_10];
+char version[NPOW_10];
 char *lock = NULL;
 int nchar;
 int i;
 
 
   crc = cite_crc8();
+
+  get_version(version, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s/CITEME_%#02x.txt", dname, crc);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -467,8 +470,8 @@ int i;
 
   fprintf(_cite_fp_, "FORCE - Framework for Operational Radiometric "
                      "Correction for Environmental monitoring\n");
-  fprintf(_cite_fp_, "Version %s\n", _VERSION_);
-  fprintf(_cite_fp_, "Copyright (C) 2013-2022 David Frantz, "
+  fprintf(_cite_fp_, "Version %s\n", version);
+  fprintf(_cite_fp_, "Copyright (C) 2013-2024 David Frantz, "
                      "david.frantz@uni-trier.de\n");
 
   fprintf(_cite_fp_, "\nFORCE is free software under the terms of the "

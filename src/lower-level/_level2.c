@@ -33,6 +33,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cite-cl.h"
@@ -97,7 +98,7 @@ int opt;
       case 'h':
         usage(argv[0], SUCCESS);
       case 'v':
-        printf("FORCE version: %s\n", _VERSION_);
+        get_version(NULL, 0);
         exit(SUCCESS);
       case 'i':
         printf("Level 2 processing of single image\n");

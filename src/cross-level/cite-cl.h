@@ -36,6 +36,7 @@ Citation header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/dir-cl.h"
 #include "../cross-level/lock-cl.h"
+#include "../cross-level/utils-cl.h"
 
 
 #ifdef __cplusplus

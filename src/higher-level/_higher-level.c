@@ -32,6 +32,7 @@ This program is the FORCE Higher Level Processing System
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/brick-cl.h"
 #include "../cross-level/tile-cl.h"
 #include "../cross-level/konami-cl.h"
@@ -83,7 +84,7 @@ int opt;
       case 'h':
         usage(argv[0], SUCCESS);
       case 'v':
-        printf("FORCE version: %s\n", _VERSION_);
+        get_version(NULL, 0);
         exit(SUCCESS);
       case 'i':
         printf("Higher level processing (compositing, time series analysis, ...)\n");
