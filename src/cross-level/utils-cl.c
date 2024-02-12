@@ -28,6 +28,43 @@ This file contains some utility functions
 #include "utils-cl.h"
 
 
+/** Get software version
++++ This function gets the Software version. If dst is NULL, the version
++++ is simply printed to stdout.
+--- dst:    destination buffer
+--- size:   size of destination buffer
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void get_version(char *dst, size_t size){
+char dname_exe[NPOW_10];
+char fname_version[NPOW_10];
+char buffer[NPOW_16] = "\0";
+FILE *fp = NULL;
+
+
+  get_install_directory(dname_exe, NPOW_10);
+  concat_string_3(fname_version,  NPOW_10, dname_exe, "force-misc", "force-version.txt", "/");
+
+  if (!(fp = fopen(fname_version, "r"))){
+    printf("unable to open version file %s\n", fname_version); exit(FAILURE);}
+
+  if (fgets(buffer, NPOW_16, fp) == NULL){
+    printf("unable to read from version file %s\n", fname_version); exit(FAILURE);}
+
+  buffer[strcspn(buffer, "\r\n")] = 0;
+
+  if (dst == NULL){
+    puts(buffer);
+  } else {
+    copy_string(dst, size, buffer);
+  }
+
+  fclose(fp);
+
+  return;
+}
+
+
 /** Print integer vector to stdout
 --- v:      vector
 --- name:   string that indicates what is printed (printed to stdout) 

@@ -37,11 +37,14 @@ Utility functions header
 #include <limits.h>   // macro constants of the integer types
 
 #include "../cross-level/enum-cl.h"
+#include "../cross-level/string-cl.h"
+#include "../cross-level/sys-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+void get_version(char *dst, size_t size);
 void print_ivector(int    *v, const char *name, int n, int big);
 void print_fvector(float  *v, const char *name, int n, int big, int small);
 void print_dvector(double *v, const char *name, int n, int big, int small);
