@@ -182,6 +182,10 @@ for (m in 1:n_classes){
   }
 }
 
+if (any(rowSums(confusion_counts) < 2)) {
+  exit_with_error("at least one map class has less than two samples")
+}
+
 
 acc_metrics <- function(confusion_matrix) {
 
