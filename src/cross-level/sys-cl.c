@@ -122,8 +122,8 @@ ssize_t len;
   
   buf[len] = '\0';
 
-  printf("Installation path: %s\n", buf);
   #ifdef FORCE_DEBUG
+  printf("Installation path: %s\n", buf);
   #endif
 
   return;
@@ -142,8 +142,8 @@ char path[NPOW_10];
   get_install_path(path, NPOW_10);
   directoryname(path, buf, size);
 
-  printf("Installation directory: %s\n", buf);
   #ifdef FORCE_DEBUG
+  printf("Installation directory: %s\n", buf);
   #endif
 
   return;
