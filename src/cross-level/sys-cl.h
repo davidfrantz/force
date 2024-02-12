@@ -35,6 +35,7 @@ System info header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/alloc-cl.h"
+#include "../cross-level/dir-cl.h"
 
 
 #ifdef __cplusplus
@@ -42,7 +43,8 @@ extern "C" {
 #endif
 
 char **system_info(int *n);
-void get_install_path(char *path, size_t size);
+void get_install_path(char *buf, size_t size);
+void get_install_directory(char *buf, size_t size);
 
 #ifdef __cplusplus
 }
