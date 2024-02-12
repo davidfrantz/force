@@ -51,7 +51,7 @@ RUN echo "building FORCE" && \
   make clean && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
-  force && \
+  force-info && \
 # clone FORCE UDF
   git clone https://github.com/davidfrantz/force-udf.git
 
@@ -65,4 +65,4 @@ WORKDIR /home/docker
 ENV R_HOME=/usr/lib/R
 ENV LD_LIBRARY_PATH=$R_HOME/lib
 
-CMD ["force"]
+CMD ["force-info"]
