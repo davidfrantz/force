@@ -27,6 +27,13 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=1
 
@@ -223,7 +230,7 @@ LAYER="DEFAULT"
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) "$BIN"/force -v; exit 0;;
+    -v|--version) force_version; exit 0;;
     -i|--info) echo "Ingestion of auxiliary data into datacube format"; exit 0;;
     -r|--resample) RESAMPLE="$2"; shift ;;
     -s|--resolution) RES="$2"; shift ;;

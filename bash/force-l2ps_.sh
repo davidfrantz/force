@@ -24,6 +24,16 @@
 
 # this script is a wrapper, and acts as bridge between a batch interface, and the core FORCE Level-2 processing system
 
+# functions/definitions ------------------------------------------------------------------
+export PROG=`basename $0`;
+export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 EXPECTED_ARGS=5
 

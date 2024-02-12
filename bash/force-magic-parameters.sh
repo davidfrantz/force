@@ -25,6 +25,13 @@
 # functions/definitions ------------------------------------------------------------------
 PROG=`basename $0`;
 BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=1
 
@@ -40,10 +47,13 @@ cmd_not_found(){      # check required external commands
 help(){
 cat <<HELP
 
-Usage: $PROG [-h] [-c {all,paired}] [-o] parameter-file
+Usage: $PROG [-hvi] [-c {all,paired}] [-o] parameter-file
 
   optional:
   -h = show this help
+  -v = show version
+  -i = show program's purpose
+
   -c = combination type
        all:    all combinations (default)
        paired: pairwise combinations
@@ -62,7 +72,7 @@ exit 1
 #cmd_not_found "...";    # important, check required commands !!! dies on missing
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hc:o: --long help,combine:,output: -n "$0" -- "$@"`
+ARGS=`getopt -o hvic:o: --long help,version,info,combine:,output: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -71,6 +81,8 @@ DOUT='NA'
 while :; do
   case "$1" in
     -h|--help) help ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Replace variables in parameterfile for bulk processing"; exit 0;;
     -c|--combine) COMB="$2"; shift ;;
     -o|--output) DOUT="$2"; shift ;;
     -- ) shift; break ;;

@@ -25,6 +25,13 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=1
 
@@ -149,7 +156,7 @@ CPU="100%"
 while :; do
   case "$1" in
     -h) help ;;
-    -v) "$BIN"/force -v; exit 0 ;;
+    -v) force_version; exit 0 ;;
     -i) echo "Mosaicking of image chips"; exit 0 ;;
     -j) CPU="$2"; shift ;;
     -m) MOSAIC="$2"; shift ;;

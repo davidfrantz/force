@@ -22,6 +22,17 @@
 # 
 ##########################################################################
 
+# functions/definitions ------------------------------------------------------------------
+export PROG=`basename $0`;
+export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
+
 EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]

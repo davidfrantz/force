@@ -25,6 +25,17 @@
 # Copyright (C) 2020-2022 Stefan Ernst
 # Contact: stefan.ernst@hu-berlin.de
 
+# functions/definitions ------------------------------------------------------------------
+export PROG=`basename $0`;
+export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
+
 # This script downloads Landsat and Sentinel-2 Level 1 data from GCS
 trap "echo Exited!; exit;" SIGINT SIGTERM # make sure that CTRL-C breaks out of download loop
 set -e # make sure script exits if any process exits unsuccessfully

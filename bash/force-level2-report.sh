@@ -29,6 +29,12 @@ export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export MISC="$BIN/force-misc"
 
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
+
 MANDATORY_ARGS=1
 
 export REPORT_EXE="R"
@@ -60,10 +66,13 @@ export -f file_not_found
 help () {
 cat <<HELP
 
-Usage: $PROG [-ho] dir-log
+Usage: $PROG [-hvi] [-o] dir-log
 
-  -h  = show his help
-  -o  = output file
+  -h = show this help
+  -v = show version
+  -i = show program's purpose
+
+  -o = output file
         defaults to FORCE_L2PS_YYYYMMDD-HHMMSS.html
 
 $PROG:  generate Level 2 processing report
@@ -78,7 +87,7 @@ cmd_not_found "$REPORT_EXE";
 file_not_found "$REPORT_TEMPLATE";
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o ho: --long help,output: -n "$0" -- "$@"`
+ARGS=`getopt -o hvio: --long help,version,info,output: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -86,6 +95,8 @@ eval set -- "$ARGS"
 while :; do
   case "$1" in
     -h|--help) help ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Generate Level 2 processing report"; exit 0;;
     -o|--output) OUTPUT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;

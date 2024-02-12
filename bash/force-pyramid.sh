@@ -25,6 +25,13 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=1
 
@@ -49,9 +56,12 @@ export -f cmd_not_found
 help () {
 cat <<HELP
 
-Usage: $PROG [-hjrl] image [image]*
+Usage: $PROG [-hvi] [-jrl] image [image]*
 
   -h  = show his help
+  -v  = show version
+  -i  = show program's purpose
+
   -j  = number of jobs
         defaults to 100%
   -r  = resampling option
@@ -71,7 +81,7 @@ cmd_not_found "$PARALLEL_EXE"; # important, check required commands !!! dies on 
 cmd_not_found "$PYRAMID_EXE";  # important, check required commands !!! dies on missing
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hj:r:l: --long help,jobs:,resample:,levels: -n "$0" -- "$@"`
+ARGS=`getopt -o hvij:r:l: --long help,version,info,jobs:,resample:,levels: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -83,6 +93,8 @@ RESAMPLE="nearest"
 while :; do
   case "$1" in
     -h|--help) help ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Compute image pyramids"; exit 0;;
     -j|--jobs) NJOB="$2"; shift ;;
     -r|--resample) RESAMPLE="$2"; shift ;;
     -l|--levels) LEVELS="$2"; shift ;;
