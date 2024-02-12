@@ -37,13 +37,13 @@ fi
 
 VERSION=$1
 
-V_README=README.md
-V_DOCS=docs/source/index.rst
-V_CODE=src/cross-level/_version-cl.h
+VERSION_FILE=misc/force-version.txt
 
-sed -i -e "s/\(\*\*Version\) .*\(\*\*\)/\1 $VERSION\2/" $V_README
-sed -i -e "s/\(\*\*Version\) .*\(\*\*\)/\1 $VERSION\2/" $V_DOCS
-sed -i -e "s/\(#define _VERSION_ \"\).*\(\"\)/\1$VERSION\2/" $V_CODE
+OLD_VERSION=$(cat $VERSION_FILE)
+echo $VERSION > $VERSION_FILE
+NEW_VERSION=$(cat $VERSION_FILE)
+
+echo "Changed version from $OLD_VERSION to $NEW_VERSION"
 
 exit 0
 
