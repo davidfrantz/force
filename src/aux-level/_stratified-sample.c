@@ -34,6 +34,7 @@ This program computes a histogram of the given image
 #include <time.h>
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/table-cl.h"
@@ -107,7 +108,7 @@ bool o, f;
       case 'h':
         usage(argv[0], SUCCESS);
       case 'v':
-        printf("FORCE version: %s\n", _VERSION_);
+        get_version(NULL, 0);
         exit(SUCCESS);
       case 'i':
         printf("Compute image histogram\n");

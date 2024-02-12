@@ -33,6 +33,7 @@ cessing grid + the bounding box of each tile in projected coordinates
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/konami-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/warp-cl.h"
@@ -109,7 +110,7 @@ bool o, f;
       case 'h':
         usage(argv[0], SUCCESS);
       case 'v':
-        printf("FORCE version: %s\n", _VERSION_);
+        get_version(NULL, 0);
         exit(SUCCESS);
       case 'i':
         printf("Extract the data cube grid to shapefile\n");

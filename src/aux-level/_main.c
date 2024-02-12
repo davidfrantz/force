@@ -32,6 +32,7 @@ This program is the general entry point to FORCE
 #include <unistd.h>  // standard symbolic constants and types 
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/konami-cl.h"
 
@@ -63,7 +64,7 @@ int opt;
       case 'h':
         usage(argv[0], SUCCESS);
       case 'v':
-        printf("FORCE version: %s\n", _VERSION_);
+        get_version(NULL, 0);
         exit(SUCCESS);
       case 'i':
         printf("Entrypoint, print short disclaimer, available modules etc.\n");
@@ -94,16 +95,18 @@ int opt;
 
 int main (int argc, char *argv[]){
 char user[NPOW_10];
+char version[NPOW_10];
 
 
   parse_args(argc, argv);
 
   if (getlogin_r(user, NPOW_10) != 0) copy_string(user, NPOW_10, "user");
+  get_version(version, NPOW_10);
 
   printf("\n##########################################################################\n");
 
   printf("\nHello %s! You are currently running FORCE v. %s\n", 
-         user, _VERSION_);
+         user, version);
   printf("Framework for Operational Radiometric Correction for "
          "Environmental monitoring\n");
   printf("Copyright (C) 2013-2022 David Frantz, "
