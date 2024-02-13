@@ -81,7 +81,8 @@ function pretty_size(){
   sensor=$1
   size=$2
   unit="B"
-
+echo $size
+echo ${size%%.*}
   unit="B"
   if [ ${size%%.*} -gt 1024 ]; then
     size=$(echo $size | awk '{printf "%f", $1 / 1024.0}')
