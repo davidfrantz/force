@@ -81,8 +81,7 @@ function pretty_size(){
   sensor=$1
   size=$2
   unit="B"
-echo $size
-echo ${size%%.*}
+
   unit="B"
   if [ ${size%%.*} -gt 1024 ]; then
     size=$(echo $size | awk '{printf "%f", $1 / 1024.0}')
@@ -183,9 +182,9 @@ for s in $SENSORS; do
 
   SIZE=$(grep $s $FILE_TEMP | tr -s ' ' | cut -d ' ' -f 5 | awk '{ sum += $1 } END { printf "%f", sum }')
 
-  if ! [[ -z $SIZE ]]; then
+  if [ ${SIZE%%.*} -gt 0 ]; then
 
-    ALL_SIZE=$(echo $ALL_SIZE $SIZE | awk '{ print $1 + $2 }')
+    ALL_SIZE=$(echo $ALL_SIZE $SIZE | awk '{ printf "%f", $1 + $2 }')
 
     pretty_size $s $SIZE
 
