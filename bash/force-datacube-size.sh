@@ -181,7 +181,7 @@ ALL_SIZE=0
 
 for s in $SENSORS; do
 
-  SIZE=$(grep $s $FILE_TEMP | tr -s ' ' | cut -d ' ' -f 5 | awk '{ sum += $1 } END { print sum }')
+  SIZE=$(grep $s $FILE_TEMP | tr -s ' ' | cut -d ' ' -f 5 | awk '{ sum += $1 } END { printf %d, sum }')
 
   if ! [[ -z $SIZE ]]; then
 
