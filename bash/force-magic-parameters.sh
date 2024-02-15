@@ -35,15 +35,6 @@ export LIB
 
 MANDATORY_ARGS=1
 
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-
-cmd_not_found(){      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-
 help(){
 cat <<HELP
 

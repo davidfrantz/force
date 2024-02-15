@@ -28,5 +28,49 @@
 force_version() {
   cat "$BIN/force-misc/force-version.txt"; 
 }
+export -f force_version
 
+echoerr(){ 
+  echo "$PROG: $@" 1>&2; 
+}    # warnings and/or errormessages go to STDERR
+export -f echoerr
 
+export DEBUG=false # display debug messages?
+debug(){ 
+  if [ "$DEBUG" == "true" ]; then 
+    echo "DEBUG: $@"; 
+  fi 
+} # debug message
+export -f DEBUG debug
+
+cmd_not_found(){      # check required external commands
+  for cmd in "$@"; do
+    stat=`which $cmd`
+    if [ $? != 0 ] ; then 
+      echoerr "\"$cmd\": external command not found, terminating..."; 
+      exit 1; 
+    fi
+  done
+}
+export -f cmd_not_found
+
+file_not_found() {      # check required files
+  for file in "$@"; do
+    stat=`which $file`
+    if [ ! -r $file ] ; then 
+      echoerr "\"$file\": file not found, terminating..."; 
+      exit 1; 
+    fi
+  done
+}
+export -f file_not_found
+
+issmaller(){
+  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
+}
+export -f issmaller
+
+isgreater(){
+  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
+}
+export -f isgreater
