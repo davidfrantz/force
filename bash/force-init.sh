@@ -37,13 +37,6 @@ export LIB
 
 MANDATORY_ARGS=1
 
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=false # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
 help(){
 cat <<HELP
 

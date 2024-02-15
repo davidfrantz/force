@@ -35,13 +35,6 @@ eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash librar
 export LIB
 
 
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=false # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
 print_info(){
   for cmd in "$@"; do
     if [ -f $cmd ] && [ -x $cmd ]; then

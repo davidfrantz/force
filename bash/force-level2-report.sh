@@ -40,29 +40,6 @@ MANDATORY_ARGS=1
 export REPORT_EXE="R"
 export REPORT_TEMPLATE="$MISC/force-level2-report.Rmd"
 
-echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=true # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
-cmd_not_found() {      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-export -f cmd_not_found
-
-file_not_found() {      # check required files
-  for file in "$@"; do
-    stat=`which $file`
-    if [ ! -r $file ] ; then echoerr "\"$file\": file not found, terminating..."; exit 1; fi
-  done
-}
-export -f file_not_found
-
 help () {
 cat <<HELP
 

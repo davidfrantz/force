@@ -45,22 +45,6 @@ export RASTER_MERGE_EXE="gdal_merge.py"
 export RASTERIZE_EXE="gdal_rasterize"
 export PARALLEL_EXE="parallel"
 
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=false # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
-cmd_not_found(){      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-export -f cmd_not_found
-
-
 help(){
 cat <<HELP
 
@@ -108,16 +92,6 @@ cmd_not_found "$RASTER_WARP_EXE"
 cmd_not_found "$RASTER_MERGE_EXE"
 cmd_not_found "$RASTERIZE_EXE"
 cmd_not_found "$PARALLEL_EXE"
-
-issmaller(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
-}
-export -f issmaller
-
-isgreater(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
-}
-export -f isgreater
 
 function cubethis(){
 
