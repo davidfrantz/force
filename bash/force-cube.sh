@@ -41,6 +41,7 @@ export RASTER_INFO_EXE="gdalinfo"
 export VECTOR_INFO_EXE="ogrinfo"
 export VECTOR_WARP_EXE="ogr2ogr"
 export RASTER_WARP_EXE="gdalwarp"
+export RASTER_WARP_HELP="--help"
 export RASTER_MERGE_EXE="gdal_merge.py"
 export RASTERIZE_EXE="gdal_rasterize"
 export PARALLEL_EXE="parallel"
@@ -236,7 +237,7 @@ fi
 debug "$# input files will be cubed"
 
 # options received, check now ------------------------------------------------------------
-RESOPT=$($RASTER_WARP_EXE 2>/dev/null | grep -A 1 'Available resampling methods:')
+RESOPT=$($RASTER_WARP_EXE $RASTER_WARP_HELP | grep -A 2 'Available resampling methods:')
 TEMP=$(echo $RESOPT | sed 's/[., ]/%/g')
 if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then 
   echoerr "Unknown resampling method."; 
