@@ -30,47 +30,123 @@ force_version() {
 }
 export -f force_version
 
+# warnings and/or error messages go to STDERR
 echoerr(){ 
-  echo "$PROG: $@" 1>&2; 
-}    # warnings and/or errormessages go to STDERR
+  echo "$PROG: $*" 1>&2
+}
 export -f echoerr
 
-export DEBUG=false # display debug messages?
+# print debug messages
+export DEBUG=true
 debug(){ 
-  if [ "$DEBUG" == "true" ]; then 
-    echo "DEBUG: $@"; 
+  if is_true "$DEBUG"; then 
+    echo "DEBUG: $*"
   fi 
-} # debug message
-export -f DEBUG debug
+}
+export -f debug
 
-cmd_not_found(){      # check required external commands
+# check required external commands
+cmd_not_found(){
   for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then 
-      echoerr "\"$cmd\": external command not found, terminating..."; 
+    if ! eval which "$cmd" >/dev/null 2>&1; then
+      echoerr "external command ($cmd) not found, terminating..."; 
       exit 1; 
     fi
   done
 }
 export -f cmd_not_found
 
-file_not_found() {      # check required files
+# check files (exist+read)
+file_not_found(){
   for file in "$@"; do
-    stat=`which $file`
-    if [ ! -r $file ] ; then 
-      echoerr "\"$file\": file not found, terminating..."; 
+    if [ ! -f "$file" ]; then
+      echoerr "file not found ($file), terminating..."; 
+      exit 1; 
+    fi
+    if [ ! -r "$file" ]; then 
+      echoerr "file not readable ($file), terminating..."; 
       exit 1; 
     fi
   done
 }
 export -f file_not_found
 
-issmaller(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
+# check files (exist+read+write)
+file_not_writeable(){
+  for file in "$@"; do
+    file_not_found "$file"
+    if [ ! -w "$file" ]; then 
+      echoerr "file not writeable ($file), terminating..."; 
+      exit 1; 
+    fi
+  done
 }
-export -f issmaller
+export -f file_not_writeable
 
-isgreater(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
+# check directories (exist+read)
+dir_not_found(){
+  for dir in "$@"; do
+    if [ ! -d "$dir" ]; then
+      echoerr "directory not found ($dir), terminating..."; 
+      exit 1; 
+    fi
+    if [ ! -x "$dir" ]; then 
+      echoerr "directory not executable ($dir), terminating..."; 
+      exit 1; 
+    fi
+  done
 }
-export -f isgreater
+export -f dir_not_found
+
+# check directories (exist+read+write)
+dir_not_writeable(){
+  for dir in "$@"; do
+    dir_not_found "$dir"
+    if [ ! -w "$dir" ]; then 
+      echoerr "directory not writeable ($dir), terminating..."; 
+      exit 1; 
+    fi
+  done
+}
+export -f dir_not_writeable
+
+# value is true?
+is_true(){
+  if [ "$1" == true ]; then return 0; else return 1; fi
+}
+export -f is_true
+
+# number is smaller than other number?
+is_lt(){
+  res=$(awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}')
+  if [ "$res" == "true" ]; then return 0; else return 1; fi
+}
+export -f is_lt
+
+# number is greater than other number?
+is_gt(){
+  res=$(awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}')
+  if [ "$res" == "true" ]; then return 0; else return 1; fi
+}
+export -f is_gt
+
+# number is smaller or equal than other number?
+is_le(){
+  res=$(awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<=n2) ? "true" : "false"}')
+  if [ "$res" == "true" ]; then return 0; else return 1; fi
+}
+export -f is_le
+
+# number is greater or equal than other number?
+is_ge(){
+  res=$(awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>=n2) ? "true" : "false"}')
+  if [ "$res" == "true" ]; then return 0; else return 1; fi
+}
+export -f is_ge
+
+# number is equal to other number?
+is_eq(){
+  res=$(awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1==n2) ? "true" : "false"}')
+  if [ "$res" == "true" ]; then return 0; else return 1; fi
+}
+export -f is_eq
