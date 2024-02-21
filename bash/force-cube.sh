@@ -244,7 +244,7 @@ if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then
   help
 fi
 
-if [ $(isgreater $RES 0) == "false" ]; then 
+if [ $(is_gt $RES 0) == "false" ]; then 
   echoerr "Resolution must be > 0"; help
 fi
 
@@ -370,7 +370,7 @@ for i in "$@"; do
   # step a tile to the west, and check if image is in tile, find last tile
   TXMAX=$TXMIN
   ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
-  while [ $(issmaller $ULX $XMAX) == "true" ]; do
+  while [ $(is_lt $ULX $XMAX) == "true" ]; do
     TXMAX=$(echo $TXMAX | awk '{print $1+1}')
     ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
   done
@@ -378,7 +378,7 @@ for i in "$@"; do
   # step a tile to the south, and check if image is in tile, find last tile
   TYMAX=$TYMIN
   ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
-  while [ $(issmaller $YMIN $ULY) == "true" ]; do
+  while [ $(is_lt $YMIN $ULY) == "true" ]; do
     TYMAX=$(echo $TYMAX | awk '{print $1+1}')
     ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
   done
