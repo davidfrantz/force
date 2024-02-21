@@ -37,7 +37,7 @@ echoerr(){
 export -f echoerr
 
 # print debug messages
-export DEBUG=true
+export DEBUG=false
 debug(){ 
   if is_true "$DEBUG"; then 
     echo "DEBUG: $*"
