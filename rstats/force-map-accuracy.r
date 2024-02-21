@@ -58,7 +58,7 @@ usage <- function(exit){
     "     defaults to './accuracy-assessment.txt'\n",
     "  -c count-file  = csv table with pixel counts per class\n",
     "     2 columns named class and count\n",
-    "  -s sample-file = vector file with predicted and reference class labels\n",
+    "  -s sample-file = vector file (or csv table) with predicted and reference class labels\n",
     "     2 columns named label_map and label_reference\n",
     "  -a pixel-area  = area of one pixel in desired reporting unit, e.g.\n",
     "      100 for a Sentinel-2 based map to be reported in m², or\n",
