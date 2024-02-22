@@ -420,14 +420,14 @@ force-stack: temp cross $(DA)/_stack.c
 force-import-modis: temp cross lower $(DL)/_import-modis.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-import-modis $(DL)/_import-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
-force-cube-init: temp cross lower  $(DA)/_init-cube.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-cube-init $(DA)/_init-cube.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+force-cube-init: temp cross lower  $(DL)/_init-cube.c
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-cube-init $(DL)/_init-cube.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 force-hist: temp cross $(DA)/_hist.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-hist $(DA)/_hist.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-hist $(DA)/_hist.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 force-stratified-sample: temp cross $(DA)/_stratified-sample.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stratified-sample $(DA)/_stratified-sample.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
+	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stratified-sample $(DA)/_stratified-sample.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
 
 ### dummy code for testing stuff  
 
