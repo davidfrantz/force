@@ -1016,7 +1016,8 @@ char ftpname[NPOW_10], locname[NPOW_10];
 int nchar;
 int c, try__, nvalid, curl;
 bool aqua = false;
-double *modavg, *mydavg, *modctr, *mydctr;
+double *modavg = NULL, *mydavg = NULL;
+double *modctr = NULL, *mydctr = NULL;
 
 
   // test if AQUA was commissioned

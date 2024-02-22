@@ -46,7 +46,7 @@ int warp_geo_to_any(double  srs_x, double  srs_y,
                double *dst_x, double *dst_y, char *dst_wkt){
 OGRSpatialReference oSrcSRS, oDstSRS;
 OGRCoordinateTransformation *poCT = NULL;
-char *wkt = dst_wkt;
+const char *wkt = dst_wkt;
 double x, y;
 
 
@@ -90,7 +90,7 @@ int warp_any_to_geo(double  srs_x, double  srs_y,
                double *dst_x, double *dst_y, char *src_wkt){
 OGRSpatialReference oSrcSRS, oDstSRS;
 OGRCoordinateTransformation *poCT = NULL;
-char *wkt = src_wkt;
+const char *wkt = src_wkt;
 double x, y;
 
 
@@ -135,8 +135,8 @@ int warp_any_to_any(double  srs_x, double  srs_y,
                  char *src_wkt, char *dst_wkt){
 OGRSpatialReference oSrcSRS, oDstSRS;
 OGRCoordinateTransformation *poCT = NULL;
-char *src_css = src_wkt;
-char *dst_css = dst_wkt;
+const char *src_css = src_wkt;
+const char *dst_css = dst_wkt;
 double x, y;
 
 

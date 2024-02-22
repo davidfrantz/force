@@ -741,6 +741,7 @@ float coef[3], coefbest[3];
 
       if (!dobj[o].valid) continue;
 
+      memset(coefbest, 0, 3*sizeof(float));
 
       /** estimate band-wise aod that matches best with each pair of target 
       +++ and library reflectance **/
