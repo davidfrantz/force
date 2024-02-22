@@ -25,22 +25,25 @@
 # Entrypoint, print short disclaimer, available modules etc.
 
 # functions/definitions ------------------------------------------------------------------
-export PROG=`basename $0`;
-export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export MISC="$BIN/force-misc"
+PROG=$(basename "$0")
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+MISC="$BIN/force-misc"
+export PROG BIN MISC
 
 # source bash "library" file
 LIB="$MISC/force-bash-library.sh"
-eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
-export LIB
+if ! eval ". ${LIB}" >/dev/null 2>&1; then 
+  echo "loading bash library failed" 1>&2
+  exit 1
+fi
 
 
 print_info(){
   for cmd in "$@"; do
-    if [ -f $cmd ] && [ -x $cmd ]; then
-      message=`$cmd -i`
-      if [ $? -eq 0 ]; then 
-        echo $(basename $cmd): "$message"
+    if [ -f "$cmd" ] && [ -x "$cmd" ]; then
+      if message=$($cmd -i); then
+        base_cmd=$(basename "$cmd")
+        echo "$base_cmd: $message"
       fi
     fi
   done
@@ -68,7 +71,7 @@ export -f help
 
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hvi --long help,version,info -n "$0" -- "$@"`
+ARGS=$(getopt -o hvi --long help,version,info -n "$0" -- "$@")
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -133,8 +136,8 @@ info
 echo "available programs:"
 echo ""
 
-executables=$BIN/force*
-debug $executables
+executables="$BIN/force*"
+debug "$executables"
 print_info $executables
 
 echo ""
