@@ -79,11 +79,15 @@ cat << HELP
 force-level1-csd - FORCE cloud storage downloader for Landsat and Sentinel-2
 https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html
 
-Usage: force-level1-csd [-c min,max] [-d starttime,endtime] [-n] [-k] [-s sensor]
+Usage: force-level1-csd [-hvi] [-c min,max] [-d starttime,endtime] [-n] [-k] [-s sensor]
                         [-t tier] [-u]
                         metadata-dir level-1-datapool queue aoi
 
   optional:
+  -h = show this help
+  -v = show version
+  -i = show program's purpose
+
   -c = cloudcover
   -d = daterange
   -n = no-act
@@ -151,12 +155,15 @@ CHECKLOGS=0
 ARGS=$(echo "$*" | sed -E "s/ -([0-9])/ %dummy%\1/g")
 set -- $ARGS
 
-ARGS=`getopt -o c:d:l:nks:t:u -l cloudcover:,daterange:,logs:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
+ARGS=`getopt -o hvic:d:l:nks:t:u -l help,version,info,cloudcover:,daterange:,logs:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
 if [ $? != 0 ] ; then show_help "$(printf "%s\n       " "Error in command line options. Please check your options.")"; fi
 eval set -- "$ARGS"
 
 while :; do
   case "$1" in
+    -h|--help) help ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Cloud Storage Downloader"; exit 0;;
     -c|--cloudcover)
       check_params "$2" "cloud cover threshold"
       CCMIN=$(echo "$2" | cut -d"," -f1)
