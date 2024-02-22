@@ -103,6 +103,9 @@ Develop version
     ``-f`` can override the file format, use the GDAL vector drive short name - thus grid can now be 
     generated in any GDAL vector format. Both need to be given if not using defaults.
 
+  - ``force-tile-extent`` has been updated to common Linux usage with options. Small changes for users are necessary,
+    though all the functionality remained the same
+
   - The CLI help of `force-tile-finder` has been corrected concerning the separator for the coordinates.
 
 - **FORCE L1AS*
