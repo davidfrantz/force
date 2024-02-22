@@ -1072,6 +1072,7 @@ void write_par_hl_thread(FILE *fp, bool verbose){
     fprintf(fp, "# from Block 3 are already being input and results from Block 1 are being\n");
     fprintf(fp, "# output. Each team can have multiple sub-threads to speed up the work. The\n");
     fprintf(fp, "# number of threads to use for each team is given by following parameters.\n");
+    fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
   }
   fprintf(fp, "NTHREAD_READ = 8\n");
   fprintf(fp, "NTHREAD_COMPUTE = 22\n");
