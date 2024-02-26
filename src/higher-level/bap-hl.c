@@ -768,6 +768,65 @@ float max_score = -1;
 }
 
 
+/** This function does the best available pixel compositing.
+--- ard:    ARD
+--- l3:     pointer to instantly useable L3 image arrays
+--- nt:     number of ARD products over time
+--- nb:     number of bands
+--- nodata: nodata value
+--- p:      pixel
+--- score:  score parameters
+--- tdist:  temporal distance to target
+--- hmean:  mean of HOT
+--- hsd:    std. dev. of HOT
+--- water:  is pixel water?
+--- bap:    bap parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int bap_weighting(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap){
+int t, b;
+float sum_weight = 0;
+
+
+  // initialize nodata
+  for (b=0; b<nb; b++) l3->bap[b][p] = 0;
+
+  // go through time
+  for (t=0; t<nt; t++){
+
+    if (!ard[t].msk[p]) continue;
+
+    if (!bap->offsea && score[t].d < 0.01) continue;
+    if (bap->w.h  > 0 && score[t].h  < 0.01 && 
+        hmean > 0.01 && hsd > 0.01) continue;
+    if (bap->w.c > 0 && score[t].c < 0.01) continue;
+
+
+    for (b=0; b<nb; b++) l3->bap[b][p] += (ard[t].dat[b][p] * score[t].t);
+    sum_weight += score[t].t;
+
+  }
+
+  if (sum_weight > 0){
+
+    // best available pixel composite
+    if (l3->bap != NULL){
+      for (b=0; b<nb; b++) l3->bap[b][p] /= sum_weight;
+    }
+
+  } else {
+
+    if (l3->bap != NULL){
+      for (b=0; b<nb; b++) l3->bap[b][p] = nodata;
+    }
+
+  }
+
+
+  return SUCCESS;
+}
+
+
 /** This function builds overview images for the best available pixel 
 +++ composite.
 --- l3:     pointer to instantly useable L3 image arrays

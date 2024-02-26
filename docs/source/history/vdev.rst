@@ -53,6 +53,11 @@ Develop version
   - In the TSA submodule, it is now possible to disable fitting a monotonic trend within the harmonic model.
     The new parameter ``HARMONIC_TREND = TRUE/FALSE`` was added. Default behaviour (as before) is ``TRUE``.
 
+  - The Level 3 submodule now allows to use the internal scores for determining the best available observation as
+    as a weight, i.e., not performing a selection, but a weighted average. This idea is taken from the MAJA WASP 
+    approach of Olivier Hagolle. A new parameter ``SELECT = TRUE/FALSE`` was introduced. with ``FALSE`` enabling
+    the weighted average. Note that the ``INF`` and ``SCR`` products will not be produced when using this option.
+
 - **FORCE L2PS**
 
   - force-level2 was refactored. Little has changed for users. The logfiles are more verbose, and 
