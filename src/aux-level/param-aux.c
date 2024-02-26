@@ -1138,6 +1138,12 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "Y_FACTOR = 0.75\n");
 
   if (verbose){
+    fprintf(fp, "# Should selection or weighting be performed?\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "SELECT = TRUE\n");
+
+  if (verbose){
     fprintf(fp, "# These parameters specify the function values used for fitting the DOY\n");
     fprintf(fp, "# scoring functions. The function type is automatically chosen from the \n");
     fprintf(fp, "# given values, i.e.\n");

@@ -214,6 +214,9 @@ YEAR_NUM = 2
 # less of the year).
 # Type: Float. Valid values: [0,...
 Y_FACTOR = 0.75
+# Should selection or weighting be performed?
+# Type: Logical. Valid values: {TRUE,FALSE}
+SELECT = TRUE
 # These parameters specify the function values used for fitting the DOY
 # scoring functions. The function type is automatically chosen from the 
 # given values, i.e.

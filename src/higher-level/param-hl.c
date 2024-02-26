@@ -140,6 +140,7 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_int_par(params,   "YEAR_TARGET", 1900, 2100, &phl->bap.Yt);
   register_int_par(params,   "YEAR_NUM", 0, 100, &phl->bap.Yr);
   register_float_par(params, "Y_FACTOR", 0, FLT_MAX, &phl->bap.Yf);
+  register_bool_par(params,  "SELECT", &phl->bap.select);
 
   register_floatvec_par(params, "DOY_SCORE", 0, 1, &phl->bap.Ds, &phl->bap.nDs);
   register_intvec_par(params,   "DOY_STATIC", 1, 365, &phl->bap.Dt, &phl->bap.nDt);
@@ -1562,6 +1563,15 @@ double tol = 5e-3;
       phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
+    }
+
+    if (!phl->bap.select && phl->bap.oinf){
+      phl->bap.oinf = false;
+      printf("Warning: will not output INF product as weighting observations was selected. Proceed.\n");
+    }
+    if (!phl->bap.select && phl->bap.oscr){
+      phl->bap.oscr = false;
+      printf("Warning: will not output SCR product as weighting observations was selected. Proceed.\n");
     }
 
     // choose products

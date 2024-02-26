@@ -140,6 +140,7 @@ typedef struct {
   int nDt, nDs;
   float *Ds;           // function values for target DOYs
   int offsea; // use off-season data?
+  int select; // select or weight?
 
   int score_type;
   par_scr_t w;          // scoring struct for weigting parameters
