@@ -106,7 +106,7 @@ RESOLUTION = 10
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
-# Sensors to be used in the analysis. Multi-sensor analysis are restricted
+# Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
 # LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
@@ -124,6 +124,21 @@ RESOLUTION = 10
 # Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
 #   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
 SENSORS = LND08 LND09 SEN2A SEN2B
+# Main product type to be used. Usually, this is a reflectance product like BOA.
+# When using composites, you may use BAP. This can be anything, but make sure that
+# the string can uniquely identify your product. As an example, do not use LEVEL2.
+# Note that the product should contain the bands that are to be expected with the
+# sensor used, e.g. 10 bands when sensor is SEN2A.
+# Type: Character. Valid values: {BOA,TOA,IMP,BAP,SIG,...}
+PRODUCT_TYPE_MAIN = BOA
+# Quality product type to be used. This should be a bit flag product like QAI.
+# When using composites, you may use INF. This can be anything, but make sure that
+# the product should contain quality bit flags as outputted by FORCE L2PS.
+# As an exception, it is also possible to give NULL if you don't have any quality masks.
+# In this case, FORCE will only be able to filter nodata values, but no other quality
+# flags as defined with SCREEN_QAI.
+# Type: Character. Valid values: {QAI,INF,NULL,...}
+PRODUCT_TYPE_QUALITY = QAI
 # Perform a spectral adjustment to Sentinel-2?
 # This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
@@ -163,10 +178,10 @@ DOY_RANGE = 1 365
 # Type: Integer. Valid values: [1,12]
 MONTH_STEP = 3
 # Which statistics should be computed? Currently available statistics are
-# the number of observations and aggregate statistics of the temporal
+# the number of observations, and aggregate statistics of the temporal
 # difference between observations (available are average, standard deviation,
 # minimum, maximum, range, skewness, kurtosis, any quantile from 1-99%, and
-# interquartile range. Note that median is Q50).
+# interquartile range. Note that median is Q50.
 # Type: Character list. Valid values: {NUM,MIN,Q01-Q99,MAX,AVG,STD,RNG,IQR,SKW,KRT}
 CSO = NUM AVG STD
 

@@ -162,7 +162,7 @@ ML_CONVERGENCE = 0
 # This parameter is a scaling factor to scale the prediction to fit into a
 # 16bit signed integer. This parameter should be set in dependence on the
 # scale used for training the model.
-# Type: Float. Valid range: [1,...
+# Type: Float. Valid range: ]0,...
 ML_SCALE = 10000
 # This parameter defines the basename for the output files. The basename will
 # be appended by Module ID, product ID, and the file extension.

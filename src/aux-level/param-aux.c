@@ -2854,7 +2854,7 @@ if (verbose){
     fprintf(fp, "# target classes 1, 2, and 3, respectively. Multiple classes can be given, \n");
     fprintf(fp, "# i.e. output tables will be generated for each target class.\n");
 
-    fprintf(fp, "# Type: Integer list. Valid values: [1,n-class\n");
+    fprintf(fp, "# Type: Integer list. Valid values: [1,n-class]\n");
   }
   fprintf(fp, "TARGET_CLASS = 1 2 3 4\n");
 

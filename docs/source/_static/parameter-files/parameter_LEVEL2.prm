@@ -224,7 +224,7 @@ RES_MERGE = IMPROPHE
 # CO-REGISTRATION OPTIONS
 # ------------------------------------------------------------------------
 # This parameter only applies for Sentinel-2 data. This parameter defines
-# the path to a directory that contains monthly Landsat NIR base images.
+# the path to a directory that contains monthly NIR base images.
 # If given, a co-registration is attempted. If it fails (no tie points),
 # the image won't be processed.
 # Type: full directory path
@@ -272,7 +272,7 @@ NTHREAD = 2
 # images are read sequentially or in parallel. Note that we observed two kinds
 # of GDAL installation: (1) the JPEG driver reads each band parallely, but 
 # separated images in sequence - we recommend to disable PARALLEL_READS in this
-# case (for Sentinel-2). (2) The GDAL JPEG drived does not do anything in 
+# case (for Sentinel-2). (2) The GDAL JPEG driver does not do anything in 
 # parallel - use PARALLEL_READ to speed up the work (also use it for Landsat).
 # Type: Logical. Valid values: {TRUE,FALSE}
 PARALLEL_READS = FALSE
@@ -318,14 +318,14 @@ OUTPUT_DST = FALSE
 # module is using this.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_AOD = FALSE
-# Output the Water Wapor map? No higher-level FORCE module is using this.
+# Output the Water Vapor map? No higher-level FORCE module is using this.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_WVP = FALSE
-# Output the view zenith map? This product can be used in force-level3; no
+# Output the View Zenith map? This product can be used in force-level3; no
 # other higher-level FORCE module is using this.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_VZN = FALSE
-# Output the  Haze Optimzed Transformation output? This product can be
+# Output the Haze Optimzed Transformation output? This product can be
 # used in force-level3; no other higher-level FORCE module is using this.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_HOT = FALSE

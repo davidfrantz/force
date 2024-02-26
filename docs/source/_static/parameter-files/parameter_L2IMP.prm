@@ -119,7 +119,7 @@ USE_L2_IMPROPHE = FALSE
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
-# Sensors to be used in the analysis. Multi-sensor analysis are restricted
+# Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
 # LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
@@ -137,6 +137,21 @@ USE_L2_IMPROPHE = FALSE
 # Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
 #   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
 SENSORS = LND08 LND09 SEN2A SEN2B
+# Main product type to be used. Usually, this is a reflectance product like BOA.
+# When using composites, you may use BAP. This can be anything, but make sure that
+# the string can uniquely identify your product. As an example, do not use LEVEL2.
+# Note that the product should contain the bands that are to be expected with the
+# sensor used, e.g. 10 bands when sensor is SEN2A.
+# Type: Character. Valid values: {BOA,TOA,IMP,BAP,SIG,...}
+PRODUCT_TYPE_MAIN = BOA
+# Quality product type to be used. This should be a bit flag product like QAI.
+# When using composites, you may use INF. This can be anything, but make sure that
+# the product should contain quality bit flags as outputted by FORCE L2PS.
+# As an exception, it is also possible to give NULL if you don't have any quality masks.
+# In this case, FORCE will only be able to filter nodata values, but no other quality
+# flags as defined with SCREEN_QAI.
+# Type: Character. Valid values: {QAI,INF,NULL,...}
+PRODUCT_TYPE_QUALITY = QAI
 # Perform a spectral adjustment to Sentinel-2?
 # This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
@@ -163,9 +178,10 @@ SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUB
 # can be restored if its residual is lower than a multiple of the noise
 # (BELOW_NOISE). Higher/Lower values will restore observations more aggres-
 # sively/conservative. Give 0 to both parameters to disable the filtering.
+# ABOVE_NOISE = 3, BELOW_NOISE = 1 are parameters that have worked in some settings.
 # Type: Float. Valid range: [0,...
-ABOVE_NOISE = 3
-BELOW_NOISE = 1
+ABOVE_NOISE = 0
+BELOW_NOISE = 0
 
 # PROCESSING TIMEFRAME
 # ------------------------------------------------------------------------
@@ -189,7 +205,7 @@ DOY_RANGE = 1 365
 # the window breakpoints. If you specify 5 breakpoints, there will be four
 # windows. The windows can extend to the previous/next year (e.g. 270 30
 # 91 181 270 would extend into the previous year, 1 30 91 181 270 30 would
-# extend into the next year).
+# extend into the next year.
 # Type: Integer list. Valid values: [1,365]
 SEASONAL_WINDOW = 1 91 181 271 365
 # This parameter defines the radius of the prediction kernel (in projection

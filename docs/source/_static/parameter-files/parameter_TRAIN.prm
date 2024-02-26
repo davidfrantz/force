@@ -53,7 +53,7 @@ ML_METHOD = RFC
 # frequency. Alternatively, you can use custom weights, i.e. a vector of weights
 # for each class in your response file. The weights must sum to one, and must be
 # given in ascending order.
-# Type: Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or [0,1]
+# Type: Character / Float list. Valid values: {EQUALIZED,PROPORTIONAL,ANTIPROPORTIONAL} or ]0,1[
 FEATURE_WEIGHTS = EQUALIZED
 
 # RANDOM FOREST PARAMETERS
