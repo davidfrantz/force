@@ -150,8 +150,10 @@ bool b_ext = false;
         printf("too many GDAL output options."); 
         exit(FAILURE);
       }
-      copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_TAG_]);
-      copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_VAL_]);
+      if (tagval[i][_TV_TAG_][0] != '#'){
+        copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_TAG_]);
+        copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_VAL_]);
+      }
     }
 
   }
