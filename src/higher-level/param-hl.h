@@ -503,6 +503,7 @@ typedef struct {
   gdalopt_t gdalopt; // GDAL output options
   int format;        // output format
   int explode;
+  int subfolders;
   int owr;             // flag: overwrite output
   int ithread;
   int othread;

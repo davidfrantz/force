@@ -58,6 +58,10 @@ Develop version
     approach of Olivier Hagolle. A new parameter ``SELECT = TRUE/FALSE`` was introduced. with ``FALSE`` enabling
     the weighted average. Note that the ``INF`` and ``SCR`` products will not be produced when using this option.
 
+  - a new parameter ``OUTPUT_SUBFOLDERS`` was implemented that allows to output the data into subfolders under the tile 
+    folder instead of just dumping everything into the tile folder itself. It is planned that this feature will be
+    expanded in the future. ``OUTPUT_SUBFOLDERS = FALSE`` remains the default.
+
 - **FORCE L2PS**
 
   - force-level2 was refactored. Little has changed for users. The logfiles are more verbose, and 

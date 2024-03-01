@@ -1043,6 +1043,14 @@ void write_par_hl_output(FILE *fp, bool verbose){
   }
   fprintf(fp, "OUTPUT_EXPLODE = FALSE\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter controls whether the output is written in one folder,\n");
+    fprintf(fp, "# or whether several subfolders per product type will be generated to better\n");
+    fprintf(fp, "# structure the output.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_SUBFOLDERS = FALSE\n");
+
   //if (verbose){
   //  fprintf(fp, "# If an output file already exists.. Overwrite?\n");
   //  fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");

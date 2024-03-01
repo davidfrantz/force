@@ -48,6 +48,11 @@ FILE_OUTPUT_OPTIONS = NULL
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_EXPLODE = FALSE
+# This parameter controls whether the output is written in one folder,
+# or whether several subfolders per product type will be generated to better
+# structure the output.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_SUBFOLDERS = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------

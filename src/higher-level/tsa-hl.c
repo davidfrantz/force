@@ -923,6 +923,7 @@ date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
 char domain[NPOW_10];
+char subname[NPOW_03];
 int nchar;
 
 
@@ -931,9 +932,15 @@ int nchar;
   set_brick_name(brick, "FORCE Time Series Analysis");
   set_brick_product(brick, info->prodname);
 
+  if (phl->subfolders){
+    copy_string(subname, NPOW_03, info->prodname);
+  } else {
+    subname[0] = '\0';
+  }
+
   //printf("dirname should be assemlbed in write_brick, check with L2\n");
-  nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
-    get_brick_tilex(brick), get_brick_tiley(brick));
+  nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_higher, 
+    get_brick_tilex(brick), get_brick_tiley(brick), subname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return NULL;}
   set_brick_dirname(brick, dname);
