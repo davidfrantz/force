@@ -534,7 +534,9 @@ int *rstats_return_ = NULL;
 
     value = nodata;
 
-    if (udf->type == _UDF_BLOCK_ || (mask_ != NULL && mask_[p])){
+    if (udf->type == _UDF_BLOCK_ ||
+       (udf->type == _UDF_PIXEL_ && 
+       (mask_ == NULL || (mask_ != NULL && mask_[p])))){
       value = rstats_return_[k++];
     }
 
