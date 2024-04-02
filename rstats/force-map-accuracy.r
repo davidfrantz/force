@@ -109,8 +109,10 @@ if (is.null(opt$output)) opt$output <- "accuracy-assessment.txt"
 
 
 # read data
-count <- read.csv(opt$counts)
-sample <- read_sf(opt$sample)
+count <- read.csv(opt$counts) %>%
+  mutate_all(as.integer)
+sample <- read_sf(opt$sample) %>%
+  mutate_all(as.integer)
 
 
 # columns OK?
