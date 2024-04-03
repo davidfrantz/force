@@ -280,7 +280,7 @@ We call the synthetic training data generation using
 
 	force-synthmix parameterfiles/40_lcf_synthmix.prm
 
-You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/60_lcf_ml_predict.prm>`_ or use the one provided in the data repository. 	
+You can access the parameter file `here <../_static/parameter-files/tutorials/lcf/40_lcf_synthmix.prm>`_ or use the one provided in the data repository. 	
 
 The parameter file offers some customization of the synthetic mixing procedure. The default settings have been refined over the years, but feel free to experiment with some of them, as they might each affect model outcomes. A more detailed description of the mixing process can be found in `Cooper et al. (2020) <https://www.sciencedirect.com/science/article/pii/S0034425720302261>`_
 
