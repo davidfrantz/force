@@ -704,7 +704,7 @@ float max_score = -1;
     if (!bap->offsea && score[t].d < 0.01) continue;
     if (bap->w.h  > 0 && score[t].h  < 0.01 && 
         hmean > 0.01 && hsd > 0.01) continue;
-    if (bap->w.c > 0 && score[t].c < 0.01) continue;
+    if (bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
 
     n++;
 
@@ -799,7 +799,7 @@ float sum_weight = 0;
     if (!bap->offsea && score[t].d < 0.01) continue;
     if (bap->w.h  > 0 && score[t].h  < 0.01 && 
         hmean > 0.01 && hsd > 0.01) continue;
-    if (bap->w.c > 0 && score[t].c < 0.01) continue;
+    if (bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
 
 
     for (b=0; b<nb; b++) l3->bap[b][p] += (ard[t].dat[b][p] * score[t].t);
