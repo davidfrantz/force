@@ -1190,6 +1190,14 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "OFF_SEASON = FALSE\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter specifies whether observations with a cloud score of less than 1%%\n");
+    fprintf(fp, "# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,\n");
+    fprintf(fp, "# it will include clouds if there is no better observation.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "USE_CLOUDY = FALSE\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter controls the strength of the DOY score.\n");
     fprintf(fp, "# 0 disables the use of this score.\n");
     fprintf(fp, "# Type: Float. Valid values: [0,1]\n");
