@@ -74,6 +74,9 @@ Develop version
     of ``DONE``. The wrapper script ``forcel-l2ps_`` was discontinued; ``force-level2`` is now directly 
     calling ``force-l2ps``.
 
+  - A new parameter ``STRICT_WATER_VAPOR`` was introduced, which will result in process abortion when the water
+    vapor database does not hold a day-specific value, i.e. the usage of the climatology is forbidden. 
+    Applies to Landsat only.
 
 - **FORCE AUX**
 

@@ -108,6 +108,7 @@ typedef struct {
   
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile
   float wvp;              // water vapor dummy value
+  int wvp_strict;         // die when no daily wvp, Landsat only
   float cldprob, shdprob; // Fmask thresholds
   float cldbuf, cirbuf, shdbuf, snwbuf; // buffer sizes
   int erase_cloud;        // erase the clouds?

@@ -316,6 +316,13 @@ void write_par_ll_wvp(FILE *fp, bool verbose){
   fprintf(fp, "DIR_WVPLUT = NULL\n");
 
   if (verbose){
+    fprintf(fp, "# This indicates if the water vapor climatology tables are permitted (FALSE),\n");
+    fprintf(fp, "# or if only daily tables are allowed (TRUE)\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "STRICT_WATER_VAPOR = FALSE\n");
+
+  if (verbose){
     fprintf(fp, "# This specifies a global value for atmospheric water vapor content in\n");
     fprintf(fp, "# g cm-2. This parameter can be a dummy value to quickly process an image\n");
     fprintf(fp, "# without needing to generate a water vapor database. Note that especially\n");

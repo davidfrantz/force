@@ -70,6 +70,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_bool_par(params,    "MULTI_SCATTERING",      &pl2->domulti);
   register_bool_par(params,    "ADJACENCY_EFFECT",      &pl2->doenv);
   register_float_par(params,   "WATER_VAPOR",           0, 15, &pl2->wvp);
+  register_bool_par(params,    "STRICT_WATER_VAPOR",    &pl2->wvp_strict);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
   register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
