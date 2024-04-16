@@ -1159,6 +1159,16 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "SELECT = TRUE\n");
 
   if (verbose){
+    fprintf(fp, "# How to combine individual scores?\n");
+    fprintf(fp, "# In the default behaviour, the individual scores are summed up.\n");
+    fprintf(fp, "# You can also choose to multiply the scores. This applies a \n");
+    fprintf(fp, "# strong penalty on an observation that performs poor in a single score.\n");
+    fprintf(fp, "# The weigting of scores is applied in both cases.\n");
+    fprintf(fp, "# Type: Character. Valid values: {ADDITIVE,MULTIPLICATIVE}\n");
+  }
+  fprintf(fp, "COMBINE_SCORES = ADDITIVE\n");
+
+  if (verbose){
     fprintf(fp, "# These parameters specify the function values used for fitting the DOY\n");
     fprintf(fp, "# scoring functions. The function type is automatically chosen from the \n");
     fprintf(fp, "# given values, i.e.\n");

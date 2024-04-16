@@ -506,7 +506,11 @@ float vz;
 
   for (t=0; t<nt; t++){
 
-    score[t].t = 0;
+    if (bap->combine == _SCR_COMB_ADD_){
+      score[t].t = 0;
+    } else if (bap->combine == _SCR_COMB_MUL_){
+      score[t].t = 1;
+    }
 
     // skip if no data
     if (!ard[t].msk[p]) continue;
@@ -654,13 +658,23 @@ float vz;
     /** Total score
     +** *****************************************************************/
 
-    score[t].t += (bap->w.d * score[t].d);
-    score[t].t += (bap->w.y * score[t].y);
-    score[t].t += (bap->w.c * score[t].c);
-    score[t].t += (bap->w.h * score[t].h);
-    score[t].t += (bap->w.r * score[t].r);
-    score[t].t += (bap->w.v * score[t].v);
-    score[t].t /=  bap->w.t;
+    if (bap->combine == _SCR_COMB_ADD_){
+      score[t].t += (bap->w.d * score[t].d);
+      score[t].t += (bap->w.y * score[t].y);
+      score[t].t += (bap->w.c * score[t].c);
+      score[t].t += (bap->w.h * score[t].h);
+      score[t].t += (bap->w.r * score[t].r);
+      score[t].t += (bap->w.v * score[t].v);
+      score[t].t /=  bap->w.t;
+    } else if (bap->combine == _SCR_COMB_MUL_){
+      score[t].t *= (bap->w.d * score[t].d);
+      score[t].t *= (bap->w.y * score[t].y);
+      score[t].t *= (bap->w.c * score[t].c);
+      score[t].t *= (bap->w.h * score[t].h);
+      score[t].t *= (bap->w.r * score[t].r);
+      score[t].t *= (bap->w.v * score[t].v);
+      score[t].t /=  bap->w.t;
+    }
     
     //printf("d weight %f, score %f\n", bap->w.d, score[t].d);
     //printf("y weight %f, score %f\n", bap->w.y, score[t].y);

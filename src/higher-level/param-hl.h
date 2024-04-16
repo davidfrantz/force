@@ -143,6 +143,7 @@ typedef struct {
   int use_cloudy; // use ultra-cloudy data?
   int use_hazy; // use ultra-hazy data?
   int select; // select or weight?
+  int combine; // how to combine scores?
 
   int score_type;
   par_scr_t w;          // scoring struct for weigting parameters

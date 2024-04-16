@@ -146,6 +146,8 @@ enum { _SCR_TOTAL_,  _SCR_DOY_,  _SCR_YEAR_, _SCR_DST_, _SCR_HAZE_,
 enum { _INF_QAI_,  _INF_NUM_, _INF_DOY_, _INF_YEAR_, 
        _INF_DIFF_, _INF_SEN_, _INF_LENGTH_ };
 
+enum { _SCR_COMB_ADD_, _SCR_COMB_MUL_, _SCR_COMB_LENGTH_ };
+
 // interpolation method
 enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
 
@@ -309,6 +311,7 @@ extern const tagged_enum_t _TAGGED_ENUM_TRD_[_TRD_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_CAT_[_CAT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_[_SCR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_SCR_COMB_[_SCR_COMB_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
 

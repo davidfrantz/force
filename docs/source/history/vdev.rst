@@ -62,6 +62,11 @@ Develop version
     observations with a cloud or haze score of less than 1% in the composite. On one hand, this reduces nodata gaps 
     in the composite. On the other hand, it will include clouds or haze if there is no better observation.
 
+  - The Level 3 submodule received a new parameter COMBINE_SCORES, which allows you to choose between additive or 
+    multiplicative combination of the individual scores into the total score. Additive combination is the previously
+    used method and remains the default. Multiplicative combination can be used, which is much stricter in case one 
+    observation is characterized by a very poor suitability in a single score.
+
   - a new parameter ``OUTPUT_SUBFOLDERS`` was implemented that allows to output the data into subfolders under the tile 
     folder instead of just dumping everything into the tile folder itself. It is planned that this feature will be
     expanded in the future. ``OUTPUT_SUBFOLDERS = FALSE`` remains the default.

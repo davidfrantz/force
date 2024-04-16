@@ -142,6 +142,7 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_int_par(params,   "YEAR_NUM", 0, 100, &phl->bap.Yr);
   register_float_par(params, "Y_FACTOR", 0, FLT_MAX, &phl->bap.Yf);
   register_bool_par(params,  "SELECT", &phl->bap.select);
+  register_enum_par(params,  "COMBINE_SCORES",  _TAGGED_ENUM_SCR_COMB_, _SCR_COMB_LENGTH_, &phl->bap.combine);
 
   register_floatvec_par(params, "DOY_SCORE", 0, 1, &phl->bap.Ds, &phl->bap.nDs);
   register_intvec_par(params,   "DOY_STATIC", 1, 365, &phl->bap.Dt, &phl->bap.nDt);
@@ -1548,8 +1549,13 @@ double tol = 5e-3;
   if (phl->type == _HL_BAP_){
 
     // total scoring weight
-    phl->bap.w.t = phl->bap.w.d + phl->bap.w.y + phl->bap.w.c  + phl->bap.w.h +
-             phl->bap.w.r + phl->bap.w.v;
+    if (phl->bap.combine == _SCR_COMB_ADD_){
+      phl->bap.w.t = phl->bap.w.d + phl->bap.w.y + phl->bap.w.c  + phl->bap.w.h +
+              phl->bap.w.r + phl->bap.w.v;
+    } else if (phl->bap.combine == _SCR_COMB_MUL_){
+      phl->bap.w.t = phl->bap.w.d * phl->bap.w.y * phl->bap.w.c  * phl->bap.w.h *
+              phl->bap.w.r * phl->bap.w.v;
+    }
 
     if (phl->bap.w.t == 0){
       printf("ALL scoring weights are zero. This is not allowed. "
