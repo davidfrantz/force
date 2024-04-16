@@ -702,7 +702,7 @@ float max_score = -1;
     if (!ard[t].msk[p]) continue;
 
     if (!bap->offsea && score[t].d < 0.01) continue;
-    if (bap->w.h  > 0 && score[t].h  < 0.01 && 
+    if (!bap->use_hazy && bap->w.h  > 0 && score[t].h  < 0.01 && 
         hmean > 0.01 && hsd > 0.01) continue;
     if (!bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
 
@@ -797,7 +797,7 @@ float sum_weight = 0;
     if (!ard[t].msk[p]) continue;
 
     if (!bap->offsea && score[t].d < 0.01) continue;
-    if (bap->w.h  > 0 && score[t].h  < 0.01 && 
+    if (!bap->use_hazy && bap->w.h  > 0 && score[t].h  < 0.01 && 
         hmean > 0.01 && hsd > 0.01) continue;
     if (!bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
 

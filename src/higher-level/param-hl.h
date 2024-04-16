@@ -141,6 +141,7 @@ typedef struct {
   float *Ds;           // function values for target DOYs
   int offsea; // use off-season data?
   int use_cloudy; // use ultra-cloudy data?
+  int use_hazy; // use ultra-hazy data?
   int select; // select or weight?
 
   int score_type;

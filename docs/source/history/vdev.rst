@@ -58,9 +58,9 @@ Develop version
     approach of Olivier Hagolle. A new parameter ``SELECT = TRUE/FALSE`` was introduced. with ``FALSE`` enabling
     the weighted average. Note that the ``INF`` and ``SCR`` products will not be produced when using this option.
 
-  - The Level 3 submodule received a new parameter ``USE_CLOUDY``, which can be used to allow observations with
-    a cloud score of less than 1% in the composite. On one hand, this reduces nodata gaps in the composite. On the 
-    other hand, it will include clouds if there is no better observation.
+  - The Level 3 submodule received the new parameters ``USE_CLOUDY`` and ``USE_HAZY``, which can be used to allow 
+    observations with a cloud or haze score of less than 1% in the composite. On one hand, this reduces nodata gaps 
+    in the composite. On the other hand, it will include clouds or haze if there is no better observation.
 
   - a new parameter ``OUTPUT_SUBFOLDERS`` was implemented that allows to output the data into subfolders under the tile 
     folder instead of just dumping everything into the tile folder itself. It is planned that this feature will be

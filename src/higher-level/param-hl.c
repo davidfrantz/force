@@ -148,6 +148,7 @@ void register_bap(params_t *params, par_hl_t *phl){
 
   register_bool_par(params,  "OFF_SEASON", &phl->bap.offsea);
   register_bool_par(params,  "USE_CLOUDY", &phl->bap.use_cloudy);
+  register_bool_par(params,  "USE_HAZY", &phl->bap.use_hazy);
   register_float_par(params, "DREQ", 1, FLT_MAX, &phl->bap.dreq);
   register_float_par(params, "VREQ", 1, 90, &phl->bap.vreq);
 
