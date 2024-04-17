@@ -353,6 +353,7 @@ int corr_matrix(ard_t *ard, int nt, int nb, int p, float **cor){
 int t, u, b, nodata = -9999;
 double xm, ym, xv, yv, cv;
 
+  for (t=0; t<nt; t++) memset(cor[t], 0, sizeof(float)*nt);
 
   for (t=0;     t<nt; t++){
   for (u=(t+1); u<nt; u++){
@@ -676,7 +677,6 @@ float vz;
       if (bap->w.h > 0) score[t].t *= (bap->w.h * score[t].h);
       if (bap->w.r > 0) score[t].t *= (bap->w.r * score[t].r);
       if (bap->w.v > 0) score[t].t *= (bap->w.v * score[t].v);
-      score[t].t /=  bap->w.t;
     }
     
     //printf("d weight %f, score %f\n", bap->w.d, score[t].d);
@@ -801,8 +801,11 @@ float max_score = -1;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int bap_weighting(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap){
-int t, b;
-float sum_weight = 0;
+int t, b, n = 0;
+float sum_t = 0;
+float sum_d = 0, sum_y = 0;
+float sum_c = 0, sum_h = 0;
+float sum_r = 0, sum_v = 0;
 
 
   // initialize nodata
@@ -820,21 +823,49 @@ float sum_weight = 0;
 
 
     for (b=0; b<nb; b++) l3->bap[b][p] += (ard[t].dat[b][p] * score[t].t);
-    sum_weight += score[t].t;
+    sum_t += score[t].t;
+
+    sum_d += score[t].d;
+    sum_y += score[t].y;
+    sum_c += score[t].c;
+    sum_h += score[t].h;
+    sum_r += score[t].r;
+    sum_v += score[t].v;
+
+    n++;
+    //printf("score_c: %f, sum_c: %f, n: %d\n", score[t].c, sum_c, n);
 
   }
 
-  if (sum_weight > 0){
+  if (sum_t > 0){
 
-    // best available pixel composite
+    // weighted average
     if (l3->bap != NULL){
-      for (b=0; b<nb; b++) l3->bap[b][p] /= sum_weight;
+      for (b=0; b<nb; b++) l3->bap[b][p] /= sum_t;
     }
+    
+    // compositing scores
+    if (l3->scr != NULL){
+      l3->scr[_SCR_TOTAL_][p]    = (short) (sum_t / n * 10000);
+      if (!water){
+        l3->scr[_SCR_DOY_][p]    = (short) (sum_d / n * 10000);
+        l3->scr[_SCR_YEAR_][p]   = (short) (sum_y / n * 10000);
+        l3->scr[_SCR_DST_][p]    = (short) (sum_c / n * 10000);
+        l3->scr[_SCR_HAZE_][p]   = (short) (sum_h / n * 10000);
+        l3->scr[_SCR_CORREL_][p] = (short) (sum_r / n * 10000);
+        l3->scr[_SCR_VZEN_][p]   = (short) (sum_v / n * 10000);
+      }
+    }
+
 
   } else {
 
     if (l3->bap != NULL){
       for (b=0; b<nb; b++) l3->bap[b][p] = nodata;
+    }
+
+    if (l3->scr != NULL){
+      for (b=0; b<_SCR_LENGTH_; b++) l3->scr[b][p] = nodata;
     }
 
   }

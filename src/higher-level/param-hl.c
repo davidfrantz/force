@@ -1557,14 +1557,6 @@ double tol = 5e-3;
       if (phl->bap.w.h > 0) phl->bap.w.t += phl->bap.w.h;
       if (phl->bap.w.r > 0) phl->bap.w.t += phl->bap.w.r;
       if (phl->bap.w.v > 0) phl->bap.w.t += phl->bap.w.v;
-    } else if (phl->bap.combine == _SCR_COMB_MUL_){
-      phl->bap.w.t = 1.0;
-      if (phl->bap.w.d > 0) phl->bap.w.t *= phl->bap.w.d;
-      if (phl->bap.w.y > 0) phl->bap.w.t *= phl->bap.w.y;
-      if (phl->bap.w.c > 0) phl->bap.w.t *= phl->bap.w.c;
-      if (phl->bap.w.h > 0) phl->bap.w.t *= phl->bap.w.h;
-      if (phl->bap.w.r > 0) phl->bap.w.t *= phl->bap.w.r;
-      if (phl->bap.w.v > 0) phl->bap.w.t *= phl->bap.w.v;
     }
 
     if (phl->bap.w.d == 0 && phl->bap.w.y == 0 &&
@@ -1589,10 +1581,6 @@ double tol = 5e-3;
     if (!phl->bap.select && phl->bap.oinf){
       phl->bap.oinf = false;
       printf("Warning: will not output INF product as weighting observations was selected. Proceed.\n");
-    }
-    if (!phl->bap.select && phl->bap.oscr){
-      phl->bap.oscr = false;
-      printf("Warning: will not output SCR product as weighting observations was selected. Proceed.\n");
     }
 
     // choose products
