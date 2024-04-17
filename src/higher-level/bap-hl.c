@@ -659,20 +659,20 @@ float vz;
     +** *****************************************************************/
 
     if (bap->combine == _SCR_COMB_ADD_){
-      score[t].t += (bap->w.d * score[t].d);
-      score[t].t += (bap->w.y * score[t].y);
-      score[t].t += (bap->w.c * score[t].c);
-      score[t].t += (bap->w.h * score[t].h);
-      score[t].t += (bap->w.r * score[t].r);
-      score[t].t += (bap->w.v * score[t].v);
+      if (bap->w.d > 0) score[t].t += (bap->w.d * score[t].d);
+      if (bap->w.y > 0) score[t].t += (bap->w.y * score[t].y);
+      if (bap->w.c > 0) score[t].t += (bap->w.c * score[t].c);
+      if (bap->w.h > 0) score[t].t += (bap->w.h * score[t].h);
+      if (bap->w.r > 0) score[t].t += (bap->w.r * score[t].r);
+      if (bap->w.v > 0) score[t].t += (bap->w.v * score[t].v);
       score[t].t /=  bap->w.t;
     } else if (bap->combine == _SCR_COMB_MUL_){
-      score[t].t *= (bap->w.d * score[t].d);
-      score[t].t *= (bap->w.y * score[t].y);
-      score[t].t *= (bap->w.c * score[t].c);
-      score[t].t *= (bap->w.h * score[t].h);
-      score[t].t *= (bap->w.r * score[t].r);
-      score[t].t *= (bap->w.v * score[t].v);
+      if (bap->w.d > 0) score[t].t *= (bap->w.d * score[t].d);
+      if (bap->w.y > 0) score[t].t *= (bap->w.y * score[t].y);
+      if (bap->w.c > 0) score[t].t *= (bap->w.c * score[t].c);
+      if (bap->w.h > 0) score[t].t *= (bap->w.h * score[t].h);
+      if (bap->w.r > 0) score[t].t *= (bap->w.r * score[t].r);
+      if (bap->w.v > 0) score[t].t *= (bap->w.v * score[t].v);
       score[t].t /=  bap->w.t;
     }
     

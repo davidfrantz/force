@@ -1550,14 +1550,26 @@ double tol = 5e-3;
 
     // total scoring weight
     if (phl->bap.combine == _SCR_COMB_ADD_){
-      phl->bap.w.t = phl->bap.w.d + phl->bap.w.y + phl->bap.w.c  + phl->bap.w.h +
-              phl->bap.w.r + phl->bap.w.v;
+      phl->bap.w.t = 0.0;
+      if (phl->bap.w.d > 0) phl->bap.w.t += phl->bap.w.d;
+      if (phl->bap.w.y > 0) phl->bap.w.t += phl->bap.w.y;
+      if (phl->bap.w.c > 0) phl->bap.w.t += phl->bap.w.c;
+      if (phl->bap.w.h > 0) phl->bap.w.t += phl->bap.w.h;
+      if (phl->bap.w.r > 0) phl->bap.w.t += phl->bap.w.r;
+      if (phl->bap.w.v > 0) phl->bap.w.t += phl->bap.w.v;
     } else if (phl->bap.combine == _SCR_COMB_MUL_){
-      phl->bap.w.t = phl->bap.w.d * phl->bap.w.y * phl->bap.w.c  * phl->bap.w.h *
-              phl->bap.w.r * phl->bap.w.v;
+      phl->bap.w.t = 1.0;
+      if (phl->bap.w.d > 0) phl->bap.w.t *= phl->bap.w.d;
+      if (phl->bap.w.y > 0) phl->bap.w.t *= phl->bap.w.y;
+      if (phl->bap.w.c > 0) phl->bap.w.t *= phl->bap.w.c;
+      if (phl->bap.w.h > 0) phl->bap.w.t *= phl->bap.w.h;
+      if (phl->bap.w.r > 0) phl->bap.w.t *= phl->bap.w.r;
+      if (phl->bap.w.v > 0) phl->bap.w.t *= phl->bap.w.v;
     }
 
-    if (phl->bap.w.t == 0){
+    if (phl->bap.w.d == 0 && phl->bap.w.y == 0 &&
+        phl->bap.w.c == 0 && phl->bap.w.h == 0 &&
+        phl->bap.w.r == 0 && phl->bap.w.v == 0){
       printf("ALL scoring weights are zero. This is not allowed. "
              "At least, the seasonal score should be > 0.\n"); return FAILURE;}
 
