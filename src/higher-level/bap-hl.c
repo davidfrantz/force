@@ -513,7 +513,10 @@ float vz;
     }
 
     // skip if no data
-    if (!ard[t].msk[p]) continue;
+    if (!ard[t].msk[p]){
+      score[t].t = 0;
+      continue;
+    } 
 
     // get date in continuous time
     ce = get_brick_ce(ard[t].DAT, 0);
