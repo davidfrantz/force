@@ -212,6 +212,27 @@ float diff, max, A, B;
 }
 
 
+/** Equality test for doubles
++++ This function tests for quasi equality of doubles
+--- a:      number 1
+--- b:      number 2
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool dequal(double a, double b){
+double diff, max, A, B;
+
+  diff = fabs(a-b);
+  A = fabs(a);
+  B = fabs(b);
+
+  max = (B > A) ? B : A;
+
+  if (diff <= max * DBL_EPSILON) return true;
+
+  return false;
+}
+
+
 /** Print bytes as human-readable string
 --- bytes:  bytes
 +++ Return: void

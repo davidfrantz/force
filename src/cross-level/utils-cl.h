@@ -53,6 +53,7 @@ double proctime(time_t start);
 void proctime_print(const char *string, time_t start);
 void fproctime_print(FILE *fp, const char *string, time_t start);
 bool fequal(float a, float b);
+bool dequal(double a, double b);
 void print_humanreadable_bytes(off_t bytes);
 
 #ifdef __cplusplus
