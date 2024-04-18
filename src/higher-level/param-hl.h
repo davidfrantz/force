@@ -36,6 +36,7 @@ Higher Level Processing paramater header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/param-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
 
 
@@ -113,13 +114,13 @@ typedef struct {
 
 // BAP scoring
 typedef struct {
-  float t;
-  float d;
-  float y;
-  float c;
-  float h;
-  float r;
-  float v;
+  double t;
+  double d;
+  double y;
+  double c;
+  double h;
+  double r;
+  double v;
 } par_scr_t;
 
 // phenology-adaptive compositing

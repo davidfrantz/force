@@ -158,12 +158,12 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_bool_par(params,   "OUTPUT_SCR", &phl->bap.oscr);
   register_bool_par(params,   "OUTPUT_OVV", &phl->bap.oovv);
 
-  register_float_par(params, "SCORE_DOY_WEIGHT",    0, 1, &phl->bap.w.d);
-  register_float_par(params, "SCORE_YEAR_WEIGHT",   0, 1, &phl->bap.w.y);
-  register_float_par(params, "SCORE_CLOUD_WEIGHT",  0, 1, &phl->bap.w.c);
-  register_float_par(params, "SCORE_HAZE_WEIGHT",   0, 1, &phl->bap.w.h);
-  register_float_par(params, "SCORE_CORREL_WEIGHT", 0, 1, &phl->bap.w.r);
-  register_float_par(params, "SCORE_VZEN_WEIGHT",   0, 1, &phl->bap.w.v);
+  register_double_par(params, "SCORE_DOY_WEIGHT",    0, 1, &phl->bap.w.d);
+  register_double_par(params, "SCORE_YEAR_WEIGHT",   0, 1, &phl->bap.w.y);
+  register_double_par(params, "SCORE_CLOUD_WEIGHT",  0, 1, &phl->bap.w.c);
+  register_double_par(params, "SCORE_HAZE_WEIGHT",   0, 1, &phl->bap.w.h);
+  register_double_par(params, "SCORE_CORREL_WEIGHT", 0, 1, &phl->bap.w.r);
+  register_double_par(params, "SCORE_VZEN_WEIGHT",   0, 1, &phl->bap.w.v);
 
   register_char_par(params,    "DIR_LSP", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
   register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, &phl->con.fname, &phl->con.n);
@@ -1559,9 +1559,9 @@ double tol = 5e-3;
       if (phl->bap.w.v > 0) phl->bap.w.t += phl->bap.w.v;
     }
 
-    if (phl->bap.w.d == 0 && phl->bap.w.y == 0 &&
-        phl->bap.w.c == 0 && phl->bap.w.h == 0 &&
-        phl->bap.w.r == 0 && phl->bap.w.v == 0){
+    if (dequal(phl->bap.w.d, 0) && dequal(phl->bap.w.y, 0) &&
+        dequal(phl->bap.w.c, 0) && dequal(phl->bap.w.h, 0) &&
+        dequal(phl->bap.w.r, 0) && dequal(phl->bap.w.v, 0)){
       printf("ALL scoring weights are zero. This is not allowed. "
              "At least, the seasonal score should be > 0.\n"); return FAILURE;}
 
@@ -1576,11 +1576,6 @@ double tol = 5e-3;
       phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
-    }
-
-    if (!phl->bap.select && phl->bap.oinf){
-      phl->bap.oinf = false;
-      printf("Warning: will not output INF product as weighting observations was selected. Proceed.\n");
     }
 
     // choose products

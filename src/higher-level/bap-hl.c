@@ -423,7 +423,7 @@ int t;
     if (!ard[t].msk[p] || 
        (!bap->offsea && score[t].d < 0.01)) continue;
 
-    if (fequal(++n, 1)){
+    if (dequal(++n, 1)){
       m = score[t].h;
     } else {
       var_recurrence(score[t].h, &m, &v, n);
@@ -628,8 +628,8 @@ float vz;
     +** *****************************************************************/
 
     // doesn't make sense, but to be sure
-    if (bap->w.d == 0) score[t].d = 0.0;
-    if (bap->w.y == 0) score[t].y = 0.0;
+    if (dequal(bap->w.d, 0)) score[t].d = 0.0;
+    if (dequal(bap->w.y, 0)) score[t].y = 0.0;
 
     // cloud distance score
     if (bap->w.c > 0){
@@ -679,13 +679,13 @@ float vz;
       if (bap->w.v > 0) score[t].t *= (bap->w.v * score[t].v);
     }
     
-    //printf("d weight %f, score %f\n", bap->w.d, score[t].d);
-    //printf("y weight %f, score %f\n", bap->w.y, score[t].y);
-    //printf("c weight %f, score %f\n", bap->w.c, score[t].c);
-    //printf("h weight %f, score %f\n", bap->w.h, score[t].h);
-    //printf("r weight %f, score %f\n", bap->w.r, score[t].r);
-    //printf("v weight %f, score %f\n", bap->w.v, score[t].v);
-    //printf("t            score %f\n",           score[t].t);
+    //printf("d weight %lf, score %lf\n", bap->w.d, score[t].d);
+    //printf("y weight %lf, score %lf\n", bap->w.y, score[t].y);
+    //printf("c weight %lf, score %lf\n", bap->w.c, score[t].c);
+    //printf("h weight %lf, score %lf\n", bap->w.h, score[t].h);
+    //printf("r weight %lf, score %lf\n", bap->w.r, score[t].r);
+    //printf("v weight %lf, score %lf\n", bap->w.v, score[t].v);
+    //printf("t            score %lf\n",           score[t].t);
 
   }
 
@@ -710,7 +710,7 @@ float vz;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int bap_compositing(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap){
 int t, max_t = -1, n = 0, b;
-float max_score = -1;
+double max_score = -1;
 
 
   // go through time
@@ -802,14 +802,15 @@ float max_score = -1;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int bap_weighting(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap){
 int t, b, n = 0;
-float sum_t = 0;
-float sum_d = 0, sum_y = 0;
-float sum_c = 0, sum_h = 0;
-float sum_r = 0, sum_v = 0;
+double *sum_reflection = NULL;
+double sum_total = 0;
+double sum_d = 0, sum_y = 0;
+double sum_c = 0, sum_h = 0;
+double sum_r = 0, sum_v = 0;
 
 
-  // initialize nodata
-  for (b=0; b<nb; b++) l3->bap[b][p] = 0;
+  // allocate 0-initialized
+  alloc((void**)&sum_reflection, nb, sizeof(double));
 
   // go through time
   for (t=0; t<nt; t++){
@@ -822,8 +823,8 @@ float sum_r = 0, sum_v = 0;
     if (!bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
 
 
-    for (b=0; b<nb; b++) l3->bap[b][p] += (ard[t].dat[b][p] * score[t].t);
-    sum_t += score[t].t;
+    for (b=0; b<nb; b++) sum_reflection[b] += (ard[t].dat[b][p] * score[t].t);
+    sum_total += score[t].t;
 
     sum_d += score[t].d;
     sum_y += score[t].y;
@@ -833,20 +834,34 @@ float sum_r = 0, sum_v = 0;
     sum_v += score[t].v;
 
     n++;
-    //printf("score_c: %f, sum_c: %f, n: %d\n", score[t].c, sum_c, n);
+    
+    //printf("score_total: %lf, sum_total: %lf, n: %d\n", score[t].t, sum_total, n);
+    //printf("score_d:     %lf, sum_d:     %lf, n: %d\n", score[t].d, sum_d,     n);
+    //printf("score_y:     %lf, sum_y:     %lf, n: %d\n", score[t].y, sum_y,     n);
+    //printf("score_c:     %lf, sum_c:     %lf, n: %d\n", score[t].c, sum_c,     n);
+    //printf("score_h:     %lf, sum_h:     %lf, n: %d\n", score[t].h, sum_h,     n);
+    //printf("score_r:     %lf, sum_r:     %lf, n: %d\n", score[t].r, sum_r,     n);
+    //printf("score_v:     %lf, sum_v:     %lf, n: %d\n", score[t].v, sum_v,     n);
 
   }
 
-  if (sum_t > 0){
+  if (sum_total > 0){
 
     // weighted average
     if (l3->bap != NULL){
-      for (b=0; b<nb; b++) l3->bap[b][p] /= sum_t;
+      for (b=0; b<nb; b++) sum_reflection[b] /= sum_total;
     }
-    
+
+    // information    
+    if (l3->inf != NULL){
+      if ((sum_c / n) < 0.01) l3->inf[_INF_QAI_][p] |= (short)(1 << _QAI_BIT_CLD_);
+      l3->inf[_INF_NUM_][p] = n;
+      for (b=2; b<_INF_LENGTH_; b++) l3->inf[b][p] = nodata;
+    }
+
     // compositing scores
     if (l3->scr != NULL){
-      l3->scr[_SCR_TOTAL_][p]    = (short) (sum_t / n * 10000);
+      l3->scr[_SCR_TOTAL_][p]    = (short) (sum_total / n * 10000);
       if (!water){
         l3->scr[_SCR_DOY_][p]    = (short) (sum_d / n * 10000);
         l3->scr[_SCR_YEAR_][p]   = (short) (sum_y / n * 10000);
@@ -861,7 +876,13 @@ float sum_r = 0, sum_v = 0;
   } else {
 
     if (l3->bap != NULL){
-      for (b=0; b<nb; b++) l3->bap[b][p] = nodata;
+      for (b=0; b<nb; b++) sum_reflection[b] = nodata;
+    }
+
+    if (l3->inf != NULL){
+      l3->inf[_INF_QAI_][p] = 1;
+      l3->inf[_INF_NUM_][p] = 0;
+      for (b=2; b<_INF_LENGTH_; b++) l3->inf[b][p] = nodata;
     }
 
     if (l3->scr != NULL){
@@ -870,6 +891,7 @@ float sum_r = 0, sum_v = 0;
 
   }
 
+  for (b=0; b<nb; b++) l3->bap[b][p] = (short)sum_reflection[b];
 
   return SUCCESS;
 }
