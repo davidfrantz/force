@@ -893,6 +893,8 @@ double sum_r = 0, sum_v = 0;
 
   for (b=0; b<nb; b++) l3->bap[b][p] = (short)sum_reflection[b];
 
+  free((void*)sum_reflection);
+
   return SUCCESS;
 }
 
