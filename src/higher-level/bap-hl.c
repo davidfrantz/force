@@ -855,6 +855,7 @@ double sum_r = 0, sum_v = 0;
     // information    
     if (l3->inf != NULL){
       if ((sum_c / n) < 0.01) l3->inf[_INF_QAI_][p] |= (short)(1 << _QAI_BIT_CLD_);
+      if ((sum_h / n) < 0.01) l3->inf[_INF_QAI_][p] |= (short)(1 << _QAI_BIT_SHD_);
       l3->inf[_INF_NUM_][p] = n;
       for (b=2; b<_INF_LENGTH_; b++) l3->inf[b][p] = nodata;
     }
