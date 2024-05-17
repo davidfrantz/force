@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# a hook that is executed before each commmit (locally)
+# a hook that is executed before each commmit on develop (locally)
 #
 # it ensures that a software version with time stamp
 # uniquely identifies each commmit
