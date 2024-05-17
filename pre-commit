@@ -1,11 +1,17 @@
 #!/bin/bash
 #
-# An example hook script to verify what is about to be committed.
-# Called by "git commit" with no arguments.  The hook should
-# exit with non-zero status after issuing an appropriate message if
-# it wants to stop the commit.
+# a hook that is executed before each commmit (locally)
 #
-# To enable this hook, rename this file to "pre-commit".
+# it ensures that a software version with time stamp
+# uniquely identifies each commmit
+#
+# note: will this cause merge conflicts when 
+# collaborators change the version number or
+# version number is changed on GitHub?
+#
+# this script can be installed with: 
+# ./pre-commit install
+
 
 if [ $# -eq 1 ] && [ "$1" == "install" ]; then
   cp "$0" -t .git/hooks/
@@ -24,3 +30,5 @@ TIME=$(date +"%Y-%m-%d_%H:%M:%S")
 printf "%s:::%s\n" "$VERSION" "$TIME" > "$FILE"
 
 git add "$FILE"
+
+exit 0
