@@ -386,13 +386,10 @@ for i in "$@"; do
   debug "Y_TILE_RANGE = $TYMIN $TYMAX"
 
 
-  # check free RAM
-  MEMORY=$(LANG="C"; free --mega | awk '/^Mem/ { printf("%.0fM\n", $2 * 0.05) }')
-
   # cube the file, spawn multiple jobs for each tile
   export WKT ORIGX ORIGY TILESIZE CHUNKSIZE RES 
   export FINP DOUT COUT INODATA ONODATA RESAMPLE RASTER DATATYPE ATTRIBUTE
-  $PARALLEL_EXE -j $NJOB --memsuspend "$MEMORY" cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
+  $PARALLEL_EXE -j $NJOB cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
 
   # remove the temporary file
   rm "$FTMP"
