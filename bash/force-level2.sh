@@ -146,9 +146,10 @@ function process_this_image(){
         --exclude='LE07*B6_VCID_2.TIF' --exclude='LC08*B11.TIF' --exclude='LC08*B8.TIF' \
         -C "$EXTRACT_IMAGE" &> /dev/null
     if [ ! $? -eq 0 ]; then
+      UNPACK_STATUS="FAIL"
       echo "tar.gz container is corrupt, connection stalled or similar." >> "$FILE_LOG"
-      exit 1
     else 
+      UNPACK_STATUS="SUCCESS"
       echo "Unpacking tar.gz container successful" >> "$FILE_LOG"
     fi
 
@@ -168,9 +169,10 @@ function process_this_image(){
         --exclude='LE07*B6_VCID_2.TIF' --exclude='LC08*B11.TIF' --exclude='LC08*B8.TIF' \
         -C "$EXTRACT_IMAGE" &> /dev/null
     if [ ! $? -eq 0 ]; then
+      UNPACK_STATUS="FAIL"
       echo "tar container is corrupt, connection stalled or similar." >> "$FILE_LOG"
-      exit 1
     else 
+      UNPACK_STATUS="SUCCESS"
       echo "Unpacking tar container successful" >> "$FILE_LOG"
     fi
 
@@ -184,48 +186,60 @@ function process_this_image(){
 
     timeout -k "$TIMEOUT_ZIP" 10m unzip -qq -d "$DIR_TEMP" "$FILE_IMAGE" &>/dev/null
     if [ ! $? -eq 0 ]; then
+      UNPACK_STATUS="FAIL"
       echo "zip container is corrupt, connection stalled or similar." >> "$FILE_LOG"
-      exit 1
     else 
+      UNPACK_STATUS="SUCCESS"
       echo "Unpacking zip container successful" >> "$FILE_LOG"
+      dir_not_found "$EXTRACT_IMAGE" &>>"$FILE_LOG"
     fi
-
-    dir_not_found "$EXTRACT_IMAGE" &>>"$FILE_LOG"
 
   # already unpacked
   else
 
     unpacked=false
+    UNPACK_STATUS="SUCCESS"
     EXTRACT_IMAGE="$FILE_IMAGE"
     dir_not_found "$FILE_IMAGE" &>>"$FILE_LOG"
     echo "Image is already unpacked" >> "$FILE_LOG"
 
   fi
 
+  debug "UNPACK_STATUS" "$UNPACK_STATUS"
   debug "unpacked: $unpacked"
   debug "EXTRACT_IMAGE: $EXTRACT_IMAGE"
 
+  if [ "$UNPACK_STATUS" == "SUCCESS" ]; then
 
-  {
-    echo ""
-    echo "Start core processing"
-    echo "-----------------------------------------------------------"
-    echo ""
-  } >> "$FILE_LOG"
+    {
+      echo ""
+      echo "Start core processing"
+      echo "-----------------------------------------------------------"
+      echo ""
+    } >> "$FILE_LOG"
 
-  # process
-  if $FORCE_L2PS_CORE_EXE "$EXTRACT_IMAGE" "$FILE_PRM" &>>"$FILE_LOG"; then
-    STATUS="DONE"
-  else 
+    # process
+    if $FORCE_L2PS_CORE_EXE "$EXTRACT_IMAGE" "$FILE_PRM" &>> "$FILE_LOG"; then
+      STATUS="DONE"
+    else 
+      STATUS="FAIL"
+    fi
+
+    debug "STATUS: $STATUS"
+
+    {
+      echo ""
+      echo "-----------------------------------------------------------"
+      echo "Core processing signaled $STATUS"
+    }  >> "$FILE_LOG"
+
+  else
+
     STATUS="FAIL"
+
   fi
 
-  debug "STATUS: $STATUS"
-
   {
-    echo ""
-    echo "-----------------------------------------------------------"
-    echo "Core processing signaled $STATUS"
     echo ""
     echo "End of processing: $(date +"%Y-%m-%d %H:%M:%S")"
     echo "May the FORCE be with you!"
