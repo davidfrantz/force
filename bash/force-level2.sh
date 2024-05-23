@@ -97,6 +97,11 @@ export -f get_parameter
 
 function process_this_image(){
 
+  # dummy test to enable linting through pipe
+  if [ $# -eq 1 ] && [ "$1" == "TEST" ]; then
+    exit 0;
+  fi
+
   FILE_IMAGE="$1"
   FILE_PRM="$2"
   DIR_LOG="$3"
@@ -363,10 +368,11 @@ fi
 FILE_NPROC="$DIR_TEMP/cpu-$TIME"
 echo "$NPROC" > "$FILE_NPROC"
 
+process_this_image "TEST" # dummy call to enable linting through pipe
+
 echo "${QUEUE[*]}" | \
   $PARALLEL_EXE -j "$FILE_NPROC" --delay "$DELAY" --eta \
   process_this_image {} "$FILE_PRM" "$DIR_LOG" "$DIR_TEMP" "$TIMEOUT_ZIP" "$FILE_QUEUE"
-process_this_image 1 "$FILE_PRM" "$DIR_LOG" "$DIR_TEMP" "$TIMEOUT_ZIP" "$FILE_QUEUE"
 
 rm "$FILE_NPROC"
 
