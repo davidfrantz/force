@@ -227,19 +227,17 @@ function process_this_image(){
 
     debug "STATUS: $STATUS"
 
-    {
-      echo ""
-      echo "-----------------------------------------------------------"
-      echo "Core processing signaled $STATUS"
-    }  >> "$FILE_LOG"
-
   else
 
+    echo "could not attempt to process" >> "$FILE_LOG"
     STATUS="FAIL"
 
   fi
 
   {
+    echo ""
+    echo "-----------------------------------------------------------"
+    echo "Core processing signaled $STATUS"
     echo ""
     echo "End of processing: $(date +"%Y-%m-%d %H:%M:%S")"
     echo "May the FORCE be with you!"
