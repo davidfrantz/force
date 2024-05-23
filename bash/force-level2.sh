@@ -99,7 +99,7 @@ function process_this_image(){
 
   # dummy test to enable linting through pipe
   if [ $# -eq 1 ] && [ "$1" == "TEST" ]; then
-    exit 0;
+    return 0;
   fi
 
   FILE_IMAGE="$1"
