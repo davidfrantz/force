@@ -229,7 +229,15 @@ function process_this_image(){
 
   else
 
-    echo "could not attempt to process" >> "$FILE_LOG"
+    {
+      echo ""
+      echo "Start core processing"
+      echo "-----------------------------------------------------------"
+      echo ""
+      echo "could not attempt to process"
+      echo ""
+    } >> "$FILE_LOG"
+
     STATUS="FAIL"
 
   fi
