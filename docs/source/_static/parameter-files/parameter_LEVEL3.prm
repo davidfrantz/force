@@ -222,6 +222,13 @@ Y_FACTOR = 0.75
 # Should selection or weighting be performed?
 # Type: Logical. Valid values: {TRUE,FALSE}
 SELECT = TRUE
+# How to combine individual scores?
+# In the default behaviour, the individual scores are summed up.
+# You can also choose to multiply the scores. This applies a 
+# strong penalty on an observation that performs poor in a single score.
+# The weigting of scores is applied in both cases.
+# Type: Character. Valid values: {ADDITIVE,MULTIPLICATIVE}
+COMBINE_SCORES = ADDITIVE
 # These parameters specify the function values used for fitting the DOY
 # scoring functions. The function type is automatically chosen from the 
 # given values, i.e.
@@ -251,6 +258,16 @@ DOY_STATIC = 120 180 240
 # parts of the year are selected.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OFF_SEASON = FALSE
+# This parameter specifies whether observations with a cloud score of less than 1%
+# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,
+# it will include clouds if there is no better observation.
+# Type: Logical. Valid values: {TRUE,FALSE}
+USE_CLOUDY = FALSE
+# This parameter specifies whether observations with a haze score of less than 1%
+# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,
+# it will include haze if there is no better observation.
+# Type: Logical. Valid values: {TRUE,FALSE}
+USE_HAZY = FALSE
 # This parameter controls the strength of the DOY score.
 # 0 disables the use of this score.
 # Type: Float. Valid values: [0,1]

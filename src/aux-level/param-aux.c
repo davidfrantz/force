@@ -1499,7 +1499,7 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
     fprintf(fp, "# Harmonic interpolation can be used as a simple near-real time monitoring component.\n");
     fprintf(fp, "# Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF,HARMONIC}\n");
   }
-  fprintf(fp, "INTERPOLATE = RBF\n");
+  fprintf(fp, "INTERPOLATE = NONE\n");
 
   if (verbose){
     fprintf(fp, "# Max temporal distance for the moving average filter in days. For each\n");

@@ -156,6 +156,10 @@ MULTI_SCATTERING = TRUE
 # daily tables do not exist or if there is no valid daily value.
 # Type: full directory path
 DIR_WVPLUT = NULL
+# This indicates if the water vapor climatology tables are permitted (FALSE),
+# or if only daily tables are allowed (TRUE)
+# Type: Logical. Valid values: {TRUE,FALSE}
+STRICT_WATER_VAPOR = FALSE
 # This specifies a global value for atmospheric water vapor content in
 # g cm-2. This parameter can be a dummy value to quickly process an image
 # without needing to generate a water vapor database. Note that especially

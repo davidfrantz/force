@@ -256,7 +256,7 @@ OUTPUT_RMS = FALSE
 # Radial Basis Function or harmonic Interpolation.
 # Harmonic interpolation can be used as a simple near-real time monitoring component.
 # Type: Character. Valid values: {NONE,LINEAR,MOVING,RBF,HARMONIC}
-INTERPOLATE = RBF
+INTERPOLATE = NONE
 # Max temporal distance for the moving average filter in days. For each
 # interpolation date, MOVING_MAX days before and after are considered.
 # Type: Integer. Valid range: [1,365]
