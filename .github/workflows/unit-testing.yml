@@ -2,8 +2,7 @@ name: unit-testing
 
 on:
   push:
-    branches:
-        - '*'
+    branches: ['*']
   release:
     types: [published]
   repository_dispatch:
