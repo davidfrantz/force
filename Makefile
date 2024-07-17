@@ -440,7 +440,7 @@ test_utils-cl: temp cross $(DU)/unity/unity.c $(DU)/test_utils-cl.c
 
 units := $(TU)/*
 
-unit-testing: unit-tests
+unit-testing:
 	$(foreach unit,$(units),$(unit))
 
 ### dummy code for testing stuff  

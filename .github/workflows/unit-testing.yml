@@ -13,6 +13,8 @@ jobs:
     name: Compile and run unit tests
     runs-on: ubuntu-latest
     steps:
+      - name: Compile all units
+        run: make unit-tests
       - name: Test all units
         run: make unit-testing
       - name: Clean
