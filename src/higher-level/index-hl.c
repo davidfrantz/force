@@ -40,6 +40,7 @@ void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int n
 void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
 void index_unmixed(ard_t *ard, small *mask_, tsa_t *ts, int nc, int nt, short nodata, par_sma_t *sma, aux_emb_t *endmember);
+void index_cont_remove(ard_t *ard, small *mask_, tsa_t *ts, int b_, int b1, int b2, float w_, float w1, float w2, int nc, int nt, short nodata);
 
 
 /** This function computes a spectral index time series, with band method,
