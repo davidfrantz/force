@@ -15,8 +15,8 @@ jobs:
     container:
       image: davidfrantz/base
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Check out the repo
+        uses: actions/checkout@v4
       - name: Compile all units
         run: make unit-tests
       - name: Test all units
