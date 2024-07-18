@@ -11,7 +11,9 @@ on:
 jobs:
   testing:
     name: Compile and run unit tests
-    runs-on: davidfrantz/base
+    runs-on: ubuntu-latest
+    container:
+      image: davidfrantz/base
     steps:
       - name: Compile all units
         run: make unit-tests
