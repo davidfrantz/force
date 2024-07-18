@@ -2,26 +2,23 @@ name: unit-testing
 
 on:
   push:
-    branches: ['*']
+  pull_request:
   release:
     types: [published]
   repository_dispatch:
     types: [udf-dispatch]
 
+env:
+  IMAGE_NAME: force-unit-test
+
 jobs:
   testing:
-    name: Compile and run unit tests
+    name: Compile in Docker container, and run unit tests
     runs-on: ubuntu-latest
-    container:
-      image: davidfrantz/base
-      volumes:
-        - /__w
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-      - name: Compile all units
-        run: make unit-tests
-      - name: Test all units
-        run: make unit-testing
-      - name: Clean up
-        run: make clean
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      - name: Run unit tests
+        run: docker run --rm -t --user "$(id -u):$(id -g)" $IMAGE_NAME force-unit-testing
