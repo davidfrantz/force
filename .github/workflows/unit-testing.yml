@@ -15,6 +15,8 @@ jobs:
     container:
       image: davidfrantz/base
     steps:
+      - name: cat
+        run: cat Makefile
       - name: Compile all units
         run: make unit-tests
       - name: Test all units
