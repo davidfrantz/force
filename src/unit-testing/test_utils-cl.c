@@ -6,40 +6,38 @@ void setUp(void) { }
 
 void tearDown(void) { }
 
-void test_num_decimal_places_negative_1(void) {
-  int result = num_decimal_places(-5);
-  TEST_ASSERT_EQUAL(1, result);
+void test_num_decimal_places_SingleDigit(void) {
+  TEST_ASSERT_EQUAL_INT(1, num_decimal_places(0);
+  TEST_ASSERT_EQUAL_INT(1, num_decimal_places(5);
 }
 
-void test_num_decimal_places_negative_2(void) {
-  int result = num_decimal_places(-50);
-  TEST_ASSERT_EQUAL(2, result);
+void test_num_decimal_places_MultipleDigit(void) {
+  TEST_ASSERT_EQUAL(2, num_decimal_places(50));
+  TEST_ASSERT_EQUAL(3, num_decimal_places(500));
+  TEST_ASSERT_EQUAL(4, num_decimal_places(5000));
 }
 
-void test_num_decimal_places_positive_1(void) {
-  int result = num_decimal_places(5);
-  TEST_ASSERT_EQUAL(1, result);
+void test_num_decimal_places_NegativeNumbers(void) {
+  TEST_ASSERT_EQUAL(1, num_decimal_places(-5));
+  TEST_ASSERT_EQUAL(2, num_decimal_places(-50));
+  TEST_ASSERT_EQUAL(3, num_decimal_places(-500));
+  TEST_ASSERT_EQUAL(4, num_decimal_places(-5000));
 }
 
-void test_num_decimal_places_positive_2(void) {
-  int result = num_decimal_places(50);
-  TEST_ASSERT_EQUAL(2, result);
-}
-
-void test_num_decimal_places_zero(void) {
-  int result = num_decimal_places(0);
-  TEST_ASSERT_EQUAL(1, result);
+void test_num_decimal_places_LargeNumbers(void) {
+    TEST_ASSERT_EQUAL_INT(10, num_decimal_places(1234567890));
+    TEST_ASSERT_EQUAL_INT(11, num_decimal_places(INT_MAX));
+    TEST_ASSERT_EQUAL_INT(11, num_decimal_places(INT_MIN));
 }
 
 int main(void) {
 
   UNITY_BEGIN();
 
-  RUN_TEST(test_num_decimal_places_negative_1);
-  RUN_TEST(test_num_decimal_places_negative_2);
-  RUN_TEST(test_num_decimal_places_positive_1);
-  RUN_TEST(test_num_decimal_places_positive_2);
-  RUN_TEST(test_num_decimal_places_zero);
+  RUN_TEST(test_num_decimal_places_SingleDigit);
+  RUN_TEST(test_num_decimal_places_MultipleDigit);
+  RUN_TEST(test_num_decimal_places_NegativeNumbers);
+  RUN_TEST(test_num_decimal_places_LargeNumbers);
 
   return UNITY_END();
 
