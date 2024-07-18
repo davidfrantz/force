@@ -484,7 +484,7 @@ bash: temp
 	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
 	cp $(DB)/force-init.sh $(TB)/force-init
 	cp $(DB)/force-datacube-size.sh $(TB)/force-datacube-size
-	cp $(DB)/force-unit-testing.sh $(TU)/force-unit-testing
+	cp $(DB)/force-unit-testing.sh $(TB)/force-unit-testing
 
 external: temp
 	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
