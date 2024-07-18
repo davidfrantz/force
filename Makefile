@@ -78,7 +78,8 @@ FORCE_EXE = force-info force-cube force-higher-level force-import-modis \
             force-procmask force-pyramid force-qai-inflate force-stack \
             force-synthmix force-tabulate-grid force-tile-extent \
             force-tile-finder force-train force-level2-report force-cube-init \
-			force-init force-datacube-size force-hist force-stratified-sample
+			force-init force-datacube-size force-hist force-stratified-sample \
+			force-test/force-unit-testing
 
 FORCE_MISC = force-version.txt force-level2-report.Rmd force-bash-library.sh \
 			force-rstats-library.r
@@ -101,6 +102,7 @@ DP=python
 DR=rstats
 DD=misc
 DM=force-misc
+DT=force-test
 DC=src/cross-level
 DL=src/lower-level
 DH=src/higher-level
@@ -112,24 +114,24 @@ TC=temp-cross
 TL=temp-lower
 TH=temp-higher
 TA=temp-aux
-TU=temp-unit
+TU=$(TB)/$(DT)
 
 
 ### TARGETS
 
-all: temp cross lower higher aux exe
+all: temp cross lower higher aux exe unit-tests
 cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl table_cl gdalopt_cl
 lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
 higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl rsp_hl udf_hl
 aux: param_aux param_train_aux train_aux
 unit-tests: test_utils-cl
 exe: force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
-.PHONY: temp all install install_ bash python rstats misc external clean build check unit-testing
+.PHONY: temp all install install_ bash python rstats misc external clean build check
 
 ### TEMP
 
 temp:
-	mkdir -p $(TB) $(TM) $(TC) $(TL) $(TH) $(TA) $(TU)
+	mkdir -p $(TB) $(TM) $(TU) $(TC) $(TL) $(TH) $(TA)
 
 
 ### CROSS LEVEL COMPILE UNITS
@@ -438,10 +440,6 @@ force-stratified-sample: temp cross $(DA)/_stratified-sample.c
 test_utils-cl: temp cross $(DU)/unity/unity.c $(DU)/test_utils-cl.c
 	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TU)/test_utils-cl $(DU)/test_utils-cl.c $(TC)/*.o $(DU)/unity/unity.c $(LDGDAL) $(LDGSL) $(LDCURL)
 
-units := $(TU)/*
-
-unit-testing:
-	$(foreach unit,$(units),$(unit))
 
 ### dummy code for testing stuff  
 
@@ -453,16 +451,17 @@ dummy: temp cross aux higher src/dummy.c
 
 install_:
 	chmod 0755 $(TB)/*
+	chmod 0755 $(TU)/*
 	cp -a $(TB)/. $(BINDIR)
 
 clean:
-	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA) 
+	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA)
 
 check:
 	$(foreach exec,$(FORCE_EXE),\
       $(if $(shell which $(BINDIR)/$(exec)), \
 	    $(info $(exec) installed), \
-		$(error $(exec) was not installed properly!))) 
+		$(error $(exec) was not installed properly!)))
 	$(foreach miscfiles,$(FORCE_MISC),\
       $(if $(shell ls $(BINDIR)/$(DM)/$(miscfiles) 2> /dev/null), \
 	    $(info $(miscfiles) installed), \
@@ -485,6 +484,7 @@ bash: temp
 	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
 	cp $(DB)/force-init.sh $(TB)/force-init
 	cp $(DB)/force-datacube-size.sh $(TB)/force-datacube-size
+	cp $(DB)/force-unit-testing.sh $(TU)/force-unit-testing
 
 external: temp
 	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
