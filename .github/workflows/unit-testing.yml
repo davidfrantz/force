@@ -15,11 +15,11 @@ jobs:
     container:
       image: davidfrantz/base
     steps:
-      - name: cat
-        run: cat Makefile
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Compile all units
         run: make unit-tests
       - name: Test all units
         run: make unit-testing
-      - name: Clean
+      - name: Clean up
         run: make clean
