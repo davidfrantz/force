@@ -38,20 +38,6 @@ if ! eval ". ${LIB}" >/dev/null 2>&1; then
   exit 1
 fi
 
-
-run_units(){
-  for cmd in "$@"; do
-  echo $cmd
-    if [ -f "$cmd" ] && [ -x "$cmd" ]; then
-      eval $cmd
-    else
-      base_cmd=$(basename "$cmd")
-      echoerr "$base_cmd: not executable"
-    fi
-  done
-}
-export -f run_units
-
 help(){
 cat <<HELP
 
@@ -95,18 +81,42 @@ echo "##########################################################################
 echo ""
 echo "Start of unit testing: $(date +"%Y-%m-%d %H:%M:%S")"
 echo ""
-echo "##########################################################################"
-echo ""
 
 units="$TEST/*"
 debug "$units"
-run_units $units # deliberately no quotes here
+
+echo "$(echo $units | wc -w)" "tests were found."
+echo ""
+echo "##########################################################################"
+echo ""
+
+errors=0
+
+for cmd in $units; do
+
+  echo "Testing $cmd"
+  if ! $cmd; then
+    ((errors++))
+  fi
+  echo ""
+
+done
 
 echo ""
 echo "##########################################################################"
+echo ""
+if [ "$errors" -eq 0 ]; then
+  echo "all tests passed, all OK"
+else 
+  echoerr "$errors test(s) have failed, better get some coffee"
+fi
 echo ""
 echo "End of unit testing: $(date +"%Y-%m-%d %H:%M:%S")"
 echo ""
 echo "##########################################################################"
 
-exit 0
+if [ "$errors" -eq 0 ]; then
+  exit 0
+else
+  exit 1
+fi
