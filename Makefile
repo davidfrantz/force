@@ -79,7 +79,7 @@ FORCE_EXE = force-info force-cube force-higher-level force-import-modis \
             force-synthmix force-tabulate-grid force-tile-extent \
             force-tile-finder force-train force-level2-report force-cube-init \
 			force-init force-datacube-size force-hist force-stratified-sample \
-			force-test/force-unit-testing
+			force-unit-testing
 
 FORCE_MISC = force-version.txt force-level2-report.Rmd force-bash-library.sh \
 			force-rstats-library.r
