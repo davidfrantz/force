@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: davidfrantz/base
-      options: --user "$(id -u):$(id -g)"
       volumes:
         - /__w
     steps:
