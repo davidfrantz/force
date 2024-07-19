@@ -42,9 +42,9 @@ typedef struct {
 enum { _full_, _stats_, _inter_, _nrt_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _udf_};
 
 
-void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
-void free_ts_dates(tsa_t *ts);
-void compile_ts_dates(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
+void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
+void free_ts_metadata(tsa_t *ts, int ni);
+void compile_ts_metadata(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
 brick_t *compile_tsa_brick(brick_t *ard, int idx, brick_compile_info_t *info, par_hl_t *phl);
 brick_t **compile_tsa(ard_t *ard, tsa_t *tsa, par_hl_t *phl, cube_t *cube, int nt, int nr, int ni, int idx, int *nproduct);
 
@@ -451,8 +451,8 @@ int info_rsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 }
 
 
-/** This function allocates the date arrays
-+++ Free the arrays using free_ts_dates
+/** This function allocates the date & bandname arrays
++++ Free the arrays using free_ts_metadata
 --- ts:       pointer to instantly useable TSA image arrays
 --- phl:      HL parameters
 --- nt:       number of ARD products over time
@@ -460,7 +460,7 @@ int info_rsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
 --- ni:       number of interpolated products over time
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
+void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
 
 
   #ifdef FORCE_DEBUG
@@ -479,15 +479,17 @@ void alloc_ts_dates(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
   if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
   if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
+  if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_04, sizeof(char)); else ts->bandnames_tsi = NULL;
+
   return;
 }
 
 
-/** This function frees the date arrays
+/** This function frees the date & bandname arrays
 --- ts:       pointer to instantly useable TSA image arrays
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void free_ts_dates(tsa_t *ts){
+void free_ts_metadata(tsa_t *ts, int ni){
 
 
   if (ts->d_tss != NULL){ free((void*)ts->d_tss); ts->d_tss = NULL;}
@@ -501,11 +503,13 @@ void free_ts_dates(tsa_t *ts){
   if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
   if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
 
+  if (ts->bandnames_tsi != NULL){ free_2D((void**)ts->bandnames_tsi, ni); ts->bandnames_tsi = NULL;}
+
   return;
 }
 
 
-/** This function compiles the date arrays
+/** This function compiles the date & bandname arrays
 --- ard:      ARD
 --- ts:       pointer to instantly useable TSA image arrays
 --- phl:      HL parameters
@@ -513,15 +517,16 @@ void free_ts_dates(tsa_t *ts){
 --- ni:       number of interpolated products over time
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void compile_ts_dates(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
+void compile_ts_metadata(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
 int t, k;
 date_t date;
+char sensor[NPOW_04];
 
 
   init_date(&date);
   set_date(&date, 2000, 1, 1);
 
-  alloc_ts_dates(ts, phl, nt, nr, ni);
+  alloc_ts_metadata(ts, phl, nt, nr, ni);
 
   if (nt > 0){
     for (t=0; t<nt; t++){
@@ -543,10 +548,13 @@ date_t date;
     for (t=0; t<ni; t++){
       if (phl->tsa.tsi.method == _INT_NONE_){
         date = get_brick_date(ard[t].DAT, 0);
+        get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
       } else {
         set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
+        copy_string(sensor, NPOW_04, "BLEND");
       }
       copy_date(&date, &ts->d_tsi[t]);
+      copy_string(ts->bandnames_tsi[t], NPOW_04, sensor);
     }
   }
 
@@ -896,7 +904,7 @@ brick_compile_info_t *info = NULL;
     printf("%d compiling TSA product errors.\n", error);
     for (o=0; o<nprod; o++) free_brick(TSA[o]);
     free((void*)TSA);
-    free_ts_dates(ts);
+    free_ts_metadata(ts, ni);
     return NULL;
   }
 
@@ -1039,7 +1047,7 @@ short nodata;
   for (idx=0; idx<phl->tsa.n; idx++){
 
     // generate data arrays
-    compile_ts_dates(ard, &ts, phl, nt, nr, ni);
+    compile_ts_metadata(ard, &ts, phl, nt, nr, ni);
 
     // initialize UDFs
     init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
@@ -1080,7 +1088,7 @@ short nodata;
 
 
     // clean date arrays
-    free_ts_dates(&ts);
+    free_ts_metadata(&ts, ni);
 
     // terminate UDFs
     term_pyp(&phl->tsa.pyp);
