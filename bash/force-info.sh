@@ -138,7 +138,7 @@ echo ""
 
 executables="$BIN/force*"
 debug "$executables"
-print_info $executables
+print_info $executables # deliberately no quotes here
 
 echo ""
 echo "##########################################################################"

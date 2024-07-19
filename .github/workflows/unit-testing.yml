@@ -1,0 +1,24 @@
+name: unit-testing
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+  repository_dispatch:
+    types: [udf-dispatch]
+
+env:
+  IMAGE_NAME: force-unit-test
+
+jobs:
+  testing:
+    name: Compile in Docker container, and run unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      - name: Run unit tests
+        run: docker run --rm -t --user "$(id -u):$(id -g)" $IMAGE_NAME force-unit-testing
