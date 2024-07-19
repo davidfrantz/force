@@ -120,10 +120,10 @@ TU=$(TB)/$(DT)
 ### TARGETS
 
 all: temp cross lower higher aux exe unit-tests
-cross: string_cl enum_cl cite_cl utils_cl alloc_cl brick_cl imagefuns_cl param_cl date_cl datesys_cl lock_cl cube_cl dir_cl stats_cl pca_cl tile_cl queue_cl warp_cl sun_cl quality_cl sys_cl konami_cl download_cl read_cl table_cl gdalopt_cl
-lower: table_ll param_ll meta_ll cube_ll equi7_ll glance7_ll atc_ll sunview_ll read_ll radtran_ll topo_ll cloud_ll gas_ll brdf_ll atmo_ll aod_ll resmerge_ll coreg_ll coregfuns_ll acix_ll modwvp_ll
-higher: param_hl progress_hl tasks_hl read-aux_hl read-ard_hl quality_hl bap_hl level3_hl cso_hl tsa_hl index_hl interpolate_hl stm_hl fold_hl standardize_hl pheno_hl polar_hl trend_hl ml_hl texture_hl lsm_hl lib_hl sample_hl imp_hl cfimp_hl l2imp_hl spec-adjust_hl pyp_hl rsp_hl udf_hl
-aux: param_aux param_train_aux train_aux
+cross: string-cl enum-cl cite-cl utils-cl alloc-cl brick-cl imagefuns-cl param-cl date-cl datesys-cl lock-cl cube-cl dir-cl stats-cl pca-cl tile-cl queue-cl warp-cl sun-cl quality-cl sys-cl konami-cl download-cl read-cl table-cl gdalopt-cl
+lower: table-ll param-ll meta-ll cube-ll equi7-ll glance7-ll atc-ll sunview-ll read-ll radtran-ll topo-ll cloud-ll gas-ll brdf-ll atmo-ll aod-ll resmerge-ll coreg-ll coregfuns-ll acix-ll modwvp-ll
+higher: param-hl progress-hl tasks-hl read-aux-hl read-ard-hl quality-hl bap-hl level3-hl cso-hl tsa-hl index-hl interpolate-hl stm-hl fold-hl standardize-hl pheno-hl polar-hl trend-hl ml-hl texture-hl lsm-hl lib-hl sample-hl imp-hl cfimp-hl l2imp-hl spec-adjust-hl pyp-hl rsp-hl udf-hl
+aux: param-aux param_train-aux train-aux
 unit-tests: test_utils-cl test_alloc-cl
 exe: force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
 .PHONY: temp all install install_ bash python rstats misc external clean build check
@@ -136,258 +136,258 @@ temp:
 
 ### CROSS LEVEL COMPILE UNITS
 
-string_cl: temp $(DC)/string-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/string-cl.c -o $(TC)/string_cl.o
+string-cl: temp $(DC)/string-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/string-cl.c -o $(TC)/string-cl.o
 
-enum_cl: temp $(DC)/enum-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/enum-cl.c -o $(TC)/enum_cl.o
+enum-cl: temp $(DC)/enum-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/enum-cl.c -o $(TC)/enum-cl.o
 
-cite_cl: temp $(DC)/cite-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/cite-cl.c -o $(TC)/cite_cl.o
+cite-cl: temp $(DC)/cite-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/cite-cl.c -o $(TC)/cite-cl.o
 
-utils_cl: temp $(DC)/utils-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/utils-cl.c -o $(TC)/utils_cl.o -lm
+utils-cl: temp $(DC)/utils-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/utils-cl.c -o $(TC)/utils-cl.o -lm
 
-alloc_cl: temp $(DC)/alloc-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/alloc-cl.c -o $(TC)/alloc_cl.o
+alloc-cl: temp $(DC)/alloc-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/alloc-cl.c -o $(TC)/alloc-cl.o
 
-brick_cl: temp $(DC)/brick-cl.c
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/brick-cl.c -o $(TC)/brick_cl.o $(LDGDAL)
+brick-cl: temp $(DC)/brick-cl.c
+	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/brick-cl.c -o $(TC)/brick-cl.o $(LDGDAL)
 
-imagefuns_cl: temp $(DC)/imagefuns-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/imagefuns-cl.c -o $(TC)/imagefuns_cl.o
+imagefuns-cl: temp $(DC)/imagefuns-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/imagefuns-cl.c -o $(TC)/imagefuns-cl.o
 
-param_cl: temp $(DC)/param-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/param-cl.c -o $(TC)/param_cl.o
+param-cl: temp $(DC)/param-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/param-cl.c -o $(TC)/param-cl.o
 
-date_cl: temp $(DC)/date-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/date-cl.c -o $(TC)/date_cl.o
+date-cl: temp $(DC)/date-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/date-cl.c -o $(TC)/date-cl.o
 
-datesys_cl : temp $(DC)/datesys-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/datesys-cl.c -o $(TC)/datesys_cl.o
+datesys-cl : temp $(DC)/datesys-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/datesys-cl.c -o $(TC)/datesys-cl.o
 
-lock_cl: temp $(DC)/lock-cl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/lock-cl.c -o $(TC)/lock_cl.o $(LDGDAL)
+lock-cl: temp $(DC)/lock-cl.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/lock-cl.c -o $(TC)/lock-cl.o $(LDGDAL)
 
-sys_cl: temp $(DC)/sys-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/sys-cl.c -o $(TC)/sys_cl.o
+sys-cl: temp $(DC)/sys-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/sys-cl.c -o $(TC)/sys-cl.o
 
-konami_cl: temp $(DC)/konami-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/konami-cl.c -o $(TC)/konami_cl.o
+konami-cl: temp $(DC)/konami-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/konami-cl.c -o $(TC)/konami-cl.o
 
-sun_cl: temp $(DC)/sun-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/sun-cl.c -o $(TC)/sun_cl.o
+sun-cl: temp $(DC)/sun-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/sun-cl.c -o $(TC)/sun-cl.o
 
-cube_cl: temp $(DC)/cube-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/cube-cl.c -o $(TC)/cube_cl.o
+cube-cl: temp $(DC)/cube-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/cube-cl.c -o $(TC)/cube-cl.o
 
-tile_cl: temp $(DC)/tile-cl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/tile-cl.c -o $(TC)/tile_cl.o $(LDGDAL)
+tile-cl: temp $(DC)/tile-cl.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/tile-cl.c -o $(TC)/tile-cl.o $(LDGDAL)
 
-dir_cl: temp $(DC)/dir-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/dir-cl.c -o $(TC)/dir_cl.o
+dir-cl: temp $(DC)/dir-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/dir-cl.c -o $(TC)/dir-cl.o
 
-stats_cl: temp $(DC)/stats-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/stats-cl.c -o $(TC)/stats_cl.o
+stats-cl: temp $(DC)/stats-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/stats-cl.c -o $(TC)/stats-cl.o
 
-pca_cl: temp $(DC)/pca-cl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DC)/pca-cl.c -o $(TC)/pca_cl.o $(LDGSL)
+pca-cl: temp $(DC)/pca-cl.c
+	$(GCC) $(CFLAGS) $(GSL) -c $(DC)/pca-cl.c -o $(TC)/pca-cl.o $(LDGSL)
 
-queue_cl: temp $(DC)/queue-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/queue-cl.c -o $(TC)/queue_cl.o
+queue-cl: temp $(DC)/queue-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/queue-cl.c -o $(TC)/queue-cl.o
 
-warp_cl: temp $(DC)/warp-cl.cpp
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/warp-cl.cpp -o $(TC)/warp_cl.o $(LDGDAL)
+warp-cl: temp $(DC)/warp-cl.cpp
+	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/warp-cl.cpp -o $(TC)/warp-cl.o $(LDGDAL)
 
-quality_cl: temp $(DC)/quality-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/quality-cl.c -o $(TC)/quality_cl.o
+quality-cl: temp $(DC)/quality-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/quality-cl.c -o $(TC)/quality-cl.o
 
-download_cl: temp $(DC)/download-cl.c
-	$(GCC) $(CFLAGS) $(CURL) -c $(DC)/download-cl.c -o $(TC)/download_cl.o $(LDCURL)
+download-cl: temp $(DC)/download-cl.c
+	$(GCC) $(CFLAGS) $(CURL) -c $(DC)/download-cl.c -o $(TC)/download-cl.o $(LDCURL)
 
-read_cl: temp $(DC)/read-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/read-cl.c -o $(TC)/read_cl.o
+read-cl: temp $(DC)/read-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/read-cl.c -o $(TC)/read-cl.o
 
-table_cl: temp $(DC)/table-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/table-cl.c -o $(TC)/table_cl.o
+table-cl: temp $(DC)/table-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/table-cl.c -o $(TC)/table-cl.o
 
-gdalopt_cl: temp $(DC)/gdalopt-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/gdalopt-cl.c -o $(TC)/gdalopt_cl.o
+gdalopt-cl: temp $(DC)/gdalopt-cl.c
+	$(GCC) $(CFLAGS) -c $(DC)/gdalopt-cl.c -o $(TC)/gdalopt-cl.o
 
 
 ### LOWER LEVEL COMPILE UNITS
 
-table_ll: temp $(DL)/table-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/table-ll.c -o $(TL)/table_ll.o
+table-ll: temp $(DL)/table-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/table-ll.c -o $(TL)/table-ll.o
 
-param_ll: temp $(DL)/param-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/param-ll.c -o $(TL)/param_ll.o
+param-ll: temp $(DL)/param-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/param-ll.c -o $(TL)/param-ll.o
 
-meta_ll: temp $(DL)/meta-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/meta-ll.c -o $(TL)/meta_ll.o $(LDGDAL)
+meta-ll: temp $(DL)/meta-ll.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/meta-ll.c -o $(TL)/meta-ll.o $(LDGDAL)
 
-atc_ll: temp $(DL)/atc-ll.c
+atc-ll: temp $(DL)/atc-ll.c
 	$(GCC) $(CFLAGS) -c $(DL)/atc-ll.c -o $(TL)/atc.o
 
-sunview_ll: temp $(DL)/sunview-ll.c
+sunview-ll: temp $(DL)/sunview-ll.c
 	$(GCC) $(CFLAGS) -c $(DL)/sunview-ll.c -o $(TL)/sunview.o
 
-read_ll: temp $(DL)/read-ll.c
+read-ll: temp $(DL)/read-ll.c
 	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/read-ll.c -o $(TL)/read.o $(LDGDAL)
 
-brdf_ll: temp $(DL)/brdf-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/brdf-ll.c -o $(TL)/brdf_ll.o
+brdf-ll: temp $(DL)/brdf-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/brdf-ll.c -o $(TL)/brdf-ll.o
 
-geo_ll: temp $(DL)/geo-ll.cpp
-	$(GCC) $(CFLAGS) -c $(DL)/geo-ll.c -o $(TL)/geo_ll.o
+geo-ll: temp $(DL)/geo-ll.cpp
+	$(GCC) $(CFLAGS) -c $(DL)/geo-ll.c -o $(TL)/geo-ll.o
 
-cube_ll: temp $(DL)/cube-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/cube-ll.c -o $(TL)/cube_ll.o
+cube-ll: temp $(DL)/cube-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/cube-ll.c -o $(TL)/cube-ll.o
  
-equi7_ll: temp $(DL)/equi7-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/equi7-ll.c -o $(TL)/equi7_ll.o
+equi7-ll: temp $(DL)/equi7-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/equi7-ll.c -o $(TL)/equi7-ll.o
 
-glance7_ll: temp $(DL)/glance7-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/glance7-ll.c -o $(TL)/glance7_ll.o
+glance7-ll: temp $(DL)/glance7-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/glance7-ll.c -o $(TL)/glance7-ll.o
 
-radtran_ll: temp $(DL)/radtran-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/radtran-ll.c -o $(TL)/radtran_ll.o
+radtran-ll: temp $(DL)/radtran-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/radtran-ll.c -o $(TL)/radtran-ll.o
 
-topo_ll: temp $(DL)/topo-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/topo-ll.c -o $(TL)/topo_ll.o
+topo-ll: temp $(DL)/topo-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/topo-ll.c -o $(TL)/topo-ll.o
 
-cloud_ll: temp $(DL)/cloud-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/cloud-ll.c -o $(TL)/cloud_ll.o
+cloud-ll: temp $(DL)/cloud-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/cloud-ll.c -o $(TL)/cloud-ll.o
 
-gas_ll: temp $(DL)/gas-ll.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/gas-ll.c -o $(TL)/gas_ll.o $(LDGSL)
+gas-ll: temp $(DL)/gas-ll.c
+	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/gas-ll.c -o $(TL)/gas-ll.o $(LDGSL)
 
-atmo_ll: temp $(DL)/atmo-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/atmo-ll.c -o $(TL)/atmo_ll.o $(LDGDAL)
+atmo-ll: temp $(DL)/atmo-ll.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/atmo-ll.c -o $(TL)/atmo-ll.o $(LDGDAL)
 
-aod_ll: temp $(DL)/aod-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) $(GSL) -c $(DL)/aod-ll.c -o $(TL)/aod_ll.o $(LDGDAL) $(LDGSL)
+aod-ll: temp $(DL)/aod-ll.c
+	$(GCC) $(CFLAGS) $(GDAL) $(GSL) -c $(DL)/aod-ll.c -o $(TL)/aod-ll.o $(LDGDAL) $(LDGSL)
 
-resmerge_ll: temp $(DL)/resmerge-ll.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/resmerge-ll.c -o $(TL)/resmerge_ll.o $(LDGSL)
+resmerge-ll: temp $(DL)/resmerge-ll.c
+	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/resmerge-ll.c -o $(TL)/resmerge-ll.o $(LDGSL)
 
-coreg_ll: temp $(DL)/coreg-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/coreg-ll.c -o $(TL)/coreg_ll.o
+coreg-ll: temp $(DL)/coreg-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/coreg-ll.c -o $(TL)/coreg-ll.o
 
-coregfuns_ll: temp $(DL)/coregfuns-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/coregfuns-ll.c -o $(TL)/coregfuns_ll.o
+coregfuns-ll: temp $(DL)/coregfuns-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/coregfuns-ll.c -o $(TL)/coregfuns-ll.o
 
-acix_ll: temp $(DL)/acix-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/acix-ll.c -o $(TL)/acix_ll.o
+acix-ll: temp $(DL)/acix-ll.c
+	$(GCC) $(CFLAGS) -c $(DL)/acix-ll.c -o $(TL)/acix-ll.o
 
- modwvp_ll: temp $(DL)/modwvp-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/modwvp-ll.c -o $(TL)/modwvp_ll.o $(LDGDAL)
+ modwvp-ll: temp $(DL)/modwvp-ll.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/modwvp-ll.c -o $(TL)/modwvp-ll.o $(LDGDAL)
 
  
 ### HIGHER LEVEL COMPILE UNITS
  
-param_hl: temp $(DH)/param-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/param-hl.c -o $(TH)/param_hl.o
+param-hl: temp $(DH)/param-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/param-hl.c -o $(TH)/param-hl.o
 
-progress_hl: temp $(DH)/progress-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/progress-hl.c -o $(TH)/progress_hl.o
+progress-hl: temp $(DH)/progress-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/progress-hl.c -o $(TH)/progress-hl.o
 
-tasks_hl: temp $(DH)/tasks-hl.c
-	$(G11) $(CFLAGS) $(GDAL) $(OPENCV) -c $(DH)/tasks-hl.c -o $(TH)/tasks_hl.o $(LDGDAL) $(LDOPENCV)
+tasks-hl: temp $(DH)/tasks-hl.c
+	$(G11) $(CFLAGS) $(GDAL) $(OPENCV) -c $(DH)/tasks-hl.c -o $(TH)/tasks-hl.o $(LDGDAL) $(LDOPENCV)
 
-read-aux_hl: temp $(DH)/read-aux-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/read-aux-hl.c -o $(TH)/read-aux_hl.o $(LDOPENCV)
+read-aux-hl: temp $(DH)/read-aux-hl.c
+	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/read-aux-hl.c -o $(TH)/read-aux-hl.o $(LDOPENCV)
 
-read-ard_hl: temp $(DH)/read-ard-hl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DH)/read-ard-hl.c -o $(TH)/read-ard_hl.o $(LDGDAL)
+read-ard-hl: temp $(DH)/read-ard-hl.c
+	$(GCC) $(CFLAGS) $(GDAL) -c $(DH)/read-ard-hl.c -o $(TH)/read-ard-hl.o $(LDGDAL)
 
-quality_hl: temp $(DH)/quality-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/quality-hl.c -o $(TH)/quality_hl.o
+quality-hl: temp $(DH)/quality-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/quality-hl.c -o $(TH)/quality-hl.o
 
-index_hl: temp $(DH)/index-hl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/index-hl.c -o $(TH)/index_hl.o $(LDGSL)
+index-hl: temp $(DH)/index-hl.c
+	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/index-hl.c -o $(TH)/index-hl.o $(LDGSL)
 
-interpolate_hl: temp $(DH)/interpolate-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/interpolate-hl.c -o $(TH)/interpolate_hl.o
+interpolate-hl: temp $(DH)/interpolate-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/interpolate-hl.c -o $(TH)/interpolate-hl.o
 
-stm_hl: temp $(DH)/stm-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/stm-hl.c -o $(TH)/stm_hl.o
+stm-hl: temp $(DH)/stm-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/stm-hl.c -o $(TH)/stm-hl.o
 
-fold_hl: temp $(DH)/fold-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/fold-hl.c -o $(TH)/fold_hl.o
+fold-hl: temp $(DH)/fold-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/fold-hl.c -o $(TH)/fold-hl.o
 
-standardize_hl: temp $(DH)/standardize-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/standardize-hl.c -o $(TH)/standardize_hl.o
+standardize-hl: temp $(DH)/standardize-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/standardize-hl.c -o $(TH)/standardize-hl.o
  
 # SPLITS crashes if compiled with C++11
-pheno_hl: temp $(DH)/pheno-hl.cpp
-	$(GPP) $(CFLAGS) $(SPLITS) -c $(DH)/pheno-hl.cpp -o $(TH)/pheno_hl.o $(LDSPLITS)
+pheno-hl: temp $(DH)/pheno-hl.cpp
+	$(GPP) $(CFLAGS) $(SPLITS) -c $(DH)/pheno-hl.cpp -o $(TH)/pheno-hl.o $(LDSPLITS)
 
-polar_hl: temp $(DH)/polar-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/polar-hl.c -o $(TH)/polar_hl.o
+polar-hl: temp $(DH)/polar-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/polar-hl.c -o $(TH)/polar-hl.o
 
-trend_hl: temp $(DH)/trend-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/trend-hl.c -o $(TH)/trend_hl.o
+trend-hl: temp $(DH)/trend-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/trend-hl.c -o $(TH)/trend-hl.o
  
-bap_hl: temp $(DH)/bap-hl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/bap-hl.c -o $(TH)/bap_hl.o $(LDGSL)
+bap-hl: temp $(DH)/bap-hl.c
+	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/bap-hl.c -o $(TH)/bap-hl.o $(LDGSL)
 
-level3_hl: temp $(DH)/level3-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/level3-hl.c -o $(TH)/level3_hl.o
+level3-hl: temp $(DH)/level3-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/level3-hl.c -o $(TH)/level3-hl.o
 
-cso_hl: temp $(DH)/cso-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/cso-hl.c -o $(TH)/cso_hl.o
+cso-hl: temp $(DH)/cso-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/cso-hl.c -o $(TH)/cso-hl.o
 
-tsa_hl: temp $(DH)/tsa-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/tsa-hl.c -o $(TH)/tsa_hl.o
+tsa-hl: temp $(DH)/tsa-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/tsa-hl.c -o $(TH)/tsa-hl.o
 
-ml_hl: temp $(DH)/ml-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/ml-hl.c -o $(TH)/ml_hl.o $(LDOPENCV)
+ml-hl: temp $(DH)/ml-hl.c
+	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/ml-hl.c -o $(TH)/ml-hl.o $(LDOPENCV)
 
-texture_hl: temp $(DH)/texture-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/texture-hl.c -o $(TH)/texture_hl.o $(LDOPENCV)
+texture-hl: temp $(DH)/texture-hl.c
+	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/texture-hl.c -o $(TH)/texture-hl.o $(LDOPENCV)
 
-lsm_hl: temp $(DH)/lsm-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/lsm-hl.c -o $(TH)/lsm_hl.o
+lsm-hl: temp $(DH)/lsm-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/lsm-hl.c -o $(TH)/lsm-hl.o
 
-lib_hl: temp $(DH)/lib-hl.c
-	$(GCC) $(CFLAGS) $(OPENCV) -c $(DH)/lib-hl.c -o $(TH)/lib_hl.o
+lib-hl: temp $(DH)/lib-hl.c
+	$(GCC) $(CFLAGS) $(OPENCV) -c $(DH)/lib-hl.c -o $(TH)/lib-hl.o
 
-sample_hl: temp $(DH)/sample-hl.c
-	$(G11) $(CFLAGS) -c $(DH)/sample-hl.c -o $(TH)/sample_hl.o
+sample-hl: temp $(DH)/sample-hl.c
+	$(G11) $(CFLAGS) -c $(DH)/sample-hl.c -o $(TH)/sample-hl.o
 
-imp_hl: temp $(DH)/improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/improphe-hl.c -o $(TH)/imp_hl.o
+imp-hl: temp $(DH)/improphe-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/improphe-hl.c -o $(TH)/imp-hl.o
  
-cfimp_hl: temp $(DH)/cf-improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/cf-improphe-hl.c -o $(TH)/cfimp_hl.o
+cfimp-hl: temp $(DH)/cf-improphe-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/cf-improphe-hl.c -o $(TH)/cfimp-hl.o
  
-l2imp_hl: temp $(DH)/l2-improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/l2-improphe-hl.c -o $(TH)/l2imp_hl.o
+l2imp-hl: temp $(DH)/l2-improphe-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/l2-improphe-hl.c -o $(TH)/l2imp-hl.o
   
-spec-adjust_hl: temp $(DH)/spec-adjust-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/spec-adjust-hl.c -o $(TH)/spec-adjust_hl.o
+spec-adjust-hl: temp $(DH)/spec-adjust-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/spec-adjust-hl.c -o $(TH)/spec-adjust-hl.o
 
-pyp_hl: temp $(DH)/py-udf-hl.c
-	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-udf-hl.c -o $(TH)/pyp_hl.o $(LDPYTHON)
+pyp-hl: temp $(DH)/py-udf-hl.c
+	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-udf-hl.c -o $(TH)/pyp-hl.o $(LDPYTHON)
 
-rsp_hl: temp $(DH)/r-udf-hl.c
-	$(GCC) $(CFLAGS) $(RSTATS) -c $(DH)/r-udf-hl.c -o $(TH)/rsp_hl.o $(LDRSTATS)
+rsp-hl: temp $(DH)/r-udf-hl.c
+	$(GCC) $(CFLAGS) $(RSTATS) -c $(DH)/r-udf-hl.c -o $(TH)/rsp-hl.o $(LDRSTATS)
 
-udf_hl: temp $(DH)/udf-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/udf-hl.c -o $(TH)/udf_hl.o
+udf-hl: temp $(DH)/udf-hl.c
+	$(GCC) $(CFLAGS) -c $(DH)/udf-hl.c -o $(TH)/udf-hl.o
 
 
 ### AUX COMPILE UNITS
 
-param_aux: temp $(DA)/param-aux.c
-	$(GCC) $(CFLAGS) -c $(DA)/param-aux.c -o $(TA)/param_aux.o
+param-aux: temp $(DA)/param-aux.c
+	$(GCC) $(CFLAGS) -c $(DA)/param-aux.c -o $(TA)/param-aux.o
 
-param_train_aux: temp $(DA)/param-train-aux.c
-	$(GCC) $(CFLAGS) -c $(DA)/param-train-aux.c -o $(TA)/param_train_aux.o
+param_train-aux: temp $(DA)/param-train-aux.c
+	$(GCC) $(CFLAGS) -c $(DA)/param-train-aux.c -o $(TA)/param_train-aux.o
 
-train_aux: temp $(DA)/train-aux.cpp
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DA)/train-aux.cpp -o $(TA)/train_aux.o $(LDOPENCV)
+train-aux: temp $(DA)/train-aux.cpp
+	$(G11) $(CFLAGS) $(OPENCV) -c $(DA)/train-aux.cpp -o $(TA)/train-aux.o $(LDOPENCV)
 
 
 ### EXECUTABLES
