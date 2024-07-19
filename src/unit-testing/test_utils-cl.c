@@ -58,9 +58,9 @@ void test_num_decimal_places_NegativeNumbers(void) {
 }
 
 void test_num_decimal_places_LargeNumbers(void) {
-    TEST_ASSERT_EQUAL_INT(10, num_decimal_places(1234567890));
-    TEST_ASSERT_EQUAL_INT(10, num_decimal_places(INT_MAX));
-    TEST_ASSERT_EQUAL_INT(10, num_decimal_places(INT_MIN));
+  TEST_ASSERT_EQUAL_INT(10, num_decimal_places(1234567890));
+  TEST_ASSERT_EQUAL_INT(10, num_decimal_places(INT_MAX));
+  TEST_ASSERT_EQUAL_INT(10, num_decimal_places(INT_MIN));
 }
 
 int main(void) {
