@@ -397,8 +397,8 @@ SEXP sensors, bandnames;
     for (t=0; t<nt; t++){
       INTEGER(years)[t]  = ts->d_tsi[t].year;
       INTEGER(months)[t] = ts->d_tsi[t].month;
-      INTEGER(days)[t]   = ts->d_tsi[t].day;
-      SET_STRING_ELT(sensors, t, mkChar("BLENDED"));
+      INTEGER(days)[t]   = ts->d_tsi[t].day; 
+      SET_STRING_ELT(sensors, t, mkChar(ts->bandnames_tsi[t]));
     }
 
     SET_STRING_ELT(bandnames, 0, mkChar(idx_name));

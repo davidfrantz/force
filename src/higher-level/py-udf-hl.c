@@ -426,7 +426,7 @@ char bandname[NPOW_10];
       year_[t]  = ts->d_tsi[t].year;
       month_[t] = ts->d_tsi[t].month;
       day_[t]   = ts->d_tsi[t].day;
-      copy_string(sensor_, NPOW_04, "BLEND");
+      copy_string(sensor_, NPOW_04, ts->bandnames_tsi[t]);
       sensor_ += NPOW_04;
     }
 
