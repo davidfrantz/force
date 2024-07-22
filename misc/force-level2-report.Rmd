@@ -468,6 +468,6 @@ fig
 ```
 
 ```{r write-csv, echo = FALSE, warning = FALSE}
-write.csv(data, file = ftable)
+write.csv(data, file = params$ftable)
 ```
 
