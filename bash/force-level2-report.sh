@@ -74,7 +74,7 @@ while :; do
     -h|--help) help ;;
     -v|--version) force_version; exit 0;;
     -i|--info) echo "Generate Level 2 processing report"; exit 0;;
-    -o|--output) OUTPUT="$2"; shift ;;
+    -o|--output) OUTREPORT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -97,18 +97,29 @@ if [ ! -d $LOGDIR ]; then
   echoerr "$LOGDIR does not exist."; help
 fi
 
-if [ -z "$OUTPUT" ]; then
+if [ -z "$OUTREPORT" ]; then
   if [ ! -w $LOGDIR ]; then
     echoerr "$LOGDIR is not writeable."; help
   fi
   TIME=$(date +"%Y%m%d-%H%M%S")
-  OUTPUT="$LOGDIR/FORCE_L2PS_$TIME.html"
+  OUTREPORT="$LOGDIR/FORCE_L2PS_$TIME.html"
 fi
-export OUTPUT=$(readlink -f $OUTPUT) # absolute directory path
-export OUTDIR=`dirname $OUTPUT`;
+
+if [[ $OUTREPORT != *.html ]]; then
+  echoerr "$OUTREPORT extension must be .html"; help
+fi
+OUTREPORT=$(readlink -f "$OUTREPORT") # absolute directory path
+export OUTREPORT
+
+OUTTABLE="${OUTREPORT%.*}.csv"
+export OUTTABLE
+
+OUTDIR=$(dirname "$OUTREPORT")
+export
+
 
 debug "binary directory: $BIN"
 debug "log directory: $LOGDIR"
-debug "output: $OUTPUT"
+debug "output: $OUTREPORT"
 
-$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTPUT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR'))"
+$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTREPORT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR', ftable = '$OUTTABLE'))"
