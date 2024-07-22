@@ -4,6 +4,7 @@ date: "`r Sys.Date()`"
 output: html_document
 params:
   dlog: "log"
+  ftable: NULL
 ---
 
 ```{r load-packages, include = FALSE}
@@ -464,5 +465,9 @@ fig <- plot_ly(data = data,
               x = status, y = ~time, color = ~sensor, type = "box") %>%
       layout(yaxis = list(title = "runtime [minutes]"), boxmode = "group")
 fig
+```
+
+```{r write-csv, echo = FALSE, warning = FALSE}
+write.csv(data, file = ftable)
 ```
 
