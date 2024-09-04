@@ -62,7 +62,7 @@ brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick
 short *gas_transmittance(atc_t *atc, int b, brick_t *WVP, brick_t *QAI);
 void free_wvlut();
 float ozone_amount(float lon, float lat, int doy);
-float water_vapor_from_lut();
+float water_vapor_from_lut(par_ll_t *pl2, atc_t *atc);
 
 #ifdef __cplusplus
 }

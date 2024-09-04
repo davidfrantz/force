@@ -43,7 +43,7 @@ else
   exit 1
 fi
 
-CONST=src/cross-level/const-cl.h
+CONST=src/modules/cross-level/const-cl.h
 
 if [ ! -r $CONST ]; then
   echo "$CONST is not existing/readable"
@@ -51,9 +51,9 @@ if [ ! -r $CONST ]; then
 fi
 
 if [ $enable -eq 1 ]; then
-  sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%\1%' src/cross-level/const-cl.h
+  sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%\1%' src/modules/cross-level/const-cl.h
 elif [ $enable -eq 0 ]; then
-  sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%//\1%' src/cross-level/const-cl.h
+  sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%//\1%' src/modules/cross-level/const-cl.h
 fi
 
 exit 0

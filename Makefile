@@ -3,7 +3,7 @@
 # This file is part of FORCE - Framework for Operational Radiometric 
 # Correction for Environmental monitoring.
 # 
-# Copyright (C) 2013-2022 David Frantz
+# Copyright (C) 2013-2024 David Frantz
 # 
 # FORCE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,486 +22,278 @@
 
 ##########################################################################
 # Modify the following lines to match your needs
+##########################################################################
 
 # Installation directory
 BINDIR=/usr/local/bin
 
 # Libraries
-GDAL=-I/usr/include/gdal -L/usr/lib -Wl,-rpath=/usr/lib
-GSL=-I/usr/include/gsl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
-CURL=-I/usr/include/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/curl -L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
-OPENCV=-I/usr/local/include/opencv4 -L/usr/local/lib -Wl,-rpath=/usr/local/lib
-PYTHON != python3-config --includes 
-PYTHON2 != python3-config --ldflags
-RSTATS1 != R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L'
-RSTATS2 != R CMD config --cppflags
-RSTATS != echo $(RSTATS1) $(RSTATS2)
-#SPLITS=-I/usr/local/include/splits -L/usr/local/lib -Wl,-rpath=/usr/local/lib
+GDAL_INCLUDES = -I/usr/include/gdal
+GDAL_LIBS = -L/usr/lib -lgdal
+GDAL_FLAGS = -Wl,-rpath=/usr/lib
 
-# Linked libs
-LDGDAL=-lgdal
-LDGSL=-lgsl -lgslcblas
-#LDSPLITS=-lsplits -larmadillo
-LDOPENCV=-lopencv_core -lopencv_ml -lopencv_imgproc
-LDCURL=-lcurl
-LDPYTHON != (python3-config --libs --embed || python3-config --libs) | tail -n 1
-LDRSTATS=-lR
+GSL_INCLUDES = -I/usr/include/gsl
+GSL_LIBS = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas
+GSL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 
+CURL_INCLUDES = -I/usr/include/curl -I/usr/include/x86_64-linux-gnu/curl
+CURL_LIBS = -L/usr/lib/x86_64-linux-gnu -lcurl
+CURL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu
+
+OPENCV_INCLUDES = -I/usr/local/include/opencv4
+OPENCV_LIBS = -L/usr/local/lib -lopencv_core -lopencv_ml -lopencv_imgproc
+OPENCV_FLAGS = -Wl,-rpath=/usr/local/lib
+
+PYTHON_INCLUDES = $(shell python3-config --includes)
+PYTHON_LIBS = $(shell (python3-config --ldflags --libs --embed || python3-config --ldflags --libs) | tr -d '\n')
+
+RSTATS_INCLUDES = $(shell R CMD config --cppflags)
+RSTATS_LIBS = $(shell R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L') -lR
+
+INCLUDES = $(GDAL_INCLUDES) $(GSL_INCLUDES) $(CURL_INCLUDES) $(OPENCV_INCLUDES) $(PYTHON_INCLUDES) $(RSTATS_INCLUDES)
+LIBS = $(GDAL_LIBS) $(GSL_LIBS) $(CURL_LIBS) $(OPENCV_LIBS) $(PYTHON_LIBS) $(RSTATS_LIBS)
+FLAGS = $(GDAL_FLAGS) $(GSL_FLAGS) $(CURL_FLAGS) $(OPENCV_FLAGS) $(PYTHON_FLAGS) $(RSTATS_FLAGS)
+
+
+##########################################################################
 # NO! changes below this line (unless you know what to do, then go ahead)
 ##########################################################################
 
+### Compiler
+
+CXX=g++ -std=c++11
+
+# Compilation Flags
+CFLAGS=-O3 -Wall -fopenmp
+#CFLAGS=-g -Wall -fopenmp
+
+##########################################################################
+
+# Directories
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
+
+# Create necessary directories
+$(shell mkdir -p $(OBJDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
+
+# Source Files (modules)
+CROSS_SRC = $(wildcard $(SRCDIR)/modules/cross-level/*.c)
+LOWER_SRC = $(wildcard $(SRCDIR)/modules/lower-level/*.c)
+HIGHER_SRC = $(wildcard $(SRCDIR)/modules/higher-level/*.c)
+AUX_SRC = $(wildcard $(SRCDIR)/modules/aux-level/*.c)
+
+# Source Files (main executables)
+MAIN_AUX_SRC = $(wildcard $(SRCDIR)/exe/aux-level/*.c)
+MAIN_LOWER_SRC = $(wildcard $(SRCDIR)/exe/lower-level/*.c)
+MAIN_HIGHER_SRC = $(wildcard $(SRCDIR)/exe/higher-level/*.c)
+
+# Source Files (test executables)
+TEST_SRC = $(wildcard $(SRCDIR)/tests/*.c)
+
+# Object Files
+CROSS_OBJ = $(patsubst $(SRCDIR)/modules/cross-level/%.c, $(OBJDIR)/%.o, $(CROSS_SRC))
+LOWER_OBJ = $(patsubst $(SRCDIR)/modules/lower-level/%.c, $(OBJDIR)/%.o, $(LOWER_SRC))
+HIGHER_OBJ = $(patsubst $(SRCDIR)/modules/higher-level/%.c, $(OBJDIR)/%.o, $(HIGHER_SRC))
+AUX_OBJ = $(patsubst $(SRCDIR)/modules/aux-level/%.c, $(OBJDIR)/%.o, $(AUX_SRC))
+
+# Main executables
+MAIN_AUX_EXE = $(patsubst $(SRCDIR)/exe/aux-level/%.c, $(BINDIR)/%, $(MAIN_AUX_SRC))
+MAIN_LOWER_EXE = $(patsubst $(SRCDIR)/exe/lower-level/%.c, $(BINDIR)/%, $(MAIN_LOWER_SRC))
+MAIN_HIGHER_EXE = $(patsubst $(SRCDIR)/exe/higher-level/%.c, $(BINDIR)/%, $(MAIN_HIGHER_SRC))
+
+# Test executables
+TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
+
+# Dependencies
+DEP = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
+
+# Targets
+all: exe tests
+exe: $(MAIN_AUX_EXE) $(MAIN_LOWER_EXE) $(MAIN_HIGHER_EXE)
+tests: $(TEST_EXE)
+dev: $(BINDIR)/force-stratified-sample # specific target for development
+#tests: test_utils-cl test_alloc-cl
+#exe: force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
+#all: temp cross lower higher aux exe unit-tests
+#.PHONY: temp all install install_ bash python rstats misc external clean build check
+
+# Include dependencies
+-include $(DEP)
+
+
+print-vars:
+	@echo "exe source files: $(TEST_SRC)"
+	@echo "exe program files: $(TEST_EXE)"
+	@echo "Object files: $(CROSS_OBJ)"
+	@echo "Compiler flags: $(CFLAGS)"
+
+##########################################################################
+
+# Modules
+$(OBJDIR)/%.o: $(SRCDIR)/modules/cross-level/%.c
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/modules/lower-level/%.c
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/modules/higher-level/%.c
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/modules/aux-level/%.c
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
+
+##########################################################################
+
+
 ### DEPENDENCIES
 
-EXECUTABLES = gcc g++ \
-              parallel \
-              gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
-              gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
-              gdal_edit.py gdal_calc.py gdal-config \
-              ogrinfo ogr2ogr \
-              gsl-config curl-config \
-              unzip tar lockfile-create lockfile-remove rename dos2unix \
-              python3 pip3 \
-			  R \
-			  landsatlinks \
-              opencv_version 
+#EXECUTABLES = gcc g++ \
+#              parallel \
+#              gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
+#              gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
+#              gdal_edit.py gdal_calc.py gdal-config \
+#              ogrinfo ogr2ogr \
+#              gsl-config curl-config \
+#              unzip tar lockfile-create lockfile-remove rename dos2unix \
+#              python3 pip3 \
+#		       R \
+#			  landsatlinks \
+#              opencv_version 
 
-OK := $(foreach exec,$(EXECUTABLES),\
-        $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
+#OK := $(foreach exec,$(EXECUTABLES),\
+#        $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
 
 
 ### EXECUTABLES AND MISC FILES TO BE CHECKED
 
-FORCE_EXE = force-info force-cube force-higher-level force-import-modis \
-            force-l2ps force-level1-csd force-level1-landsat \
-            force-level2 force-lut-modis \
-            force-magic-parameters force-mdcp force-mosaic force-parameter \
-            force-procmask force-pyramid force-qai-inflate force-stack \
-            force-synthmix force-tabulate-grid force-tile-extent \
-            force-tile-finder force-train force-level2-report force-cube-init \
-			force-init force-datacube-size force-hist force-stratified-sample \
-			force-unit-testing
+#FORCE_EXE = force-info force-cube force-higher-level force-import-modis \
+#            force-l2ps force-level1-csd force-level1-landsat \
+#            force-level2 force-lut-modis \
+#            force-magic-parameters force-mdcp force-mosaic force-parameter \
+#            force-procmask force-pyramid force-qai-inflate force-stack \
+#            force-synthmix force-tabulate-grid force-tile-extent \
+#            force-tile-finder force-train force-level2-report force-cube-init \
+#			force-init force-datacube-size force-hist force-stratified-sample \
+#			force-unit-testing
 
-FORCE_MISC = force-version.txt force-level2-report.Rmd force-bash-library.sh \
-			force-rstats-library.r
+#FORCE_MISC = force-version.txt force-level2-report.Rmd force-bash-library.sh \
+#			force-rstats-library.r
 
 
-### COMPILER
-
-GCC=gcc
-GPP=g++
-G11=g++ -std=c++11
-
-CFLAGS=-O3 -Wall -fopenmp
-#CFLAGS=-g -Wall -fopenmp
 
 
 ### DIRECTORIES
 
-DB=bash
-DP=python
-DR=rstats
-DD=misc
-DM=force-misc
-DT=force-test
-DC=src/cross-level
-DL=src/lower-level
-DH=src/higher-level
-DA=src/aux-level
-DU=src/unit-testing
-TB=temp-bin
-TM=$(TB)/$(DM)
-TC=temp-cross
-TL=temp-lower
-TH=temp-higher
-TA=temp-aux
-TU=$(TB)/$(DT)
-
-
-### TARGETS
-
-all: temp cross lower higher aux exe unit-tests
-cross: string-cl enum-cl cite-cl utils-cl alloc-cl brick-cl imagefuns-cl param-cl date-cl datesys-cl lock-cl cube-cl dir-cl stats-cl pca-cl tile-cl queue-cl warp-cl sun-cl quality-cl sys-cl konami-cl download-cl read-cl table-cl gdalopt-cl
-lower: table-ll param-ll meta-ll cube-ll equi7-ll glance7-ll atc-ll sunview-ll read-ll radtran-ll topo-ll cloud-ll gas-ll brdf-ll atmo-ll aod-ll resmerge-ll coreg-ll coregfuns-ll acix-ll modwvp-ll
-higher: param-hl progress-hl tasks-hl read-aux-hl read-ard-hl quality-hl bap-hl level3-hl cso-hl tsa-hl index-hl interpolate-hl stm-hl fold-hl standardize-hl pheno-hl polar-hl trend-hl ml-hl texture-hl lsm-hl lib-hl sample-hl imp-hl cfimp-hl l2imp-hl spec-adjust-hl pyp-hl rsp-hl udf-hl
-aux: param-aux param_train-aux train-aux
-unit-tests: test_utils-cl test_alloc-cl
-exe: force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
-.PHONY: temp all install install_ bash python rstats misc external clean build check
-
-### TEMP
-
-temp:
-	mkdir -p $(TB) $(TM) $(TU) $(TC) $(TL) $(TH) $(TA)
-
-
-### CROSS LEVEL COMPILE UNITS
-
-string-cl: temp $(DC)/string-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/string-cl.c -o $(TC)/string-cl.o
-
-enum-cl: temp $(DC)/enum-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/enum-cl.c -o $(TC)/enum-cl.o
-
-cite-cl: temp $(DC)/cite-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/cite-cl.c -o $(TC)/cite-cl.o
-
-utils-cl: temp $(DC)/utils-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/utils-cl.c -o $(TC)/utils-cl.o -lm
-
-alloc-cl: temp $(DC)/alloc-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/alloc-cl.c -o $(TC)/alloc-cl.o
-
-brick-cl: temp $(DC)/brick-cl.c
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/brick-cl.c -o $(TC)/brick-cl.o $(LDGDAL)
-
-imagefuns-cl: temp $(DC)/imagefuns-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/imagefuns-cl.c -o $(TC)/imagefuns-cl.o
-
-param-cl: temp $(DC)/param-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/param-cl.c -o $(TC)/param-cl.o
-
-date-cl: temp $(DC)/date-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/date-cl.c -o $(TC)/date-cl.o
-
-datesys-cl : temp $(DC)/datesys-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/datesys-cl.c -o $(TC)/datesys-cl.o
-
-lock-cl: temp $(DC)/lock-cl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/lock-cl.c -o $(TC)/lock-cl.o $(LDGDAL)
-
-sys-cl: temp $(DC)/sys-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/sys-cl.c -o $(TC)/sys-cl.o
-
-konami-cl: temp $(DC)/konami-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/konami-cl.c -o $(TC)/konami-cl.o
-
-sun-cl: temp $(DC)/sun-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/sun-cl.c -o $(TC)/sun-cl.o
-
-cube-cl: temp $(DC)/cube-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/cube-cl.c -o $(TC)/cube-cl.o
-
-tile-cl: temp $(DC)/tile-cl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DC)/tile-cl.c -o $(TC)/tile-cl.o $(LDGDAL)
-
-dir-cl: temp $(DC)/dir-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/dir-cl.c -o $(TC)/dir-cl.o
-
-stats-cl: temp $(DC)/stats-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/stats-cl.c -o $(TC)/stats-cl.o
-
-pca-cl: temp $(DC)/pca-cl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DC)/pca-cl.c -o $(TC)/pca-cl.o $(LDGSL)
-
-queue-cl: temp $(DC)/queue-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/queue-cl.c -o $(TC)/queue-cl.o
-
-warp-cl: temp $(DC)/warp-cl.cpp
-	$(G11) $(CFLAGS) $(GDAL) -c $(DC)/warp-cl.cpp -o $(TC)/warp-cl.o $(LDGDAL)
-
-quality-cl: temp $(DC)/quality-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/quality-cl.c -o $(TC)/quality-cl.o
-
-download-cl: temp $(DC)/download-cl.c
-	$(GCC) $(CFLAGS) $(CURL) -c $(DC)/download-cl.c -o $(TC)/download-cl.o $(LDCURL)
-
-read-cl: temp $(DC)/read-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/read-cl.c -o $(TC)/read-cl.o
-
-table-cl: temp $(DC)/table-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/table-cl.c -o $(TC)/table-cl.o
-
-gdalopt-cl: temp $(DC)/gdalopt-cl.c
-	$(GCC) $(CFLAGS) -c $(DC)/gdalopt-cl.c -o $(TC)/gdalopt-cl.o
-
-
-### LOWER LEVEL COMPILE UNITS
-
-table-ll: temp $(DL)/table-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/table-ll.c -o $(TL)/table-ll.o
-
-param-ll: temp $(DL)/param-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/param-ll.c -o $(TL)/param-ll.o
-
-meta-ll: temp $(DL)/meta-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/meta-ll.c -o $(TL)/meta-ll.o $(LDGDAL)
-
-atc-ll: temp $(DL)/atc-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/atc-ll.c -o $(TL)/atc.o
-
-sunview-ll: temp $(DL)/sunview-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/sunview-ll.c -o $(TL)/sunview.o
-
-read-ll: temp $(DL)/read-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/read-ll.c -o $(TL)/read.o $(LDGDAL)
-
-brdf-ll: temp $(DL)/brdf-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/brdf-ll.c -o $(TL)/brdf-ll.o
-
-geo-ll: temp $(DL)/geo-ll.cpp
-	$(GCC) $(CFLAGS) -c $(DL)/geo-ll.c -o $(TL)/geo-ll.o
-
-cube-ll: temp $(DL)/cube-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/cube-ll.c -o $(TL)/cube-ll.o
- 
-equi7-ll: temp $(DL)/equi7-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/equi7-ll.c -o $(TL)/equi7-ll.o
-
-glance7-ll: temp $(DL)/glance7-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/glance7-ll.c -o $(TL)/glance7-ll.o
-
-radtran-ll: temp $(DL)/radtran-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/radtran-ll.c -o $(TL)/radtran-ll.o
-
-topo-ll: temp $(DL)/topo-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/topo-ll.c -o $(TL)/topo-ll.o
-
-cloud-ll: temp $(DL)/cloud-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/cloud-ll.c -o $(TL)/cloud-ll.o
-
-gas-ll: temp $(DL)/gas-ll.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/gas-ll.c -o $(TL)/gas-ll.o $(LDGSL)
-
-atmo-ll: temp $(DL)/atmo-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/atmo-ll.c -o $(TL)/atmo-ll.o $(LDGDAL)
-
-aod-ll: temp $(DL)/aod-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) $(GSL) -c $(DL)/aod-ll.c -o $(TL)/aod-ll.o $(LDGDAL) $(LDGSL)
-
-resmerge-ll: temp $(DL)/resmerge-ll.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DL)/resmerge-ll.c -o $(TL)/resmerge-ll.o $(LDGSL)
-
-coreg-ll: temp $(DL)/coreg-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/coreg-ll.c -o $(TL)/coreg-ll.o
-
-coregfuns-ll: temp $(DL)/coregfuns-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/coregfuns-ll.c -o $(TL)/coregfuns-ll.o
-
-acix-ll: temp $(DL)/acix-ll.c
-	$(GCC) $(CFLAGS) -c $(DL)/acix-ll.c -o $(TL)/acix-ll.o
-
- modwvp-ll: temp $(DL)/modwvp-ll.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DL)/modwvp-ll.c -o $(TL)/modwvp-ll.o $(LDGDAL)
-
- 
-### HIGHER LEVEL COMPILE UNITS
- 
-param-hl: temp $(DH)/param-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/param-hl.c -o $(TH)/param-hl.o
-
-progress-hl: temp $(DH)/progress-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/progress-hl.c -o $(TH)/progress-hl.o
-
-tasks-hl: temp $(DH)/tasks-hl.c
-	$(G11) $(CFLAGS) $(GDAL) $(OPENCV) -c $(DH)/tasks-hl.c -o $(TH)/tasks-hl.o $(LDGDAL) $(LDOPENCV)
-
-read-aux-hl: temp $(DH)/read-aux-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/read-aux-hl.c -o $(TH)/read-aux-hl.o $(LDOPENCV)
-
-read-ard-hl: temp $(DH)/read-ard-hl.c
-	$(GCC) $(CFLAGS) $(GDAL) -c $(DH)/read-ard-hl.c -o $(TH)/read-ard-hl.o $(LDGDAL)
-
-quality-hl: temp $(DH)/quality-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/quality-hl.c -o $(TH)/quality-hl.o
-
-index-hl: temp $(DH)/index-hl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/index-hl.c -o $(TH)/index-hl.o $(LDGSL)
-
-interpolate-hl: temp $(DH)/interpolate-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/interpolate-hl.c -o $(TH)/interpolate-hl.o
-
-stm-hl: temp $(DH)/stm-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/stm-hl.c -o $(TH)/stm-hl.o
-
-fold-hl: temp $(DH)/fold-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/fold-hl.c -o $(TH)/fold-hl.o
-
-standardize-hl: temp $(DH)/standardize-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/standardize-hl.c -o $(TH)/standardize-hl.o
- 
-# SPLITS crashes if compiled with C++11
-pheno-hl: temp $(DH)/pheno-hl.cpp
-	$(GPP) $(CFLAGS) $(SPLITS) -c $(DH)/pheno-hl.cpp -o $(TH)/pheno-hl.o $(LDSPLITS)
-
-polar-hl: temp $(DH)/polar-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/polar-hl.c -o $(TH)/polar-hl.o
-
-trend-hl: temp $(DH)/trend-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/trend-hl.c -o $(TH)/trend-hl.o
- 
-bap-hl: temp $(DH)/bap-hl.c
-	$(GCC) $(CFLAGS) $(GSL) -c $(DH)/bap-hl.c -o $(TH)/bap-hl.o $(LDGSL)
-
-level3-hl: temp $(DH)/level3-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/level3-hl.c -o $(TH)/level3-hl.o
-
-cso-hl: temp $(DH)/cso-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/cso-hl.c -o $(TH)/cso-hl.o
-
-tsa-hl: temp $(DH)/tsa-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/tsa-hl.c -o $(TH)/tsa-hl.o
-
-ml-hl: temp $(DH)/ml-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/ml-hl.c -o $(TH)/ml-hl.o $(LDOPENCV)
-
-texture-hl: temp $(DH)/texture-hl.c
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DH)/texture-hl.c -o $(TH)/texture-hl.o $(LDOPENCV)
-
-lsm-hl: temp $(DH)/lsm-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/lsm-hl.c -o $(TH)/lsm-hl.o
-
-lib-hl: temp $(DH)/lib-hl.c
-	$(GCC) $(CFLAGS) $(OPENCV) -c $(DH)/lib-hl.c -o $(TH)/lib-hl.o
-
-sample-hl: temp $(DH)/sample-hl.c
-	$(G11) $(CFLAGS) -c $(DH)/sample-hl.c -o $(TH)/sample-hl.o
-
-imp-hl: temp $(DH)/improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/improphe-hl.c -o $(TH)/imp-hl.o
- 
-cfimp-hl: temp $(DH)/cf-improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/cf-improphe-hl.c -o $(TH)/cfimp-hl.o
- 
-l2imp-hl: temp $(DH)/l2-improphe-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/l2-improphe-hl.c -o $(TH)/l2imp-hl.o
-  
-spec-adjust-hl: temp $(DH)/spec-adjust-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/spec-adjust-hl.c -o $(TH)/spec-adjust-hl.o
-
-pyp-hl: temp $(DH)/py-udf-hl.c
-	$(GCC) $(CFLAGS) $(PYTHON) -c $(DH)/py-udf-hl.c -o $(TH)/pyp-hl.o $(LDPYTHON)
-
-rsp-hl: temp $(DH)/r-udf-hl.c
-	$(GCC) $(CFLAGS) $(RSTATS) -c $(DH)/r-udf-hl.c -o $(TH)/rsp-hl.o $(LDRSTATS)
-
-udf-hl: temp $(DH)/udf-hl.c
-	$(GCC) $(CFLAGS) -c $(DH)/udf-hl.c -o $(TH)/udf-hl.o
-
-
-### AUX COMPILE UNITS
-
-param-aux: temp $(DA)/param-aux.c
-	$(GCC) $(CFLAGS) -c $(DA)/param-aux.c -o $(TA)/param-aux.o
-
-param_train-aux: temp $(DA)/param-train-aux.c
-	$(GCC) $(CFLAGS) -c $(DA)/param-train-aux.c -o $(TA)/param_train-aux.o
-
-train-aux: temp $(DA)/train-aux.cpp
-	$(G11) $(CFLAGS) $(OPENCV) -c $(DA)/train-aux.cpp -o $(TA)/train-aux.o $(LDOPENCV)
-
-
-### EXECUTABLES
-
-force-parameter: temp cross aux $(DA)/_parameter.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) -o $(TB)/force-parameter $(DA)/_parameter.c $(TC)/*.o $(TA)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV)
-
-force-tile-finder: temp cross $(DA)/_tile-finder.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-tile-finder $(DA)/_tile-finder.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-tabulate-grid: temp cross $(DA)/_tabulate-grid.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-tabulate-grid $(DA)/_tabulate-grid.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-train: temp cross aux $(DA)/_train.cpp
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) -o $(TB)/force-train $(DA)/_train.cpp $(TC)/*.o $(TA)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV)
- 
-force-qai-inflate: temp cross higher $(DA)/_quality-inflate.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(RSTATS) -o $(TB)/force-qai-inflate $(DA)/_quality-inflate.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
- 
-force-l2ps: temp cross lower $(DL)/_level2.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-l2ps $(DL)/_level2.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-higher-level: temp cross higher $(DH)/_higher-level.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/force-higher-level $(DH)/_higher-level.c $(TC)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
-
-force-lut-modis: temp cross lower $(DL)/_lut-modis.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-lut-modis $(DL)/_lut-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-mdcp: temp cross $(DA)/_md_copy.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-mdcp $(DA)/_md_copy.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-stack: temp cross $(DA)/_stack.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stack $(DA)/_stack.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-import-modis: temp cross lower $(DL)/_import-modis.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-import-modis $(DL)/_import-modis.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-cube-init: temp cross lower  $(DL)/_init-cube.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-cube-init $(DL)/_init-cube.c $(TC)/*.o $(TL)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-hist: temp cross $(DA)/_hist.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-hist $(DA)/_hist.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-force-stratified-sample: temp cross $(DA)/_stratified-sample.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TB)/force-stratified-sample $(DA)/_stratified-sample.c $(TC)/*.o $(LDGDAL) $(LDGSL) $(LDCURL)
-
-
-### UNIT TESTING
-
-test_alloc-cl: temp cross $(DU)/unity/unity.c $(DU)/test_alloc-cl.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TU)/test_alloc-cl $(DU)/test_alloc-cl.c $(TC)/*.o $(DU)/unity/unity.c $(LDGDAL) $(LDGSL) $(LDCURL)
-
-test_utils-cl: temp cross $(DU)/unity/unity.c $(DU)/test_utils-cl.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) -o $(TU)/test_utils-cl $(DU)/test_utils-cl.c $(TC)/*.o $(DU)/unity/unity.c $(LDGDAL) $(LDGSL) $(LDCURL)
+#DB=bash
+#DP=python
+#DR=rstats
+#DD=misc
+#DM=force-misc
+#DT=force-test
+#DC=src/cross-level
+#DL=src/lower-level
+#DH=src/higher-level
+#DA=src/aux-level
+#DU=src/unit-testing
+#TB=temp-bin
+#TM=$(TB)/$(DM)
+#TC=temp-cross
+#TL=temp-lower
+#TH=temp-higher
+#TA=temp-aux
+#TU=$(TB)/$(DT)
+
+
+
+
+
+##########################################################################
+
+# Main executables
+
+$(BINDIR)/%: $(SRCDIR)/exe/aux-level/%.c $(CROSS_OBJ) $(AUX_OBJ)
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
+
+$(BINDIR)/%: $(SRCDIR)/exe/lower-level/%.c $(CROSS_OBJ) $(LOWER_OBJ)
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
+
+#$(BINDIR)/%: $(SRCDIR)/exe/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
+$(BINDIR)/%: $(MAIN_HIGHER_EXE) $(CROSS_OBJ) $(HIGHER_OBJ)
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
+
+# Test executables
+
+$(BINDIR)/force-test/%: $(SRCDIR)/tests/%.c $(SRCDIR)/tests/unity/unity.c $(CROSS_OBJ)
+	@echo "Compiling $<..."
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
 
 ### dummy code for testing stuff  
 
-dummy: temp cross aux higher src/dummy.c
-	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
+#dummy: temp cross aux higher src/dummy.c
+#	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
 
-  
+
 ### MISC
 
-install_:
-	chmod 0755 $(TB)/*
-	chmod 0755 $(TU)/*
-	cp -a $(TB)/. $(BINDIR)
+#install_:
+#	chmod 0755 $(TB)/*
+#	chmod 0755 $(TU)/*
+#	cp -a $(TB)/. $(BINDIR)
 
 clean:
-	rm -rf $(TB) $(TC) $(TL) $(TH) $(TA)
+	rm -rf $(OBJDIR) $(BINDIR)
 
-check:
-	$(foreach exec,$(FORCE_EXE),\
-      $(if $(shell which $(BINDIR)/$(exec)), \
-	    $(info $(exec) installed), \
-		$(error $(exec) was not installed properly!)))
-	$(foreach miscfiles,$(FORCE_MISC),\
-      $(if $(shell ls $(BINDIR)/$(DM)/$(miscfiles) 2> /dev/null), \
-	    $(info $(miscfiles) installed), \
-		$(error $(miscfiles) was not installed properly!)))
+#check:
+#	$(foreach exec,$(FORCE_EXE),\
+#      $(if $(shell which $(BINDIR)/$(exec)), \
+#	    $(info $(exec) installed), \
+#		$(error $(exec) was not installed properly!)))
+#	$(foreach miscfiles,$(FORCE_MISC),\
+#      $(if $(shell ls $(BINDIR)/$(DM)/$(miscfiles) 2> /dev/null), \
+#	    $(info $(miscfiles) installed), \
+#		$(error $(miscfiles) was not installed properly!)))
 
-misc: temp
-	$(foreach miscfiles,$(FORCE_MISC),\
-	  $(shell cp $(DD)/$(miscfiles) -t $(TM)))
+#misc: temp
+#	$(foreach miscfiles,$(FORCE_MISC),\
+#	  $(shell cp $(DD)/$(miscfiles) -t $(TM)))
 
-bash: temp
-	cp $(DB)/force-info.sh $(TB)/force-info
-	cp $(DB)/force-cube.sh $(TB)/force-cube
-	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
-	cp $(DB)/force-level2.sh $(TB)/force-level2
-	cp $(DB)/force-mosaic.sh $(TB)/force-mosaic
-	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
-	cp $(DB)/force-procmask.sh $(TB)/force-procmask
-	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
-	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
-	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
-	cp $(DB)/force-init.sh $(TB)/force-init
-	cp $(DB)/force-datacube-size.sh $(TB)/force-datacube-size
-	cp $(DB)/force-unit-testing.sh $(TB)/force-unit-testing
+#bash: temp
+#	cp $(DB)/force-info.sh $(TB)/force-info
+#	cp $(DB)/force-cube.sh $(TB)/force-cube
+#	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
+#	cp $(DB)/force-level2.sh $(TB)/force-level2
+#	cp $(DB)/force-mosaic.sh $(TB)/force-mosaic
+#	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
+#	cp $(DB)/force-procmask.sh $(TB)/force-procmask
+#	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
+#	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
+#	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
+#	cp $(DB)/force-init.sh $(TB)/force-init
+#	cp $(DB)/force-datacube-size.sh $(TB)/force-datacube-size
+#	cp $(DB)/force-unit-testing.sh $(TB)/force-unit-testing
 
-external: temp
-	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
+#external: temp
+#	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
 
-python: temp
-	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
+#python: temp
+#	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
 
-rstats: temp
-	cp $(DR)/force-sample-size.r $(TB)/force-sample-size
-	cp $(DR)/force-map-accuracy.r $(TB)/force-map-accuracy
+#rstats: temp
+#	cp $(DR)/force-sample-size.r $(TB)/force-sample-size
+#	cp $(DR)/force-map-accuracy.r $(TB)/force-map-accuracy
 
-install: bash python rstats misc external install_ clean check
+#install: bash python rstats misc external install_ clean check
 
-build:
-	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
-	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
-	tar -czf force_v$(V)_$(T).tar.gz src bash python rstats misc external images docs Makefile LICENSE README.md
+#build:
+#	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
+#	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
+#	tar -czf force_v$(V)_$(T).tar.gz src bash python rstats misc external images docs Makefile LICENSE README.md

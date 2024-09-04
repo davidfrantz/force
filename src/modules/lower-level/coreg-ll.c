@@ -1138,10 +1138,10 @@ double mean_residual, fitting_rmse;
 
   if (ntie < MIN_TIES_NUM) return ntie;
 
-  alloc((void*)&target_j,   ntie, sizeof(double));
-  alloc((void*)&target_i,   ntie, sizeof(double));
-  alloc((void*)&base_j,     ntie, sizeof(double));
-  alloc((void*)&base_i,     ntie, sizeof(double));
+  alloc((void**)&target_j,  ntie, sizeof(double));
+  alloc((void**)&target_i,  ntie, sizeof(double));
+  alloc((void**)&base_j,    ntie, sizeof(double));
+  alloc((void**)&base_i,    ntie, sizeof(double));
   alloc((void**)&residuals, ntie, sizeof(double));
 
 
