@@ -41,7 +41,6 @@ int interpolate_moving(tsa_t *ts, small *mask_, int nc, int nt, int ni, short no
 int interpolate_rbf(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_tsi_t *tsi);
 rbf_t *rbf_kernel(par_tsi_t *tsi);
 void free_rbf(rbf_t *rbf);
-void free_rbf(rbf_t *rbf){
 int irls_fit(const gsl_matrix *X, const gsl_vector *y, gsl_vector *c, gsl_matrix *cov);
 int interpolate_harmonic(tsa_t *ts, small *mask_, int nc, int nt, int nr, int ni, short nodata, par_tsi_t *tsi);
 
