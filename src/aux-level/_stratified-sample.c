@@ -221,6 +221,9 @@ OGRGeometryH point;
   if ((col_count = find_table_col(&sample_size, "count")) < 0){
     printf("could not find column name %s in file-sample-size\n", "count"); exit(FAILURE);}
 
+  if (col_size == col_class || col_size == col_count){
+    printf("third column name cannot be class or count\n"); exit(FAILURE);}
+
   #ifdef FORCE_DEBUG
   print_table(&sample_size, false, false);
   printf("column %s in column %d\n", "class", col_class);
