@@ -110,7 +110,10 @@ DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_O
 
 # Targets
 all: exe tests
-exe: $(MAIN_AUX_EXE) $(MAIN_LOWER_EXE) $(MAIN_HIGHER_EXE)
+exe: aux_exe higher_exe lower_exe
+aux_exe: $(MAIN_AUX_EXE)
+higher_exe: $(MAIN_HIGHER_EXE)
+lower_exe: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
 dev: $(BINDIR)/force-stratified-sample # specific target for development
 #tests: test_utils-cl test_alloc-cl
