@@ -75,13 +75,17 @@ par_udf_t *udf;
   } else if (phl->udf.pyp.out){
     udf = &phl->udf.pyp;
   } else {
-    return;
+    exit(FAILURE);
   }
 
 
   Py_Initialize();
 
-  import_array();
+  if (_import_array() < 0) {
+    PyErr_Print();
+    PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import");
+    exit(FAILURE);
+  }
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
@@ -548,7 +552,7 @@ short* return_  = NULL;
     py_nproc, 
     NULL);
 
-  if (py_return == Py_None){
+  if ((PyObject*)py_return == Py_None){
     printf("None returned from python. Check the python UDF code!\n");
     exit(FAILURE);}
 

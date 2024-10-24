@@ -106,7 +106,7 @@ MAIN_HIGHER_EXE = $(patsubst $(SRCDIR)/main/higher-level/%.c, $(BINDIR)/%, $(MAI
 TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
 
 # Dependencies
-DEP = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
+DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
 
 # Targets
 all: exe tests
@@ -119,7 +119,7 @@ dev: $(BINDIR)/force-stratified-sample # specific target for development
 #.PHONY: temp all install install_ bash python rstats misc external clean build check
 
 # Include dependencies
--include $(DEP)
+-include $(DEPENDENCIES)
 
 
 print-vars:
@@ -224,8 +224,7 @@ $(BINDIR)/%: $(SRCDIR)/main/lower-level/%.c $(CROSS_OBJ) $(LOWER_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
-#$(BINDIR)/%: $(SRCDIR)/main/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
-$(BINDIR)/%: $(MAIN_HIGHER_EXE) $(CROSS_OBJ) $(HIGHER_OBJ)
+$(BINDIR)/%: $(SRCDIR)/main/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
