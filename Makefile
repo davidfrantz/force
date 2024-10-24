@@ -175,49 +175,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/modules/aux-level/%.c
 #        $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
 
 
-### EXECUTABLES AND MISC FILES TO BE CHECKED
-
-#FORCE_EXE = force-info force-cube force-higher-level force-import-modis \
-#            force-l2ps force-level1-csd force-level1-landsat \
-#            force-level2 force-lut-modis \
-#            force-magic-parameters force-mdcp force-mosaic force-parameter \
-#            force-procmask force-pyramid force-qai-inflate force-stack \
-#            force-synthmix force-tabulate-grid force-tile-extent \
-#            force-tile-finder force-train force-level2-report force-cube-init \
-#			force-init force-datacube-size force-hist force-stratified-sample \
-#			force-unit-testing
-
-#FORCE_MISC = force-version.txt force-level2-report.Rmd force-bash-library.sh \
-#			force-rstats-library.r
-
-
-
-
-### DIRECTORIES
-
-#DB=bash
-#DP=python
-#DR=rstats
-#DD=misc
-#DM=force-misc
-#DT=force-test
-#DC=src/cross-level
-#DL=src/lower-level
-#DH=src/higher-level
-#DA=src/aux-level
-#DU=src/unit-testing
-#TB=temp-bin
-#TM=$(TB)/$(DM)
-#TC=temp-cross
-#TL=temp-lower
-#TH=temp-higher
-#TA=temp-aux
-#TU=$(TB)/$(DT)
-
-
-
-
-
 ##########################################################################
 
 # Main executables
@@ -298,14 +255,4 @@ install: all
 
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
-
-#check:
-#	$(foreach exec,$(FORCE_EXE),\
-#      $(if $(shell which $(BINDIR)/$(exec)), \
-#	    $(info $(exec) installed), \
-#		$(error $(exec) was not installed properly!)))
-#	$(foreach miscfiles,$(FORCE_MISC),\
-#      $(if $(shell ls $(BINDIR)/$(DM)/$(miscfiles) 2> /dev/null), \
-#	    $(info $(miscfiles) installed), \
-#		$(error $(miscfiles) was not installed properly!)))
 
