@@ -69,15 +69,14 @@ CFLAGS=-O3 -Wall -fopenmp
 
 ##########################################################################
 
-# Compile directories
+# Directories
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
-
-# Script directories
 BASHDIR = bash
 RSTATSDIR = rstats
 PYTHONDIR = python
+MISCDIR = misc
 
 # Create necessary directories
 $(shell mkdir -p $(OBJDIR) $(BINDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
@@ -114,7 +113,7 @@ TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
 DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
 
 # Targets
-all: exe tests scripts
+all: exe tests scripts misc
 exe: aux higher lower
 aux: $(MAIN_AUX_EXE)
 higher: $(MAIN_HIGHER_EXE)
@@ -122,7 +121,7 @@ lower: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
 scripts: bash rstats python external
 dev: $(BINDIR)/force-stratified-sample # specific target for development
-.PHONY: bash rstats python external scripts install
+.PHONY: bash rstats python external scripts misc install
 #.PHONY: temp all install install_ bash python rstats misc external clean build check
 
 # Include dependencies
@@ -273,6 +272,14 @@ external:
 	cp $(shell which landsatlinks) $(BINDIR)/force-level1-landsat
 
 
+# misc files
+
+misc:
+	@for file in $(MISCDIR)/*; do \
+		cp $$file $(BINDIR)/force-misc/; \
+	done
+
+
 ### dummy code for testing stuff  
 
 #dummy: temp cross aux higher src/dummy.c
@@ -302,6 +309,3 @@ clean:
 #	    $(info $(miscfiles) installed), \
 #		$(error $(miscfiles) was not installed properly!)))
 
-#misc: temp
-#	$(foreach miscfiles,$(FORCE_MISC),\
-#	  $(shell cp $(DD)/$(miscfiles) -t $(TM)))
