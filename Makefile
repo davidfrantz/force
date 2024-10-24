@@ -25,7 +25,7 @@
 ##########################################################################
 
 # Installation directory
-BINDIR=/usr/local/bin
+INSTALLDIR=/usr/local/bin
 
 # Libraries
 GDAL_INCLUDES = -I/usr/include/gdal
@@ -69,10 +69,15 @@ CFLAGS=-O3 -Wall -fopenmp
 
 ##########################################################################
 
-# Directories
+# Compile directories
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
+
+# Script directories
+BASHDIR = bash
+RSTATSDIR = rstats
+PYTHONDIR = python
 
 # Create necessary directories
 $(shell mkdir -p $(OBJDIR) $(BINDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
@@ -109,16 +114,15 @@ TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
 DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
 
 # Targets
-all: exe tests
-exe: aux_exe higher_exe lower_exe
-aux_exe: $(MAIN_AUX_EXE)
-higher_exe: $(MAIN_HIGHER_EXE)
-lower_exe: $(MAIN_LOWER_EXE)
+all: exe tests scripts
+exe: aux higher lower
+aux: $(MAIN_AUX_EXE)
+higher: $(MAIN_HIGHER_EXE)
+lower: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
+scripts: bash rstats python external
 dev: $(BINDIR)/force-stratified-sample # specific target for development
-#tests: test_utils-cl test_alloc-cl
-#exe: force-parameter force-qai-inflate force-tile-finder force-tabulate-grid force-l2ps force-higher-level force-train force-lut-modis force-mdcp force-stack force-import-modis force-cube-init force-hist force-stratified-sample
-#all: temp cross lower higher aux exe unit-tests
+.PHONY: bash rstats python external scripts install
 #.PHONY: temp all install install_ bash python rstats misc external clean build check
 
 # Include dependencies
@@ -231,11 +235,42 @@ $(BINDIR)/%: $(SRCDIR)/main/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
+
 # Test executables
 
 $(BINDIR)/force-test/%: $(SRCDIR)/tests/%.c $(SRCDIR)/tests/unity/unity.c $(CROSS_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
+
+
+# Bash scripts
+
+bash:
+	@for file in $(BASHDIR)/*.sh; do \
+		cp $$file $(BINDIR)/$$(basename $$file .sh); \
+	done
+
+
+# R scripts
+
+rstats:
+	@for file in $(RSTATSDIR)/*.r; do \
+		cp $$file $(BINDIR)/$$(basename $$file .r); \
+	done
+
+
+# Python scripts
+
+python:
+	@for file in $(PYTHONDIR)/*.py; do \
+		cp $$file $(BINDIR)/$$(basename $$file .py); \
+	done
+
+
+# re-branded tools [with permission]
+
+external:
+	cp $(shell which landsatlinks) $(BINDIR)/force-level1-landsat
 
 
 ### dummy code for testing stuff  
@@ -244,12 +279,15 @@ $(BINDIR)/force-test/%: $(SRCDIR)/tests/%.c $(SRCDIR)/tests/unity/unity.c $(CROS
 #	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
 
 
-### MISC
+# install the software
 
-#install_:
-#	chmod 0755 $(TB)/*
-#	chmod 0755 $(TU)/*
-#	cp -a $(TB)/. $(BINDIR)
+install: all
+	find $(BINDIR) -type f -exec chmod 0755 {} +
+	find $(BINDIR) -type d -exec chmod 0755 {} +
+	cp -a $(BINDIR)/. $(INSTALLDIR)
+
+
+# clean up
 
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
@@ -267,35 +305,3 @@ clean:
 #misc: temp
 #	$(foreach miscfiles,$(FORCE_MISC),\
 #	  $(shell cp $(DD)/$(miscfiles) -t $(TM)))
-
-#bash: temp
-#	cp $(DB)/force-info.sh $(TB)/force-info
-#	cp $(DB)/force-cube.sh $(TB)/force-cube
-#	cp $(DB)/force-level1-csd.sh $(TB)/force-level1-csd  
-#	cp $(DB)/force-level2.sh $(TB)/force-level2
-#	cp $(DB)/force-mosaic.sh $(TB)/force-mosaic
-#	cp $(DB)/force-pyramid.sh $(TB)/force-pyramid
-#	cp $(DB)/force-procmask.sh $(TB)/force-procmask
-#	cp $(DB)/force-tile-extent.sh $(TB)/force-tile-extent
-#	cp $(DB)/force-magic-parameters.sh $(TB)/force-magic-parameters
-#	cp $(DB)/force-level2-report.sh $(TB)/force-level2-report
-#	cp $(DB)/force-init.sh $(TB)/force-init
-#	cp $(DB)/force-datacube-size.sh $(TB)/force-datacube-size
-#	cp $(DB)/force-unit-testing.sh $(TB)/force-unit-testing
-
-#external: temp
-#	cp $(shell which landsatlinks) $(TB)/force-level1-landsat
-
-#python: temp
-#	cp $(DP)/force-synthmix.py $(TB)/force-synthmix
-
-#rstats: temp
-#	cp $(DR)/force-sample-size.r $(TB)/force-sample-size
-#	cp $(DR)/force-map-accuracy.r $(TB)/force-map-accuracy
-
-#install: bash python rstats misc external install_ clean check
-
-#build:
-#	$(eval V := $(shell grep '#define _VERSION_' src/cross-level/const-cl.h | cut -d '"' -f 2 | sed 's/ /_/g'))
-#	$(eval T :=$(shell date +"%Y%m%d%H%M%S"))
-#	tar -czf force_v$(V)_$(T).tar.gz src bash python rstats misc external images docs Makefile LICENSE README.md
