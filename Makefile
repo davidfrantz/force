@@ -113,7 +113,7 @@ TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
 DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
 
 # Targets
-all: exe tests scripts misc
+all: check-required exe tests scripts misc
 exe: aux higher lower
 aux: $(MAIN_AUX_EXE)
 higher: $(MAIN_HIGHER_EXE)
@@ -121,22 +121,45 @@ lower: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
 scripts: bash rstats python external
 dev: $(BINDIR)/force-stratified-sample # specific target for development
-.PHONY: bash rstats python external scripts misc install
-#.PHONY: temp all install install_ bash python rstats misc external clean build check
+.PHONY: check-required bash rstats python external scripts misc install
 
 # Include dependencies
 -include $(DEPENDENCIES)
 
 
-print-vars:
-	@echo "main source files: $(TEST_SRC)"
-	@echo "main program files: $(TEST_EXE)"
-	@echo "Object files: $(CROSS_OBJ)"
-	@echo "Compiler flags: $(CFLAGS)"
+##########################################################################
+
+### Check external tools
+
+REQUIRE = gcc g++ \
+          parallel \
+          gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
+          gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
+          gdal_edit.py gdal_calc.py gdal-config \
+          ogrinfo ogr2ogr \
+          gsl-config curl-config \
+          unzip tar lockfile-create lockfile-remove rename dos2unix \
+          python3 pip3 \
+          R \
+          landsatlinks \
+          opencv_version 
+
+check-required:
+	@missing=$$(for exec in $(REQUIRE); do \
+		if ! command -v $$exec > /dev/null; then \
+			echo $$exec; \
+		fi; \
+	done); \
+	if [ "$$missing" ]; then \
+		echo "No executable(s) in PATH: $$missing. Please install the dependencies!"; \
+		exit 1; \
+	fi
+
 
 ##########################################################################
 
 # Modules
+
 $(OBJDIR)/%.o: $(SRCDIR)/modules/cross-level/%.c
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
@@ -152,28 +175,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/modules/higher-level/%.c
 $(OBJDIR)/%.o: $(SRCDIR)/modules/aux-level/%.c
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
-
-##########################################################################
-
-
-### DEPENDENCIES
-
-#EXECUTABLES = gcc g++ \
-#              parallel \
-#              gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
-#              gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
-#              gdal_edit.py gdal_calc.py gdal-config \
-#              ogrinfo ogr2ogr \
-#              gsl-config curl-config \
-#              unzip tar lockfile-create lockfile-remove rename dos2unix \
-#              python3 pip3 \
-#		       R \
-#			  landsatlinks \
-#              opencv_version 
-
-#OK := $(foreach exec,$(EXECUTABLES),\
-#        $(if $(shell which $(exec)),OK,$(error "No $(exec) in PATH, install dependencies!")))
-
 
 ##########################################################################
 
@@ -198,6 +199,8 @@ $(BINDIR)/force-test/%: $(SRCDIR)/tests/%.c $(SRCDIR)/tests/unity/unity.c $(CROS
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
+
+##########################################################################
 
 # Bash scripts
 
@@ -242,6 +245,8 @@ misc:
 #dummy: temp cross aux higher src/dummy.c
 #	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
 
+
+##########################################################################
 
 # install the software
 
