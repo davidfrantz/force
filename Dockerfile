@@ -45,7 +45,7 @@ COPY --chown=docker:docker . .
 RUN echo "building FORCE" && \
   ./splits.sh enable && \
   ./debug.sh $debug && \
-  sed -i "/^BINDIR=/cBINDIR=$INSTALL_DIR/" Makefile && \
+  sed -i "/^INSTALLDIR=/INSTALLDIR=$INSTALL_DIR/" Makefile && \
   make -j && \
   make install && \
   make clean && \
