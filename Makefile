@@ -75,7 +75,7 @@ OBJDIR = obj
 BINDIR = bin
 
 # Create necessary directories
-$(shell mkdir -p $(OBJDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
+$(shell mkdir -p $(OBJDIR) $(BINDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
 
 # Source Files (modules)
 CROSS_SRC = $(wildcard $(SRCDIR)/modules/cross-level/*.c)
@@ -84,9 +84,9 @@ HIGHER_SRC = $(wildcard $(SRCDIR)/modules/higher-level/*.c)
 AUX_SRC = $(wildcard $(SRCDIR)/modules/aux-level/*.c)
 
 # Source Files (main executables)
-MAIN_AUX_SRC = $(wildcard $(SRCDIR)/exe/aux-level/*.c)
-MAIN_LOWER_SRC = $(wildcard $(SRCDIR)/exe/lower-level/*.c)
-MAIN_HIGHER_SRC = $(wildcard $(SRCDIR)/exe/higher-level/*.c)
+MAIN_AUX_SRC = $(wildcard $(SRCDIR)/main/aux-level/*.c)
+MAIN_LOWER_SRC = $(wildcard $(SRCDIR)/main/lower-level/*.c)
+MAIN_HIGHER_SRC = $(wildcard $(SRCDIR)/main/higher-level/*.c)
 
 # Source Files (test executables)
 TEST_SRC = $(wildcard $(SRCDIR)/tests/*.c)
@@ -98,9 +98,9 @@ HIGHER_OBJ = $(patsubst $(SRCDIR)/modules/higher-level/%.c, $(OBJDIR)/%.o, $(HIG
 AUX_OBJ = $(patsubst $(SRCDIR)/modules/aux-level/%.c, $(OBJDIR)/%.o, $(AUX_SRC))
 
 # Main executables
-MAIN_AUX_EXE = $(patsubst $(SRCDIR)/exe/aux-level/%.c, $(BINDIR)/%, $(MAIN_AUX_SRC))
-MAIN_LOWER_EXE = $(patsubst $(SRCDIR)/exe/lower-level/%.c, $(BINDIR)/%, $(MAIN_LOWER_SRC))
-MAIN_HIGHER_EXE = $(patsubst $(SRCDIR)/exe/higher-level/%.c, $(BINDIR)/%, $(MAIN_HIGHER_SRC))
+MAIN_AUX_EXE = $(patsubst $(SRCDIR)/main/aux-level/%.c, $(BINDIR)/%, $(MAIN_AUX_SRC))
+MAIN_LOWER_EXE = $(patsubst $(SRCDIR)/main/lower-level/%.c, $(BINDIR)/%, $(MAIN_LOWER_SRC))
+MAIN_HIGHER_EXE = $(patsubst $(SRCDIR)/main/higher-level/%.c, $(BINDIR)/%, $(MAIN_HIGHER_SRC))
 
 # Test executables
 TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
@@ -123,8 +123,8 @@ dev: $(BINDIR)/force-stratified-sample # specific target for development
 
 
 print-vars:
-	@echo "exe source files: $(TEST_SRC)"
-	@echo "exe program files: $(TEST_EXE)"
+	@echo "main source files: $(TEST_SRC)"
+	@echo "main program files: $(TEST_EXE)"
 	@echo "Object files: $(CROSS_OBJ)"
 	@echo "Compiler flags: $(CFLAGS)"
 
@@ -216,15 +216,15 @@ $(OBJDIR)/%.o: $(SRCDIR)/modules/aux-level/%.c
 
 # Main executables
 
-$(BINDIR)/%: $(SRCDIR)/exe/aux-level/%.c $(CROSS_OBJ) $(AUX_OBJ)
+$(BINDIR)/%: $(SRCDIR)/main/aux-level/%.c $(CROSS_OBJ) $(AUX_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
-$(BINDIR)/%: $(SRCDIR)/exe/lower-level/%.c $(CROSS_OBJ) $(LOWER_OBJ)
+$(BINDIR)/%: $(SRCDIR)/main/lower-level/%.c $(CROSS_OBJ) $(LOWER_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
 
-#$(BINDIR)/%: $(SRCDIR)/exe/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
+#$(BINDIR)/%: $(SRCDIR)/main/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
 $(BINDIR)/%: $(MAIN_HIGHER_EXE) $(CROSS_OBJ) $(HIGHER_OBJ)
 	@echo "Compiling $<..."
 	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
