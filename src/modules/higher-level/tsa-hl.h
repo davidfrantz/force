@@ -52,9 +52,6 @@ typedef struct {
   short **fby_, **fbq_, **fbm_, **fbw_, **fbd_;
   short **try_, **trq_, **trm_, **trw_, **trd_;
   short **cay_, **caq_, **cam_, **caw_, **cad_;
-  short **lsp_[_LSP_LENGTH_];
-  short **trp_[_LSP_LENGTH_];
-  short **cap_[_LSP_LENGTH_];
   short **pcx_, **pcy_;
   short **pol_[_POL_LENGTH_];
   short **tro_[_POL_LENGTH_];
@@ -62,7 +59,7 @@ typedef struct {
   short **pyp_, **rsp_, **nrt_;
   date_t *d_tss, *d_nrt, *d_tsi;
   date_t *d_fby, *d_fbq, *d_fbm, *d_fbw, *d_fbd;
-  date_t *d_lsp, *d_pol;
+  date_t *d_pol;
   char **bandnames_tsi;
 } tsa_t;
 
@@ -71,7 +68,6 @@ typedef struct {
 #include "../higher-level/stm-hl.h"
 #include "../higher-level/fold-hl.h"
 #include "../higher-level/trend-hl.h"
-#include "../higher-level/pheno-hl.h"
 #include "../higher-level/polar-hl.h"
 #include "../higher-level/standardize-hl.h"
 #include "../higher-level/py-udf-hl.h"

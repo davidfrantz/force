@@ -43,7 +43,6 @@ COPY --chown=docker:docker . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
-  ./splits.sh enable && \
   ./debug.sh $debug && \
   sed -i "/^INSTALLDIR=/INSTALLDIR=$INSTALL_DIR/" Makefile && \
   make -j && \

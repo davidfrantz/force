@@ -254,7 +254,6 @@ FILE *fp;
     write_par_hl_rsp(fp, args.comments);
     write_par_hl_stm(fp, args.comments);
     write_par_hl_fold(fp, args.comments);
-    write_par_hl_lsp(fp, args.comments);
     write_par_hl_pol(fp, args.comments);
     write_par_hl_trend(fp, args.comments);
   }

@@ -208,30 +208,6 @@ typedef struct {
   int orms;    // flag: output model residuals
 } par_sma_t;
 
-// phenometrics
-typedef struct {
-  int ny;
-  int dprev;              // use data from this date (year-1)
-  int dnext;              // until this date (year+1)
-  int hemi;               // southern/mixed/northern hemisphere
-  int nseg;               // number of segments per year
-  float start;
-  float minval;
-  float minamp;
-  int ospl;       // flag: output spline fit
-  int olsp;       // flag: output LSP metrics
-  int *metrics, nmetrics;
-  int use[_LSP_LENGTH_];
-  //int odem, odss, odri, odps, odfi, odes;
-  //int odlm, olts, olgs, ovem, ovss, ovri;;
-  //int ovps, ovfi, oves, ovlm, ovbl, ovsa;
-  //int oist, oibl, oibt, oigs, orar, oraf;
-  //int ormr, ormf;
-  int otrd;       // flag: output LSP trends
-  int ocat;       // flag: output LSP cats
-  int standard;
-} par_lsp_t;
-
 // polar metrics
 typedef struct {
   int ny;
@@ -313,7 +289,6 @@ typedef struct {
   par_fld_t fld;
   par_tsi_t tsi;
   par_sma_t sma;
-  par_lsp_t lsp;
   par_pol_t pol;
   par_trd_t trd;
   par_udf_t pyp;

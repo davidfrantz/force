@@ -58,8 +58,6 @@ typedef struct {
 //#define FORCE_DEBUG
 //#define FORCE_DEV
 
-//#define SPLITS
-
 //#define ACIX
 //#define ACIX2
 //#define CMIX_FAS
