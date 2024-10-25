@@ -1,4 +1,5 @@
-temp*
+bin
+obj
 docs/build
 docs/source/_build
 .idea
