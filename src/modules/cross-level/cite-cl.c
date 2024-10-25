@@ -211,12 +211,6 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "vegetation gradients with Landsat time series. International Journal "
     "of Applied Earth Observation and Geoinformation, 52, 361-370",
     false },
-  { "SPLITS", 
-    "Mader, S. (2012). A Framework for the Phenological Analysis of Hyper"
-    "temporal Remote Sensing Data Based on Polynomial Spline Models. In, "
-    "Faculty of Geography/Geosciences (p. 101). Trier, Germany: "
-    "Trier University",
-    false },
   { "CAT transformation", 
     "Hird, J.N., Castilla, G., McDermid, G.J., & Bueno, I.T. (2016). A "
     "Simple Transformation for Visualizing Non-seasonal Landscape Change "

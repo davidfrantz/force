@@ -70,7 +70,6 @@ void write_par_hl_pyp(FILE *fp, bool verbose);
 void write_par_hl_rsp(FILE *fp, bool verbose);
 void write_par_hl_stm(FILE *fp, bool verbose);
 void write_par_hl_fold(FILE *fp, bool verbose);
-void write_par_hl_lsp(FILE *fp, bool verbose);
 void write_par_hl_pol(FILE *fp, bool verbose);
 void write_par_hl_trend(FILE *fp, bool verbose);
 void write_par_hl_cso(FILE *fp, bool verbose);

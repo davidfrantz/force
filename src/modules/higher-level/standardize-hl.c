@@ -116,7 +116,6 @@ int t, p;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_standardize(tsa_t *ts, small *mask_, int nc, int nt, int ni, short nodata, par_hl_t *phl){
-int l, nlsp = 26;
 
 
   if (phl->tsa.otss)     standardize_timeseries(ts->tss_, mask_, nc, nt,      nodata, phl->tsa.standard);
@@ -126,12 +125,6 @@ int l, nlsp = 26;
   if (phl->tsa.fld.ofbm) standardize_timeseries(ts->fbm_, mask_, nc, phl->nm, nodata, phl->tsa.fld.standard);
   if (phl->tsa.fld.ofbw) standardize_timeseries(ts->fbw_, mask_, nc, phl->nw, nodata, phl->tsa.fld.standard);
   if (phl->tsa.fld.ofbd) standardize_timeseries(ts->fbd_, mask_, nc, phl->nd, nodata, phl->tsa.fld.standard);
-  
-  if (phl->tsa.lsp.ocat){
-    for (l=0; l<nlsp; l++){
-      standardize_timeseries(ts->lsp_[l], mask_, nc, phl->tsa.lsp.ny, nodata, phl->tsa.lsp.standard);
-    }
-  }
 
   return SUCCESS;
 }

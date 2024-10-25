@@ -50,7 +50,6 @@ void alloc_mcl(par_mcl_t *mcl);
 void free_mcl(par_mcl_t *mcl);
 int parse_ftr(par_ftr_t *ftr);
 int parse_sta(par_sta_t *sta);
-int parse_lsp(par_lsp_t *lsp);
 int parse_pol(par_pol_t *pol);
 int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
@@ -233,21 +232,6 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params, "OUTPUT_CAM", &phl->tsa.fld.ocam);
   register_bool_par(params, "OUTPUT_CAW", &phl->tsa.fld.ocaw);
   register_bool_par(params, "OUTPUT_CAD", &phl->tsa.fld.ocad);
-
-  // phenology parameters
-  register_int_par(params,     "LSP_DOY_PREV_YEAR", 1, 365, &phl->tsa.lsp.dprev);
-  register_int_par(params,     "LSP_DOY_NEXT_YEAR", 1, 365, &phl->tsa.lsp.dnext);
-  register_enum_par(params,    "LSP_HEMISPHERE", _TAGGED_ENUM_HEMI_, _HEMI_LENGTH_, &phl->tsa.lsp.hemi);
-  register_int_par(params,     "LSP_N_SEGMENT",     1, INT_MAX, &phl->tsa.lsp.nseg);
-  register_float_par(params,   "LSP_AMP_THRESHOLD", 0.01, 0.99, &phl->tsa.lsp.start);
-  register_float_par(params,   "LSP_MIN_VALUE",     -10000, 10000, &phl->tsa.lsp.minval);
-  register_float_par(params,   "LSP_MIN_AMPLITUDE", 0, 10000, &phl->tsa.lsp.minamp);
-  register_enumvec_par(params, "LSP", _TAGGED_ENUM_LSP_, _LSP_LENGTH_, &phl->tsa.lsp.metrics, &phl->tsa.lsp.nmetrics);
-  register_enum_par(params,    "STANDARDIZE_LSP", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.lsp.standard);
-  register_bool_par(params,    "OUTPUT_SPL",        &phl->tsa.lsp.ospl);
-  register_bool_par(params,    "OUTPUT_LSP",        &phl->tsa.lsp.olsp);
-  register_bool_par(params,    "OUTPUT_TRP",        &phl->tsa.lsp.otrd);
-  register_bool_par(params,    "OUTPUT_CAP",        &phl->tsa.lsp.ocat);
 
   // polar parameters
   register_float_par(params,   "POL_START_THRESHOLD", 0.01, 0.99, &phl->tsa.pol.start);
@@ -898,24 +882,9 @@ int i;
 }
 
 
-/** This function reparses phenometrics parameters (special para-
-+++ meter that cannot be parsed with the general parser).
---- lsp:    phenometrics parameters
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_lsp(par_lsp_t *lsp){
-int i;
-
-
-  for (i=0; i<lsp->nmetrics; i++) lsp->use[lsp->metrics[i]] = true;
-
-  return SUCCESS;
-}
-
-
 /** This function reparses polarmetrics parameters (special para-
 +++ meter that cannot be parsed with the general parser).
---- lsp:    phenometrics parameters
+--- pol:    phenometrics parameters
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int parse_pol(par_pol_t *pol){
@@ -1451,8 +1420,6 @@ double tol = 5e-3;
   if (phl->type == _HL_TSA_) parse_sta(&phl->tsa.stm.sta);
   if (phl->type == _HL_CSO_) parse_sta(&phl->cso.sta);
   
-  if (phl->type == _HL_TSA_) parse_lsp(&phl->tsa.lsp);
-
   if (phl->type == _HL_TSA_) parse_pol(&phl->tsa.pol);
   
   if (phl->type == _HL_TXT_) parse_txt(&phl->txt);
@@ -1497,9 +1464,6 @@ double tol = 5e-3;
     for (q=1; q<=4;   q++) phl->nq += phl->date_quarters[q];
     phl->ny = phl->date_range[_MAX_].year - phl->date_range[_MIN_].year + 1;
 
-    // phenology not possible for first and last year
-    phl->tsa.lsp.ny = phl->ny-2;
-    
     // polarmetrics not possible for one year
     phl->tsa.pol.ny = phl->ny;
     phl->tsa.pol.ns = phl->ny-1;
@@ -1644,46 +1608,6 @@ double tol = 5e-3;
       set_date(&phl->tsa.tsi.harm_fit_range[_MIN_], 1900,  1,  1);
       set_date(&phl->tsa.tsi.harm_fit_range[_MAX_], 2100, 12, 31);
     }
-
-    if (phl->tsa.lsp.ospl || phl->tsa.lsp.olsp || phl->tsa.lsp.otrd || phl->tsa.lsp.ocat){
-      
-      #ifndef SPLITS
-      printf("Phenology options require to have FORCE compiled with SPLITS\n");
-      printf("Install SPLITS and re-compile (see user guide)\n");
-      printf(" OR disable phenology options\n");
-      return FAILURE;
-      #endif
-    
-      if (phl->tsa.lsp.ny < 1){
-        printf("LSP cannot be estimated for first and last year.\n");
-        printf("Time window is too short.\n");
-        return FAILURE;
-      }
-
-      if (phl->tsa.tsi.method == _INT_NONE_){
-        printf("Phenology options require INTERPOLATE != NONE\n"); return FAILURE;}
-
-      if (phl->tsa.lsp.hemi == _HEMI_NORTH_ || phl->tsa.lsp.hemi == _HEMI_MIXED_){
-        if (phl->tsa.lsp.dnext < phl->tsa.tsi.step){
-          printf("If LSP_HEMISPHERE = NORTH or MIXED, LSP_DOY_NEXT_YEAR needs to be >= INT_DAY\n"); 
-          return FAILURE;
-        }
-      }
-      if (phl->tsa.lsp.hemi == _HEMI_NORTH_){
-        if (phl->tsa.lsp.dprev > 365-phl->tsa.tsi.step){
-          printf("If LSP_HEMISPHERE = NORTH, LSP_DOY_PREV_YEAR needs to be <= 365-INT_DAY\n"); 
-          return FAILURE;
-        }
-      }
-      if (phl->tsa.lsp.hemi == _HEMI_SOUTH_ || phl->tsa.lsp.hemi == _HEMI_MIXED_){
-        if (phl->tsa.lsp.dprev > 182-phl->tsa.tsi.step){
-          printf("If LSP_HEMISPHERE = NORTH or MIXED, LSP_DOY_PREV_YEAR needs to be <= 182-INT_DAY\n"); 
-          return FAILURE;
-        }
-      }
-
-    }
- 
  
     if (phl->tsa.pol.opct || phl->tsa.pol.opol || phl->tsa.pol.otrd || phl->tsa.pol.ocat){
           

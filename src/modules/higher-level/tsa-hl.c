@@ -39,7 +39,7 @@ typedef struct {
   short ***ptr;
 } brick_compile_info_t;
 
-enum { _full_, _stats_, _inter_, _nrt_, _year_, _quarter_, _month_, _week_, _day_, _lsp_, _pol_, _trd_, _cat_, _udf_};
+enum { _full_, _stats_, _inter_, _nrt_, _year_, _quarter_, _month_, _week_, _day_, _pol_, _trd_, _cat_, _udf_};
 
 
 void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni);
@@ -118,21 +118,6 @@ int info_rms(brick_compile_info_t *info, int o, int nt, tsa_t *ts, par_hl_t *phl
   info[o].enable   = phl->tsa.sma.orms;
   info[o].write    = phl->tsa.sma.orms;
   info[o].ptr      = &ts->rms_;
-
-  return o+1;
-}
-
-int info_spl(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
-
-
-  copy_string(info[o].prodname, NPOW_02, "SPL");
-  info[o].prodlen  = ni;
-  info[o].bandname = NULL;
-  info[o].date     = NULL;
-  info[o].prodtype = _inter_;
-  info[o].enable   = phl->tsa.lsp.ospl;
-  info[o].write    = phl->tsa.lsp.ospl;
-  info[o].ptr      = &ts->spl_;
 
   return o+1;
 }
@@ -307,53 +292,6 @@ int p = o;
   return p;
 }
 
-int info_lsp(brick_compile_info_t *info, int o, tsa_t *ts, par_hl_t *phl){
-int l, p = o;
-int nchar;
-
-
-  for (l=0; l<_LSP_LENGTH_; l++, p++){
-    info[p].prodlen  = phl->tsa.lsp.ny;
-    info[p].bandname = NULL;
-    info[o].date     = NULL;
-    nchar = snprintf(info[p].prodname, NPOW_03, "%s-LSP", _TAGGED_ENUM_LSP_[l].tag);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); exit(1);}
-    info[p].prodtype = _lsp_;
-    info[p].enable   = phl->tsa.lsp.use[l]*(phl->tsa.lsp.olsp+phl->tsa.lsp.otrd+phl->tsa.lsp.ocat);
-    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.olsp;
-    info[p].ptr      = &ts->lsp_[l];
-  }
-
-  for (l=0; l<_LSP_LENGTH_; l++, p++){
-    info[p].prodlen  =_TRD_LENGTH_;
-    info[p].bandname = NULL;
-    info[o].date     = NULL;
-    nchar = snprintf(info[p].prodname, NPOW_03, "%s-TRP", _TAGGED_ENUM_LSP_[l].tag);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); exit(1);}
-    info[p].prodtype = _trd_;
-    info[p].enable   = phl->tsa.lsp.use[l]*phl->tsa.lsp.otrd;
-    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.otrd;
-    info[p].ptr      = &ts->trp_[l];
-  }
-
-  for (l=0; l<_LSP_LENGTH_; l++, p++){
-    info[p].prodlen  = _CAT_LENGTH_;
-    info[p].bandname = NULL;
-    info[o].date     = NULL;
-    nchar = snprintf(info[p].prodname, NPOW_03, "%s-CAP", _TAGGED_ENUM_LSP_[l].tag);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); exit(1);}
-    info[p].prodtype = _cat_;
-    info[p].enable   = phl->tsa.lsp.use[l]*phl->tsa.lsp.ocat;
-    info[p].write    = phl->tsa.lsp.use[l]*phl->tsa.lsp.ocat;
-    info[p].ptr      = &ts->cap_[l];
-  }
-
-  return p;
-}
-
 int info_pol(brick_compile_info_t *info, int o, int ni, tsa_t *ts, par_hl_t *phl){
 int l, p = o;
 int nchar;
@@ -464,8 +402,8 @@ void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
 
 
   #ifdef FORCE_DEBUG
-  printf("about to allocate %d %d %d %d %d %d %d %d %d dates\n", 
-    nt,nr,ni,phl->ny,phl->nq,phl->nm,phl->nw,phl->nd,phl->tsa.lsp.ny);
+  printf("about to allocate %d %d %d %d %d %d %d %d dates\n", 
+    nt,nr,ni,phl->ny,phl->nq,phl->nm,phl->nw,phl->nd);
   #endif
 
   if (nt              > 0) alloc((void**)&ts->d_tss, nt, sizeof(date_t));              else ts->d_tss = NULL;
@@ -476,7 +414,6 @@ void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
   if (phl->nm         > 0) alloc((void**)&ts->d_fbm, phl->nm, sizeof(date_t));         else ts->d_fbm = NULL;
   if (phl->nw         > 0) alloc((void**)&ts->d_fbw, phl->nw, sizeof(date_t));         else ts->d_fbw = NULL;
   if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
-  if (phl->tsa.lsp.ny > 0) alloc((void**)&ts->d_lsp, phl->tsa.lsp.ny, sizeof(date_t)); else ts->d_lsp = NULL;
   if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
   if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_04, sizeof(char)); else ts->bandnames_tsi = NULL;
@@ -500,7 +437,6 @@ void free_ts_metadata(tsa_t *ts, int ni){
   if (ts->d_fbm != NULL){ free((void*)ts->d_fbm); ts->d_fbm = NULL;}
   if (ts->d_fbw != NULL){ free((void*)ts->d_fbw); ts->d_fbw = NULL;}
   if (ts->d_fbd != NULL){ free((void*)ts->d_fbd); ts->d_fbd = NULL;}
-  if (ts->d_lsp != NULL){ free((void*)ts->d_lsp); ts->d_lsp = NULL;}
   if (ts->d_pol != NULL){ free((void*)ts->d_pol); ts->d_pol = NULL;}
 
   if (ts->bandnames_tsi != NULL){ free_2D((void**)ts->bandnames_tsi, ni); ts->bandnames_tsi = NULL;}
@@ -601,13 +537,6 @@ char sensor[NPOW_04];
     }
   }
 
-  if (phl->tsa.lsp.ny > 0){
-    for (t=0; t<phl->tsa.lsp.ny; t++){
-      set_date_year(&date, phl->date_range[_MIN_].year+t+1);
-      copy_date(&date, &ts->d_lsp[t]);
-    }
-  }
-
   if (phl->tsa.pol.ny > 0){
     for (t=0; t<phl->tsa.pol.ny; t++){
       set_date_year(&date, phl->date_range[_MIN_].year+t);
@@ -669,13 +598,11 @@ brick_compile_info_t *info = NULL;
   o = info_rms(info, o, nt, ts, phl);
   o = info_tsi(info, o, ni, ts, phl);
   o = info_stm(info, o,     ts, phl);
-  o = info_spl(info, o, ni, ts, phl);
   o = info_fby(info, o,     ts, phl);
   o = info_fbq(info, o,     ts, phl);
   o = info_fbm(info, o,     ts, phl);
   o = info_fbw(info, o,     ts, phl);
   o = info_fbd(info, o,     ts, phl);
-  o = info_lsp(info, o,     ts, phl);
   o = info_pol(info, o, ni, ts, phl);
   o = info_pyp(info, o,     ts, phl);
   o = info_rsp(info, o,     ts, phl);
@@ -815,17 +742,6 @@ brick_compile_info_t *info = NULL;
               set_brick_date(TSA[o], t, date);
               k++;
               break;
-            case _lsp_: 
-              set_date_year(&date, phl->date_range[_MIN_].year+t+1);
-              set_brick_sensor(TSA[o], t, "BLEND");
-              nchar = snprintf(fdate, NPOW_10, "YEAR-%04d", date.year);
-              if (nchar < 0 || nchar >= NPOW_10){ 
-                printf("Buffer Overflow in assembling domain\n"); error++;}
-              set_brick_wavelength(TSA[o], t, date.year);
-              set_brick_unit(TSA[o], t, "year");
-              set_brick_bandname(TSA[o], t, fdate);
-              set_brick_date(TSA[o], t, date);
-              break;
             case _pol_: 
               set_date_year(&date, phl->date_range[_MIN_].year+t);
               set_brick_sensor(TSA[o], t, "BLEND");
@@ -876,7 +792,6 @@ brick_compile_info_t *info = NULL;
   //printf("%02d: ts ptr rms: %p\n", 0, ts->rms_);
   //printf("%02d: ts ptr tsi: %p\n", 0, ts->tsi_);
   //printf("%02d: ts ptr stm: %p\n", 0, ts->stm_);
-  //printf("%02d: ts ptr spl: %p\n", 0, ts->spl_);
   //printf("%02d: ts ptr fby: %p\n", 0, ts->fby_);
   //printf("%02d: ts ptr fbq: %p\n", 0, ts->fbq_);
   //printf("%02d: ts ptr fbm: %p\n", 0, ts->fbm_);
@@ -892,9 +807,6 @@ brick_compile_info_t *info = NULL;
   //printf("%02d: ts ptr cam: %p\n", 0, ts->cam_);
   //printf("%02d: ts ptr caw: %p\n", 0, ts->caw_);
   //printf("%02d: ts ptr cad: %p\n", 0, ts->cad_);
-  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr lsp: %p\n", o, ts->lsp_[o]);
-  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr trp: %p\n", o, ts->trp_[o]);
-  //for (o=0; o<_LSP_LENGTH_; o++)  printf("%02d: ts ptr cap: %p\n", o, ts->cap_[o]);
   //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr pol: %p\n", o, ts->pol_[o]);
   //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr tro: %p\n", o, ts->tro_[o]);
   //for (o=0; o<_POL_LENGTH_; o++)  printf("%02d: ts ptr cao: %p\n", o, ts->cao_[o]);
@@ -1077,8 +989,6 @@ short nodata;
     tsa_fold(&ts, mask_, nc, ni, nodata, phl);
     
     tsa_polar(&ts, mask_, nc, ni, nodata, phl);
-    
-    tsa_pheno(&ts, mask_, nc, ni, nodata, phl);
     
     tsa_trend(&ts, mask_, nc, nodata, phl);
     

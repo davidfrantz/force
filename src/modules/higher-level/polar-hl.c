@@ -673,18 +673,17 @@ float green_val, base_val;
 
 
 /** This function derives phenometrics from an interpolated time series.
-                      +++ The function will fail if FORCE was not compiled with SPLITS (see in-
-                      +++ stallation instructions). Do not expect this function to work if you
-                      +++ have fairly sparse time series. In addition, the time series needs to
-                      +++ be long enough (at least extend into the previous and next year). Phe-
-                      +++ nometrics are derived for each given year.
-                      --- ts:     pointer to instantly useable TSA image arrays
-                      --- mask_:  mask image
-                      --- nc:     number of cells
-                      --- ni:     number of interpolation steps
-                      --- nodata: nodata value
-                      --- phl:    HL parameters
-                      +++ Return: SUCCESS/FAILURE
++++ Do not expect this function to work if you
++++ have fairly sparse time series. In addition, the time series needs to
++++ be long enough (at least extend into the previous and next year). Phe-
++++ nometrics are derived for each given year.
+--- ts:     pointer to instantly useable TSA image arrays
+--- mask_:  mask image
+--- nc:     number of cells
+--- ni:     number of interpolation steps
+--- nodata: nodata value
+--- phl:    HL parameters
++++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tsa_polar(tsa_t *ts, small *mask_, int nc, int ni, short nodata, par_hl_t *phl){
 

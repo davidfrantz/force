@@ -243,7 +243,7 @@ misc:
 ### dummy code for testing stuff  
 
 #dummy: temp cross aux higher src/dummy.c
-#	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(SPLITS) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDSPLITS) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
+#	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
 
 
 ##########################################################################

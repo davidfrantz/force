@@ -475,14 +475,6 @@ bool in_ce = false;
   trend(ts->fbw_, ts->d_fbw, mask_, nc, phl->nw, ts->trw_, nodata, _FLD_WEEK_,    in_ce, &phl->tsa.trd);
   trend(ts->fbd_, ts->d_fbd, mask_, nc, phl->nd, ts->trd_, nodata, _FLD_DOY_,     in_ce, &phl->tsa.trd);
 
-
-  if (phl->tsa.lsp.otrd){
-    for (l=0; l<_LSP_LENGTH_; l++){
-      if (l < 7) in_ce = true; else in_ce = false;
-      trend(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->trp_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
-    }
-  }
-  
   if (phl->tsa.pol.otrd){
     for (l=0; l<_POL_LENGTH_; l++){
       if (l < 9) in_ce = true; else in_ce = false;
@@ -516,14 +508,6 @@ bool in_ce = false;
   cat(ts->fbw_, ts->d_fbw, mask_, nc, phl->nw, ts->caw_, nodata, _FLD_WEEK_,    in_ce, &phl->tsa.trd);
   cat(ts->fbd_, ts->d_fbd, mask_, nc, phl->nd, ts->cad_, nodata, _FLD_DOY_,     in_ce, &phl->tsa.trd);
 
-
-  if (phl->tsa.lsp.ocat){
-    for (l=0; l<_LSP_LENGTH_; l++){
-      if (l < 7) in_ce = true; else in_ce = false;
-      cat(ts->lsp_[l], ts->d_lsp, mask_, nc, phl->tsa.lsp.ny, ts->cap_[l], nodata, _FLD_YEAR_, in_ce, &phl->tsa.trd);
-    }
-  }
-  
   if (phl->tsa.pol.ocat){
     for (l=0; l<_POL_LENGTH_; l++){
       if (l < 9) in_ce = true; else in_ce = false;
