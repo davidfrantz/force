@@ -204,8 +204,8 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# X0000_Y0000 represents this point. It is a good choice to use a coord-\n");
     fprintf(fp, "# inate that is North-West of your study area – to avoid negative tile\n");
     fprintf(fp, "# numbers. Not used if DO_TILE = FALSE.\n");
-    fprintf(fp, "# Type: Double. Valid range: [-90,90]\n");
     fprintf(fp, "# Type: Double. Valid range: [-180,180]\n");
+    fprintf(fp, "# Type: Double. Valid range: [-90,90]\n");
   }
   fprintf(fp, "ORIGIN_LON = -25\n");
   fprintf(fp, "ORIGIN_LAT = 60\n");
@@ -251,16 +251,16 @@ void write_par_ll_atcor(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
-    fprintf(fp, "# This indicates if topographic correction should be performed. If TRUE,\n");
-    fprintf(fp, "# a DEM need to be given.\n");
+    fprintf(fp, "# This indicates if atmospheric correction should be performed. If TRUE,\n");
+    fprintf(fp, "# Bottom-of-Atmosphere reflectance is computed. If FALSE, only Top-of-Atmo-\n");
+    fprintf(fp, "# sphere reflectance is computed.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "DO_ATMO = TRUE\n");
 
   if (verbose){
-    fprintf(fp, "# This indicates if atmospheric correction should be performed. If TRUE,\n");
-    fprintf(fp, "# Bottom-of-Atmosphere reflectance is computed. If FALSE, only Top-of-Atmo-\n");
-    fprintf(fp, "# sphere reflectance is computed.\n");
+    fprintf(fp, "# This indicates if topographic correction should be performed. If TRUE,\n");
+    fprintf(fp, "# a DEM need to be given.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "DO_TOPO = TRUE\n");
