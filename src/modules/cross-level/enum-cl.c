@@ -206,7 +206,7 @@ const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_] = {
   { _INF_YEAR_, "YEAR" }, { _INF_DIFF_, "dDOY" }, { _INF_SEN_, "SENSOR" }};
 
 const tagged_enum_t _TAGGED_ENUM_SCR_COMB_[_SCR_COMB_LENGTH_] = {
-  { _SCR_COMB_ADD_,  "ADDITITVE" },  { _SCR_COMB_MUL_,  "MULTIPLICATIVE" }};
+  { _SCR_COMB_ADD_,  "ADDITIVE" },  { _SCR_COMB_MUL_,  "MULTIPLICATIVE" }};
 
 const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
   { _RGB_R_,  "RED" }, { _RGB_G_,  "GREEN" }, { _RGB_B_,  "BLUE" }};
