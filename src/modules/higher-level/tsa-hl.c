@@ -575,13 +575,10 @@ int error = 0;
 brick_compile_info_t *info = NULL;
 
 
-  nprod = 6 +              // TSS, RMS, TSI, STM, SPL, NRT
+  nprod = 5 +              // TSS, RMS, TSI, STM, NRT
           5 +              // folds
           5 +              // trend on folds
           5 +              // cat on folds
-          _LSP_LENGTH_ +   // phenometrics
-          _LSP_LENGTH_ +   // trend on phenometrics
-          _LSP_LENGTH_ +   // cat on phenometrics
           2 +              // polar-transformed coordinates
           _POL_LENGTH_ +   // polarmetrics
           _POL_LENGTH_ +   // trend on polarmetrics
