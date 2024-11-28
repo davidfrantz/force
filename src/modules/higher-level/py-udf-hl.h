@@ -39,7 +39,7 @@ Python UDF plug-in header
 extern "C" {
 #endif
 
-void register_python(par_hl_t *phl);
+int register_python(par_hl_t *phl);
 void deregister_python(par_hl_t *phl);
 void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
 void term_pyp(par_udf_t *udf);

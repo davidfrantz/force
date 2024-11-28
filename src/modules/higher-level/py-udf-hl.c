@@ -61,7 +61,7 @@ int date_from_bandname(date_t *date, char *bandname);
 --- phl:    HL parameters
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_python(par_hl_t *phl){
+int register_python(par_hl_t *phl){
 par_udf_t *udf;
 
 
@@ -75,17 +75,12 @@ par_udf_t *udf;
   } else if (phl->udf.pyp.out){
     udf = &phl->udf.pyp;
   } else {
-    exit(FAILURE);
+    return(CANCEL);
   }
-
 
   Py_Initialize();
 
-  if (_import_array() < 0) {
-    PyErr_Print();
-    PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import");
-    exit(FAILURE);
-  }
+  import_array();
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
@@ -185,7 +180,7 @@ par_udf_t *udf;
   printf("finished to register python interface\n");
   #endif
 
-  return;
+  return SUCCESS;
 }
 
 
