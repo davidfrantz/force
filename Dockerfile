@@ -39,7 +39,7 @@ ARG debug=disable
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
-COPY --chown=docker:docker . .
+COPY --chown=ubuntu:ubuntu . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
@@ -56,10 +56,8 @@ RUN echo "building FORCE" && \
 
 FROM davidfrantz/base:latest as force
 
-COPY --chown=docker:docker --from=force_builder $HOME/bin $HOME/bin
-COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
-
-WORKDIR /home/docker
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/bin $HOME/bin
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/force-udf $HOME/udf
 
 ENV R_HOME=/usr/lib/R
 ENV LD_LIBRARY_PATH=$R_HOME/lib

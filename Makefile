@@ -40,11 +40,13 @@ CURL_INCLUDES = -I/usr/include/curl -I/usr/include/x86_64-linux-gnu/curl
 CURL_LIBS = -L/usr/lib/x86_64-linux-gnu -lcurl
 CURL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 
-OPENCV_INCLUDES = -I/usr/local/include/opencv4
+OPENCV_INCLUDES = -I/usr/include/opencv4
 OPENCV_LIBS = -L/usr/local/lib -lopencv_core -lopencv_ml -lopencv_imgproc
 OPENCV_FLAGS = -Wl,-rpath=/usr/local/lib
 
-PYTHON_INCLUDES = $(shell python3-config --includes)
+NUMPY_INCLUDE_PATH := $(shell python3 -c "import numpy; print(numpy.get_include())")
+
+PYTHON_INCLUDES = $(shell python3-config --includes) -I$(NUMPY_INCLUDE_PATH)
 PYTHON_LIBS = $(shell (python3-config --ldflags --libs --embed || python3-config --ldflags --libs) | tr -d '\n')
 
 RSTATS_INCLUDES = $(shell R CMD config --cppflags)
