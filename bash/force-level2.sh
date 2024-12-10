@@ -86,7 +86,8 @@ function get_parameter(){
     exit 1
   else
     VALUE=$(echo "$LINE" | sed 's/.* *= *//g')
-    VALUE=$(echo "$VALUE" | sed 's/ *$//g')
+    VALUE=$(echo "$VALUE" | sed 's/#.*//g')
+    VALUE=$(echo "$VALUE" | sed 's/[[:space:]]*$//g')
   fi
 
   echo "$VALUE"
