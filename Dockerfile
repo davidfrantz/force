@@ -45,7 +45,7 @@ COPY --chown=docker:docker . .
 RUN echo "building FORCE" && \
   ./debug.sh $debug && \
   sed -i "/^INSTALLDIR=/cINSTALLDIR=$INSTALL_DIR/" Makefile && \
-  make -j && \
+  make -j$(nproc) && \
   make install && \
   make clean && \
   cd $HOME && \
