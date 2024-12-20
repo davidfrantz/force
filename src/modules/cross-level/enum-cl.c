@@ -51,7 +51,9 @@ const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_] = {
   { _SEN_S1AID_, "S1AID" }, { _SEN_S1BIA_, "S1BIA" }, 
   { _SEN_S1BID_, "S1BID" }, { _SEN_VVVHP_, "VVVHP" }, 
   { _SEN_MOD01_, "MOD01" }, { _SEN_MOD02_, "MOD02" }, 
-  { _SEN_MOD02_, "MODIS" }};
+  { _SEN_MOD02_, "MODIS" }, { _SEN_SEN2B_, "SEN2C" },
+  { _SEN_sen2c_, "sen2c" }, { _SEN_SEN2B_, "SEN2D" }, 
+  { _SEN_sen2a_, "sen2d" }};
 
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },
