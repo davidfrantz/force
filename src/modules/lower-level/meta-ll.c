@@ -751,6 +751,16 @@ int svgrid = 5000;
           b_rsr = _RSR_START_SEN2A_;
         } else if (strcmp(sensor, "SEN2B") == 0){
           b_rsr = _RSR_START_SEN2B_;
+        } else if (strcmp(sensor, "SEN2C") == 0){
+          #ifdef FORCE_DEBUG
+          printf("SEN2C: using SEN2A RSR. Adjust later!\n");
+          #endif
+          b_rsr = _RSR_START_SEN2A_;
+        } else if (strcmp(sensor, "SEN2D") == 0){
+          #ifdef FORCE_DEBUG
+          printf("SEN2D: using SEN2A RSR. Adjust later!\n");
+          #endif
+          b_rsr = _RSR_START_SEN2A_;
         } else {
           printf("unknown/unsupported Sentinel-2! "); return FAILURE;
         }
