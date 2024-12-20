@@ -109,6 +109,8 @@ const int _RSR_START_LND08_ = 21;
 const int _RSR_START_LND09_ = 21; // quick fix
 const int _RSR_START_SEN2A_ = 30;
 const int _RSR_START_SEN2B_ = 43;
+const int _RSR_START_SEN2C_ = 30; // quick fix
+const int _RSR_START_SEN2D_ = 30; // quick fix
 
 
 /** Relative Spectral Response @1nm [410-2400], courtesy of USGS/ESA
