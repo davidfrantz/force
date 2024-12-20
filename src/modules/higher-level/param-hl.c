@@ -1042,15 +1042,22 @@ const int  ns = _SEN_LENGTH_, nb = _WVL_LENGTH_;
 const char sensor[_SEN_LENGTH_][NPOW_10] = {
   "LND04", "LND05", "LND07",
   "LND08", "LND09", "SEN2A", 
-  "SEN2B", "sen2a", "sen2b", 
+  "SEN2B", "SEN2C", "SEN2D",
+  "sen2a", "sen2b", "sen2c",
+  "sen2d",
   "LNDLG", "SEN2L", "SEN2H", 
   "R-G-B", "S1AIA", "S1AID", 
   "S1BIA", "S1BID", "VVVHP", 
   "MOD01", "MOD02", "MODIS" };
 bool adjustable[_SEN_LENGTH_] = {
-  true,  true,  true,  true,  true,  true,  
-  true,  false, false, false, false, false, 
-  false, false, false, false, false, false, 
+  true,  true,  true,  
+  true,  true,  true,  
+  true,  true,  true,
+  false, false, false,
+  false,
+  false, false, false, 
+  false, false, false, 
+  false, false, false, 
   true,  true,  false };
 const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
@@ -1060,8 +1067,12 @@ const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 9 OLI  (legacy bands)
   { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
   { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
+  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2C MSI (land surface bands)
+  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2D MSI (land surface bands)
   { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
   { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
+  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2C MSI (high-res bands)
+  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2D MSI (high-res bands)
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat legacy bands
   { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
   { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
