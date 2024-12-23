@@ -56,6 +56,9 @@ RUN echo "building FORCE" && \
 
 FROM davidfrantz/base:ubuntu24 AS force
 
+# FIXME: workaround to make CI tests (that run as uid < 1000) pass.
+RUN chmod 777 /home/ubuntu
+
 COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/bin $HOME/bin
 COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/force-udf $HOME/udf
 
