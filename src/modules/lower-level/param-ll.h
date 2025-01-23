@@ -54,6 +54,7 @@ typedef struct {
   char *d_out;            // exact output directory
   char *fdem;             // Digital Elevation Model
   char *d_coreg;         // Master image for coregistration
+  char *f_aoi;            // AOI vector file
   char *f_tile;           // tile allow-list
   char *f_queue;          // file queue
   char *d_aod;            // directory of AOD LUT

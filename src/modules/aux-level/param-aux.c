@@ -90,6 +90,29 @@ void write_par_ll_dirs(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: lower
++++ level AOI pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_ll_aoi(FILE *fp, bool verbose){
+
+  fprintf(fp, "\n# MASKING\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# You can use a vector file to clip your output to a specific AOI.\n");
+    fprintf(fp, "# Note that this mask will be applied after the radiomateric correction, \n");
+    fprintf(fp, "# but before the reprojection/tiling. NULL disables clipping (default)\n");
+    fprintf(fp, "# Type: full file path\n");
+  }
+  fprintf(fp, "FILE_AOI = NULL\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: lower
 +++ level DEM pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?

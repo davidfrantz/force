@@ -38,6 +38,7 @@ extern "C" {
 #endif
 
 void write_par_ll_dirs(FILE *fp, bool verbose);
+void write_par_ll_aoi(FILE *fp, bool verbose);
 void write_par_ll_dem(FILE *fp, bool verbose);
 void write_par_ll_cube(FILE *fp, bool verbose);
 void write_par_ll_atcor(FILE *fp, bool verbose);
