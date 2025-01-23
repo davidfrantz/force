@@ -22,7 +22,6 @@ id <- "character" %>% vector(nlog)
 for (i in 1:nlog) {
 
   tmp <- readLines(flog[i])
-  id[i] <- log[i]
 
   if (length(grep("Image:", tmp)) > 0){
     id[i] <- tmp %>% 
@@ -31,13 +30,14 @@ for (i in 1:nlog) {
       basename()
   } else {
     id[i] <- tmp %>% 
+      paste(collapse = " ") %>%
       gsub(":.*", "", .) %>%
       gsub("/ ", "", .) %>%
       basename()
   }
 
   log[i] <- tmp %>%
-    paste(collapse = " ")
+    paste(collapse = " ") %>%
     gsub(".*Start core processing", "", .) %>%
     gsub("Core processing signaled.*", "", .)
                       
@@ -63,11 +63,6 @@ ss <- log %>%
      gsub(".*([0-9]{2}) secs.*", "\\1", .) %>%
      as.numeric()
 time <- mm + ss / 60
-
-id <- log %>%
-     gsub(":.*", "", .) %>%
-     gsub("/ ", "", .) %>%
-     basename()
 
 id_split <- id %>% strsplit("_")
 
