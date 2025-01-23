@@ -5,9 +5,9 @@ force-level1-csd
 
 .. note:: 
     
-    FORCE Level 1 CSD only provide Sentinel-2 and `Landsat Collection 1 <https://www.usgs.gov/landsat-missions/landsat-collection-1>`_ data. For downloading of `Landsat Collection 2 <https://www.usgs.gov/landsat-missions/landsat-collection-2>`_ data use :ref:`force-level1-landsat <level1-landsat>`.
+    For downloading of `Landsat Collection 2 <https://www.usgs.gov/landsat-missions/landsat-collection-2>`_ data use :ref:`force-level1-landsat <level1-landsat>`.
 
-FORCE can download Landsat and Sentinel-2 data from cloud storage providers (currently Google Cloud Storage).
+FORCE can download Sentinel-2 data from cloud storage providers (currently Google Cloud Storage).
 
 ``force-level1-csd`` allows to search for image acquisitions that precisely match the user's requirements, manages data pool, and prepares/updates the file queue required for level 2 procesing.
 
@@ -65,8 +65,6 @@ Several optional arguments can be used to further refine the search.
     | (2) a shapefile (point/polygon/line). On-the-fly reprojection is provided,
     |     but using EPSG4326 is recommended.
     | (3) scene identifier:
-    |     Landsat: Path/Row as ``PPPRRR``. Make sure to keep leading zeros:
-    |       correct: 181034, incorrect: 18134
     |     Sentinel-2: MGRS tile as ``TXXXXX``. Make sure to keep the leading ``T``
     |       before the MGRS tile number.
     |     You can either give the path to a file, or give the IDs on the command line.
@@ -75,7 +73,7 @@ Several optional arguments can be used to further refine the search.
 
 
 
-Running the search without any optional parameters will return all Landsat and Sentinel-2 scenes for the specified ``aoi``.
+Running the search without any optional parameters will return all Sentinel-2 scenes for the specified ``aoi``.
 To narrow down the search results, use the following parameters.
 
 * **-c | \--cloudcover**
@@ -91,19 +89,17 @@ To narrow down the search results, use the following parameters.
 * **-s | \--sensor**
     | Sensors to include in the query, comma-separated.
     | Valid sensors:
-    | Landsat
-    | ``LT04`` - Landsat 4 TM
-    | ``LT05`` - Landsat 5 TM
-    | ``LE07`` - Landsat 7 ETM+
-    | ``LC08`` - Landsat 8 OLI
     | Sentinel
     | ``S2A`` - Sentinel-2A MSI
     | ``S2B`` - Sentinel-2B MSI
-    | Default: ``LT04,LT05,LE07,LC08,S2A,S2B``
+    | ``S2C`` - Sentinel-2C MSI
+    | ``S2D`` - Sentinel-2D MSI (future-ready)
+    | Default: ``S2A,S2B,S2C,S2D``
 
 * **-t | \--tier**
     | Landsat collection tier level. Valid tiers: ``T1,T2,RT``
     | Default: ``T1``
+    | deprecated option, has no effect anymore
 
 
 The remaining optional arguments are used to perform a search without actually downloading data, store the metadata of search results, and download / update the metadata catalogues.
@@ -114,9 +110,9 @@ The remaining optional arguments are used to perform a search without actually d
 
 * **-k | \--keep-meta**
     | Will write the results of the query to the level 1 datapool directory.
-    | Two files will be created if Landsat and Sentinel-2 data is queried
+    | Two files will be created if Sentinel-2 data is queried
     | at the same time. Filename: ``csd_metadata_[satellite]_YYYY-MM-DDTHH-MM-SS``
-    | ``[satellite]`` refers to either Landsat or Sentinel-2.
+    | ``[satellite]`` refers to Sentinel-2.
 
 * **-l | \--logs**
     | Check for FORCE Level-2 log files and remove any products from the search
@@ -126,7 +122,7 @@ The remaining optional arguments are used to perform a search without actually d
 * **-u | \--update**
     | Will create or the metadata catalogue (download and extract from GCS)
     | If this option is used, only one mandatory argument is expected (metadata-dir).
-    | Use the -s option to only update Landsat or Sentinel-2 metadata.
+    | Use the -s option to only update Sentinel-2 metadata.
 
 .. note::
 
