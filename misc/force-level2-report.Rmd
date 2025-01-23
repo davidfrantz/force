@@ -17,15 +17,35 @@ flog <- params$dlog %>% dir(".log$", full.names = TRUE)
 nlog <- flog %>% length()
 
 log <- "character" %>% vector(nlog)
+id <- "character" %>% vector(nlog)
 
 for (i in 1:nlog) {
-  log[i] <- flog[i] %>%
-           readLines() %>%
-           paste(collapse = " ") %>%
-           gsub(".*Start core processing", "", .) %>%
-           gsub("Core processing signaled.*", "", .)
+
+  tmp <- readLines(flog[i])
+  id[i] <- log[i]
+
+  if (length(grep("Image:", tmp)) > 0){
+    id[i] <- tmp %>% 
+      grep("Image:", ., value = TRUE) %>%
+      gsub("/ ", "", .) %>%
+      basename()
+  } else {
+    id[i] <- tmp %>% 
+      gsub(":.*", "", .) %>%
+      gsub("/ ", "", .) %>%
+      basename()
+  }
+
+  log[i] <- tmp %>%
+    paste(collapse = " ")
+    gsub(".*Start core processing", "", .) %>%
+    gsub("Core processing signaled.*", "", .)
+                      
 }
 ```
+
+
+
 
 
 ```{r prepare-data, include = FALSE}
