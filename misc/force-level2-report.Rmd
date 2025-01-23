@@ -21,7 +21,9 @@ log <- "character" %>% vector(nlog)
 for (i in 1:nlog) {
   log[i] <- flog[i] %>%
            readLines() %>%
-           paste(collapse = " ")
+           paste(collapse = " ") %>%
+           gsub(".*Start core processing", "", .) %>%
+           gsub("Core processing signaled.*", "", .)
 }
 ```
 
