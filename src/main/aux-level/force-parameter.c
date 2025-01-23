@@ -307,6 +307,7 @@ FILE *fp;
   
   if (args.level == _LOWER_LEVEL_){
     write_par_ll_dirs(fp, args.comments);
+    write_par_ll_aoi(fp, args.comments);
     write_par_ll_dem(fp, args.comments);
     write_par_ll_cube(fp, args.comments);
     write_par_ll_atcor(fp, args.comments);

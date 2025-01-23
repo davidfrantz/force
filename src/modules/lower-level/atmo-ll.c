@@ -45,6 +45,7 @@ int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *to
 short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI);
 int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI);
 int atmo_elevdep(par_ll_t *pl2, atc_t *atc, brick_t *QAI, top_t *TOP);
+int apply_aoi(brick_t *QAI, brick_t *AOI);
 brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
 brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
 brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
@@ -931,6 +932,37 @@ small *xy_interp = NULL;
   #ifdef FORCE_CLOCK
   proctime_print("elevation-dependent atm. modelling", TIME);
   #endif
+
+  return SUCCESS;
+}
+
+
+/** This function applies the AOI and sets QAI to nodata
+--- QAI:    Quality Assurance Information
+--- AOI:    Area of Interest
++++ Return: SUCCESS/FAILURE/CANCEL
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int apply_aoi(brick_t *QAI, brick_t *AOI){
+int nc, p;
+small *aoi_ = NULL;
+
+
+  if (AOI == NULL) return CANCEL;
+
+  nc = get_brick_ncells(QAI);
+  aoi_ = get_band_small(AOI, 0);
+
+  #pragma omp parallel shared(QAI, aoi_, nc) default(none) 
+  {
+    
+    #pragma omp for
+    for (p=0; p<nc; p++){
+      if (!aoi_[p]) set_off(QAI, p, true);
+    }
+
+  }
+
+  free_brick(AOI);
 
   return SUCCESS;
 }
@@ -1986,7 +2018,7 @@ brick_t **LEVEL2 = NULL;
 --- nprod:   number of products
 +++ Return:  array of product bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, top_t *TOP, int *nprod){
+brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *AOI, top_t *TOP, int *nprod){
 int b, nb;
 brick_t  *WVP    = NULL;
 brick_t **L2 = NULL;
@@ -2055,6 +2087,13 @@ brick_t **L2 = NULL;
           printf("error in topographic correction. "); return NULL;}
     }
 
+  }
+
+  /** Apply AOI mask
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (apply_aoi(QAI, AOI) == FAILURE){
+    fprintf(stderr, "Failed to apply AOI mask\n");
+    return NULL;
   }
 
 

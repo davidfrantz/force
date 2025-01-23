@@ -40,6 +40,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include "../../modules/cross-level/brick-cl.h"
 #include "../../modules/cross-level/cube-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
+#include "../../modules/cross-level/vector-cl.h"
 #include "../../modules/lower-level/param-ll.h"
 #include "../../modules/lower-level/meta-ll.h"
 #include "../../modules/lower-level/cube-ll.h"
@@ -158,6 +159,7 @@ top_t   *TOP = NULL;
 brick_t *DN  = NULL;
 brick_t *TOA = NULL;
 brick_t *QAI = NULL;
+brick_t *AOI = NULL;
 
 brick_t **LEVEL2 = NULL;
 int nprod;
@@ -235,6 +237,13 @@ GDALDriverH driver;
       printf("Compiling nodata / saturation masks failed.\n"); return FAILURE;}
 
 
+    /** warp and rasterize AOI
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+    if (strcmp(pl2->f_aoi, "NULL") != 0){
+      AOI = rasterize_vector_from_disc(pl2->f_aoi, DN);
+    }
+
+
     /** sun-target-view geometry
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (sun_target_view(pl2, meta, mission, atc, QAI) == FAILURE){
@@ -279,7 +288,7 @@ GDALDriverH driver;
 
     /** radiometric correction
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if ((LEVEL2 = radiometric_correction(pl2, meta, mission, atc, multicube->cube[c], TOA, QAI, TOP, &nprod)) == NULL){
+    if ((LEVEL2 = radiometric_correction(pl2, meta, mission, atc, multicube->cube[c], TOA, QAI, AOI, TOP, &nprod)) == NULL){
       printf("Error in radiometric module.\n"); return FAILURE;}
     free_atc(atc);
 
