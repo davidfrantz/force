@@ -25,6 +25,8 @@
 # Copyright (C) 2020-2022 Stefan Ernst
 # Contact: stefan.ernst@hu-berlin.de
 
+# 2025 modified by David Frantz (S2C/S2D, disabled Landsat)
+
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -124,12 +126,13 @@ which_satellite() {
   SENSIN=$(echo $SENSIN | tr '[:lower:]' '[:upper:]')  # convert sensor strings to upper case to prevent unnecessary headaches
   for SENSOR in $(echo $SENSIN | sed 's/,/ /g'); do
     case $SENSOR in
-      S2A|S2B)
+      S2A|S2B|S2C|S2D)
         SENTINEL=1 ;;
-      LT04|LT05|LE07|LC08)
-        LANDSAT=1 ;;
+#      LT04|LT05|LE07|LC08)
+#        echo "Landsat "LANDSAT=1 ;;
       *)
-        show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,LT04,LT05,LE07,LC08")"
+        #show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,LT04,LT05,LE07,LC08")"
+        show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,S2C,S2D")"
         exit 1
     esac
   done
@@ -138,7 +141,8 @@ which_satellite() {
 
 # ============================================================
 # Initialize arguments and parse command line input
-SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
+#SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
+SENSIN="S2A,S2B,S2C,S2D"
 DATEMIN="19700101"
 DATEMAX=$(date +%Y%m%d)
 CCMIN=0
@@ -419,7 +423,7 @@ get_data() {
   PRINTNAME=${SATELLITE^}
   case $SATELLITE in
     landsat) SENSORS=$(echo $SENSIN | grep -o "L[C,E,T]0[4,5,7,8]") ;;
-    sentinel2) SENSORS=$(echo $SENSIN | grep -o "S2[A-B]") ;;
+    sentinel2) SENSORS=$(echo $SENSIN | grep -o "S2[A-D]") ;;
   esac
 
 
