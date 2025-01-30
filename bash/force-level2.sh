@@ -185,6 +185,9 @@ function process_this_image(){
     file_not_found "$FILE_IMAGE" 2>> "$FILE_LOG"
     EXTRACT_IMAGE=$DIR_TEMP/${BASE_IMAGE//.zip/.SAFE}
 
+    # when downloaded from CDSE, make sure that .SAFE is included only once
+    EXTRACT_IMAGE=${EXTRACT_IMAGE//.SAFE.SAFE/.SAFE}
+
     timeout -k "$TIMEOUT_ZIP" 10m unzip -qq -d "$DIR_TEMP" "$FILE_IMAGE" &>/dev/null
     if [ ! $? -eq 0 ]; then
       UNPACK_STATUS="FAIL"
