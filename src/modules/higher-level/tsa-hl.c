@@ -863,8 +863,9 @@ int nchar;
   set_brick_dirname(brick, dname);
   set_brick_provdir(brick, phl->d_prov);
 
-  nchar = snprintf(fname, NPOW_10, "%04d-%04d_%03d-%03d_HL_TSA_%s_%s_%s", 
-    phl->date_range[_MIN_].year, phl->date_range[_MAX_].year, 
+  nchar = snprintf(fname, NPOW_10, "%04d%02d%02d-%04d%02d%02d_%03d-%03d_HL_TSA_%s_%s_%s", 
+    phl->date_range[_MIN_].year, phl->date_range[_MIN_].month, phl->date_range[_MIN_].day, 
+    phl->date_range[_MAX_].year, phl->date_range[_MAX_].month, phl->date_range[_MAX_].day, 
     phl->doy_range[_MIN_], phl->doy_range[_MAX_], 
     phl->sen.target, phl->tsa.index_name[idx], info->prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
