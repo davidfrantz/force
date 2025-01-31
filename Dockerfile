@@ -43,15 +43,14 @@ COPY --chown=docker:docker . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
-  ./splits.sh enable && \
   ./debug.sh $debug && \
-  sed -i "/^BINDIR=/cBINDIR=$INSTALL_DIR/" Makefile && \
-  make -j && \
+  sed -i "/^INSTALLDIR=/cINSTALLDIR=$INSTALL_DIR/" Makefile && \
+  make -j$(nproc) && \
   make install && \
   make clean && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
-  force && \
+  force-info && \
 # clone FORCE UDF
   git clone https://github.com/davidfrantz/force-udf.git
 
@@ -62,4 +61,7 @@ COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
 
 WORKDIR /home/docker
 
-CMD ["force"]
+ENV R_HOME=/usr/lib/R
+ENV LD_LIBRARY_PATH=$R_HOME/lib
+
+CMD ["force-info"]

@@ -3,4 +3,4 @@
 Develop version
 ===============
 
-  .. -- No further changes yet.
+ No further changes yet.

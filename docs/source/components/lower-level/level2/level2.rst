@@ -41,14 +41,14 @@ It spawns jobs by using multiple ssh logins; the number of allowed ssh logins pe
 With a small change in the script and passwordless access to other machines, GNU parallel also allows for parallelization across a cluster. 
 
 It is highly advised to monitor the workload.
-Swapping should be prevented – in this case, decrease the number of parallel jobs.
+Swapping should be prevented - in this case, decrease the number of parallel jobs.
 
 The number of CPUs can be re-adjusted while(!) force-level2 is running.
-A file ‘cpu-$TIME’ is created in the temporary directory.
+A file ``cpu-$TIME`` is created in the temporary directory.
 This file can be modified.
 Note that the effect is not immediate, as the load is only adjusted after one of the running jobs (images) is finished.
 
 To prevent an I/O jam at startup (by reading / extracting a lot of data simultaneously), a delay (in seconds) might be necessary.
 GNU parallel will wait that long before starting a new job.
-The necessary delay (or none) is dependent on your system’s architecture (I/O speed etc), on sensor to be processed, and whether packed archives or uncompressed images are given as input.
+The necessary delay (or none) is dependent on your system's architecture (I/O speed etc), on sensor to be processed, and whether packed archives or uncompressed images are given as input.
 

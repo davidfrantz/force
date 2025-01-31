@@ -31,7 +31,7 @@ force-level1-landsat search
     | The area of interest. Valid input:
     | (1) .txt - text file containing one tile per line in the format ``PPPRRR``
     |     (``P`` = path, ``R`` = row)
-    |     Keep padding zeroes. Correct: ``194023``, incorrect: ``19432``
+    |     Keep padding zeroes. Correct: ``194023``, incorrect: ``19423``
     | (2) .shp, .gpkg, .geojson - vector file containing point, line, or polygon geometries.
 
 * output-dir

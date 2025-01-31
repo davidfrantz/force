@@ -29,41 +29,27 @@ export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export MISC="$BIN/force-misc"
 
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
+
 MANDATORY_ARGS=1
 
 export REPORT_EXE="R"
 export REPORT_TEMPLATE="$MISC/force-level2-report.Rmd"
 
-echoerr() { echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=true # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
-cmd_not_found() {      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-export -f cmd_not_found
-
-file_not_found() {      # check required files
-  for file in "$@"; do
-    stat=`which $file`
-    if [ ! -r $file ] ; then echoerr "\"$file\": file not found, terminating..."; exit 1; fi
-  done
-}
-export -f file_not_found
-
 help () {
 cat <<HELP
 
-Usage: $PROG [-ho] dir-log
+Usage: $PROG [-hvi] [-o] dir-log
 
-  -h  = show his help
-  -o  = output file
+  -h = show this help
+  -v = show version
+  -i = show program's purpose
+
+  -o = output file
         defaults to FORCE_L2PS_YYYYMMDD-HHMMSS.html
 
 $PROG:  generate Level 2 processing report
@@ -78,7 +64,7 @@ cmd_not_found "$REPORT_EXE";
 file_not_found "$REPORT_TEMPLATE";
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o ho: --long help,output: -n "$0" -- "$@"`
+ARGS=`getopt -o hvio: --long help,version,info,output: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
@@ -86,7 +72,9 @@ eval set -- "$ARGS"
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -o|--output) OUTPUT="$2"; shift ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Generate Level 2 processing report"; exit 0;;
+    -o|--output) OUTREPORT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -98,7 +86,8 @@ if [ $# -lt $MANDATORY_ARGS ] ; then
   echoerr "Mandatory argument is missing."; help
 fi
 
-export LOGDIR=$1
+LOGDIR=$(readlink -f $1) # absolute directory path
+export LOGDIR
 
 if [ ! -d $LOGDIR ]; then
   echoerr "$LOGDIR does not exist."; help
@@ -108,18 +97,29 @@ if [ ! -d $LOGDIR ]; then
   echoerr "$LOGDIR does not exist."; help
 fi
 
-if [ -z "$OUTPUT" ]; then
+if [ -z "$OUTREPORT" ]; then
   if [ ! -w $LOGDIR ]; then
     echoerr "$LOGDIR is not writeable."; help
   fi
   TIME=$(date +"%Y%m%d-%H%M%S")
-  OUTPUT="$LOGDIR/FORCE_L2PS_$TIME.html"
+  OUTREPORT="$LOGDIR/FORCE_L2PS_$TIME.html"
 fi
-export OUTPUT
-export OUTDIR=`dirname $OUTPUT`;
+
+if [[ $OUTREPORT != *.html ]]; then
+  echoerr "$OUTREPORT extension must be .html"; help
+fi
+OUTREPORT=$(readlink -f "$OUTREPORT") # absolute directory path
+export OUTREPORT
+
+OUTTABLE="${OUTREPORT%.*}.csv"
+export OUTTABLE
+
+OUTDIR=$(dirname "$OUTREPORT")
+export
+
 
 debug "binary directory: $BIN"
 debug "log directory: $LOGDIR"
-debug "output: $OUTPUT"
+debug "output: $OUTREPORT"
 
-$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTPUT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR'))"
+$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTREPORT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR', ftable = '$OUTTABLE'))"

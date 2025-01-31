@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -48,6 +48,11 @@ FILE_OUTPUT_OPTIONS = NULL
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_EXPLODE = FALSE
+# This parameter controls whether the output is written in one folder,
+# or whether several subfolders per product type will be generated to better
+# structure the output.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_SUBFOLDERS = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
@@ -61,6 +66,20 @@ OUTPUT_EXPLODE = FALSE
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
 NTHREAD_WRITE = 4
+# Use STREAMING = FALSE to disable streaming. This will perform reading, 
+# computing and writing after one another in sequential mode.
+# Each operation will still be parallelized with above settings.
+# Disabling streaming might be necessary for some UDFs that otherwise
+# produce threading conflicts with the internally used OpenMP functionality.
+# Type: Logical. Valid values: {TRUE,FALSE}
+STREAMING = TRUE
+# This module will display progress information on screen. By default, the
+# progress information overwrites itself to produce a pretty displayal. 
+# However, this can cause error messages (or printing in UDFs) to be overwritten.
+# If disabled (FALSE), the progress information will be simply be appended
+# on screen (stdout).
+# Type: Logical. Valid values: {TRUE,FALSE}
+PRETTY_PROGRESS = TRUE
 
 # PROCESSING EXTENT AND RESOLUTION
 # ------------------------------------------------------------------------
@@ -108,23 +127,38 @@ USE_L2_IMPROPHE = FALSE
 # Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
-# LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
-# Sentinel-2B), sen2a (4-band Sentinel-2A), sen2b (4-band Sentinel-2B),
+# LND08/09 (6-band Landsat 8-9 OLI), SEN2[A-D] (10-band Sentinel-2[A-D])
+# sen2[a-d] (4-band Sentinel-2[A-D])
 # S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-
 # nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID
 # (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
 # (7-band Aqua MODIS).
 # The resulting outputs are named according to their band designation, i.e. 
-# LNDLG ((6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
+# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
 # bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or
 # VVVHP (VV/VH polarized), MODIS (7-band MODIS).
 # BAP Composites with such a band designation can be input again (e.g. 
 # SENSORS = LNDLG).
 # Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
-#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
-SENSORS = LND08 LND09 SEN2A SEN2B
+#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
+SENSORS = LND08 LND09 SEN2A SEN2B SEN2C
+# Main product type to be used. Usually, this is a reflectance product like BOA.
+# When using composites, you may use BAP. This can be anything, but make sure that
+# the string can uniquely identify your product. As an example, do not use LEVEL2.
+# Note that the product should contain the bands that are to be expected with the
+# sensor used, e.g. 10 bands when sensor is SEN2A.
+# Type: Character. Valid values: {BOA,TOA,IMP,BAP,SIG,...}
+PRODUCT_TYPE_MAIN = BOA
+# Quality product type to be used. This should be a bit flag product like QAI.
+# When using composites, you may use INF. This can be anything, but make sure that
+# the product should contain quality bit flags as outputted by FORCE L2PS.
+# As an exception, it is also possible to give NULL if you don't have any quality masks.
+# In this case, FORCE will only be able to filter nodata values, but no other quality
+# flags as defined with SCREEN_QAI.
+# Type: Character. Valid values: {QAI,INF,NULL,...}
+PRODUCT_TYPE_QUALITY = QAI
 # Perform a spectral adjustment to Sentinel-2?
-# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, 
+# This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
 # A material-specific spectral harmonization will be performed, which will convert the 
 # spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be 
@@ -140,7 +174,7 @@ SPECTRAL_ADJUST = FALSE
 #   SATURATION,SUN_LOW,ILLUMIN_NONE,ILLUMIN_POOR,ILLUMIN_LOW,SLOPED,WVP_NONE}
 SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUBZERO SATURATION
 # Threshold for removing outliers. Triplets of observations are used to determine
-# the overall noise in the time series by computinglinearly interpolating between
+# the overall noise in the time series by computing linearly interpolating between
 # the bracketing observations. The RMSE of the residual between the middle value
 # and the interpolation is the overall noise. Any observations, which have a
 # residual larger than a multiple of the noise are iteratively filtered out
@@ -149,9 +183,10 @@ SCREEN_QAI = NODATA CLOUD_OPAQUE CLOUD_BUFFER CLOUD_CIRRUS CLOUD_SHADOW SNOW SUB
 # can be restored if its residual is lower than a multiple of the noise
 # (BELOW_NOISE). Higher/Lower values will restore observations more aggres-
 # sively/conservative. Give 0 to both parameters to disable the filtering.
+# ABOVE_NOISE = 3, BELOW_NOISE = 1 are parameters that have worked in some settings.
 # Type: Float. Valid range: [0,...
-ABOVE_NOISE = 3
-BELOW_NOISE = 1
+ABOVE_NOISE = 0
+BELOW_NOISE = 0
 
 # PROCESSING TIMEFRAME
 # ------------------------------------------------------------------------
@@ -161,7 +196,7 @@ BELOW_NOISE = 1
 DATE_RANGE = 2010-01-01 2019-12-31
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
-# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
+# 2019-12-31, DOY_RANGE = 91 273 will use all April-September observations from
 # 2010-2019. If you want to extend this window over years give DOY min > 
 # DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 
 # will use all October-March observations from 2010-2019.
@@ -204,7 +239,7 @@ DIR_COARSE = NULL
 # the corresponding years, need to be the same for all files.
 # Type: List with basename of files
 BASE_COARSE = NULL
-# This parameter defines year, which corresponds to he 1st band of the
+# This parameter defines year, which corresponds to the 1st band of the
 # continuous fields.
 # Type: Integer. Valid values: [1900,2100]
 COARSE_1ST_YEAR = 2000

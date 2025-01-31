@@ -87,7 +87,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
 
     sudo apt-get install unzip
 
-* **lockfile-progs** is used to place a temporary lock on file queues
+* **lockfile-progs** is used to place a temporary lock on file queues.
   The utility is already included in some distributions.
   The software can be installed with:
 
@@ -145,8 +145,10 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
     Rscript -e 'install.packages("stringi",   repos="https://cloud.r-project.org")'
     Rscript -e 'install.packages("knitr",     repos="https://cloud.r-project.org")'
     Rscript -e 'install.packages("dplyr",     repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("snow",      repos="https://cloud.r-project.org")'
+    Rscript -e 'install.packages("snowfall",  repos="https://cloud.r-project.org")'
 
-* **OpenCV** is used for machine learning and image processing tasks
+* **OpenCV** is used for machine learning and image processing tasks.
   We developed the code using OpenCV v. 4.1. 
   The installation process might need some more dependencies, e.g. ``cmake``.
   The software needs to be installed manually. 
@@ -166,7 +168,7 @@ FORCE can also be installed on other Liunx distributions (e.g. CentOS). The inst
      sudo make install
      make clean
 
-* **aria2** is used to download Landsat Level 1 product bundles with ``force-level1-landsat``
+* **aria2** is used to download Landsat Level 1 product bundles with ``force-level1-landsat``.
 
   .. code-block:: bash
 

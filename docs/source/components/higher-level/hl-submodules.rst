@@ -41,12 +41,12 @@ Depending on the parameter file, the program will figure out which submodule to 
    :maxdepth: 2
 
    l3/index.rst
-   tsa/index.rst
    cso/index.rst
+   tsa/index.rst
    ml/index.rst
    txt/index.rst
    lsm/index.rst
    smp/index.rst
-   l2i/index.rst
    cfi/index.rst
+   l2i/index.rst
 

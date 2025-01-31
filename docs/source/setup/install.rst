@@ -85,27 +85,6 @@ To install FORCE with all "bleeding-edge features", consider to use the develop 
   If you are running different versions - or want to make sure to always use the latest version - consider using pre-built Docker images, see :ref:`docker`.
 
 
-Installation with optional software
------------------------------------
-
-* Install with SPLITS.
-
-  Follow these steps before step 3 in the installation instruction:
-
-  a) Install SPLITS, see :ref:`depend-opt`
-
-  b) Enable SPLITS in FORCE
-
-     .. code-block:: bash
-     
-       cd ~/src/force
-       ./splits.sh enable
-
-  c) Proceed with the installation of FORCE
-
-  In the pre-built Docker images, FORCE is already installed with optional software, see :ref:`docker`.
-
-
 Installation in DEBUG mode
 --------------------------
 

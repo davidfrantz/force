@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# a hook that is executed before each commmit on develop (locally)
+#
+# it ensures that a software version with time stamp
+# uniquely identifies each commmit
+#
+# note: will this cause merge conflicts when 
+# collaborators change the version number or
+# version number is changed on GitHub?
+#
+# this script can be installed with: 
+# ./pre-commit install
+
+
+if [ $# -eq 1 ] && [ "$1" == "install" ]; then
+  cp "$0" -t .git/hooks/
+  exit 0
+fi
+
+FILE="misc/force-version.txt"
+
+if ! grep 'dev' "$FILE" &> /dev/null; then
+  exit 0
+fi
+
+VERSION=$(sed -E 's/:::.*//' "$FILE")
+TIME=$(date -u +"%Y-%m-%d_%H:%M:%S")
+
+printf "%s:::%s\n" "$VERSION" "$TIME" > "$FILE"
+
+git add "$FILE"
+
+exit 0

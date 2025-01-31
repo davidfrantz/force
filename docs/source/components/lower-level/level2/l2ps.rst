@@ -3,10 +3,10 @@
 force-l2ps
 ==========
 
-The hidden workhorse of FORCE L2PS is force-l2ps, which is a lower-level routine called from within :ref:`level2-bulk` and :ref:`level2-wrapper`.
+The hidden workhorse of FORCE L2PS is ``force-l2ps``, which is a lower-level routine called from within :ref:`level2-bulk`.
 
 It processes one single image.
-For the majority of users, it is recommended to use force-level2 instead of directly calling force-l2ps.
+For the majority of users, it is recommended to use force-level2 instead of directly calling ``force-l2ps``.
 However, for specific purposes (e.g. testing/debugging or or if you need/want to implement your own job scheduler), the expert user may want to use this program directly.
 
 Usage
@@ -21,8 +21,8 @@ Usage
 * image-dir
 
   | The 1st argument is the directory that contains the image data.
-  | In case of Landsat, the *.tar.gz archive needs to be extracted before processing.
-  | In case of Sentinel-2, the *.zip archive needs to extracted before processing and either the ``.SAFE`` directory or one tile (directory) within the ``GRANULE`` directory must be given as input.
+  | In case of Landsat, the ``*.tar.gz`` archive needs to be extracted before processing.
+  | In case of Sentinel-2, the ``*.zip`` archive needs to extracted before processing and either the ``.SAFE`` directory or one tile (directory) within the ``GRANULE`` directory must be given as input.
 
 * parameter-file
 

@@ -25,34 +25,29 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=2
 
 export CALC_EXE="gdal_calc.py"
 export PARALLEL_EXE="parallel"
 
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=false # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
-cmd_not_found(){      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-export -f cmd_not_found
-
-
 help(){
 cat <<HELP
 
-Usage: $PROG [-sldobj] input-basename calc-expr
+Usage: $PROG [-hvi] [-sldobj] input-basename calc-expr
 
   optional:
+  -h  = show this help
+  -v  = show version
+  -i  = show program's purpose
+
   -s = pixel resolution of cubed data, defaults to 10
   -l = input-layer: band number in case of multi-band input rasters,
        defaults to 1
@@ -64,7 +59,7 @@ Usage: $PROG [-sldobj] input-basename calc-expr
   -b = basename of output file (without extension)
        defaults to the basename of the input-file, 
        appended by '_procmask'
-  -j = number of jobs, defaults to 'as many as possible'
+  -j = number of jobs, defaults to 100%
 
   Positional arguments:
   - input-basename: basename of input data
@@ -121,12 +116,12 @@ LAYER=1
 DINP=$PWD
 DOUT=$PWD
 OBASE="DEFAULT"
-NJOB=0
+NJOB="100%"
 
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) echo "version-print to be implemented"; exit 0;;
+    -v|--version) force_version; exit 0;;
     -i|--info) echo "Processing masks from raster images"; exit 0;;
     -s|--resolution) RES="$2"; shift ;;
     -l|--layer) LAYER="$2"; shift;;

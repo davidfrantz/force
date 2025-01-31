@@ -46,8 +46,8 @@ WITHIN_CLASS_MIXING = TRUE
 # Class likelihood, i.e. what is the statitical likelihood of drawing an
 # endmember from a specific class. This parameter can be set to PROPORTIONAL
 # or EQUALIZED. If PROPORTIONAL, the likelihood is based on the number of 
-# samples given for each class. If EQUALIZED, the same likelihhod is given 
-# to all classes. Alternatively, custom likelihhods can be defined. In this 
+# samples given for each class. If EQUALIZED, the same likelihood is given 
+# to all classes. Alternatively, custom likelihoods can be defined. In this 
 # case, a likelihood needs to be given for each class given in the response 
 # file (FILE_RESPONSE), and the sum needs to be 1.
 # Type: Character. Valid values: {PROPORTIONAL,EQUALIZED} OR
@@ -62,7 +62,7 @@ ITERATIONS = 10
 # a beach and ocean endmember would result in 70%, 0% and 30% fractions for 
 # target classes 1, 2, and 3, respectively. Multiple classes can be given, 
 # i.e. output tables will be generated for each target class.
-# Type: Integer list. Valid values: [1,n-class
+# Type: Integer list. Valid values: [1,n-class]
 TARGET_CLASS = 1 2 3 4
 # What classes should be considered for mixing? Default: use all classes.
 # You can however select individual classes. If custom likelihoods are defined

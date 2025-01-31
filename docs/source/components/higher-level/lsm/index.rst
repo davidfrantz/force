@@ -3,24 +3,18 @@
 Landscape Metrics
 =================
 
+The Landscape Metrics submodule of HLPS computes area depending metrics or patches from several input features. This metrics characterize the structure of the landscape and can be used as training data for machine learning.
+Landscape metrics are computed for pixels covererd by the foreground class, no metrics are computed for the pixels covered by the background class.
+The foreground class is defined by the type of the threshold for each feature given in the parameter-file. All pixels that are greater than, lower than or equal to this threshold are interpreted as foreground class (in dependence of threshold type). 
+The minimum size (in pixels) of an area to be considered as a patch will be defined in the parameter-file. Patches with fewer pixels will be omitted.
 
-The FORCE Level 2 Processing System (FORCE L2PS) is intended to generate harmonized, standardized and radiometrically consistent Level 2 products ( ARD: Analysis Ready Data) based on Level 1 data as provided from the space agencies. This includes cloud and cloud shadow detection, radiometric correction and data cubing. This section summarizes the usage of FORCE L2PS, its helper programs and the output format.
+# Workflow
+# A glimpse of what you get:
 
-About / Workflow
-
-A glimpse of what you get:
-
- 
-Fig. 2. Data Cube of Landsat 7/8 and Sentinel-2 A/B ARD.
-A two-month period of atmospherically corrected imagery acquired over South-East Berlin, Germany, is shown here.
-[Images were corrected using force-level2, true-color quicklooks were generated using force-quicklook-level2]
 
 .. toctree::
    :maxdepth: 2
 
-   prereq.rst
    param.rst
-   process.rst
    format.rst
-
    

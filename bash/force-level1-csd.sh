@@ -25,6 +25,19 @@
 # Copyright (C) 2020-2022 Stefan Ernst
 # Contact: stefan.ernst@hu-berlin.de
 
+# 2025 modified by David Frantz (S2C/S2D, disabled Landsat)
+
+# functions/definitions ------------------------------------------------------------------
+export PROG=`basename $0`;
+export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
+
 # This script downloads Landsat and Sentinel-2 Level 1 data from GCS
 trap "echo Exited!; exit;" SIGINT SIGTERM # make sure that CTRL-C breaks out of download loop
 set -e # make sure script exits if any process exits unsuccessfully
@@ -68,9 +81,22 @@ cat << HELP
 force-level1-csd - FORCE cloud storage downloader for Landsat and Sentinel-2
 https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html
 
-Usage: force-level1-csd [-c min,max] [-d starttime,endtime] [-n] [-k] [-s sensor]
+Usage: force-level1-csd [-hvi] [-c min,max] [-d starttime,endtime] [-n] [-k] [-s sensor]
                         [-t tier] [-u]
                         metadata-dir level-1-datapool queue aoi
+
+  optional:
+  -h = show this help
+  -v = show version
+  -i = show program's purpose
+
+  -c = cloudcover
+  -d = daterange
+  -n = no-act
+  -k = keep metadata
+  -s = sensor list
+  -t = tier
+  -u = update metadata
 
 Error: `printf "$1"`
 HELP
@@ -100,12 +126,13 @@ which_satellite() {
   SENSIN=$(echo $SENSIN | tr '[:lower:]' '[:upper:]')  # convert sensor strings to upper case to prevent unnecessary headaches
   for SENSOR in $(echo $SENSIN | sed 's/,/ /g'); do
     case $SENSOR in
-      S2A|S2B)
+      S2A|S2B|S2C|S2D)
         SENTINEL=1 ;;
-      LT04|LT05|LE07|LC08)
-        LANDSAT=1 ;;
+#      LT04|LT05|LE07|LC08)
+#        echo "Landsat "LANDSAT=1 ;;
       *)
-        show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,LT04,LT05,LE07,LC08")"
+        #show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,LT04,LT05,LE07,LC08")"
+        show_help "$(printf "%s\n       " "Invalid sensor(s) specified" "Sensors provided: $SENSIN" "Valid sensors: S2A,S2B,S2C,S2D")"
         exit 1
     esac
   done
@@ -114,7 +141,8 @@ which_satellite() {
 
 # ============================================================
 # Initialize arguments and parse command line input
-SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
+#SENSIN="LT04,LT05,LE07,LC08,S2A,S2B"
+SENSIN="S2A,S2B,S2C,S2D"
 DATEMIN="19700101"
 DATEMAX=$(date +%Y%m%d)
 CCMIN=0
@@ -131,12 +159,15 @@ CHECKLOGS=0
 ARGS=$(echo "$*" | sed -E "s/ -([0-9])/ %dummy%\1/g")
 set -- $ARGS
 
-ARGS=`getopt -o c:d:l:nks:t:u -l cloudcover:,daterange:,logs:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
+ARGS=`getopt -o hvic:d:l:nks:t:u -l help,version,info,cloudcover:,daterange:,logs:,no-act,keep-meta,sensors:,tier:,update -n $0 -- "$@"`
 if [ $? != 0 ] ; then show_help "$(printf "%s\n       " "Error in command line options. Please check your options.")"; fi
 eval set -- "$ARGS"
 
 while :; do
   case "$1" in
+    -h|--help) help ;;
+    -v|--version) force_version; exit 0;;
+    -i|--info) echo "Cloud Storage Downloader"; exit 0;;
     -c|--cloudcover)
       check_params "$2" "cloud cover threshold"
       CCMIN=$(echo "$2" | cut -d"," -f1)
@@ -296,7 +327,7 @@ else
 fi
 export BOTO_CONFIG
 if [ ! -r $BOTO_CONFIG ]; then
-  show_help "$(printf "%s\n       " "gsutil config file was not found in $CREDDIR.")"
+  show_help "$(printf "%s\n       " "gsutil config file was not found in $FORCE_CREDENTIALS.")"
 fi
 
 
@@ -392,7 +423,7 @@ get_data() {
   PRINTNAME=${SATELLITE^}
   case $SATELLITE in
     landsat) SENSORS=$(echo $SENSIN | grep -o "L[C,E,T]0[4,5,7,8]") ;;
-    sentinel2) SENSORS=$(echo $SENSIN | grep -o "S2[A-B]") ;;
+    sentinel2) SENSORS=$(echo $SENSIN | grep -o "S2[A-D]") ;;
   esac
 
 

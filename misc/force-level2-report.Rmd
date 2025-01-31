@@ -1,0 +1,490 @@
+---
+title: "FORCE Level 2 Processing Report"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  dlog: "log"
+  ftable: NULL
+---
+
+```{r load-packages, include = FALSE}
+require(dplyr)
+require(plotly)
+```
+
+```{r load-data, include = FALSE}
+flog <- params$dlog %>% dir(".log$", full.names = TRUE)
+nlog <- flog %>% length()
+
+log <- "character" %>% vector(nlog)
+id <- "character" %>% vector(nlog)
+
+for (i in 1:nlog) {
+
+  tmp <- readLines(flog[i])
+
+  if (length(grep("Image:", tmp)) > 0){
+    id[i] <- tmp %>% 
+      grep("Image:", ., value = TRUE) %>%
+      gsub("/ ", "", .) %>%
+      basename()
+  } else {
+    id[i] <- tmp %>% 
+      paste(collapse = " ") %>%
+      gsub(":.*", "", .) %>%
+      gsub("/ ", "", .) %>%
+      basename()
+  }
+
+  log[i] <- tmp %>%
+    paste(collapse = " ") %>%
+    gsub(".*Start core processing", "", .) %>%
+    gsub("Core processing signaled.*", "", .)
+                      
+}
+```
+
+
+
+
+
+```{r prepare-data, include = FALSE}
+status <- rep("Error", nlog)
+status[grep("Success", log)]      <- "Success"
+status[grep("Skip", log)]         <- "Too cloudy"
+status[grep("coreg failed", log)] <- "Coregistration failed"
+status <- status %>% as.factor()
+nfail <- sum(status == "Error")
+
+mm <- log %>%
+     gsub(".*([0-9]{2}) mins.*", "\\1", .) %>%
+     as.numeric()
+ss <- log %>%
+     gsub(".*([0-9]{2}) secs.*", "\\1", .) %>%
+     as.numeric()
+time <- mm + ss / 60
+
+id_split <- id %>% strsplit("_")
+
+sensor <- id_split %>% sapply("[", 1)
+
+date <- id_split %>%
+       sapply(function(x) {
+         grep("^[0-9]{8}", x, value = TRUE) %>%
+         first() }) %>%
+       substr(1, 8) %>%
+       strptime("%Y%m%d")
+
+dc <- log %>%
+     gsub(".*dc: ([^%]*)%.*", "\\1", .) %>%
+     as.numeric()
+
+cc <- log %>%
+     gsub(".*cc: ([^%]*)%.*", "\\1", .) %>%
+     as.numeric()
+
+sc <- log %>%
+     gsub(".*sc: ([^%]*)%.*", "\\1", .) %>%
+     as.numeric()
+
+wc <- log %>%
+     gsub(".*wc: ([^%]*)%.*", "\\1", .) %>%
+     as.numeric()
+
+ac <- 100 %>%
+     `-`(cc + sc) %>%
+     pmax(0)
+lc <- 100 %>%
+     `-`(cc + sc + wc) %>%
+     pmax(0)
+
+aod <- log %>%
+      gsub(".*AOD: (.*)\\. #.*", "\\1", .) %>%
+      as.numeric()
+
+nwater <- log %>%
+         gsub(".*# of targets: ([0-9]*)/.*", "\\1", .) %>%
+         as.integer()
+
+nveg <- log %>%
+         gsub(".*# of targets: [0-9]*/([0-9]*).*", "\\1", .) %>%
+         as.integer()
+
+aod_status <- rep("NA", nlog)
+aod_status[(nwater + nveg) == 0] <- "AOD estimation failed"
+aod_status[(nwater + nveg)  > 0] <- "AOD estimation successful"
+aod_status <- aod_status %>% as.factor()
+
+nchip <- log %>%
+        gsub(".* ([0-9]*) product.*", "\\1", .) %>%
+        as.integer()
+
+data <- data.frame(status,
+                  sensor,
+                  nchip,
+                  time,
+                  date,
+                  year  = format(date, "%Y"),
+                  month = format(date, "%m"),
+                  week  = format(date, "%W"),
+                  doy       = format(date, "%j"),
+                  yearhalf  = paste(
+                                   format(date, "%Y"),
+                                   format(date, "%m") %>%
+                                          as.integer() %>%
+                                          `/`(6) %>%
+                                          ceiling(),
+                                   sep = "-"
+                            ),
+                  yearquarter  = paste(
+                                   format(date, "%Y"),
+                                   format(date, "%m") %>%
+                                          as.integer() %>%
+                                          `/`(3) %>%
+                                          ceiling(),
+                                   sep = "-"
+                            ),
+                  yearmonth = format(date, "%Y-%m"),
+                  dc,
+                  cc,
+                  sc,
+                  wc,
+                  ac,
+                  lc,
+                  aod_status,
+                  aod,
+                  nwater,
+                  nveg,
+                  log,
+                  id)
+```
+
+
+# Processing status
+
+`r nlog` Level 1 images were processed. 
+`r nfail` images failed.
+
+```{r plot-status, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(status),
+              labels = ~status, values = ~n, type = "pie")
+fig
+```
+
+
+```{r failed-images, echo = FALSE}
+if (nfail > 0) {
+  data %>% filter(status == "Error") %>% select(log)
+}
+```
+
+
+# Number of Level 1 images
+
+The following plots count the number of processed Level 1 images per sensor, year, month and week.
+*Processing status is not taken into account.*
+
+
+```{r plot-l1-sensor, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor),
+              x = ~sensor, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"))
+fig
+```
+
+```{r plot-l1-year, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, year),
+              x = ~year, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-yearhalf, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearhalf),
+              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-yearquarter, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearquarter),
+              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-yearmonth, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, yearmonth),
+              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-month, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, month),
+              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l1-week, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     count(sensor, week),
+              x = ~week, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+
+# Number of Level 2 images
+
+The following plots count the number of processed Level 2 image chips per sensor, year, month and week.
+
+```{r plot-l2-sensor, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~sensor, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"))
+fig
+```
+
+```{r plot-l2-year, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, year) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~year, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-yearhalf, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearhalf) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-yearquarter, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearquarter) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-yearmonth, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, yearmonth) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-month, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, month) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+```{r plot-l2-week, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(sensor, week) %>%
+                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
+              x = ~week, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
+fig
+```
+
+
+# Coverages
+
+Data cover is the percentage of valid pixels in an input image, i.e. excl. the black border or SLC-off stripes.
+Cloud cover includes opaque clouds + buffer, cloud shadows + buffer and cirrus clouds. 
+Snow and cloud are not mutually exclusive, i.e. a cloud can be classified as snow, too.
+Clear scene includes any valid pixels not tagged as cloud, cloud shadow or snow.
+Clear land further excludes water pixels.
+*Processing status is not taken into account.*
+
+```{r plot-cover, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data,
+                y = ~dc, name = "data", type = "box") %>%
+      add_trace(y = ~cc, name = "cloud") %>%
+      add_trace(y = ~sc, name = "snow") %>%
+      add_trace(y = ~wc, name = "water") %>%
+      add_trace(y = ~ac, name = "clear scene") %>%
+      add_trace(y = ~lc, name = "clear land") %>%
+      layout(yaxis = list(title = "% cover"))
+fig
+```
+
+The following plots show the mean cover per year, month and week.
+
+
+```{r plot-cover-by-year, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(year) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~year, y = ~dc, name = "data",
+              type = "scatter", mode = "lines+markers") %>%
+    add_trace(x = ~year, y = ~cc, name = "cloud") %>%
+    add_trace(x = ~year, y = ~sc, name = "snow") %>%
+    add_trace(x = ~year, y = ~wc, name = "water") %>%
+    add_trace(x = ~year, y = ~ac, name = "clear all") %>%
+    add_trace(x = ~year, y = ~lc, name = "clear land") %>%
+    layout(yaxis = list(title = "% cover"))
+fig
+```
+
+```{r plot-cover-by-month, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(month) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~month, y = ~dc, name = "data",
+              type = "scatter", mode = "lines+markers") %>%
+    add_trace(x = ~month, y = ~cc, name = "cloud") %>%
+    add_trace(x = ~month, y = ~sc, name = "snow") %>%
+    add_trace(x = ~month, y = ~wc, name = "water") %>%
+    add_trace(x = ~month, y = ~ac, name = "clear all") %>%
+    add_trace(x = ~month, y = ~lc, name = "clear land") %>%
+    layout(yaxis = list(title = "% cover"))
+fig
+```
+
+```{r plot-cover-by-week, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     group_by(week) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~week, y = ~dc, name = "data",
+              type = "scatter", mode = "lines+markers") %>%
+    add_trace(x = ~week, y = ~cc, name = "cloud") %>%
+    add_trace(x = ~week, y = ~sc, name = "snow") %>%
+    add_trace(x = ~week, y = ~wc, name = "water") %>%
+    add_trace(x = ~week, y = ~ac, name = "clear all") %>%
+    add_trace(x = ~week, y = ~lc, name = "clear land") %>%
+    layout(yaxis = list(title = "% cover"))
+fig
+```
+
+
+# Aerosol Optical depth
+
+```{r plot-aod-status, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success") %>%
+                     count(aod_status),
+              labels = ~aod_status, values = ~n, type = "pie")
+fig
+```
+
+```{r plot-aod-targets, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success"),
+                y = ~nwater, name = "dark water", type = "box") %>%
+      add_trace(y = ~nveg, name = "dark dense vegetation")
+fig
+```
+
+```{r plot-aod, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success"),
+                y = ~aod, name = "AOD", type = "box")
+fig
+```
+
+```{r plot-aod-by-year, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success") %>%
+                     group_by(year) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~year, y = ~aod, name = "AOD",
+              type = "scatter", mode = "lines+markers") %>%
+      layout(yaxis = list(title = "AOD"))
+fig
+```
+
+
+```{r plot-aod-by-month, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success") %>%
+                     group_by(month) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~month, y = ~aod, name = "AOD",
+              type = "scatter", mode = "lines+markers") %>%
+      layout(yaxis = list(title = "AOD"))
+fig
+```
+
+
+```{r plot-aod-by-week, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Success") %>%
+                     group_by(week) %>%
+                     summarise_all(mean, na.rm = TRUE),
+              x = ~week, y = ~aod, name = "AOD",
+              type = "scatter", mode = "lines+markers") %>%
+      layout(yaxis = list(title = "AOD"))
+fig
+```
+
+
+# Coregistration
+
+Coregistration failed for 
+`r data %>% filter(status == "Coregistration failed") %>% nrow()` 
+Level 1 images.
+
+```{r plot-month-coreg, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Coregistration failed") %>%
+                     count(sensor, month),
+              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
+      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
+fig
+```
+
+```{r plot-cover-coreg, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data %>%
+                     filter(status == "Coregistration failed"),
+                y = ~dc, name = "data", type = "box") %>%
+      add_trace(y = ~cc, name = "cloud") %>%
+      add_trace(y = ~sc, name = "snow") %>%
+      add_trace(y = ~wc, name = "water") %>%
+      add_trace(y = ~ac, name = "clear all") %>%
+      add_trace(y = ~lc, name = "clear land") %>%
+      layout(yaxis = list(title = "% cover"))
+fig
+```
+
+
+# Runtime
+
+The following plot summarizes the runtime for each image by sensor and processing status. 
+The runtime is the required real-time of each process (time between process start and end).
+This measure may deviate from CPU-time due to multithreading etc. 
+
+```{r plot-runtime, echo = FALSE, warning = FALSE}
+fig <- plot_ly(data = data,
+              x = status, y = ~time, color = ~sensor, type = "box") %>%
+      layout(yaxis = list(title = "runtime [minutes]"), boxmode = "group")
+fig
+```
+
+```{r write-csv, echo = FALSE, warning = FALSE}
+write.csv(data, file = params$ftable, row.names = FALSE)
+```
+

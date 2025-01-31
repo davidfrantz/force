@@ -27,14 +27,10 @@ The data generated with this module are the main input for the :ref:`hlps` compo
 **Figure 1.** FORCE Level 2 Processing System (L2PS) workflow.  
 
 
-FORCE L2PS consists of two main executables, and a wrapper script that acts as a bridge between them. 
-For the majority of users, it is recommended to use :ref:`level2-bulk`. 
-However, for specific purposes (e.g. testing/debugging, or if you want/need to implement your own job scheduler), the expert user may want to use :ref:`force-core` or :ref:`force-wrapper` directly.
+FORCE L2PS consists of two main executables:
 
-
-+--------------------+-----------------------+--------------------+
-+ :ref:`level2-bulk` + :ref:`level2-wrapper` + :ref:`level2-core` +
-+--------------------+-----------------------+--------------------+
+- for the majority of users, it is recommended to use :ref:`level2-bulk`. 
+- some expert users may want to use :ref:`force-core` directly.
 
 
 **A glimpse of what you get:**
@@ -48,7 +44,6 @@ However, for specific purposes (e.g. testing/debugging, or if you want/need to i
    :maxdepth: 2
 
    level2.rst
-   l2ps_.rst
    l2ps.rst
    param.rst
    format.rst

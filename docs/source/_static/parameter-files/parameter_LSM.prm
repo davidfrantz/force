@@ -15,7 +15,7 @@ DIR_PROVENANCE = NULL
 # MASKING
 # ------------------------------------------------------------------------
 # Analysis Mask datapool (parent directory of tiled analysis masks)
-# If no analsys mask should be applied, give NULL.
+# If no analysis mask should be applied, give NULL.
 # Type: full directory path
 DIR_MASK = NULL
 # Basename of analysis masks (e.g. WATER-MASK.tif).
@@ -48,6 +48,11 @@ FILE_OUTPUT_OPTIONS = NULL
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_EXPLODE = FALSE
+# This parameter controls whether the output is written in one folder,
+# or whether several subfolders per product type will be generated to better
+# structure the output.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_SUBFOLDERS = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
@@ -61,6 +66,20 @@ OUTPUT_EXPLODE = FALSE
 NTHREAD_READ = 8
 NTHREAD_COMPUTE = 22
 NTHREAD_WRITE = 4
+# Use STREAMING = FALSE to disable streaming. This will perform reading, 
+# computing and writing after one another in sequential mode.
+# Each operation will still be parallelized with above settings.
+# Disabling streaming might be necessary for some UDFs that otherwise
+# produce threading conflicts with the internally used OpenMP functionality.
+# Type: Logical. Valid values: {TRUE,FALSE}
+STREAMING = TRUE
+# This module will display progress information on screen. By default, the
+# progress information overwrites itself to produce a pretty displayal. 
+# However, this can cause error messages (or printing in UDFs) to be overwritten.
+# If disabled (FALSE), the progress information will be simply be appended
+# on screen (stdout).
+# Type: Logical. Valid values: {TRUE,FALSE}
+PRETTY_PROGRESS = TRUE
 
 # PROCESSING EXTENT AND RESOLUTION
 # ------------------------------------------------------------------------
@@ -118,7 +137,7 @@ FEATURE_EXCLUDE = FALSE
 LSM_RADIUS = 50
 # This parameter defines the minimum size (in pixels) of an area to be considered as a patch.
 # Patches with fewer pixels will be omitted. Mind that this parameter has an effect on
-# all metrics, inlcuding garithmetic mean, maximum value, ...
+# all metrics, inlcuding arithmetic mean, maximum value, ...
 # Type: Integer. Valid values: ]1,BLOCK_SIZE]
 LSM_MIN_PATCHSIZE = 3
 # This parameter determines if the kernel for landscape metrics calculation

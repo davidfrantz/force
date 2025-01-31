@@ -1,0 +1,14 @@
+.. _v3712:
+
+FORCE v. 3.7.12
+===============
+
+Release: 09.11.2023
+
+
+- **FORCE L2PS/HLPS**
+
+  - Ongoing problems with the quantile function were hopefully fixed for good.
+    The function still had problems when a large amount of singular values occured.
+    Switched over to a GSL implementation, though memory might slightly increase.
+

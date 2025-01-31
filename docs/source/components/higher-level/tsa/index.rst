@@ -66,13 +66,11 @@ hARD+ products can be directly used to fuel your research questions without any 
   * If folded by day, the observations are grouped by DOY, which gives up to 365 values per pixel.
 
 * Annual Land Surface Phenology (LSP) metrics a.k.a. phenometrics can be extracted.
-  This option is only available if FORCE was compiled with SPLITS (see :ref:`depend-opt`).
-  The SPLITS code fits a spline to the time series in a first step (can be output).
-  The number of segments for fitting the splines need to be specified (in segments per year); more segments give a more detailed fit; the detail vs. smoothing capability of the spline needs to be considered with respect to application, land cover of interest and data density.
   Deriving LSP will only work nicely if data availability throughout the year is high; do not expect good results for sparse data.
   To derive LSP metrics for a given year, some data from the previous and next year need to be included, as the early/late minima may not be found in the year of interest (the data range can be specified by the user).
-  The same can be true for the peak.
-  The user can select if a Northern hemisphere (peak assumed in the middle of the year), Southern hemisphere (peak is assumed around the turn of the year) or mixed phenology (both can happen, let the program decide) should be assumed.
+  The same can be true for the peak. 
+  The code will autodetect whether we have a Northern hemisphere (peak assumed in the middle of the year) or Southern hemisphere (peak is assumed around the turn of the year) type of phenology.
+  This decision is taken on the pixel-level.
   In total, 26 LSP metrics can be derived for each year (see :ref:`tsa-format`).
 
 * Trend analysis and/or an change/trend analyses can be performed on any of the folded and/or LSP time series.

@@ -1,0 +1,14 @@
+.. _v3711:
+
+FORCE v. 3.7.11
+===============
+
+Release: 01.07.2023
+
+
+- **FORCE HLPS**
+
+  - in ``force-higher-level``, TSA sub-module:
+    fixed a bug that resulted in incorrect quantiles (STM QXX metrics). 
+    This occured when duplicate values existed, which can happen when a kernel filtering method (interpolation) is 
+    used to extrapolate values in the off-season where no bracketing observations exist.

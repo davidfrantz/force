@@ -27,6 +27,13 @@
 # functions/definitions ------------------------------------------------------------------
 export PROG=`basename $0`;
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export MISC="$BIN/force-misc"
+
+# source bash "library" file
+LIB="$MISC/force-bash-library.sh"
+eval ". ${LIB}" >/dev/null 2>&1 ;[[ "$?" -ne "0" ]] && echo "loading bash library failed" && exit 1;
+export LIB
+
 
 MANDATORY_ARGS=1
 
@@ -37,22 +44,6 @@ export RASTER_WARP_EXE="gdalwarp"
 export RASTER_MERGE_EXE="gdal_merge.py"
 export RASTERIZE_EXE="gdal_rasterize"
 export PARALLEL_EXE="parallel"
-
-echoerr(){ echo "$PROG: $@" 1>&2; }    # warnings and/or errormessages go to STDERR
-export -f echoerr
-
-export DEBUG=false # display debug messages?
-debug(){ if [ "$DEBUG" == "true" ]; then echo "DEBUG: $@"; fi } # debug message
-export -f debug
-
-cmd_not_found(){      # check required external commands
-  for cmd in "$@"; do
-    stat=`which $cmd`
-    if [ $? != 0 ] ; then echoerr "\"$cmd\": external command not found, terminating..."; exit 1; fi
-  done
-}
-export -f cmd_not_found
-
 
 help(){
 cat <<HELP
@@ -71,7 +62,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
        into the output raster. default: no attribute is used; a binary mask 
        with geometry presence (1) or absence (0) is generated
   -l = layer name for vector data (default: basename of input, without extension)
-  -n = output nodate value (defaults to 255) 
+  -n = output nodata value (defaults to 255) 
   -t = output data type (defaults to Byte; see GDAL for datatypes; 
        but note that FORCE HLPS only understands Int16 and Byte types correctly)
   -o = output directory: the directory where you want to store the cubes
@@ -80,7 +71,7 @@ Usage: $PROG [-hvirsantobj] input-file(s)
   -b = basename of output file (without extension)
        defaults to the basename of the input-file
        cannot be used when multiple input files are given
-  -j = number of jobs, defaults to 'as many as possible'
+  -j = number of jobs, defaults to 100%
 
   mandatory:
   input-file(s) = the file(s) you want to cube
@@ -101,16 +92,6 @@ cmd_not_found "$RASTER_WARP_EXE"
 cmd_not_found "$RASTER_MERGE_EXE"
 cmd_not_found "$RASTERIZE_EXE"
 cmd_not_found "$PARALLEL_EXE"
-
-issmaller(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1<n2) ? "true" : "false"}'
-}
-export -f issmaller
-
-isgreater(){
-  awk -v n1="$1" -v n2="$2" 'BEGIN {print (n1>n2) ? "true" : "false"}'
-}
-export -f isgreater
 
 function cubethis(){
 
@@ -214,7 +195,7 @@ RESAMPLE="near"
 RES=10
 DOUT=$PWD
 BASE="DEFAULT"
-NJOB=0
+NJOB="100%"
 ATTRIBUTE="DEFAULT"
 DATATYPE="Byte"
 ONODATA=255
@@ -223,7 +204,7 @@ LAYER="DEFAULT"
 while :; do
   case "$1" in
     -h|--help) help ;;
-    -v|--version) echo "version-print to be implemented"; exit 0;;
+    -v|--version) force_version; exit 0;;
     -i|--info) echo "Ingestion of auxiliary data into datacube format"; exit 0;;
     -r|--resample) RESAMPLE="$2"; shift ;;
     -s|--resolution) RES="$2"; shift ;;
@@ -255,7 +236,7 @@ fi
 debug "$# input files will be cubed"
 
 # options received, check now ------------------------------------------------------------
-RESOPT=$($RASTER_WARP_EXE 2>/dev/null | grep -A 1 'Available resampling methods:')
+RESOPT=$($RASTER_WARP_EXE --help 2>/dev/null | grep -A 2 'Available resampling methods:')
 TEMP=$(echo $RESOPT | sed 's/[., ]/%/g')
 if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then 
   echoerr "Unknown resampling method."; 
@@ -263,7 +244,7 @@ if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then
   help
 fi
 
-if [ $(isgreater $RES 0) == "false" ]; then 
+if is_le "$RES" 0; then 
   echoerr "Resolution must be > 0"; help
 fi
 
@@ -344,6 +325,14 @@ for i in "$@"; do
     fi
   fi
 
+  # is given layer name present?
+  if [ "$RASTER" == "false" ]; then
+    $VECTOR_INFO_EXE $FINP $LAYER &> /dev/null
+    if [ $? -ne 0 ]; then
+      echoerr "requested layer was not found."; exit 1
+    fi
+  fi
+
   # bounding box
   if [ "$RASTER" == "true" ]; then
     FTMP="$FTMP.vrt"
@@ -381,7 +370,7 @@ for i in "$@"; do
   # step a tile to the west, and check if image is in tile, find last tile
   TXMAX=$TXMIN
   ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
-  while [ $(issmaller $ULX $XMAX) == "true" ]; do
+  while is_lt "$ULX" "$XMAX"; do
     TXMAX=$(echo $TXMAX | awk '{print $1+1}')
     ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
   done
@@ -389,7 +378,7 @@ for i in "$@"; do
   # step a tile to the south, and check if image is in tile, find last tile
   TYMAX=$TYMIN
   ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
-  while [ $(issmaller $YMIN $ULY) == "true" ]; do
+  while is_lt "$YMIN" "$ULY"; do
     TYMAX=$(echo $TYMAX | awk '{print $1+1}')
     ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
   done
@@ -397,10 +386,13 @@ for i in "$@"; do
   debug "Y_TILE_RANGE = $TYMIN $TYMAX"
 
 
+  # check free RAM
+  MEMORY=$(LANG="C"; free --mega | awk '/^Mem/ { printf("%.0fM\n", $2 * 0.05) }')
+
   # cube the file, spawn multiple jobs for each tile
   export WKT ORIGX ORIGY TILESIZE CHUNKSIZE RES 
   export FINP DOUT COUT INODATA ONODATA RESAMPLE RASTER DATATYPE ATTRIBUTE
-  $PARALLEL_EXE -j $NJOB cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
+  $PARALLEL_EXE -j $NJOB --memsuspend "$MEMORY" cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
 
   # remove the temporary file
   rm "$FTMP"
