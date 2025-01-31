@@ -127,8 +127,8 @@ USE_L2_IMPROPHE = FALSE
 # Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Following sensors are available: LND04 (6-band
 # Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
-# LND08/09 (6-band Landsat 8-9 OLI), SEN2A (10-band Sentinel-2A), SEN2B (10-band
-# Sentinel-2B), sen2a (4-band Sentinel-2A), sen2b (4-band Sentinel-2B),
+# LND08/09 (6-band Landsat 8-9 OLI), SEN2[A-D] (10-band Sentinel-2[A-D])
+# sen2[a-d] (4-band Sentinel-2[A-D])
 # S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-
 # nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID
 # (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
@@ -140,8 +140,8 @@ USE_L2_IMPROPHE = FALSE
 # BAP Composites with such a band designation can be input again (e.g. 
 # SENSORS = LNDLG).
 # Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
-#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
-SENSORS = LND08 LND09 SEN2A SEN2B
+#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
+SENSORS = LND08 LND09 SEN2A SEN2B SEN2C
 # Main product type to be used. Usually, this is a reflectance product like BOA.
 # When using composites, you may use BAP. This can be anything, but make sure that
 # the string can uniquely identify your product. As an example, do not use LEVEL2.
@@ -158,7 +158,7 @@ PRODUCT_TYPE_MAIN = BOA
 # Type: Character. Valid values: {QAI,INF,NULL,...}
 PRODUCT_TYPE_QUALITY = QAI
 # Perform a spectral adjustment to Sentinel-2?
-# This method can only be used with following sensors: SEN2A, SEN2B, LND04, LND05, LND07, 
+# This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
 # A material-specific spectral harmonization will be performed, which will convert the 
 # spectral response of any of these sensors to Sentinel-2A. Non-existent bands will be 
@@ -235,7 +235,7 @@ KERNEL_TEXT = 330
 # Sentinel-2, it is recommended to use "SENSORS = sen2a sen2b", and
 # "SENSORS_LOWRES = LND07 LND08 LND09"
 # Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
-#   SEN2B,sen2a,sen2b,S1AIA,S1BIA,S1AID,S1BID}
+#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID}
 SENSORS_LOWRES = LND07 LND08 LND09
 
 ++PARAM_L2IMP_END++
