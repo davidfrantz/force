@@ -76,9 +76,9 @@ cp $DIR/datacube-definition.prj $TMP/datacube-definition.prj
 BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 $BINDIR"/"force-cube -j 0 -s 10 -o $TMP -b force-extent $INP &> /dev/null
 
-if [ $? == 1 ]; then
+if [ $? -ne 0 ]; then
   echoerr "force-cube returned an error."
-  echoerr "run '$BINDIR"/"force-cube -j 0 -s 10 -o $TMP -b force-extent $INP' to see where the error occured."
+  echoerr "run '$BINDIR"/"force-cube -j 0 -s 10 -o $TMP -b force-extent $INP' to see where the error occurred."
   exit 1
 fi
 
