@@ -336,7 +336,7 @@ for i in "$@"; do
   # is there at least one feature?
   if [ "$RASTER" == "false" ]; then
     N_FEATURES=$($VECTOR_INFO_EXE -ro $FINP $LAYER | grep "Feature Count" | tr -d ' ' | cut -d ':' -f2)
-    if ! [[ "$variable" =~ ^-?[0-9]+$ ]] || ((variable < 1)); then
+    if ! is_integer "$N_FEATURES" || is_lt "$N_FEATURES" 1; then
       echoerr "no features found in input layer."; exit 1
     fi
   fi
