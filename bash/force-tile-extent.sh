@@ -137,6 +137,11 @@ cd "$DIR_TMP" || {
   exit 1
 }
 
+if [ $? -ne 0 ]; then
+  echoerr "force-cube returned an error."
+  echoerr "run '$BINDIR"/"force-cube -j 0 -s 10 -o $TMP -b force-extent $INP' to see where the error occurred."
+  exit 1
+fi
 
 # find all the generated masks
 FILES_MASK=$(ls -d X*/*.tif)
