@@ -1,0 +1,21 @@
+.. _v3800:
+
+FORCE v. 3.8.01
+===============
+
+Release: 20.02.2025
+
+
+- **FORCE HLPS**
+
+  - Fixed a bug when attempting to use Sentinel-2C/D due to some 
+    typos in the sensor enum definition.
+    Thanks to Kasia Lewinska for pointing me in this direction.
+
+- **FORCE AUX**
+
+  - Florian Katerndahl added a safety check to ``force-cube``, as well as 
+    ``force-tile-extent`` to throw a warning when no features are present 
+    in a vector layer. Thanks!
+
+  
