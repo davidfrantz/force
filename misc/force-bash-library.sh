@@ -150,3 +150,9 @@ is_eq(){
   if [ "$res" == "true" ]; then return 0; else return 1; fi
 }
 export -f is_eq
+
+# number is an integer?
+is_integer(){
+  if [[ "$1" =~ ^-?[0-9]+$ ]]; then return 0; else return 1; fi
+}
+export -f is_integer

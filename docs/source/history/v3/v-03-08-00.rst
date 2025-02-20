@@ -6,7 +6,7 @@ FORCE v. 3.8.00
 Release: 31.01.2025
 
 
-- **FORCE L1AS*
+- **FORCE L1AS**
 
   - force-level1-sentinel2 was finally removed after being deprecated for a while now.
     Use force-level1-csd. Contributions to substitute this program using the 
