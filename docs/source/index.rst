@@ -43,11 +43,7 @@ Related Links
 
 **Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
-**Stay updated**, and follow me on `Twitter <https://twitter.com/d__frantz>`_
-
-**You are using FORCE? Spread the word**, and use the `#FORCE_EO <https://twitter.com/search?q=%23FORCE_EO&src=recent_search_click>`_ hashtag in your tweets!
-
-
+**Stay updated**, and follow me on `Bluesky <https://bsky.app/profile/dfrantz.bsky.social>`_
 
 
 .. toctree::
