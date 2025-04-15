@@ -138,6 +138,16 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   }
   fprintf(fp, "FILE_DEM = NULL\n");
 
+  if (verbose) {
+    fprintf(fp, "# This parameter specifies whether a DEM database should be used.\n");
+    fprintf(fp, "# If TRUE, a predefined DEM database is used for processing, i.e., \n");
+    fprintf(fp, "# a precompiled database containing an individual DEM for each WRS-2 and\n");
+    fprintf(fp, "# MGRS frame. If TRUE, give the directory of the database through FILE_DEM.\n");
+    fprintf(fp, "# If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "USE_DEM_DATABASE = FALSE\n");
+
   if (verbose){
     fprintf(fp, "# Nodata value of the DEM.\n");
     fprintf(fp, "# Type: Integer. Valid range: [-32768,32767]\n");

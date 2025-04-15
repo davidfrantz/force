@@ -105,6 +105,7 @@ typedef struct {
   int doenv;   // flag: environment reflectance
 
   int dem_nodata;    // DEM nodata
+  int use_dem_database; // flag: use DEM database
   int coreg_nodata;  // Master nodata
   
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile
