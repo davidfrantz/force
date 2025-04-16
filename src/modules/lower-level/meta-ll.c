@@ -179,7 +179,7 @@ printf("init and check for brick struct, too?\n");
 //    printf("error in resolution. "); return FAILURE;}
 //  if (meta->map_ul_x == fill || meta->map_ul_y == fill){
 //    printf("error in map ul. "); return FAILURE;}
-//  if (atof(meta->refsys) == 0){
+//  if (atof(meta->refsys_id) == 0){
 //    printf("error in path/row. "); return FAILURE;}/  //if (meta->date.day == fill){
   //  printf("error in date.day. "); return FAILURE;}
   //if (meta->date.doy == fill){
@@ -245,7 +245,7 @@ char basename[NPOW_10];
 
   printf("dtype: %d\n", meta->dtype);
   printf("sat: %d\n", meta->sat);
-  printf("refsys   = %s\n", meta->refsys);
+  printf("refsys   = %s %s\n", meta->refsys_type, meta->refsys_id);
   //printf("res: %d\n", meta->res);
   //printf("yyyy/mm/dd + doy = %04d/%02d/%02d + %03d\n", meta->date.year, meta->date.month, meta->date.day, meta->date.doy);
   //printf("hh/mm/ss= %02d/%02d/%02d\n", meta->date.hh, meta->date.mm, meta->date.ss);
@@ -596,7 +596,9 @@ GDALDatasetH fp_;
   set_brick_filename(DN, "DIGITAL-NUMBERS");
   set_brick_par(DN, pl2->params->log);
 
-  nchar = snprintf(meta->refsys, NPOW_04, "%03d%03d", path, row);
+  copy_string(meta->refsys_type, NPOW_04, "WRS-2");
+
+  nchar = snprintf(meta->refsys_id, NPOW_04, "%03d%03d", path, row);
   if (nchar < 0 || nchar >= NPOW_04){
     printf("Buffer Overflow in assembling WRS-2\n"); return FAILURE;}
 
@@ -848,13 +850,14 @@ int svgrid = 5000;
 
         }
 
+        copy_string(meta->refsys_type, NPOW_04, "MGRS");
 
         if (strlen(pl2->b_level1) > 50){ // old, long naming convention
-          strncpy(meta->refsys, pl2->b_level1+49, 6);
+          strncpy(meta->refsys_id, pl2->b_level1+49, 6);
         } else { // new, compact naming convention
-          strncpy(meta->refsys, pl2->b_level1+4, 6);
+          strncpy(meta->refsys_id, pl2->b_level1+4, 6);
         }
-        meta->refsys[6] = '\0';
+        meta->refsys_id[6] = '\0';
 
       // product type
       } else if (strcmp(tag, "PROCESSING_LEVEL") == 0){
@@ -1468,6 +1471,39 @@ char metaname[NPOW_10];
 }
 
 
+/** This function appends the reference system to the DEM name
+--- pl2:    L2 parameters
+--- meta:   metadata
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int append_reference_system_to_dem(par_ll_t *pl2, meta_t *meta) {
+char dir_name[NPOW_10];
+int nchar;
+
+  if (pl2->use_dem_database) {
+
+    copy_string(dir_name, NPOW_10, pl2->fdem);
+
+    nchar = snprintf(pl2->fdem, NPOW_10, "%s/%s_%s.vrt", dir_name, meta->refsys_type, meta->refsys_id);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling string for DEM database\n"); 
+      return FAILURE;
+    }
+  
+    if (!fileexist(pl2->fdem)) {
+      printf("DEM database file %s does not exist!\n", pl2->fdem);
+      return FAILURE;
+    }
+
+    #ifdef FORCE_DEBUG
+    printf("DEM database file: %s\n", pl2->fdem);
+    #endif
+  }
+
+  return SUCCESS;
+}
+
+
 /** This function reads the metadata
 --- pl2:      L2 parameters
 --- metadata: metadata
@@ -1494,6 +1530,10 @@ printf("there are still some things to do int meta. checking etc\n");
     default:
       printf("unknown mission. ");
       return FAILURE;
+  }
+
+  if (append_reference_system_to_dem(pl2, meta) != SUCCESS) {
+    return FAILURE;
   }
 
   *metadata = meta;

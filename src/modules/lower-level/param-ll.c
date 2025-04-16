@@ -74,6 +74,7 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_bool_par(params,    "STRICT_WATER_VAPOR",    &pl2->wvp_strict);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
+  register_bool_par(params,    "USE_DEM_DATABASE",      &pl2->use_dem_database);
   register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
   register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
   register_bool_par(params,    "ERASE_CLOUDS",          &pl2->erase_cloud);
@@ -244,6 +245,16 @@ char  bname[NPOW_10] = "\0";
 
   if (pl2->dotopo && !fileexist(pl2->fdem)){
     printf("FILE_DEM does not exist in the file system. Give a DEM, or use DOTOPO = FALSE + FILE_DEM = NULL (surface will be assumed flat, z = 0m). "); return FAILURE;}
+
+  if (pl2->use_dem_database && (strcmp(pl2->fdem, "NULL") == 0)) {
+    printf("If USE_DEM_DATABASE = TRUE, FILE_DEM cannot be NULL.\n");
+    return FAILURE;
+  }
+
+  if (pl2->use_dem_database && (!fileexist(pl2->fdem))) {
+    printf("If USE_DEM_DATABASE = TRUE, FILE_DEM needs to exist.\n");
+    return FAILURE;
+  }
 
   if (pl2->format != _FMT_CUSTOM_){
     default_gdaloptions(pl2->format, &pl2->gdalopt);

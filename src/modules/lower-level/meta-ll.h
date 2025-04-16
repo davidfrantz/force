@@ -67,7 +67,8 @@ typedef struct {
   int dtype;           // data type (bytes)
   int sat;             // saturation value
   cal_t *cal;          // calibration DN->TOA reflectance / BT
-  char refsys[NPOW_04];  // worldwide reference system ID
+  char refsys_type[NPOW_04]; // reference system type
+  char refsys_id[NPOW_04];  // reference system ID
   int tier;            // tier level
   s2_meta s2;          // Sentinel-2 calibration specific
 } meta_t;
