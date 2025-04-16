@@ -250,7 +250,7 @@ int nchar;
   time_t TIME; time(&TIME);
   #endif
   
-  nchar = snprintf(dname, NPOW_10, "%s/%s", pl2->d_level2, meta->refsys);
+  nchar = snprintf(dname, NPOW_10, "%s/%s", pl2->d_level2, meta->refsys_id);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
   
