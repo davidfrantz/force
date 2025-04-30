@@ -121,7 +121,7 @@ lower: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
 scripts: bash rstats python external
 dev: $(BINDIR)/force-l2ps # specific target for development
-#dev: $(OBJDIR)/vector-cl.o # specific target for development
+#dev: $(OBJDIR)/brick_io-cl.o # specific target for development
 .PHONY: check-required bash rstats python external scripts misc install
 
 # Include dependencies
@@ -243,9 +243,8 @@ misc:
 
 ### dummy code for testing stuff  
 
-#dummy: temp cross aux higher src/dummy.c
-#	$(G11) $(CFLAGS) $(GDAL) $(GSL) $(CURL) $(OPENCV) $(PYTHON) $(PYTHON2) $(RSTATS) -o $(TB)/dummy src/dummy.c $(TC)/*.o $(TA)/*.o $(TH)/*.o $(LDGDAL) $(LDGSL) $(LDCURL) $(LDOPENCV) $(LDPYTHON) $(LDRSTATS)
-
+dummy: $(CROSS_OBJ) $(SRCDIR)/main/dummy.c
+	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o dummy $(SRCDIR)/main/dummy.c $(CROSS_OBJ) $(LIBS)
 
 ##########################################################################
 
