@@ -33,6 +33,7 @@ Sun/view geometry header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick_base-cl.h"
+#include "../cross-level/brick_io-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/sun-cl.h"
 #include "../lower-level/meta-ll.h"
