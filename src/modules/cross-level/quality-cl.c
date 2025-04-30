@@ -37,18 +37,30 @@ This file contains functions for quality assurance
 --- p:      pixel
 --- val:    set to this value (typically 0 or 1, but can be another 
             integer, too, in which case, a wider bit field is changed
+--- bitfields: how many bitfields to set? (typically 1 for binary bit, 
+               but can be larger to set multi-bit flags)
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_qai(brick_t *qai, int index, int p, short val){
+void set_qai(brick_t *qai, int index, int p, short val, int bitfields){
 
+  // Clear the existing bits for the specified bitfields
+  short mask = (1 << bitfields) - 1;
+  qai->vshort[0][p] &= ~(mask << index);
+
+  // Set the new value
   qai->vshort[0][p] |= (short)(val << index);
 }
 
 /** This function sets any quality bit in the QAI layer
 +++ The same as set_qai, but writes the value to a short value directly
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_qai_to_value(short *value, int index, short val){
+void set_qai_to_value(short *value, int index, short val, int bitfields){
 
+  // Clear the existing bits for the specified bitfields
+  short mask = (1 << bitfields) - 1;
+  *value &= ~(mask << index);
+
+  // Set the new value
   *value |= (short)(val << index);
 }
 
@@ -231,145 +243,122 @@ bool get_vaporfill_from_value(short value){
 /** set off/on flag **/
 void set_off(brick_t *qai, int p, short val){
 
-  set_qai(qai, _QAI_BIT_OFF_, p, val);
+  set_qai(qai, _QAI_BIT_OFF_, p, val, 1);
 }
 
 /** set off/on flag, directly to value **/
 void set_off_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_OFF_, val);
+  set_qai_to_value(value, _QAI_BIT_OFF_, val, 1);
 }
 
 /** set cloud flag **/
 void set_cloud(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_CLD_, p, val);
+  set_qai(qai, _QAI_BIT_CLD_, p, val, 2);
 }
 
 /** set cloud flag, directly to value **/
 void set_cloud_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_CLD_, val);
+  set_qai_to_value(value, _QAI_BIT_CLD_, val, 2);
 }
 
 /** set cloud shadow flag **/
 void set_shadow(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SHD_, p, val);
+  set_qai(qai, _QAI_BIT_SHD_, p, val, 1);
 }
 
 /** set cloud shadow flag, directly to value **/
 void set_shadow_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SHD_, val);
+  set_qai_to_value(value, _QAI_BIT_SHD_, val, 1);
 }
 
 /** set snow flag **/
 void set_snow(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SNW_, p, val);
+  set_qai(qai, _QAI_BIT_SNW_, p, val, 1);
 }
 
 /** set snow flag, directly to value **/
 void set_snow_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SNW_, val);
+  set_qai_to_value(value, _QAI_BIT_SNW_, val, 1);
 }
 
 /** set water flag **/
 void set_water(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_WTR_, p, val);
+  set_qai(qai, _QAI_BIT_WTR_, p, val, 1);
 }
 
 /** set water flag, directly to value **/
 void set_water_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_WTR_, val);
+  set_qai_to_value(value, _QAI_BIT_WTR_, val, 1);
 }
 
 /** set aerosol flag **/
 void set_aerosol(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_AOD_, p, val);
+  set_qai(qai, _QAI_BIT_AOD_, p, val, 2);
 }
 
 /** set aerosol flag, directly to value **/
 void set_aerosol_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_AOD_, val);
+  set_qai_to_value(value, _QAI_BIT_AOD_, val, 2);
 }
 
 /** set subzero reflectance flag **/
 void set_subzero(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SUB_, p, val);
+  set_qai(qai, _QAI_BIT_SUB_, p, val, 1);
 }
 
 /** set subzero reflectance flag, directly to value **/
 void set_subzero_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SUB_, val);
+  set_qai_to_value(value, _QAI_BIT_SUB_, val, 1);
 }
 
 /** set saturated reflectance flag **/
 void set_saturation(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SAT_, p, val);
+  set_qai(qai, _QAI_BIT_SAT_, p, val, 1);
 }
 
 /** set saturated reflectance flag, directly to value **/
 void set_saturation_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SAT_, val);
+  set_qai_to_value(value, _QAI_BIT_SAT_, val, 1);
 }
 
 /** set low sun angle flag **/
 void set_lowsun(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SUN_, p, val);
+  set_qai(qai, _QAI_BIT_SUN_, p, val, 1);
 }
 
 /** set low sun angle flag, directly to value **/
 void set_lowsun_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SUN_, val);
+  set_qai_to_value(value, _QAI_BIT_SUN_, val, 1);
 }
 
 /** set illumination flag **/
 void set_illumination(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_ILL_, p, val);
+  set_qai(qai, _QAI_BIT_ILL_, p, val, 2);
 }
 
 /** set illumination flag, directly to value **/
 void set_illumination_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_ILL_, val);
+  set_qai_to_value(value, _QAI_BIT_ILL_, val, 2);
 }
 
 /** set slope flag **/
 void set_slope(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_SLP_, p, val);
+  set_qai(qai, _QAI_BIT_SLP_, p, val, 1);
 }
 
 /** set slope flag, directly to value **/
 void set_slope_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_SLP_, val);
+  set_qai_to_value(value, _QAI_BIT_SLP_, val, 1);
 }
 
 /** set water vapor fill flag **/
 void set_vaporfill(brick_t *qai, int p, short val){
-
-  set_qai(qai, _QAI_BIT_WVP_, p, val);
+  set_qai(qai, _QAI_BIT_WVP_, p, val, 1);
 }
 
 /** set water vapor fill flag, directly to value **/
 void set_vaporfill_to_value(short *value, short val){
-
-  set_qai_to_value(value, _QAI_BIT_WVP_, val);
+  set_qai_to_value(value, _QAI_BIT_WVP_, val, 1);
 }
 
 
