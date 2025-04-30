@@ -21,26 +21,19 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Image header
+Brick base header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef IMAGE_CL_H
-#define IMAGE_CL_H
+#ifndef BRICK_BASE_CL_H
+#define BRICK_BASE_CL_H
 
 #include <stdio.h>   // core input and output functions
-#include <string.h>  // string handling functions
+#include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/string-cl.h"
 #include "../cross-level/date-cl.h"
-#include "../cross-level/datesys-cl.h"
-#include "../cross-level/alloc-cl.h"
 #include "../cross-level/warp-cl.h"
-#include "../cross-level/dir-cl.h"
-#include "../cross-level/lock-cl.h"
-#include "../cross-level/cube-cl.h"
-#include "../cross-level/sys-cl.h"
 #include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
 
@@ -112,11 +105,8 @@ void     free_brick(brick_t *brick);
 void     copy_brick_band(brick_t *brick, int b, brick_t *from, int b_from);
 brick_t *copy_brick(brick_t *from, int nb, int datatype);
 brick_t *crop_brick(brick_t *from, double radius);
-int      warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube);
-int      warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata);
 void     init_brick_bands(brick_t *brick);
 void     init_brick(brick_t *brick);
-int      write_brick(brick_t *brick);
 void     print_brick_band_info(brick_t *brick, int b);
 void     print_brick_info(brick_t *brick);
 int      convert_brick_p2p(brick_t *from, brick_t *to, int p_from);
