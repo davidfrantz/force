@@ -32,7 +32,8 @@ Higher level tasks header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/brick_io-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/lock-cl.h"
 #include "../higher-level/progress-hl.h"

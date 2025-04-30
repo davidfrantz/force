@@ -33,7 +33,7 @@ Level 1 metadata header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../lower-level/table-ll.h"
 #include "../lower-level/param-ll.h"
 

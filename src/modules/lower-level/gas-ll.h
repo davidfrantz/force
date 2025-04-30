@@ -34,7 +34,7 @@ Atmospheric Gas header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../lower-level/meta-ll.h"
 #include "../lower-level/atc-ll.h"

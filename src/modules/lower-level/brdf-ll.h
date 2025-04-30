@@ -33,7 +33,7 @@ BRDF header
 #include <math.h>    // common mathematical functions
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../lower-level/sunview-ll.h"
 
 

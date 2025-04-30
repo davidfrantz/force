@@ -34,7 +34,7 @@ Vector header
 #include "gdal.h"           // public (C callable) GDAL entry points
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 
 
 #ifdef __cplusplus

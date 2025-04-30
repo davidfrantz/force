@@ -21,30 +21,30 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Equi7 header
+Brick I/O header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef EQUI7_CL_H
-#define EQUI7_CL_H
+#ifndef BRICK_IO_CL_H
+#define BRICK_IO_CL_H
 
 #include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
-#include <stdbool.h>  // boolean data type
+#include <stdlib.h>  // standard general utilities library'
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/string-cl.h"
-#include "../cross-level/cite-cl.h"
 #include "../cross-level/brick_base-cl.h"
+#include "../cross-level/datesys-cl.h"
 #include "../cross-level/cube-cl.h"
-#include "../lower-level/param-ll.h"
+#include "../cross-level/quality-cl.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-multicube_t *start_equi7cube(par_ll_t *pl2, brick_t *brick);
+int      warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube);
+int      warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata);
+int      write_brick(brick_t *brick);
 
 #ifdef __cplusplus
 }

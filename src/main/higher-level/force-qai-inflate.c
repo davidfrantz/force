@@ -34,6 +34,8 @@ This program inflates QAI layers
 #include "../../modules/cross-level/const-cl.h"
 #include "../../modules/cross-level/utils-cl.h"
 #include "../../modules/cross-level/string-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
+#include "../../modules/cross-level/brick_io-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
 #include "../../modules/higher-level/read-ard-hl.h"

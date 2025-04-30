@@ -1192,7 +1192,7 @@ short *qa_ = NULL;
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   #endif
   set_brick_filename(QA, fname);
-  set_brick_open(QA, OPEN_UPDATE);
+  set_brick_open(QA, OPEN_QAI_MERGE);
   set_brick_explode(QA, false);
   set_brick_format(QA, &pl2->gdalopt);
   set_brick_nodata(QA, 0, 1);

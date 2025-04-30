@@ -110,11 +110,12 @@ enum { _QAI_OFF_,      _QAI_CLD_OPQ_, _QAI_CLD_UNC_,  _QAI_CLD_CIR_,
        _QAI_SLP_,      _QAI_WVP_,     _QAI_LENGTH_ };
 
 // output option
-enum { OPEN_FALSE,   // do not write
-       OPEN_CREATE,  // create file from scratch
-       OPEN_UPDATE,  // read file, and update values
-       OPEN_MERGE,   // read file, and merge values
-       OPEN_BLOCK }; // write block into file
+enum { OPEN_FALSE,     // do not write
+       OPEN_CREATE,    // create file from scratch
+       OPEN_UPDATE,    // read file, and update values
+       OPEN_MERGE,     // read file, and merge values
+       OPEN_QAI_MERGE, // read file, and merge QAI values
+       OPEN_BLOCK };   // write block into file
 
 // sensors
 enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_LND09_, 
