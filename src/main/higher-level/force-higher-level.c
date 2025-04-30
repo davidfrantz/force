@@ -33,7 +33,7 @@ This program is the FORCE Higher Level Processing System
 
 #include "../../modules/cross-level/const-cl.h"
 #include "../../modules/cross-level/utils-cl.h"
-#include "../../modules/cross-level/brick-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
 #include "../../modules/cross-level/tile-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/cite-cl.h"

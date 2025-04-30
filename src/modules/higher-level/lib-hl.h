@@ -32,7 +32,7 @@ Library completeness header
 #include <stdlib.h>  // standard general utilities library
 
 
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/read-ard-hl.h"

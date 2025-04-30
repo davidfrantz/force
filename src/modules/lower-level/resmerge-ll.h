@@ -34,7 +34,7 @@ Enhance spatial resolution header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/quality-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/cite-cl.h"
 

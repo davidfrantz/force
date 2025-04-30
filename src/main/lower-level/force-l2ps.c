@@ -37,7 +37,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include "../../modules/cross-level/string-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/cite-cl.h"
-#include "../../modules/cross-level/brick-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
 #include "../../modules/cross-level/cube-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
 #include "../../modules/cross-level/vector-cl.h"

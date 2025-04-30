@@ -33,7 +33,7 @@ Image methods header
 #include <limits.h>  // macro constants of the integer types
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/queue-cl.h"
 
 

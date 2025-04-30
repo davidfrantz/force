@@ -38,7 +38,8 @@ This program imports MODIS 09 GA products to FORCE
 #include "../../modules/cross-level/string-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/date-cl.h"
-#include "../../modules/cross-level/brick-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
+#include "../../modules/cross-level/brick_io-cl.h"
 #include "../../modules/cross-level/cube-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
 

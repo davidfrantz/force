@@ -35,7 +35,7 @@ Machine learning header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
