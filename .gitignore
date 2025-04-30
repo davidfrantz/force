@@ -6,3 +6,4 @@ docs/source/_build
 python/test*
 *.pyc
 .vscode
+dummy
