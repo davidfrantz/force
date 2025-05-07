@@ -81,9 +81,9 @@ force-level1-landsat search
     | Downloaded product bundle file paths will be appended to the queue.
 
 * \--secret
-    | Path to the file containing the username and password for M2MApi access (EarthExplorer login).
-    | Avoids having to enter credentials every time the tool is run.
-    | First line: ``user``, second line: ``password``
+    | Path to the file containing the username and application token for M2MApi access.
+    | Application tokens can be generated at https://ers.cr.usgs.gov/.
+    | 1st line: 'app-token', 2nd line: ``user``, 3rd line: ``token``
 
 .. code-block:: None
 
