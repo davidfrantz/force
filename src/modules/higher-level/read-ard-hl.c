@@ -958,19 +958,27 @@ off_t bytes = 0;
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, sen->aux_product, NPOW_10);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
-        if ((ard[t].AUX = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
-            (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
-          printf("Error reading AUX product %s. ", fname); error++; continue;}
-        if (phl->radius > 0){
-          if ((ard[t].AUX = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].AUX)) == NULL ||
+        if (strcmp(sen->aux_product, "NULL") != 0){
+          if ((ard[t].AUX = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
               (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
-            printf("Error adding AUX products %s. ", fname); error++; continue;}
+            printf("Error reading AUX product %s. ", fname); error++; continue;}
+          if (phl->radius > 0){
+            if ((ard[t].AUX = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].AUX)) == NULL ||
+                (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
+              printf("Error adding AUX products %s. ", fname); error++; continue;}
+          }
+          bytes += get_brick_size(ard[t].AUX);
+        } else {
+          if ((ard[t].AUX = copy_brick(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
+              (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
+            printf("Error compiling AUX products %s.", fname); error++; continue;}
+          for (p=0; p<nc; p++) ard[t].aux[p] = -9999;
         }
-        bytes += get_brick_size(ard[t].AUX);
       } else {
         ard[t].AUX = NULL;
         ard[t].aux = NULL;
       }
+
 
     }
 

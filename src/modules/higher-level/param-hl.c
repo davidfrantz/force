@@ -1445,6 +1445,7 @@ double tol = 5e-3;
 
   if (phl->input_level1 != _INP_QAI_) phl->prd.ref = true;
   phl->prd.qai = true;
+  phl->prd.aux = true;
 
 
   // compile temporal window
