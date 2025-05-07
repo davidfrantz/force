@@ -52,6 +52,7 @@ typedef struct {
   brick_t *HOT;
   brick_t *VZN;
   brick_t *WVP;
+  brick_t *AUX;
   brick_t *MSK;
   short  **dat;  // quantitative data (reflectance, or index)
   short   *qai;  // quality assurance information (bit-coding)
@@ -60,6 +61,7 @@ typedef struct {
   short   *hot;  // haze optimized transformation
   short   *vzn;  // view zenith angle
   short   *wvp;  // water vapor
+  short   *aux;  // free-folating auxiliary product
   small   *msk;  // encoded mask
   //int     sid;  // sensor id
   //date_t  date; // acquisition date

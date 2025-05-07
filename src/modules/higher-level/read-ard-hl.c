@@ -953,6 +953,25 @@ off_t bytes = 0;
         ard[t].wvp = NULL;
       }
 
+      // read Auxiliary Product (AUX)
+      if (phl->prd.aux && error == 0){
+        copy_string(bname, 1024, dir.list[t]); // clean copy
+        replace_string(bname, sen->main_product, sen->aux_product, NPOW_10);
+        concat_string_2(fname, NPOW_10, dir.name, bname, "/");
+        if ((ard[t].AUX = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
+            (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
+          printf("Error reading AUX product %s. ", fname); error++; continue;}
+        if (phl->radius > 0){
+          if ((ard[t].AUX = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].AUX)) == NULL ||
+              (ard[t].aux = get_band_short(ard[t].AUX, 0)) == NULL){
+            printf("Error adding AUX products %s. ", fname); error++; continue;}
+        }
+        bytes += get_brick_size(ard[t].AUX);
+      } else {
+        ard[t].AUX = NULL;
+        ard[t].aux = NULL;
+      }
+
     }
 
   }
@@ -1539,6 +1558,7 @@ int t;
     if (ard[t].VZN != NULL){ free_brick(ard[t].VZN); ard[t].VZN = NULL;}
     if (ard[t].WVP != NULL){ free_brick(ard[t].WVP); ard[t].WVP = NULL;}
     if (ard[t].MSK != NULL){ free_brick(ard[t].MSK); ard[t].MSK = NULL;}
+    if (ard[t].AUX != NULL){ free_brick(ard[t].AUX); ard[t].AUX = NULL;}
   }
   free((void*)ard);
   ard = NULL;
