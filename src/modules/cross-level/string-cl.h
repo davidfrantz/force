@@ -47,6 +47,8 @@ void concat_string_3(char *dst, size_t size, const char *src1, const char *src2,
 void replace_string(char *src, const char *search, const char *replace, size_t src_len);
 int char_to_int(const char *src, int *val);
 int char_to_float(const char *src, float *val);
+bool strings_equal(const char *str1, const char *str2);
+bool vector_contains(const char **vector, size_t size, const char *target);
 
 #ifdef __cplusplus
 }
