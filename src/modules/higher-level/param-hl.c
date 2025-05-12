@@ -102,7 +102,6 @@ void register_ard1(params_t *params, par_hl_t *phl){
   register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
-  register_char_par(params,    "PRODUCT_TYPE_AUX",     _CHAR_TEST_NONE_, &phl->sen.aux_product);
   register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
   register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
@@ -143,6 +142,10 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_float_par(params, "Y_FACTOR", 0, FLT_MAX, &phl->bap.Yf);
   register_bool_par(params,  "SELECT", &phl->bap.select);
   register_enum_par(params,  "COMBINE_SCORES",  _TAGGED_ENUM_SCR_COMB_, _SCR_COMB_LENGTH_, &phl->bap.combine);
+
+  // additional aux products
+  register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
+    _CHAR_TEST_NONE_, &phl->sen.aux_products, &phl->sen.n_aux_products);
 
   register_floatvec_par(params, "DOY_SCORE", 0, 1, &phl->bap.Ds, &phl->bap.nDs);
   register_intvec_par(params,   "DOY_STATIC", 1, 365, &phl->bap.Dt, &phl->bap.nDt);
@@ -460,11 +463,15 @@ void register_udf(params_t *params, par_hl_t *phl){
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.pyp.f_code);
   register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.pyp.type);
   register_bool_par(params,    "OUTPUT_PYP",    &phl->udf.pyp.out);
-
+  
   // R UDF plug-in parameters
   register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
   register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
   register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
+
+  // additional aux products
+  register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
+    _CHAR_TEST_NONE_, &phl->sen.aux_products, &phl->sen.n_aux_products);
 
   return;
 }
@@ -1445,8 +1452,15 @@ double tol = 5e-3;
 
   if (phl->input_level1 != _INP_QAI_) phl->prd.ref = true;
   phl->prd.qai = true;
-  phl->prd.aux = true;
 
+  if (phl->sen.n_aux_products > 0) phl->prd.aux = true;
+
+  if (phl->sen.n_aux_products != 0 && strcmp(phl->sen.aux_products[0], "NULL") == 0) phl->prd.aux = false;
+
+  if (phl->prd.aux && !phl->prd.ref){
+    printf("aux products cannot be used when reflectance product is not used.\n");
+    return FAILURE;
+  }
 
   // compile temporal window
   if ((phl->input_level1 == _INP_QAI_ ||
@@ -1555,11 +1569,40 @@ double tol = 5e-3;
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
     }
 
-    // choose products
-    if (phl->bap.w.c > 0) phl->prd.dst = true;
-    if (phl->bap.w.h > 0) phl->prd.hot = true;
-    if (phl->bap.w.v > 0) phl->prd.vzn = true;
-    
+    // check whether products and weights are consistent
+    if (phl->bap.w.c > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "DST")){
+      printf("A cloud distance weight is given, but DST auxiliary product is not specified.\n");
+      return FAILURE;
+    }
+    if (phl->bap.w.h > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "HOT")){
+      printf("A haze weight is given, but HOT auxiliary product is not specified.\n");
+      return FAILURE;
+    }
+    if (phl->bap.w.v > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "VZN")){
+      printf("A view zenith weight is given, but VZN auxiliary product is specified.\n");
+      return FAILURE;
+    }
+
+    if (fequal(phl->bap.w.c, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "DST")){
+      printf("A cloud distance weight is not given, but DST auxiliary product is specified.\n");
+      return FAILURE;
+    }
+    if (fequal(phl->bap.w.h, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "HOT")){
+      printf("A haze weight is not given, but HOT auxiliary product is specified.\n");
+      return FAILURE;
+    }
+    if (fequal(phl->bap.w.v, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "VZN")){
+      printf("A view zenith weight is not given, but VZN auxiliary product is specified.\n");
+      return FAILURE;
+    }
+
+
     if (phl->bap.pac.lsp) phl->input_level2 = _INP_CON_;
 
   }
