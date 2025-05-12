@@ -960,8 +960,8 @@ short nodata;
     compile_ts_metadata(ard, &ts, phl, nt, nr, ni);
 
     // initialize UDFs
-    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.pyp);
-    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, ni, &phl->tsa.rsp);
+    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, 0, ni, &phl->tsa.pyp);
+    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, 0, ni, &phl->tsa.rsp);
 
     // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, nr, ni, idx, &nprod)) == NULL || nprod == 0){
@@ -977,10 +977,10 @@ short nodata;
     tsa_interpolation(&ts, mask_, nc, nt, nr, ni, nodata, &phl->tsa.tsi);
 
     python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
-      nx, ny, nc, 1, ni, nodata, &phl->tsa.pyp, phl->cthread);
+      nx, ny, nc, 1, 0, ni, nodata, &phl->tsa.pyp, phl->cthread);
 
     rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
-      nx, ny, nc, 1, ni, nodata, &phl->tsa.rsp, phl->cthread);
+      nx, ny, nc, 1, 0, ni, nodata, &phl->tsa.rsp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
     

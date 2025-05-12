@@ -49,7 +49,7 @@ typedef struct {
 } py_dimlab_t;
 
 
-py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf);
 int date_from_bandname(date_t *date, char *bandname);
 
 /** public functions
@@ -223,7 +223,7 @@ par_udf_t *udf;
 --- udf:       user-defined code parameters
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+void init_pyp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf){
 FILE *fpy             = NULL;
 py_dimlab_t pylab;
 PyObject *main_module = NULL;
@@ -234,7 +234,6 @@ PyObject *py_bandname = NULL;
 PyObject *py_encoded  = NULL;
 char *bandname = NULL;
 date_t date;
-int b;
 
 
   #ifdef FORCE_DEBUG
@@ -254,7 +253,7 @@ int b;
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
-  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb_main, nb_aux, nt, udf);
 
   // parse the provided python function
   fpy = fopen(udf->f_code, "r");
@@ -286,7 +285,7 @@ int b;
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
   alloc((void**)&udf->date, udf->nb, sizeof(date_t));
 
-  for (b=0; b<udf->nb; b++){
+  for (size_t b = 0; b < udf->nb; b++){
 
     py_bandname = PyList_GetItem(py_return, b);
     py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
@@ -364,7 +363,7 @@ void term_pyp(par_udf_t *udf){
 --- udf:       user-defined code parameters
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+py_dimlab_t python_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf){
 py_dimlab_t pylab;
 int b, t;
 int* year_      = NULL;
@@ -378,7 +377,7 @@ char bandname[NPOW_10];
 
 
   pylab.dim_nt[0] = nt;
-  pylab.dim_nb[0] = nb;
+  pylab.dim_nb[0] = nb_main + nb_aux;
 
   pylab.year     = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
   pylab.month    = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
@@ -413,8 +412,12 @@ char bandname[NPOW_10];
       sensor_ += NPOW_04;
     }
 
-    for (b=0; b<nb; b++){
-      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+    for (b = 0; b < (nb_main + nb_aux); b++){
+      if (b < nb_main){
+        get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+      } else {
+        get_brick_bandname(ard[0].AUX, b-nb_main, bandname, NPOW_10);
+      }
       copy_string(bandname_, NPOW_10, bandname);
       bandname_ += NPOW_10;
     }
@@ -459,11 +462,11 @@ char bandname[NPOW_10];
 --- cthread:   number of computing threads
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
+int python_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb_main, int nb_aux, int nt, short nodata, par_udf_t *udf, int cthread){
 int b, t, p;
 size_t k;
 py_dimlab_t pylab;
-npy_intp dim_data[4] = { nt, nb, ny, nx };
+npy_intp dim[4] { nt, nb_main + nb_aux, ny, nx };
 FILE     *fpy         = NULL;
 PyObject *main_module = NULL;
 PyObject *main_dict   = NULL;
@@ -488,7 +491,7 @@ short* return_  = NULL;
   main_module = PyImport_AddModule("__main__");
   main_dict   = PyModule_GetDict(main_module);
 
-  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+  pylab = python_label_dimensions(ard, ts, submodule, idx_name, nb_main, nb_aux, nt, udf);
 
   fpy = fopen(udf->f_code, "r");
   PyRun_SimpleFile(fpy, udf->f_code);
@@ -502,7 +505,7 @@ short* return_  = NULL;
   py_nproc = PyLong_FromLong(cthread);
   py_nband = PyLong_FromLong(udf->nb);
 
-  py_data     = (PyArrayObject *) PyArray_SimpleNew(4, dim_data, NPY_INT16);
+  py_data     = (PyArrayObject *) PyArray_SimpleNew(4, dim, NPY_INT16);
   data_     = (short*)PyArray_DATA(py_data);
 
 
@@ -510,13 +513,17 @@ short* return_  = NULL;
   
   if (submodule == _HL_UDF_){
 
-    for (t=0, k=0; t<nt; t++){
-      for (b=0; b<nb; b++){
-        for (p=0; p<nc; p++){
+    for (t = 0, k = 0; t < nt; t++){
+      for (b = 0; b < (nb_main + nb_aux); b++){
+        for (p = 0; p < nc; p++){
           if (!ard[t].msk[p]){
             data_[k++] = nodata;
           } else {
-            data_[k++] = ard[t].dat[b][p];
+            if (b < nb_main){
+              data_[k++] = ard[t].dat[b][p];
+            } else {
+              data_[k++] = ard[t].aux[b-nb_main][p];
+            }
           }
         }
       }
