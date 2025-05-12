@@ -54,6 +54,13 @@ FILE_AOI = NULL
 # a DEM.
 # Type: full file path
 FILE_DEM = NULL
+# This parameter specifies whether a DEM database should be used.
+# If TRUE, a predefined DEM database is used for processing, i.e., 
+# a precompiled database containing an individual DEM for each WRS-2 and
+# MGRS frame. If TRUE, give the directory of the database through FILE_DEM.
+# If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.
+# Type: Logical. Valid values: {TRUE,FALSE}
+USE_DEM_DATABASE = FALSE
 # Nodata value of the DEM.
 # Type: Integer. Valid range: [-32768,32767]
 DEM_NODATA = -32767

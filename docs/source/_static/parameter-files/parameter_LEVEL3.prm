@@ -229,6 +229,10 @@ SELECT = TRUE
 # The weigting of scores is applied in both cases.
 # Type: Character. Valid values: {ADDITIVE,MULTIPLICATIVE}
 COMBINE_SCORES = ADDITIVE
+# Which auxiliary products should be used? These should match with the usage of
+# the scores below. Give NULL to disable using any auxiliary product.
+# Type: Character. Valid values: {DST,HOT,VZN}
+REQUIRE_AUX_PRODUCTS = DST HOT
 # These parameters specify the function values used for fitting the DOY
 # scoring functions. The function type is automatically chosen from the 
 # given values, i.e.

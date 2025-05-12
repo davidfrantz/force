@@ -244,5 +244,11 @@ RSTATS_TYPE = PIXEL
 # Output the results provided by the R UDF? If TRUE, FILE_RSTATS must exist.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_RSP = FALSE
+# Which auxiliary products should be used? These products are appended
+# to the data array that is passed to the UDF! Custom products may be given;
+# auxiliary products should contain one band only.
+# Give NULL to disable using any auxiliary product.
+# Type: Character. Valid values: {DST,HOT,VZN,WVP,AOD,...}
+REQUIRE_AUX_PRODUCTS = NULL
 
 ++PARAM_UDF_END++
