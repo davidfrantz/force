@@ -1202,6 +1202,13 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "COMBINE_SCORES = ADDITIVE\n");
 
   if (verbose){
+    fprintf(fp, "# Which auxiliary products should be used? These should match with the usage of\n");
+    fprintf(fp, "# the scores below. Give NULL to disable using any auxiliary product.\n");
+    fprintf(fp, "# Type: Character. Valid values: {DST,HOT,VZN}\n");
+  }
+  fprintf(fp, "REQUIRE_AUX_PRODUCTS = DST HOT\n");
+
+  if (verbose){
     fprintf(fp, "# These parameters specify the function values used for fitting the DOY\n");
     fprintf(fp, "# scoring functions. The function type is automatically chosen from the \n");
     fprintf(fp, "# given values, i.e.\n");
@@ -1700,6 +1707,27 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RSP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level UDF pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_udf(FILE *fp, bool verbose){
+
+  if (verbose){
+    fprintf(fp, "# Which auxiliary products should be used? These products are appended\n");
+    fprintf(fp, "# to the data array that is passed to the UDF! Custom products may be given;\n");
+    fprintf(fp, "# auxiliary products should contain one band only.\n");
+    fprintf(fp, "# Give NULL to disable using any auxiliary product.\n");
+    fprintf(fp, "# Type: Character. Valid values: {DST,HOT,VZN,WVP,AOD,...}\n");
+  }
+  fprintf(fp, "REQUIRE_AUX_PRODUCTS = NULL\n");
 
   return;
 }
