@@ -222,7 +222,7 @@ udf_t udf_;
 brick_t **UDF;
 small *mask_ = NULL;
 int nprod = 0;
-int nb, nx, ny, nc;
+int nb_main, nb_aux, nx, ny, nc;
 short nodata;
 
 
@@ -230,8 +230,16 @@ short nodata;
   nx = get_brick_chunkncols(ard[0].DAT);
   ny = get_brick_chunknrows(ard[0].DAT);
   nc = get_brick_chunkncells(ard[0].DAT);
-  nb = get_brick_nbands(ard[0].DAT);
+
+
+  nb_main = get_brick_nbands(ard[0].DAT);
   nodata = get_brick_nodata(ard[0].DAT, 0);
+
+  if (phl->prd.aux) {
+    nb_aux = get_brick_nbands(ard[0].AUX);
+  } else {
+    nb_aux = 0; 
+  }
 
   // import mask (if available)
   if (mask != NULL){
@@ -240,8 +248,8 @@ short nodata;
   }
 
   // initialize python and R udf
-  init_pyp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.pyp);
-  init_rsp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.rsp);
+  init_pyp(ard, NULL, _HL_UDF_, NULL, nb_main, nb_aux, nt, &phl->udf.pyp);
+  init_rsp(ard, NULL, _HL_UDF_, NULL, nb_main, nb_aux, nt, &phl->udf.rsp);
 
   // compile products + bricks
   if ((UDF = compile_udf(ard, &udf_, phl, cube, nt, &nprod)) == NULL || nprod == 0){
@@ -253,10 +261,10 @@ short nodata;
 
 
   python_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
-    nx, ny, nc, nb, nt, nodata, &phl->udf.pyp, phl->cthread);
+    nx, ny, nc, nb_main, nb_aux, nt, nodata, &phl->udf.pyp, phl->cthread);
 
   rstats_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
-    nx, ny, nc, nb, nt, nodata, &phl->udf.rsp, phl->cthread);
+    nx, ny, nc, nb_main, nb_aux, nt, nodata, &phl->udf.rsp, phl->cthread);
 
   // terminate python and R udf
   term_pyp(&phl->udf.pyp);

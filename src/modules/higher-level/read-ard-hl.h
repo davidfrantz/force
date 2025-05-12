@@ -47,19 +47,11 @@ extern "C" {
 typedef struct {
   brick_t *DAT;
   brick_t *QAI;
-  brick_t *DST;
-  brick_t *AOD;
-  brick_t *HOT;
-  brick_t *VZN;
-  brick_t *WVP;
+  brick_t *AUX;
   brick_t *MSK;
   short  **dat;  // quantitative data (reflectance, or index)
   short   *qai;  // quality assurance information (bit-coding)
-  short   *dst;  // cloud / cloud shadow distance
-  short   *aod;  // aerosol optical depth @ 550 nm
-  short   *hot;  // haze optimized transformation
-  short   *vzn;  // view zenith angle
-  short   *wvp;  // water vapor
+  short  **aux;  // auxiliary products
   small   *msk;  // encoded mask
   //int     sid;  // sensor id
   //date_t  date; // acquisition date

@@ -80,6 +80,8 @@ typedef struct {
   char   target[NPOW_10];
   char  *main_product;
   char  *quality_product;
+  char **aux_products;
+  int    n_aux_products;
 
   int spec_adjust; // spectral band adjustment to S2A?
 
@@ -145,6 +147,10 @@ typedef struct {
   int use_hazy; // use ultra-hazy data?
   int select; // select or weight?
   int combine; // how to combine scores?
+
+  int band_dst;
+  int band_hot;
+  int band_vzn;
 
   int score_type;
   par_scr_t w;          // scoring struct for weigting parameters
@@ -418,11 +424,7 @@ typedef struct {
 typedef struct {
   int ref;
   int qai;
-  int dst;
-  int aod;
-  int hot;
-  int vzn;
-  int wvp;
+  int aux;
   int imp;
 } par_prd_t;
 
