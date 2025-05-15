@@ -1659,18 +1659,18 @@ int success = FAILURE;
   dy = 0;
   while (success == FAILURE && dy < 50){
     
-    nchar = snprintf(cyear, NPOW_03, "%04d-", year-dy);
+    nchar = snprintf(cyear, NPOW_03, "%04d", year-dy);
     if (nchar < 0 || nchar >= NPOW_03){
       printf("Buffer Overflow in assembling pattern\n"); return FAILURE;}
 
-    success = findfile_pattern(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
+    success = findfile_starts(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
     dy++;
   }
   
   //printf("%s %d %d\n", cyear, year, month-1);
 
   if (!fileexist(fname)){
-    printf("could not retrieve base image. First 5 digits = 'YYYY-'. "); return FAILURE;}
+    printf("could not retrieve base image. First 4 digits = 'YYYY'. "); return FAILURE;}
 
   #ifdef FORCE_DEBUG
   printf("reference image: %s\n", fname);
