@@ -286,7 +286,7 @@ GDALDatasetH fp_;
   #endif
 
   // scan directory for MTL.txt file
-  if (findfile(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
     printf("Unable to find Landsat metadata (MTL file)! "); return FAILURE;}
 
   // open MTL file
@@ -703,8 +703,8 @@ int svgrid = 5000;
   directoryname(d_top_1, d_top_2, NPOW_10);
 
   // scan directory for xml file
-  if (findfile(d_top_2, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(d_top_2, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
+      findfile_pattern(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding top-level S2 metadata file failed. ");
     return FAILURE;
   }
@@ -845,7 +845,7 @@ int svgrid = 5000;
           if (nchar < 0 || nchar >= NPOW_10){
             printf("Buffer Overflow in assembling image ID\n"); return FAILURE;}
 
-          if (findfile(d_img, id_img, NULL, meta->cal[b].fname, NPOW_10) == FAILURE){
+          if (findfile_pattern(d_img, id_img, NULL, meta->cal[b].fname, NPOW_10) == FAILURE){
             printf("Unable to find image %s. ", id_img); return FAILURE;}
 
         }
@@ -927,8 +927,8 @@ int svgrid = 5000;
   /** parse granule xml **/
 
   // scan directory for xml file
-  if (findfile(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
+      findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding granule metadata file failed. "); return FAILURE;
   }
 
@@ -1452,11 +1452,11 @@ int parse_metadata_mission(par_ll_t *pl2){
 int mission;
 char metaname[NPOW_10];
 
-  if (findfile(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
     mission = LANDSAT;
     pl2->res = pl2->res_landsat;
-  } else if (findfile(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == SUCCESS ||
-             findfile(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
+  } else if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == SUCCESS ||
+             findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
     mission = SENTINEL2;
     pl2->res = pl2->res_sentinel2;
   } else {

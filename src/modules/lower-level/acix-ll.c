@@ -57,7 +57,7 @@ bool y_found = false;
 
 
   // scan directory for ANG.txt file
-  if (findfile(pl2->d_level1, "ANG", ".txt", metaname, NPOW_10) != SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "ANG", ".txt", metaname, NPOW_10) != SUCCESS){
     printf("Unable to find Landsat angle metadata (ANG file)! "); return FAILURE;}
 
   // open ANG file

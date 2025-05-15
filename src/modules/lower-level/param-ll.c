@@ -177,7 +177,7 @@ char  bname[NPOW_10] = "\0";
       
       strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
 
-      if (findfile(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
+      if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
          printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
       copy_string(pl2->d_level1, NPOW_10, bname);
