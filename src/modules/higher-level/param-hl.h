@@ -471,6 +471,7 @@ typedef struct {
 
   // temporal parameters
   date_t *date_range; // date range for the analysis (continous time period)
+  date_t date_ignore_lnd07; // date after which LND07 should be ignored (deorbiting)
   int ndate, ndoy;
   int *doy_range;
   int date_doys[366];        // doys   that should be used (modulates date_from, date_to)

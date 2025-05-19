@@ -1035,6 +1035,14 @@ void write_par_hl_time(FILE *fp, bool verbose){
   }
   fprintf(fp, "DOY_RANGE = 1 365\n");
 
+  if (verbose){
+    fprintf(fp, "# Landat 7 was de-orbited in 2019. Landsat 7 data might be available \n");
+    fprintf(fp, "# in your data cube even though you might not want to use it anymore. \n");
+    fprintf(fp, "# This parameters sets the date after which Landsat 7 data should be ignored.\n");
+    fprintf(fp, "# Type: Date. Format: YYYY-MM-DD\n");
+  }
+  fprintf(fp, "DATE_IGNORE_LANDSAT_7 = 2099-12-31\n");
+
   return;
 }
 

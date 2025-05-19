@@ -379,6 +379,10 @@ int nchar;
     if (date.ce > phl->date_range[_MAX_].ce) continue;
     if (!phl->date_doys[date.doy]) continue;
 
+    // special case: use de-orbiting Landsat 7?
+    if (strstr(d.LIST[i]->d_name, _TAGGED_ENUM_SEN_[_SEN_LND07_].tag) != NULL &&
+        date.ce > phl->date_ignore_lnd07.ce) continue;
+
     // if we are still here, copy
     copy_string(d.list[d.n++], NPOW_10, d.LIST[i]->d_name);
 
