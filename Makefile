@@ -120,7 +120,7 @@ higher: $(MAIN_HIGHER_EXE)
 lower: $(MAIN_LOWER_EXE)
 tests: $(TEST_EXE)
 scripts: bash rstats python external
-dev: $(BINDIR)/force-l2ps # specific target for development
+dev: $(BINDIR)/force-higher-level # specific target for development
 #dev: $(OBJDIR)/brick_io-cl.o # specific target for development
 .PHONY: check-required bash rstats python external scripts misc install
 

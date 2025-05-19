@@ -30,3 +30,9 @@ Develop version
     Before, the usage of a specific product was solely managed by using a corresponding score > 0. 
     To prevent accidental use of a product, the user must now explicitly specify the product in addition to the score.
 
+  - in ``force-higher-level``, all ARD-based modules:
+    a new parameter ``DATE_IGNORE_LANDSAT_7`` was added. During the last years of Landsat 7's life,
+    the satellite was slowly de-orbited, which caused the acquisition times to slowly shift away from
+    the nominal time. Operational production continued. This parameter allows the user to ignore
+    the Landsat 7 data after a specific point in time. The default is ``2099-12-31``, which just means 
+    that all Landsat 7 data will be used.
