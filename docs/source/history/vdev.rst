@@ -36,3 +36,14 @@ Develop version
     the nominal time. Operational production continued. This parameter allows the user to ignore
     the Landsat 7 data after a specific point in time. The default is ``2099-12-31``, which just means 
     that all Landsat 7 data will be used.
+
+--  **FORCE AUX**
+
+  - ``force-mosaic`` was overhauled:
+    The tool should now be much more efficient and faster as it splits the working load into smaller chunks
+    instead of relying a singular find command. As suggested by Max Freudenberg, the tool can now be used
+    if your data cube does not have files in *.tif or *.dat extentsion. The user can now specify the
+    file extension with the ``-e`` option. The default is ``tif``, whereas ``dat`` is no longer part of the default.
+    The tool can now also be used on write-protected data cubes by specifiying an output directory that no longer
+    needs to be a subdirectoy of the data cube. The default is still a `mosaic` folder within the datacube.
+    
