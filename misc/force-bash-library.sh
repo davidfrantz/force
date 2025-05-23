@@ -83,11 +83,15 @@ file_not_writeable(){
 }
 export -f file_not_writeable
 
-# check directories (exist+read)
+# check directories (exist+read+executable)
 dir_not_found(){
   for dir in "$@"; do
     if [ ! -d "$dir" ]; then
       echoerr "directory not found ($dir), terminating..."; 
+      exit 1; 
+    fi
+    if [ ! -r "$dir" ]; then
+      echoerr "directory not readable ($dir), terminating..."; 
       exit 1; 
     fi
     if [ ! -x "$dir" ]; then 
@@ -98,7 +102,7 @@ dir_not_found(){
 }
 export -f dir_not_found
 
-# check directories (exist+read+write)
+# check directories (exist+read+executable+write)
 dir_not_writeable(){
   for dir in "$@"; do
     dir_not_found "$dir"
