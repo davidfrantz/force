@@ -130,7 +130,7 @@ function cubethis(){
     $RASTERIZE_EXE "${BURNOPT[@]}" -a_nodata "$ONODATA" -ot "$DATATYPE" -of GTiff \
       -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
       -co BIGTIFF=YES -co BLOCKXSIZE="$XBLOCK" -co BLOCKYSIZE="$YBLOCK" \
-      -init 0 -tr "$RES" "$RES" -te "$ULX" "$LRY" "$LRX" "$ULY" "$FINP" "$FOUT"
+      -init "$ONODATA" -tr "$RES" "$RES" -te "$ULX" "$LRY" "$LRX" "$ULY" "$FINP" "$FOUT"
     if [ "$?" -ne 0 ]; then
       echoerr "rasterizing failed."; exit 1
     fi
