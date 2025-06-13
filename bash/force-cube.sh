@@ -95,18 +95,24 @@ cmd_not_found "$PARALLEL_EXE"
 
 function cubethis(){
 
+  # silly workaround to make my linter work :/
+  if [ "$1" == "NULL" ] && [ "$2" == "NULL" ]; then
+    return 0
+  fi
+
+
   x=$1
   y=$2
 
   debug "$x $y $ORIGX $ORIGY $TILESIZE $CHUNKSIZE $RES $FINP $DOUT $COUT"
 
-  ULX=$(echo $ORIGX $x $TILESIZE | awk '{printf "%f",  $1 + $2*$3}')
-  ULY=$(echo $ORIGY $y $TILESIZE | awk '{printf "%f",  $1 - $2*$3}')
-  LRX=$(echo $ORIGX $x $TILESIZE | awk '{printf "%f",  $1 + ($2+1)*$3}')
-  LRY=$(echo $ORIGY $y $TILESIZE | awk '{printf "%f",  $1 - ($2+1)*$3}')
-  TILE=$(printf "X%04d_Y%04d" $x $y)
-  XBLOCK=$(echo $TILESIZE  $RES | awk '{print int($1/$2)}')
-  YBLOCK=$(echo $CHUNKSIZE $RES | awk '{print int($1/$2)}')
+  ULX=$(echo "$ORIGX" "$x" "$TILESIZE" | awk '{printf "%f",  $1 + $2*$3}')
+  ULY=$(echo "$ORIGY" "$y" "$TILESIZE" | awk '{printf "%f",  $1 - $2*$3}')
+  LRX=$(echo "$ORIGX" "$x" "$TILESIZE" | awk '{printf "%f",  $1 + ($2+1)*$3}')
+  LRY=$(echo "$ORIGY" "$y" "$TILESIZE" | awk '{printf "%f",  $1 - ($2+1)*$3}')
+  TILE=$(printf "X%04d_Y%04d" "$x" "$y")
+  XBLOCK=$(echo "$TILESIZE"  "$RES" | awk '{print int($1/$2)}')
+  YBLOCK=$(echo "$CHUNKSIZE" "$RES" | awk '{print int($1/$2)}')
   debug "$ULX $ULY $LRX $LRY $TILE $XBLOCK $YBLOCK"
 
   mkdir -p "$DOUT/$TILE"
@@ -121,11 +127,11 @@ function cubethis(){
       BURNOPT=( -a "$ATTRIBUTE" )
     fi
 
-    $RASTERIZE_EXE "${BURNOPT[@]}" -a_nodata $ONODATA -ot $DATATYPE -of GTiff \
+    $RASTERIZE_EXE "${BURNOPT[@]}" -a_nodata "$ONODATA" -ot "$DATATYPE" -of GTiff \
       -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
-      -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK \
-      -init 0 -tr $RES $RES -te $ULX $LRY $LRX $ULY "$FINP" "$FOUT"
-    if [ $? -ne 0 ]; then
+      -co BIGTIFF=YES -co BLOCKXSIZE="$XBLOCK" -co BLOCKYSIZE="$YBLOCK" \
+      -init 0 -tr "$RES" "$RES" -te "$ULX" "$LRY" "$LRX" "$ULY" "$FINP" "$FOUT"
+    if [ "$?" -ne 0 ]; then
       echoerr "rasterizing failed."; exit 1
     fi
 
@@ -133,7 +139,7 @@ function cubethis(){
     rm "$FOUT.aux.xml"
     debug "valid: $VALID"
 
-    if [ $VALID -eq 0 ]; then
+    if [ "$VALID" -eq 0 ]; then
       rm "$FOUT"
       exit 1
     fi
@@ -148,11 +154,11 @@ function cubethis(){
       EXIST="false"
     fi
 
-    $RASTER_WARP_EXE -q -srcnodata $INODATA -dstnodata $ONODATA -ot $DATATYPE -of GTiff \
+    $RASTER_WARP_EXE -q -srcnodata "$INODATA" -dstnodata "$ONODATA" -ot "$DATATYPE" -of GTiff \
       -co INTERLEAVE=BAND -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
-      -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK \
-      -t_srs "$WKT" -te $ULX $LRY $LRX $ULY -tr $RES $RES -r $RESAMPLE "$FINP" "$FOUT"
-    if [ $? -ne 0 ]; then
+      -co BIGTIFF=YES -co BLOCKXSIZE="$XBLOCK" -co BLOCKYSIZE="$YBLOCK" \
+      -t_srs "$WKT" -te "$ULX" "$LRY" "$LRX" "$ULY" -tr "$RES" "$RES" -r "$RESAMPLE" "$FINP" "$FOUT"
+    if [ "$?" -ne 0 ]; then
       echoerr "warping failed."; exit 1
     fi
 
@@ -160,7 +166,7 @@ function cubethis(){
     rm "$FOUT.aux.xml"
     debug "valid: $VALID"
 
-    if [ $VALID -eq 0 ]; then
+    if [ "$VALID" -eq 0 ]; then
       rm "$FOUT"
       exit 1
     fi
@@ -169,12 +175,12 @@ function cubethis(){
     if [ "$EXIST" == "true" ]; then
       debug "building mosaic"
       mv "$DOUT/$TILE/$COUT.tif" "$DOUT/$TILE/$COUT'_TEMP1.tif'"
-      $RASTER_MERGE_EXE -q -o $DOUT/$TILE/$COUT.tif -ot $DATATYPE -of GTiff \
-        -n $ONODATA -a_nodata $ONODATA -init $ONODATA \
+      $RASTER_MERGE_EXE -q -o "$DOUT/$TILE/$COUT.tif" -ot "$DATATYPE" -of GTiff \
+        -n "$ONODATA" -a_nodata "$ONODATA" -init "$ONODATA" \
         -co INTERLEAVE=BAND -co COMPRESS=LZW -co PREDICTOR=2 -co NUM_THREADS=ALL_CPUS \
-        -co BIGTIFF=YES -co BLOCKXSIZE=$XBLOCK -co BLOCKYSIZE=$YBLOCK \
+        -co BIGTIFF=YES -co BLOCKXSIZE="$XBLOCK" -co BLOCKYSIZE="$YBLOCK" \
         "$DOUT/$TILE/$COUT'_TEMP1.tif'" "$DOUT/$TILE/$COUT'_TEMP2.tif'"
-      if [ $? -ne 0 ]; then
+      if [ "$?" -ne 0 ]; then
         echoerr "merging failed."; exit 1
       fi
       rm "$DOUT/$TILE/$COUT'_TEMP1.tif'" "$DOUT/$TILE/$COUT'_TEMP2.tif'"
@@ -237,10 +243,10 @@ debug "$# input files will be cubed"
 
 # options received, check now ------------------------------------------------------------
 RESOPT=$($RASTER_WARP_EXE --help 2>/dev/null | grep -A 2 'Available resampling methods:')
-TEMP=$(echo $RESOPT | sed 's/[., ]/%/g')
+TEMP=$(echo "$RESOPT" | sed 's/[., ]/%/g')
 if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then 
   echoerr "Unknown resampling method."; 
-  echo $RESOPT
+  echo "$RESOPT"
   help
 fi
 
@@ -266,19 +272,19 @@ fi
 # main thing -----------------------------------------------------------------------------
 for i in "$@"; do
 
-  FINP=$(readlink -f $i) # absolute file path
-  DINP=$(dirname  $FINP) # directory name
-  BINP=$(basename $FINP) # basename
+  FINP=$(readlink -f "$i") # absolute file path
+  DINP=$(dirname  "$FINP") # directory name
+  BINP=$(basename "$FINP") # basename
   CINP=${BINP%%.*}       # corename (without extension)
 
-  if [ $BASE == "DEFAULT" ]; then
-    COUT=$CINP  # corename from input file
+  if [ "$BASE" == "DEFAULT" ]; then
+    COUT="$CINP"  # corename from input file
   else
-    COUT=$BASE # corename from user parameters
+    COUT="$BASE" # corename from user parameters
   fi
 
-  if [ $LAYER == "DEFAULT" ]; then
-    LAYER=$CINP  # layername from input file
+  if [ "$LAYER" == "DEFAULT" ]; then
+    LAYER="$CINP"  # layername from input file
   fi
 
   debug "input  file:      $FINP"
@@ -293,9 +299,9 @@ for i in "$@"; do
   fi
 
   # raster, vector, or non-such (then die)
-  if $RASTER_INFO_EXE $FINP >& /dev/null; then 
+  if $RASTER_INFO_EXE "$FINP" >& /dev/null; then 
     RASTER=true
-  elif $VECTOR_INFO_EXE $FINP >& /dev/null; then 
+  elif $VECTOR_INFO_EXE "$FINP" >& /dev/null; then 
     RASTER=false
   else
     echoerr "$FINP is not recognized as vector or raster file, exiting."; exit 1;
@@ -304,38 +310,38 @@ for i in "$@"; do
 
   # temporary file
   TMPSTRING="_force-cube-temp"
-  FTMP=$(echo $FINP | sed 's+/+_+g')
+  FTMP=$(echo "$FINP" | sed 's+/+_+g')
   FTMP="$DOUT/$FTMP$TMPSTRING"
   debug "tempfile: $FTMP"
 
   # datacube parameters
-  WKT=$(head -n 1 $DCDEF)
-  ORIGX=$(head -n 4 $DCDEF  | tail -1 )
-  ORIGY=$(head -n 5 $DCDEF | tail -1 )
-  TILESIZE=$(head -n 6 $DCDEF | tail -1 )
-  CHUNKSIZE=$(head -n 7 $DCDEF | tail -1 )
+  WKT=$(head -n 1 "$DCDEF")
+  ORIGX=$(head -n 4 "$DCDEF"  | tail -1 )
+  ORIGY=$(head -n 5 "$DCDEF" | tail -1 )
+  TILESIZE=$(head -n 6 "$DCDEF" | tail -1 )
+  CHUNKSIZE=$(head -n 7 "$DCDEF" | tail -1 )
   debug "$WKT $ORIGX $ORIGY $TILESIZE $CHUNKSIZE"
 
   # nodata value
   if [ "$RASTER" == "true" ]; then
-    INODATA=$($RASTER_INFO_EXE $FINP | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
+    INODATA=$($RASTER_INFO_EXE "$FINP" | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
     debug "nodata: $INODATA"
-    if [ -z $INODATA ]; then
+    if [ -z "$INODATA" ]; then
       echoerr "NODATA not found in $FINP"; exit 1;
     fi
   fi
 
   # is given layer name present?
   if [ "$RASTER" == "false" ]; then
-    $VECTOR_INFO_EXE $FINP $LAYER &> /dev/null
-    if [ $? -ne 0 ]; then
+    $VECTOR_INFO_EXE "$FINP" "$LAYER" &> /dev/null
+    if [ "$?" -ne 0 ]; then
       echoerr "requested layer was not found."; exit 1
     fi
   fi
 
   # is there at least one feature?
   if [ "$RASTER" == "false" ]; then
-    N_FEATURES=$($VECTOR_INFO_EXE -ro $FINP $LAYER | grep "Feature Count" | tr -d ' ' | cut -d ':' -f2)
+    N_FEATURES=$($VECTOR_INFO_EXE -ro "$FINP" "$LAYER" | grep "Feature Count" | tr -d ' ' | cut -d ':' -f2)
     if ! is_integer "$N_FEATURES" || is_lt "$N_FEATURES" 1; then
       echoerr "no features found in input layer."; exit 1
     fi
@@ -345,50 +351,50 @@ for i in "$@"; do
   if [ "$RASTER" == "true" ]; then
     FTMP="$FTMP.vrt"
     debug "tempfile: $FTMP"
-    $RASTER_WARP_EXE -q -of 'VRT' -t_srs "$WKT" -tr $RES $RES -r near $FINP $FTMP #&> /dev/null
-    if [ $? -ne 0 ]; then
+    $RASTER_WARP_EXE -q -of 'VRT' -t_srs "$WKT" -tr "$RES" "$RES" -r near "$FINP" "$FTMP" #&> /dev/null
+    if [ "$?" -ne 0 ]; then
       echoerr "quick warping failed."; exit 1
     fi
-    XMIN=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMAX=$($RASTER_INFO_EXE $FTMP | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-    XMAX=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMIN=$($RASTER_INFO_EXE $FTMP | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    XMIN=$($RASTER_INFO_EXE "$FTMP" | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMAX=$($RASTER_INFO_EXE "$FTMP" | grep 'Upper Left'  | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    XMAX=$($RASTER_INFO_EXE "$FTMP" | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMIN=$($RASTER_INFO_EXE "$FTMP" | grep 'Lower Right' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
   else
     FTMP="$FTMP.gpkg"
     debug "tempfile: $FTMP"
-    $VECTOR_WARP_EXE -f 'GPKG' -t_srs "$WKT" $FTMP $FINP &> /dev/null
-    if [ $? -ne 0 ]; then
+    $VECTOR_WARP_EXE -f 'GPKG' -t_srs "$WKT" "$FTMP" "$FINP" &> /dev/null
+    if [ "$?" -ne 0 ]; then
       echoerr "warping vector failed."; exit 1
     fi
-    XMIN=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMIN=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-    XMAX=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
-    YMAX=$($VECTOR_INFO_EXE $FTMP -so $LAYER | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
-    FINP=$FTMP
+    XMIN=$($VECTOR_INFO_EXE "$FTMP" -so "$LAYER" | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMIN=$($VECTOR_INFO_EXE "$FTMP" -so "$LAYER" | grep 'Extent:' | cut -d "(" -f 2 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    XMAX=$($VECTOR_INFO_EXE "$FTMP" -so "$LAYER" | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 1)
+    YMAX=$($VECTOR_INFO_EXE "$FTMP" -so "$LAYER" | grep 'Extent:' | cut -d "(" -f 3 | cut -d ")" -f 1 | sed 's/[ ]//g' | cut -d ',' -f 2)
+    FINP="$FTMP"
   fi
   debug "$XMIN $YMAX $XMAX $YMIN"
 
   # 1st tile, and ulx/uly of 1st tile
-  TXMIN=$(echo $XMIN $ORIGX $TILESIZE | awk '{f=($1-$2)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
-  TYMIN=$(echo $YMAX $ORIGY $TILESIZE | awk '{f=($2-$1)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
-  ULX=$(echo $ORIGX $TXMIN $TILESIZE | awk '{printf "%f", $1 + $2*$3}')
-  ULY=$(echo $ORIGY $TYMIN $TILESIZE | awk '{printf "%f", $1 - $2*$3}')
+  TXMIN=$(echo "$XMIN" "$ORIGX" "$TILESIZE" | awk '{f=($1-$2)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
+  TYMIN=$(echo "$YMAX" "$ORIGY" "$TILESIZE" | awk '{f=($2-$1)/$3;i=int(f);print(i==f||f>0)?i:i-1}')
+  ULX=$(echo "$ORIGX" "$TXMIN" "$TILESIZE" | awk '{printf "%f", $1 + $2*$3}')
+  ULY=$(echo "$ORIGY" "$TYMIN" "$TILESIZE" | awk '{printf "%f", $1 - $2*$3}')
   debug "UL grid $ULX $ULY"
 
   # step a tile to the west, and check if image is in tile, find last tile
-  TXMAX=$TXMIN
-  ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
+  TXMAX="$TXMIN"
+  ULX=$(echo "$ULX" "$TILESIZE" | awk '{printf "%f",  $1+$2}')
   while is_lt "$ULX" "$XMAX"; do
-    TXMAX=$(echo $TXMAX | awk '{print $1+1}')
-    ULX=$(echo $ULX $TILESIZE | awk '{printf "%f",  $1+$2}')
+    TXMAX=$(echo "$TXMAX" | awk '{print $1+1}')
+    ULX=$(echo "$ULX" "$TILESIZE" | awk '{printf "%f",  $1+$2}')
   done
 
   # step a tile to the south, and check if image is in tile, find last tile
   TYMAX=$TYMIN
-  ULY=$(echo $ULY $TILESIZE | awk '{printf "%f", $1-$2}')
+  ULY=$(echo "$ULY" "$TILESIZE" | awk '{printf "%f", $1-$2}')
   while is_lt "$YMIN" "$ULY"; do
-    TYMAX=$(echo $TYMAX | awk '{print $1+1}')
-    ULY=$(echo $ULY $TILESIZE | awk '{printf "%f",  $1-$2}')
+    TYMAX=$(echo "$TYMAX" | awk '{print $1+1}')
+    ULY=$(echo "$ULY" "$TILESIZE" | awk '{printf "%f",  $1-$2}')
   done
   debug "X_TILE_RANGE = $TXMIN $TXMAX"
   debug "Y_TILE_RANGE = $TYMIN $TYMAX"
@@ -400,12 +406,16 @@ for i in "$@"; do
   # cube the file, spawn multiple jobs for each tile
   export WKT ORIGX ORIGY TILESIZE CHUNKSIZE RES 
   export FINP DOUT COUT INODATA ONODATA RESAMPLE RASTER DATATYPE ATTRIBUTE
-  $PARALLEL_EXE -j $NJOB --memsuspend "$MEMORY" cubethis {1} {2} ::: $(seq $TXMIN $TXMAX) ::: $(seq $TYMIN $TYMAX)
+  $PARALLEL_EXE -j "$NJOB" --memsuspend "$MEMORY" cubethis {1} {2} ::: $(seq "$TXMIN" "$TXMAX") ::: $(seq "$TYMIN" "$TYMAX")
+
+  # silly workaround to make my linter work :/
+  cubethis "NULL" "NULL"
+
 
   # remove the temporary file
   rm "$FTMP"
   # remove empty folders in datacube
-  find $DOUT -type d -regextype grep -regex ".*X[0-9-]\{4\}_Y[0-9-]\{4\}" -empty -delete
+  find "$DOUT" -type d -regextype grep -regex ".*X[0-9-]\{4\}_Y[0-9-]\{4\}" -empty -delete
 
 done
 
