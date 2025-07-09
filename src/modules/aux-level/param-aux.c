@@ -138,6 +138,14 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   }
   fprintf(fp, "FILE_DEM = NULL\n");
 
+  if (verbose){
+    fprintf(fp, "# This is the resampling option for reprojection the DEM; you can choose\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
+    fprintf(fp, "# (CC).\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+  }
+  fprintf(fp, "DEM_RESAMPLING = BL\n");
+
   if (verbose) {
     fprintf(fp, "# This parameter specifies whether a DEM database should be used.\n");
     fprintf(fp, "# If TRUE, a predefined DEM database is used for processing, i.e., \n");

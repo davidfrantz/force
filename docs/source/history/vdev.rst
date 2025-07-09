@@ -10,6 +10,10 @@ Develop version
     i.e., merely overlaying them on top of each other. Now, the QAI files are merged feature-based
     on a custom logic such that the most restrictive QAI value is kept. This ensures that reproducibility
     is guaranteed, independent of the order in which the chips are merged. 
+  - It is now possible to specify the resampling method for the DEM.
+    The parameter ``DEM_RESAMPLING`` can be set to ``NN`` (Nearest Neighbor), ``BL`` (Bilinear), or ``CC`` (Cubic Convolution).
+    The default is ``BL``. This allows users to choose the resampling method that best fits their needs.
+    Thanks to Oleg Zheleznyy for the suggestion.
 
 - **FORCE HLPS**
 

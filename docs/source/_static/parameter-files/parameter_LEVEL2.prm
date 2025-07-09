@@ -54,6 +54,11 @@ FILE_AOI = NULL
 # a DEM.
 # Type: full file path
 FILE_DEM = NULL
+# This is the resampling option for reprojection the DEM; you can choose
+# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution
+# (CC).
+# Type: Character. Valid values: {NN,BL,CC}
+DEM_RESAMPLING = BL
 # This parameter specifies whether a DEM database should be used.
 # If TRUE, a predefined DEM database is used for processing, i.e., 
 # a precompiled database containing an individual DEM for each WRS-2 and
