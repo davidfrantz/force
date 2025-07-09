@@ -637,7 +637,7 @@ brick_t *DEM = NULL;
 
   // warp DEM to MEM or use flat DEM (z = 0m)
   if (strcmp(pl2->fdem, "NULL") != 0){
-    if ((warp_from_disc_to_known_brick(1, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
+    if ((warp_from_disc_to_known_brick(pl2->dem_resample, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
       printf("Reprojecting of DEM failed! "); return FAILURE;}
   }
 

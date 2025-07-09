@@ -105,6 +105,7 @@ typedef struct {
   int doenv;   // flag: environment reflectance
 
   int dem_nodata;    // DEM nodata
+  int dem_resample;  // resampling option for DEM
   int use_dem_database; // flag: use DEM database
   int coreg_nodata;  // Master nodata
   
