@@ -22,7 +22,7 @@ FORCE natively supports the integrated processing and analysis of
   * Landsat 4/5 TM, 
   * Landsat 7 ETM+, 
   * Landsat 8/9 OLI and 
-  * Sentinel-2 A/B MSI.
+  * Sentinel-2 A/B/C MSI.
 
 Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or environmental variables.
 
@@ -40,8 +40,6 @@ Related Links
 **Learn how to use FORCE**. Have a look at the :ref:`howto`. Check regularly for new content.
 
 **Get help**, and help others in the FORCE self-help `discussion group <https://github.com/davidfrantz/force/discussions>`_
-
-**Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
 
 **Stay updated**, and follow me on `Bluesky <https://bsky.app/profile/dfrantz.bsky.social>`_
 
@@ -77,10 +75,8 @@ Related Links
    :hidden:
 
    setup/requirements.rst
-   setup/depend.rst
-   setup/depend_opt.rst
-   setup/install.rst
    setup/docker.rst
+   setup/install.rst
 
 
 .. toctree::

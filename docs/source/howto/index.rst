@@ -5,6 +5,8 @@ Tutorials
 
 There are several tutorials available that showcase how to use the FORCE.
 
+Please note that all users are warmly welcome to share their own tutorials!
+
 
 +--------------+--------+---------------------+----------------------------------------------------------------------------+
 + Level        + Module + Tutorial            + Learning Objective                                                         +
