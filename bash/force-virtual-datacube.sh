@@ -43,14 +43,13 @@ export PARALLEL_EXE="parallel"
 help(){
 cat <<HELP
 
-Usage: $PROG [-hvi] [-p pattern] [-t tempdir] [-w] [-j nJobs] physical-datacube-dir virtual-datacube-dir
+Usage: $PROG [-hvi] [-p pattern] [-w] [-j nJobs] physical-datacube-dir virtual-datacube-dir
 
   optional:
   -h = show this help
   -v = show version
   -i = show program's purpose
   -p = search pattern (default: '*.tif')
-  -t = temp directory (default: current directory)
   -w = overwrite output file (default: skips existing files)
   -j = number of jobs, defaults to 100%
 
@@ -87,12 +86,11 @@ export -f translate_to_virtual
 
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hvip:t:wj: --long help,version,info,pattern:,temp:,overwrite,jobs: -n "$0" -- "$@"`
+ARGS=`getopt -o hvip:wj: --long help,version,info,pattern:,overwrite,jobs: -n "$0" -- "$@"`
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
 PATTERN='*.tif'
-DIR_TEMP=$PWD
 OVERWRITE=FALSE
 NJOB="100%"
 
@@ -102,7 +100,6 @@ while :; do
     -v|--version) force_version; exit 0;;
     -i|--info) echo "Display the size of your datacube"; exit 0;;
     -p|--pattern) PATTERN="$2"; shift ;;
-    -t|--temp) DIR_TEMP="$2"; shift ;;
     -w|-overwrite) OVERWRITE=TRUE; shift ;;
     -j|--jobs) NJOB="$2"; shift ;;
     
@@ -112,7 +109,6 @@ while :; do
   shift
 done
 debug "PATTERN: $PATTERN"
-debug "DIR_TEMP: $DIR_TEMP"
 debug "OVERWRITE: $OVERWRITE"
 
 if [ $# -lt $MANDATORY_ARGS ] ; then 
@@ -126,10 +122,6 @@ debug "DIR_OUTPUT: $DIR_OUTPUT"
 
 
 # options received, check now ------------------------------------------------------------
-if ! [[ -d "$DIR_TEMP" && -w "$DIR_TEMP" ]]; then
-  echoerr "$DIR_TEMP is not a writeable directory, exiting."; exit 1;
-fi
-
 if ! [[ -d "$DIR_OUTPUT" && -w "$DIR_OUTPUT" ]]; then
   echoerr "$DIR_OUTPUT is not a writeable directory, exiting."; exit 1;
 fi
@@ -161,32 +153,20 @@ debug "DC_DEFINITION_OUTPUT: $DC_DEFINITION_OUTPUT"
 
 
 # main thing -----------------------------------------------------------------------------
-FILE_TEMP="$DIR_TEMP/force-virtual-datacube_temp.txt"
-
-if [[ -f "$FILE_TEMP" ]]; then
-  echoerr "$FILE_TEMP exists, clean up an re-run, exiting."; exit 1;
-fi
 
 # walk tiles
 for d in "$DIR_INPUT"/X*; do 
+
   echo "walking tile $d" 
-  ls -l "$d"/"$PATTERN" >> "$FILE_TEMP"
+
+  # check free RAM
+  MEMORY=$(LANG="C"; free --mega | awk '/^Mem/ { printf("%.0fM\n", $2 * 0.05) }')
+
+  # do the thing
+  find "$d" -maxdepth 1 -type f -name "$PATTERN" | \
+    $PARALLEL_EXE -j "$NJOB" --eta --memsuspend "$MEMORY" \
+    translate_to_virtual {} "$DIR_OUTPUT"/{/.}.vrt "$OVERWRITE"
+
 done
-
-if ! [[ -f "$FILE_TEMP" ]]; then
-  echoerr "no $FILE_TEMP generated, check if $DIR_INPUT is ok and if pattern ($PATTERN) makes sense, exiting."; exit 1;
-fi
-
-
-# check free RAM
-MEMORY=$(LANG="C"; free --mega | awk '/^Mem/ { printf("%.0fM\n", $2 * 0.05) }')
-
-# do the thing
-$PARALLEL_EXE -a "$FILE_TEMP" -j "$NJOB" --eta --memsuspend "$MEMORY" translate_to_virtual {} "$DIR_OUTPUT"/{/.}.vrt "$OVERWRITE"
-
-# remove temp file
-if [[ -f "$FILE_TEMP" ]]; then
-  rm $FILE_TEMP
-fi
 
 exit 0
