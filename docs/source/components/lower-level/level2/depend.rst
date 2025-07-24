@@ -7,8 +7,8 @@ Data dependencies
 File queue
 ^^^^^^^^^^
 
-A :ref:`queue` is required for :ref:`force-bulk`. 
-The queue us not needed for :ref:`force-core` and :ref:`force-wrapper`.
+A :ref:`queue` is required for :ref:`level2-bulk`. 
+The queue us not needed for :ref:`level2-core`.
 
 The queue is automatically generated when using the :ref:`l1as`.
 
@@ -21,7 +21,7 @@ It is used for cloud detection, topographic and atmospheric correction.
 The user should provide a DEM that covers the complete(!) study area at adequate spatial resolution.
 The DEM must be specified in the :ref:`l2-param` as ``FILE_DEM``.
 There is not really a restriction on the source, projection or resolution; the file format must be supported by GDAL.
-The DEM will be warped to the extent and resolution of the processed image using bilinear resampling.
+The DEM will be warped to the extent and resolution of the processed image.
 The DEM needs to be provided in meters above sea level, and the nodata value needs to be given in the :ref:`l2-param` with ``FILE_DEM_NODATA``.
 
 .. note::
@@ -72,9 +72,11 @@ AOD for any given wavelength is retrieved using following equation:
 ln⁡〖τ_a 〗=a_0+a_1∙ln⁡λ+a_2∙(ln⁡λ )^2
 
 
-Master images for co-registration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Base images for co-registration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+A base image can be given to enable co-registration. 
+See the :ref:`tut-coreg` tutorial for details.
 
 Tile allow-list
 ^^^^^^^^^^^^^^^

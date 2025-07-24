@@ -72,9 +72,13 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 +        +-------+-----------------------------------------+
 +        + LND08 + Landsat 8 Operational Land Imager       +
 +        +-------+-----------------------------------------+
++        + LND09 + Landsat 9 Operational Land Imager       +
++        +-------+-----------------------------------------+
 +        + SEN2A + Sentinel-2A MultiSpectral Instrument    +
 +        +-------+-----------------------------------------+
 +        + SEN2B + Sentinel-2B MultiSpectral Instrument    +
++        +-------+-----------------------------------------+
++        + SEN2C + Sentinel-2C MultiSpectral Instrument    +
 +--------+-------+-----------------------------------------+
 + 23–25  + Product Type                                    +
 +        +-------+-----------------------------------------+
@@ -98,10 +102,6 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 +        +-------+-----------------------------------------+
 +        + tif   + image data in compressed GeoTiff format +
 +        +-------+-----------------------------------------+
-+        + dat   + image data in flat binary ENVI format   +
-+        +-------+-----------------------------------------+
-+        + hdr   + metadata for ENVI format                +
-+        +-------+-----------------------------------------+
 +        + jpg   + quicklooks                              +
 +--------+-------+-----------------------------------------+
 
@@ -109,7 +109,7 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 File format
 ^^^^^^^^^^^
 
-The images are provided with signed 16bit datatype and band sequential (BSQ) interleaving in one of the following formats:
+The images are provided with signed 16bit datatype and band sequential (BSQ) interleaving in following default format:
 
 * GeoTiff 
   
@@ -118,19 +118,11 @@ The images are provided with signed 16bit datatype and band sequential (BSQ) int
   The images are generated with internal blocks for partial image access.
   These blocks are strips that are as wide as the ``TILE_SIZE`` and as high as the ``BLOCK_SIZE``.
   
-* ENVI Standard format
-
-  This produces flat binary images without any compression.
-  This option might seem tempting as there is no overhead in cracking the compression when reading these data.
-  However, the transfer of the larger data volume from disc to CPU often takes longer than cracking the compression.
-  Therefore, we recommend to use the GeoTiff option.
-
 
 Metadata
 ^^^^^^^^
 
 Metadata are written to all output products.
-For ENVI format, the metadata are written to the ENVI header (``.hdr`` extension).
 For GeoTiff format, the metadata are written into the GeoTiff file.
 If the metadata is larger than allowed by the GeoTiff driver, the excess metadata will be written to an "auxiliary metadata" file with ``.aux.xml`` extension.
 FORCE-specific metadata will be written to the FORCE domain, and thus are probably not visible unless the FORCE domain (or all domains) are specifically printed:
@@ -453,6 +445,14 @@ LC08_L1TP_195023_20170312_20170317_01_T1: sc:   0.29%. cc:  91.85%. Skip. Proces
 The first entry indicates the image ID, followed by overall snow and cloud cover, aerosol optical depth @ 550 nm (scene average), the number of dark targets for retrieving aerosol optical depth (over water/vegetation), the number of products written (number of tiles, this is dependent on tile cloud cover, and FILE_TILE), and a supportive success indication.
 In the case the overall cloud coverage is higher than allowed, the image is skipped.
 The processing time (real time) is appended at the end.
+
+
+Provenance
+^^^^^^^^^^
+
+A data provenance table is generated per processing day. 
+The csv table stores the information necessary to trace which output product was produced by which input product(s),
+and whether the file was newly created, or data were merged into it. 
 
 
 Quicklooks

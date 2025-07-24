@@ -11,7 +11,7 @@ The full file paths must be given.
 No white spaces should be present in the file paths.
 The file is specified with ``FILE_QUEUE`` in the Level 2 :ref:`l2-param`.
 
-Each image is followed by ``QUEUED`` or ``DONE``, which indicates the queue status.
+Each image is followed by ``QUEUED``, ``FAIL``, or ``DONE``, which indicates the queue status.
 Queued images will be processed, and the queue status will be changed to ``DONE`` after Level 2 processing.
 If a reprocessing is required, the queue status needs to be changed to ``QUEUED``, e.g. using
 

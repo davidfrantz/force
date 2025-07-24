@@ -61,16 +61,6 @@ Related Links
 
 .. toctree::
    :maxdepth: 1
-   :caption: Usage Policy
-   :hidden:
-
-   policy/citation.rst
-   policy/development.rst
-   policy/license.rst
-
-
-.. toctree::
-   :maxdepth: 1
    :caption: Setup
    :hidden:
 
@@ -106,3 +96,12 @@ Related Links
    refs.rst
    refs-applied.rst
 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Usage Policy
+   :hidden:
+
+   policy/citation.rst
+   policy/development.rst
+   policy/license.rst
