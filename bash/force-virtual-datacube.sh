@@ -25,7 +25,7 @@
 # this script displays the size of your datacube
 
 # functions/definitions ------------------------------------------------------------------
-export PROG=$(basename $0)
+export PROG=$(basename "$0")
 export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export MISC="$BIN/force-misc"
 
@@ -73,12 +73,12 @@ cmd_not_found "$PARALLEL_EXE"
 
 function translate_to_virtual(){
 
-  inputfile=$1
-  outputfile=$2
-  overwrite=$3
+  inputfile="$1"
+  outputfile="$2"
+  overwrite="$3"
 
   if [[ "$overwrite" == "TRUE" || ! -f "$outputfile" ]]; then 
-    $TRANSLATE_EXE -f VRT $inputfile $outputfile
+    $TRANSLATE_EXE -f VRT "$inputfile" "$outputfile"
   fi
 
 }
