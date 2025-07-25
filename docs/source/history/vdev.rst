@@ -51,3 +51,9 @@ Develop version
     The tool can now also be used on write-protected data cubes by specifiying an output directory that no longer
     needs to be a subdirectoy of the data cube. The default is still a `mosaic` folder within the datacube.
     
+  - added a new tool ``force-virtual-datacube``:
+    This tool allows users to create a virtual datacube from a physical datacube. It is useful for creating
+    a virtual representation of the data without duplicating the actual files, thus saving disk space.
+    It can be used to combine multiple datacubes into a single virtual dataset, which can be useful for analysis.
+    The tool can be used with various options to customize the output, such as specifying the pattern of files
+    to include and whether to overwrite existing files.
