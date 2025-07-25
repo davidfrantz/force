@@ -22,12 +22,13 @@
 # 
 ##########################################################################
 
-# this script displays the size of your datacube
+# this script builds a virtual datacube from a physical datacube
 
 # functions/definitions ------------------------------------------------------------------
-export PROG=$(basename "$0")
-export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export MISC="$BIN/force-misc"
+PROG=$(basename "$0")
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+MISC="$BIN/force-misc"
+export PROG BIN MISC
 
 # source bash "library" file
 LIB="$MISC/force-bash-library.sh"
@@ -78,7 +79,7 @@ function translate_to_virtual(){
   overwrite="$3"
 
   if [[ "$overwrite" == "TRUE" || ! -f "$outputfile" ]]; then 
-    $TRANSLATE_EXE -f VRT "$inputfile" "$outputfile"
+    $TRANSLATE_EXE -f VRT "$inputfile" "$outputfile" >/dev/null
   fi
 
 }
@@ -86,8 +87,8 @@ export -f translate_to_virtual
 
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hvip:wj: --long help,version,info,pattern:,overwrite,jobs: -n "$0" -- "$@"`
-if [ $? != 0 ] ; then help; fi
+ARGS=$(getopt -o hvip:wj: --long help,version,info,pattern:,overwrite,jobs: -n "$0" -- "$@")
+if [ "$?" != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
 PATTERN='*.tif'
@@ -114,8 +115,8 @@ debug "OVERWRITE: $OVERWRITE"
 if [ $# -lt $MANDATORY_ARGS ] ; then 
   echoerr "Mandatory argument(s) are missing."; help
 else
-  DIR_INPUT=$(readlink -f $1) # absolute file path
-  DIR_OUTPUT=$(readlink -f $2) # absolute file path
+  DIR_INPUT=$(readlink -f "$1") # absolute file path
+  DIR_OUTPUT=$(readlink -f "$2") # absolute file path
 fi
 debug "DIR_INPUT: $DIR_INPUT"
 debug "DIR_OUTPUT: $DIR_OUTPUT"
@@ -159,13 +160,15 @@ for d in "$DIR_INPUT"/X*; do
 
   echo "walking tile $d" 
 
+  mkdir -p "$DIR_OUTPUT"/"${d#"$DIR_INPUT"}"
+
   # check free RAM
   MEMORY=$(LANG="C"; free --mega | awk '/^Mem/ { printf("%.0fM\n", $2 * 0.05) }')
 
   # do the thing
   find "$d" -maxdepth 1 -type f -name "$PATTERN" | \
-    $PARALLEL_EXE -j "$NJOB" --eta --memsuspend "$MEMORY" \
-    translate_to_virtual {} "$DIR_OUTPUT"/{/.}.vrt "$OVERWRITE"
+    $PARALLEL_EXE -j "$NJOB" --memsuspend "$MEMORY" \
+    translate_to_virtual {} "$DIR_OUTPUT"/"${d#"$DIR_INPUT"}"/{/.}.vrt "$OVERWRITE"
 
 done
 
