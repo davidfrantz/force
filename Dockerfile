@@ -27,7 +27,7 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest as force_builder
+FROM davidfrantz/base:ubuntu24 AS force_builder
 
 # Environment variables
 ENV SOURCE_DIR $HOME/src/force
@@ -39,7 +39,7 @@ ARG debug=disable
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
-COPY --chown=docker:docker . .
+COPY --chown=ubuntu:ubuntu . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
@@ -54,12 +54,13 @@ RUN echo "building FORCE" && \
 # clone FORCE UDF
   git clone https://github.com/davidfrantz/force-udf.git
 
-FROM davidfrantz/base:latest as force
+FROM davidfrantz/base:ubuntu24 AS force
 
-COPY --chown=docker:docker --from=force_builder $HOME/bin $HOME/bin
-COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
+# FIXME: workaround to make CI tests (that run as uid < 1000) pass.
+RUN chmod 777 /home/ubuntu
 
-WORKDIR /home/docker
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/bin $HOME/bin
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/force-udf $HOME/udf
 
 ENV R_HOME=/usr/lib/R
 ENV LD_LIBRARY_PATH=$R_HOME/lib
