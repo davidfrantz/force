@@ -351,6 +351,20 @@ int *ny_ = NULL;
     #endif
   }
 
+  #ifdef FORCE_DEBUG
+  for (layer=0; layer<nlayer; layer++){
+    brick_t *BRICK = NULL; short *brick_ = NULL;
+    char fname[NPOW_10];
+    BRICK = copy_brick(QAI, 1, _DT_SHORT_); 
+    sprintf(fname, "COREG_PYRAMID-LAYER-%d", layer+1);
+    set_brick_filename(BRICK, fname);
+    set_brick_nrows(BRICK, ny_[layer]);
+    set_brick_ncols(BRICK, nx_[layer]);
+    brick_ = get_band_short(BRICK, 0);  memmove(brick_, pyramids_[layer],  nx_[layer]*ny_[layer]*sizeof(short));
+    print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  }
+  #endif
+
   #ifdef FORCE_CLOCK
   proctime_print("building pyramids", TIME);
   #endif
@@ -407,7 +421,7 @@ int nx_new, ny_new;
         p = i*nx+j;
         p_new = i_new*nx_new+j_new;
 
-        if (image_[p] == nodata){
+        if (blurred_[p] == nodata){
           pyramid_[p_new] = nodata;
         } else {
           pyramid_[p_new] = blurred_[p];
@@ -420,6 +434,9 @@ int nx_new, ny_new;
   }
 
   free(blurred_); free(pfFilter);
+
+
+
 
   *nx_new_ = nx_new;
   *ny_new_ = ny_new;
