@@ -65,8 +65,8 @@ typedef struct {
 int resolution_merge_1(brick_t *TOA, brick_t *QAI);
 int resolution_merge_2(brick_t *TOA, brick_t *QAI);
 int resolution_merge_3(brick_t *TOA, brick_t *QAI);
-double rescale_weight(double weight, double minweight, double maxweight);
-short **improphe(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink);
+double rescale_weight_resmerge(double weight, double minweight, double maxweight);
+short **improphe_resmerge(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink);
 float *starfm(int nx, int ny, brick_t *QAI, float **coarse, float **fine, int r);
 
 
@@ -298,7 +298,7 @@ short **pred_ = NULL;
 
 
   // predict fine data
-  pred_ = improphe(nx, ny, QAI, toa_, KDIST,
+  pred_ = improphe_resmerge(nx, ny, QAI, toa_, KDIST,
                             h, nb_m, nb_c, bands_m, bands_c, nk, mink);
 
   // update toa with prediction
@@ -514,7 +514,7 @@ short **toa_ = NULL;
 --- maxweight: maximum weight within kernel
 +++ Return:    rescaled weight R'
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-double rescale_weight(double weight, double minweight, double maxweight){
+double rescale_weight_resmerge(double weight, double minweight, double maxweight){
 double normweight;
 
   if (weight == 0){
@@ -550,7 +550,7 @@ double normweight;
 --- mink:    minimum number of pixels for good prediction
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short **improphe(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink){
+short **improphe_resmerge(int nx, int ny, brick_t *QAI, short **toa_, float **KDIST, int h, int nb_m, int nb_c, int *bands_m, int *bands_c, int nk, int mink){
 int i, j, p;
 int ki, kj; // iterator for KDIST
 int ii, jj; // iterator for kernel relative to center
@@ -670,7 +670,7 @@ short **pred_ = NULL;
 
         if (Sclass[k] > Sc) continue;
 
-        SS = rescale_weight(Srecord[k], Srange[0][Sc], Srange[1][Sc]);
+        SS = rescale_weight_resmerge(Srecord[k], Srange[0][Sc], Srange[1][Sc]);
 
         W = 1/SS;
         for (f=0; f<nb_c; f++) weightxdata[f] += W*Crecord[f][k];
