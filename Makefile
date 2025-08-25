@@ -50,10 +50,6 @@ PYTHON_LIBS = $(shell (python3-config --ldflags --libs --embed || python3-config
 RSTATS_INCLUDES = $(shell R CMD config --cppflags)
 RSTATS_LIBS = $(shell R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L') -lR
 
-INCLUDES = $(GDAL_INCLUDES) $(GSL_INCLUDES) $(CURL_INCLUDES) $(OPENCV_INCLUDES) $(PYTHON_INCLUDES) $(RSTATS_INCLUDES)
-LIBS = $(GDAL_LIBS) $(GSL_LIBS) $(CURL_LIBS) $(OPENCV_LIBS) $(PYTHON_LIBS) $(RSTATS_LIBS)
-FLAGS = $(GDAL_FLAGS) $(GSL_FLAGS) $(CURL_FLAGS) $(OPENCV_FLAGS) $(PYTHON_FLAGS) $(RSTATS_FLAGS)
-
 
 ##########################################################################
 # NO! changes below this line (unless you know what to do, then go ahead)
@@ -61,11 +57,13 @@ FLAGS = $(GDAL_FLAGS) $(GSL_FLAGS) $(CURL_FLAGS) $(OPENCV_FLAGS) $(PYTHON_FLAGS)
 
 ### Compiler
 
-CXX=g++ -std=c++11
-
 # Compilation Flags
 CFLAGS=-O3 -Wall -fopenmp
 #CFLAGS=-g -Wall -fopenmp
+
+GCC=gcc $(CFLAGS)
+G11=g++ -std=c++11 $(CFLAGS)
+
 
 ##########################################################################
 
@@ -73,183 +71,67 @@ CFLAGS=-O3 -Wall -fopenmp
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
+BUILDDIR = build
 BASHDIR = bash
 RSTATSDIR = rstats
 PYTHONDIR = python
 MISCDIR = misc
 
-# Create necessary directories
-$(shell mkdir -p $(OBJDIR) $(BINDIR) $(BINDIR)/force-test $(BINDIR)/force-misc)
-
-# Source Files (modules)
-CROSS_SRC = $(wildcard $(SRCDIR)/modules/cross-level/*.c)
-LOWER_SRC = $(wildcard $(SRCDIR)/modules/lower-level/*.c)
-HIGHER_SRC = $(wildcard $(SRCDIR)/modules/higher-level/*.c)
-AUX_SRC = $(wildcard $(SRCDIR)/modules/aux-level/*.c)
-
-# Source Files (main executables)
-MAIN_AUX_SRC = $(wildcard $(SRCDIR)/main/aux-level/*.c)
-MAIN_LOWER_SRC = $(wildcard $(SRCDIR)/main/lower-level/*.c)
-MAIN_HIGHER_SRC = $(wildcard $(SRCDIR)/main/higher-level/*.c)
-
-# Source Files (test executables)
-TEST_SRC = $(wildcard $(SRCDIR)/tests/*.c)
-
-# Object Files
-CROSS_OBJ = $(patsubst $(SRCDIR)/modules/cross-level/%.c, $(OBJDIR)/%.o, $(CROSS_SRC))
-LOWER_OBJ = $(patsubst $(SRCDIR)/modules/lower-level/%.c, $(OBJDIR)/%.o, $(LOWER_SRC))
-HIGHER_OBJ = $(patsubst $(SRCDIR)/modules/higher-level/%.c, $(OBJDIR)/%.o, $(HIGHER_SRC))
-AUX_OBJ = $(patsubst $(SRCDIR)/modules/aux-level/%.c, $(OBJDIR)/%.o, $(AUX_SRC))
-
-# Main executables
-MAIN_AUX_EXE = $(patsubst $(SRCDIR)/main/aux-level/%.c, $(BINDIR)/%, $(MAIN_AUX_SRC))
-MAIN_LOWER_EXE = $(patsubst $(SRCDIR)/main/lower-level/%.c, $(BINDIR)/%, $(MAIN_LOWER_SRC))
-MAIN_HIGHER_EXE = $(patsubst $(SRCDIR)/main/higher-level/%.c, $(BINDIR)/%, $(MAIN_HIGHER_SRC))
-
-# Test executables
-TEST_EXE = $(patsubst $(SRCDIR)/tests/%.c, $(BINDIR)/force-test/%, $(TEST_SRC))
-
-# Dependencies
-DEPENDENCIES = $(CROSS_OBJ:.o=.d) $(LOWER_OBJ:.o=.d) $(HIGHER_OBJ:.o=.d) $(AUX_OBJ:.o=.d)
 
 # Targets
-all: check-required exe tests scripts misc
-exe: aux higher lower
-aux: $(MAIN_AUX_EXE)
-higher: $(MAIN_HIGHER_EXE)
-lower: $(MAIN_LOWER_EXE)
-tests: $(TEST_EXE)
-scripts: bash rstats python external
-dev: $(BINDIR)/force-higher-level # specific target for development
-#dev: $(OBJDIR)/brick_io-cl.o # specific target for development
-.PHONY: check-required bash rstats python external scripts misc install
+all: check-tools prepare exe bash rstats python external misc
+with_tests: all tests
+.PHONY: prepare check-tools bash rstats python external misc \
+  install clean all with_tests exe tests auch higher lower cross
 
-# Include dependencies
--include $(DEPENDENCIES)
+# Compile targets
+include $(BUILDDIR)/cross-level.mk
+include $(BUILDDIR)/lower-level.mk
+include $(BUILDDIR)/higher-level.mk
+include $(BUILDDIR)/aux-level.mk
+include $(BUILDDIR)/executables.mk
+include $(BUILDDIR)/tests.mk
 
+# Prepare build directories
+prepare: check-tools
+	mkdir -p \
+	$(OBJDIR) \
+	$(BINDIR) \
+	$(BINDIR)/force-misc
 
-##########################################################################
-
-### Check external tools
-
-REQUIRE = gcc g++ \
-          parallel \
-          gdalinfo gdal_translate gdaladdo gdalwarp gdalbuildvrt \
-          gdal_merge.py gdal_rasterize gdaltransform gdalsrsinfo \
-          gdal_edit.py gdal_calc.py gdal-config \
-          ogrinfo ogr2ogr \
-          gsl-config curl-config \
-          unzip tar lockfile-create lockfile-remove rename dos2unix \
-          python3 pip3 \
-          R \
-          landsatlinks \
-          opencv_version 
-
-check-required:
-	@missing=$$(for exec in $(REQUIRE); do \
-		if ! command -v $$exec > /dev/null; then \
-			echo $$exec; \
-		fi; \
-	done); \
-	if [ "$$missing" ]; then \
-		echo "No executable(s) in PATH: $$missing. Please install the dependencies!"; \
-		exit 1; \
-	fi
-
-
-##########################################################################
-
-# Modules
-
-$(OBJDIR)/%.o: $(SRCDIR)/modules/cross-level/%.c
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
-
-$(OBJDIR)/%.o: $(SRCDIR)/modules/lower-level/%.c
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
-
-$(OBJDIR)/%.o: $(SRCDIR)/modules/higher-level/%.c
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
-
-$(OBJDIR)/%.o: $(SRCDIR)/modules/aux-level/%.c
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -c $< -o $@ $(LIBS)
-
-##########################################################################
-
-# Main executables
-
-$(BINDIR)/%: $(SRCDIR)/main/aux-level/%.c $(CROSS_OBJ) $(AUX_OBJ)
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
-
-$(BINDIR)/%: $(SRCDIR)/main/lower-level/%.c $(CROSS_OBJ) $(LOWER_OBJ)
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
-
-$(BINDIR)/%: $(SRCDIR)/main/higher-level/%.c $(CROSS_OBJ) $(HIGHER_OBJ)
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
-
-
-# Test executables
-
-$(BINDIR)/force-test/%: $(SRCDIR)/tests/%.c $(SRCDIR)/tests/unity/unity.c $(CROSS_OBJ)
-	@echo "Compiling $<..."
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o $@ $^ $(LIBS)
-
-
-##########################################################################
+# Check installed tools
+check-tools:
+	./check-required.sh
 
 # Bash scripts
-
-bash:
+bash: prepare
 	@for file in $(BASHDIR)/*.sh; do \
 		cp $$file $(BINDIR)/$$(basename $$file .sh); \
 	done
 
-
 # R scripts
-
-rstats:
+rstats: prepare
 	@for file in $(RSTATSDIR)/*.r; do \
 		cp $$file $(BINDIR)/$$(basename $$file .r); \
 	done
 
-
 # Python scripts
-
-python:
+python: prepare
 	@for file in $(PYTHONDIR)/*.py; do \
 		cp $$file $(BINDIR)/$$(basename $$file .py); \
 	done
 
-
 # re-branded tools [with permission]
-
-external:
+external: prepare
 	cp $(shell which landsatlinks) $(BINDIR)/force-level1-landsat
 
-
 # misc files
-
-misc:
+misc: prepare
 	@for file in $(MISCDIR)/*; do \
 		cp $$file $(BINDIR)/force-misc/; \
 	done
 
-
-### dummy code for testing stuff  
-
-dummy: $(CROSS_OBJ) $(SRCDIR)/main/dummy.c
-	$(CXX) $(CFLAGS) $(INCLUDES) $(FLAGS) -o dummy $(SRCDIR)/main/dummy.c $(CROSS_OBJ) $(LIBS)
-
-##########################################################################
-
 # install the software
-
 install: all
 	find $(BINDIR) -type f -exec chmod 0755 {} +
 	find $(BINDIR) -type d -exec chmod 0755 {} +
@@ -257,7 +139,6 @@ install: all
 
 
 # clean up
-
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 

@@ -33,6 +33,7 @@ String handling header
 #include <string.h>   // string handling functions
 #include <limits.h>   // macro constants of the integer types
 #include <errno.h>    // error numbers
+#include <stdbool.h> // boolean data type
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
