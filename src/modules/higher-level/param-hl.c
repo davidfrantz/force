@@ -80,6 +80,7 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   register_bool_par(params,    "OUTPUT_SUBFOLDERS", &phl->subfolders);
+  register_bool_par(params,    "STRICT_IO", &phl->strict_io);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
   register_int_par(params,     "NTHREAD_WRITE",   1, INT_MAX, &phl->othread);

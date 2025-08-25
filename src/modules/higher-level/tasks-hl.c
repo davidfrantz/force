@@ -322,16 +322,19 @@ int o;
 }
 
 
-/** This function prints a warning if no input or output was detected
+/** This function prints a message if no input or output was detected
++++ and possibly instructs the caller to return an error if the
++++ strict flag is set to true
 +++ Special behaviour when sampling module is used
 --- ibytes:   number of bytes read
 --- obytes:   number of bytes written
 --- phl:      HL parameters
-+++ Return:   void
++++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void warn_if_no_io(off_t ibytes, off_t obytes, par_hl_t *phl){
+int handle_no_io(off_t ibytes, off_t obytes, par_hl_t *phl){
 bool warn_i = true;
 bool warn_o = true;
+int exit_code = SUCCESS;
 
 
   if (phl->type == _HL_SMP_){
@@ -356,10 +359,15 @@ bool warn_o = true;
 
   if ((warn_i && ibytes == 0) || (warn_o && obytes == 0)){
     printf("________________________________________\n");
-    printf("Warning: no input or output detected. If\n"
-           "unintentional, triple-check for mis-\n"
-           "matching entries in\n"
-           "  DIR_MASK\n"
+    if (phl->strict_io){
+      printf("Error: no input or output deteccted.\n"
+             "Triple-check for mismatching entries in\n");
+    } else {
+      printf("Warning: no input or output detected. If\n"
+             "unintentional, triple-check for mis-\n"
+             "matching entries in\n");
+    }
+    printf("  DIR_MASK\n"
            "  BASE_MASK\n"
            "  X_TILE_RANGE\n"
            "  Y_TILE_RANGE\n"
@@ -371,9 +379,11 @@ bool warn_o = true;
            "and make sure that your input file type\n"
            "  is one of .dat .bsq .bil .tif .vrt\n");
     printf("________________________________________\n");
+
+    if (phl->strict_io) exit_code = FAILURE;
   }
 
 
-  return;
+  return exit_code;
 }
 
