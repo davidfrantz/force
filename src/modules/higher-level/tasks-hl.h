@@ -36,7 +36,6 @@ Higher level tasks header
 #include "../cross-level/brick_io-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/lock-cl.h"
-#include "../cross-level/enum-cl.h"
 #include "../higher-level/progress-hl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/quality-hl.h"
