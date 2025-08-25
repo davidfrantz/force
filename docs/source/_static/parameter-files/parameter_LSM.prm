@@ -53,6 +53,11 @@ OUTPUT_EXPLODE = FALSE
 # structure the output.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_SUBFOLDERS = FALSE
+# This parameter controls whether FORCE raises a warning or an error 
+# if no read or written bytes are detected. The default (FALSE) will 
+# result in a warning.
+# Type: Logical. Valid values: {TRUE,FALSE}
+STRICT_IO = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
