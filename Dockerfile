@@ -35,6 +35,7 @@ ENV INSTALL_DIR $HOME/bin
 
 # build args
 ARG debug=disable
+ARG build=all
 
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
@@ -45,7 +46,7 @@ COPY --chown=docker:docker . .
 RUN echo "building FORCE" && \
   ./debug.sh $debug && \
   sed -i "/^INSTALLDIR=/cINSTALLDIR=$INSTALL_DIR/" Makefile && \
-  make -j$(nproc) && \
+  make -j$(nproc) $build && \
   make install && \
   make clean && \
   cd $HOME && \

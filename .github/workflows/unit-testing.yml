@@ -19,6 +19,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --build-arg build=with_tests
       - name: Run unit tests
         run: docker run --rm -t --user "$(id -u):$(id -g)" $IMAGE_NAME force-unit-testing
