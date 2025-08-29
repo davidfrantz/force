@@ -28,24 +28,27 @@
 INSTALLDIR=/usr/local/bin
 
 # Libraries
-GDAL_INCLUDES = -I/usr/include/gdal
-GDAL_LIBS = -L/usr/lib -lgdal
+GDAL_INCLUDES = $(shell gdal-config --cflags)
+GDAL_LIBS = $(shell gdal-config --libs)
 GDAL_FLAGS = -Wl,-rpath=/usr/lib
 
-GSL_INCLUDES = -I/usr/include/gsl
-GSL_LIBS = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas
+GSL_INCLUDES = $(shell gsl-config --cflags)
+GSL_LIBS = $(shell gsl-config --libs)
 GSL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 
 CURL_INCLUDES = -I/usr/include/curl -I/usr/include/x86_64-linux-gnu/curl
 CURL_LIBS = -L/usr/lib/x86_64-linux-gnu -lcurl
 CURL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 
-OPENCV_INCLUDES = -I/usr/local/include/opencv4
-OPENCV_LIBS = -L/usr/local/lib -lopencv_core -lopencv_ml -lopencv_imgproc
+OPENCV_INCLUDES = $(shell pkg-config --cflags opencv4)
+OPENCV_LIBS = $(shell pkg-config --libs opencv4)
 OPENCV_FLAGS = -Wl,-rpath=/usr/local/lib
 
 PYTHON_INCLUDES = $(shell python3-config --includes)
 PYTHON_LIBS = $(shell (python3-config --ldflags --libs --embed || python3-config --ldflags --libs) | tr -d '\n')
+
+NUMPY_INCLUDES = $(shell python3 -c "import numpy; print(numpy.get_include())")
+PYTHON_INCLUDES += -I$(NUMPY_INCLUDES)
 
 RSTATS_INCLUDES = $(shell R CMD config --cppflags)
 RSTATS_LIBS = $(shell R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L') -lR
