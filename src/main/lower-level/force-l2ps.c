@@ -78,7 +78,7 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - 'image-dir':      extracted Level 1 image\n");
-  printf("  - 'parameter-file': ML parameter file\n");
+  printf("  - 'parameter-file': LEVEL2 parameter file\n");
   printf("\n");
   // option -d is hidden from user and only used from force caller
 
