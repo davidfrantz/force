@@ -20,18 +20,18 @@
 # 
 ##########################################################################
 
-# Copyright (C) 2020-2022 Gergely Padányi-Gulyás (github user fegyi001),
+# Copyright (C) 2020-2025 Gergely Padányi-Gulyás (github user fegyi001),
 #                         David Frantz
 #                         Fabian Lehmann
 
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest as force_builder
+FROM davidfrantz/base:latest AS force_builder
 
 # Environment variables
-ENV SOURCE_DIR $HOME/src/force
-ENV INSTALL_DIR $HOME/bin
+ENV SOURCE_DIR=$HOME/src/force
+ENV INSTALL_DIR=$HOME/bin
 
 # build args
 ARG debug=disable
@@ -40,14 +40,13 @@ ARG build=all
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
-COPY --chown=docker:docker . .
+COPY --chown=ubuntu:ubuntu . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
   ./debug.sh $debug && \
-  sed -i "/^INSTALLDIR=/cINSTALLDIR=$INSTALL_DIR/" Makefile && \
   make -j$(nproc) $build && \
-  make install && \
+  make INSTALLDIR=$INSTALL_DIR install && \
   make clean && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
@@ -55,12 +54,12 @@ RUN echo "building FORCE" && \
 # clone FORCE UDF
   git clone https://github.com/davidfrantz/force-udf.git
 
-FROM davidfrantz/base:latest as force
+FROM davidfrantz/base:latest AS force
 
-COPY --chown=docker:docker --from=force_builder $HOME/bin $HOME/bin
-COPY --chown=docker:docker --from=force_builder $HOME/force-udf $HOME/udf
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/bin $HOME/bin
+COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/force-udf $HOME/udf
 
-WORKDIR /home/docker
+WORKDIR /home/ubuntu
 
 ENV R_HOME=/usr/lib/R
 ENV LD_LIBRARY_PATH=$R_HOME/lib
