@@ -492,7 +492,7 @@ typedef struct {
   int cthread;
   int stream;
   int pretty_progress;
-  int strict_io;    // warn (false) or error (true) without IO
+  int fail_if_empty;    // warn (false) or error (true) without IO
 
   // products
   par_prd_t prd;

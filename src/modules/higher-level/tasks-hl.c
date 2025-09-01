@@ -359,8 +359,8 @@ int exit_code = SUCCESS;
 
   if ((warn_i && ibytes == 0) || (warn_o && obytes == 0)){
     printf("________________________________________\n");
-    if (phl->strict_io){
-      printf("Error: no input or output deteccted.\n"
+    if (phl->fail_if_empty){
+      printf("Error: no input or output detected.\n"
              "Triple-check for mismatching entries in\n");
     } else {
       printf("Warning: no input or output detected. If\n"
@@ -380,7 +380,7 @@ int exit_code = SUCCESS;
            "  is one of .dat .bsq .bil .tif .vrt\n");
     printf("________________________________________\n");
 
-    if (phl->strict_io) exit_code = FAILURE;
+    if (phl->fail_if_empty) exit_code = FAILURE;
   }
 
 

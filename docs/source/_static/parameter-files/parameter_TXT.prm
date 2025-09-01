@@ -57,7 +57,7 @@ OUTPUT_SUBFOLDERS = FALSE
 # if no read or written bytes are detected. The default (FALSE) will 
 # result in a warning.
 # Type: Logical. Valid values: {TRUE,FALSE}
-STRICT_IO = FALSE
+FAIL_IF_EMPTY = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------

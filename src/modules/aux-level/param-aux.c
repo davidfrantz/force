@@ -1113,7 +1113,7 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# result in a warning.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "STRICT_IO = FALSE\n");
+  fprintf(fp, "FAIL_IF_EMPTY = FALSE\n");
 
   //if (verbose){
   //  fprintf(fp, "# If an output file already exists.. Overwrite?\n");
