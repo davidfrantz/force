@@ -14,6 +14,9 @@ Develop version
     The parameter ``DEM_RESAMPLING`` can be set to ``NN`` (Nearest Neighbor), ``BL`` (Bilinear), or ``CC`` (Cubic Convolution).
     The default is ``BL``. This allows users to choose the resampling method that best fits their needs.
     Thanks to Oleg Zheleznyy for the suggestion.
+  - When co-registering L7 SLC-Off imagery, a big portion of the data failed. 
+    This issue was addressed by altering the no-data filtering logic in the pyramid building process of LSReg.
+    Thanks to Oleg Zheleznyy for reporting this issue.
 
 - **FORCE HLPS**
 

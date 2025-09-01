@@ -36,8 +36,8 @@ extern "C" {
 short get_qai(brick_t *qai, int index, int p, int bitfields);
 short get_qai_from_value(short value, int index, int bitfields);
 
-void set_qai(brick_t *qai, int index, int p, short val);
-void set_qai_to_value(short *value, int index, short val);
+void set_qai(brick_t *qai, int index, int p, short val, int bitfields);
+void set_qai_to_value(short *value, int index, short val, int bitfields);
 
 bool get_off(brick_t *qai, int p);
 char get_cloud(brick_t *qai, int p);
