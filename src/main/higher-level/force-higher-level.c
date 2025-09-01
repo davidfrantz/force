@@ -140,6 +140,7 @@ int         *nprod    = NULL;
 GDALDriverH driver;
 progress_t  pro;
 off_t ibytes = 0, obytes = 0;
+int         exit_code = SUCCESS;
 
 
   /** INITIALIZING
@@ -239,7 +240,7 @@ off_t ibytes = 0, obytes = 0;
 
   }
 
-  warn_if_no_io(ibytes, obytes, phl);
+  exit_code = handle_no_io(ibytes, obytes, phl);
 
   cite_push(phl->d_higher);
 
@@ -265,6 +266,6 @@ off_t ibytes = 0, obytes = 0;
   #endif
 
 
-  return SUCCESS;
+  return exit_code;
 }
 
