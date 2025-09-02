@@ -44,6 +44,15 @@ Develop version
     the Landsat 7 data after a specific point in time. The default is ``2099-12-31``, which just means 
     that all Landsat 7 data will be used.
 
+  - in ``force-higher-level``, all modules:
+    a new parameter ``FAIL_IF_EMPTY`` was added by Florian Katerndahl.
+    If set to ``TRUE``, the module will fail if no input data is found for the specified configuration, 
+    e.g. time range, or if no output was written. This is meant to be used in complex workflows, where
+    one want the program to signal an error condition. 
+    The default is ``FALSE``, which is better suited for production runs, 
+    as e.g. an NRT application may not have data for a specific day or region.
+    In this case, only a warning is displayed with some hints on how to resolve potential issues.
+
 --  **FORCE AUX**
 
   - ``force-mosaic`` was overhauled:
