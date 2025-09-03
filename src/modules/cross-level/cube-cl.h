@@ -45,20 +45,20 @@ extern "C" {
 #endif
 
 typedef struct {
-  char dname[NPOW_10];  // path of datacube
-  int tminx, tmaxx;   // extent min/max tile
-  int tminy, tmaxy;   // extent min/max tile
-  int tnx, tny, tnc;  // number of tiles (square extent)
-  int *tx, *ty, tn;   // allow-listed tiles
-  double tilesize;     // tile size in desination unit
-  double chunksize;    // vertical chunk size
-  double res;          // spatial resolution
-  int nx, ny, nc;     // number of pixels in tile
-  int cx, cy, cc;     // number of pixels in chunk
-  int cn;             // number of chunks in tile
+  char dir_path[NPOW_10];  // path of datacube
+  char def_path[NPOW_10];  // path of datacube definition
   coord_t origin_geo; // origin of grid, geographic
   coord_t origin_map; // origin of grid, destination projection
-  char proj[NPOW_10];   // destination projection
+  int tile_extent[2][2]; // tile extent [_X_, _Y_][_MIN_, _MAX_]
+  double tile_size[2];   // tile size in destination unit
+  double chunk_size[2];  // chunk size in destination unit
+  double resolution[2];  // spatial resolution [_X_][_Y_]
+  array_2d_int allowed_tiles; // allow-listed tiles: n x [_X_][_Y_]
+  dim_t dim_tiles;     // number of tiles (square extent)
+  dim_t dim_chunks;    // number of chunks per tile
+  dim_t dim_pixels;    // number of pixels per tile
+  dim_t dim_subpixels; // number of pixels per chunk
+  char projection[NPOW_10]; // destination projection
 } cube_t;
 
 typedef struct{

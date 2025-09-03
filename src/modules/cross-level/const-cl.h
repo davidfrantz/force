@@ -43,6 +43,10 @@ typedef struct {
   double x, y;
 } coord_t;
 
+// array indexing struct
+typedef struct {
+  int rows, cols, cells;
+} dim_t;
 
 // pi
 #ifndef M_PI
