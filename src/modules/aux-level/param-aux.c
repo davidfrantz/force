@@ -664,7 +664,7 @@ void write_par_ll_output(FILE *fp, bool verbose){
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
-  fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
+  fprintf(fp, "OUTPUT_FORMAT = COG\n");
 
   if (verbose){
     fprintf(fp, "# File that contains custom GDAL output options. This is only used if \n");

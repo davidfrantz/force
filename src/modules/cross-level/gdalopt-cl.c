@@ -57,16 +57,20 @@ int o = 0;
     case _FMT_COG_:
       copy_string(gdalopt->extension,   NPOW_04, "tif");
       copy_string(gdalopt->driver,      NPOW_04, "COG");
+      copy_string(gdalopt->option[o++], NPOW_10, "BLOCKSIZE");
+      copy_string(gdalopt->option[o++], NPOW_10, "256");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
-      copy_string(gdalopt->option[o++], NPOW_10, "LZW");
+      copy_string(gdalopt->option[o++], NPOW_10, "ZSTD");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
       copy_string(gdalopt->option[o++], NPOW_10, "INTERLEAVE");
-      copy_string(gdalopt->option[o++], NPOW_10, "PIXEL");
+      copy_string(gdalopt->option[o++], NPOW_10, "TILE");
       copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
       copy_string(gdalopt->option[o++], NPOW_10, "TILED");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      copy_string(gdalopt->option[o++], NPOW_10, "OVERVIEW_RESAMPLING");
+      copy_string(gdalopt->option[o++], NPOW_10, "AVERAGE");
       break;
     case _FMT_JPEG_:
       copy_string(gdalopt->extension,   NPOW_04, "jpg");

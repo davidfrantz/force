@@ -17,6 +17,8 @@ Develop version
   - When co-registering L7 SLC-Off imagery, a big portion of the data failed. 
     This issue was addressed by altering the no-data filtering logic in the pyramid building process of LSReg.
     Thanks to Oleg Zheleznyy for reporting this issue.
+  - Updated COG default parameters. COG has been set as the default output format for L2PS 
+    (note: HLPS still uses GTiff as default)
 
 - **FORCE HLPS**
 
