@@ -245,8 +245,8 @@ debug "$# input files will be cubed"
 HELP_TEXT=$($RASTER_WARP_EXE --help 2>/dev/null) 
 RESOPT=$(echo "$HELP_TEXT" | grep -A 2 'Available resampling methods:')
 if [[ -z "$RESOPT" ]]; then
-    RAW=$(echo "$HELP_TEXT" | grep -o '\[-r [^]]*\]' | sed -E 's/^\[-r //; s/\]$//')
-    RESOPT="Available resampling methods:
+  RAW=$(echo "$HELP_TEXT" | grep -o '\[-r [^]]*\]' | sed -E 's/^\[-r //; s/\]$//')
+  RESOPT="Available resampling methods:
     $(echo "$RAW" | tr '|' ',' )"
 fi
 
