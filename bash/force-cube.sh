@@ -242,7 +242,14 @@ fi
 debug "$# input files will be cubed"
 
 # options received, check now ------------------------------------------------------------
-RESOPT=$($RASTER_WARP_EXE --help 2>/dev/null | grep -A 2 'Available resampling methods:')
+HELP_TEXT=$($RASTER_WARP_EXE --help 2>/dev/null) 
+RESOPT=$(echo "$HELP_TEXT" | grep -A 2 'Available resampling methods:')
+if [[ -z "$RESOPT" ]]; then
+    RAW=$(echo "$HELP_TEXT" | grep -o '\[-r [^]]*\]' | sed -E 's/^\[-r //; s/\]$//')
+    RESOPT="Available resampling methods:
+    $(echo "$RAW" | tr '|' ',' )"
+fi
+
 TEMP=$(echo "$RESOPT" | sed 's/[., ]/%/g')
 if [[ ! $TEMP =~ "%$RESAMPLE%" ]]; then 
   echoerr "Unknown resampling method."; 
