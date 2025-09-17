@@ -533,11 +533,12 @@ void register_char_par(params_t *params, const char *name, int char_test, char *
 --- name:       parameter name (tag)
 --- min:        minimum valid value for parameter
 --- max:        maximum valid value for parameter
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_intvec_par(params_t *params, const char *name, int min, int max, int **ptr, int *ptr_length){
+void register_intvec_par(params_t *params, const char *name, int min, int max, int expected_length, int **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -548,6 +549,7 @@ void register_intvec_par(params_t *params, const char *name, int min, int max, i
 
   params->par[params->n].int_range[_MIN_] = min;
   params->par[params->n].int_range[_MAX_] = max;
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_INT_;
 
@@ -567,11 +569,12 @@ void register_intvec_par(params_t *params, const char *name, int min, int max, i
 --- name:       parameter name (tag)
 --- enums:      enum definition
 --- n_enums:    number of enums in enum definition
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length){
+void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int expected_length, int **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -583,6 +586,8 @@ void register_enumvec_par(params_t *params, const char *name, const tagged_enum_
   params->par[params->n].n_enums = n_enums;
   alloc((void**)&params->par[params->n].enums, n_enums, sizeof(tagged_enum_t));
   memmove(params->par[params->n].enums, enums, sizeof(tagged_enum_t)*n_enums);
+
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_ENUM_;
 
@@ -602,11 +607,12 @@ void register_enumvec_par(params_t *params, const char *name, const tagged_enum_
 --- name:       parameter name (tag)
 --- min:        minimum valid value for parameter
 --- max:        maximum valid value for parameter
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_floatvec_par(params_t *params, const char *name, float min, float max, float **ptr, int *ptr_length){
+void register_floatvec_par(params_t *params, const char *name, float min, float max, int expected_length, float **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -617,6 +623,7 @@ void register_floatvec_par(params_t *params, const char *name, float min, float 
 
   params->par[params->n].float_range[_MIN_] = min;
   params->par[params->n].float_range[_MAX_] = max;
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_FLOAT_;
 
@@ -636,11 +643,12 @@ void register_floatvec_par(params_t *params, const char *name, float min, float 
 --- name:       parameter name (tag)
 --- min:        minimum valid value for parameter
 --- max:        maximum valid value for parameter
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_doublevec_par(params_t *params, const char *name, double min, double max, double **ptr, int *ptr_length){
+void register_doublevec_par(params_t *params, const char *name, double min, double max, int expected_length, double **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -651,6 +659,7 @@ void register_doublevec_par(params_t *params, const char *name, double min, doub
 
   params->par[params->n].double_range[_MIN_] = min;
   params->par[params->n].double_range[_MAX_] = max;
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_DOUBLE_;
 
@@ -668,11 +677,12 @@ void register_doublevec_par(params_t *params, const char *name, double min, doub
 /** This function registers a bool parameter vector
 --- params:     parsed parameters
 --- name:       parameter name (tag)
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_boolvec_par(params_t *params, const char *name, int **ptr, int *ptr_length){
+void register_boolvec_par(params_t *params, const char *name, int expected_length, int **ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -689,6 +699,8 @@ void register_boolvec_par(params_t *params, const char *name, int **ptr, int *pt
 
   params->par[params->n].enums[0].en = false;
   params->par[params->n].enums[1].en = true;
+
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_BOOL_;
 
@@ -708,11 +720,12 @@ void register_boolvec_par(params_t *params, const char *name, int **ptr, int *pt
 --- name:       parameter name (tag)
 --- min:        minimum valid date for parameter
 --- max:        maximum valid date for parameter
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_datevec_par(params_t *params, const char *name, const char *min, const char *max, date_t **ptr, int *ptr_length){
+void register_datevec_par(params_t *params, const char *name, const char *min, const char *max, int expected_length, date_t **ptr, int *ptr_length){
 char cmin[NPOW_10];
 char cmax[NPOW_10];
 
@@ -728,6 +741,7 @@ char cmax[NPOW_10];
 
   params->par[params->n].date_range[_MIN_] =  parse_date(cmin);
   params->par[params->n].date_range[_MAX_] =  parse_date(cmax);
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_DATE_;
 
@@ -746,11 +760,12 @@ char cmax[NPOW_10];
 --- params:     parsed parameters
 --- name:       parameter name (tag)
 --- char_test:  test type for string evaluation
+--- expected_length: expected length of parameter vector
 --- ptr:        pointer to instantly useable parameter variable
 --- ptr_length: pointer to instantly useable parameter variable (holding n)
 +++ Return:     void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void register_charvec_par(params_t *params, const char *name, int char_test, char ***ptr, int *ptr_length){
+void register_charvec_par(params_t *params, const char *name, int char_test, int expected_length, char ***ptr, int *ptr_length){
 
 
   reallocate_params(params);
@@ -760,6 +775,8 @@ void register_charvec_par(params_t *params, const char *name, int char_test, cha
   params->par[params->n].set = false;
 
   params->par[params->n].char_test = char_test;
+  
+  params->par[params->n].expected_length = expected_length;
 
   params->par[params->n].type = _PAR_CHAR_;
 
@@ -1386,6 +1403,14 @@ int error = 0, i;
 
     if (params->par[i].length != NULL && *params->par[i].length == 0){
       printf("parameter %s was incorrectly parsed.\n", params->par[i].name);
+      error++;
+      continue;
+    }
+
+    if (params->par[i].length != NULL && params->par[i].expected_length > 0 &&
+       *params->par[i].length != params->par[i].expected_length){
+      printf("parameter %s has wrong length (expected %d, got %d).\n",
+        params->par[i].name, params->par[i].expected_length, *params->par[i].length);
       error++;
       continue;
     }

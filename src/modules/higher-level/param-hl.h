@@ -449,7 +449,8 @@ typedef struct {
   int ntx, nty;
   double radius;
   double res;
-  double blocksize;
+  double *chunk_size; // size of chunks to read and process
+  int n_chunk_size;   // number of sizes that were written (should be 2)
   int psf;             // flag: point spread function
 
   // sensors

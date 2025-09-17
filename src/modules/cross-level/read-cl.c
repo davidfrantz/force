@@ -131,7 +131,10 @@ int n_buf = NPOW_00;
 
   // open file
   if (!(fp = fopen(fname, "r"))){
-    printf("unable to open tag and value file %s. ", fname); return NULL;}
+    printf("unable to open tag and value file %s. ", fname); 
+    free_3D((void***)tagval, n_buf, _TV_LENGTH_);
+    return NULL;
+  }
 
 
   // read line by line
@@ -141,14 +144,16 @@ int n_buf = NPOW_00;
 
     if ((ptr = strtok(buffer, separator)) == NULL){
       printf("could not read tag/value pair from:\n  %s\n", fname);
-      exit(FAILURE);
+      free_3D((void***)tagval, n_buf, _TV_LENGTH_);
+      return NULL;
     } else {
       copy_string(tagval[n][_TV_TAG_], NPOW_10, ptr);
     }
 
     if ((ptr = strtok(NULL, separator)) == NULL){
       printf("could not read tag/value pair from:\n  %s\n", fname);
-      exit(FAILURE);
+      free_3D((void***)tagval, n_buf, _TV_LENGTH_);
+      return NULL;
     } else {
       copy_string(tagval[n][_TV_VAL_], NPOW_10, ptr);
     }

@@ -193,7 +193,7 @@ int cx, cy, cx_, cy_, cc_;
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
 
-  set_brick_open(brick, OPEN_BLOCK);
+  set_brick_open(brick, OPEN_CHUNK);
   set_brick_format(brick, &phl->gdalopt);
   set_brick_explode(brick, explode);
   set_brick_par(brick, phl->params->log);

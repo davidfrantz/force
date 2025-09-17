@@ -4,6 +4,7 @@ force-tabulate-grid: \
   dir-cl \
   konami-cl \
   lock-cl \
+  read-cl \
   string-cl \
   sys-cl \
   utils-cl \
@@ -15,6 +16,7 @@ force-tabulate-grid: \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/lock-cl.o \
+	$(OBJDIR)/read-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
 	$(OBJDIR)/utils-cl.o \

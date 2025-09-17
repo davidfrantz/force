@@ -151,8 +151,8 @@ int nchar;
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling output name name\n"); exit(FAILURE);}
 
+
   default_gdaloptions(_FMT_GTIFF_, &format);
-  update_gdaloptions_blocksize(_FMT_GTIFF_, &format, nx, ny/10);
 
   set_brick_open(BRICK, 1);
   set_brick_format(BRICK, &format);
@@ -163,9 +163,6 @@ int nchar;
   set_brick_uly(BRICK, geotran[3]);
   set_brick_ncols(BRICK, nx);
   set_brick_nrows(BRICK, ny);
-  set_brick_chunkncols(BRICK, nx);
-  set_brick_chunknrows(BRICK, ny/10);
-  set_brick_nchunks(BRICK, 10);
   set_brick_proj(BRICK, proj);
   set_brick_tilex(BRICK, tx);
   set_brick_tiley(BRICK, ty);
@@ -202,15 +199,14 @@ void write_modcube(char *dout, char *proj){
 cube_t cube;
 
 
-  copy_string(cube.dname, NPOW_10, dout);
-  copy_string(cube.proj,  NPOW_10, proj);
+  copy_string(cube.dir_path, NPOW_10, dout);
+  copy_string(cube.projection, NPOW_10, proj);
 
   cube.origin_geo.x = -124.291447;
   cube.origin_geo.y = 90.000000;
   cube.origin_map.x = -20015109.354000;
   cube.origin_map.y = 10007554.677000;
-  cube.tilesize     = 1111950.521000;
-  cube.chunksize    = 111195.052100;
+  cube.tile_size[_X_] = cube.tile_size[_Y_] = 1111950.521000;
 
   if (write_datacube_def(&cube) == FAILURE){
     printf("Writing datacube definition failed\n\n"); exit(FAILURE);}

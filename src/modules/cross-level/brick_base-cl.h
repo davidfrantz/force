@@ -64,15 +64,14 @@ typedef struct {
   int cx;                // number of chunking columns
   int cy;                // number of chunking rows
   int cc;                // number of chunking cells
-  double res;             // resolution
   double geotran[6];     // geotransformation
   double width;           // width of image (nx*res)
   double height;          // height of image (ny*res)
   double cwidth;          // chunking width of image (nx*res)
   double cheight;         // chunking height of image (ny*res)
-  int chunk;             // ID of chunk
-  int nchunk;             // # of chunks
-  int tx, ty;            // ID of tile
+  int chunk[2];           // ID of chunk
+  dim_t dim_chunk;        // # chunks dimensions
+  int tile[2];            // ID of tile
   char proj[NPOW_10];      // projection
 
   char par[NPOW_14];       // parameterization
@@ -159,10 +158,17 @@ void     set_brick_chunknrows(brick_t *brick, int cy);
 int      get_brick_chunknrows(brick_t *brick);
 void     set_brick_chunkncells(brick_t *brick, int cc);
 int      get_brick_chunkncells(brick_t *brick);
-void     set_brick_chunk(brick_t *brick, int chunk);
-int      get_brick_chunk(brick_t *brick);
-void     set_brick_nchunks(brick_t *brick, int nchunk);
-int      get_brick_nchunks(brick_t *brick);
+void     set_brick_chunkx(brick_t *brick, int chunkx);
+int      get_brick_chunkx(brick_t *brick);
+void     set_brick_chunky(brick_t *brick, int chunky);
+int      get_brick_chunky(brick_t *brick);
+void     set_brick_chunk_dim_x(brick_t *brick, int ncol);
+void     set_brick_chunk_dim_y(brick_t *brick, int nrow);
+void     set_brick_chunk_dim(brick_t *brick, dim_t *dim);
+int get_brick_chunk_dim_x(brick_t *brick);
+int get_brick_chunk_dim_y(brick_t *brick);
+int get_brick_chunk_dim_n(brick_t *brick);
+dim_t    get_brick_chunk_dim(brick_t *brick);
 void     set_brick_tilex(brick_t *brick, int tx);
 int      get_brick_tilex(brick_t *brick);
 void     set_brick_tiley(brick_t *brick, int ty);

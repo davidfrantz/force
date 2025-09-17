@@ -38,7 +38,7 @@ This program inflates QAI layers
 #include "../../modules/cross-level/brick_io-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
-#include "../../modules/higher-level/read-ard-hl.h"
+
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
@@ -126,49 +126,23 @@ int opt;
 
 int main(int argc, char *argv[]){
 args_t args;
-double geotran[6];
 char *pch   = NULL;
 char oname[NPOW_10];
-const char *proj;
-GDALDatasetH fp;
 brick_t *QAI = NULL;
 brick_t *QIM = NULL;
 small **qim_ = NULL;
 int b, p;
-cube_t *cube = NULL;
+dim_t dim;
 
 
   parse_args(argc, argv, &args);
 
   GDALAllRegister();
 
-  
-  if ((cube = allocate_datacube()) == NULL){
-    printf("unable to init cube\n"); return FAILURE;}
 
-  if ((fp = GDALOpen(args.finp, GA_ReadOnly)) == NULL){
-    printf("unable to open %s. ", args.finp); return FAILURE;}
-
-  cube->nx = cube->cx = GDALGetRasterXSize(fp);
-  cube->ny = cube->cy = GDALGetRasterYSize(fp);
-  cube->nc = cube->nx*cube->ny;
-  cube->cn = cube->cx*cube->cy;
-
-  GDALGetGeoTransform(fp, geotran);
-  cube->res = geotran[1];
-  
-  cube->tilesize  = cube->nx*cube->res;
-  cube->chunksize = cube->ny*cube->res;
-
-  proj = GDALGetProjectionRef(fp);
-  copy_string(cube->proj, NPOW_10, proj);
-
-  GDALClose(fp);
-  
-
-  if ((QAI = read_block(args.finp, _ARD_AUX_, NULL, 1, 1, 1, _DT_SHORT_, 0, 0, 0, cube, false, 0, 0)) == NULL){
+  // read full QAI product
+  if ((QAI = read_brick(args.finp)) == NULL){
       printf("Error reading QAI product %s\n", args.finp); return FAILURE;}
-
 
   QIM  = copy_brick(QAI, _QAI_FLAG_LENGTH_, _DT_SMALL_);
   if ((qim_ = get_bands_small(QIM)) == NULL){
@@ -218,11 +192,11 @@ cube_t *cube = NULL;
   #endif
 
   
-  #pragma omp parallel shared(cube, qim_, QAI) default(none)
+  #pragma omp parallel shared(qim_, QAI, dim) default(none)
   {
   
     #pragma omp for
-    for (p=0; p<cube->nc; p++){
+    for (p=0; p<dim.cells; p++){
       qim_[_QAI_FLAG_OFF_][p] = get_off(QAI, p);
       qim_[_QAI_FLAG_CLD_][p] = get_cloud(QAI, p);
       qim_[_QAI_FLAG_SHD_][p] = get_shadow(QAI, p);
@@ -244,8 +218,6 @@ cube_t *cube = NULL;
 
   free_brick(QAI);
   free_brick(QIM);
-  free_datacube(cube);
-
 
   return SUCCESS;
 }

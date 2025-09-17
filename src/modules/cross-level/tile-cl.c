@@ -93,6 +93,7 @@ char cx[5], cy[5];
 
 /** Test if tile is allow-listed
 +++ This function tests whether a given tile is allow-listed or not.
++++ If no allow-list is given, all tiles are considered allow-listed.
 --- allow_x: allow-listed X tile coordinate IDs
 --- allow_y: allow-listed Y tile coordinate IDs
 --- allow_k: number of allow-listed tiles
@@ -135,20 +136,19 @@ int *allow_x = NULL, *allow_y = NULL, allow_k;
     printf("Reading tile file failed! "); return FAILURE;}
 
   // allocate active tile list
-  alloc((void**)&cube->tx, cube->tnc, sizeof(int));
-  alloc((void**)&cube->ty, cube->tnc, sizeof(int));
-  cube->tn = 0;
+  alloc_2D((void***)&cube->allowed_tiles, 2, cube->dim_tiles.cells, sizeof(int));
+  cube->n_allowed_tiles = 0;
 
   // how many tiles really to do?
-  for (ty=cube->tminy; ty<=cube->tmaxy; ty++){
-  for (tx=cube->tminx; tx<=cube->tmaxx; tx++){
+  for (ty=cube->tile_extent[_Y_][_MIN_]; ty<=cube->tile_extent[_Y_][_MAX_]; ty++){
+  for (tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
 
     // if tile is not allowlisted (if specified), skip
     if (tile_allowlisted(allow_x, allow_y, allow_k, tx, ty) == FAILURE) continue;
 
-    cube->tx[cube->tn] = tx;
-    cube->ty[cube->tn] = ty;
-    cube->tn++;
+    cube->allowed_tiles[_X_][cube->n_allowed_tiles] = tx;
+    cube->allowed_tiles[_Y_][cube->n_allowed_tiles] = ty;
+    cube->n_allowed_tiles++;
 
   }
   }
@@ -157,7 +157,7 @@ int *allow_x = NULL, *allow_y = NULL, allow_k;
   free((void*)allow_y);
 
   // is there any tile to do?
-  if (cube->tn == 0){
+  if (cube->n_allowed_tiles == 0){
     printf("No active tile to process. "); return FAILURE;}
 
   return SUCCESS;

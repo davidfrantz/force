@@ -72,10 +72,10 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_char_par(params,    "DIR_MASK",   _CHAR_TEST_NULL_OR_EXIST_, &phl->d_mask);
   register_char_par(params,    "BASE_MASK",  _CHAR_TEST_NULL_OR_BASE_,  &phl->b_mask);
   register_char_par(params,    "FILE_TILE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->f_tile);
-  register_intvec_par(params,  "X_TILE_RANGE", -999, 9999, &phl->tx, &phl->ntx);
-  register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
+  register_intvec_par(params,  "X_TILE_RANGE", -999, 9999, 2, &phl->tx, &phl->ntx);
+  register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, 2, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
-  register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
+  register_doublevec_par(params, "CHUNK_SIZE", 0, FLT_MAX, 2, &phl->chunk_size, &phl->n_chunk_size);
   register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &phl->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
@@ -100,13 +100,13 @@ void register_higher(params_t *params, par_hl_t *phl){
 void register_ard1(params_t *params, par_hl_t *phl){
 
 
-  register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
+  register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, -1, &phl->sen.senid, &phl->sen.n);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
   register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
-  register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
-  register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
-  register_intvec_par(params,  "DOY_RANGE", 1, 365, &phl->doy_range, &phl->ndoy);
+  register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, -1, &phl->qai.flags, &phl->qai.nflags);
+  register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", 2, &phl->date_range, &phl->ndate);
+  register_intvec_par(params,  "DOY_RANGE", 1, 365, 2, &phl->doy_range, &phl->ndoy);
   register_date_par(params,    "DATE_IGNORE_LANDSAT_7", "1900-01-01", "2099-12-31", &phl->date_ignore_lnd07);
 
   return;
@@ -147,10 +147,10 @@ void register_bap(params_t *params, par_hl_t *phl){
 
   // additional aux products
   register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
-    _CHAR_TEST_NONE_, &phl->sen.aux_products, &phl->sen.n_aux_products);
+    _CHAR_TEST_NONE_, -1, &phl->sen.aux_products, &phl->sen.n_aux_products);
 
-  register_floatvec_par(params, "DOY_SCORE", 0, 1, &phl->bap.Ds, &phl->bap.nDs);
-  register_intvec_par(params,   "DOY_STATIC", 1, 365, &phl->bap.Dt, &phl->bap.nDt);
+  register_floatvec_par(params, "DOY_SCORE", 0, 1, 3, &phl->bap.Ds, &phl->bap.nDs);
+  register_intvec_par(params,   "DOY_STATIC", 1, 365, 3, &phl->bap.Dt, &phl->bap.nDt);
 
   register_bool_par(params,  "OFF_SEASON", &phl->bap.offsea);
   register_bool_par(params,  "USE_CLOUDY", &phl->bap.use_cloudy);
@@ -171,7 +171,7 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_double_par(params, "SCORE_VZEN_WEIGHT",   0, 1, &phl->bap.w.v);
 
   register_char_par(params,    "DIR_LSP", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
-  register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, &phl->con.fname, &phl->con.n);
+  register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, 3, &phl->con.fname, &phl->con.n);
   register_int_par(params,     "LSP_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_bool_par(params,    "LSP_DO", &phl->bap.pac.lsp);
   register_int_par(params,     "LSP_1ST_YEAR", 1900, 2100, &phl->bap.pac.y0);
@@ -191,7 +191,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
 
   // TS parameters
-  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, &phl->tsa.index, &phl->tsa.n);
+  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, -1, &phl->tsa.index, &phl->tsa.n);
   register_enum_par(params,    "STANDARDIZE_TSS", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.standard);
   register_bool_par(params,    "OUTPUT_TSS", &phl->tsa.otss);
 
@@ -206,18 +206,18 @@ void register_tsa(params_t *params, par_hl_t *phl){
   // interpolation parameters
   register_enum_par(params,    "INTERPOLATE", _TAGGED_ENUM_INT_, _INT_LENGTH_, &phl->tsa.tsi.method);
   register_int_par(params,     "MOVING_MAX",  1, 365, &phl->tsa.tsi.mov_max);
-  register_intvec_par(params,  "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
+  register_intvec_par(params,  "RBF_SIGMA",   1, 365, -1, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
   register_float_par(params,   "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
   register_int_par(params,     "HARMONIC_MODES",  1, 3, &phl->tsa.tsi.harm_nmodes);
   register_bool_par(params,    "HARMONIC_TREND",  &phl->tsa.tsi.harm_trend);
-  register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
+  register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", 2, &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
   register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);
 
   // STM parameters
-  register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
+  register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, -1, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
   register_bool_par(params,    "OUTPUT_STM", &phl->tsa.stm.ostm);
 
   // folding parameters
@@ -244,7 +244,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_float_par(params,   "POL_MID_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.mid);
   register_float_par(params,   "POL_END_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.end);
   register_bool_par(params,    "POL_ADAPTIVE",        &phl->tsa.pol.adaptive);
-  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
+  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, -1, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
   register_enum_par(params,    "STANDARDIZE_POL", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.pol.standard);
   register_bool_par(params,    "OUTPUT_PCT",        &phl->tsa.pol.opct);
   register_bool_par(params,    "OUTPUT_POL",        &phl->tsa.pol.opol);
@@ -279,7 +279,7 @@ void register_cso(params_t *params, par_hl_t *phl){
 
 
   register_int_par(params,     "MONTH_STEP", 1, 12, &phl->cso.step);
-  register_enumvec_par(params, "CSO", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
+  register_enumvec_par(params, "CSO", _TAGGED_ENUM_STA_, _STA_LENGTH_, -1, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
 
   return;
 }
@@ -293,7 +293,7 @@ void register_cso(params_t *params, par_hl_t *phl){
 void register_imp(params_t *params, par_hl_t *phl){
 
 
-  register_intvec_par(params,  "SEASONAL_WINDOW",      1, 365, &phl->imp.dwin, &phl->imp.bwin);
+  register_intvec_par(params,  "SEASONAL_WINDOW",      1, 365, -1, &phl->imp.dwin, &phl->imp.bwin);
   register_double_par(params,  "KERNEL_SIZE",          0, 1e6, &phl->imp.pred_radius);
   register_double_par(params,  "KERNEL_TEXT",          0, 1e6, &phl->imp.text_radius);
 
@@ -311,10 +311,10 @@ void register_cfi(params_t *params, par_hl_t *phl){
 
   register_imp(params, phl);
   register_char_par(params,    "DIR_COARSE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
-  register_charvec_par(params, "BASE_COARSE", _CHAR_TEST_BASE_, &phl->con.fname, &phl->con.n);
+  register_charvec_par(params, "BASE_COARSE", _CHAR_TEST_BASE_, -1, &phl->con.fname, &phl->con.n);
   register_int_par(params,     "COARSE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_int_par(params,     "COARSE_1ST_YEAR",      1900, 2100, &phl->cfi.y0);
-  register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, &phl->cfi.years, &phl->cfi.nyears);
+  register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, -1, &phl->cfi.years, &phl->cfi.nyears);
 
   return;
 }
@@ -329,7 +329,7 @@ void register_l2i(params_t *params, par_hl_t *phl){
 
   
   register_imp(params, phl);
-  register_enumvec_par(params, "SENSORS_LOWRES", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen2.senid, &phl->sen2.n);
+  register_enumvec_par(params, "SENSORS_LOWRES", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, -1, &phl->sen2.senid, &phl->sen2.n);
 
   return;
 }
@@ -356,7 +356,7 @@ int i;
   register_bool_par(params,  "OUTPUT_RFM", &phl->mcl.orfm);
 
   for (i=0; i<phl->mcl.nmodelset; i++) register_charvec_par(params,  "FILE_MODEL",
-    _CHAR_TEST_BASE_, &phl->mcl.f_model[i], &phl->mcl.nmodel[i]);
+    _CHAR_TEST_BASE_, -1, &phl->mcl.f_model[i], &phl->mcl.nmodel[i]);
 
   return;
 }
@@ -372,7 +372,7 @@ int i;
 
 
   for (i=0; i<phl->ftr.ntags; i++) register_charvec_par(params,  "INPUT_FEATURE",
-    _CHAR_TEST_NONE_, &phl->ftr.cfeature[i], &phl->ftr.ifeature[i]);
+    _CHAR_TEST_NONE_, -1, &phl->ftr.cfeature[i], &phl->ftr.ifeature[i]);
 
   register_int_par(params,  "FEATURE_NODATA", SHRT_MIN, SHRT_MAX, &phl->ftr.nodata);
   register_bool_par(params, "FEATURE_EXCLUDE", &phl->ftr.exclude);
@@ -409,7 +409,7 @@ void register_txt(params_t *params, par_hl_t *phl){
 
   register_double_par(params,  "TXT_RADIUS",    0, 1e6,  &phl->txt.radius);
   register_int_par(params,     "TXT_ITERATION", 1, 1000, &phl->txt.iter);
-  register_enumvec_par(params, "TXT", _TAGGED_ENUM_TXT_, _TXT_LENGTH_, &phl->txt.metrics, &phl->txt.nmetrics);
+  register_enumvec_par(params, "TXT", _TAGGED_ENUM_TXT_, _TXT_LENGTH_, -1, &phl->txt.metrics, &phl->txt.nmetrics);
   register_char_par(params,    "TXT_BASE",  _CHAR_TEST_NONE_, &phl->txt.base);
 
   return;
@@ -426,10 +426,10 @@ void register_lsm(params_t *params, par_hl_t *phl){
 
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
   register_int_par(params,     "LSM_MIN_PATCHSIZE",    0, 1e6,  &phl->lsm.minpatchsize);
-  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
-  register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, &phl->lsm.threshold, &phl->lsm.nthreshold);
+  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, -1, &phl->lsm.query, &phl->lsm.nquery);
+  register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, -1, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);
-  register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
+  register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, -1, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
   register_enum_par(params,    "LSM_KERNEL_SHAPE", _TAGGED_ENUM_KERNEL_, _KERNEL_LENGTH_, &phl->lsm.kernel);
 
@@ -446,7 +446,7 @@ void register_lib(params_t *params, par_hl_t *phl){
 
 
   register_char_par(params,    "DIR_LIBRARY",  _CHAR_TEST_EXIST_, &phl->lib.d_lib);
-  register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  &phl->lib.f_lib, &phl->lib.n_lib);
+  register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  -1, &phl->lib.f_lib, &phl->lib.n_lib);
   register_bool_par(params,    "LIB_RESCALE",  &phl->lib.rescale);
   register_char_par(params,    "LIB_BASE",     _CHAR_TEST_NONE_,  &phl->lib.base);
 
@@ -473,7 +473,7 @@ void register_udf(params_t *params, par_hl_t *phl){
 
   // additional aux products
   register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
-    _CHAR_TEST_NONE_, &phl->sen.aux_products, &phl->sen.n_aux_products);
+    _CHAR_TEST_NONE_, -1, &phl->sen.aux_products, &phl->sen.n_aux_products);
 
   return;
 }
@@ -1464,6 +1464,29 @@ double tol = 5e-3;
     return FAILURE;
   }
 
+
+
+  // check chunk size
+  if (fmod(phl->chunk_size[_X_], phl->res) > tol ||
+      fmod(phl->chunk_size[_Y_], phl->res) > tol){
+    printf("CHUNK_SIZE must be a multiple of RESOLUTION.\n");
+    return FAILURE;
+  }
+
+  // check chunk size against 0
+  if (phl->chunk_size[_X_] <= 0.0 ||
+      phl->chunk_size[_Y_] <= 0.0){
+    printf("CHUNK_SIZE must be positive.\n");
+    return FAILURE;
+  }
+
+    // check resolution against 0
+  if (phl->res <= 0.0){
+    printf("RESOLUTION must be positive.\n");
+    return FAILURE;
+  }
+
+  
   // compile temporal window
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&

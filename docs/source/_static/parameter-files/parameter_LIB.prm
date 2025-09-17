@@ -26,12 +26,13 @@ BASE_MASK = NULL
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
 # Output format, which is either uncompressed flat binary image format aka
-# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-
-# zontal differencing; BigTiff support is enabled; the Tiff is structured 
-# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-
-# fications. Metadata are written to the ENVI header or directly into the Tiff
+# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-
+# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled 
+# with 256x256 px blocks.
+# Metadata are written to the ENVI header or directly into the Tiff
 # to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,
 # an external .aux.xml file is additionally generated.
+# Note that COG output is only possible when the chunk size matches the tile size.
 # Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}
 OUTPUT_FORMAT = GTiff
 # File that contains custom GDAL output options. This is only used if 
@@ -63,8 +64,8 @@ FAIL_IF_EMPTY = FALSE
 # ------------------------------------------------------------------------
 # This module is using a streaming mechanism to speed up processing. There
 # are three processing teams (3 Threads) that simultaneously handle Input,
-# Processing, and Output. Example: when Block 2 is being processed, data
-# from Block 3 are already being input and results from Block 1 are being
+# Processing, and Output. Example: when chunk 2 is being processed, data
+# from chunk 3 are already being input and results from chunk 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
 # Type: Integer. Valid range: [1,...
@@ -101,17 +102,17 @@ Y_TILE_RANGE = 0 0
 # Optional. If NULL, the complete analysis extent is processed
 # Type: full file path
 FILE_TILE = NULL
-# This parameter can be used to override the default blocksize of the input
-# images (as specified in the datacube-definition.prj file). This can be
-# necessary if the default blocksize is too large for your system and you
-# cannot fit all necessary data into RAM. Note that processing of larger
-# blocksizes is more efficient. The tilesize must be dividable by the blocksize
-# without remainder. Set to 0, to use the default blocksize
-# Type: Double. Valid range: 0 or [RESOLUTION,TILE_SIZE]
-BLOCK_SIZE = 0
-# Analysis resolution. The tile (and block) size must be dividable by this
+# This parameter is used to define the size of the sub-tile processing units.
+# Most efficient is to use a chunk size that coincides with the tile size. Using 
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# The tilesize must be dividable by the chunk size without remainder.
+# Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
+# parameter is not permitted anymore.
+# Type: Integer list. Valid range: ]0,TILE_SIZE]
+CHUNK_SIZE = 0 0
+# Analysis resolution. The tile (and chunk) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: ]0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,CHUNK_SIZE]
 RESOLUTION = 10
 
 # FEATURES

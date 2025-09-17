@@ -12,4 +12,5 @@ force-info: \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
-	$(OBJDIR)/utils-cl.o
+	$(OBJDIR)/utils-cl.o \
+	-lm

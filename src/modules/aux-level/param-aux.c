@@ -211,21 +211,11 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# gridded output. tiles are square; not used if DO_TILE = FALSE. \n");
     fprintf(fp, "# Type: Double. Valid range: ]0,...\n");
   }
-  fprintf(fp, "TILE_SIZE = 30000\n");
-
-  if (verbose){
-    fprintf(fp, "# This is the block size (in target units, commonly in meters) of the \n");
-    fprintf(fp, "# image chips. Blocks are stripes, i.e. they are as wide as the tile,\n");
-    fprintf(fp, "# and as high as specified here; not used if DO_TILE = FALSE or \n");
-    fprintf(fp, "# OUTPUT_FORMAT = ENVI. The blocks are the primary processing unit of\n");
-    fprintf(fp, "# the force-higher-level routines.\n");
-    fprintf(fp, "# Type: Double. Valid range: ]0,TILE_SIZE]\n");
-  }
-  fprintf(fp, "BLOCK_SIZE = 3000\n");
+  fprintf(fp, "TILE_SIZE = 30000 30000\n");
 
   if (verbose){
     fprintf(fp, "# This is the spatial resolution of Landsat output; not used if DO_REPROJ \n");
-    fprintf(fp, "# = FALSE. Note that the tile and block sizes must be a multiple of the\n");
+    fprintf(fp, "# = FALSE. Note that the tile size must be a multiple of the\n");
     fprintf(fp, "# pixel resolution.\n");
     fprintf(fp, "# Type: Double. Valid range: ]0,...\n");
   }
@@ -233,7 +223,7 @@ void write_par_ll_cube(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This is the spatial resolution of Sentinel-2 output; not used if DO_REPROJ \n");
-    fprintf(fp, "# = FALSE. Note that the tile and block sizes must be a multiple of the\n");
+    fprintf(fp, "# = FALSE. Note that the tile and chunk sizes must be a multiple of the\n");
     fprintf(fp, "# pixel resolution.\n");
     fprintf(fp, "# Type: Double. Valid range: ]0,...\n");
   }
@@ -255,9 +245,9 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# This defines the target coordinate system. If DO_REPROJ = FALSE, the\n");
     fprintf(fp, "# projection string can be NULL. The coordinate system must either be\n");
     fprintf(fp, "# given as WKT string - or can be a predefined coordinate/grid system.\n");
-    fprintf(fp, "# If one of the predefined systems are used, TILE_SIZE, BLOCK_SIZE,\n");
-    fprintf(fp, "# ORIGIN_LAT, and ORIGIN_LON are ignored and internally replaced with\n");
-    fprintf(fp, "# predefined values. Currently, EQUI7 and GLANCE7 are availble. Both\n");
+    fprintf(fp, "# If one of the predefined systems are used, TILE_SIZE,  ORIGIN_LAT, \n");
+    fprintf(fp, "# ORIGIN_LON are ignored and internally replaced with predefined values.\n");
+    fprintf(fp, "# Currently, EQUI7 and GLANCE7 are availble. Both\n");
     fprintf(fp, "# are globally defined sets of projections with a corresponding grid \n");
     fprintf(fp, "# system. EQUI7 consists of 7 Equi-Distant, continental projections,\n");
     fprintf(fp, "# with a tile size of 100km. GLANCE7 consists of 7 Equal-Area, conti-\n");
@@ -656,10 +646,10 @@ void write_par_ll_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
-    fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
-    fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
-    fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-\n");
+    fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled \n");
+    fprintf(fp, "# with 256x256 px blocks.\n");
+    fprintf(fp, "# Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
@@ -824,20 +814,20 @@ void write_par_hl_extent(FILE *fp, bool verbose){
   fprintf(fp, "FILE_TILE = NULL\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter can be used to override the default blocksize of the input\n");
-    fprintf(fp, "# images (as specified in the datacube-definition.prj file). This can be\n");
-    fprintf(fp, "# necessary if the default blocksize is too large for your system and you\n");
-    fprintf(fp, "# cannot fit all necessary data into RAM. Note that processing of larger\n");
-    fprintf(fp, "# blocksizes is more efficient. The tilesize must be dividable by the blocksize\n");
-    fprintf(fp, "# without remainder. Set to 0, to use the default blocksize\n");
-    fprintf(fp, "# Type: Double. Valid range: 0 or [RESOLUTION,TILE_SIZE]\n");
+    fprintf(fp, "# This parameter is used to define the size of the sub-tile processing units.\n");
+    fprintf(fp, "# Most efficient is to use a chunk size that coincides with the tile size. Using \n");
+    fprintf(fp, "# smaller chunks may be necessary if you cannot fit all necessary data into RAM. \n");
+    fprintf(fp, "# The tilesize must be dividable by the chunk size without remainder.\n");
+    fprintf(fp, "# Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE\n");
+    fprintf(fp, "# parameter is not permitted anymore.\n");
+    fprintf(fp, "# Type: Integer list. Valid range: ]0,TILE_SIZE]\n");
   }
-  fprintf(fp, "BLOCK_SIZE = 0\n");
+  fprintf(fp, "CHUNK_SIZE = 0 0\n");
 
   if (verbose){
-    fprintf(fp, "# Analysis resolution. The tile (and block) size must be dividable by this\n");
+    fprintf(fp, "# Analysis resolution. The tile (and chunk) size must be dividable by this\n");
     fprintf(fp, "# resolution without remainder, e.g. 30m resolution with 100km tiles is not possible\n");
-    fprintf(fp, "# Type: Double. Valid range: ]0,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Double. Valid range: ]0,CHUNK_SIZE]\n");
   }
   fprintf(fp, "RESOLUTION = 10\n");
 
@@ -1069,12 +1059,13 @@ void write_par_hl_output(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Output format, which is either uncompressed flat binary image format aka\n");
-    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-\n");
-    fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is structured \n");
-    fprintf(fp, "# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-\n");
-    fprintf(fp, "# fications. Metadata are written to the ENVI header or directly into the Tiff\n");
+    fprintf(fp, "# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-\n");
+    fprintf(fp, "# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled \n");
+    fprintf(fp, "# with 256x256 px blocks.\n");
+    fprintf(fp, "# Metadata are written to the ENVI header or directly into the Tiff\n");
     fprintf(fp, "# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,\n");
     fprintf(fp, "# an external .aux.xml file is additionally generated.\n");
+    fprintf(fp, "# Note that COG output is only possible when the chunk size matches the tile size.\n");
     fprintf(fp, "# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}\n");
   }
   fprintf(fp, "OUTPUT_FORMAT = GTiff\n");
@@ -1140,8 +1131,8 @@ void write_par_hl_thread(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This module is using a streaming mechanism to speed up processing. There\n");
     fprintf(fp, "# are three processing teams (3 Threads) that simultaneously handle Input,\n");
-    fprintf(fp, "# Processing, and Output. Example: when Block 2 is being processed, data\n");
-    fprintf(fp, "# from Block 3 are already being input and results from Block 1 are being\n");
+    fprintf(fp, "# Processing, and Output. Example: when chunk 2 is being processed, data\n");
+    fprintf(fp, "# from chunk 3 are already being input and results from chunk 1 are being\n");
     fprintf(fp, "# output. Each team can have multiple sub-threads to speed up the work. The\n");
     fprintf(fp, "# number of threads to use for each team is given by following parameters.\n");
     fprintf(fp, "# Type: Integer. Valid range: [1,...\n");
@@ -1680,11 +1671,11 @@ void write_par_hl_pyp(FILE *fp, bool verbose){
     fprintf(fp, "# as 4D-nd.array [nDates, nBands, nrows, ncols]. A multi-processing pool is spawned to \n");
     fprintf(fp, "# parallely execute this function with ``NTHREAD_COMPUTE`` workers.\n");
     fprintf(fp, "#     ``def forcepy_pixel(inarray, outarray, dates, sensors, bandnames, nodata, nproc):``\n");
-    fprintf(fp, "# 2) ``BLOCK`` expects a pixel-function that receives the time series of a complete \n");
+    fprintf(fp, "# 2) ``CHUNK`` expects a pixel-function that receives the time series of a complete \n");
     fprintf(fp, "# processing unit as 4D-nd.array [nDates, nBands, nrows, ncols]. No parallelization is  \n");
     fprintf(fp, "# done on FORCE's end.\n");
-    fprintf(fp, "#     ``def forcepy_block(inblock, outblock, dates, sensors, bandnames, nodata, nproc):``\n");
-    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+    fprintf(fp, "#     ``def forcepy_chunk(inarray, outarray, dates, sensors, bandnames, nodata, nproc):``\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,CHUNK}\n");
   }
   fprintf(fp, "PYTHON_TYPE = PIXEL\n");
 
@@ -1722,7 +1713,7 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# TBD\n");
-    fprintf(fp, "# Type: Character. Valid values: {PIXEL,BLOCK}\n");
+    fprintf(fp, "# Type: Character. Valid values: {PIXEL,CHUNK}\n");
   }
   fprintf(fp, "RSTATS_TYPE = PIXEL\n");
 
@@ -2062,7 +2053,7 @@ void write_par_hl_imp(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the radius of the prediction kernel (in projection\n");
     fprintf(fp, "# units, commonly in meters). A larger kernel increases the chance of finding\n");
     fprintf(fp, "# a larger number of within-class pixels, but increases prediction time\n");
-    fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Double. Valid values: ]0,CHUNK_SIZE]\n");
   }
   fprintf(fp, "KERNEL_SIZE = 2500\n");
 
@@ -2072,7 +2063,7 @@ void write_par_hl_imp(FILE *fp, bool verbose){
     fprintf(fp, "# heterogeneity proxies are derived from a focal standard deviation filter.\n");
     fprintf(fp, "# The width of the kernel should reflect the scale difference between the\n");
     fprintf(fp, "# coarse and medium resolution data.\n");
-    fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Double. Valid values: ]0,CHUNK_SIZE]\n");
   }
   fprintf(fp, "KERNEL_TEXT = 330\n");
 
@@ -2221,7 +2212,7 @@ void write_par_hl_txt(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter defines the radius of the kernel used for computing the\n");
     fprintf(fp, "# texture metrics (in projection units, commonly in meters).\n");
-    fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Double. Valid values: ]0,CHUNK_SIZE]\n");
   }
   fprintf(fp, "TXT_RADIUS = 50\n");
 
@@ -2268,7 +2259,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter defines the radius of the kernel used for computing the\n");
     fprintf(fp, "# landscape metrics (in projection units, commonly in meters).\n");
-    fprintf(fp, "# Type: Double. Valid values: ]0,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Double. Valid values: ]0,CHUNK_SIZE]\n");
   }
   fprintf(fp, "LSM_RADIUS = 50\n");
     
@@ -2276,7 +2267,7 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the minimum size (in pixels) of an area to be considered as a patch.\n");
     fprintf(fp, "# Patches with fewer pixels will be omitted. Mind that this parameter has an effect on\n");
     fprintf(fp, "# all metrics, inlcuding arithmetic mean, maximum value, ...\n");
-    fprintf(fp, "# Type: Integer. Valid values: ]1,BLOCK_SIZE]\n");
+    fprintf(fp, "# Type: Integer. Valid values: ]1,CHUNK_SIZE]\n");
   }
   fprintf(fp, "LSM_MIN_PATCHSIZE = 3\n");
 

@@ -462,12 +462,12 @@ int n;
 --- ibytes:  bytes read
 --- tx:      tile X-ID
 --- ty:      tile Y-ID
---- chunk:   block number
+--- chunk:   chunk number
 --- cube:    datacube parameters, e.g. resolution
 --- phl:     HL parameters
 +++ Return: image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *read_mask(int *success, off_t *ibytes, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
 brick_t *MASK = NULL;
 small *mask_ = NULL;
 int nc, p;
@@ -481,7 +481,7 @@ int n = 0;
   #endif
 
   #ifdef FORCE_DEBUG
-  printf("Reading mask X%04d_Y%04d\n", tx, ty);
+  printf("Reading mask X%04d_Y%04d\n", tile[_X_], tile[_Y_]);
   #endif
 
   if (strcmp(phl->d_mask, "NULL") == 0){
@@ -490,7 +490,7 @@ int n = 0;
   }
 
   // get mask file listing, skip if tile is empty
-  if (list_mask(tx, ty, phl, &dir) == FAILURE){
+  if (list_mask(tile[_X_], tile[_Y_], phl, &dir) == FAILURE){
     #ifdef FORCE_DEBUG
     printf("No data in here (no mask). Skip.\n");
     #endif
@@ -501,13 +501,13 @@ int n = 0;
 
   // read mask
   concat_string_2(fname, NPOW_10, dir.name, dir.list[0], "/");
-  if ((MASK = read_block(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, chunk, tx, ty, cube, false, 0, 0)) == NULL){
+  if ((MASK = read_chunk(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, 0, 0)) == NULL){
       printf("Error reading mask %s. ", fname); *success = FAILURE; return NULL;}
   if (phl->radius > 0){
-    if ((MASK = add_blocks(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, chunk, tx, ty, cube, false, phl->radius, MASK)) == NULL){
+    if ((MASK = add_chunks(fname, _ARD_MSK_, NULL, 1, 1, 255, _DT_SMALL_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, phl->radius, MASK)) == NULL){
       printf("Error adding masks %s. ", fname); *success = FAILURE; return NULL;}
   }
-  //if ((MASK = read_mask_block(fname, 255, chunk, tx, ty, cube)) == NULL){
+  //if ((MASK = read_mask_chunk(fname, 255, chunk, tx, ty, cube)) == NULL){
   //    printf("Error reading mask %s. ", fname); *success = FAILURE; return NULL;}
 
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
@@ -531,7 +531,7 @@ int n = 0;
   }
 
   if (n == 0){
-    //printf("no valid pixel in mask in this block. skip this block!\n");
+    //printf("no valid pixel in mask in this chunk. skip this chunk!\n");
     free_brick(MASK);
     *success = CANCEL;
     return NULL;
@@ -551,13 +551,13 @@ int n = 0;
 --- nt:     number of features read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
---- chunk:  block number
+--- chunk:  chunk number
 --- cube:   datacube parameters, e.g. resolution
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_features(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
-int f, p, nc;
+ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
+int f, p;
 char fname[NPOW_10];
 int nchar;
 ard_t *features = NULL;
@@ -570,13 +570,13 @@ off_t bytes = 0;
   #endif
 
   #ifdef FORCE_DEBUG
-  printf("Reading X%04d_Y%04d\n", tx, ty);
+  printf("Reading X%04d_Y%04d\n", tile[_X_], tile[_Y_]);
   #endif
 
 
   // check if all features do exist
   for (f=0; f<phl->ftr.nfeature; f++){
-    nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tx, ty, phl->ftr.bname[f]);
+    nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tile[_X_], tile[_Y_], phl->ftr.bname[f]);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); 
       *nt = 0; 
@@ -592,23 +592,23 @@ off_t bytes = 0;
   alloc((void**)&features, phl->ftr.nfeature, sizeof(ard_t));
 
 
-  #pragma omp parallel private(fname,p,nchar) shared(features,phl,cube,chunk,tx,ty,nc) reduction(+: error, bytes) default(none)
+  #pragma omp parallel private(fname,p,nchar) shared(features,phl,cube,chunk,tile) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
     for (f=0; f<phl->ftr.nfeature; f++){
-      
-      nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tx, ty, phl->ftr.bname[f]);
-      if (nchar < 0 || nchar >= NPOW_10){ 
+
+      nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tile[_X_], tile[_Y_], phl->ftr.bname[f]);
+      if (nchar < 0 || nchar >= NPOW_10){
         printf("Buffer Overflow in assembling filename\n"); error++; continue;}
   
 
       // read feature
-      if ((features[f].DAT = read_block(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
+      if ((features[f].DAT = read_chunk(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL ||
           (features[f].dat = get_bands_short(features[f].DAT)) == NULL){
         printf("Error reading feature %s. ", fname); error++; continue;}
       if (phl->radius > 0){
-        if ((features[f].DAT = add_blocks(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, features[f].DAT)) == NULL ||
+        if ((features[f].DAT = add_chunks(fname, _ARD_FTR_, NULL, phl->ftr.band[f], 1, phl->ftr.nodata, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, phl->radius, features[f].DAT)) == NULL ||
             (features[f].dat = get_bands_short(features[f].DAT)) == NULL){
           printf("Error adding feature %s. ", fname); error++; continue;}
       }
@@ -619,7 +619,7 @@ off_t bytes = 0;
           (features[f].qai = get_band_short(features[f].QAI, 0)) == NULL){
         printf("Error compiling feature %s.", fname); error++; continue;}
         
-      nc = get_brick_chunkncells(features[f].DAT);
+      int nc = get_brick_chunkncells(features[f].DAT);
       
       for (p=0; p<nc; p++){
         if (features[f].dat[0][p] == phl->ftr.nodata) set_off(features[f].QAI, p, true);
@@ -654,12 +654,12 @@ off_t bytes = 0;
 --- nt:     number of images read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
---- chunk:  block number
+--- chunk:  chunk number
 --- cube:   datacube parameters, e.g. resolution
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_confield(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl){
+ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
 int f;
 char fname[NPOW_10];
 int nchar;
@@ -673,13 +673,13 @@ off_t bytes = 0;
   #endif
 
   #ifdef FORCE_DEBUG
-  printf("Reading X%04d_Y%04d\n", tx, ty);
+  printf("Reading X%04d_Y%04d\n", tile[_X_], tile[_Y_]);
   #endif
 
 
   // check if all features do exist
   for (f=0; f<phl->con.n; f++){
-    nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tx, ty, phl->con.fname[f]);
+    nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tile[_X_], tile[_Y_], phl->con.fname[f]);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling filename\n"); 
       *nt = 0; 
@@ -695,22 +695,22 @@ off_t bytes = 0;
   alloc((void**)&con, phl->con.n, sizeof(ard_t));
 
 
-  #pragma omp parallel private(fname,nchar) shared(con,phl,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
+  #pragma omp parallel private(fname,nchar) shared(con,phl,cube,chunk,tile) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
     for (f=0; f<phl->con.n; f++){
 
-      nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tx, ty, phl->con.fname[f]);
+      nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tile[_X_], tile[_Y_], phl->con.fname[f]);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling filename\n"); error++; continue;}
 
       // read continuous field
-      if ((con[f].DAT = read_block(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, chunk, tx, ty, cube, false, 0, 0)) == NULL ||
+      if ((con[f].DAT = read_chunk(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, 0, 0)) == NULL ||
           (con[f].dat = get_bands_short(con[f].DAT)) == NULL){
         printf("Error reading continuous field %s. ", fname); error++; continue;}
       if (phl->radius > 0){
-        if ((con[f].DAT = add_blocks(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, chunk, tx, ty, cube, false, phl->radius, con[f].DAT)) == NULL ||
+        if ((con[f].DAT = add_chunks(fname, _ARD_FTR_, NULL, 1, -1, phl->con.nodata, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, phl->radius, con[f].DAT)) == NULL ||
             (con[f].dat = get_bands_short(con[f].DAT)) == NULL){
           printf("Error adding continuous field products %s. ", fname); error++; continue;}
       }
@@ -752,13 +752,13 @@ off_t bytes = 0;
 --- nt:     number of datasets read (returned)
 --- tx:     tile X-ID
 --- ty:     tile Y-ID
---- chunk:  block number
+--- chunk:  chunk number
 --- cube:   datacube parameters, e.g. resolution
 --- sen:    sensor parameters
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_ard(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl){
+ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_sen_t *sen, par_hl_t *phl){
 int t, b, p, nb, nc;
 char fname[NPOW_10];
 char bname[NPOW_10];
@@ -774,12 +774,12 @@ off_t bytes = 0;
   #endif
 
   #ifdef FORCE_DEBUG
-  printf("Reading X%04d_Y%04d\n", tx, ty);
+  printf("Reading X%04d_Y%04d\n", tile[_X_], tile[_Y_]);
   #endif
 
 
   // get ARD file listing, skip if tile is empty
-  if (list_ard(tx, ty, sen, phl, &dir) == FAILURE){
+  if (list_ard(tile[_X_], tile[_Y_], sen, phl, &dir) == FAILURE){
     #ifdef FORCE_DEBUG
     printf("No data in here (datasets). Skip.\n");
     #endif
@@ -791,7 +791,7 @@ off_t bytes = 0;
   alloc((void**)&ard, dir.n, sizeof(ard_t));
   
 
-  #pragma omp parallel private(bname,fname,temp,p,b,nc,nb) shared(ard,dir,phl,sen,cube,chunk,tx,ty) reduction(+: error, bytes) default(none)
+  #pragma omp parallel private(bname,fname,temp,p,b,nc,nb) shared(ard,dir,phl,sen,cube,chunk,tile) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
@@ -801,11 +801,11 @@ off_t bytes = 0;
       if (phl->prd.ref && error == 0){
         copy_string(bname, 1024, dir.list[t]);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
-        if ((ard[t].DAT = read_block(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL ||
+        if ((ard[t].DAT = read_chunk(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL ||
             (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
           printf("Error reading main product %s. ", fname); error++; continue;}
         if (phl->radius > 0){
-          if ((ard[t].DAT = add_blocks(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, ard[t].DAT)) == NULL ||
+          if ((ard[t].DAT = add_chunks(fname, _ARD_REF_, sen, 0, 0, -9999, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, phl->radius, ard[t].DAT)) == NULL ||
               (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
             printf("Error adding main products %s. ", fname); error++; continue;}
         }
@@ -822,11 +822,11 @@ off_t bytes = 0;
         replace_string(bname, sen->main_product, sen->quality_product, NPOW_10);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if (strcmp(sen->quality_product, "NULL") != 0){
-          if ((ard[t].QAI = read_block(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, chunk, tx, ty, cube, false, 0, 0)) == NULL ||
+          if ((ard[t].QAI = read_chunk(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, 0, 0)) == NULL ||
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
             printf("Error reading QAI product %s. ", fname); error++; continue;}
           if (phl->radius > 0){
-            if ((ard[t].QAI = add_blocks(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, chunk, tx, ty, cube, false, phl->radius, ard[t].QAI)) == NULL ||
+            if ((ard[t].QAI = add_chunks(fname, _ARD_AUX_, sen, 1, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, phl->radius, ard[t].QAI)) == NULL ||
                 (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
               printf("Error adding QAI products %s. ", fname); error++; continue;}
           }
@@ -869,10 +869,10 @@ off_t bytes = 0;
           copy_string(bname, 1024, dir.list[t]); // clean copy
           replace_string(bname, sen->main_product, phl->sen.aux_products[prd], NPOW_10);
           concat_string_2(fname, NPOW_10, dir.name, bname, "/");
-          if ((aux_brick = read_block(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, 0, 0)) == NULL){
+          if ((aux_brick = read_chunk(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL){
             printf("Error reading %s product %s. ", phl->sen.aux_products[prd], fname); error++; continue;}
           if (phl->radius > 0){
-            if ((aux_brick = add_blocks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, chunk, tx, ty, cube, phl->psf, phl->radius, aux_brick)) == NULL){
+            if ((aux_brick = add_chunks(fname, _ARD_AUX_, sen, 1, 1, -9999, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, phl->radius, aux_brick)) == NULL){
               printf("Error adding %s products %s. ", phl->sen.aux_products[prd], fname); error++; continue;}
           }
           
@@ -925,7 +925,7 @@ off_t bytes = 0;
 }
 
 
-/** This function reads a block of ARD-styled data, and returns a brick. 
+/** This function reads a chunk of ARD-styled data, and returns a brick. 
 +++ GDAL takes care of image decimation / replication if the image has a 
 +++ different spatial resolution than expected. A PSF aggregation can also
 +++ be used.
@@ -936,16 +936,16 @@ off_t bytes = 0;
 --- read_nb:   if not ARD reflectance, how many bands to read?
 --- nodata:    nodata value
 --- datatype:  datatype for brick
---- chunk:     block number
+--- chunk:     chunk number
 --- tx:        tile X-ID
 --- ty:        tile Y-ID
 --- cube:      datacube parameters, e.g. resolution
 --- psf:       use PSF?
---- partial_x: only read part of the block (width)
---- partial_y: only read part of the block (height)
+--- partial_x: only read part of the chunk (width)
+--- partial_y: only read part of the chunk (height)
 +++ Return:    image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y){
+brick_t *read_chunk(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y){
 brick_t *brick  = NULL;
 short   *brick_short_ = NULL;
 small   *brick_small_ = NULL;
@@ -966,7 +966,8 @@ int b_brick;
 int b_disc;
 int nx_disc, ny_disc, nc_disc;
 double res_disc;
-double geotran_disc[6];
+double geotran_disc[_GT_LEN_];
+const char *projection_disc = NULL;
 
 char bname[NPOW_10];
 char prd[NPOW_02] = "TBD";
@@ -979,19 +980,19 @@ double tol = 5e-3;
   //CPLSetConfigOption("GDAL_PAM_ENABLED", "NO");
   //CPLPushErrorHandler(CPLQuietErrorHandler);
 
-  width  = cube->tilesize;
-  height = cube->chunksize;
-  x_offset = 0;
-  y_offset = chunk*cube->chunksize;
+  width  = chunk_size[_X_];
+  height = chunk_size[_Y_];
+  x_offset = chunk[_X_]*chunk_size[_X_];
+  y_offset = chunk[_Y_]*chunk_size[_Y_];
 
   if (fabs(partial_x) > tol){
     width = fabs(partial_x);
-    if (partial_x < 0) x_offset = cube->tilesize+partial_x;
+    if (partial_x < 0) x_offset = chunk_size[_X_]+partial_x;
   }
   
   if (fabs(partial_y) > tol){
     height = fabs(partial_y);
-    if (partial_y < 0) y_offset = y_offset+cube->chunksize+partial_y;
+    if (partial_y < 0) y_offset = y_offset+chunk_size[_Y_]+partial_y;
   }
 
 
@@ -1016,17 +1017,17 @@ double tol = 5e-3;
   } else init_date(&date);
     
 
-  if (fmod(width, cube->res) > tol){
-    printf("requested width %f must be a multiple of RESOLUTION %f (%f > %f). ", width, cube->res, fmod(width, cube->res), tol);
+  if (fmod(width, resolution) > tol){
+    printf("requested width %f must be a multiple of RESOLUTION %f (%f > %f). ", width, resolution, fmod(width, resolution), tol);
     return NULL;
   }
-  if (fmod(height, cube->res) > tol){
-    printf("requested height %f must be a multiple of RESOLUTION %f (%f > %f). ", height, cube->res, fmod(height, cube->res), tol);
+  if (fmod(height, resolution) > tol){
+    printf("requested height %f must be a multiple of RESOLUTION %f (%f > %f). ", height, resolution, fmod(height, resolution), tol);
     return NULL;
   }
   
-  nx = (int)(width/cube->res);
-  ny = (int)(height/cube->res);
+  nx = (int)(width/resolution);
+  ny = (int)(height/resolution);
   nc = nx*ny;
 
   
@@ -1072,10 +1073,11 @@ double tol = 5e-3;
   // number of pixels, resolution and projection in image on disc
 
   GDALGetGeoTransform(dataset, geotran_disc); 
-  res_disc = geotran_disc[1];
+  res_disc = geotran_disc[_GT_RES_];
+  projection_disc = GDALGetProjectionRef(dataset);
 
   #ifdef FORCE_DEBUG
-  print_dvector(geotran_disc, "Geotransformation", 6, 10, 2);
+  print_dvector(geotran_disc, "Geotransformation", _GT_LEN_, 10, 2);
   #endif
   
   if (fmod(width, res_disc) > tol){
@@ -1104,7 +1106,7 @@ double tol = 5e-3;
 
   #ifdef FORCE_DEBUG
   printf("read %d x %d pixels with offset %d / %d at resolution %f\n", nx_disc, ny_disc, xoff_disc, yoff_disc, res_disc);
-  printf("copy to %d x %d pixels with offset %d / %d at resolution %f\n", nx, ny, 0, 0, cube->res);
+  printf("copy to %d x %d pixels with offset %d / %d at resolution %f\n", nx, ny, 0, 0, resolution);
   #endif
 
 
@@ -1191,24 +1193,21 @@ double tol = 5e-3;
 
   }
 
-  GDALClose(dataset);
-  if (read_buf != NULL){ free((void*)read_buf); read_buf = NULL;}
-  if (psf_buf  != NULL){ free((void*)psf_buf);  psf_buf  = NULL;}
 
-  //CSLDestroy(open_options);
-
-  // compile brick correctly
+// compile brick correctly
   set_brick_geotran(brick,    geotran_disc);
-  set_brick_res(brick,        cube->res);
-  set_brick_proj(brick,       cube->proj);
-  set_brick_ncols(brick,      cube->nx);
-  set_brick_nrows(brick,      cube->ny);
-  set_brick_chunkncols(brick, cube->cx);
-  set_brick_chunknrows(brick, cube->cy);
-  set_brick_nchunks(brick,    cube->cn);
-  set_brick_chunk(brick,      chunk);
-  set_brick_tilex(brick,      tx);
-  set_brick_tiley(brick,      ty);
+  set_brick_res(brick,        resolution);
+  set_brick_proj(brick,       projection_disc);
+  set_brick_ncols(brick,      (int)(tile_size[_X_]/resolution));
+  set_brick_nrows(brick,      (int)(tile_size[_Y_]/resolution));
+  set_brick_chunkncols(brick, (int)(chunk_size[_X_]/resolution));
+  set_brick_chunknrows(brick, (int)(chunk_size[_Y_]/resolution));
+  set_brick_chunk_dim_x(brick,  (int)(tile_size[_X_]/chunk_size[_X_]));
+  set_brick_chunk_dim_y(brick,  (int)(tile_size[_Y_]/chunk_size[_Y_]));
+  set_brick_chunkx(brick,     chunk[_X_]);
+  set_brick_chunky(brick,     chunk[_Y_]);
+  set_brick_tilex(brick,      tile[_X_]);
+  set_brick_tiley(brick,      tile[_Y_]);
 
   set_brick_filename(brick, "DONOTOUTPUT");
   set_brick_dirname(brick, "DONOTOUTPUT");
@@ -1221,7 +1220,6 @@ double tol = 5e-3;
   set_brick_provenance(brick, 0, file);
 
   default_gdaloptions(_FMT_GTIFF_, &format);
-  update_gdaloptions_blocksize(_FMT_GTIFF_, &format, cube->cx, cube->cy);
 
   set_brick_open(brick,   OPEN_FALSE);
   set_brick_format(brick, &format);
@@ -1233,14 +1231,20 @@ double tol = 5e-3;
   if(sen != NULL){
     for (b=0; b<nb; b++) set_brick_sensor(brick, b, sen->sensor[sid]);
   }
-   
+
+  GDALClose(dataset);
+  if (read_buf != NULL){ free((void*)read_buf); read_buf = NULL;}
+  if (psf_buf  != NULL){ free((void*)psf_buf);  psf_buf  = NULL;}
+
+  //CSLDestroy(open_options);
+
   return brick;
 }
 
 
-/** This function adds a partial block of ARD-styled data to the brick we
+/** This function adds a partial chunk of ARD-styled data to the brick we
 +++ already have. This is needed for functions that use kernel based pro-
-+++ cessing and need to incorporate data from neighoring blocks and/or
++++ cessing and need to incorporate data from neighoring chunks and/or
 +++ tiles to generate seamless output.
 --- file:     filename
 --- ard_type: type of ARD, e.g. L2 reflectance or feature
@@ -1249,7 +1253,7 @@ double tol = 5e-3;
 --- read_nb:  if not ARD reflectance, how many bands to read?
 --- nodata:   nodata value
 --- datatype: datatype for brick
---- chunk:    block number
+--- chunk:    chunk number
 --- tx:       tile X-ID
 --- ty:       tile Y-ID
 --- cube:     datacube parameters, e.g. resolution
@@ -1257,46 +1261,48 @@ double tol = 5e-3;
 --- radius:   distance (in projection units) that need to be added
 --- ARD:      image brick we already have in memory (freed within)
 +++ Return:   extended image brick
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, brick_t *ARD){
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+brick_t *add_chunks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk_central[], double tile_size[], int tile_central[], double resolution, bool psf, double distance_to_add, brick_t *ARD){
 brick_t *add  = NULL;
 small  **add_small_ = NULL;
 short  **add_short_ = NULL;
 brick_t *brick  = NULL;
 small  **brick_small_ = NULL;
 short  **brick_short_ = NULL;
-double res;
-int pix;
-int b, nb;
-int i_off = 0, j_off = 0, p, nx, ny, nc;
-int i_add, j_add, p_add, nx_add = 0, ny_add = 0;
-int block_i, block_j, chunk_add, nchunk, tx_add, ty_add;
+int pixels_to_add;
+int nbands;
+int mosaic_pixels[2], chunk_pixels[2];
+int chunk_to_add_relative[2], chunk_to_add[2], chunk_layout[2];
+int tile_to_add[2];
 char fname[NPOW_10], *pch = NULL;;
 char c_tc[NPOW_04];
 char c_tn[NPOW_04];
 int nchar;
 
 
-  nb = get_brick_nbands(ARD);
-  res = get_brick_res(ARD);
-  
-  pix = (int)(radius/res);
+  nbands = get_brick_nbands(ARD);
 
-  nx = cube->cx + pix*2;
-  ny = cube->cy + pix*2;
-  nc = nx*ny;
-  
+  pixels_to_add = (int)(distance_to_add/resolution);
+  mosaic_pixels[_X_] = (int)(chunk_size[_X_]/resolution) + pixels_to_add*2;
+  mosaic_pixels[_Y_] = (int)(chunk_size[_Y_]/resolution) + pixels_to_add*2;
+
+  chunk_pixels[_X_] = (int)(chunk_size[_X_]/resolution);
+  chunk_pixels[_Y_] = (int)(chunk_size[_Y_]/resolution);
+
+  chunk_layout[_X_] = (int)(tile_size[_X_]/chunk_size[_X_]);
+  chunk_layout[_Y_] = (int)(tile_size[_Y_]/chunk_size[_Y_]);
+
+
   #ifdef FORCE_DEBUG
   printf("brick with added edges has %d x %d pixels = %d cells\n",
-    nx, ny, nc);
+    mosaic_pixels[_X_], mosaic_pixels[_Y_], mosaic_pixels[_X_]*mosaic_pixels[_Y_]);
   #endif
   
-  nchunk = cube->cn;
 
-  brick = copy_brick(ARD, nb, _DT_NONE_);
-  set_brick_chunkncols(brick, nx);
-  set_brick_chunknrows(brick, ny);
-  allocate_brick_bands(brick, nb, nc, datatype);
+  brick = copy_brick(ARD, nbands, _DT_NONE_);
+  set_brick_chunkncols(brick, mosaic_pixels[_X_]);
+  set_brick_chunknrows(brick, mosaic_pixels[_Y_]);
+  allocate_brick_bands(brick, nbands, mosaic_pixels[_X_] * mosaic_pixels[_Y_], datatype);
   if (datatype == _DT_SMALL_){
     if ((brick_small_ = get_bands_small(brick)) == NULL) return NULL;
   } else if (datatype == _DT_SHORT_){
@@ -1307,42 +1313,41 @@ int nchar;
   
   // copy file name
   copy_string(fname, NPOW_10, file);
-  
-  nchar = snprintf(c_tc, NPOW_04, "X%04d_Y%04d", tx, ty);
+
+  nchar = snprintf(c_tc, NPOW_04, "X%04d_Y%04d", tile_central[_X_], tile_central[_Y_]);
   if (nchar < 0 || nchar >= NPOW_04){ 
     printf("Buffer Overflow in assembling tile\n"); return NULL;}
 
 
-  for (block_i=-1; block_i<=1; block_i++){
-  for (block_j=-1; block_j<=1; block_j++){
+  for (chunk_to_add_relative[_Y_]=-1; chunk_to_add_relative[_Y_]<=1; chunk_to_add_relative[_Y_]++){
+  for (chunk_to_add_relative[_X_]=-1; chunk_to_add_relative[_X_]<=1; chunk_to_add_relative[_X_]++){
     
-    if (block_i < 0){
-      chunk_add = chunk-1;
-    } else if (block_i > 0){
-      chunk_add = chunk+1;
+
+    chunk_to_add[_Y_] = chunk_central[_Y_] + chunk_to_add_relative[_Y_];
+    chunk_to_add[_X_] = chunk_central[_X_] + chunk_to_add_relative[_X_];
+
+    if (chunk_to_add[_Y_] < 0){
+      chunk_to_add[_Y_] = chunk_layout[_Y_] - 1;
+      tile_to_add[_Y_] = tile_central[_Y_] - 1;
+    } else if (chunk_to_add[_Y_] >= chunk_layout[_Y_]){
+      chunk_to_add[_Y_] = 0;
+      tile_to_add[_Y_] = tile_central[_Y_] + 1;
     } else {
-      chunk_add = chunk;
+      tile_to_add[_Y_] = tile_central[_Y_];
     }
 
-    if (chunk_add < 0){
-      chunk_add = nchunk-1;
-      ty_add = ty-1;
-    } else if (chunk_add >= nchunk){
-      chunk_add = 0;
-      ty_add = ty+1;
+     if (chunk_to_add[_X_] < 0){
+      chunk_to_add[_X_] = chunk_layout[_X_] - 1;
+      tile_to_add[_X_] = tile_central[_X_] - 1;
+    } else if (chunk_to_add[_X_] >= chunk_layout[_X_]){
+      chunk_to_add[_X_] = 0;
+      tile_to_add[_X_] = tile_central[_X_] + 1;
     } else {
-      ty_add = ty;
-    }
-    
-    if (block_j < 0){
-      tx_add = tx-1;
-    } else if (block_j > 0){
-      tx_add = tx+1;
-    } else {
-      tx_add = tx;
+      tile_to_add[_X_] = tile_central[_X_];
     }
 
-    if (block_i == 0 && block_j == 0){
+
+    if (chunk_to_add_relative[_Y_] == 0 && chunk_to_add_relative[_X_] == 0){
 
       add = ARD;
       if (datatype == _DT_SMALL_){
@@ -1356,32 +1361,32 @@ int nchar;
     } else {
 
       // new filename
-      nchar = snprintf(c_tn, NPOW_04, "X%04d_Y%04d", tx_add, ty_add);
+      nchar = snprintf(c_tn, NPOW_04, "X%04d_Y%04d", tile_to_add[_X_], tile_to_add[_Y_]);
       if (nchar < 0 || nchar >= NPOW_04){ 
         printf("Buffer Overflow in assembling tile\n"); return NULL;}
       
       if ((pch = strstr(fname, c_tc)) == NULL){
-        printf("error in assembling filename for neighboring block.\n"); return NULL;
+        printf("error in assembling filename for neighboring chunk.\n"); return NULL;
       } else strncpy(pch, c_tn, 11);
 
       copy_string(c_tc, NPOW_04, c_tn);
           
       
       #ifdef FORCE_DEBUG
-      printf("\nneighboring block %d %d:\n", block_j, block_i);
-      printf("X%04d_Y%04d -> X%04d_Y%04d\n", tx, ty, tx_add, ty_add);
-      printf("Chunk %d -> Chunk %d\n", chunk, chunk_add);
-      printf("Radius %.0f %.0f\n", block_j*radius, block_i*radius);
+      printf("\nneighboring chunk %d %d:\n", chunk_to_add_relative[_X_], chunk_to_add_relative[_Y_]);
+      printf("X%04d_Y%04d -> X%04d_Y%04d\n", tile_central[_X_], tile_central[_Y_], tile_to_add[_X_], tile_to_add[_Y_]);
+      printf("Chunk X:%d Y:%d -> Chunk X:%d Y:%d\n", chunk_central[_X_], chunk_central[_Y_], chunk_to_add[_X_], chunk_to_add[_Y_]);
+      printf("Radius %.0f %.0f\n", chunk_to_add_relative[_X_]*distance_to_add, chunk_to_add_relative[_Y_]*distance_to_add);
       printf("%s\n", fname);
       #endif
 
       
-      // read the strip
+      // read the partial chunk
       if (fileexist(fname)){
         #ifdef FORCE_DEBUG
-        printf("file exists. read block.\n");
+        printf("file exists. read chunk.\n");
         #endif
-        if ((add  = read_block(fname, ard_type, sen, read_b, read_nb, nodata, datatype, chunk_add, tx, ty, cube, psf, block_j*radius, block_i*radius)) == NULL){
+        if ((add  = read_chunk(fname, ard_type, sen, read_b, read_nb, nodata, datatype, chunk_size, chunk_to_add, tile_size, tile_to_add, resolution, psf, chunk_to_add_relative[_X_]*distance_to_add, chunk_to_add_relative[_Y_]*distance_to_add)) == NULL){
           printf("Error reading neighoring product %s. ", fname); return NULL;}
         if (datatype == _DT_SMALL_){
           if ((add_small_ = get_bands_small(add)) == NULL) return NULL;
@@ -1401,38 +1406,57 @@ int nchar;
       
     }
 
+    int mosaic_insert[2];
+    int mosaic_offset[2];
 
-    if (block_j <  0){ nx_add = pix;      j_off = 0; }
-    if (block_j == 0){ nx_add = cube->cx; j_off = pix; }
-    if (block_j >  0){ nx_add = pix;      j_off = nx-pix; }
-    if (block_i <  0){ ny_add = pix;      i_off = 0; }
-    if (block_i == 0){ ny_add = cube->cy; i_off = pix; }
-    if (block_i >  0){ ny_add = pix;      i_off = ny-pix; }
+    if (chunk_to_add_relative[_X_] <  0){ 
+      mosaic_insert[_X_] = pixels_to_add; 
+      mosaic_offset[_X_] = 0; 
+    } else if (chunk_to_add_relative[_X_] == 0){ 
+      mosaic_insert[_X_] = chunk_pixels[_X_]; 
+      mosaic_offset[_X_] = pixels_to_add; 
+    } else if (chunk_to_add_relative[_X_] >  0){
+      mosaic_insert[_X_] = pixels_to_add;
+      mosaic_offset[_X_] = mosaic_pixels[_X_] - pixels_to_add; 
+    }
+
+    if (chunk_to_add_relative[_Y_] <  0){ 
+      mosaic_insert[_Y_] = pixels_to_add;
+      mosaic_offset[_Y_] = 0; 
+    } else if (chunk_to_add_relative[_Y_] == 0){ 
+      mosaic_insert[_Y_] = chunk_pixels[_Y_];
+      mosaic_offset[_Y_] = pixels_to_add; 
+    } else if (chunk_to_add_relative[_Y_] >  0){ 
+      mosaic_insert[_Y_] = pixels_to_add;
+      mosaic_offset[_Y_] = mosaic_pixels[_Y_] - pixels_to_add; 
+    }
 
 
     #ifdef FORCE_DEBUG
-    printf("adding %d x %d pixels with %d / %d offset\n", nx_add, ny_add, j_off, i_off); 
+    printf("adding %d x %d pixels with %d / %d offset\n", 
+      mosaic_insert[_X_], mosaic_insert[_Y_], 
+      mosaic_offset[_X_], mosaic_offset[_Y_]); 
     #endif
 
 
     // copy the values
-    for (i_add=0; i_add<ny_add; i_add++){
-    for (j_add=0; j_add<nx_add; j_add++){
+    for (int row=0; row<mosaic_insert[_Y_]; row++){
+    for (int col=0; col<mosaic_insert[_X_]; col++){
 
-      p_add = i_add*nx_add + j_add;
-      p = (i_add+i_off)*nx + j_add+j_off;
+      int neighbor_cell = row*mosaic_insert[_X_] + col;
+      int mosaic_cell = (row+mosaic_offset[_Y_])*mosaic_pixels[_X_] + col+mosaic_offset[_X_];
 
       if (datatype == _DT_SMALL_){
         if (add_small_ == NULL){
-          for (b=0; b<nb; b++) brick_small_[b][p] = nodata;
+          for (int b=0; b<nbands; b++) brick_small_[b][mosaic_cell] = nodata;
         } else {
-          for (b=0; b<nb; b++) brick_small_[b][p] = add_small_[b][p_add];
+          for (int b=0; b<nbands; b++) brick_small_[b][mosaic_cell] = add_small_[b][neighbor_cell];
         }
       } else if (datatype == _DT_SHORT_){
         if (add_short_ == NULL){
-          for (b=0; b<nb; b++) brick_short_[b][p] = nodata;
+          for (int b=0; b<nbands; b++) brick_short_[b][mosaic_cell] = nodata;
         } else {
-          for (b=0; b<nb; b++) brick_short_[b][p] = add_short_[b][p_add];
+          for (int b=0; b<nbands; b++) brick_short_[b][mosaic_cell] = add_short_[b][neighbor_cell];
         }
       } else {
         printf("unsupported datatype. "); return NULL;

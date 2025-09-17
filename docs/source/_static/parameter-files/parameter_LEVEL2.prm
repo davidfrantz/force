@@ -94,21 +94,14 @@ FILE_TILE = NULL
 # This is the tile size (in target units, commonly in meters) of the 
 # gridded output. tiles are square; not used if DO_TILE = FALSE. 
 # Type: Double. Valid range: ]0,...
-TILE_SIZE = 30000
-# This is the block size (in target units, commonly in meters) of the 
-# image chips. Blocks are stripes, i.e. they are as wide as the tile,
-# and as high as specified here; not used if DO_TILE = FALSE or 
-# OUTPUT_FORMAT = ENVI. The blocks are the primary processing unit of
-# the force-higher-level routines.
-# Type: Double. Valid range: ]0,TILE_SIZE]
-BLOCK_SIZE = 3000
+TILE_SIZE = 30000 30000
 # This is the spatial resolution of Landsat output; not used if DO_REPROJ 
-# = FALSE. Note that the tile and block sizes must be a multiple of the
+# = FALSE. Note that the tile size must be a multiple of the
 # pixel resolution.
 # Type: Double. Valid range: ]0,...
 RESOLUTION_LANDSAT = 30
 # This is the spatial resolution of Sentinel-2 output; not used if DO_REPROJ 
-# = FALSE. Note that the tile and block sizes must be a multiple of the
+# = FALSE. Note that the tile and chunk sizes must be a multiple of the
 # pixel resolution.
 # Type: Double. Valid range: ]0,...
 RESOLUTION_SENTINEL2 = 10
@@ -124,9 +117,9 @@ ORIGIN_LAT = 60
 # This defines the target coordinate system. If DO_REPROJ = FALSE, the
 # projection string can be NULL. The coordinate system must either be
 # given as WKT string - or can be a predefined coordinate/grid system.
-# If one of the predefined systems are used, TILE_SIZE, BLOCK_SIZE,
-# ORIGIN_LAT, and ORIGIN_LON are ignored and internally replaced with
-# predefined values. Currently, EQUI7 and GLANCE7 are availble. Both
+# If one of the predefined systems are used, TILE_SIZE,  ORIGIN_LAT, 
+# ORIGIN_LON are ignored and internally replaced with predefined values.
+# Currently, EQUI7 and GLANCE7 are availble. Both
 # are globally defined sets of projections with a corresponding grid 
 # system. EQUI7 consists of 7 Equi-Distant, continental projections,
 # with a tile size of 100km. GLANCE7 consists of 7 Equal-Area, conti-
@@ -314,14 +307,14 @@ TIMEOUT_ZIP = 30
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
 # Output format, which is either uncompressed flat binary image format aka
-# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-
-# zontal differencing; BigTiff support is enabled; the Tiff is structured 
-# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-
-# fications. Metadata are written to the ENVI header or directly into the Tiff
+# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-
+# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled 
+# with 256x256 px blocks.
+# Metadata are written to the ENVI header or directly into the Tiff
 # to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,
 # an external .aux.xml file is additionally generated.
 # Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}
-OUTPUT_FORMAT = GTiff
+OUTPUT_FORMAT = COG
 # File that contains custom GDAL output options. This is only used if 
 # OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
 # The file should be written in tag and value notation. The first two lines 

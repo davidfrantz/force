@@ -217,11 +217,6 @@ GDALDriverH driver;
     // skip inactive cubes
     if (!multicube->cover[c]) continue;
 
-    // update blocksize in GDAL options
-    update_gdaloptions_blocksize(pl2->format, &pl2->gdalopt, 
-      multicube->cube[c]->cx, multicube->cube[c]->cy);
-
-
     /** read Digital Numbers + projection
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
     if (read_level1(meta, mission, DN, pl2) != SUCCESS){

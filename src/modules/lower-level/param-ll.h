@@ -80,8 +80,8 @@ typedef struct {
   
   double orig_lat;      // origin latitude
   double orig_lon;      // origin longitude
-  double tilesize;      // tilesize
-  double chunksize;     // chunksize
+  double *tile_size;    // tilesize
+  int n_tile_size;      // number of tilesize values
   double res_landsat;   // output resolution Landsat
   double res_sentinel2; // output resolution S2
   double res;           // output resolution

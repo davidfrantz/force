@@ -40,9 +40,11 @@ cessing grid + the bounding box of each tile in projected coordinates
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "gdal.h"           // public (C callable) GDAL entry points
-#include "ogr_spatialref.h" // coordinate systems services
 #include "ogr_api.h"        // OGR geometry and feature definition
 
+#ifdef __cplusplus
+#include "ogr_spatialref.h" // coordinate systems services
+#endif
 
 enum { _bottom_, _top_, _left_, _right_ };
 enum { _ll_, _lr_, _ul_, _ur_ };
@@ -60,7 +62,8 @@ typedef struct {
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] [-b bottom,top,left,right] [-f format] datacube-dir\n", exe);
+  printf("Usage: %s [-h] [-v] [-i] [-b bottom,top,left,right] [-o output-file] \n", exe);
+  printf("          [-f format] datacube-dir\n");
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");
@@ -220,12 +223,12 @@ cube_t *cube = NULL;
   // read datacube definition
   if ((cube = read_datacube_def(args.dcube)) == NULL){
     fprintf(stderr, "Reading datacube definition failed.\n"); usage(argv[0], FAILURE);}
-  wkt = cube->proj;
+  wkt = cube->projection;
 
   // get border coordinates in target css coordinates
   for (c=0; c<4; c++){
     if ((warp_geo_to_any(geo[c].x,  geo[c].y, &map[c].x, &map[c].y, 
-                     cube->proj)) == FAILURE){
+                     cube->projection)) == FAILURE){
       printf("Computing bbox coordinates in dst_srs failed!\n"); return FAILURE;}
     if (map[c].x < min.x) min.x = map[c].x;
     if (map[c].y < min.y) min.y = map[c].y;
@@ -278,10 +281,10 @@ cube_t *cube = NULL;
   for (px=x0; px<=x1; px++){
 
     // bounding box
-    left   = cube->origin_map.x + cube->tilesize*px;
-    right  = cube->origin_map.x + cube->tilesize*(px+1);
-    top    = cube->origin_map.y - cube->tilesize*py;
-    bottom = cube->origin_map.y - cube->tilesize*(py+1);
+    left   = cube->origin_map.x + cube->tile_size[_X_] * px;
+    right  = cube->origin_map.x + cube->tile_size[_X_] * (px+1);
+    top    = cube->origin_map.y - cube->tile_size[_Y_] * py;
+    bottom = cube->origin_map.y - cube->tile_size[_Y_] * (py+1);
 
     // tile ID
     nchar = snprintf(tile_id, NPOW_10, "X%04d_Y%04d", px, py);

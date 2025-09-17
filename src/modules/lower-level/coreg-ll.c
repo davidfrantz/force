@@ -68,7 +68,7 @@ typedef struct{
   double rmse;
 } match_t;
 
-int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
+int coreg(short **target, short *base, brick_t *QAI, double res, int nx, int ny, int nb, int band, short nodata);
 int cumulative_scale(int toplayer, int *scales);
 void free_pyramids(short ***pyramids_, int nlayer);
 void build_pyramids(short *image, brick_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr);
@@ -97,7 +97,7 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 --- nodata:  nodata value
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
+int coreg(short **target, short *base, brick_t *QAI, double res, int nx, int ny, int nb, int band, short nodata){
 int h, max_h, b;
 int i, j, p;
 double SAM, SAM_original;
@@ -1629,7 +1629,7 @@ match_t dm;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI){
 int p, nx, ny, nc, nb, band, err, year, month, dy;
-float res;
+double res;
 char fname[NPOW_10], cyear[NPOW_03];
 int nchar;
 short nodata;
