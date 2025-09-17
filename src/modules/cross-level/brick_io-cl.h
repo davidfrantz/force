@@ -45,6 +45,7 @@ extern "C" {
 int      warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube);
 int      warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata);
 int      write_brick(brick_t *brick);
+brick_t  *read_brick(char *file);
 
 #ifdef __cplusplus
 }

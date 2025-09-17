@@ -33,7 +33,10 @@ This file contains functions for organizing bricks in memory, and output
 #include "gdal.h"           // public (C callable) GDAL entry points
 #include "cpl_multiproc.h"  // CPL Multi-Threading
 #include "gdalwarper.h"     // GDAL warper related entry points and defs
+
+#ifdef __cplusplus
 #include "ogr_spatialref.h" // coordinate systems services
+#endif
 
 
 /** This function outputs a brick
@@ -243,7 +246,7 @@ int write_brick(brick_t *brick){
   
       // mosaicking into existing file
       // read and rewrite brick (safer when using compression)
-      if (brick->open != OPEN_CREATE && brick->open != OPEN_BLOCK && fileexist(fname)){
+      if (brick->open != OPEN_CREATE && brick->open != OPEN_CHUNK && fileexist(fname)){
   
         update = true;
   
@@ -310,8 +313,9 @@ int write_brick(brick_t *brick){
       }
   
   
-      // open for block mode or write from scratch
-      if (brick->open == OPEN_BLOCK && fileexist(fname) && brick->chunk > 0){
+      // open for chunk mode or write from scratch
+      if (brick->open == OPEN_CHUNK && fileexist(fname) && 
+         (brick->chunk[_X_] > 0 || brick->chunk[_Y_] > 0)){
         if ((fp = GDALOpen(fname, GA_Update)) == NULL){
           printf("Unable to open %s. ", fname); return FAILURE;}
       } else {
@@ -319,15 +323,18 @@ int write_brick(brick_t *brick){
           printf("Error creating file %s. ", fname); return FAILURE;}
       }
         
-      if (brick->open == OPEN_BLOCK){
-        if (brick->chunk < 0){
+      if (brick->open == OPEN_CHUNK){
+        if (brick->chunk[_X_] < 0 || 
+            brick->chunk[_Y_] < 0 || 
+            brick->chunk[_X_] >= brick->dim_chunk.cols || 
+            brick->chunk[_Y_] >= brick->dim_chunk.rows){
           printf("attempting to write invalid chunk\n");
           return FAILURE;
         }
         nx_write     = brick->cx;
         ny_write     = brick->cy;
-        xoff_write   = 0;
-        yoff_write   = brick->chunk*brick->cy;
+        xoff_write   = brick->chunk[_X_] * brick->cx;
+        yoff_write   = brick->chunk[_Y_] * brick->cy;
       } else {
         nx_write     = brick->nx;
         ny_write     = brick->ny;
@@ -449,7 +456,9 @@ int write_brick(brick_t *brick){
       CPLUnlockFile(lock);
     
       // write provenance info
-      if (brick->nprovenance > 0 && brick->chunk <= 0){
+      if (brick->nprovenance > 0 && 
+          brick->chunk[_X_] <= 0 && 
+          brick->chunk[_Y_] <= 0){
   
         if ((lock = (char*)CPLLockFile(provname, timeout)) == NULL){
           printf("Unable to lock file %s (timeout: %fs). ", provname, timeout);
@@ -498,7 +507,94 @@ int write_brick(brick_t *brick){
     return SUCCESS;
   }
   
+
+/** This function reads a full brick as it is stored on disk.
++++ Int16 datatype is assumed.
+--- file:       filename
++++ Return:    image brick
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+brick_t *read_brick(char *file){
+brick_t *brick  = NULL;
+short   *brick_short_ = NULL;
+GDALDatasetH dataset;
+GDALRasterBandH band;
+gdalopt_t format;
+int b, nbands;
+dim_t dim;
+double geotran[_GT_LEN_];
+const char *projection = NULL;
+
+
+  dataset = GDALOpenEx(file, GDAL_OF_READONLY, NULL, NULL, NULL);
+  if (dataset == NULL){
+    printf("unable to open %s.\n", file); 
+    exit(FAILURE);
+  }
+
+  nbands = GDALGetRasterCount(dataset);
+  if (nbands <= 0){
+    printf("no bands found in %s.\n", file); 
+    GDALClose(dataset); 
+    exit(FAILURE);
+  } 
+
+  dim.cols = (int)GDALGetRasterXSize(dataset);
+  dim.rows = (int)GDALGetRasterYSize(dataset);
+  dim.cells = dim.cols*dim.rows;
+  GDALGetGeoTransform(dataset, geotran); 
+  projection = GDALGetProjectionRef(dataset);
+
+  #ifdef FORCE_DEBUG
+  print_dvector(geotran, "Geotransformation", _GT_LEN_, 10, 2);
+  #endif
+
+
+  brick = allocate_brick(nbands, dim.cells, _DT_SHORT_);
+
+  for (b=0; b<nbands; b++){
+
+
+    if ((brick_short_ = get_band_short(brick, b)) == NULL){
+      printf("unable to get short band from brick.\n"); 
+      exit(FAILURE);
+    }
+
+    band = GDALGetRasterBand(dataset, b+1);
+    if (GDALRasterIO(band, GF_Read, 
+      0, 0, dim.cols, dim.rows, 
+      brick_short_, dim.cols, dim.rows, GDT_Int16, 0, 0) == CE_Failure){
+      printf("could not read image.\n"); return NULL;}
+
+  }
+
+  GDALClose(dataset);
+
+  //CSLDestroy(open_options);
+
+  // compile brick correctly
+  set_brick_geotran(brick,    geotran);
+  set_brick_res(brick,        geotran[_GT_RES_]);
+  set_brick_proj(brick,       projection);
+  set_brick_ncols(brick,      dim.cols);
+  set_brick_nrows(brick,      dim.rows);
+
+  set_brick_filename(brick, "DONOTOUTPUT");
+  set_brick_dirname(brick, "DONOTOUTPUT");
+  set_brick_provdir(brick, "DONOTOUTPUT");
+  set_brick_name(brick, "GENERIC BRICK");
+
+  set_brick_nprovenance(brick, 1);
+  set_brick_provenance(brick, 0, file);
+
+  default_gdaloptions(_FMT_GTIFF_, &format);
+
+  set_brick_open(brick,   OPEN_FALSE);
+  set_brick_format(brick, &format);
   
+  return brick;
+}
+  
+
   /** This function reprojects a brick into any other projection. The extent
   +++ of the warped image is unknown, thus it needs to be estimated first.
   +++ The reprojection might be performed in chunks if the number of pixels
@@ -523,8 +619,8 @@ int write_brick(brick_t *brick){
   GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
   void *transformer = NULL;
   char src_proj[NPOW_10];
-  double src_geotran[6];
-  double dst_geotran[6];
+  double src_geotran[_GT_LEN_];
+  double dst_geotran[_GT_LEN_];
   short *src_ = NULL;
   short **buf_ = NULL;
   short nodata;
@@ -555,7 +651,7 @@ int write_brick(brick_t *brick){
     src_nx = get_brick_ncols(src);
     src_ny = get_brick_nrows(src);
     src_nc = get_brick_ncells(src);
-    get_brick_geotran(src, src_geotran, 6);
+    get_brick_geotran(src, src_geotran, _GT_LEN_);
     get_brick_proj(src, src_proj, NPOW_10);
   
     // create source image
@@ -585,7 +681,7 @@ int write_brick(brick_t *brick){
   
     // create transformer between source and destination
     if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
-      NULL, cube->proj, false, 0, 2)) == NULL){
+      NULL, cube->projection, false, 0, 2)) == NULL){
       printf("could not create image to image transformer. "); return FAILURE;}
   
     // estimate approximate extent
@@ -596,9 +692,9 @@ int write_brick(brick_t *brick){
     // align with output grid of data cube
     if (tile){
   
-      if (tile_align(cube, dst_geotran[0], dst_geotran[3], &tmpx, &tmpy) == SUCCESS){
-        dst_geotran[0] = tmpx;
-        dst_geotran[3] = tmpy;
+      if (tile_align(cube, dst_geotran[_GT_ULX_], dst_geotran[_GT_ULY_], &tmpx, &tmpy) == SUCCESS){
+        dst_geotran[_GT_ULX_] = tmpx;
+        dst_geotran[_GT_ULY_] = tmpy;
       } else {
         printf("could not align with datacube. "); return FAILURE;
       }
@@ -607,19 +703,20 @@ int write_brick(brick_t *brick){
     
     // convert computed resolution to actual dst resolution
     // add some rows and columns, just to be sure
-    dst_nx = dst_nx * dst_geotran[1] / cube->res + 10;
-    dst_ny = dst_ny * dst_geotran[5] / cube->res * -1 + 10;
+    dst_nx = dst_nx * dst_geotran[_GT_XRES_] / cube->resolution + 10;
+    dst_ny = dst_ny * dst_geotran[_GT_YRES_] / cube->resolution * -1 + 10;
     dst_nc = dst_nx*dst_ny;
-    dst_geotran[1] = cube->res; dst_geotran[5] = -1 * cube->res; 
-  
+    dst_geotran[_GT_XRES_] = cube->resolution; 
+    dst_geotran[_GT_YRES_] = cube->resolution * -1;
+
     // destroy transformer
     GDALDestroyGenImgProjTransformer(transformer);
   
     #ifdef FORCE_DEBUG
     printf("src nx/ny: %d/%d\n",  src_nx, src_ny);
-    print_dvector(src_geotran, "src geotransf.", 6, 1, 2);
+    print_dvector(src_geotran, "src geotransf.", _GT_LEN_, 1, 2);
     printf("dst nx/ny: %d/%d\n", dst_nx, dst_ny);
-    print_dvector(dst_geotran, "dst geotransf.", 6, 1, 2);
+    print_dvector(dst_geotran, "dst geotransf.", _GT_LEN_, 1, 2);
     #endif
   
   
@@ -651,7 +748,7 @@ int write_brick(brick_t *brick){
   
       if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, chunk_nb, dt, NULL)) == NULL){
         printf("could not create dst image. "); return FAILURE;}
-      if (GDALSetProjection(dst_dataset, cube->proj) == CE_Failure){
+      if (GDALSetProjection(dst_dataset, cube->projection) == CE_Failure){
         printf("could not set dst projection. "); return FAILURE;}
       if (GDALSetGeoTransform(dst_dataset, dst_geotran) == CE_Failure){
         printf("could not set dst geotransformation. "); return FAILURE;}
@@ -660,7 +757,7 @@ int write_brick(brick_t *brick){
       /** create accurate transformer between source and destination
       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
       if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
-        dst_dataset, cube->proj, false, 0, 2)) == NULL){
+        dst_dataset, cube->projection, false, 0, 2)) == NULL){
         printf("could not create image to image transformer. "); return FAILURE;}
   
   
@@ -763,7 +860,7 @@ int write_brick(brick_t *brick){
     set_brick_geotran(src, dst_geotran);
     set_brick_ncols(src, dst_nx);
     set_brick_nrows(src, dst_ny);
-    set_brick_proj(src, cube->proj);
+    set_brick_proj(src, cube->projection);
   
   
     #ifdef FORCE_DEBUG
@@ -806,7 +903,7 @@ int write_brick(brick_t *brick){
   float *buf = NULL;
   const char *src_proj = NULL;
   char dst_proj[NPOW_10];
-  double dst_geotran[6];
+  double dst_geotran[_GT_LEN_];
   int i, j, p, np, k, k_do;
   int dst_nodata;
   int nc_done_, nc_done = 0;
@@ -860,7 +957,7 @@ int write_brick(brick_t *brick){
     /** "create" the destination dataset
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
   
-    get_brick_geotran(dst, dst_geotran, 6);
+    get_brick_geotran(dst, dst_geotran, _GT_LEN_);
     get_brick_proj(dst, dst_proj, NPOW_10);
     dst_nodata = get_brick_nodata(dst, 0);
     dst_nb = get_brick_nbands(dst);
