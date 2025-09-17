@@ -3,6 +3,8 @@
 Develop version
 ===============
 
+**Read through the changelog closely. In this version, there are some important changes that may affect your workflows!**
+
 - **FORCE L2PS**
 
   - When merging chips of the same day/sensor to avoid data redundancy, the merging 
@@ -19,8 +21,49 @@ Develop version
     Thanks to Oleg Zheleznyy for reporting this issue.
   - Updated COG default parameters. COG has been set as the default output format for L2PS 
     (note: HLPS still uses GTiff as default)
+  - The default format for L2PS has been changed from ``GTiff`` to ``COG``.
+    This affects the output format of the L2PS products. COGs are more efficient for cloud storage and access,
+    making them a better choice for modern geospatial workflows. Users can still specify ``GTiff`` if needed.
+  - The default creation options for ``GTiff`` files  have been updated to include ``COMPRESS=ZSTD`` and a gridded tile layout.
+    Refer to https://github.com/davidfrantz/force/discussions/376 for more details.
+    These options improve the compression and efficiency of the GTiff files. 
+    Users can still use the previous parameterization through custom GDAL options if needed.
+  - This choice has resulted in a decoupling of internal file layout and higher level processing (more below and in the issue above).
+    As a result, the ``BLOCK_SIZE`` parameter has been deprecated and is no longer used in L2PS.
+    Also, the block size is no longer part of the data cube definition.
+    This comes with a new file format for the data cube definition in tag and value notification.
+    **IMPORTANT: FORCE has backward compatibility for existing data cubes, but the new format is used
+    when creating a new data cube. Existing data cubes do not need to be converted. 
+    However, older software versions will not be able to read data cubes created with the new format!**
+  - The ``TILE_SIZE`` has been changed into a two-dimensional parameter.
+    This allows users to specify different tile sizes in x and y direction, which can be useful for certain applications.
+    The sizes should be given in the unit of the data cube's coordinate reference system (CRS), usually meters.
+    The sizes should be a multiple of the processing resolution. 
+    Note that it is not generally recommended to make use of non-square tiles, but hey, you can now if you want to.
 
 - **FORCE HLPS**
+
+  - The internal file layout (blocks) has been decoupled from the sub-tile processing chunks. This means that the
+    penalty for using a non-optimal block size became less significant.
+    See the details described in https://github.com/davidfrantz/force/discussions/376.
+    This has been implemented throughout FORCE. To make this clearer, the term "block" is now only used
+    in the context of the internal file layout, whereas "chunk" is used for the processing units.
+    These chunks can now be specified by the user via the ``CHUNK_SIZE`` parameter. 
+    The old ``BLOCK_SIZE`` parameter has been deprecated and is no longer used in HLPS.
+    Note that ``CHUNK_SIZE`` requires two values, i.e., the chunk size in x and y direction.
+    The sizes should be given in the unit of the data cube's coordinate reference system (CRS), usually meters.
+    The sizes should be a multiple of the processing resolution and the tile size should be divisible by the chunk size.
+    This is to ensure that the chunks fit neatly into the tiles. This is the same behaviour as with the previous ``BLOCK_SIZE`` parameter.
+    The only usage difference is that the chunk size can now follow a two-dimensional approach, i.e., different sizes in x and y direction,
+    which e.g. can make processing way more efficient when using masks.
+    Further note, that the chunk size must be greater than 0 and less than or equal to the tile size (in the specific direction).
+
+  - It became apparent that using COGs is not possible when using sub-tile processing chunks. 
+    So, just don't do that. If you want to use COGs, set the chunk size to the tile size!
+    You need enough memory to process a full tile at once, though.
+    https://github.com/davidfrantz/force/issues/374
+    Alternatively, use GTiff as output format, which works with sub-tile chunks, and the new configuration is actually
+    pretty comparable to COGs.
 
   - in ``force-higher-level``, UDF sub-module:
     a new feature was added to the UDF module, which allows users to add auxiliary products
@@ -71,3 +114,6 @@ Develop version
     It can be used to combine multiple datacubes into a single virtual dataset, which can be useful for analysis.
     The tool can be used with various options to customize the output, such as specifying the pattern of files
     to include and whether to overwrite existing files.
+
+  - Minor adjustments have been made in a couple of AUX tools to reflect the changes in handling chunks.
+  
