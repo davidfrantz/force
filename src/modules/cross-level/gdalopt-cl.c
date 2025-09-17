@@ -46,28 +46,34 @@ int o = 0;
       copy_string(gdalopt->extension,   NPOW_04, "tif");
       copy_string(gdalopt->driver,      NPOW_04, "GTiff");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
-      copy_string(gdalopt->option[o++], NPOW_10, "LZW");
+      copy_string(gdalopt->option[o++], NPOW_10, "ZSTD");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
       copy_string(gdalopt->option[o++], NPOW_10, "2");
       copy_string(gdalopt->option[o++], NPOW_10, "INTERLEAVE");
       copy_string(gdalopt->option[o++], NPOW_10, "BAND");
       copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      copy_string(gdalopt->option[o++], NPOW_10, "TILED");
+      copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      copy_string(gdalopt->option[o++], NPOW_10, "BLOCKXSIZE");
+      copy_string(gdalopt->option[o++], NPOW_10, "256");
+      copy_string(gdalopt->option[o++], NPOW_10, "BLOCKYSIZE");
+      copy_string(gdalopt->option[o++], NPOW_10, "256");
       break;
     case _FMT_COG_:
       copy_string(gdalopt->extension,   NPOW_04, "tif");
       copy_string(gdalopt->driver,      NPOW_04, "COG");
-      copy_string(gdalopt->option[o++], NPOW_10, "BLOCKSIZE");
-      copy_string(gdalopt->option[o++], NPOW_10, "256");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "ZSTD");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
       copy_string(gdalopt->option[o++], NPOW_10, "INTERLEAVE");
       copy_string(gdalopt->option[o++], NPOW_10, "TILE");
-      copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
-      copy_string(gdalopt->option[o++], NPOW_10, "YES");
       copy_string(gdalopt->option[o++], NPOW_10, "TILED");
+      copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      copy_string(gdalopt->option[o++], NPOW_10, "BLOCKSIZE");
+      copy_string(gdalopt->option[o++], NPOW_10, "256");
+      copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
       copy_string(gdalopt->option[o++], NPOW_10, "YES");
       copy_string(gdalopt->option[o++], NPOW_10, "OVERVIEW_RESAMPLING");
       copy_string(gdalopt->option[o++], NPOW_10, "AVERAGE");
@@ -81,42 +87,6 @@ int o = 0;
     default:
       printf("unknown format.\n");
       exit(FAILURE);
-  }
-
-  gdalopt->n = o;
-
-
-  return;
-}
-
-
-/** This function updates the blocksize in GDAL output options
---- format:  Default format
---- gdalopt: GDAL options (returned)
-+++ Return:  void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void update_gdaloptions_blocksize(int format, gdalopt_t *gdalopt, int cx, int cy){
-int nchar;
-int o = gdalopt->n;
-char blockxsize[NPOW_10];
-char blockysize[NPOW_10];
-
-
-  if (format != _FMT_GTIFF_) return;
-
-  if (cx > 0){
-    nchar = snprintf(blockxsize, NPOW_10, "%d", cx);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling BLOCKXSIZE\n"); exit(FAILURE);}
-    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKXSIZE");
-    copy_string(gdalopt->option[o++], NPOW_10, blockxsize);
-  }
-  if (cy > 0){
-    nchar = snprintf(blockysize, NPOW_10, "%d", cy);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling BLOCKYSIZE\n"); exit(FAILURE);}
-    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKYSIZE");
-    copy_string(gdalopt->option[o++], NPOW_10, blockysize);
   }
 
   gdalopt->n = o;
@@ -140,6 +110,10 @@ bool b_ext = false;
 
 
   tagval = read_tagvalue(fname, &nrows);
+  if (tagval == NULL){
+    printf("Reading GDAL options failed.\n");
+    exit(FAILURE);
+  }
 
   for (i=0; i<nrows; i++){
 
