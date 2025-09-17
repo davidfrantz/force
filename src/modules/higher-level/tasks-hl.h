@@ -28,8 +28,9 @@ Higher level tasks header
 #ifndef TASKS_HL_H
 #define TASKS_HL_H
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
+#include <stdio.h>     // core input and output functions
+#include <stdlib.h>    // standard general utilities library
+#include <sys/types.h> // data types
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick_base-cl.h"
