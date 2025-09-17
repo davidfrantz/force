@@ -14,7 +14,6 @@ force-qai-inflate: \
   quality-cl \
   queue-cl \
   read-cl \
-  read-ard-hl \
   string-cl \
   sys-cl \
   utils-cl \
@@ -36,7 +35,6 @@ force-qai-inflate: \
 	$(OBJDIR)/quality-cl.o \
 	$(OBJDIR)/queue-cl.o \
 	$(OBJDIR)/read-cl.o \
-	$(OBJDIR)/read-ard-hl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
 	$(OBJDIR)/utils-cl.o \

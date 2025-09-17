@@ -12,8 +12,8 @@ force-train: \
   read-cl \
   utils-cl \
   train-aux \
-  $(EXE_AUX_DIR)/force-train.c
-	$(G11) -o $(BINDIR)/force-train $(EXE_AUX_DIR)/force-train.c \
+  $(EXE_AUX_DIR)/force-train.cpp
+	$(G11) -o $(BINDIR)/force-train $(EXE_AUX_DIR)/force-train.cpp \
 	$(OBJDIR)/alloc-cl.o \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/date-cl.o \
