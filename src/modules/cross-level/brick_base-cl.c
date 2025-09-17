@@ -33,7 +33,10 @@ This file contains functions for organizing bricks in memory, and output
 #include "gdal.h"           // public (C callable) GDAL entry points
 #include "cpl_multiproc.h"  // CPL Multi-Threading
 #include "gdalwarper.h"     // GDAL warper related entry points and defs
+
+#ifdef __cplusplus
 #include "ogr_spatialref.h" // coordinate systems services
+#endif
 
 
 /** This function allocates a brick
@@ -136,7 +139,7 @@ brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
 int b, p;
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0 || from->chunk[_Y_] < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
   } else {
     if ((brick = allocate_brick(nb, from->cc, datatype)) == NULL) return NULL;
@@ -163,10 +166,11 @@ int b, p;
   set_brick_chunknrows(brick, from->cy);
   set_brick_chunkwidth(brick, from->cwidth);
   set_brick_chunkheight(brick, from->cheight);
-  set_brick_nchunks(brick, from->nchunk);
-  set_brick_chunk(brick, from->chunk);
-  set_brick_tilex(brick, from->tx);
-  set_brick_tiley(brick, from->ty);
+  set_brick_chunk_dim(brick, &from->dim_chunk);
+  set_brick_chunkx(brick, from->chunk[_X_]);
+  set_brick_chunky(brick, from->chunk[_Y_]);
+  set_brick_tilex(brick, from->tile[_X_]);
+  set_brick_tiley(brick, from->tile[_Y_]);
   set_brick_proj(brick, from->proj);
   set_brick_par(brick, from->par);
 
@@ -378,7 +382,7 @@ brick_t *crop_brick(brick_t *from, double radius){
 brick_t *brick = NULL; 
 int b, nb;
 int pix;
-double res;
+double resolution;
 int nx,  ny;
 int nx_, ny_, nc_;
 int i, j, p, p_;
@@ -394,39 +398,53 @@ int datatype;
   }
 
   nb = get_brick_nbands(from);
-  res = get_brick_res(from);
+  resolution = get_brick_res(from);
   datatype = get_brick_datatype(from);
   
   brick = copy_brick(from, nb, _DT_NONE_);
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0){
     nx = get_brick_ncols(from);
-    ny = get_brick_nrows(from);
   } else {
     nx = get_brick_chunkncols(from);
+  }
+
+  if (from->chunk[_Y_] < 0){
+    ny = get_brick_nrows(from);
+  } else {
     ny = get_brick_chunknrows(from);
   }
 
-  pix = (int)(radius/res);
+  pix = (int)(radius/resolution);
   nx_ = nx - 2*pix;
   ny_ = ny - 2*pix;
   nc_ = nx_*ny_;
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0){
     set_brick_ncols(brick, nx_);
-    set_brick_nrows(brick, ny_);
   } else {
     set_brick_chunkncols(brick, nx_);
+  }
+
+  if (from->chunk[_Y_] < 0){
+    set_brick_nrows(brick, ny_);
+  } else {
     set_brick_chunknrows(brick, ny_);
   }
+  
   allocate_brick_bands(brick, nb, nc_, datatype);
   
   #ifdef FORCE_DEBUG
   int nc;
-  if (from->chunk < 0){
-    nc = get_brick_ncells(from);
+  if (from->chunk[_X_] < 0){
+    nc = get_brick_ncols(from);
   } else {
-    nc = get_brick_chunkncells(from);
+    nc = get_brick_chunkncols(from);
+  }
+  if (from->chunk[_Y_] < 0){
+    nc *= get_brick_nrows(from);
+  } else {
+    nc *= get_brick_chunknrows(from);
   }
   printf("cropping %d -> %d cols\n", nx, nx_);
   printf("cropping %d -> %d rows\n", ny, ny_);
@@ -500,7 +518,6 @@ int datatype;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_brick(brick_t *brick){
-int i;
 
 
   copy_string(brick->name,      NPOW_10, "NA");
@@ -526,16 +543,16 @@ int i;
   brick->cx =  0;
   brick->cy =  0;
   brick->cc =  0;
-  brick->res = 0;
-  for (i=0; i<6; i++) brick->geotran[i] = 0;
+  memset(&brick->geotran, 0, _GT_LEN_*sizeof(double));
   brick->width  = 0;
   brick->height = 0;
   brick->cwidth  = 0;
   brick->cheight = 0;
-  brick->chunk = -1;
-  brick->nchunk = 0;
-  brick->tx = 0;
-  brick->ty = 0;
+  brick->chunk[_X_] = -1;
+  brick->chunk[_Y_] = -1;
+  memset(&brick->dim_chunk, 0, sizeof(dim_t));
+  brick->tile[_X_] = 0;
+  brick->tile[_Y_] = 0;
 
   copy_string(brick->proj,NPOW_10, "NA");
   copy_string(brick->par, NPOW_14, "NA");
@@ -602,18 +619,20 @@ int b, p;
   for (p=0; p<brick->nprovenance; p++) printf("input #%04d: %s\n", brick->nprovenance+1, brick->provenance[p]);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
     brick->nx, brick->ny, brick->nc, 
-    brick->res, brick->nb);
+    brick->geotran[_GT_RES_], brick->nb);
   printf("width: %.1f, height: %.1f\n", 
     brick->width, brick->height);
-  printf("chunking: nx: %d, ny: %d, nc: %d, width: %.1f, height: %.1f, #: %d\n", 
-    brick->cx, brick->cy, brick->cc, brick->cwidth, brick->cheight, brick->nchunk);
-  printf("active chunk: %d, tile X%04d_Y%04d\n", brick->chunk, brick->tx, brick->ty);
+  printf("chunking: nx: %d, ny: %d, nc: %d, width: %.1f, height: %.1f, #: %d x %d = %d\n", 
+    brick->cx, brick->cy, brick->cc, brick->cwidth, brick->cheight, 
+    brick->dim_chunk.cols, brick->dim_chunk.rows, brick->dim_chunk.cells);
+  printf("active chunk: X:%d, Y:%d, tile X%04d_Y%04d\n", 
+    brick->chunk[_X_], brick->chunk[_Y_], brick->tile[_X_], brick->tile[_Y_]);
   printf("ulx: %.3f, uly: %.3f\n", 
-    brick->geotran[0], brick->geotran[3]);
+    brick->geotran[_GT_ULX_], brick->geotran[_GT_ULY_]);
   printf("geotran: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n", 
-    brick->geotran[0], brick->geotran[1],
-    brick->geotran[2], brick->geotran[3],
-    brick->geotran[4], brick->geotran[5]);
+    brick->geotran[_GT_ULX_], brick->geotran[_GT_XRES_],
+    brick->geotran[_GT_XROT_], brick->geotran[_GT_ULY_],
+    brick->geotran[_GT_YROT_], brick->geotran[_GT_YRES_]);
   printf("proj: %s\n", brick->proj);
   printf("par: %s\n", brick->par);
 
@@ -654,10 +673,10 @@ int i_from, i_to;
 int j_from, j_to;
 
   i_from = floor(p_from/from->nx);
-  i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return i_to*to->nx+j_to;
 }
@@ -677,10 +696,10 @@ int i_from;
 int j_from;
 
   i_from = floor(p_from/from->nx);
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return;
 }
@@ -701,11 +720,11 @@ int i_from;
 int j_from;
 
   i_from = floor(p_from/from->nx);
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
-  
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+
   *p_to = (*i_to)*to->nx+(*j_to);
 
   return;
@@ -724,9 +743,8 @@ int convert_brick_ji2p(brick_t *from, brick_t *to, int i_from, int j_from){
 int i_to;
 int j_to;
 
-  i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
-
+  i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return i_to*to->nx+j_to;
 }
@@ -744,8 +762,8 @@ int j_to;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void convert_brick_ji2ji(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to){
 
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return;
 }
@@ -764,8 +782,8 @@ void convert_brick_ji2ji(brick_t *from, brick_t *to, int i_from, int j_from, int
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void convert_brick_ji2jip(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to, int *p_to){
 
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
   *p_to = (*i_to)*to->nx+(*j_to);
 
   return;
@@ -1186,7 +1204,7 @@ void set_brick_ncols(brick_t *brick, int nx){
 
   brick->nx = nx;
   brick->nc = brick->nx*brick->ny;
-  brick->width = brick->nx*brick->res;
+  brick->width = brick->nx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1213,7 +1231,7 @@ void set_brick_nrows(brick_t *brick, int ny){
 
   brick->ny = ny;
   brick->nc = brick->nx*brick->ny;
-  brick->height = brick->ny*brick->res;
+  brick->height = brick->ny*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1283,7 +1301,7 @@ void set_brick_chunkncols(brick_t *brick, int cx){
 
   brick->cx = cx;
   brick->cc = brick->cx*brick->cy;
-  brick->cwidth = brick->cx*brick->res;
+  brick->cwidth = brick->cx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1310,7 +1328,7 @@ void set_brick_chunknrows(brick_t *brick, int cy){
 
   brick->cy = cy;
   brick->cc = brick->cx*brick->cy;
-  brick->cheight = brick->cy*brick->res;
+  brick->cheight = brick->cy*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1351,53 +1369,145 @@ int get_brick_chunkncells(brick_t *brick){
 }
 
 
-/** This function sets the chunk ID of a brick
+/** This function sets the chunk X-ID of a brick
 --- brick:  brick
---- chunk:  chunk ID
+--- chunk:  chunk x-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_chunk(brick_t *brick, int chunk){
-  
-  if (chunk >= 0 && chunk >= brick->nchunk) printf("current chunk %d is higher than max chunks %d.\n", chunk, brick->nchunk);
+void set_brick_chunkx(brick_t *brick, int chunkx){
 
-  brick->chunk = chunk;
-  
+  if (chunkx >= 0 && chunkx >= brick->dim_chunk.cols){
+    printf("current chunk %d is higher than chunks in X-direction %d.\n", 
+      chunkx, brick->dim_chunk.cols);
+  }
+
+  brick->chunk[_X_] = chunkx;
+
   return;
 }
 
 
-/** This function gets the chunk ID of a brick
+/** This function gets the chunk X-ID of a brick
 --- brick:  brick
-+++ Return: chunk ID
++++ Return: chunk X-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_brick_chunk(brick_t *brick){
-  
-  return brick->chunk;
+int get_brick_chunkx(brick_t *brick){
+
+  return brick->chunk[_X_];
 }
 
 
-/** This function sets the number of chunks of a brick
+/** This function sets the chunk Y-ID of a brick
 --- brick:  brick
---- nchunk: number of chunks
+--- chunk:  chunk y-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_nchunks(brick_t *brick, int nchunk){
-  
-  if (nchunk < 0) printf("nchunks %d < 0.\n", nchunk);
+void set_brick_chunky(brick_t *brick, int chunky){
 
-  brick->nchunk = nchunk;
-  
+  if (chunky >= 0 && chunky >= brick->dim_chunk.rows){
+    printf("current chunk %d is higher than chunks in Y-direction %d.\n", 
+      chunky, brick->dim_chunk.rows);
+  }
+
+  brick->chunk[_Y_] = chunky;
+
   return;
 }
 
 
-/** This function gets the number of chunks of a brick
+/** This function gets the chunk Y-ID of a brick
 --- brick:  brick
-+++ Return: number of chunks
++++ Return: chunk Y-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_brick_nchunks(brick_t *brick){
+int get_brick_chunky(brick_t *brick){
   
-  return brick->nchunk;
+  return brick->chunk[_Y_];
+}
+
+
+/** This function sets the chunk dimensions in X-direction of a brick
+--- brick:  brick
+--- ncol:   number of columns in chunk
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim_x(brick_t *brick, int ncol){
+dim_t dim;
+
+  dim.cols = ncol;
+  dim.rows = brick->dim_chunk.rows;
+  dim.cells = dim.cols * dim.rows;
+
+  set_brick_chunk_dim(brick, &dim);
+
+}
+
+
+/** This function sets the chunk dimensions in X-direction of a brick
+--- brick:  brick
+--- ncol:   number of columns in chunk
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim_y(brick_t *brick, int nrow){
+dim_t dim;
+
+  dim.cols = brick->dim_chunk.cols;
+  dim.rows = nrow;
+  dim.cells = dim.cols * dim.rows;
+
+  set_brick_chunk_dim(brick, &dim);
+
+}
+
+
+/** This function gets the chunk dimensions in X-direction of a brick
+--- brick:  brick
++++ Return: number of chunk columns in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_x(brick_t *brick){
+  return brick->dim_chunk.cols;
+}
+
+
+/** This function gets the chunk dimensions in Y-direction of a brick
+--- brick:  brick
++++ Return: number of chunk rows in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_y(brick_t *brick){
+  return brick->dim_chunk.rows;
+}
+
+/** This function gets the number of chunks in a brick
+--- brick:  brick
++++ Return: number of chunks in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_n(brick_t *brick){
+  return brick->dim_chunk.cells;
+}
+
+
+/** This function sets the chunk dimensions of a brick
+--- brick:  brick
+--- dim:    chunk dimensions
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim(brick_t *brick, dim_t *dim){
+
+  if (dim->cols < 0 || dim->rows < 0) printf("chunk dimensions %d||%d < 0.\n", dim->cols, dim->rows);
+  if (dim->cols * dim->rows != dim->cells) printf("chunk X/Y dimensions do not match with # of chunk  cells.\n");
+
+  brick->dim_chunk = *dim;
+
+  return;
+}
+
+
+/** This function gets the chunk dimensions of a brick
+--- brick:  brick
++++ Return: chunk dimensions
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+dim_t get_brick_chunk_dim(brick_t *brick){
+
+  return brick->dim_chunk;
 }
 
 
@@ -1410,7 +1520,7 @@ void set_brick_tilex(brick_t *brick, int tx){
   
   if (tx >= 9999 || tx < -999) printf("tile-x is out of bounds.\n");
 
-  brick->tx = tx;
+  brick->tile[_X_] = tx;
   
   return;
 }
@@ -1422,7 +1532,7 @@ void set_brick_tilex(brick_t *brick, int tx){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int get_brick_tilex(brick_t *brick){
   
-  return brick->tx;
+  return brick->tile[_X_];
 }
 
 
@@ -1435,8 +1545,8 @@ void set_brick_tiley(brick_t *brick, int ty){
   
   if (ty >= 9999 || ty < -999) printf("tile-y is out of bounds.\n");
 
-  brick->ty = ty;
-  
+  brick->tile[_Y_] = ty;
+
   return;
 }
 
@@ -1446,8 +1556,8 @@ void set_brick_tiley(brick_t *brick, int ty){
 +++ Return: tile Y-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int get_brick_tiley(brick_t *brick){
-  
-  return brick->ty;
+
+  return brick->tile[_Y_];
 }
 
 
@@ -1460,11 +1570,10 @@ void set_brick_res(brick_t *brick, double res){
 
   if (res <= 0) printf("resolution must be > 0.\n");
 
-  brick->res = res;
-  brick->geotran[1] = res;
-  brick->geotran[5] = res*-1;
-  brick->width  = brick->nx*brick->res;
-  brick->height = brick->ny*brick->res;
+  brick->geotran[_GT_XRES_] = res;
+  brick->geotran[_GT_YRES_] = res * -1;
+  brick->width  = brick->nx * res;
+  brick->height = brick->ny * res;
 
   return;
 }
@@ -1475,8 +1584,8 @@ void set_brick_res(brick_t *brick, double res){
 +++ Return: resolution
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_res(brick_t *brick){
-  
-  return brick->res;
+
+  return brick->geotran[_GT_RES_];
 }
 
 
@@ -1487,7 +1596,7 @@ double get_brick_res(brick_t *brick){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_ulx(brick_t *brick, double ulx){
 
-  brick->geotran[0] = ulx;
+  brick->geotran[_GT_ULX_] = ulx;
 
   return;
 }
@@ -1498,8 +1607,8 @@ void set_brick_ulx(brick_t *brick, double ulx){
 +++ Return: UL-X coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_ulx(brick_t *brick){
-  
-  return brick->geotran[0];
+
+  return brick->geotran[_GT_ULX_];
 }
 
 
@@ -1509,8 +1618,8 @@ double get_brick_ulx(brick_t *brick){
 +++ Return: X coordinate of a column
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_x(brick_t *brick, int j){
-  
-  return (brick->geotran[0] + j*brick->geotran[1]);
+
+  return (brick->geotran[_GT_ULX_] + j*brick->geotran[_GT_RES_]);
 }
 
 
@@ -1521,7 +1630,7 @@ double get_brick_x(brick_t *brick, int j){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_uly(brick_t *brick, double uly){
 
-  brick->geotran[3] = uly;
+  brick->geotran[_GT_ULY_] = uly;
 
   return;
 }
@@ -1532,8 +1641,8 @@ void set_brick_uly(brick_t *brick, double uly){
 +++ Return: UL-Y coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_uly(brick_t *brick){
-  
-  return brick->geotran[3];
+
+  return brick->geotran[_GT_ULY_];
 }
 
 
@@ -1543,8 +1652,8 @@ double get_brick_uly(brick_t *brick){
 +++ Return: Y coordinate of a row 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_y(brick_t *brick, int i){
-  
-  return (brick->geotran[3] + i*brick->geotran[5]);
+
+  return (brick->geotran[_GT_ULY_] + i*brick->geotran[_GT_RES_]);
 }
 
 
@@ -1580,13 +1689,12 @@ double geox, geoy;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_geotran(brick_t *brick, double *geotran){
 
-  brick->res = geotran[1];
-  brick->geotran[0] = geotran[0];
-  brick->geotran[1] = geotran[1];
-  brick->geotran[2] = geotran[2];
-  brick->geotran[3] = geotran[3];
-  brick->geotran[4] = geotran[4];
-  brick->geotran[5] = geotran[5];
+  brick->geotran[_GT_XRES_] = geotran[_GT_XRES_];
+  brick->geotran[_GT_YRES_] = geotran[_GT_YRES_];
+  brick->geotran[_GT_ULX_]  = geotran[_GT_ULX_];
+  brick->geotran[_GT_ULY_]  = geotran[_GT_ULY_];
+  brick->geotran[_GT_XROT_] = geotran[_GT_XROT_];
+  brick->geotran[_GT_YROT_] = geotran[_GT_YROT_];
 
   return;
 }
@@ -1600,15 +1708,15 @@ void set_brick_geotran(brick_t *brick, double *geotran){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_geotran(brick_t *brick, double geotran[], size_t size){
 
-  if (size != 6){
+  if (size != _GT_LEN_){
     printf("array is not compatible for getting geotran.\n"); return;}
 
-  geotran[0] = brick->geotran[0];
-  geotran[1] = brick->geotran[1];
-  geotran[2] = brick->geotran[2];
-  geotran[3] = brick->geotran[3];
-  geotran[4] = brick->geotran[4];
-  geotran[5] = brick->geotran[5];
+  geotran[_GT_ULX_] = brick->geotran[_GT_ULX_];
+  geotran[_GT_ULY_] = brick->geotran[_GT_ULY_];
+  geotran[_GT_XRES_] = brick->geotran[_GT_XRES_];
+  geotran[_GT_YRES_] = brick->geotran[_GT_YRES_];
+  geotran[_GT_XROT_] = brick->geotran[_GT_XROT_];
+  geotran[_GT_YROT_] = brick->geotran[_GT_YROT_];
   
   return;
 }
@@ -1620,10 +1728,10 @@ void get_brick_geotran(brick_t *brick, double geotran[], size_t size){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_width(brick_t *brick, double width){
-  
-  if (width != brick->nx*brick->res) printf("width does not match with nx*res.\n");
 
-  brick->width = brick->nx*brick->res;
+  if (width != brick->nx*brick->geotran[_GT_RES_]) printf("width does not match with nx*res.\n");
+
+  brick->width = brick->nx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1645,11 +1753,11 @@ double get_brick_width(brick_t *brick){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_height(brick_t *brick, double height){
-  
-  if (height != brick->ny*brick->res) printf("height does not match with ny*res.\n");
 
-  brick->height = brick->ny*brick->res;
-  
+  if (height != brick->ny*brick->geotran[_GT_RES_]) printf("height does not match with ny*res.\n");
+
+  brick->height = brick->ny*brick->geotran[_GT_RES_];
+
   return;
 }
 
@@ -1670,10 +1778,10 @@ double get_brick_height(brick_t *brick){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_chunkwidth(brick_t *brick, double cwidth){
-  
-  if (cwidth != brick->cx*brick->res) printf("chunking width does not match with cx*res.\n");
 
-  brick->cwidth = brick->cx*brick->res;
+  if (cwidth != brick->cx*brick->geotran[_GT_RES_]) printf("chunking width does not match with cx*res.\n");
+
+  brick->cwidth = brick->cx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -1695,11 +1803,11 @@ double get_brick_chunkwidth(brick_t *brick){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_chunkheight(brick_t *brick, double cheight){
-  
-  if (cheight != brick->cy*brick->res) printf("chunking height does not match with cy*res.\n");
 
-  brick->cheight = brick->cy*brick->res;
-  
+  if (cheight != brick->cy*brick->geotran[_GT_RES_]) printf("chunking height does not match with cy*res.\n");
+
+  brick->cheight = brick->cy*brick->geotran[_GT_RES_];
+
   return;
 }
 
