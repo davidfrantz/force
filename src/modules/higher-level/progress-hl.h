@@ -45,14 +45,14 @@ extern "C" {
 #endif
 
 typedef struct {
-  int thread[_TASK_LENGTH_];
-  int pu, pu_next, pu_prev, npu;
-  int tile, tile_next, tile_prev;
-  int chunk, chunk_next, chunk_prev, nchunk;
-  int tx, tx_next, tx_prev;
-  int ty, ty_next, ty_prev;
-  int *tiles_x, *tiles_y;
-  float done;
+  int tile[2];
+  int chunk[2];
+  int tile_number;
+  int chunk_number;
+  int processing_unit;
+} team_t;
+
+typedef struct {
   time_t TIME[_TASK_LENGTH_];
   double secs[_TASK_LENGTH_];
   double secs_total[_TASK_LENGTH_];
@@ -60,6 +60,17 @@ typedef struct {
   date_t eta, runtime, saved;
   date_t bound[_TASK_LENGTH_];
   date_t sequential[_TASK_LENGTH_];
+} stopwatch_t;
+
+typedef struct {
+  team_t now, next, last;
+  stopwatch_t stopwatch;
+  int thread[_TASK_LENGTH_];
+  int **tiles;
+  int n_tiles; // tile layout is irregular
+  dim_t dim_chunks; // chunk layout is rectangular
+  int n_processing_units; // # of tiles x chunks
+  float done;
   int pretty_progress;
 } progress_t;
 
