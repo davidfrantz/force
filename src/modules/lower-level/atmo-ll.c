@@ -39,7 +39,7 @@ float wul, wur, wll, wlr;
 float wtop, wdown;
 } iweights_t;
 
-iweights_t interpolation_weights(int j, int i, int nf, int ne, float res, float full_res, float *COARSE, float nodata);
+iweights_t interpolation_weights(int j, int i, int nf, int ne, double res, double full_res, float *COARSE, float nodata);
 float interpolate_coarse(iweights_t weight, float *COARSE);
 int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, brick_t *QAI);
 short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI);
@@ -69,7 +69,7 @@ brick_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, b
 --- nodata:   nodata of coarse grid
 +++ Return:   weights
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-iweights_t interpolation_weights(int j, int i, int nf, int ne, float res, float full_res, float *COARSE, float nodata){
+iweights_t interpolation_weights(int j, int i, int nf, int ne, double res, double full_res, float *COARSE, float nodata){
 iweights_t weight;
 float e_, f_;
 int   e, f;
@@ -190,7 +190,7 @@ float ul, ur, ll, lr;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, brick_t *QAI){
 int i, j, p, nx, ny, ne, nf, z, b_sw2;
-float fres, gres;
+double fres, gres;
 float A = 1.0;
 float brdf = 1.0;
 iweights_t weights;
@@ -227,10 +227,10 @@ float **xyz_tsd_sw2 = NULL;
 
   nx  = get_brick_ncols(QAI);
   ny  = get_brick_nrows(QAI);
-  fres  = get_brick_res(QAI);
+  fres = get_brick_res(QAI);
   nf  = get_brick_ncols(atc->xy_view);
   ne  = get_brick_nrows(atc->xy_view);
-  gres  = get_brick_res(atc->xy_view);
+  gres = get_brick_res(atc->xy_view);
   vnodata = get_brick_nodata(atc->xy_view, ZEN);
   if ((b_sw2 = find_domain(atc->xy_mod, "SWIR2")) < 0)   return FAILURE;
 
@@ -401,7 +401,8 @@ float **xyz_tsd_sw2 = NULL;
 short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI){
 int i, j, p, nx, ny, nc, g, z, k;
 float F[3], Fr, Fa, km[3], r[3], dF[3], sF, aod, mod;
-float rho_p, T, s, F_, res;
+float rho_p, T, s, F_;
+double res;
 float alpha[3], tmp, tg;
 float old[3];
 short  *ref = NULL;
@@ -1456,7 +1457,7 @@ char date[NPOW_04];
 int nchar;
 iweights_t weights;
 short nodata = -9999;
-float res, fres, gres;
+double res, fres, gres;
 brick_t *VZN      = NULL;
 brick_t *COARSE   = NULL;
 short   *vzn_     = NULL;
@@ -1490,8 +1491,8 @@ GDALDataType eOutputType = GDT_Float64;
   }
   
   
-  res = cube->res;
-  cube->res = get_brick_res(COARSE);
+  res = cube->resolution;
+  cube->resolution = get_brick_res(COARSE);
 
   // reproj the data
   if (pl2->doreproj){
@@ -1499,9 +1500,8 @@ GDALDataType eOutputType = GDT_Float64;
       printf("warping VZN failed.\n"); return NULL;}
   }
 
-  cube->res = res;
-
-
+  // restore original resolution
+  cube->resolution = res;
 
   nf = get_brick_ncols(COARSE);
   ne = get_brick_nrows(COARSE);
@@ -1717,7 +1717,7 @@ short *hot_ = NULL;
 brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP){
 int i, j, p, nx, ny, ne, nf, z;
 int b_green;
-float fres, gres;
+double fres, gres;
 char fname[NPOW_10];
 char product[NPOW_02];
 char sensor[NPOW_04];

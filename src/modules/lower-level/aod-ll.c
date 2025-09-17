@@ -304,7 +304,7 @@ short **toa_   = NULL;
   {
 
     #pragma omp for schedule(static)
-  
+
     for (j=0; j<nx; j+=cell_size){
     for (i=0; i<ny; i++){
       p = i*nx+j;
@@ -660,7 +660,7 @@ FILE *fp = NULL;
 --- type:   Target type (water/shadow/vegetation)
 +++ Return: Number of successful targets
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, float res, darkobj_t *dobj, int num, int type){
+int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, double res, darkobj_t *dobj, int num, int type){
 speclib_t *lib = NULL;
 int b, bb, nb, naod, c, o, w, wbest, k = 0;
 int ultrablue, blue, green, red, sw2;
@@ -1211,7 +1211,7 @@ float rb, g;
 --- aodest: Estimated AOD
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int aod_lib_to_target(atc_t *atc, float res, bool multi, darkobj_t dobj, speclib_t *lib, int type, float **aodest){
+int aod_lib_to_target(atc_t *atc, double res, bool multi, darkobj_t dobj, speclib_t *lib, int type, float **aodest){
 int b, nb, g, w;
 int blue, green, red, sw2;
 float aod, mod, od, Hr, Pr, Pa, tmp;
@@ -1720,7 +1720,7 @@ double *interpol = NULL;
 int compile_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP){
 int b, nb, o;
 int green, sw2;
-float res;
+double res;
 float *aod_lut = NULL;
 //int *aod_bands = NULL;
 dark_t dark;
