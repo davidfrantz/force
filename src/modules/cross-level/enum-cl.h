@@ -56,6 +56,11 @@ enum { _X_, _Y_, _Z_ };
 // range
 enum { _MIN_, _MAX_ };
 
+// geotransform
+enum { _GT_ULX_, _GT_XRES_, _GT_YROT_, _GT_ULY_, _GT_XROT_, _GT_YRES_, _GT_LEN_ };
+// alias for _GT_XRES_
+#define _GT_RES_ 1
+
 // modules
 enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
        _HL_L2I_,    _HL_ML_,  _HL_SMP_, _HL_TXT_, _HL_LSM_, 
@@ -115,7 +120,7 @@ enum { OPEN_FALSE,     // do not write
        OPEN_UPDATE,    // read file, and update values
        OPEN_MERGE,     // read file, and merge values
        OPEN_QAI_MERGE, // read file, and merge QAI values
-       OPEN_BLOCK };   // write block into file
+       OPEN_CHUNK };   // write chunk into file
 
 // sensors
 enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_LND09_, 
@@ -278,7 +283,7 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 
 // user-defined function type
-enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
+enum { _UDF_PIXEL_, _UDF_CHUNK_, _UDF_LENGTH_ };
 
 // tag and value
 enum { _TV_TAG_, _TV_VAL_, _TV_LENGTH_ };
