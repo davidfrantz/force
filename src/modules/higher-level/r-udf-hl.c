@@ -174,15 +174,15 @@ char *r_argv[] = { "R", "--silent" };
     );
     findFun(install("force_rstats_"), R_GlobalEnv); // make sure parsing worked
     // wrapper fun
-   } else if (udf->type == _UDF_BLOCK_){
-    // wrapper for 'force_rstats_block'
-    findFun(install("force_rstats_block"), R_GlobalEnv);
+   } else if (udf->type == _UDF_CHUNK_){
+    // wrapper for 'force_rstats_chunk'
+    findFun(install("force_rstats_chunk"), R_GlobalEnv);
     parse_rstats(
       "force_rstats_ <- function(array){                                     \n"
       "  dates_str <- paste(years, months, days, sep='-')                    \n"
       "  dates <- as.Date(dates_str, format='%Y-%m-%d')                      \n"
       "  array <- replace(array, array == na_value, NA)                      \n"
-      "  result <- force_rstats_block(array, dates, sensors, bandnames, ncpu)\n"
+      "  result <- force_rstats_chunk(array, dates, sensors, bandnames, ncpu)\n"
       "  result <- replace(result, is.na(result), na_value)                  \n"
       "  storage.mode(result) <- 'integer'                                   \n"
       "  return(result)                                                      \n"
@@ -483,7 +483,7 @@ int *rstats_return_ = NULL;
     INTEGER(dim)[0] = nt;
     INTEGER(dim)[1] = nb_main + nb_aux;
     INTEGER(dim)[2] = nvalid;
-  } else if (udf->type == _UDF_BLOCK_){
+  } else if (udf->type == _UDF_CHUNK_){
     PROTECT(dim = allocVector(INTSXP, 4));
     INTEGER(dim)[0] = nt;
     INTEGER(dim)[1] = nb_main + nb_aux;
@@ -542,7 +542,7 @@ int *rstats_return_ = NULL;
 
     int value = nodata;
 
-    if (udf->type == _UDF_BLOCK_ ||
+    if (udf->type == _UDF_CHUNK_ ||
        (udf->type == _UDF_PIXEL_ && 
        (mask_ == NULL || (mask_ != NULL && mask_[p])))){
       value = rstats_return_[k++];

@@ -172,7 +172,7 @@ int nchar;
   set_brick_filename(brick, fname);
 
   if (write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }
