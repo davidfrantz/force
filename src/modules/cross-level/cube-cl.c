@@ -65,11 +65,9 @@ void free_datacube(cube_t *cube){
 
   if (cube == NULL) return;
 
-  if (cube->tx != NULL) free((void*)cube->tx);
-  if (cube->ty != NULL) free((void*)cube->ty);
-  cube->tx = NULL;
-  cube->ty = NULL;
-  cube->tn = 0;
+  if (cube->allowed_tiles != NULL) free_2D((void**)cube->allowed_tiles, 2);
+  cube->allowed_tiles = NULL;
+  cube->n_allowed_tiles = 0;
 
   free((void*)cube); cube = NULL;
 
@@ -105,32 +103,18 @@ int c;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_datacube(cube_t *cube){
 
-  cube->dname[0] = '\0';
-  cube->proj[0]  = '\0';
-  cube->origin_geo.x = 0;
-  cube->origin_geo.y = 0;
-  cube->origin_map.x = 0;
-  cube->origin_map.y = 0;
-  cube->tilesize     = 0;
-  cube->chunksize    = 0;
-  cube->res          = 0;
-  cube->nx           = 0;
-  cube->ny           = 0;
-  cube->nc           = 0;
-  cube->cx           = 0;
-  cube->cy           = 0;
-  cube->cc           = 0;
-  cube->cn           = 0;
-  cube->tminx        = 0;
-  cube->tmaxx        = 0;
-  cube->tminy        = 0;
-  cube->tmaxy        = 0;
-  cube->tnx          = 0;
-  cube->tny          = 0;
-  cube->tnc          = 0;
-  cube->tn           = 0;
-  cube->tx           = NULL;
-  cube->ty           = NULL;
+  cube->dir_path[0] = '\0';
+  cube->def_path[0] = '\0';
+  cube->projection[0] = '\0';
+  memset(&cube->origin_geo, 0, sizeof(coord_t));
+  memset(&cube->origin_map, 0, sizeof(coord_t));
+  memset(cube->tile_extent, 0, 2*2*sizeof(int));
+  memset(cube->tile_size, 0, 2*sizeof(double));
+  cube->resolution = 0;
+  memset(&cube->dim_tiles, 0, sizeof(dim_t));
+  memset(&cube->dim_tile_pixels, 0, sizeof(dim_t));
+  cube->allowed_tiles = NULL;
+  cube->n_allowed_tiles = 0;
 
   return;
 }
@@ -160,24 +144,17 @@ int c;
 void print_datacube(cube_t *cube){
 
   printf("Data cube definition:\n");
-  printf("Path: %s\n", cube->dname);
-  printf("Projection: %s\n", cube->proj);
-  printf("Active resolution: %.2f\n", cube->res);
-  printf("X-origin (geo): %.2f\n",  cube->origin_geo.x);
-  printf("Y-origin (geo): %.2f\n",  cube->origin_geo.y);
-  printf("X-origin (map): %.2f\n",  cube->origin_map.x);
-  printf("Y-origin (map): %.2f\n",  cube->origin_map.y);
-  printf("Tile size: %.2f\n", cube->tilesize);
-  printf("Tile pixels: %d x %d = %d\n", cube->nx, cube->ny, cube->nc);
-  printf("Tiles X%04d to X%04d\n", cube->tminx, cube->tmaxx);
-  printf("Tiles Y%04d to Y%04d\n", cube->tminy, cube->tmaxy);
-  printf("Chunk size: %.2f\n", cube->chunksize);
-  printf("Chunk pixels: %d x %d = %d\n", cube->cx, cube->cy, cube->cc);
-  printf("Number of chunks per tile: %d\n", cube->cn);
-  printf("Number of tiles (x): %d\n", cube->tnx);
-  printf("Number of tiles (y): %d\n", cube->tny);
-  printf("Number of tiles: %d\n", cube->tnc);
-  printf("Number of allow-listed tiles: %d\n", cube->tn);
+  printf("Path: %s\n", cube->dir_path);
+  printf("Projection: %s\n", cube->projection);
+  printf("Active resolution: %.2f\n", cube->resolution);
+  printf("Origin (geo): %.2f (X) %.2f (Y)\n",  cube->origin_geo.x, cube->origin_geo.y);
+  printf("Origin (map): %.2f (X) %.2f (Y)\n",  cube->origin_map.x, cube->origin_map.y);
+  printf("Tile extent: X%04d to X%04d\n", cube->tile_extent[_X_][_MIN_], cube->tile_extent[_X_][_MAX_]);
+  printf("Tile extent: Y%04d to Y%04d\n", cube->tile_extent[_Y_][_MIN_], cube->tile_extent[_Y_][_MAX_]);
+  printf("Number of tiles: %d (X) x %d (Y) = %d\n", cube->dim_tiles.cols, cube->dim_tiles.rows, cube->dim_tiles.cells);
+  printf("Number of allow-listed tiles: %d\n", cube->n_allowed_tiles);
+  printf("Tile size: %.2f (X) %.2f (Y)\n", cube->tile_size[_X_], cube->tile_size[_Y_]);
+  printf("Number of pixels per tile: %d (X) x %d (Y) = %d\n", cube->dim_tile_pixels.cols, cube->dim_tile_pixels.rows, cube->dim_tile_pixels.cells);
 
   return;
 }
@@ -211,16 +188,16 @@ int c;
 void update_datacube_extent(cube_t *cube, int tminx, int tmaxx, int tminy, int tmaxy){
 
   // extent
-  cube->tminx = tminx;
-  cube->tmaxx = tmaxx;
-  cube->tminy = tminy;
-  cube->tmaxy = tmaxy;
+  cube->tile_extent[_X_][_MIN_] = tminx;
+  cube->tile_extent[_X_][_MAX_] = tmaxx;
+  cube->tile_extent[_Y_][_MIN_] = tminy;
+  cube->tile_extent[_Y_][_MAX_] = tmaxy;
 
   // number of tiles
-  cube->tnx = cube->tmaxx-cube->tminx+1;
-  cube->tny = cube->tmaxy-cube->tminy+1;
-  cube->tnc = cube->tnx*cube->tny;
-  
+  cube->dim_tiles.cols = cube->tile_extent[_X_][_MAX_] - cube->tile_extent[_X_][_MIN_] + 1;
+  cube->dim_tiles.rows = cube->tile_extent[_Y_][_MAX_] - cube->tile_extent[_Y_][_MIN_] + 1;
+  cube->dim_tiles.cells = cube->dim_tiles.cols * cube->dim_tiles.rows;
+
   return;
 }
 
@@ -235,28 +212,21 @@ void update_datacube_res(cube_t *cube, double res){
 double tol = 5e-3;
 
 
-  if (fmod(cube->tilesize, res) > tol){
+  if (fmod(cube->tile_size[_X_], res) > tol ||
+      fmod(cube->tile_size[_Y_], res) > tol){
     printf("TILE_SIZE must be a multiple of RESOLUTION.\n");
-    exit(1);
-  }
-  if (fmod(cube->chunksize, res) > tol){
-    printf("BLOCK_SIZE must be a multiple of RESOLUTION.\n");
     exit(1);
   }
 
   // resolution
-  cube->res = res;
-  
+  cube->resolution = res;
 
   // number of pixels in tile
-  cube->nx = cube->ny = (int)(cube->tilesize/cube->res);
-  cube->nc = cube->nx*cube->ny;
+  cube->dim_tile_pixels.cols = (int)(cube->tile_size[_X_]/cube->resolution);
+  cube->dim_tile_pixels.rows = (int)(cube->tile_size[_Y_]/cube->resolution);
+  cube->dim_tile_pixels.cells = cube->dim_tile_pixels.cols*cube->dim_tile_pixels.rows;
 
-  // number of pixels in chunk
-  cube->cx = cube->nx;
-  cube->cy = (int)(cube->chunksize/cube->res);
-  cube->cc = cube->cx*cube->cy;
-  
+
   return;
 }
 
@@ -270,30 +240,25 @@ double tol = 5e-3;
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int write_datacube_def(cube_t *cube){
-char fname[NPOW_10];
-int nchar;
 char *lock = NULL;
 FILE *fp = NULL;
 
+  concat_string_2(cube->def_path, NPOW_10, cube->dir_path, "datacube-definition.prj", "/");
 
-  nchar = snprintf(fname, NPOW_10, "%s/datacube-definition.prj", cube->dname);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+  if (!fileexist(cube->def_path)){
 
-  if (!fileexist(fname)){
-    
-    if ((lock = (char*)lock_file(fname, 60)) == NULL) return FAILURE;
+    if ((lock = (char*)lock_file(cube->def_path, 60)) == NULL) return FAILURE;
 
-    if ((fp = fopen(fname, "w")) == NULL){
-      printf("Unable to open %s. ", fname); return FAILURE;}
+    if ((fp = fopen(cube->def_path, "w")) == NULL){
+      printf("Unable to open %s. ", cube->def_path); return FAILURE;}
 
-    fprintf(fp, "%s\n", cube->proj);
-    fprintf(fp, "%f\n", cube->origin_geo.x);
-    fprintf(fp, "%f\n", cube->origin_geo.y);
-    fprintf(fp, "%f\n", cube->origin_map.x);
-    fprintf(fp, "%f\n", cube->origin_map.y);
-    fprintf(fp, "%f\n", cube->tilesize);
-    fprintf(fp, "%f\n", cube->chunksize);
+    fprintf(fp, "PROJECTION = %s\n", cube->projection);
+    fprintf(fp, "ORIGIN_GEO_X = %f\n", cube->origin_geo.x);
+    fprintf(fp, "ORIGIN_GEO_Y = %f\n", cube->origin_geo.y);
+    fprintf(fp, "ORIGIN_MAP_X = %f\n", cube->origin_map.x);
+    fprintf(fp, "ORIGIN_MAP_Y = %f\n", cube->origin_map.y);
+    fprintf(fp, "TILE_SIZE_X = %f\n", cube->tile_size[_X_]);
+    fprintf(fp, "TILE_SIZE_Y = %f\n", cube->tile_size[_Y_]);
 
     fclose(fp);
 
@@ -307,93 +272,125 @@ FILE *fp = NULL;
 
 /** Read spatial definition of datacube
 +++ This function read the text file with all spatial specs of the data
++++ cube. This function is for backward compatibility with old
++++ datacube-definition.prj files that had a different format.
+--- d_read: Input directory
++++ Return: datacube
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+char ***read_datacube_def_deprecated(char *fname, int *nrows){
+char ***tagval = NULL;
+int nlines_input = 6;
+int nlines_output = 7;
+char buffer[NPOW_10] = "\0";
+FILE *fp = NULL;
+
+char tags_output[7][NPOW_10] = {
+  "PROJECTION", 
+  "ORIGIN_GEO_X",
+  "ORIGIN_GEO_Y",
+  "ORIGIN_MAP_X",
+  "ORIGIN_MAP_Y",
+  "TILE_SIZE_Y",
+  "TILE_SIZE_X",
+};
+
+  alloc_3D((void****)&tagval, nlines_output, _TV_LENGTH_, NPOW_10, sizeof(char));
+
+  if ((fp = fopen(fname, "r")) == NULL){
+    printf("Unable to open %s. ", fname); 
+    exit(FAILURE);
+  }
+
+  for (int line=0; line<nlines_input; line++){
+    if (fgets(buffer, NPOW_10, fp) == NULL){
+      printf("Unable to read line %d. ", line);
+      exit(FAILURE);
+    } else {
+      buffer[strcspn(buffer, "\r\n#")] = 0;
+      copy_string(tagval[line][_TV_TAG_], NPOW_10, tags_output[line]);
+      copy_string(tagval[line][_TV_VAL_], NPOW_10, buffer);
+    }
+  }
+
+  copy_string(tagval[6][_TV_TAG_], NPOW_10, tags_output[6]);
+  copy_string(tagval[6][_TV_VAL_], NPOW_10, tagval[5][_TV_VAL_]);
+
+  fclose(fp);
+
+  *nrows = nlines_output;
+  return tagval;
+}
+
+
+/** Read spatial definition of datacube
++++ This function read the text file with all spatial specs of the data
 +++ cube.
 --- d_read: Input directory
 +++ Return: datacube
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 cube_t *read_datacube_def(char *d_read){
 cube_t *cube = NULL;
-char fname[NPOW_10];
-char buffer[NPOW_10] = "\0";
-int nchar;
-FILE *fp = NULL;
-
+char ***input = NULL;
+int received = 0, expected = 7;
+int nrows = 0;
 
   if ((cube = allocate_datacube()) == NULL) return NULL;
 
-  nchar = snprintf(fname, NPOW_10, "%s/datacube-definition.prj", d_read);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling filename\n"); return NULL;}
+
+  copy_string(cube->dir_path, NPOW_10, d_read);
+  concat_string_2(cube->def_path, NPOW_10, cube->dir_path, "datacube-definition.prj", "/");
+
+  // read datacube definition
+  input = read_tagvalue(cube->def_path, &nrows);
+
+  // if reading with new function failed, try deprecated function
+  if (input == NULL){
+    printf("WARNING: Reading new datacube definition failed. Try deprecated function.\n");
+    input = read_datacube_def_deprecated(cube->def_path, &nrows);
+  }
+
+  // parse datacube definition
+  for (int line=0; line<nrows; line++){
+
+    if (strcmp(input[line][_TV_TAG_], "PROJECTION") == 0){
+      copy_string(cube->projection, NPOW_10, input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "ORIGIN_GEO_X") == 0){
+      cube->origin_geo.x = atof(input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "ORIGIN_GEO_Y") == 0){
+      cube->origin_geo.y = atof(input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "ORIGIN_MAP_X") == 0){
+      cube->origin_map.x = atof(input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "ORIGIN_MAP_Y") == 0){
+      cube->origin_map.y = atof(input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "TILE_SIZE_X") == 0){
+      cube->tile_size[_X_] = atof(input[line][_TV_VAL_]);
+      received++;
+    } else if (strcmp(input[line][_TV_TAG_], "TILE_SIZE_Y") == 0){
+      cube->tile_size[_Y_] = atof(input[line][_TV_VAL_]);
+      received++;
+    } else {
+      printf("Unknown tag in datacube definition: %s. ", input[line][_TV_TAG_]);
+      free_datacube(cube); free_3D((void***)input, nrows, _TV_LENGTH_);
+      return NULL;
+    }
+
+  }
+
+  free_3D((void***)input, nrows, _TV_LENGTH_);
+  input = NULL;
+  nrows = 0;
+
+  if (received != expected){
+    printf("Incomplete datacube definition. Expected %d tags, received %d.\n", expected, received);
+    free_datacube(cube);
+    return NULL;
+  }
   
-  copy_string(cube->dname, NPOW_10, d_read);
-
-  if ((fp = fopen(fname, "r")) == NULL){
-    printf("Unable to open %s. ", fname); 
-    free_datacube(cube); return NULL;
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read projection. ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    copy_string(cube->proj, NPOW_10, buffer);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read X-origin (geo). ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->origin_geo.x = atof(buffer);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read Y-origin (geo). ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->origin_geo.y = atof(buffer);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read X-origin (map). ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->origin_map.x = atof(buffer);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read Y-origin (map). ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->origin_map.y = atof(buffer);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read tile size. ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->tilesize = atof(buffer);
-    //printf("%s %f\n", buffer, cube->tilesize);
-  }
-
-  if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Unable to read chunk size. ");
-    free_datacube(cube); return NULL;
-  } else {
-    buffer[strcspn(buffer, "\r\n#")] = 0;
-    cube->chunksize = atof(buffer);
-    //printf("%s %f\n", buffer, cube->chunksize);
-  }
-
-  fclose(fp);
-
-  cube->cn = (int)(cube->tilesize/cube->chunksize);
-
   #ifdef FORCE_DEBUG
   print_datacube(cube);
   #endif
@@ -407,30 +404,16 @@ FILE *fp = NULL;
 +++ cube.
 --- d_read:        Input directory
 --- d_write:       Output directory
---- blockoverride: use a different chunk size than in datacube definition?
 +++ Return:        datacube
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-cube_t *copy_datacube_def(char *d_read, char *d_write, double blockoverride){
+cube_t *copy_datacube_def(char *d_read, char *d_write){
 cube_t *cube = NULL;
-double tol = 5e-3;
 
 
   if ((cube = read_datacube_def(d_read)) == NULL){
     printf("Reading datacube definition failed. "); return NULL;}
 
-  if (blockoverride > 0){
-    
-    if (fmod(cube->tilesize, blockoverride) > tol){
-      printf("TILE_SIZE must be a multiple of BLOCK_SIZE. ");
-      return NULL;
-    }
-   
-    cube->cn = (int)(cube->tilesize/blockoverride);
-    cube->chunksize = cube->tilesize/cube->cn;
-
-  }
-
-  copy_string(cube->dname, NPOW_10, d_write);
+  copy_string(cube->dir_path, NPOW_10, d_write);
 
   if (write_datacube_def(cube) == FAILURE){
     printf("Writing datacube definition failed. "); 
@@ -461,11 +444,11 @@ int px = 0, py = 0;
 
     // shift tile-x to the right until x is left of tile-x
     while (x > tx){
-      tx += cube->tilesize;
+      tx += cube->tile_size[_X_];
       px++;
     }
     // step back one tile; x should be right of tile-x
-    tx -= cube->tilesize;
+    tx -= cube->tile_size[_X_];
     px--;
 
   // if x is left of tile-origin
@@ -473,7 +456,7 @@ int px = 0, py = 0;
 
     // shift tile-x to the left until x is right of tile-x
     while (x < tx){
-      tx -= cube->tilesize;
+      tx -= cube->tile_size[_X_];
       px--;
     }
   }
@@ -484,11 +467,11 @@ int px = 0, py = 0;
 
     // shift tile-y to the bottom until y is above tile-y
     while (y < ty){
-      ty -= cube->tilesize;
+      ty -= cube->tile_size[_Y_];
       py++;
     }
     // step back one tile; y should be below tile-y
-    ty += cube->tilesize;
+    ty += cube->tile_size[_Y_];
     py--;
  
   // if y is above tile-origin
@@ -496,7 +479,7 @@ int px = 0, py = 0;
 
     // shift tile-y to the top until y is below tile-y
     while (y > ty){
-      ty += cube->tilesize;
+      ty += cube->tile_size[_Y_];
       py--;
     }
   }
@@ -529,23 +512,21 @@ int px = 0, py = 0;
 int tile_align(cube_t *cube, double ulx, double uly, double *new_ulx, double *new_uly){
 double t0x, t0y; // ul x/y of first tile
 int idx, idy;   // id of first tile
-#ifdef FORCE_DEBUG
-printf("new function tile_align. test. THOROUGHLY!!!!\n");
-#endif
+
 
   // ul coordinate of 1st tile: t0x, t0y
   tile_find(ulx, uly, &t0x, &t0y, &idx, &idy, cube);
   
   // shift t0x to the right until it is right of image-ul, 
   // then step back one pixel and assign as new image-ul
-  while (t0x < ulx) t0x += cube->res;
-  t0x -= cube->res;
+  while (t0x < ulx) t0x += cube->resolution;
+  t0x -= cube->resolution;
   *new_ulx = t0x;
 
   // shift t0y to the bottom until it is below image-ul, 
   // then step back one pixel and assign as new image-ul
-  while (t0y > uly) t0y -= cube->res;
-  t0y += cube->res;
+  while (t0y > uly) t0y -= cube->resolution;
+  t0y += cube->resolution;
   *new_uly = t0y;
 
   return SUCCESS;
