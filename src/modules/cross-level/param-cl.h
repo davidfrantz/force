@@ -61,6 +61,7 @@ typedef struct {
   float  float_range[2];
   double double_range[2];
   date_t date_range[2];
+  int expected_length;
   int char_test;
 } par_t;
 
@@ -87,13 +88,13 @@ void register_double_par(params_t *params, const char *name, double min, double 
 void register_bool_par(params_t *params, const char *name, int *ptr);
 void register_date_par(params_t *params, const char *name, const char *min, const char *max, date_t *ptr);
 void register_char_par(params_t *params, const char *name, int char_test, char **ptr);
-void register_intvec_par(params_t *params, const char *name, int min, int max, int **ptr, int *ptr_length);
-void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int **ptr, int *ptr_length);
-void register_floatvec_par(params_t *params, const char *name, float min, float max, float **ptr, int *ptr_length);
-void register_doublevec_par(params_t *params, const char *name, double min, double max, double **ptr, int *ptr_length);
-void register_boolvec_par(params_t *params, const char *name, int **ptr, int *ptr_length);
-void register_datevec_par(params_t *params, const char *name, const char *min, const char *max, date_t **ptr, int *ptr_length);
-void register_charvec_par(params_t *params, const char *name, int char_test, char ***ptr, int *ptr_length);
+void register_intvec_par(params_t *params, const char *name, int min, int max, int expected_length, int **ptr, int *ptr_length);
+void register_enumvec_par(params_t *params, const char *name, const tagged_enum_t *enums, int n_enums, int expected_length, int **ptr, int *ptr_length);
+void register_floatvec_par(params_t *params, const char *name, float min, float max, int expected_length, float **ptr, int *ptr_length);
+void register_doublevec_par(params_t *params, const char *name, double min, double max, int expected_length, double **ptr, int *ptr_length);
+void register_boolvec_par(params_t *params, const char *name, int expected_length, int **ptr, int *ptr_length);
+void register_datevec_par(params_t *params, const char *name, const char *min, const char *max, int expected_length, date_t **ptr, int *ptr_length);
+void register_charvec_par(params_t *params, const char *name, int char_test, int expected_length, char ***ptr, int *ptr_length);
 void parse_parameter(params_t *params, const char *buf);
 void print_parameter(params_t *params);
 void log_parameter(params_t *params);
