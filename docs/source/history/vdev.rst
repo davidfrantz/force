@@ -58,6 +58,8 @@ Develop version
     which e.g. can make processing way more efficient when using masks.
     Further note, that the chunk size must be greater than 0 and less than or equal to the tile size (in the specific direction).
 
+    **IMPORTANT: When working with an old data cube, you should ensure that the chunk X-size is equal to the tile X-size to avoid a huge penalty on efficiency.**
+
   - It became apparent that using COGs is not possible when using sub-tile processing chunks. 
     So, just don't do that. If you want to use COGs, set the chunk size to the tile size!
     You need enough memory to process a full tile at once, though.
