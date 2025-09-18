@@ -8,13 +8,13 @@ File format
 
 Higher level images are generated with signed 16bit datatype in one of the following preconfigured formats:
 
-.. include:: ../../../_static/files/format_gtiff.txt
+.. include:: ../../../../../_static/files/format_gtiff.txt
   :code: shell
 
-.. include:: ../../../_static/files/format_cog.txt
+.. include:: ../../../../../_static/files/format_cog.txt
   :code: shell
 
-.. include:: ../../../_static/files/format_envi.txt
+.. include:: ../../../../../_static/files/format_envi.txt
   :code: shell
 
 GTiff is the default and recommended format.
@@ -30,7 +30,7 @@ FORCE versions older than ``3.8.01-dev:::2025-09-17_14:04:58`` used a different 
 If you want to create GeoTiff files with the old configuration, you may use following settings in a custom format.
 Note that you need to adapt the block sizes to your tile size, such that you have ``BLOCKXSIZE`` being the tile size in x direction and ``BLOCKYSIZE`` being a divisor of the tile size in y direction, usually 10 blocks.
 
-.. include:: ../../../_static/files/format_gtiff_old.txt
+.. include:: ../../../../../_static/files/format_gtiff_old.txt
   :code: shell
 
 

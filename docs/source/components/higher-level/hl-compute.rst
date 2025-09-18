@@ -15,7 +15,7 @@ The numbers increase from left ro right, and from top to bottom.
 In a first step, a rectangular extent needs to be specified using the tile X- and Y-IDs. 
 In this example, we have selected the extent covering Belgium, i.e. 9 tiles.
 
-image:: hl-1.jpg
+.. image:: hl-1.jpg
 
 
 2) The tile allow-list
@@ -26,7 +26,7 @@ The allow-list is intersected with the analysis extent,
 i.e. only tiles included in both the analysis extent AND the allow-list will be processed. 
 This is optional.
 
-image:: hl-2.jpg
+.. image:: hl-2.jpg
 
 
 3) The internal file layout
@@ -48,7 +48,7 @@ Also, chunks require two values, i.e., the chunk size in x and y direction.
 
 These chunks are the main processing units (PU), and are processed sequentially, i.e. one after another.
 
-image:: hl-3.jpg
+.. image:: hl-3.jpg
 
 4) Streaming
 ^^^^^^^^^^^^
@@ -62,7 +62,7 @@ If processing takes longer than I/O, this streaming strategy avoids idle CPUs wa
 Optionally, :ref:`processing-masks` can be used, which restrict processing and analysis to certain pixels of interest. 
 Processing units, which do not contain any active pixels, are skipped (in this case, the national territory of Belgium).
 
-image:: hl-4.jpg
+.. image:: hl-4.jpg
 
 5) Nested parallelism
 ^^^^^^^^^^^^^^^^^^^^^
@@ -73,6 +73,6 @@ In the computing team, the pixels are distributed to different threads
 (please note that the actual load distribution may differ from the idealized figure due to load balancing etc.). 
 In the output team, multiple threads write multiple output products simultaneously, e.g. different Spectral Temporal Metrics.
 
-image:: hl-5.jpg
+.. image:: hl-5.jpg
 
 
