@@ -29,23 +29,27 @@ Data Cube definition
 ^^^^^^^^^^^^^^^^^^^^
 
 The spatial data cube definition is appended to each data cube, i.e. to each directory containing tiled datasets.
-The file ``datacube-definition.prj`` is a 7-line text file that contains the (1) projection as WKT string, (2) origin of the tile system as geographic Longitude, (3) origin of the tile system as geographic Latitude, (4) origin of the tile system as projected X-coordinate, (5) origin of the tile system as projected Y-coordinate, (6) size of the tiles in projection units, and (7) block size within each tile.
+The file ``datacube-definition.prj`` is a text file in tag and value notation that contains the (1) projection as WKT string, (2) origin of the tile system as geographic Longitude, (3) origin of the tile system as geographic Latitude, (4) origin of the tile system as projected X-coordinate, (5) origin of the tile system as projected Y-coordinate, and the (6-7) sizes of the tiles in projection units.
 
 .. warning::
 
   Do not modify or delete any of these files!
 
-The datacube definition file looks like this:
+An example datacube definition file looks like this:
 
-.. code-block:: bash
+.. include:: ../../../_static/files/datacube-definition.prj
+  :code: shell
 
-  PROJCS["ETRS89 / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AUTHORITY["EPSG","3035"]]
-  -25.000000
-  60.000000
-  2456026.250000
-  4574919.500000
-  30000.000000
-  3000.0000000
+FORCE versions older than ``3.8.01-dev:::2025-09-17_14:04:58`` used a different format for the datacube definition file. 
+Backward compatibility is ensured, i.e. existing data cubes do not need to be converted.
+
+However, older software versions will not be able to read data cubes created with the new format!
+
+An example of the old format looks like this:
+
+.. include:: ../../../_static/files/datacube-definition_deprecated.prj
+  :code: shell
+
 
 
 Naming convention
@@ -58,11 +62,11 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 +--------+-------+-----------------------------------------+
 + Digits + Description                                     +
 +========+=======+=========================================+
-+ 1–8    + Acquisition date as YYYYMMDD                    +
++ 1-8    + Acquisition date as YYYYMMDD                    +
 +--------+-------+-----------------------------------------+
-+ 10–15  + Product Level                                   +
++ 10-15  + Product Level                                   +
 +--------+-------+-----------------------------------------+
-+ 17–21  + Sensor ID                                       +
++ 17-21  + Sensor ID                                       +
 +        +-------+-----------------------------------------+
 +        + LND04 + Landsat 4 Thematic Mapper               +
 +        +-------+-----------------------------------------+
@@ -80,7 +84,7 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 +        +-------+-----------------------------------------+
 +        + SEN2C + Sentinel-2C MultiSpectral Instrument    +
 +--------+-------+-----------------------------------------+
-+ 23–25  + Product Type                                    +
++ 23-25  + Product Type                                    +
 +        +-------+-----------------------------------------+
 +        + BOA   + Bottom-of-Atmosphere Reflectance        +
 +        +-------+-----------------------------------------+
@@ -98,7 +102,7 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 +        +-------+-----------------------------------------+
 +        + HOT   + Haze Optimized Transformation           +
 +--------+-------+-----------------------------------------+
-+ 27–29  + File extension                                  +
++ 27-29  + File extension                                  +
 +        +-------+-----------------------------------------+
 +        + tif   + image data in compressed GeoTiff format +
 +        +-------+-----------------------------------------+
@@ -109,15 +113,28 @@ Example filename: 20160823_LEVEL2_SEN2A_BOA.tif
 File format
 ^^^^^^^^^^^
 
-The images are provided with signed 16bit datatype and band sequential (BSQ) interleaving in following default format:
+The images are provided with signed 16bit datatype in one of the following preconfigured formats:
 
-* GeoTiff 
-  
-  This is the recommended output option. 
-  Images are compressed GeoTiff images using LZW compression with horizontal differencing.
-  The images are generated with internal blocks for partial image access.
-  These blocks are strips that are as wide as the ``TILE_SIZE`` and as high as the ``BLOCK_SIZE``.
-  
+.. include:: ../../../_static/files/format_cog.txt
+  :code: shell
+
+.. include:: ../../../_static/files/format_gtiff.txt
+  :code: shell
+
+.. include:: ../../../_static/files/format_envi.txt
+  :code: shell
+
+
+COG is the default and recommended format.
+Users may also use a custom format by providing GDAL configuration options in the same format as shown above.
+
+FORCE versions older than ``3.8.01-dev:::2025-09-17_14:04:58`` used a different GeoTiff configuration.
+If you want to create GeoTiff files with the old configuration, you may use following settings in a custom format.
+Note that you need to adapt the block sizes to your tile size, such that you have ``BLOCKXSIZE`` being the tile size in x direction and ``BLOCKYSIZE`` being a divisor of the tile size in y direction, usually 10 blocks.
+
+.. include:: ../../../_static/files/format_gtiff_old.txt
+  :code: shell
+
 
 Metadata
 ^^^^^^^^
@@ -149,24 +166,24 @@ All other products are optional.
   Bands intended for atmospheric characterization are not output (e.g. ultra-blue, water vapor or cirrus bands).
   Following tables summarize the output bands for each sensor.
 
-  * Landsat 4–5 Thematic Mapper (TM):
+  * Landsat 4-5 Thematic Mapper (TM):
 
     +--------------+----------------------+------------------+------------------+---------------+
     + USGS L1 band + Wavelength name      + Wavelength in µm + Resolution in m  + FORCE L2 band +
     +==============+======================+==================+==================+===============+
-    + 1            + Blue                 + 0.45–0.52        + 30               + 1             +
+    + 1            + Blue                 + 0.45-0.52        + 30               + 1             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 2            + Green                + 0.52–0.60        + 30               + 2             +
+    + 2            + Green                + 0.52-0.60        + 30               + 2             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 3            + Red                  + 0.63–0.69        + 30               + 3             +
+    + 3            + Red                  + 0.63-0.69        + 30               + 3             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 4            + Near Infrared        + 0.76–0.90        + 30               + 4             +
+    + 4            + Near Infrared        + 0.76-0.90        + 30               + 4             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 5            + Shortwave Infrared 1 + 1.55–1.75        + 30               + 5             +
+    + 5            + Shortwave Infrared 1 + 1.55-1.75        + 30               + 5             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 6            + Thermal Infrared     + 10.40–12.50      + 30 (120 :sup:`1`)+ / :sup:`2`    +
+    + 6            + Thermal Infrared     + 10.40-12.50      + 30 (120 :sup:`1`)+ / :sup:`2`    +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 7            + Shortwave Infrared 2 + 2.08–2.35        + 30               + 6             +
+    + 7            + Shortwave Infrared 2 + 2.08-2.35        + 30               + 6             +
     +--------------+----------------------+------------------+------------------+---------------+
     
     | :sup:`1` Band is acquired at 120m resolution, but USGS products are resampled and provided at 30m.
@@ -178,21 +195,21 @@ All other products are optional.
     +--------------+----------------------+------------------+-----------------+---------------+
     + USGS L1 band + Wavelength name      + Wavelength in µm + Resolution in m + FORCE L2 band +
     +==============+======================+==================+=================+===============+
-    + 1            + Blue                 + 0.45–0.52        + 30              + 1             +
+    + 1            + Blue                 + 0.45-0.52        + 30              + 1             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 2            + Green                + 0.52–0.60        + 30              + 2             +
+    + 2            + Green                + 0.52-0.60        + 30              + 2             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 3            + Red                  + 0.63–0.69        + 30              + 3             +
+    + 3            + Red                  + 0.63-0.69        + 30              + 3             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 4            + Near Infrared        + 0.77–0.90        + 30              + 4             +
+    + 4            + Near Infrared        + 0.77-0.90        + 30              + 4             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 5            + Shortwave Infrared 1 + 1.55–1.75        + 30              + 5             +
+    + 5            + Shortwave Infrared 1 + 1.55-1.75        + 30              + 5             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 6            + Thermal Infrared     + 10.40–12.50      + 30 (60 :sup:`1`)+ / :sup:`2`    +
+    + 6            + Thermal Infrared     + 10.40-12.50      + 30 (60 :sup:`1`)+ / :sup:`2`    +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 7            + Shortwave Infrared 2 + 2.09–2.35        + 30              + 6             +
+    + 7            + Shortwave Infrared 2 + 2.09-2.35        + 30              + 6             +
     +--------------+----------------------+------------------+-----------------+---------------+
-    + 8            + Panchromatic         + 0.52–0.90        + 15              + /             +
+    + 8            + Panchromatic         + 0.52-0.90        + 15              + /             +
     +--------------+----------------------+------------------+-----------------+---------------+
 
     | :sup:`1` Band is acquired at 60m resolution, but USGS products are resampled and provided at 30m.
@@ -204,27 +221,27 @@ All other products are optional.
     +--------------+----------------------+------------------+------------------+---------------+
     + USGS L1 band + Wavelength name      + Wavelength in µm + Resolution in m  + FORCE L2 band +
     +==============+======================+==================+==================+===============+
-    + 1            + Ultra-Blue           + 0.435–0.451      + 30               + / :sup:`2`    +
+    + 1            + Ultra-Blue           + 0.435-0.451      + 30               + / :sup:`2`    +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 2            + Blue                 + 0.452–0.512      + 30               + 1             +
+    + 2            + Blue                 + 0.452-0.512      + 30               + 1             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 3            + Green                + 0.533–0.590      + 30               + 2             +
+    + 3            + Green                + 0.533-0.590      + 30               + 2             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 4            + Red                  + 0.636–0.673      + 30               + 3             +
+    + 4            + Red                  + 0.636-0.673      + 30               + 3             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 5            + Near Infrared        + 0.851–0.879      + 30               + 4             +
+    + 5            + Near Infrared        + 0.851-0.879      + 30               + 4             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 6            + Shortwave Infrared 1 + 1.566–1.651      + 30               + 5             +
+    + 6            + Shortwave Infrared 1 + 1.566-1.651      + 30               + 5             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 7            + Shortwave Infrared 2 + 2.107–2.294      + 30               + 6             +
+    + 7            + Shortwave Infrared 2 + 2.107-2.294      + 30               + 6             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 8            + Panchromatic         + 0.503–0.676      + 15               + /             +
+    + 8            + Panchromatic         + 0.503-0.676      + 15               + /             +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 9            + Cirrus               + 1.363–1.384      + 30               + / :sup:`3`    +
+    + 9            + Cirrus               + 1.363-1.384      + 30               + / :sup:`3`    +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 10           + Thermal Infrared 1   + 10.60–11.19      + 30 (100 :sup:`1`)+ / :sup:`4`    +
+    + 10           + Thermal Infrared 1   + 10.60-11.19      + 30 (100 :sup:`1`)+ / :sup:`4`    +
     +--------------+----------------------+------------------+------------------+---------------+
-    + 11           + Thermal Infrared 2   + 11.50–12.51      + 30 (100 :sup:`1`)+ /             +
+    + 11           + Thermal Infrared 2   + 11.50-12.51      + 30 (100 :sup:`1`)+ /             +
     +--------------+----------------------+------------------+------------------+---------------+
 
     | :sup:`1` Bands are acquired at 100m resolution, but USGS products are resampled and provided at 30m.
@@ -238,31 +255,31 @@ All other products are optional.
     +-------------+----------------------+------------------+-----------------+---------------+
     + ESA L1 band + Wavelength name      + Wavelength in µm + Resolution in m + FORCE L2 band +
     +=============+======================+==================+=================+===============+
-    + 1           + Ultra-Blue           + 0.430–0.457      + 60              + / :sup:`1`    +
+    + 1           + Ultra-Blue           + 0.430-0.457      + 60              + / :sup:`1`    +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 2           + Blue                 + 0.440–0.538      + 10              + 1             +
+    + 2           + Blue                 + 0.440-0.538      + 10              + 1             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 3           + Green                + 0.537–0.582      + 10              + 2             +
+    + 3           + Green                + 0.537-0.582      + 10              + 2             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 4           + Red                  + 0.646–0.684      + 10              + 3             +
+    + 4           + Red                  + 0.646-0.684      + 10              + 3             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 5           + Red Edge 1           + 0.694–0.713      + 20              + 4             +
+    + 5           + Red Edge 1           + 0.694-0.713      + 20              + 4             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 6           + Red Edge 2           + 0.731–0.749      + 20              + 5             +
+    + 6           + Red Edge 2           + 0.731-0.749      + 20              + 5             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 7           + Red Edge 3           + 0.769–0.797      + 20              + 6             +
+    + 7           + Red Edge 3           + 0.769-0.797      + 20              + 6             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 8           + Broad Near Infrared  + 0.760–0.908      + 10              + 7             +
+    + 8           + Broad Near Infrared  + 0.760-0.908      + 10              + 7             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 8A          + Near Infrared        + 0.848–0.881      + 20              + 8             +
+    + 8A          + Near Infrared        + 0.848-0.881      + 20              + 8             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 9           + Water Vapor          + 0.932–0.958      + 60              + / :sup:`2`    +
+    + 9           + Water Vapor          + 0.932-0.958      + 60              + / :sup:`2`    +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 10          + Cirrus               + 1.337–1.412      + 60              + / :sup:`3`    +
+    + 10          + Cirrus               + 1.337-1.412      + 60              + / :sup:`3`    +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 11          + Shortwave Infrared 1 + 1.539–1.682      + 20              + 9             +
+    + 11          + Shortwave Infrared 1 + 1.539-1.682      + 20              + 9             +
     +-------------+----------------------+------------------+-----------------+---------------+
-    + 12          + Shortwave Infrared 2 + 2.078–2.320      + 20              + 10            +
+    + 12          + Shortwave Infrared 2 + 2.078-2.320      + 20              + 10            +
     +-------------+----------------------+------------------+-----------------+---------------+
 
     | :sup:`1` Ultra-Blue band is used internally for aerosol retrieval, but not output.
@@ -301,7 +318,7 @@ All other products are optional.
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 1         + 1       + no data                                                            +
   +---------+----------------------+-----------+---------+--------------------------------------------------------------------+
-  + 1–2     + Cloud state          + 00        + 0       + clear                                                              +
+  + 1-2     + Cloud state          + 00        + 0       + clear                                                              +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 01        + 1       + less confident cloud (i.e., buffered cloud)                        +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
@@ -321,7 +338,7 @@ All other products are optional.
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 1         + 1       + yes                                                                +
   +---------+----------------------+-----------+---------+--------------------------------------------------------------------+
-  + 6–7     + Aerosol state        + 00        + 0       + estimated (best quality)                                           +
+  + 6-7     + Aerosol state        + 00        + 0       + estimated (best quality)                                           +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 01        + 1       + interpolated (mid quality)                                         +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
@@ -341,9 +358,9 @@ All other products are optional.
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 1         + 1       + yes (sun elevation < 15°, use with caution)                        +
   +---------+----------------------+-----------+---------+--------------------------------------------------------------------+
-  + 11–12   + Illumination state   + 00        + 0       + good (incidence angle < 55°, best quality for top. correction)     +
+  + 11-12   + Illumination state   + 00        + 0       + good (incidence angle < 55°, best quality for top. correction)     +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
-  +         +                      + 01        + 1       + medium (incidence angle 55°–80°, good quality for top. correction) +
+  +         +                      + 01        + 1       + medium (incidence angle 55°-80°, good quality for top. correction) +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
   +         +                      + 10        + 2       + poor (incidence angle > 80°, low quality for top. correction)      +
   +         +                      +-----------+---------+--------------------------------------------------------------------+
@@ -433,9 +450,9 @@ Logfile
 A logfile is created by force-level2 in the output directory.
 Following 29-digit naming convention is applied:
 FORCE-L2PS_20170712040001.log
-Digits 1–10 Processing module
-Digits 12–25 Processing time (start time) as YYYYMMDDHHMMSS
-Digits 27–29 File extension
+Digits 1-10 Processing module
+Digits 12-25 Processing time (start time) as YYYYMMDDHHMMSS
+Digits 27-29 File extension
 
 Typical entries look like this:
 LC08_L1TP_195023_20180110_20180119_01_T1: sc:   0.10%. cc:  89.59%. AOD: 0.2863. # of targets: 0/327.  4 product(s) written. Success! Processing time: 32 mins 37 secs
