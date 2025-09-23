@@ -32,6 +32,7 @@ Spectral index header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/cite-cl.h"
+#include "../cross-level/table-cl.h"
 #include "../higher-level/read-ard-hl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/tsa-hl.h"
@@ -41,7 +42,7 @@ Spectral index header
 extern "C" {
 #endif
 
-int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, aux_emb_t *endmember);
+int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int idx, short nodata, par_tsa_t *tsa, par_sen_t *sen, table_t *endmember);
 
 #ifdef __cplusplus
 }

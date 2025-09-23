@@ -90,8 +90,8 @@ r-udf-hl: prepare $(HIGHER_DIR)/r-udf-hl.c
 read-ard-hl: prepare $(HIGHER_DIR)/read-ard-hl.c
 	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(HIGHER_DIR)/read-ard-hl.c -o $(OBJDIR)/read-ard-hl.o $(GDAL_LIBS)
 
-read-aux-hl: prepare $(HIGHER_DIR)/read-aux-hl.c
-	$(G11) $(OPENCV_INCLUDES) $(OPENCV_FLAGS) -c $(HIGHER_DIR)/read-aux-hl.c -o $(OBJDIR)/read-aux-hl.o $(OPENCV_LIBS)
+read-aux-hl: prepare $(HIGHER_DIR)/read-aux-hl.cpp
+	$(G11) $(OPENCV_INCLUDES) $(OPENCV_FLAGS) -c $(HIGHER_DIR)/read-aux-hl.cpp -o $(OBJDIR)/read-aux-hl.o $(OPENCV_LIBS)
 
 sample-hl: prepare $(HIGHER_DIR)/sample-hl.c
 	$(GCC) -c $(HIGHER_DIR)/sample-hl.c -o $(OBJDIR)/sample-hl.o

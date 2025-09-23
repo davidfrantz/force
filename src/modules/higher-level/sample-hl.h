@@ -32,6 +32,7 @@ Sampling header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
+#include "../cross-level/table-cl.h"
 #include "../higher-level/read-ard-hl.h"
 
 
@@ -47,7 +48,7 @@ typedef struct {
   int nr;        // number of response variables
 } aux_smp_t;
 
-brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct);
+brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *smp, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

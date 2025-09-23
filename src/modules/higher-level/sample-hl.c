@@ -79,7 +79,7 @@ FILE *fp = NULL;
 --- nproduct:  number of output bricks (returned)
 +++ Return:    empty bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct){
+brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *smp, cube_t *cube, int *nproduct){
 small *mask_ = NULL;
 int f, r, s, i, j, p;
 int cx, cy, chunk[2], tile[2];
@@ -98,7 +98,7 @@ double minx, maxx, miny, maxy;
 
 
   // if no sample is left, skip all
-  if (smp->nleft == 0){
+  if (smp->n_active_rows == 0){
     *nproduct = 0;
     return NULL;
   }
@@ -124,11 +124,11 @@ double minx, maxx, miny, maxy;
   }
 
 
-  nr = smp->nr-2;
+  nr = smp->ncol-2;
 
-  alloc((void**)&copied,           smp->ns,     sizeof(bool));
-  alloc_2D((void***)&smp_features, smp->ns, nf, sizeof(double));
-  alloc_2D((void***)&smp_response, smp->ns, nr, sizeof(double));
+  alloc((void**)&copied,           smp->nrow,     sizeof(bool));
+  alloc_2D((void***)&smp_features, smp->nrow, nf, sizeof(double));
+  alloc_2D((void***)&smp_response, smp->nrow, nr, sizeof(double));
 
 
   if (phl->smp.projected){
@@ -172,24 +172,24 @@ double minx, maxx, miny, maxy;
   {
 
     #pragma omp for
-    for (s=0; s<smp->ns; s++){
+    for (s=0; s<smp->nrow; s++){
 
-      if (smp->visited[s]) continue;
+      if (!smp->row_mask[s]) continue;
 
-      if (smp->tab[s][_X_] < minx) continue;
-      if (smp->tab[s][_X_] > maxx) continue;
-      if (smp->tab[s][_Y_] < miny) continue;
-      if (smp->tab[s][_Y_] > maxy) continue;
+      if (smp->data[s][_X_] < minx) continue;
+      if (smp->data[s][_X_] > maxx) continue;
+      if (smp->data[s][_Y_] < miny) continue;
+      if (smp->data[s][_Y_] > maxy) continue;
       
       if (phl->smp.projected){
 
-        smp_map.x = smp->tab[s][_X_];
-        smp_map.y = smp->tab[s][_Y_];
+        smp_map.x = smp->data[s][_X_];
+        smp_map.y = smp->data[s][_Y_];
 
       } else {
 
         // get target coordinates in target css coordinates
-        if ((warp_geo_to_any(smp->tab[s][_X_], smp->tab[s][_Y_], &smp_map.x, &smp_map.y, cube->projection)) == FAILURE){
+        if ((warp_geo_to_any(smp->data[s][_X_], smp->data[s][_Y_], &smp_map.x, &smp_map.y, cube->projection)) == FAILURE){
           printf("Computing target coordinates in dst_srs failed!\n"); 
           error++;
           continue;
@@ -227,11 +227,11 @@ double minx, maxx, miny, maxy;
         smp_features[s][f] = features[f].dat[0][p];
         if (!features[f].msk[p] && phl->ftr.exclude) valid = false;
       }
-     for (r=0; r<nr; r++) smp_response[s][r] = smp->tab[s][_Z_+r];
+     for (r=0; r<nr; r++) smp_response[s][r] = smp->data[s][_Z_+r];
 
 
       // we are done with this sample
-      smp->visited[s] = true;
+      smp->row_mask[s] = false;
       found++;
 
       if (!valid) continue;
@@ -245,13 +245,13 @@ double minx, maxx, miny, maxy;
 
   if (error > 0) printf("there were %d errors in coordinate conversion..\n", error);
 
-  smp->nleft -= found;
+  smp->n_active_rows -= found;
 
 
   if (added > 0){
-    append_table(phl->smp.f_sample,   copied, smp_features, smp->ns, nf, 0);
-    append_table(phl->smp.f_response, copied, smp_response, smp->ns, nr, 6);
-    append_table(phl->smp.f_coords,   copied, smp->tab,     smp->ns, 2,  6);
+    append_table(phl->smp.f_sample,   copied, smp_features, smp->nrow, nf, 0);
+    append_table(phl->smp.f_response, copied, smp_response, smp->nrow, nr, 6);
+    append_table(phl->smp.f_coords,   copied, smp->data,    smp->nrow, 2,  6);
   }
 
 
@@ -262,8 +262,8 @@ double minx, maxx, miny, maxy;
 
 
   free((void*)copied);
-  free_2D((void**)smp_response, smp->ns);
-  free_2D((void**)smp_features, smp->ns);
+  free_2D((void**)smp_response, smp->nrow);
+  free_2D((void**)smp_features, smp->nrow);
 
   *nproduct = 0;
   return NULL;

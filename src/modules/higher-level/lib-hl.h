@@ -35,6 +35,7 @@ Library completeness header
 #include "../cross-level/brick_base-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/stats-cl.h"
+#include "../cross-level/table-cl.h"
 #include "../higher-level/read-ard-hl.h"
 
 #ifdef __cplusplus
@@ -55,7 +56,7 @@ typedef struct {
   short **mae_;
 } lib_t;
 
-brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *libraries, int n_libraries, cube_t *cube, int *nproduct);
 
 #ifdef __cplusplus
 }

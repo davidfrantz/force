@@ -74,7 +74,7 @@ typedef struct {
 #include "../higher-level/py-udf-hl.h"
 #include "../higher-level/r-udf-hl.h"
 
-brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
+brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, table_t *endmember, cube_t *cube, int *nproduct);
 
 
 #ifdef __cplusplus

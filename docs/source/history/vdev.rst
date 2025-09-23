@@ -100,6 +100,10 @@ Develop version
     as e.g. an NRT application may not have data for a specific day or region.
     In this case, only a warning is displayed with some hints on how to resolve potential issues.
 
+  - endmember, sampling, feature and response tables can be a csv now, i.e. "," has become an allowed column separator. 
+    Tab and whitespace are still allowed, too.
+    @German users, take care to use English csv settings!
+
 --  **FORCE AUX**
 
   - ``force-mosaic`` was overhauled:
