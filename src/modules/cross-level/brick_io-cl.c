@@ -567,8 +567,7 @@ const char *projection = NULL;
 
   }
 
-  GDALClose(dataset);
-
+  
   //CSLDestroy(open_options);
 
   // compile brick correctly
@@ -577,19 +576,21 @@ const char *projection = NULL;
   set_brick_proj(brick,       projection);
   set_brick_ncols(brick,      dim.cols);
   set_brick_nrows(brick,      dim.rows);
-
+  
   set_brick_filename(brick, "DONOTOUTPUT");
   set_brick_dirname(brick, "DONOTOUTPUT");
   set_brick_provdir(brick, "DONOTOUTPUT");
   set_brick_name(brick, "GENERIC BRICK");
-
+  
   set_brick_nprovenance(brick, 1);
   set_brick_provenance(brick, 0, file);
-
+  
   default_gdaloptions(_FMT_GTIFF_, &format);
-
+  
   set_brick_open(brick,   OPEN_FALSE);
   set_brick_format(brick, &format);
+  
+  GDALClose(dataset); // only close after projection has been copied!
   
   return brick;
 }
