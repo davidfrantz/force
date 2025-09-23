@@ -131,8 +131,6 @@ char oname[NPOW_10];
 brick_t *QAI = NULL;
 brick_t *QIM = NULL;
 small **qim_ = NULL;
-int b, p;
-dim_t dim;
 
 
   parse_args(argc, argv, &args);
@@ -163,7 +161,7 @@ dim_t dim;
   set_brick_dirname(QIM, args.dout);
   set_brick_filename(QIM, oname);
   set_brick_open(QIM, OPEN_CREATE);
-  for (b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_save(QIM, b, true);
+  for (int b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_save(QIM, b, true);
 
   set_brick_bandname(QIM, _QAI_FLAG_OFF_, "valid data");           
   set_brick_bandname(QIM, _QAI_FLAG_CLD_, "Cloud state");
@@ -178,7 +176,7 @@ dim_t dim;
   set_brick_bandname(QIM, _QAI_FLAG_SLP_, "Slope flag");           
   set_brick_bandname(QIM, _QAI_FLAG_WVP_, "Water vapor flag");
   
-  for (b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_nodata(QIM, b, 255);
+  for (int b=0; b<_QAI_FLAG_LENGTH_; b++) set_brick_nodata(QIM, b, 255);
 
   #ifdef FORCE_DEBUG
   printf("valid data %d %d\n",           _QAI_FLAG_OFF_,  _QAI_BIT_OFF_);
@@ -196,11 +194,11 @@ dim_t dim;
   #endif
 
   
-  #pragma omp parallel shared(qim_, QAI, dim) default(none)
+  #pragma omp parallel shared(qim_, QAI) default(none)
   {
   
     #pragma omp for
-    for (p=0; p<dim.cells; p++){
+    for (int p=0; p<get_brick_ncells(QAI); p++){
       qim_[_QAI_FLAG_OFF_][p] = get_off(QAI, p);
       qim_[_QAI_FLAG_CLD_][p] = get_cloud(QAI, p);
       qim_[_QAI_FLAG_SHD_][p] = get_shadow(QAI, p);
