@@ -41,7 +41,6 @@ Reading all-purpose files
 extern "C" {
 #endif
 
-double **read_table_deprecated(char *fname, int *nrows, int *ncols);
 char ***read_tagvalue(char *fname, int *nrows);
 
 #ifdef __cplusplus

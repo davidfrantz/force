@@ -44,6 +44,7 @@ force-higher-level: \
   stm-hl \
   string-cl \
   sys-cl \
+  table-cl \
   tasks-hl \
   texture-hl \
   tile-cl \
@@ -99,6 +100,7 @@ force-higher-level: \
 	$(OBJDIR)/stm-hl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
+	$(OBJDIR)/table-cl.o \
 	$(OBJDIR)/tasks-hl.o \
 	$(OBJDIR)/texture-hl.o \
 	$(OBJDIR)/tile-cl.o \

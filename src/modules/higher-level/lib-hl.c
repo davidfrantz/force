@@ -28,7 +28,7 @@ This file contains functions for library completeness testing
 #include "lib-hl.h"
 
 
-brick_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct);
+brick_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, int n_libraries, cube_t *cube, int *nproduct);
 brick_t *compile_lib_brick(brick_t *ard, int nb, bool write, char *prodname, par_hl_t *phl);
 
 
@@ -42,7 +42,7 @@ brick_t *compile_lib_brick(brick_t *ard, int nb, bool write, char *prodname, par
 --- nproduct: number of output bricks (returned)
 +++ Return:   bricks for LIB results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct){
+brick_t **compile_lib(ard_t *features, lib_t *lib, par_hl_t *phl, int n_libraries, cube_t *cube, int *nproduct){
 brick_t **LIB = NULL;
 int b, o, nprod = 1;
 int error = 0;
@@ -50,7 +50,7 @@ int nchar;
 char bname[NPOW_10];
 char domain[NPOW_10];
 enum{ _mae_ };
-int prodlen[1] ={ library->n + 1 };
+int prodlen[1] ={ n_libraries + 1 };
 char prodname[1][NPOW_02] ={ "MAE" };
 
 int prodtype[1] ={ _mae_ };
@@ -70,7 +70,7 @@ short ***ptr[1] ={ &lib->mae_ };
         printf("Error compiling %s product. ", prodname[o]); error++;
       } else {
         for (b=0; b<prodlen[o]; b++){
-          if (b < library->n){
+          if (b < n_libraries){
             basename_without_ext(phl->lib.f_lib[b], bname, NPOW_10);
             if (strlen(bname) > NPOW_10-1){
               nchar = snprintf(domain, NPOW_10, "LIBRARY-%02d", b+1);
@@ -176,7 +176,7 @@ int nchar;
 --- nproduct:  number of output bricks (returned)
 +++ Return:    bricks with TXT results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_lib_t *library, cube_t *cube, int *nproduct){
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t **libraries, int n_libraries, cube_t *cube, int *nproduct){
 lib_t lib;
 brick_t **LIB;
 small *mask_ = NULL;
@@ -193,7 +193,7 @@ double mae, min_mae, min_mae_all, k;
   nodata = get_brick_nodata(features[0].DAT, 0);
 
   // number of features okay?
-  if (library->nf != nf){
+  if (libraries[0]->ncol != nf){
     printf("number of features in library files is different from given features.\n");
     *nproduct = 0;
     return NULL;}
@@ -207,14 +207,14 @@ double mae, min_mae, min_mae_all, k;
   }
 
   // compile products + bricks
-  if ((LIB = compile_lib(features, &lib, phl, library, cube, &nprod)) == NULL || nprod == 0){
+  if ((LIB = compile_lib(features, &lib, phl, n_libraries, cube, &nprod)) == NULL || nprod == 0){
     printf("Unable to compile LIB products!\n");
     *nproduct = 0;
     return NULL;
   }
 
   
-  #pragma omp parallel private(newfeatures,valid,mae,min_mae,min_mae_all,k,f,l,s) shared(lib,phl,features,library,mask_,nc,nf,nodata) default(none)
+  #pragma omp parallel private(newfeatures,valid,mae,min_mae,min_mae_all,k,f,l,s) shared(lib,phl,features,libraries,n_libraries,mask_,nc,nf,nodata) default(none)
   {
 
     alloc((void**)&newfeatures, nf, sizeof(double));
@@ -222,7 +222,7 @@ double mae, min_mae, min_mae_all, k;
     #pragma omp for
     for (p=0; p<nc; p++){
       
-      for (l=0; l<=library->n; l++) lib.mae_[l][p] = nodata;
+      for (l=0; l<=n_libraries; l++) lib.mae_[l][p] = nodata;
     
       if (mask_ != NULL && !mask_[p]) continue;
 
@@ -235,19 +235,19 @@ double mae, min_mae, min_mae_all, k;
       
       min_mae_all = SHRT_MAX;
       
-      for (l=0; l<library->n; l++){
+      for (l=0; l<n_libraries; l++){
         
         min_mae = SHRT_MAX;
 
         for (f=0; f<nf; f++){
           if (phl->lib.rescale){
-            newfeatures[f] = ((double)features[f].dat[0][p] - library->mean[l][f]) / library->sd[l][f];
+            newfeatures[f] = ((double)features[f].dat[0][p] - libraries[l]->mean[f]) / libraries[l]->sd[f];
           } else {
             newfeatures[f] = (double)features[f].dat[0][p];
           }
         }
 
-        for (s=0; s<library->ns[l]; s++){
+        for (s=0; s<libraries[l]->nrow; s++){
           
           mae = k = 0;
 
@@ -255,7 +255,7 @@ double mae, min_mae, min_mae_all, k;
             
             if (!features[f].msk[p]) continue;
 
-            mae += fabs(library->tab[l][s][f] - newfeatures[f]);
+            mae += fabs(libraries[l]->data[s][f] - newfeatures[f]);
             k++;
 
           }
@@ -273,7 +273,7 @@ double mae, min_mae, min_mae_all, k;
       }
 
       if (min_mae_all < SHRT_MAX && phl->lib.rescale) min_mae_all *= 1000;
-      if (min_mae_all < SHRT_MAX) lib.mae_[library->n][p] = (short)min_mae_all;
+      if (min_mae_all < SHRT_MAX) lib.mae_[n_libraries][p] = (short)min_mae_all;
 
     }
     

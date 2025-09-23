@@ -219,7 +219,7 @@ bool error = false;
         break;
       case _HL_LIB_:
         OUTPUT[pu] = library_completeness(ARD1[pu], MASK[pu], 
-          nt1[pu], phl, &aux->library, cube, &nprod[pu]);
+          nt1[pu], phl, &aux->libraries, aux->n_libraries, cube, &nprod[pu]);
         break;
       case _HL_UDF_:
         OUTPUT[pu] = udf_plugin(ARD1[pu], MASK[pu], 

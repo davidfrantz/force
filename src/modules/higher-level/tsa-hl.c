@@ -909,7 +909,7 @@ int nchar;
 --- nproduct:  number of output bricks (returned)
 +++ Return:    bricks with TSA results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct){
+brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, table_t *endmember, cube_t *cube, int *nproduct){
 tsa_t ts;
 brick_t ***TSA;
 brick_t **PTR;
