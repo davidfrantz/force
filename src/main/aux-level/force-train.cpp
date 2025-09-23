@@ -172,7 +172,7 @@ time_t TIME;
     return FAILURE;}
 
   #ifdef FORCE_DEBUG
-  print_table(&t_response, true);
+  print_table(&t_response, true, true);
   #endif
 
   alloc((void**)&c_response, t_response.nrow, sizeof(int));
@@ -198,7 +198,7 @@ time_t TIME;
   }
 
   #ifdef FORCE_DEBUG
-  print_table(&t_features, true);
+  print_table(&t_features, true, true);
   #endif
 
 
