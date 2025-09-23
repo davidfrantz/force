@@ -156,6 +156,10 @@ dim_t dim;
     printf("Wrong product given. Give QAI or INF product\n"); return FAILURE;}
   strncpy(pch, "_QIM", 4);
   
+  set_brick_provdir(QIM, args.dout);
+  set_brick_nprovenance(QIM, 1);
+  set_brick_provenance(QIM, 0, args.finp);
+  
   set_brick_dirname(QIM, args.dout);
   set_brick_filename(QIM, oname);
   set_brick_open(QIM, OPEN_CREATE);
