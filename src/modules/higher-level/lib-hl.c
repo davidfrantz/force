@@ -176,7 +176,7 @@ int nchar;
 --- nproduct:  number of output bricks (returned)
 +++ Return:    bricks with TXT results
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t **libraries, int n_libraries, cube_t *cube, int *nproduct){
+brick_t **library_completeness(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *libraries, int n_libraries, cube_t *cube, int *nproduct){
 lib_t lib;
 brick_t **LIB;
 small *mask_ = NULL;
@@ -193,7 +193,7 @@ double mae, min_mae, min_mae_all, k;
   nodata = get_brick_nodata(features[0].DAT, 0);
 
   // number of features okay?
-  if (libraries[0]->ncol != nf){
+  if (libraries[0].ncol != nf){
     printf("number of features in library files is different from given features.\n");
     *nproduct = 0;
     return NULL;}
@@ -241,13 +241,13 @@ double mae, min_mae, min_mae_all, k;
 
         for (f=0; f<nf; f++){
           if (phl->lib.rescale){
-            newfeatures[f] = ((double)features[f].dat[0][p] - libraries[l]->mean[f]) / libraries[l]->sd[f];
+            newfeatures[f] = ((double)features[f].dat[0][p] - libraries[l].mean[f]) / libraries[l].sd[f];
           } else {
             newfeatures[f] = (double)features[f].dat[0][p];
           }
         }
 
-        for (s=0; s<libraries[l]->nrow; s++){
+        for (s=0; s<libraries[l].nrow; s++){
           
           mae = k = 0;
 
@@ -255,7 +255,7 @@ double mae, min_mae, min_mae_all, k;
             
             if (!features[f].msk[p]) continue;
 
-            mae += fabs(libraries[l]->data[s][f] - newfeatures[f]);
+            mae += fabs(libraries[l].data[s][f] - newfeatures[f]);
             k++;
 
           }
