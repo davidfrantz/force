@@ -52,9 +52,10 @@ fi
 
 if [ $enable -eq 1 ]; then
   sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%\1%' src/modules/cross-level/const-cl.h
-  sed -i 's/^export DEBUG=false$/export DEBUG=true/' misc/force-bash-library.sh
+  sed -i 's/^export DEBUG=.*$/export DEBUG=true/' misc/force-bash-library.sh
 elif [ $enable -eq 0 ]; then
   sed -i -e 's%^[/]*\(#define FORCE_DEBUG\)%//\1%' src/modules/cross-level/const-cl.h
+  sed -i 's/^export DEBUG=.*$/export DEBUG=false/' misc/force-bash-library.sh
 fi
 
 exit 0
