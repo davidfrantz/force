@@ -478,6 +478,71 @@ void register_udf(params_t *params, par_hl_t *phl){
 }
 
 
+
+
+int load_index_definitions(json_t **def_indices){
+
+  char d_exe[NPOW_10];
+  get_install_directory(d_exe, NPOW_10);
+
+  char path_sensor[NPOW_10];
+  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data", "indices.json", "/");
+
+  json_error_t error;
+  json_t *def;
+  def = json_load_file(path_sensor, 0, &error);
+  if (!def){
+    fprintf(stderr, "Error: %s\n", error.text);
+    return FAILURE;
+  }
+
+  *def_indices = def;
+
+  return SUCCESS;
+}
+
+
+int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t *def_indices){
+  
+  json_t *def_index = json_object_get(def_indices, index_name);
+  
+  if (def_index == NULL) {
+    fprintf(stderr, "Error: Item %s not found\n", index_name);
+    fprintf(stderr, "There is no definition for this index.\n");
+    return FAILURE;
+  }
+
+  char **names = NULL;
+
+  if (json_is_array(def_index)) {
+
+    *nbands = json_array_size(def_index);
+
+    alloc_2D((void***)&names, nbands, NPOW_10, sizeof(char));
+  
+
+    for (int b=0; b<nbands; b++){
+        json_t *def_band_name = json_array_get(def_index, b);
+        if (json_is_string(def_band_name)){
+          copy_string(names[b], NPOW_10, json_string_value(def_band_name));
+          printf("  %02d: %s\n", b+1, names[b]);
+        } else {
+          fprintf(stderr, "Error: Element %d in %s array is not a string.\n", b+1, index_name);
+          return FAILURE;
+        }
+    }
+  } else {
+    fprintf(stderr, "Error: Item %s is not an array.\n", index_name);
+    return FAILURE;
+  }
+
+  *bandnames = names;
+
+  return SUCCESS;
+}
+
+
+
 /** This function checks that each index can be computed with the given
 +++ set of sensors. It also kicks out unused bands to remove I/O
 --- tsa:    TSA parameters
@@ -495,6 +560,116 @@ int *band_ptr[_WVL_LENGTH_] = {
   &sen->rededge1, &sen->rededge2, &sen->rededge3,
   &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
   &sen->vv, &sen->vh };
+
+
+
+  printf("\nDEVELOP ALERT: SMA index needs separate logic.\n\n");
+
+  // load index definitions
+  json_t *def_indices = NULL;
+  if (load_index_definitions(&def_indices) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse index definitions.\n");
+    return FAILURE;
+  }
+
+  int error_indices = 0;
+  bool *use_band = NULL;
+  alloc((void**)&use_band, sen->nb, sizeof(bool));
+
+  for (int i=0; i<tsa->n; i++){
+
+    char **required_bands = NULL;
+    int n_required = 0;
+
+    if (get_index_bandnames(&required_bands, &n_required, tsa->index[i], def_indices) != SUCCESS){
+      fprintf(stderr, "Error: Could not load index definition for %d.\n", tsa->index[i]);
+      if (required_bands != NULL) free_2D((void**)required_bands, n_required);
+      error_indices++;
+      continue;
+    }
+
+    // check that all required bands are available
+    int error_bands = 0;
+
+    for (int b_required=0; b_required<n_required; b_required++){
+
+      bool found = false;
+
+      for (int b_available=0; b_available<sen->nb; b_available++){
+        if (string_equal(sen->domain[b_available], required_bands[b_required])){
+          use_band[b_available] = true;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found){
+        fprintf(stderr, "Error: Required band %s is not available given the requested sensors and their configuration.\n", required_bands[b_required]);
+        error_bands++;
+        continue;
+      }
+
+    }
+
+    if (error_bands > 0){
+      free_2D((void**)required_bands, n_required);
+      error_indices++;
+      continue;
+    }
+
+    free_2D((void**)required_bands, n_required);
+    
+  }
+
+  if (error_indices > 0){
+    fprintf(stderr, "Error: Failed to parse index definitions for %d indices.\n", error_indices);
+    exit(FAILURE);
+  }
+
+  json_decref(def_indices);
+
+
+  // go through all available bands and check if they are needed
+  for (int b_available=0; b_available<sen->nb; b_available++){
+
+    // band not needed, kick it out
+    if (!use_band[b_available]){
+      
+      for (int i=b_available; i<sen->nb-1; i++){
+        copy_string(sen->domain[i], NPOW_10, sen->domain[i + 1]);
+      }
+
+      for (int s=0; s<sen->n; s++){
+        for (int i=b_available; i<sen->nb-1; i++) {
+          sen->band[s][i] = sen->band[s][i + 1];
+        }
+      }
+
+      sen->nb--;
+      b_available--; // stay at the same index for next iteration
+
+    }
+
+  }
+
+  free((void**)use_band);
+
+
+  #ifdef FORCE_DEBUG
+  #endif
+  printf("Waveband mapping after index parsing:\n");
+  for (int s=0; s<sen->n; s++){
+    printf("Sensor # %02d: %s with %d retained bands:\n", s, sen->sensor[s], sen->nb);
+    for (int b=0; b<sen->nb; b++){
+      printf("  %s (# %02d)", sen->domain[b], sen->band[s][b]);
+    }
+    printf("\n");
+  }
+
+
+
+
+
 
 
   alloc_2D((void***)&tsa->index_name, tsa->n, NPOW_02, sizeof(char));
