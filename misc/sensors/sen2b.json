@@ -1,0 +1,11 @@
+{
+  "description": "Sentinel-2B MSI high-res bands",
+  "name": "SEN2B",
+  "bands": 4,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "BROADNIR"
+  ]
+}

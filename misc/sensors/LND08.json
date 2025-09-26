@@ -1,0 +1,13 @@
+{
+  "description": "Landsat 8 Operational Land Imager",
+  "name": "LND08",
+  "bands": 6,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "NIR",
+    "SWIR1",
+    "SWIR2"
+  ]
+}
