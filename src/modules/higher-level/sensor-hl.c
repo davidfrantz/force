@@ -39,7 +39,7 @@ int get_sensor_definition(json_t **def_sensor, char *sensor_name){
   concat_string_2(file_sensor, NPOW_10, sensor_name, ".json", "");
 
   char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/sensors", file_sensor, "/");
+  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data/sensors", file_sensor, "/");
 
   json_error_t error;
   json_t *def;
