@@ -96,6 +96,9 @@ read-aux-hl: prepare $(HIGHER_DIR)/read-aux-hl.cpp
 sample-hl: prepare $(HIGHER_DIR)/sample-hl.c
 	$(GCC) -c $(HIGHER_DIR)/sample-hl.c -o $(OBJDIR)/sample-hl.o
 
+sensor-hl: prepare $(HIGHER_DIR)/sensor-hl.c
+	$(GCC) -c $(HIGHER_DIR)/sensor-hl.c -o $(OBJDIR)/sensor-hl.o
+
 spec-adjust-hl: prepare $(HIGHER_DIR)/spec-adjust-hl.c
 	$(GCC) -c $(HIGHER_DIR)/spec-adjust-hl.c -o $(OBJDIR)/spec-adjust-hl.o
 
