@@ -30,7 +30,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 --- sensor_name: Name of the sensor (e.g. "SEN2A")
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_sensor_definition(json_t **def_sensor, char *sensor_name){
+int load_sensor_definition(json_t **def_sensor, char *sensor_name){
 
   char d_exe[NPOW_10];
   get_install_directory(d_exe, NPOW_10);
@@ -272,7 +272,7 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
 
     // get full sensor definition
     json_t *def_sensor = NULL;
-    if (get_sensor_definition(&def_sensor, sen->sensor[s]) != SUCCESS){
+    if (load_sensor_definition(&def_sensor, sen->sensor[s]) != SUCCESS){
       fprintf(stderr, "Error: Could not parse sensor definition for %s.\n", sen->sensor[s]);
       error++;
       continue;
