@@ -1222,6 +1222,12 @@ double tol = 5e-3;
 
   if (phl->type == _HL_TSA_){
 
+    if (vector_contains((const char**)phl->tsa.index.names, phl->tsa.index.n, "SMA")){
+      phl->tsa.sma.v = true;
+    } else {
+      phl->tsa.sma.v = false;
+    }
+
     if (phl->tsa.sma.orms && !phl->tsa.sma.v){
       phl->tsa.sma.orms = false;
       printf("Warning: will not output SMA RMSE as INDEX does not contain SMA. Proceed.\n");}

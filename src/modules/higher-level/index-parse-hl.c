@@ -310,6 +310,5 @@ int retrieve_indices(index_t *index, sen_t *sen){
     printf("\n");
   }
 
-exit(SUCCESS);
   return SUCCESS;
 }

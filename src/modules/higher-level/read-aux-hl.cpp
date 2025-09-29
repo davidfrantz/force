@@ -62,9 +62,15 @@ float scale = 10000.0;
   }
   }
 
+  
   #ifdef FORCE_DEBUG
   print_table(&aux->endmember, false, false);
   #endif
+  
+  if (aux->endmember.nrow != phl->sen.n_bands){
+    printf("Endmember spectra (%d bands) do not match sensor configuration (%d bands).\n", aux->endmember.nrow, phl->sen.n_bands);
+    return FAILURE;
+  }
 
   return SUCCESS;
 }
