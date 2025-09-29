@@ -141,7 +141,7 @@ short val = 0;
 }
 
 
-void set_meta(brick_t *BRICK, date_t *date, double geotran[6], int nx, int ny, const char *proj, int tx, int ty, int sid, const char *sensor, const char *prd, const char *dout){
+void set_meta(brick_t *BRICK, date_t *date, double geotran[6], int nx, int ny, const char *proj, int tx, int ty, const char *sensor, const char *prd, const char *dout){
 char fname[NPOW_10];
 gdalopt_t format;
 int nchar;
@@ -168,7 +168,6 @@ int nchar;
   set_brick_tiley(BRICK, ty);
 
   set_brick_product(BRICK, prd);
-  set_brick_sensorid(BRICK, sid);
 
   set_brick_name(BRICK, "FORCE Level 2 MODIS Import");
   set_brick_dirname(BRICK, dout);
@@ -215,7 +214,7 @@ cube_t cube;
 }
 
 
-void compile_qai(brick_t *QAI, ushort *modqa_, short **boa_, int nc, int nb, int sid, short nodata){
+void compile_qai(brick_t *QAI, ushort *modqa_, short **boa_, int nc, int nb, char *sensor, short nodata){
 int p, b;
 
 
@@ -238,7 +237,7 @@ int p, b;
     if (get_modqa(modqa_, 15, p, 1) >  0) set_snow(QAI, p, 1);    // internal snow algo
 
     for (b=0; b<nb; b++){
-      if (b == 5 && sid == _SEN_MOD02_) continue;
+      if (b == 5 && strings_equal(sensor, "MOD02")) continue;
       if (boa_[b][p] < 0){     set_subzero(QAI, p, 1);    break;}
       if (boa_[b][p] > 10000){ set_saturation(QAI, p, 1); break;}
     }
@@ -261,7 +260,6 @@ char year_[5], doy_[4];
 char tx_[3], ty_[3];
 int year, doy, month, day;
 int tx, ty;
-int sid;
 
 
 date_t date;
@@ -321,10 +319,8 @@ short nodata = -9999;
   
   if (strcmp(sen_, "MOD") == 0){
     copy_string(sensor, 6, "MOD01");
-    sid = _SEN_MOD01_;
   } else if (strcmp(sen_, "MYD") == 0){
     copy_string(sensor, 6, "MOD02");
-    sid = _SEN_MOD02_;
   } else {
     printf("no MODIS sensor detected: %s.\n\n", sen_); return FAILURE;
   }
@@ -412,10 +408,10 @@ short nodata = -9999;
   GDALClose(fp);
 
 
-  compile_qai(QAI, modqa_, boa_, nc, nb, sid, nodata);
+  compile_qai(QAI, modqa_, boa_, nc, nb, sensor, nodata);
 
-  set_meta(BOA, &date, geotran, nx, ny, proj, tx, ty, sid, sensor, "BOA", dtile);
-  set_meta(QAI, &date, geotran, nx, ny, proj, tx, ty, sid, sensor, "QAI", dtile);
+  set_meta(BOA, &date, geotran, nx, ny, proj, tx, ty, sensor, "BOA", dtile);
+  set_meta(QAI, &date, geotran, nx, ny, proj, tx, ty, sensor, "QAI", dtile);
 
   //print_brick_info(BOA);
   //print_brick_info(QAI);

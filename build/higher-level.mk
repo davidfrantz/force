@@ -8,7 +8,8 @@ higher: \
     cso-hl \
     fold-hl \
     improphe-hl \
-    index-hl \
+    index-compute-hl \
+    index-parse-hl \
     interpolate-hl \
     l2-improphe-hl \
     level3-hl \
@@ -48,8 +49,11 @@ fold-hl: prepare $(HIGHER_DIR)/fold-hl.c
 improphe-hl: prepare $(HIGHER_DIR)/improphe-hl.c
 	$(GCC) -c $(HIGHER_DIR)/improphe-hl.c -o $(OBJDIR)/improphe-hl.o
 
-index-hl: prepare $(HIGHER_DIR)/index-hl.c
-	$(GCC) $(GSL) -c $(HIGHER_DIR)/index-hl.c -o $(OBJDIR)/index-hl.o $(LDGSL)
+index-compute-hl: prepare $(HIGHER_DIR)/index-compute-hl.c
+	$(GCC) $(GSL) -c $(HIGHER_DIR)/index-compute-hl.c -o $(OBJDIR)/index-compute-hl.o $(LDGSL)
+
+index-parse-hl: prepare $(HIGHER_DIR)/index-parse-hl.c
+	$(GCC) $(GSL) -c $(HIGHER_DIR)/index-parse-hl.c -o $(OBJDIR)/index-parse-hl.o $(LDGSL)
 
 interpolate-hl: prepare $(HIGHER_DIR)/interpolate-hl.c
 	$(GCC) -c $(HIGHER_DIR)/interpolate-hl.c -o $(OBJDIR)/interpolate-hl.o

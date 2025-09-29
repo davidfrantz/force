@@ -43,7 +43,6 @@ void register_smp(params_t *params, par_hl_t *phl);
 void register_txt(params_t *params, par_hl_t *phl);
 void register_lsm(params_t *params, par_hl_t *phl);
 void register_lib(params_t *params, par_hl_t *phl);
-int check_bandlist(par_tsa_t *tsa, par_sen_t *sen);
 void alloc_ftr(par_ftr_t *ftr);
 void free_ftr(par_ftr_t *ftr);
 void alloc_mcl(par_mcl_t *mcl);
@@ -190,7 +189,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
 
   // TS parameters
-  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, -1, &phl->tsa.index, &phl->tsa.n);
+  register_charvec_par(params, "INDEX", _CHAR_TEST_NONE_, -1, &phl->tsa.index.names, &phl->tsa.index.n);
   register_enum_par(params,    "STANDARDIZE_TSS", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.standard);
   register_bool_par(params,    "OUTPUT_TSS", &phl->tsa.otss);
 
@@ -475,440 +474,6 @@ void register_udf(params_t *params, par_hl_t *phl){
     _CHAR_TEST_NONE_, -1, &phl->sen.aux_products, &phl->sen.n_aux_products);
 
   return;
-}
-
-
-
-
-int load_index_definitions(json_t **def_indices){
-
-  char d_exe[NPOW_10];
-  get_install_directory(d_exe, NPOW_10);
-
-  char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data", "indices.json", "/");
-
-  json_error_t error;
-  json_t *def;
-  def = json_load_file(path_sensor, 0, &error);
-  if (!def){
-    fprintf(stderr, "Error: %s\n", error.text);
-    return FAILURE;
-  }
-
-  *def_indices = def;
-
-  return SUCCESS;
-}
-
-
-int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t *def_indices){
-  
-  json_t *def_index = json_object_get(def_indices, index_name);
-  
-  if (def_index == NULL) {
-    fprintf(stderr, "Error: Item %s not found\n", index_name);
-    fprintf(stderr, "There is no definition for this index.\n");
-    return FAILURE;
-  }
-
-  char **names = NULL;
-
-  if (json_is_array(def_index)) {
-
-    *nbands = json_array_size(def_index);
-
-    alloc_2D((void***)&names, nbands, NPOW_10, sizeof(char));
-  
-
-    for (int b=0; b<nbands; b++){
-        json_t *def_band_name = json_array_get(def_index, b);
-        if (json_is_string(def_band_name)){
-          copy_string(names[b], NPOW_10, json_string_value(def_band_name));
-          printf("  %02d: %s\n", b+1, names[b]);
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not a string.\n", b+1, index_name);
-          return FAILURE;
-        }
-    }
-  } else {
-    fprintf(stderr, "Error: Item %s is not an array.\n", index_name);
-    return FAILURE;
-  }
-
-  *bandnames = names;
-
-  return SUCCESS;
-}
-
-
-
-/** This function checks that each index can be computed with the given
-+++ set of sensors. It also kicks out unused bands to remove I/O
---- tsa:    TSA parameters
---- sen:    sensor parameters
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int check_bandlist(par_tsa_t *tsa, par_sen_t *sen){
-int idx, b, nb = _WVL_LENGTH_, k, s;
-bool v[_WVL_LENGTH_] = { 
-  false, false, false, false, false,
-  false, false, false, false, false,
-  false, false };
-int *band_ptr[_WVL_LENGTH_] = { 
-  &sen->blue, &sen->green, &sen->red,
-  &sen->rededge1, &sen->rededge2, &sen->rededge3,
-  &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
-  &sen->vv, &sen->vh };
-
-
-
-  printf("\nDEVELOP ALERT: SMA index needs separate logic.\n\n");
-
-  // load index definitions
-  json_t *def_indices = NULL;
-  if (load_index_definitions(&def_indices) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse index definitions.\n");
-    return FAILURE;
-  }
-
-  int error_indices = 0;
-  bool *use_band = NULL;
-  alloc((void**)&use_band, sen->nb, sizeof(bool));
-
-  for (int i=0; i<tsa->n; i++){
-
-    char **required_bands = NULL;
-    int n_required = 0;
-
-    if (get_index_bandnames(&required_bands, &n_required, tsa->index[i], def_indices) != SUCCESS){
-      fprintf(stderr, "Error: Could not load index definition for %d.\n", tsa->index[i]);
-      if (required_bands != NULL) free_2D((void**)required_bands, n_required);
-      error_indices++;
-      continue;
-    }
-
-    // check that all required bands are available
-    int error_bands = 0;
-
-    for (int b_required=0; b_required<n_required; b_required++){
-
-      bool found = false;
-
-      for (int b_available=0; b_available<sen->nb; b_available++){
-        if (string_equal(sen->domain[b_available], required_bands[b_required])){
-          use_band[b_available] = true;
-          found = true;
-          break;
-        }
-      }
-
-      if (!found){
-        fprintf(stderr, "Error: Required band %s is not available given the requested sensors and their configuration.\n", required_bands[b_required]);
-        error_bands++;
-        continue;
-      }
-
-    }
-
-    if (error_bands > 0){
-      free_2D((void**)required_bands, n_required);
-      error_indices++;
-      continue;
-    }
-
-    free_2D((void**)required_bands, n_required);
-    
-  }
-
-  if (error_indices > 0){
-    fprintf(stderr, "Error: Failed to parse index definitions for %d indices.\n", error_indices);
-    exit(FAILURE);
-  }
-
-  json_decref(def_indices);
-
-
-  // go through all available bands and check if they are needed
-  for (int b_available=0; b_available<sen->nb; b_available++){
-
-    // band not needed, kick it out
-    if (!use_band[b_available]){
-      
-      for (int i=b_available; i<sen->nb-1; i++){
-        copy_string(sen->domain[i], NPOW_10, sen->domain[i + 1]);
-      }
-
-      for (int s=0; s<sen->n; s++){
-        for (int i=b_available; i<sen->nb-1; i++) {
-          sen->band[s][i] = sen->band[s][i + 1];
-        }
-      }
-
-      sen->nb--;
-      b_available--; // stay at the same index for next iteration
-
-    }
-
-  }
-
-  free((void**)use_band);
-
-
-  #ifdef FORCE_DEBUG
-  #endif
-  printf("Waveband mapping after index parsing:\n");
-  for (int s=0; s<sen->n; s++){
-    printf("Sensor # %02d: %s with %d retained bands:\n", s, sen->sensor[s], sen->nb);
-    for (int b=0; b<sen->nb; b++){
-      printf("  %s (# %02d)", sen->domain[b], sen->band[s][b]);
-    }
-    printf("\n");
-  }
-
-
-
-
-
-
-
-  alloc_2D((void***)&tsa->index_name, tsa->n, NPOW_02, sizeof(char));
-
-  // for each requested index, flag required wavelength, 
-  // set short index name for filename
-  for (idx=0; idx<tsa->n; idx++){
-
-    switch (tsa->index[idx]){
-      case _IDX_BLU_:
-        v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BLU");
-        break;
-      case _IDX_GRN_:
-        v[_WVL_GREEN_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "GRN");
-        break;
-      case _IDX_RED_:
-        v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RED");
-        break;
-      case _IDX_NIR_:
-        v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NIR");
-        break;
-      case _IDX_SW0_:
-        v[_WVL_SWIR0_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW0");
-        break;
-      case _IDX_SW1_:
-        v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW1");
-        break;
-      case _IDX_SW2_:
-        v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW2");
-        break;
-      case _IDX_RE1_:
-        v[_WVL_REDEDGE1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE1");
-        break;
-      case _IDX_RE2_:
-        v[_WVL_REDEDGE2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE2");
-        break;
-      case _IDX_RE3_:
-        v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE3");
-        break;
-      case _IDX_BNR_:
-        v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BNR");
-        break;
-      case _IDX_NDV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDV");
-        break;
-      case _IDX_EVI_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "EVI"); 
-        break;
-      case _IDX_NBR_:
-        v[_WVL_NIR_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NBR"); 
-        break;
-      case _IDX_ARV_:
-        v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
-        break;
-      case _IDX_SAV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
-        break;
-      case _IDX_SRV_:
-        v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SRV"); 
-        break;
-      case _IDX_TCB_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCB"); 
-        break;
-      case _IDX_TCG_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCG"); 
-        break;
-      case _IDX_TCW_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCW"); 
-        break;
-      case _IDX_TCD_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCD"); 
-        break;
-      case _IDX_NDB_:
-        v[_WVL_SWIR1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDB"); 
-        break;
-      case _IDX_NDW_:
-        v[_WVL_GREEN_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDW"); 
-        break;
-      case _IDX_MNW_:
-        v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MNW"); 
-        break;
-      case _IDX_NDS_:
-        v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDS"); 
-        break;
-      case _IDX_SMA_:
-        for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-        copy_string(tsa->index_name[idx], NPOW_02, "SMA"); 
-        tsa->sma.v = true;
-        break;
-      case _IDX_BVV_:
-        v[_WVL_VV_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BVV"); 
-        break;
-      case _IDX_BVH_:
-        v[_WVL_VH_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BVH"); 
-        break;
-      case _IDX_NDT_:
-        v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDT"); 
-        break;
-      case _IDX_NDM_:
-        v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDM"); 
-        break;
-      case _IDX_KNV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "KNV");
-        break;
-      case _IDX_ND1_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ND1");
-        break;
-      case _IDX_ND2_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ND2");
-        break;
-      case _IDX_CRE_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CRE");
-        break;
-      case _IDX_NR1_:
-        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR1");
-        break;
-      case _IDX_NR2_:
-        v[_WVL_REDEDGE2_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR2");
-        break;
-      case _IDX_NR3_:
-        v[_WVL_REDEDGE3_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR3");
-        break;
-      case _IDX_N1n_:
-        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N1N");
-        break;
-      case _IDX_N2n_:
-        v[_WVL_REDEDGE2_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N2N");
-        break;
-      case _IDX_N3n_:
-        v[_WVL_REDEDGE3_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N3N");
-        break;
-      case _IDX_Mre_:
-        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MRE");
-        break;
-      case _IDX_Mrn_:
-        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MRN");
-        break;
-      case _IDX_CCI_:
-        v[_WVL_GREEN_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CCI");
-        break;
-      case _IDX_EV2_:
-        v[_WVL_RED_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "EV2");
-        break;
-      case _IDX_CSW_:
-        v[_WVL_NIR_] = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CSW");
-        break;
-      default:
-        printf("unknown INDEX\n");
-        break;
-    }
-  }
-
-
-  // check if index can be computed with the given sensor combination
-  // remove unused bands from each sensor to reduce I/O
-  for (b=0; b<nb; b++){
-    if (v[b]  && *band_ptr[b] <  0){
-      printf("cannot compute index, band is missing (check SENSORS). ");
-      return FAILURE;
-    }
-    if (!v[b] && *band_ptr[b] >= 0 && !sen->spec_adjust){
-      for (s=0; s<sen->n; s++){ sen->band[s][*band_ptr[b]] = -1;}; *band_ptr[b] = -1;
-    }
-  }
-
-  // set target bands
-  if (sen->spec_adjust){
-    for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-  } else {
-    for (b=0, k=0; b<nb; b++){
-      if (v[b]) *band_ptr[b] = k++;
-    }
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("filtered bandlist with requested indices:\n");
-  for (s=0; s<sen->n; s++){
-    printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
-    printf("\n");
-  }
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
-  printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
-  printf("bnir  %02d, nir   %02d, swir1 %02d\n", sen->bnir, sen->nir, sen->swir1);
-  printf("swir2 %02d  vv    %02d, vh    %02d\n", sen->swir2, sen->vv, sen->vh);
-  #endif
-
-  return SUCCESS;
 }
 
 
@@ -1241,18 +806,18 @@ void free_param_higher(par_hl_t *phl){
   if (phl->input_level1 == _INP_QAI_ ||
       phl->input_level1 == _INP_ARD_){
     free_2D((void**)phl->sen.sensor, phl->sen.n);
-    free_2D((void**)phl->sen.band,   phl->sen.n);
-    free_2D((void**)phl->sen.domain, phl->sen.nb);
+    free_2D((void**)phl->sen.band_number, phl->sen.n);
+    free_2D((void**)phl->sen.band_names, phl->sen.n_bands);
   }
 
   if (phl->input_level2 == _INP_QAI_ ||
       phl->input_level2 == _INP_ARD_){
     free_2D((void**)phl->sen2.sensor, phl->sen2.n);
-    free_2D((void**)phl->sen2.band,   phl->sen2.n);
-    free_2D((void**)phl->sen2.domain, phl->sen2.nb);
+    free_2D((void**)phl->sen2.band_number, phl->sen2.n);
+    free_2D((void**)phl->sen2.band_names, phl->sen2.n_bands);
   }
 
-  if (phl->type == _HL_TSA_) free_2D((void**)phl->tsa.index_name, phl->tsa.n); 
+  if (phl->type == _HL_TSA_) free_2D((void**)phl->tsa.index.names, phl->tsa.index.n); 
 
   if (phl->type == _HL_ML_) free_mcl(&phl->mcl);
 
@@ -1420,15 +985,15 @@ double tol = 5e-3;
 
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&
-    parse_sensor(&phl->sen) != SUCCESS){
+    retrieve_sensor(&phl->sen) != SUCCESS){
     printf("Compiling sensors failed.\n"); return FAILURE;}
     
   if ((phl->input_level2 == _INP_QAI_ ||
        phl->input_level2 == _INP_ARD_) &&
-    parse_sensor(&phl->sen2) != SUCCESS){
+    retrieve_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
-    
-  if (phl->type == _HL_TSA_ && check_bandlist(&phl->tsa, &phl->sen) == FAILURE){
+
+  if (phl->type == _HL_TSA_ && retrieve_indices(&phl->tsa.index, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}
 
   if (phl->type == _HL_TSA_) parse_sta(&phl->tsa.stm.sta);

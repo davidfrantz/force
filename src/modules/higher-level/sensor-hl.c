@@ -69,7 +69,7 @@ int get_sensor_name(char *name, size_t size, json_t *def_sensor){
       return FAILURE;
   }
   if (json_is_string(def_name)) {
-      copy_string(name, NPOW_10, json_string_value(def_name));
+      copy_string(name, size, json_string_value(def_name));
       printf("Sensor: %s\n", name);
   } else {
       fprintf(stderr, "Error: Item `Name` is not a string.\n");
@@ -205,36 +205,36 @@ int get_overlapping_bands(int *n_overlapping_bands, bool **ignore_bands, int n_s
 
 
 /** Map overlapping bands to their indices for each sensor.
-+++ Populates sen->band and sen->domain arrays.
---- sen: Pointer to par_sen_t struct (sen->band and sen->domain will be allocated)
++++ Populates sen->band and sen->band_names arrays.
+--- sen: Pointer to par_sen_t struct (sen->band and sen->band_names will be allocated)
 --- ignore_bands: Array of bools indicating ignored bands
 --- nbands: Array of band counts per sensor
 --- band_names: 2D array of band names per sensor
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_bands_to_read(par_sen_t *sen, bool *ignore_bands, int *nbands, char ***band_names){
+int get_bands_to_read(sen_t *sen, bool *ignore_bands, int *nbands, char ***band_names){
 
 
-  alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
-  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
+  alloc_2D((void***)&sen->band_number, sen->n,  sen->n_bands, sizeof(int));
+  alloc_2D((void***)&sen->band_names, sen->n_bands, NPOW_10, sizeof(char));
 
   for (int b_first=0, s_first=0, b_target=0; b_first<nbands[s_first]; b_first++){
     
     if (!ignore_bands[b_first]){
       
-      if (b_target >= sen->nb){
+      if (b_target >= sen->n_bands){
         fprintf(stderr, "Error: Target band is out of bounds. This should not have happened.\n");
         return FAILURE;
       }
 
-      copy_string(sen->domain[b_target], NPOW_10, band_names[s_first][b_first]);
+      copy_string(sen->band_names[b_target], NPOW_10, band_names[s_first][b_first]);
 
       for (int s_next=0; s_next<sen->n; s_next++){
         for (int b_next=0; b_next<nbands[s_next]; b_next++){
 
-          if (strings_equal(sen->domain[b_target], band_names[s_next][b_next])){
+          if (strings_equal(sen->band_names[b_target], band_names[s_next][b_next])){
 
-            sen->band[s_next][b_target] = b_next + 1;
+            sen->band_number[s_next][b_target] = b_next + 1;
             break;
 
           }
@@ -257,7 +257,7 @@ int get_bands_to_read(par_sen_t *sen, bool *ignore_bands, int *nbands, char ***b
 --- sen: Pointer to par_sen_t struct
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_sensor(par_sen_t *sen){
+int retrieve_sensor(sen_t *sen){
 
 printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs to be re-implemented!!! Currently non-functional, might even crash!\n\n");
   int *nbands = NULL;
@@ -308,7 +308,7 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
 
   // determine overlapping bands
   bool *ignore_bands = NULL;
-  if (get_overlapping_bands(&sen->nb, &ignore_bands, sen->n, nbands, band_names) != SUCCESS){
+  if (get_overlapping_bands(&sen->n_bands, &ignore_bands, sen->n, nbands, band_names) != SUCCESS){
     fprintf(stderr, "Error: Could not determine overlapping bands.\n");
     return FAILURE;
   }
@@ -330,9 +330,9 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
   #endif
   printf("Waveband mapping:\n");
   for (int s=0; s<sen->n; s++){
-    printf("Sensor # %02d: %s with %d retained bands:\n", s, sen->sensor[s], sen->nb);
-    for (int b=0; b<sen->nb; b++){
-      printf("  %s (# %02d)", sen->domain[b], sen->band[s][b]);
+    printf("Sensor # %02d: %s with %d retained bands:\n", s, sen->sensor[s], sen->n_bands);
+    for (int b=0; b<sen->n_bands; b++){
+      printf("  %s (# %02d)", sen->band_names[b], sen->band_number[s][b]);
     }
     printf("\n");
   }

@@ -277,13 +277,14 @@ enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };
 enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_, 
        _CONTINENT_NA_, _CONTINENT_OC_, _CONTINENT_SA_, _CONTINENT_LENGTH_ };
 
+// index type
+enum { _INDEX_TYPE_BAND_, _INDEX_TYPE_EQUATION_, _INDEX_TYPE_SMA_, _INDEX_TYPE_LEN_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];
-extern const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_];
-extern const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_];

@@ -4,7 +4,8 @@ force-higher-level: \
   cf-improphe-hl \
   cso-hl \
   fold-hl \
-  index-hl \
+  index-compute-hl \
+  index-parse-hl \
   interpolate-hl \
   brick_base-cl \
   brick_io-cl \
@@ -61,7 +62,8 @@ force-higher-level: \
 	$(OBJDIR)/cf-improphe-hl.o \
 	$(OBJDIR)/cso-hl.o \
 	$(OBJDIR)/fold-hl.o \
-	$(OBJDIR)/index-hl.o \
+	$(OBJDIR)/index-compute-hl.o \
+	$(OBJDIR)/index-parse-hl.o \
 	$(OBJDIR)/interpolate-hl.o \
 	$(OBJDIR)/brick_base-cl.o \
 	$(OBJDIR)/brick_io-cl.o \

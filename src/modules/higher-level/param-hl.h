@@ -39,6 +39,7 @@ Higher Level Processing paramater header
 #include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
 #include "../higher-level/sensor-hl.h"
+#include "../higher-level/index-parse-hl.h"
 
 
 #ifdef __cplusplus
@@ -239,11 +240,10 @@ typedef struct {
   par_sta_t sta;
 } par_stm_t;
 
+
 // general TSA
 typedef struct {
-  int n;                 // number of indices
-  int  *index;           // index type
-  char **index_name;     // short name index type
+  index_t index; // index definitions
   int otss;           // flag: output time series brick
   int standard;
 
@@ -410,8 +410,8 @@ typedef struct {
   int psf;             // flag: point spread function
 
   // sensors
-  par_sen_t sen;     // Level-2 sensor dictionary
-  par_sen_t sen2;    // secondary Level-2 sensor dictionary
+  sen_t sen;     // Level-2 sensor dictionary
+  sen_t sen2;    // secondary Level-2 sensor dictionary
 
   // features
   par_ftr_t ftr;

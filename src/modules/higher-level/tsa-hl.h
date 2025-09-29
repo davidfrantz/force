@@ -64,7 +64,7 @@ typedef struct {
   char **bandnames_tsi;
 } tsa_t;
 
-#include "../higher-level/index-hl.h"
+#include "../higher-level/index-compute-hl.h"
 #include "../higher-level/interpolate-hl.h"
 #include "../higher-level/stm-hl.h"
 #include "../higher-level/fold-hl.h"

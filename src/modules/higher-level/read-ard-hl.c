@@ -35,9 +35,9 @@ This file contains functions for reading ARD
 int reduce_psf(short *hr, int nx, int ny, int nc, short *lr, int NX, int NY, int NC, short nodata);
 int date_ard(date_t *date, char *bname);
 int product_ard(char product[], int size, char *bname);
-int sensor_ard(int *sid, par_sen_t *sen, char *bname);
+int sensor_ard(int *sid, sen_t *sen, char *bname);
 int list_mask(int tx, int ty, par_hl_t *phl, dir_t *dir);
-int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir);
+int list_ard(int tx, int ty, sen_t *sen, par_hl_t *phl, dir_t *dir);
 int list_ard_filter_ce(int cemin, int cemax, dir_t dir);
 
 
@@ -237,7 +237,7 @@ int product_ard(char product[], int size, char *bname){
 --- bname:  basename of ARD image
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int sensor_ard(int *sid, par_sen_t *sen, char *bname){
+int sensor_ard(int *sid, sen_t *sen, char *bname){
 int s;
 char cs[6];
 
@@ -318,7 +318,7 @@ dir_t d;
 --- dir:    directory listing (returned)
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int list_ard(int tx, int ty, par_sen_t *sen, par_hl_t *phl, dir_t *dir){
+int list_ard(int tx, int ty, sen_t *sen, par_hl_t *phl, dir_t *dir){
 int i, s;
 bool vs;
 date_t date;
@@ -380,7 +380,7 @@ int nchar;
     if (!phl->date_doys[date.doy]) continue;
 
     // special case: use de-orbiting Landsat 7?
-    if (strstr(d.LIST[i]->d_name, _TAGGED_ENUM_SEN_[_SEN_LND07_].tag) != NULL &&
+    if (strstr(d.LIST[i]->d_name, "LND07") != NULL &&
         date.ce > phl->date_ignore_lnd07.ce) continue;
 
     // if we are still here, copy
@@ -758,7 +758,7 @@ off_t bytes = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_sen_t *sen, par_hl_t *phl){
+ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl){
 int t, b, p, nb, nc;
 char fname[NPOW_10];
 char bname[NPOW_10];
@@ -945,7 +945,7 @@ off_t bytes = 0;
 --- partial_y: only read part of the chunk (height)
 +++ Return:    image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *read_chunk(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y){
+brick_t *read_chunk(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y){
 brick_t *brick  = NULL;
 short   *brick_short_ = NULL;
 small   *brick_small_ = NULL;
@@ -1033,10 +1033,10 @@ double tol = 5e-3;
   
 
   if (ard_type == _ARD_REF_){
-    for (b=0; b<sen->nb; b++){
-      if (sen->band[sid][b] >= 0) nb++;
+    for (b=0; b<sen->n_bands; b++){
+      if (sen->band_number[sid][b] >= 0) nb++;
     }
-    nbands = sen->nb;
+    nbands = sen->n_bands;
   } else {
     nb     = read_nb;
     nbands = read_nb;
@@ -1134,9 +1134,9 @@ double tol = 5e-3;
   for (b=0, b_brick=0; b<nbands; b++){
 
     if (ard_type == _ARD_REF_){
-      if ((b_disc = sen->band[sid][b])  < 0) continue;
-      if ((b_disc = sen->band[sid][b]) == 0){
-        set_brick_domain(brick, b_brick, sen->domain[b]);
+      if ((b_disc = sen->band_number[sid][b])  < 0) continue;
+      if ((b_disc = sen->band_number[sid][b]) == 0){
+        set_brick_domain(brick, b_brick, sen->band_names[b]);
         b_brick++;
         continue;
       }
@@ -1185,8 +1185,8 @@ double tol = 5e-3;
     }
     
     if (ard_type == _ARD_REF_){
-      set_brick_domain(brick, b_brick, sen->domain[b]);
-      set_brick_bandname(brick, b_brick, sen->domain[b]);
+      set_brick_domain(brick, b_brick, sen->band_names[b]);
+      set_brick_bandname(brick, b_brick, sen->band_names[b]);
     }
 
     b_brick++;
@@ -1262,7 +1262,7 @@ double tol = 5e-3;
 --- ARD:      image brick we already have in memory (freed within)
 +++ Return:   extended image brick
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *add_chunks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk_central[], double tile_size[], int tile_central[], double resolution, bool psf, double distance_to_add, brick_t *ARD){
+brick_t *add_chunks(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk_central[], double tile_size[], int tile_central[], double resolution, bool psf, double distance_to_add, brick_t *ARD){
 brick_t *add  = NULL;
 small  **add_small_ = NULL;
 short  **add_short_ = NULL;
