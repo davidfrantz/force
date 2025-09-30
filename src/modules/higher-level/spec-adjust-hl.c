@@ -1013,14 +1013,14 @@ small *mask_ = NULL;
 
     if (!adjust){
       if (get_brick_nbands(ard[t].DAT) !=  _SPECHOMO_N_DST_){
-        printf("There is a sensor that is not adjustable, but also not compatible: %s.\n", sensor);
-        return FAILURE;
+        printf("Non-adjustable sensor %s is not compatible.\n", sensor);
+        exit(FAILURE);
       }
       for (int b=0; b<_SPECHOMO_N_DST_; b++){
         if (find_domain(ard[t].DAT, _SPECHOMO_DST_DOMAIN_[b]) < 0){ 
           printf("Couldn't find target domain %s. ", _SPECHOMO_DST_DOMAIN_[b]);
-          printf("There is a sensor that is not adjustable, but also not compatible: %s.\n", sensor);
-          return FAILURE;
+          printf("Non-adjustable sensor %s is not compatible.\n", sensor);
+          exit(FAILURE);
         }
       }
     }
@@ -1029,7 +1029,9 @@ small *mask_ = NULL;
 
     // perform the adjustment
     if (spectral_predict(ard[t], mask_, nc, s) == FAILURE){
-      printf("failed to compute spectral prediction.\n"); exit(FAILURE);return FAILURE;}
+      printf("failed to compute spectral prediction.\n"); 
+      exit(FAILURE);
+    }
 
   }
 
