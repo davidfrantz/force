@@ -261,6 +261,7 @@ int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names){
   for (int s=0; s<sen->n; s++){
     for (int b=0; b<sen->n_bands; b++){
       sen->band_number[s][b] = vector_contains_pos((const char **)band_names[s], nbands[s], sen->band_names[b]);
+      sen->band_number[s][b]++; // from 0-based to 1-based
     }
   }
 
@@ -281,6 +282,13 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
 
   char ***band_names = NULL;
   alloc((void**)&band_names, sen->n, sizeof(char**));
+
+  // ugly hack to make sure spectral adjustment works when no target sensor is included in SENSORS
+  if (sen->spec_adjust){
+    re_alloc_2D((void***)&sen->sensor, sen->n, NPOW_10, sen->n+1, NPOW_10, sizeof(char));
+    copy_string(sen->sensor[sen->n], NPOW_10, "SEN2A");
+    sen->n++;
+  }
 
   int error = 0;
 
@@ -334,7 +342,12 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
       return FAILURE;
     }
   }
-  
+
+  // ugly hack to make sure spectral adjustment works when no target sensor is included in SENSORS
+  if (sen->spec_adjust){
+    re_alloc_2D((void***)&sen->sensor, sen->n, NPOW_10, sen->n-1, NPOW_10, sizeof(char));
+    sen->n--;
+  }
 
   // determine bands to read
   if (get_band_numbers_to_read(sen, nbands, band_names) != SUCCESS){
