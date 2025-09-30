@@ -255,7 +255,7 @@ char binp[NPOW_10];
 char ext[NPOW_10];
 char dtile[NPOW_10];
 
-char sen_[4], sensor[6];
+char sen_[NPOW_10], sensor[NPOW_10];
 char year_[5], doy_[4];
 char tx_[3], ty_[3];
 int year, doy, month, day;
@@ -318,9 +318,9 @@ short nodata = -9999;
   strncpy(ty_,   binp+21, 2); ty_[2]   = '\0'; ty   = atoi(ty_);
   
   if (strcmp(sen_, "MOD") == 0){
-    copy_string(sensor, 6, "MOD01");
+    copy_string(sensor, NPOW_10, "MOD01");
   } else if (strcmp(sen_, "MYD") == 0){
-    copy_string(sensor, 6, "MOD02");
+    copy_string(sensor, NPOW_10, "MOD02");
   } else {
     printf("no MODIS sensor detected: %s.\n\n", sen_); return FAILURE;
   }

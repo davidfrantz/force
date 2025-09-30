@@ -416,7 +416,7 @@ void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
   if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
   if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
-  if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_04, sizeof(char)); else ts->bandnames_tsi = NULL;
+  if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_10, sizeof(char)); else ts->bandnames_tsi = NULL;
 
   return;
 }
@@ -456,7 +456,7 @@ void free_ts_metadata(tsa_t *ts, int ni){
 void compile_ts_metadata(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
 int t, k;
 date_t date;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 
 
   init_date(&date);
@@ -484,13 +484,13 @@ char sensor[NPOW_04];
     for (t=0; t<ni; t++){
       if (phl->tsa.tsi.method == _INT_NONE_){
         date = get_brick_date(ard[t].DAT, 0);
-        get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+        get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
       } else {
         set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
-        copy_string(sensor, NPOW_04, "BLEND");
+        copy_string(sensor, NPOW_10, "BLEND");
       }
       copy_date(&date, &ts->d_tsi[t]);
-      copy_string(ts->bandnames_tsi[t], NPOW_04, sensor);
+      copy_string(ts->bandnames_tsi[t], NPOW_10, sensor);
     }
   }
 
@@ -566,7 +566,7 @@ brick_t **TSA = NULL;
 int t, k;
 date_t date;
 char fdate[NPOW_10];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 int o = 0, nprod;
@@ -634,7 +634,7 @@ brick_compile_info_t *info = NULL;
           switch (info[o].prodtype){
             case _full_:
               date = get_brick_date(ard[t].DAT, 0);
-              get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+              get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
               set_brick_sensor(TSA[o], t, sensor);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
@@ -647,7 +647,7 @@ brick_compile_info_t *info = NULL;
               break;
             case _nrt_:
               date = get_brick_date(ard[(nt-nr)+t].DAT, 0);
-              get_brick_sensor(ard[(nt-nr)+t].DAT, 0, sensor, NPOW_04);
+              get_brick_sensor(ard[(nt-nr)+t].DAT, 0, sensor, NPOW_10);
               set_brick_sensor(TSA[o], t, sensor);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);

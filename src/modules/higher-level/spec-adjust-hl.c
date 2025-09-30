@@ -48,7 +48,7 @@ int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 #define _SPECHOMO_MIN_WEIGHT_ 1.0 - _SPECHOMO_GOOD_SAM_/_SPECHOMO_POOR_SAM_
 #define _SPECHOMO_MED_WEIGHT_ 1.0 - _SPECHOMO_MEDI_SAM_/_SPECHOMO_POOR_SAM_
 
-const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
+const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_10] = {
   "LND04", "LND05", "LND07", "LND08", "LND09", "MOD01", "MOD02" };
 
 const char _SPECHOMO_SRC_DOMAIN_[_SPECHOMO_N_SRC_][NPOW_10] = {
@@ -976,7 +976,7 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
 int t, s, nc;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 bool adjust = false;
 small *mask_ = NULL;
 
@@ -997,7 +997,7 @@ small *mask_ = NULL;
   // for each time step
   for (t=0; t<nt; t++){
 
-    get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+    get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
 
     // is the sensor adjustable?
     for (s=0, adjust=false; s<_SPECHOMO_N_SEN_; s++){

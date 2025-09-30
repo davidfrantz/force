@@ -372,7 +372,7 @@ int* day_       = NULL;
 char *sensor_   = NULL;
 char *bandname_ = NULL;
 date_t date;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char bandname[NPOW_10];
 
 
@@ -384,7 +384,7 @@ char bandname[NPOW_10];
   pylab.day      = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
 
   pylab.desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
-  pylab.desc_sensor->elsize = NPOW_04;
+  pylab.desc_sensor->elsize = NPOW_10;
   pylab.sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nt, pylab.desc_sensor);
 
   pylab.desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
@@ -407,9 +407,9 @@ char bandname[NPOW_10];
       year_[t]  = date.year;
       month_[t] = date.month;
       day_[t]   = date.day;
-      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
-      copy_string(sensor_, NPOW_04, sensor);
-      sensor_ += NPOW_04;
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
+      copy_string(sensor_, NPOW_10, sensor);
+      sensor_ += NPOW_10;
     }
 
     for (b = 0; b < (nb_main + nb_aux); b++){
@@ -428,8 +428,8 @@ char bandname[NPOW_10];
       year_[t]  = ts->d_tsi[t].year;
       month_[t] = ts->d_tsi[t].month;
       day_[t]   = ts->d_tsi[t].day;
-      copy_string(sensor_, NPOW_04, ts->bandnames_tsi[t]);
-      sensor_ += NPOW_04;
+      copy_string(sensor_, NPOW_10, ts->bandnames_tsi[t]);
+      sensor_ += NPOW_10;
     }
 
     copy_string(bandname_, NPOW_10, idx_name);

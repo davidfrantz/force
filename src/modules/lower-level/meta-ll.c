@@ -274,7 +274,7 @@ char *tokenptr = NULL;
 char *tokenptr2 = NULL;
 char *separator = " =\":";
 char *separator2 = "-";
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 int b, b_temp = 0, nb = 0, b_rsr, lid = 0, path = 0, row = 0;
@@ -328,8 +328,8 @@ GDALDatasetH fp_;
         set_brick_nprovenance(DN, 1);
         set_brick_provenance(DN, 0, pl2->d_level1);
 
-        nchar = snprintf(sensor, NPOW_04, "LND%02d", lid);
-        if (nchar < 0 || nchar >= NPOW_04){
+        nchar = snprintf(sensor, NPOW_10, "LND%02d", lid);
+        if (nchar < 0 || nchar >= NPOW_10){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
@@ -664,7 +664,7 @@ float ***s_vz = NULL, ***s_va = NULL;
 bool s = false, v = false, z = false, a = false;
 char d_img[NPOW_10];
 char id_img[NPOW_10];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 date_t date;
@@ -742,8 +742,8 @@ int svgrid = 5000;
           printf("unknown/unsupported sensor ID! "); return FAILURE;
         }
 
-        nchar = snprintf(sensor, NPOW_04, "SEN%s", tokenptr2);
-        if (nchar < 0 || nchar >= NPOW_04){
+        nchar = snprintf(sensor, NPOW_10, "SEN%s", tokenptr2);
+        if (nchar < 0 || nchar >= NPOW_10){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);

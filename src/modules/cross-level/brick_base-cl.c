@@ -69,7 +69,7 @@ brick_t *brick = NULL;
   alloc_2D((void***)&brick->unit, nb, NPOW_04, sizeof(char));
   alloc_2D((void***)&brick->domain, nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->bandname,   nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&brick->sensor,     nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&brick->sensor,     nb, NPOW_10, sizeof(char));
   alloc((void**)&brick->date, nb, sizeof(date_t));
   
   init_brick_bands(brick);
@@ -113,7 +113,7 @@ int datatype = get_brick_datatype(brick);
   re_alloc_2D((void***)&brick->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
   re_alloc_2D((void***)&brick->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc((void**)&brick->date,         nb0, nb, sizeof(date_t));
 
   if (reallocate_brick_bands(brick, nb) == FAILURE){
@@ -593,7 +593,7 @@ int b;
     copy_string(brick->unit[b],     NPOW_04, "NA");
     copy_string(brick->domain[b],   NPOW_10, "NA");
     copy_string(brick->bandname[b], NPOW_10, "NA");
-    copy_string(brick->sensor[b],   NPOW_04, "NA");
+    copy_string(brick->sensor[b],   NPOW_10, "NA");
     init_date(&brick->date[b]);
   }
 
@@ -2094,7 +2094,7 @@ void get_brick_bandname(brick_t *brick, int b, char bandname[], size_t size){
 void set_brick_sensor(brick_t *brick, int b, const char *sensor){
 
 
-  copy_string(brick->sensor[b], NPOW_04, sensor);
+  copy_string(brick->sensor[b], NPOW_10, sensor);
 
   return;
 }

@@ -95,7 +95,7 @@ short ****ptr = NULL;
 brick_t *compile_l2i_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
 brick_t *brick = NULL;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 char fname[NPOW_10];
 char dname[NPOW_10];
@@ -108,7 +108,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   get_brick_compactdate(from, 0, date, NPOW_04);
-  get_brick_sensor(from, 0, sensor, NPOW_04);
+  get_brick_sensor(from, 0, sensor, NPOW_10);
 
   //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 

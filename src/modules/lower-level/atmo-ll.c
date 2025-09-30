@@ -1000,7 +1000,7 @@ char fname[NPOW_10];
 char product[NPOW_02];
 char domain[NPOW_10];
 char bandname[NPOW_10];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
@@ -1111,7 +1111,7 @@ brick_t *BOA = TOA;
   set_brick_product(BOA, product);
   set_brick_name(BOA, "FORCE Level 2 Processing System");
   get_brick_compactdate(BOA, 0, date, NPOW_04);
-  get_brick_sensor(BOA, 0, sensor, NPOW_04);
+  get_brick_sensor(BOA, 0, sensor, NPOW_10);
   
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1149,7 +1149,7 @@ brick_t *BOA = TOA;
 brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI){
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 brick_t *QA = QAI;
@@ -1180,7 +1180,7 @@ short *qa_ = NULL;
   copy_string(product, NPOW_02, "QAI");
   set_brick_product(QA, product);
   set_brick_name(QA, "FORCE Level 2 Processing System");
-  get_brick_sensor(QA, 0, sensor, NPOW_04);
+  get_brick_sensor(QA, 0, sensor, NPOW_10);
   get_brick_compactdate(QA, 0, date, NPOW_04);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
@@ -1221,7 +1221,7 @@ short *qa_ = NULL;
 brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI){
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
@@ -1246,7 +1246,7 @@ short  *dst_ = NULL;
   set_brick_product(DST, product);
   set_brick_name(DST, "FORCE Level 2 Processing System");
   get_brick_compactdate(DST, 0, date, NPOW_04);
-  get_brick_sensor(DST, 0, sensor, NPOW_04);
+  get_brick_sensor(DST, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1289,7 +1289,7 @@ double res, res_, step, scale;
 gdalopt_t format;
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 brick_t *OVV = NULL;
@@ -1409,7 +1409,7 @@ enum { R, G, B };
   set_brick_product(OVV, product);
   set_brick_name(OVV, "FORCE Level 2 Processing System");
   get_brick_compactdate(OVV, 0, date, NPOW_04);
-  get_brick_sensor(OVV, 0, sensor, NPOW_04);
+  get_brick_sensor(OVV, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1452,7 +1452,7 @@ brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI){
 int e, f, g, i, j, p, ne, nf, ng, nx, ny, k = 0;
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 iweights_t weights;
@@ -1585,7 +1585,7 @@ GDALDataType eOutputType = GDT_Float64;
   set_brick_product(VZN, product);
   set_brick_name(VZN, "FORCE Level 2 Processing System");
   get_brick_compactdate(VZN, 0, date, NPOW_04);
-  get_brick_sensor(VZN, 0, sensor, NPOW_04);
+  get_brick_sensor(VZN, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1626,7 +1626,7 @@ brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI)
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
@@ -1677,7 +1677,7 @@ short *hot_ = NULL;
   set_brick_product(HOT, product);
   set_brick_name(HOT, "FORCE Level 2 Processing System");
   get_brick_compactdate(HOT, 0, date, NPOW_04);
-  get_brick_sensor(HOT, 0, sensor, NPOW_04);
+  get_brick_sensor(HOT, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1720,7 +1720,7 @@ int b_green;
 double fres, gres;
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 float wvl;
@@ -1790,7 +1790,7 @@ float **xy_aod_ = NULL;
   set_brick_product(AOD, product);
   set_brick_name(AOD, "FORCE Level 2 Processing System");
   get_brick_compactdate(AOD, 0, date, NPOW_04);
-  get_brick_sensor(AOD, 0, sensor, NPOW_04);
+  get_brick_sensor(AOD, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
@@ -1832,7 +1832,7 @@ brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, b
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_02];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char date[NPOW_04];
 int nchar;
 short nodata = -9999;
@@ -1880,7 +1880,7 @@ short *wvp_ = NULL;
   set_brick_product(WV, product);
   set_brick_name(WV, "FORCE Level 2 Processing System");
   get_brick_compactdate(WV, 0, date, NPOW_04);
-  get_brick_sensor(WV, 0, sensor, NPOW_04);
+  get_brick_sensor(WV, 0, sensor, NPOW_10);
 
   nchar = snprintf(fname, NPOW_10, "%s_LEVEL2_%s_%s", date, sensor, product);
   if (nchar < 0 || nchar >= NPOW_10){ 
