@@ -153,99 +153,115 @@ char **band_names = NULL;
 
 
 /** Determine overlapping bands among multiple sensors.
-+++ Sets ignore_bands for bands not present in all sensors.
---- n_overlapping_bands: Pointer to int for number of overlapping bands
---- ignore_bands: Pointer to bool* array for ignored bands (must be freed)
+--- n_intersect: how many bands are overlapping (returned)
+--- intersect_bands: intersecting band names (returned, must be freed with free_2D)
 --- n_sensors: Number of sensors
 --- nbands: Array of band counts per sensor
 --- band_names: 2D array of band names per sensor
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_overlapping_bands(int *n_overlapping_bands, bool **ignore_bands, int n_sensors, int *nbands, char ***band_names){
+int get_band_intersection(int *n_intersect, char ***intersect_bands, int n_sensors, int *nbands, char ***band_names){
 
   int s_first = 0;
-  bool *ignore = NULL;
-  int n_overlap = nbands[s_first];
-  alloc((void**)&ignore, nbands[s_first], sizeof(bool));
+  char **buffer = NULL;
+  int ctr = 0;
+  alloc_2D((void***)&buffer, nbands[s_first], NPOW_10, sizeof(char));
 
   for (int b_first=0; b_first<nbands[s_first]; b_first++){
 
+    bool ignore = false;
+
     for (int s_next=1; s_next<n_sensors; s_next++){
 
-      bool found = false;
-      for (int b_next=0; b_next<nbands[s_next]; b_next++){
-        if (strings_equal(band_names[s_first][b_first], band_names[s_next][b_next])){
-          found = true;
-          break;
-        }
-      }
-
-      if (!found){
-        ignore[b_first] = true;
-        n_overlap--;
+      if (!vector_contains((const char **)band_names[s_next], nbands[s_next], band_names[s_first][b_first])){
+        ignore = true;
         break;
       }
 
     }
 
+    if (!ignore){
+      copy_string(buffer[ctr], NPOW_10, band_names[s_first][b_first]);
+      ctr++;
+    }
+
   }
 
-  if (n_overlap < 1){
+  if (ctr < 1){
     printf("No overlapping bands found. Check SENSORS.\n");
     return FAILURE;
   }
 
-  printf("Number of overlapping bands: %d\n", n_overlap);
+  re_alloc_2D((void***)&buffer, nbands[s_first], NPOW_10, ctr, NPOW_10, sizeof(char));
 
-  *n_overlapping_bands = n_overlap;
-  *ignore_bands = ignore;
+  printf("Number of overlapping bands: %d\n", ctr);
+
+  *n_intersect = ctr;
+  *intersect_bands = buffer;
 
   return SUCCESS;
 }
 
 
-/** Map overlapping bands to their indices for each sensor.
-+++ Populates sen->band and sen->band_names arrays.
---- sen: Pointer to par_sen_t struct (sen->band and sen->band_names will be allocated)
---- ignore_bands: Array of bools indicating ignored bands
+/** Determine all bands among multiple sensors.
+--- n_union: how many bands are there overall (returned)
+--- union_bands: unioned band names (returned, must be freed with free_2D)
+--- n_sensors: Number of sensors
 --- nbands: Array of band counts per sensor
 --- band_names: 2D array of band names per sensor
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_bands_to_read(sen_t *sen, bool *ignore_bands, int *nbands, char ***band_names){
+int get_band_union(int *n_union, char ***union_bands, int n_sensors, int *nbands, char ***band_names){
+
+  char **buffer = NULL;
+  int n_all = 0;
+  for (int s=0; s<n_sensors; s++) n_all += nbands[s];
+  alloc_2D((void***)&buffer, n_all, NPOW_10, sizeof(char));
+
+  int ctr = 0;
+
+  for (int s=0; s<n_sensors; s++){
+    for (int b=0; b<nbands[s]; b++){
+
+      if (!vector_contains((const char **)buffer, ctr, band_names[s][b])){
+        copy_string(buffer[ctr], NPOW_10, band_names[s][b]);
+        ctr++;
+      }
+
+    }
+  }
+
+  if (ctr < 1){
+    printf("No unioned bands found. Check SENSORS.\n");
+    return FAILURE;
+  }
+
+  re_alloc_2D((void***)&buffer, n_all, NPOW_10, ctr, NPOW_10, sizeof(char));
+
+  printf("Number of unioned bands: %d\n", ctr);
+
+  *n_union = ctr;
+  *union_bands = buffer;
+
+  return SUCCESS;
+}
+
+
+/** Find the band numbers to read for each sensor based on the selected bands.
+--- sen: Pointer to par_sen_t struct (sen->band_number will be allocated)
+--- nbands: Array of band counts per sensor
+--- band_names: 2D array of band names per sensor
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names){
 
 
   alloc_2D((void***)&sen->band_number, sen->n,  sen->n_bands, sizeof(int));
-  alloc_2D((void***)&sen->band_names, sen->n_bands, NPOW_10, sizeof(char));
 
-  for (int b_first=0, s_first=0, b_target=0; b_first<nbands[s_first]; b_first++){
-    
-    if (!ignore_bands[b_first]){
-      
-      if (b_target >= sen->n_bands){
-        fprintf(stderr, "Error: Target band is out of bounds. This should not have happened.\n");
-        return FAILURE;
-      }
-
-      copy_string(sen->band_names[b_target], NPOW_10, band_names[s_first][b_first]);
-
-      for (int s_next=0; s_next<sen->n; s_next++){
-        for (int b_next=0; b_next<nbands[s_next]; b_next++){
-
-          if (strings_equal(sen->band_names[b_target], band_names[s_next][b_next])){
-
-            sen->band_number[s_next][b_target] = b_next + 1;
-            break;
-
-          }
-
-        }
-      }
-
-      b_target++;
-
+  for (int s=0; s<sen->n; s++){
+    for (int b=0; b<sen->n_bands; b++){
+      sen->band_number[s][b] = vector_contains_pos((const char **)band_names[s], nbands[s], sen->band_names[b]);
     }
-
   }
 
   return SUCCESS;
@@ -307,14 +323,21 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
   }
 
   // determine overlapping bands
-  bool *ignore_bands = NULL;
-  if (get_overlapping_bands(&sen->n_bands, &ignore_bands, sen->n, nbands, band_names) != SUCCESS){
-    fprintf(stderr, "Error: Could not determine overlapping bands.\n");
-    return FAILURE;
+  if (!sen->spec_adjust){
+    if (get_band_intersection(&sen->n_bands, &sen->band_names, sen->n, nbands, band_names) != SUCCESS){
+      fprintf(stderr, "Error: Could not determine intersected bands.\n");
+      return FAILURE;
+    }
+  } else {
+    if (get_band_union(&sen->n_bands, &sen->band_names, sen->n, nbands, band_names) != SUCCESS){
+      fprintf(stderr, "Error: Could not determine unioned bands.\n");
+      return FAILURE;
+    }
   }
+  
 
   // determine bands to read
-  if (get_bands_to_read(sen, ignore_bands, nbands, band_names) != SUCCESS){
+  if (get_band_numbers_to_read(sen, nbands, band_names) != SUCCESS){
     fprintf(stderr, "Error: Could not determine bands to read.\n");
     return FAILURE;
   }
@@ -323,7 +346,6 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
   for (int s=0; s<sen->n; s++) free_2D((void**)band_names[s], nbands[s]);
   free((void*)band_names); band_names = NULL;
   free((void*)nbands); nbands = NULL;
-  free((void*)ignore_bands); ignore_bands = NULL;
 
   
   #ifdef FORCE_DEBUG
