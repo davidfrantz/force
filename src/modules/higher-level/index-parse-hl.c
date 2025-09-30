@@ -286,10 +286,12 @@ int retrieve_indices(index_t *index, sen_t *sen){
     exit(FAILURE);
   }
 
-
-  if (remove_unused_bands(use_bands, sen) != SUCCESS){
-    fprintf(stderr, "Error: Could not remove unused bands.\n");
-    return FAILURE;
+  // remove unused bands if not all bands are needed
+  if (!sen->spec_adjust){
+    if (remove_unused_bands(use_bands, sen) != SUCCESS){
+      fprintf(stderr, "Error: Could not remove unused bands.\n");
+      return FAILURE;
+    }
   }
 
 
