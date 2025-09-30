@@ -33,7 +33,6 @@ This file contains functions for reading ARD
 
 
 int reduce_psf(short *hr, int nx, int ny, int nc, short *lr, int NX, int NY, int NC, short nodata);
-int date_ard(date_t *date, char *bname);
 int product_ard(char product[], int size, char *bname);
 int sensor_ard(int *sid, sen_t *sen, char *bname);
 int list_mask(int tx, int ty, par_hl_t *phl, dir_t *dir);
@@ -173,42 +172,6 @@ float i0, i1, j0, j1, iw, jw, w;
 }
 
 
-/** This function extracts the ARD date from the file's basename, i.e.
-+++ acquisition year, month, day, day of year, week and days since CE.
---- date:   date struct (returned)
---- bname:  basename of ARD image
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int date_ard(date_t *date, char *bname){
-char cy[5], cm[3], cd[3];
-date_t d;
-
-
-  strncpy(cy, bname,   4); cy[4] = '\0';
-  strncpy(cm, bname+4, 2); cm[2] = '\0';
-  strncpy(cd, bname+6, 2); cd[2] = '\0';
-
-  init_date(&d);
-  set_date(&d, atoi(cy), atoi(cm), atoi(cd));
-  
-  
-  #ifdef FORCE_DEBUG
-  printf("date is: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
-    d.year, d.month, d.day, d.doy, d.week, d.ce);
-  #endif
-
-  if (d.year < 1900   || d.year > 2100)   return FAILURE;
-  if (d.month < 1     || d.month > 12)    return FAILURE;
-  if (d.day < 1       || d.day > 31)      return FAILURE;
-  if (d.doy < 1       || d.doy > 365)     return FAILURE;
-  if (d.week < 1      || d.week > 52)     return FAILURE;
-  if (d.ce < 1900*365 || d.ce > 2100*365) return FAILURE;
-
-  *date = d;
-  return SUCCESS;
-}
-
-
 /** This function extracts the ARD product from the file's basename.
 --- product: buffer for the product
 --- size:    length of the buffer
@@ -217,14 +180,23 @@ date_t d;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int product_ard(char product[], int size, char *bname){
 
+  char buffer[NPOW_10];
+  copy_string(buffer, NPOW_10, bname);
 
-  if (size < 4){
-    printf("array is too short for getting product.\n");
-    product[0] = '\0';
-    return FAILURE;
+  const char *separator = "_.";
+  char *ptr = strtok(buffer, separator);
+
+  int ctr = 0;
+  while (ptr != NULL){
+    ptr = strtok(NULL, separator);
+    if (ctr == 2 && ptr != NULL){
+      copy_string(product, size, ptr);
+      break;
+    }
+    ctr++;
   }
 
-  strncpy(product, bname+22, 3); product[3] = '\0';
+  printf("Product is: %s\n", product);
 
   return SUCCESS;
 }
@@ -239,19 +211,34 @@ int product_ard(char product[], int size, char *bname){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int sensor_ard(int *sid, sen_t *sen, char *bname){
 
-  char cs[6];
-  strncpy(cs, bname+16, 5); cs[5] = '\0';
+  char buffer[NPOW_10];
+  copy_string(buffer, NPOW_10, bname);
 
-  *sid = vector_contains_pos((const char**)sen->sensor, sen->n, cs);
+  const char *separator = "_.";
+  char *ptr = strtok(buffer, separator);
+  char sensor[NPOW_10] = "\0";
+
+  int ctr = 0;
+  while (ptr != NULL){
+    ptr = strtok(NULL, separator);
+    if (ctr == 1 && ptr != NULL){
+      copy_string(sensor, NPOW_10, ptr);
+      printf("substring is: %s %d\n", ptr, ctr);
+      break;
+    }
+    ctr++;
+  }
+
+  *sid = vector_contains_pos((const char**)sen->sensor, sen->n, sensor);
 
   if (*sid >= 0){
     #ifdef FORCE_DEBUG
-    printf("sensor is: %s, ID is %d\n", cs, *sid);
+    printf("sensor is: %s, ID is %d\n", sensor, *sid);
     #endif
     return SUCCESS;
   }
   
-  fprintf(stderr, "Could not identify sensor %s in image basename.\n", cs);
+  fprintf(stderr, "Could not identify sensor %s in image basename.\n", sensor);
   return FAILURE;
 
 }
@@ -373,7 +360,11 @@ int nchar;
 
 
     // filter dates
-    date_ard(&date, d.LIST[i]->d_name);
+    if (date_from_string(&date, d.LIST[i]->d_name) != SUCCESS){
+      printf("getting date of ARD failed (%s)\n", d.LIST[i]->d_name); 
+      exit(FAILURE);
+    }
+    print_date(&date);
     if (date.ce < phl->date_range[_MIN_].ce) continue;
     if (date.ce > phl->date_range[_MAX_].ce) continue;
     if (!phl->date_doys[date.doy]) continue;
@@ -424,7 +415,11 @@ int n;
   alloc_2D((void***)&list, dir.n, NPOW_10, sizeof(char));
 
   for (t=0, n=0; t<dir.n; t++){
-    date_ard(&date, dir.list[t]);
+    if (date_from_string(&date, dir.list[t]) != SUCCESS){
+      printf("getting date of ARD failed (%s)\n", dir.list[t]); 
+      exit(FAILURE);
+    }
+    printf("date is: %d\n", date.ce);
     if (date.ce < cemin || date.ce > cemax) continue;
     copy_string(list[n++], NPOW_10, dir.list[t]);
   }
@@ -999,10 +994,11 @@ double tol = 5e-3;
   basename_with_ext(file, bname, NPOW_10);
   
   if (ard_type == _ARD_REF_ || ard_type == _ARD_AUX_){
-    if (date_ard(&date, bname) != SUCCESS){
+    if (date_from_string(&date, bname) != SUCCESS){
       printf("getting date of ARD failed (%s)\n", bname); 
       exit(FAILURE);
     }
+    print_date(&date);
     if (product_ard(prd, NPOW_02, bname) != SUCCESS){
       printf("getting product of ARD failed (%s)\n", bname); 
       exit(FAILURE);
@@ -1163,7 +1159,7 @@ double tol = 5e-3;
     for (p=0; p<nc_read; p++) read_buf[p] = nodata;
 
     if (b_disc < 1 || b_disc > nb_disc){
-      printf("band %d not available.\n", b_disc, file); return NULL;}
+      printf("band %d not available.\n", b_disc); return NULL;}
 
     band = GDALGetRasterBand(dataset, b_disc);
     if (GDALRasterIO(band, GF_Read, 
