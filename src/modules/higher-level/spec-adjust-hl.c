@@ -989,7 +989,7 @@ small *mask_ = NULL;
   // import mask (if available)
   if (mask != NULL){
     if ((mask_ = get_band_small(mask, 0)) == NULL){
-      printf("Error getting processing mask."); return FAILURE;}
+      printf("Error getting processing mask.\n"); return FAILURE;}
   }
 
   nc = get_brick_chunkncells(ard[0].DAT);
@@ -1011,11 +1011,25 @@ small *mask_ = NULL;
     printf("adjusting %s: %d\n", sensor, adjust);
     #endif
 
+    if (!adjust){
+      if (get_brick_nbands(ard[t].DAT) !=  _SPECHOMO_N_DST_){
+        printf("There is a sensor that is not adjustable, but also not compatible: %s.\n", sensor);
+        return FAILURE;
+      }
+      for (int b=0; b<_SPECHOMO_N_DST_; b++){
+        if (find_domain(ard[t].DAT, _SPECHOMO_DST_DOMAIN_[b]) < 0){ 
+          printf("Couldn't find target domain %s. ", _SPECHOMO_DST_DOMAIN_[b]);
+          printf("There is a sensor that is not adjustable, but also not compatible: %s.\n", sensor);
+          return FAILURE;
+        }
+      }
+    }
+
     if (!adjust) continue;
 
     // perform the adjustment
     if (spectral_predict(ard[t], mask_, nc, s) == FAILURE){
-      printf("failed to compute spectral prediction. "); return FAILURE;}
+      printf("failed to compute spectral prediction.\n"); exit(FAILURE);return FAILURE;}
 
   }
 
