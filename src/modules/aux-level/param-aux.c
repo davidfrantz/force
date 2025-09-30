@@ -1452,12 +1452,11 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# index cannot be computed based on the requested SENSORS. The index SMA is\n");
     fprintf(fp, "# a linear spectral mixture analysis and is dependent on the parameters\n");
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
-    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
-    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren,CCI}\n");
+    fprintf(fp, "# Any index defined in indices.json can be used, as well as SMA,\n");
+    fprintf(fp, "# or any band name present in the SENSORS band combination\n");
+    fprintf(fp, "# Type: Character list. \n");
   }
-  fprintf(fp, "INDEX = NDVI EVI NBR\n");
+  fprintf(fp, "INDEX = NDVI EVI NBR RED NIR\n");
 
   if (verbose){
     fprintf(fp, "# Standardize the TSS time series with pixel mean and/or standard deviation?\n");
