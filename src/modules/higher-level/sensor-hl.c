@@ -269,6 +269,66 @@ int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names){
 }
 
 
+
+
+/** Check whether input and output sensors are compatible.
+--- sen: Pointer to par_sen_t struct
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int check_target_sensor(sen_t *sen){
+int nbands = 0;
+char **band_names = NULL;
+
+
+  // get full sensor definition
+  json_t *def_sensor = NULL;
+  if (load_sensor_definition(&def_sensor, sen->target) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse target sensor definition for %s.\n", sen->target);
+    return FAILURE;
+  }
+
+  // get sensor name
+  if (get_sensor_name(sen->target, NPOW_10, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse target sensor name for %s.\n", sen->target);
+    return FAILURE;
+  }
+  
+  // get number of bands
+  if (get_sensor_band_number(&nbands, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse number of bands for %s.\n", sen->target);
+    return FAILURE;
+  }
+
+  // get band names
+  if (get_sensor_bandnames(&band_names, nbands, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse band names for %s.\n", sen->target);
+    return FAILURE;
+  }
+
+  // clean up
+  json_decref(def_sensor);
+
+
+  if (nbands != sen->n_bands){
+    fprintf(stderr, "Error: Target sensor %s has %d bands, but %d bands were determined from input sensor combination.\n", sen->target, nbands, sen->n_bands);
+    return FAILURE;
+  }
+
+  for (int b=0; b<nbands; b++){
+    if (!vector_contains((const char **)band_names, nbands, sen->band_names[b])){
+      fprintf(stderr, "Error: Band %s in target sensor %s is not part of the determined band set from input sensors.\n", sen->band_names[b], sen->target);
+      return FAILURE;
+    }
+  }
+
+  free_2D((void**)band_names, nbands); band_names = NULL;
+
+  return SUCCESS;
+}
+
+
+
+
 /** Parse all sensor definitions and determine overlapping bands.
 +++ Populates par_sen_t with band mapping information.
 --- sen: Pointer to par_sen_t struct
@@ -352,6 +412,12 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
   // determine bands to read
   if (get_band_numbers_to_read(sen, nbands, band_names) != SUCCESS){
     fprintf(stderr, "Error: Could not determine bands to read.\n");
+    return FAILURE;
+  }
+
+  // compare with target sensor if combination is sensible
+  if (check_target_sensor(sen) != SUCCESS){
+    fprintf(stderr, "Error: Target sensor is not compatible with selected input sensors.\n");
     return FAILURE;
   }
 

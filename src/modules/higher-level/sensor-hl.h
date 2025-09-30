@@ -50,7 +50,7 @@ typedef struct {
   int  **band_number;
   char **band_names; 
   char **sensor;
-  char   target[NPOW_10];
+  char  *target;
   char  *main_product;
   char  *quality_product;
   char **aux_products;

@@ -99,6 +99,7 @@ void register_ard1(params_t *params, par_hl_t *phl){
 
 
   register_charvec_par(params, "SENSORS", _CHAR_TEST_NONE_, -1, &phl->sen.sensor, &phl->sen.n);
+  register_char_par(params,    "TARGET_SENSOR", _CHAR_TEST_NONE_, &phl->sen.target);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
   register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
