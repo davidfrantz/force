@@ -40,6 +40,7 @@ This program is for testing small things. Needs to be compiled on demand
 #include "../modules/cross-level/alloc-cl.h"
 #include "../modules/cross-level/const-cl.h"
 #include "../modules/cross-level/quality-cl.h"
+#include "../modules/cross-level/sys-cl.h"
 
 
 //#include "higher-level/read-ard-hl.h"
@@ -50,107 +51,54 @@ This program is for testing small things. Needs to be compiled on demand
 //#include "gdalwarper.h"     // GDAL warper related entry points and defs
 //#include "ogr_spatialref.h" // coordinate systems services
 
-
+#include <jansson.h>
 
 int main ( int argc, char *argv[] ){
-short qai[2] = { 12, 74 };
-short merged;
+char d_exe[NPOW_10];
+char f_sensor[NPOW_10];
 
-  merged = qai[0];
+  get_install_directory(d_exe, NPOW_10);
+  concat_string_3(f_sensor, NPOW_10, d_exe, "force-misc/sensors", "LND05.json", "/");
 
-  for ( int i = 0; i < 2; i++ ){
-    printf("qai[%d] = %d\n", i, qai[i]);
-    printf("off:          %d\n", get_off_from_value(qai[i]));
-    printf("cloud:        %d\n", get_cloud_from_value(qai[i]));
-    printf("shadow:       %d\n", get_shadow_from_value(qai[i]));
-    printf("snow:         %d\n", get_snow_from_value(qai[i]));
-    printf("water:        %d\n", get_water_from_value(qai[i]));
-    printf("aerosol:      %d\n", get_aerosol_from_value(qai[i]));
-    printf("subzero:      %d\n", get_subzero_from_value(qai[i]));
-    printf("saturation:   %d\n", get_saturation_from_value(qai[i]));
-    printf("lowsun:       %d\n", get_lowsun_from_value(qai[i]));
-    printf("illumination: %d\n", get_illumination_from_value(qai[i]));
-    printf("slope:        %d\n", get_slope_from_value(qai[i]));
-    printf("vaporfill:    %d\n", get_vaporfill_from_value(qai[i]));
-    printf("\n");
 
+  json_error_t error;
+  json_t *root = json_load_file(f_sensor, 0, &error);
+  if (!root) {
+    fprintf(stderr, "Error: %s\n", error.text);
+    return 1;
   }
+    // Get description
+    json_t *desc = json_object_get(root, "description");
+    if (json_is_string(desc)) {
+        printf("Description: %s\n", json_string_value(desc));
+    } else {
+        printf("Description is not a string\n");
+    }
+
+  json_t *bands = json_object_get(root, "bands");
+  if (json_is_integer(bands)) {
+      printf("Bands: %lld\n", json_integer_value(bands));
+  } else {
+      printf("Bands is not an integer\n");
+  }
+
+  // Get band_names array
+  json_t *band_names = json_object_get(root, "band_names");
+  if (json_is_array(band_names)) {
+      printf("Band names:\n");
+      size_t i;
+      for (i = 0; i < json_array_size(band_names); i++) {
+          json_t *name = json_array_get(band_names, i);
+          if (json_is_string(name)) {
+              printf("  %02d: %s\n", i, json_string_value(name));
+          }
+      }
+  } else {
+      printf("band_names is not an array\n");
+  }
+
+  json_decref(root);
   
-  printf("max cloud:    %d\n", 
-    (get_cloud_from_value(qai[0]) > get_cloud_from_value(qai[1])) ? 
-     get_cloud_from_value(qai[0]) : get_cloud_from_value(qai[1]));
-  printf("max aerosol   %d\n", 
-    (get_aerosol_from_value(qai[0]) > get_aerosol_from_value(qai[1])) ? 
-     get_aerosol_from_value(qai[0]) : get_aerosol_from_value(qai[1]));
-
-
-
-
-  // Merge off/on flag
-  set_off_to_value(&merged,get_off_from_value(qai[0]) && get_off_from_value(qai[1]));
-
-  // Merge cloud flag
-  set_cloud_to_value(&merged,
-    (get_cloud_from_value(qai[0]) > get_cloud_from_value(qai[1])) ? 
-     get_cloud_from_value(qai[0]) : get_cloud_from_value(qai[1]));
-
-  // Merge cloud shadow flag
-  set_shadow_to_value(&merged,
-    get_shadow_from_value(qai[0]) || get_shadow_from_value(qai[1]));
-
-  // Merge snow flag
-  set_snow_to_value(&merged,
-    get_snow_from_value(qai[0]) || get_snow_from_value(qai[1]));
-
-  // Merge water flag
-  set_water_to_value(&merged,
-    get_water_from_value(qai[0]) || get_water_from_value(qai[1]));
-
-  // Merge aerosol flag
-  set_aerosol_to_value(&merged,
-    (get_aerosol_from_value(qai[0]) > get_aerosol_from_value(qai[1])) ? 
-     get_aerosol_from_value(qai[0]) : get_aerosol_from_value(qai[1]));
-
-  // Merge subzero reflectance flag
-  set_subzero_to_value(&merged,
-    get_subzero_from_value(qai[0]) || get_subzero_from_value(qai[1]));
-
-  // Merge saturated reflectance flag
-  set_saturation_to_value(&merged,
-    get_saturation_from_value(qai[0]) || get_saturation_from_value(qai[1]));
-
-  // Merge low sun angle flag
-  set_lowsun_to_value(&merged,
-    get_lowsun_from_value(qai[0]) || get_lowsun_from_value(qai[1]));
-
-  // Merge illumination flag
-  set_illumination_to_value(&merged,
-    (get_illumination_from_value(qai[0]) < get_illumination_from_value(qai[1])) ? 
-     get_illumination_from_value(qai[0]) : get_illumination_from_value(qai[1]));
-
-  // Merge slope flag
-  set_slope_to_value(&merged,
-    get_slope_from_value(qai[0]) || get_slope_from_value(qai[1]));
-
-  // Merge water vapor fill flag
-  set_vaporfill_to_value(&merged,
-    get_vaporfill_from_value(qai[0]) || get_vaporfill_from_value(qai[1]));
-
-  printf("merged qai = %d\n", merged);
-  printf("off:          %d\n", get_off_from_value(merged));
-  printf("cloud:        %d\n", get_cloud_from_value(merged));
-  printf("shadow:       %d\n", get_shadow_from_value(merged));
-  printf("snow:         %d\n", get_snow_from_value(merged));
-  printf("water:        %d\n", get_water_from_value(merged));
-  printf("aerosol:      %d\n", get_aerosol_from_value(merged));
-  printf("subzero:      %d\n", get_subzero_from_value(merged));
-  printf("saturation:   %d\n", get_saturation_from_value(merged));
-  printf("lowsun:       %d\n", get_lowsun_from_value(merged));
-  printf("illumination: %d\n", get_illumination_from_value(merged));
-  printf("slope:        %d\n", get_slope_from_value(merged));
-  printf("vaporfill:    %d\n", get_vaporfill_from_value(merged));
-  printf("\n");
-
    return 0; 
 }
 

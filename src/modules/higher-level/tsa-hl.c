@@ -416,7 +416,7 @@ void alloc_ts_metadata(tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
   if (phl->nd         > 0) alloc((void**)&ts->d_fbd, phl->nd, sizeof(date_t));         else ts->d_fbd = NULL;
   if (phl->tsa.pol.ny > 0) alloc((void**)&ts->d_pol, phl->tsa.pol.ny, sizeof(date_t)); else ts->d_pol = NULL;
 
-  if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_04, sizeof(char)); else ts->bandnames_tsi = NULL;
+  if (ni > 0) alloc_2D((void***)&ts->bandnames_tsi, ni, NPOW_10, sizeof(char)); else ts->bandnames_tsi = NULL;
 
   return;
 }
@@ -456,7 +456,7 @@ void free_ts_metadata(tsa_t *ts, int ni){
 void compile_ts_metadata(ard_t *ard, tsa_t *ts, par_hl_t *phl, int nt, int nr, int ni){
 int t, k;
 date_t date;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 
 
   init_date(&date);
@@ -484,13 +484,13 @@ char sensor[NPOW_04];
     for (t=0; t<ni; t++){
       if (phl->tsa.tsi.method == _INT_NONE_){
         date = get_brick_date(ard[t].DAT, 0);
-        get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+        get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
       } else {
         set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
-        copy_string(sensor, NPOW_04, "BLEND");
+        copy_string(sensor, NPOW_10, "BLEND");
       }
       copy_date(&date, &ts->d_tsi[t]);
-      copy_string(ts->bandnames_tsi[t], NPOW_04, sensor);
+      copy_string(ts->bandnames_tsi[t], NPOW_10, sensor);
     }
   }
 
@@ -566,7 +566,7 @@ brick_t **TSA = NULL;
 int t, k;
 date_t date;
 char fdate[NPOW_10];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 int o = 0, nprod;
@@ -634,7 +634,7 @@ brick_compile_info_t *info = NULL;
           switch (info[o].prodtype){
             case _full_:
               date = get_brick_date(ard[t].DAT, 0);
-              get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+              get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
               set_brick_sensor(TSA[o], t, sensor);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
@@ -647,7 +647,7 @@ brick_compile_info_t *info = NULL;
               break;
             case _nrt_:
               date = get_brick_date(ard[(nt-nr)+t].DAT, 0);
-              get_brick_sensor(ard[(nt-nr)+t].DAT, 0, sensor, NPOW_04);
+              get_brick_sensor(ard[(nt-nr)+t].DAT, 0, sensor, NPOW_10);
               set_brick_sensor(TSA[o], t, sensor);
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
               set_brick_wavelength(TSA[o], t, date.year + (date.doy-1)/365.0);
@@ -867,7 +867,7 @@ int nchar;
     phl->date_range[_MIN_].year, phl->date_range[_MIN_].month, phl->date_range[_MIN_].day, 
     phl->date_range[_MAX_].year, phl->date_range[_MAX_].month, phl->date_range[_MAX_].day, 
     phl->doy_range[_MIN_], phl->doy_range[_MAX_], 
-    phl->sen.target, phl->tsa.index_name[idx], info->prodname);
+    phl->sen.target, phl->tsa.index.names[idx], info->prodname);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
@@ -881,7 +881,7 @@ int nchar;
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 
-  sprintf(domain, "%s_%s", phl->tsa.index_name[idx], info->prodname);
+  sprintf(domain, "%s_%s", phl->tsa.index.names[idx], info->prodname);
 
   for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
@@ -934,7 +934,7 @@ short nodata;
   }
 
 //  printf("allocating %d indices\n", phl->tsa.n);
-  alloc((void**)&TSA, phl->tsa.n, sizeof(brick_t**));
+  alloc((void**)&TSA, phl->tsa.index.n, sizeof(brick_t**));
 
   // number of steps for interpolation
   if (phl->tsa.tsi.method == _INT_NONE_){
@@ -954,14 +954,16 @@ short nodata;
 
 
   
-  for (idx=0; idx<phl->tsa.n; idx++){
+  for (int idx=0; idx<phl->tsa.index.n; idx++){
+
+    phl->tsa.index.i = idx;
 
     // generate data arrays
     compile_ts_metadata(ard, &ts, phl, nt, nr, ni);
 
     // initialize UDFs
-    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, 0, ni, &phl->tsa.pyp);
-    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index_name[idx], 1, 0, ni, &phl->tsa.rsp);
+    init_pyp(NULL, &ts, _HL_TSA_, phl->tsa.index.names[idx], 1, 0, ni, &phl->tsa.pyp);
+    init_rsp(NULL, &ts, _HL_TSA_, phl->tsa.index.names[idx], 1, 0, ni, &phl->tsa.rsp);
 
     // compile products + bricks
     if ((TSA[idx] = compile_tsa(ard, &ts, phl, cube, nt, nr, ni, idx, &nprod)) == NULL || nprod == 0){
@@ -971,15 +973,15 @@ short nodata;
       return NULL;
     }
 
-    
-    tsa_spectral_index(ard, &ts, mask_, nc, nt, idx, nodata, &phl->tsa, &phl->sen, endmember);
-    
+
+    tsa_spectral_index(ard, &ts, mask_, nc, nt, idx, nodata, &phl->tsa.index, &phl->sen, &phl->tsa.sma, endmember);
+
     tsa_interpolation(&ts, mask_, nc, nt, nr, ni, nodata, &phl->tsa.tsi);
 
-    python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+    python_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index.names[idx], 
       nx, ny, nc, 1, 0, ni, nodata, &phl->tsa.pyp, phl->cthread);
 
-    rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index_name[idx], 
+    rstats_udf(NULL, NULL, &ts, mask_, _HL_TSA_, phl->tsa.index.names[idx], 
       nx, ny, nc, 1, 0, ni, nodata, &phl->tsa.rsp, phl->cthread);
 
     tsa_stm(&ts, mask_, nc, ni, nodata, &phl->tsa.stm);
@@ -1006,17 +1008,17 @@ short nodata;
   
 
   // flatten out TSA bricks for returning to main
-  alloc((void**)&PTR, phl->tsa.n*nprod, sizeof(brick_t*));
-  
-  for (idx=0, k=0; idx<phl->tsa.n; idx++){
+  alloc((void**)&PTR, phl->tsa.index.n*nprod, sizeof(brick_t*));
+
+  for (idx=0, k=0; idx<phl->tsa.index.n; idx++){
     for (o=0; o<nprod; o++, k++) PTR[k] = TSA[idx][o];
   }
-  
-  for (idx=0; idx<phl->tsa.n; idx++) free((void*)TSA[idx]);
+
+  for (idx=0; idx<phl->tsa.index.n; idx++) free((void*)TSA[idx]);
   free((void*)TSA);
 
 
-  *nproduct = nprod*phl->tsa.n;
+  *nproduct = nprod*phl->tsa.index.n;
   return PTR;
 }
 

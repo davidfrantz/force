@@ -12,4 +12,5 @@ dummy: \
 	$(OPENCV_INCLUDES) $(OPENCV_FLAGS) $(OPENCV_LIBS) \
 	$(PYTHON_INCLUDES) $(PYTHON_LIBS) \
 	$(RSTATS_INCLUDES) $(RSTATS_LIBS) \
-	-lm
+	-lm \
+	-ljansson 

@@ -894,24 +894,21 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# Sensors to be used in the analysis. Multi-sensor analyses are restricted\n");
-    fprintf(fp, "# to the overlapping bands. Following sensors are available: LND04 (6-band\n");
-    fprintf(fp, "# Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),\n");
-    fprintf(fp, "# LND08/09 (6-band Landsat 8-9 OLI), SEN2[A-D] (10-band Sentinel-2[A-D])\n");
-    fprintf(fp, "# sen2[a-d] (4-band Sentinel-2[A-D])\n");
-    fprintf(fp, "# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-\n");
-    fprintf(fp, "# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID\n");
-    fprintf(fp, "# (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.\n");
-    fprintf(fp, "# (7-band Aqua MODIS).\n");
-    fprintf(fp, "# The resulting outputs are named according to their band designation, i.e. \n");
-    fprintf(fp, "# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface\n");
-    fprintf(fp, "# bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or\n");
-    fprintf(fp, "# VVVHP (VV/VH polarized), MODIS (7-band MODIS).\n");
-    fprintf(fp, "# BAP Composites with such a band designation can be input again (e.g. \n");
-    fprintf(fp, "# SENSORS = LNDLG).\n");
-    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,\n");
-    fprintf(fp, "#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}\n");
-  }
+    fprintf(fp, "# to the overlapping bands. Each sensor needs a sensor definition in the runtime-data\n");
+    fprintf(fp, "# directory. New sensors can be added by the user. New bandnames can be added, too.\n");
+    fprintf(fp, "# Type: Character list. \n");
+  }  
   fprintf(fp, "SENSORS = LND08 LND09 SEN2A SEN2B SEN2C\n");
+
+  if (verbose){
+    fprintf(fp, "# Target sensor that represents the combination of input sensors.\n");
+    fprintf(fp, "# A sensor definition for this target sensor needs to exist to make sure that processing \n");
+    fprintf(fp, "# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2, \n");
+    fprintf(fp, "# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2 \n");
+    fprintf(fp, "# sensors, the target sensor could be SEN2L. Valid values are the same as for SENSORS.\n");
+    fprintf(fp, "# Type: Character list. \n");
+  }
+  fprintf(fp, "TARGET_SENSOR = LNDLG\n");
 
   if (verbose){
     fprintf(fp, "# Main product type to be used. Usually, this is a reflectance product like BOA.\n");
@@ -1455,12 +1452,11 @@ void write_par_hl_index(FILE *fp, bool verbose){
     fprintf(fp, "# index cannot be computed based on the requested SENSORS. The index SMA is\n");
     fprintf(fp, "# a linear spectral mixture analysis and is dependent on the parameters\n");
     fprintf(fp, "# specified in the SPECTRAL MIXTURE ANALYSIS section below.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {BLUE,GREEN,RED,NIR,SWIR1,SWIR2,RE1,\n");
-    fprintf(fp, "#   RE2,RE3,BNIR,NDVI,EVI,NBR,NDTI,ARVI,SAVI,SARVI,TC-BRIGHT,TC-GREEN,TC-WET,\n");
-    fprintf(fp, "#   TC-DI,NDBI,NDWI,MNDWI,NDMI,NDSI,SMA,kNDVI,NDRE1,NDRE2,CIre,NDVIre1,NDVIre2,\n");
-    fprintf(fp, "#   NDVIre3,NDVIre1n,NDVIre2n,NDVIre3n,MSRre,MSRren,CCI}\n");
+    fprintf(fp, "# Any index defined in indices.json can be used, as well as SMA,\n");
+    fprintf(fp, "# or any band name present in the SENSORS band combination\n");
+    fprintf(fp, "# Type: Character list. \n");
   }
-  fprintf(fp, "INDEX = NDVI EVI NBR\n");
+  fprintf(fp, "INDEX = NDVI EVI NBR RED NIR\n");
 
   if (verbose){
     fprintf(fp, "# Standardize the TSS time series with pixel mean and/or standard deviation?\n");
@@ -2146,8 +2142,6 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
     fprintf(fp, "# the SENSORS parameter. For improving the spatial resolution of Landsat to\n");
     fprintf(fp, "# Sentinel-2, it is recommended to use \"SENSORS = sen2a sen2b\", and\n");
     fprintf(fp, "# \"SENSORS_LOWRES = LND07 LND08 LND09\"\n");
-    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,\n");
-    fprintf(fp, "#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID}\n");
   }
   fprintf(fp, "SENSORS_LOWRES = LND07 LND08 LND09\n");
 

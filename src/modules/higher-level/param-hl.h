@@ -38,6 +38,8 @@ Higher Level Processing paramater header
 #include "../cross-level/param-cl.h"
 #include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
+#include "../higher-level/sensor-hl.h"
+#include "../higher-level/index-parse-hl.h"
 
 
 #ifdef __cplusplus
@@ -68,51 +70,6 @@ typedef struct {
   float above_noise;
   float below_noise;
 } par_qai_t;
-
-// Level 2 band dictionary
-typedef struct {
-  int    n;
-  int    *senid;
-  int    nb;
-  int  **band;
-  char **domain; 
-  char **sensor;
-  char   target[NPOW_10];
-  char  *main_product;
-  char  *quality_product;
-  char **aux_products;
-  int    n_aux_products;
-
-  int spec_adjust; // spectral band adjustment to S2A?
-
-  int blue;
-  int green;
-  int red;
-  int rededge1;
-  int rededge2;
-  int rededge3;
-  int bnir;
-  int nir;
-  int swir0;
-  int swir1;
-  int swir2;
-  int vv;
-  int vh;
-
-  float w_blue;
-  float w_green;
-  float w_red;
-  float w_rededge1;
-  float w_rededge2;
-  float w_rededge3;
-  float w_bnir;
-  float w_nir;
-  float w_swir0;
-  float w_swir1;
-  float w_swir2;
-  float w_vv;
-  float w_vh;
-} par_sen_t;
 
 // BAP scoring
 typedef struct {
@@ -283,11 +240,10 @@ typedef struct {
   par_sta_t sta;
 } par_stm_t;
 
+
 // general TSA
 typedef struct {
-  int n;                 // number of indices
-  int  *index;           // index type
-  char **index_name;     // short name index type
+  index_t index; // index definitions
   int otss;           // flag: output time series brick
   int standard;
 
@@ -454,8 +410,8 @@ typedef struct {
   int psf;             // flag: point spread function
 
   // sensors
-  par_sen_t sen;     // Level-2 sensor dictionary
-  par_sen_t sen2;    // secondary Level-2 sensor dictionary
+  sen_t sen;     // Level-2 sensor dictionary
+  sen_t sen2;    // secondary Level-2 sensor dictionary
 
   // features
   par_ftr_t ftr;

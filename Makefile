@@ -130,8 +130,8 @@ external: prepare
 
 # misc files
 misc: prepare
-	@for file in $(MISCDIR)/*; do \
-		cp $$file $(BINDIR)/force-misc/; \
+	@for item in $(MISCDIR)/*; do \
+		cp -r $$item $(BINDIR)/force-misc/; \
 	done
 
 # install the software

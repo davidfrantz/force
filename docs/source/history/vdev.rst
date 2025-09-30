@@ -67,6 +67,42 @@ Develop version
     Alternatively, use GTiff as output format, which works with sub-tile chunks, and the new configuration is actually
     pretty comparable to COGs.
 
+  - in ``force-higher-level``, all ARD-based modules:
+    The ``SENSORS`` definitions were moved out of code and are now held in a the directoy ``force-misc\runtime-data``, 
+    which is installed with FORCE. This provides users with way more flexibility regarding sensors that shall be
+    used. The files are in ``JSON`` format and can be easily modified to change sensor behavior. An example application
+    might be the remapping of the various NIR bands if the default band mapping does not suit your analysis. 
+    Another application might be the addition of a new sensor that has not yet been supported by FORCE. 
+    When doing this, new band names can be introduced, too. As an example, this opens the door to support sensors
+    like EnMap. As the directory name suggests, these files are evaluated at runtime, hence no recompilation is necessary.
+    When you place a file ``EnMap.json`` in the directory, FORCE can make use of it by specifying ``SENSORS = EnMap`` in 
+    the configuration file. Note that when using containerization, individual files can be mounted into the container to 
+    make them available, and separating your user-defined sensors from the default ones.
+    While this gives users a lot of flexibility, it also requires some responsibility: some internal logic might
+    be affected by modifiying exising sensor definitions. Known examples are the spectral adjustment, which might
+    become dysfunctional if the involved sensor definitions are changed.
+    Also, the previous logic of automatically naming ouptut files with a matching sensor name is no longer possible.
+    The user must now specify the desired output sensor name via the ``TARGET_SENSOR`` parameter. This target sensor
+    must have a sensor definition file in the runtime-data directory, too. And it needs to match the band subset of the
+    ``SENSORS`` combination. E.g., if ``SENSORS = LND08 SEN2A``, the ``TARGET_SENSOR`` could be ``LNDLG``, wherein the 6-Band
+    band subset is defined. If ``SENSORS = SEN2A SEN2B SEN2C``, the ``TARGET_SENSOR`` could be ``SEN2L``, which has a 10-Band 
+    subset defined. Note that the ``SPECTRAL_ADJUST`` parameter influences the band subset as it adds additional bands to the processing,
+    which are synthesized. As an example, if ``SPECTRAL_ADJUST = TRUE`` and ``SENSORS = LND08 SEN2A``, the ``TARGET_SENSOR`` could be ``SEN2L``.
+
+  - in ``force-higher-level``, TSA-submodule:
+    The ``INDEX`` selection has been moved out of code and is now held in a the directoy ``force-misc\runtime-data``, 
+    which is installed with FORCE. This provides users with more flexibility regarding indices that shall be
+    used. The file ``indices.json`` is in ``JSON`` format and can be easily modified to change index behavior. 
+    As an example, NDVI can be remapped to use different bands to "create" a new, but not yet implemented index 
+    without touching the code as such. Do note however, that this only works with existing index templates implemented in the code.
+    That said, simply adding a new index definition in the JSON file will not work, as there is no corresponding implementation in the code.
+    However, together with the new ``SENSORS`` flexibility, this creates interesting possibilities.
+    Also: in addition to the listed indices, the user can specify any band name defined in the ``SENSORS`` definition files.
+    This allows users to directly use spectral bands as "indices", e.g., ``INDEX = NIR SWIR1`` 
+    (or any other "new" band name defined in the sensor definition files).
+    Additionally, the ``SMA`` index can be used to perform a Spectral Mixture Analysis, in which case the endmember file 
+    must have the same number of bands as the selected ``SENSORS`` combination. 
+
   - in ``force-higher-level``, UDF sub-module:
     a new feature was added to the UDF module, which allows users to add auxiliary products
     to the data array that is passed to the UDF. 

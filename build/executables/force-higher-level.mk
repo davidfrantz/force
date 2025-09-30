@@ -4,7 +4,8 @@ force-higher-level: \
   cf-improphe-hl \
   cso-hl \
   fold-hl \
-  index-hl \
+  index-compute-hl \
+  index-parse-hl \
   interpolate-hl \
   brick_base-cl \
   brick_io-cl \
@@ -38,6 +39,7 @@ force-higher-level: \
   read-ard-hl \
   read-aux-hl \
   sample-hl \
+  sensor-hl \
   spec-adjust-hl \
   standardize-hl \
   stats-cl \
@@ -60,7 +62,8 @@ force-higher-level: \
 	$(OBJDIR)/cf-improphe-hl.o \
 	$(OBJDIR)/cso-hl.o \
 	$(OBJDIR)/fold-hl.o \
-	$(OBJDIR)/index-hl.o \
+	$(OBJDIR)/index-compute-hl.o \
+	$(OBJDIR)/index-parse-hl.o \
 	$(OBJDIR)/interpolate-hl.o \
 	$(OBJDIR)/brick_base-cl.o \
 	$(OBJDIR)/brick_io-cl.o \
@@ -94,6 +97,7 @@ force-higher-level: \
 	$(OBJDIR)/read-ard-hl.o \
 	$(OBJDIR)/read-aux-hl.o \
 	$(OBJDIR)/sample-hl.o \
+	$(OBJDIR)/sensor-hl.o \
 	$(OBJDIR)/spec-adjust-hl.o \
 	$(OBJDIR)/standardize-hl.o \
 	$(OBJDIR)/stats-cl.o \
@@ -114,4 +118,5 @@ force-higher-level: \
 	$(OPENCV_INCLUDES) $(OPENCV_FLAGS) $(OPENCV_LIBS) \
 	$(PYTHON_INCLUDES) $(PYTHON_LIBS) \
 	$(RSTATS_INCLUDES) $(RSTATS_LIBS) \
-	-lm
+	-lm \
+	-ljansson

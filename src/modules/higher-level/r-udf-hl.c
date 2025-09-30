@@ -347,7 +347,7 @@ void term_rsp(par_udf_t *udf){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf){
 date_t date;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char bandname[NPOW_10];
 
 SEXP dim_nt, dim_nb;
@@ -380,7 +380,7 @@ SEXP sensors, bandnames;
       INTEGER(years)[t]  = date.year;
       INTEGER(months)[t] = date.month;
       INTEGER(days)[t]   = date.day;
-      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
       SET_STRING_ELT(sensors, t, mkChar(sensor));
 
     }

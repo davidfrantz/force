@@ -1,0 +1,17 @@
+{
+  "description": "Sentinel-2D MSI high-res bands",
+  "name": "SEN2D",
+  "bands": 10,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "REDEDGE1",
+    "REDEDGE2",
+    "REDEDGE3",
+    "BROADNIR",
+    "NIR",
+    "SWIR1",
+    "SWIR2"
+  ]
+}
