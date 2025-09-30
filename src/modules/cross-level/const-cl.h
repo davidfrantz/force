@@ -59,7 +59,7 @@ typedef struct {
 
 // compiler options
 //#define FORCE_CLOCK
-#define FORCE_DEBUG
+//#define FORCE_DEBUG
 //#define FORCE_DEV
 
 //#define ACIX
