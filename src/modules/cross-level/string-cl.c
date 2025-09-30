@@ -249,3 +249,23 @@ bool vector_contains(const char **vector, size_t size, const char *target) {
   return false;
 }
 
+
+/** Check if a vector of strings contains a given string
++++ This function checks if a vector of strings contains a given string.
++++ It returns the index of the string if found, -1 otherwise.
+--- vector:  array of strings
+--- size:    size of the array
+--- target:  string to search for
++++ Return:  index of the string if found, -1 otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int vector_contains_pos(const char **vector, size_t size, const char *target) {
+  
+  for (size_t i = 0; i < size; i++) {
+    if (strings_equal(vector[i], target)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+

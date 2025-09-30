@@ -50,6 +50,7 @@ int char_to_int(const char *src, int *val);
 int char_to_float(const char *src, float *val);
 bool strings_equal(const char *str1, const char *str2);
 bool vector_contains(const char **vector, size_t size, const char *target);
+int vector_contains_pos(const char **vector, size_t size, const char *target);
 
 #ifdef __cplusplus
 }
