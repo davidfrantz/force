@@ -805,19 +805,15 @@ void free_param_higher(par_hl_t *phl){
 
   if (phl->input_level1 == _INP_QAI_ ||
       phl->input_level1 == _INP_ARD_){
-    free_2D((void**)phl->sen.sensor, phl->sen.n);
     free_2D((void**)phl->sen.band_number, phl->sen.n);
     free_2D((void**)phl->sen.band_names, phl->sen.n_bands);
   }
 
   if (phl->input_level2 == _INP_QAI_ ||
       phl->input_level2 == _INP_ARD_){
-    free_2D((void**)phl->sen2.sensor, phl->sen2.n);
     free_2D((void**)phl->sen2.band_number, phl->sen2.n);
     free_2D((void**)phl->sen2.band_names, phl->sen2.n_bands);
   }
-
-  if (phl->type == _HL_TSA_) free_2D((void**)phl->tsa.index.names, phl->tsa.index.n); 
 
   if (phl->type == _HL_ML_) free_mcl(&phl->mcl);
 
