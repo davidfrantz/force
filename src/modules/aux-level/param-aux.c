@@ -2142,8 +2142,6 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
     fprintf(fp, "# the SENSORS parameter. For improving the spatial resolution of Landsat to\n");
     fprintf(fp, "# Sentinel-2, it is recommended to use \"SENSORS = sen2a sen2b\", and\n");
     fprintf(fp, "# \"SENSORS_LOWRES = LND07 LND08 LND09\"\n");
-    fprintf(fp, "# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,\n");
-    fprintf(fp, "#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID}\n");
   }
   fprintf(fp, "SENSORS_LOWRES = LND07 LND08 LND09\n");
 

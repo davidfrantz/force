@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make -j aux
+make -j force-parameter
 
 MOD=$(bin/force-parameter -m | grep -v 'available modules' | sed 's/^ *//' | cut -d ':' -f 1)
 
