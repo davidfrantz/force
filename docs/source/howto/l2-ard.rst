@@ -55,6 +55,10 @@ This includes three main processing steps:
 2. radiometric correction
 3. data cubing
 
+For Landsat, one additional option is implemented:
+
+1. co-registration with Landsat time series
+
 For Sentinel-2, two additional options are implemented:
 
 1. resolution merging, i.e. increase the spatial resolution of the 20m bands to 10m
@@ -252,6 +256,9 @@ Let's keep this method, but feel free to try the other options.
 
 Since v. 3.0, FORCE is able to perform a co-registration of Sentinel-2 images with Landsat time series.
 For starters, we will not use this option, but see the :ref:`tut-coreg` tutorial.
+
+.. note::
+   As of FORCE ``v. 3.8.00``, co-registration is also possible for Landsat imagery.
 
 
 8) Parallel Processing

@@ -223,10 +223,9 @@ RES_MERGE = IMPROPHE
 
 # CO-REGISTRATION OPTIONS
 # ------------------------------------------------------------------------
-# This parameter only applies for Sentinel-2 data. This parameter defines
-# the path to a directory that contains monthly Landsat NIR base images.
-# If given, a co-registration is attempted. If it fails (no tie points),
-# the image won't be processed.
+# This parameter defines the path to a directory that contains monthly
+# NIR base images. If given, a co-registration is attempted.
+# If it fails (no tie points), the image won't be processed.
 # Type: full directory path
 DIR_COREG_BASE = NULL
 # This parameter defines the nodata values of the coregistration base images.
