@@ -28,7 +28,7 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
   * Adjacency effect correction. 
   * BRDF correction. 
   * Resolution merge of Sentinel-2 bands: 20m –> 10m. 
-  * Co-registration of Sentinel-2 images
+  * Co-registration of Sentinel-2 and Landsat images
   * Data cubing: reprojection / gridding.
 
 * **Generation of highly Analysis Ready Data (hARD): Large area. Gap free. Easy to use. Ideal input for Machine Learners!**
