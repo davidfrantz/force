@@ -43,8 +43,8 @@ const char *separator = " ,\t";
 int line = 0;
 int row  = 0;
 int col  = 0;
-int nrow_buf = NPOW_00;
-int ncol_buf = NPOW_00;
+int nrow_buf = 1;
+int ncol_buf = 1;
 double mx, vx, k, sum;
 double minimum, maximum;
 

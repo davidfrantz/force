@@ -874,22 +874,22 @@ float ctr = 0;
   for (c=0; c<nc; c++){
     if (!aqua){
       WVP[c] = modavg[c];
-      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
     } else {
       if (modavg[c] < 9999 && mydavg[c] < 9999){
         if (modctr[c] >= mydctr[c]){
           WVP[c] = modavg[c];
-          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
         } else {
           WVP[c] = mydavg[c];
-          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MYD");
         }
       } else if (modavg[c] < 9999 && mydavg[c] >= 9999){
         WVP[c] = modavg[c];
-        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
       } else if (modavg[c] >= 9999 && mydavg[c] < 9999){
         WVP[c] = mydavg[c];
-        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MYD");
       }
     }
     if (WVP[c] < 9999) ctr++;
@@ -1026,7 +1026,7 @@ double *modctr = NULL, *mydctr = NULL;
   // initialize precipitable water with fill
   for (c=0; c<nc; c++){
     WVP[c] = 9999;
-    copy_string(SEN[c], NPOW_02, "TBD");
+    copy_string(SEN[c], NPOW_10, "TBD");
   }
 
   // if TERRA geometa doesn't exist: download

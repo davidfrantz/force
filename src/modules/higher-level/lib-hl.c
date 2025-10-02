@@ -51,7 +51,7 @@ char bname[NPOW_10];
 char domain[NPOW_10];
 enum{ _mae_ };
 int prodlen[1] ={ n_libraries + 1 };
-char prodname[1][NPOW_02] ={ "MAE" };
+char prodname[1][NPOW_10] ={ "MAE" };
 
 int prodtype[1] ={ _mae_ };
 
@@ -117,7 +117,7 @@ int b;
 brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
   if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
@@ -126,7 +126,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }

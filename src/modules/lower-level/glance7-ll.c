@@ -36,17 +36,17 @@ This file contains functions for GLANCE7 datacubes
 
 
 // name of continental cube
-static char name7[7][NPOW_04] = {
+static char name7[7][NPOW_10] = {
   "africa", "antarctica", "asia", "europe", "n-america", "oceania", "s-america" };
 
 
 // projection name of continental cube
-static char projname7[7][NPOW_04] = {
+static char projname7[7][NPOW_10] = {
   "GLANCE-AF", "GLANCE-AN", "GLANCE-AS", "GLANCE-EU", "GLANCE-NA", "GLANCE-OC", "GLANCE-SA" };
 
 
 // abbreviation of continental cube
-//static char abbr7[7][NPOW_02] = {
+//static char abbr7[7][NPOW_10] = {
 //  "AF", "AN", "AS", "EU", "NA", "OC", "SA" };
 
   

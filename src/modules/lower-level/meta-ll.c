@@ -131,7 +131,7 @@ void free_calibration(cal_t *cal){
 int init_calibration(cal_t *cal){
 
   copy_string(cal->fname,     NPOW_10, "NULL");
-  copy_string(cal->orig_band, NPOW_03, "NULL");
+  copy_string(cal->orig_band, NPOW_10, "NULL");
 
   cal->fill     = SHRT_MIN;
 
@@ -367,84 +367,84 @@ GDALDatasetH fp_;
         b = 0;
         if (lid >= 8){
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "1");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "ULTRABLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "2");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "BLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "3");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "GREEN");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "4");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "RED");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "5");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "NIR");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "9");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "9");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "CIRRUS");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "6");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR1");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "7");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR2");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "10");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "10");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "TEMP");
           b++;
 
         } else {
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "1");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "BLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "2");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "GREEN");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "3");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "RED");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "4");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "NIR");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "5");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR1");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "7");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR2");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "6");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "TEMP");
           b++;
@@ -596,10 +596,10 @@ GDALDatasetH fp_;
   set_brick_filename(DN, "DIGITAL-NUMBERS");
   set_brick_par(DN, pl2->params->log);
 
-  copy_string(meta->refsys_type, NPOW_04, "WRS-2");
+  copy_string(meta->refsys_type, NPOW_10, "WRS-2");
 
-  nchar = snprintf(meta->refsys_id, NPOW_04, "%03d%03d", path, row);
-  if (nchar < 0 || nchar >= NPOW_04){
+  nchar = snprintf(meta->refsys_id, NPOW_10, "%03d%03d", path, row);
+  if (nchar < 0 || nchar >= NPOW_10){
     printf("Buffer Overflow in assembling WRS-2\n"); return FAILURE;}
 
 
@@ -767,67 +767,67 @@ int svgrid = 5000;
 
         b = 0;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "01");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "01");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "ULTRABLUE");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "02");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "02");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "BLUE");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "03");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "03");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "GREEN");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "04");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "04");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "RED");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "05");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "05");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE1");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "06");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "06");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE2");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "07");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "07");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE3");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "08");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "08");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "BROADNIR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "8A");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "8A");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "NIR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "09");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "09");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "VAPOR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "10");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "10");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "CIRRUS");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "11");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "11");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "SWIR1");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "12");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "12");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "SWIR2");
         b++;
@@ -850,7 +850,7 @@ int svgrid = 5000;
 
         }
 
-        copy_string(meta->refsys_type, NPOW_04, "MGRS");
+        copy_string(meta->refsys_type, NPOW_10, "MGRS");
 
         if (strlen(pl2->b_level1) > 50){ // old, long naming convention
           strncpy(meta->refsys_id, pl2->b_level1+49, 6);

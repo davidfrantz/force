@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 typedef struct {
-  char  orig_band[NPOW_03];   // Band ID in original file name
+  char  orig_band[NPOW_10];   // Band ID in original file name
   char  fname[NPOW_10]; // file name
   int   fill;           // fill value
   int   rsr_band;       // ID in RSR table
@@ -67,8 +67,8 @@ typedef struct {
   int dtype;           // data type (bytes)
   int sat;             // saturation value
   cal_t *cal;          // calibration DN->TOA reflectance / BT
-  char refsys_type[NPOW_04]; // reference system type
-  char refsys_id[NPOW_04];  // reference system ID
+  char refsys_type[NPOW_10]; // reference system type
+  char refsys_id[NPOW_10];  // reference system ID
   int tier;            // tier level
   s2_meta s2;          // Sentinel-2 calibration specific
 } meta_t;

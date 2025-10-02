@@ -136,7 +136,7 @@ params_t *params = NULL;
 
   alloc((void**)&params, 1, sizeof(params_t));
   params->n    = 0;
-  params->nmax = NPOW_04;
+  params->nmax = _BYTE_LEN_;
 
   alloc((void**)&params->par, params->nmax, sizeof(par_t));
   alloc((void**)&params->log, NPOW_14,      sizeof(char));
@@ -445,8 +445,8 @@ void register_bool_par(params_t *params, const char *name, int *ptr){
   params->par[params->n].n_enums = 2;
   alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
 
-  copy_string(params->par[params->n].enums[0].tag, NPOW_04, "FALSE");
-  copy_string(params->par[params->n].enums[1].tag, NPOW_04, "TRUE");
+  copy_string(params->par[params->n].enums[0].tag, NPOW_10, "FALSE");
+  copy_string(params->par[params->n].enums[1].tag, NPOW_10, "TRUE");
 
   params->par[params->n].enums[0].en = false;
   params->par[params->n].enums[1].en = true;
@@ -694,8 +694,8 @@ void register_boolvec_par(params_t *params, const char *name, int expected_lengt
   params->par[params->n].n_enums = 2;
   alloc((void**)&params->par[params->n].enums, 2, sizeof(tagged_enum_t));
 
-  copy_string(params->par[params->n].enums[0].tag, NPOW_04, "FALSE");
-  copy_string(params->par[params->n].enums[1].tag, NPOW_04, "TRUE");
+  copy_string(params->par[params->n].enums[0].tag, NPOW_10, "FALSE");
+  copy_string(params->par[params->n].enums[1].tag, NPOW_10, "TRUE");
 
   params->par[params->n].enums[0].en = false;
   params->par[params->n].enums[1].en = true;

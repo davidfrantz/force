@@ -74,11 +74,11 @@ int write_brick(brick_t *brick){
   
   char version[NPOW_10];
   
-  char ldate[NPOW_05];
-  char lwritetime[NPOW_05];
+  char ldate[NPOW_10];
+  char lwritetime[NPOW_10];
   date_t today;
   
-  char c_update[2][NPOW_04] = { "create", "update" };
+  char c_update[2][NPOW_10] = { "create", "update" };
   bool update;
   
   
@@ -130,7 +130,7 @@ int write_brick(brick_t *brick){
     }
   
     enum { _brick_, _FILE_};
-    alloc_3D((void****)&bands, NPOW_01, nfiles, nbands, sizeof(int));
+    alloc_3D((void****)&bands, 2, nfiles, nbands, sizeof(int));
     // dim 1: 2 slots - brick and file
     // dim 2: output files
     // dim 3: band numbers
@@ -438,7 +438,7 @@ int write_brick(brick_t *brick){
         copy_string(band_meta[i++], NPOW_14, "Sensor");
         copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
   
-        get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
+        get_brick_longdate(brick, b_brick, ldate, NPOW_10-1);
         copy_string(band_meta[i++], NPOW_14, "Date");
         copy_string(band_meta[i++], NPOW_14, ldate);
   
@@ -481,7 +481,7 @@ int write_brick(brick_t *brick){
         }
   
         current_date(&today);
-        long_date(today.year, today.month, today.day, today.hh, today.mm, today.ss, today.tz, lwritetime, NPOW_05);
+        long_date(today.year, today.month, today.day, today.hh, today.mm, today.ss, today.tz, lwritetime, NPOW_10);
   
         fprintf(fprov, "%s,", fname);
         for (p=0; p<(brick->nprovenance-1); p++) fprintf(fprov, "%s;", brick->provenance[p]);
@@ -500,7 +500,7 @@ int write_brick(brick_t *brick){
     if (fp_meta   != NULL){ free_2DC((void**)fp_meta);                fp_meta   = NULL;}
     if (band_meta != NULL){ free_2DC((void**)band_meta);              band_meta = NULL;}
     if (sys_meta  != NULL){ free_2DC((void**)sys_meta);               sys_meta  = NULL;}
-    if (bands     != NULL){ free_3D((void***)bands, NPOW_01, nfiles); bands     = NULL;}
+    if (bands     != NULL){ free_3D((void***)bands, 2, nfiles); bands     = NULL;}
   
     //CPLPopErrorHandler();
   
@@ -632,7 +632,7 @@ const char *projection = NULL;
   //size_t max_mem = 1342177280; // 1.25GB
   //size_t max_mem = 1073741824; // 1GB
   size_t max_mem = 805306368; // 0.75GB
-  char nthread[NPOW_04];
+  char nthread[NPOW_10];
   int nchar;
   char **papszWarpOptions = NULL;
   
@@ -802,8 +802,8 @@ const char *projection = NULL;
       wopt->padfDstNoDataImag = (double*)CPLMalloc(sizeof(double)*chunk_nb);
       for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataImag[b_] = 0;
   
-      nchar = snprintf(nthread, NPOW_04, "%d", threads);
-      if (nchar < 0 || nchar >= NPOW_04){ 
+      nchar = snprintf(nthread, NPOW_10, "%d", threads);
+      if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
   
       papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
@@ -913,8 +913,8 @@ const char *projection = NULL;
   int chunk_nx, chunk_ny;
   int chunk_xoff, chunk_yoff;
   float tmp;
-  char nthread[NPOW_04];
-  char initdata[NPOW_04];
+  char nthread[NPOW_10];
+  char initdata[NPOW_10];
   int nchar;
   char **papszWarpOptions = NULL;
   
@@ -1020,12 +1020,12 @@ const char *projection = NULL;
       (double*) CPLMalloc(sizeof(double)*wopt->nBandCount);
     wopt->padfDstNoDataImag[0] = 0.0;
   
-    nchar = snprintf(nthread, NPOW_04, "%d", threads);
-    if (nchar < 0 || nchar >= NPOW_04){ 
+    nchar = snprintf(nthread, NPOW_10, "%d", threads);
+    if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
       
-    nchar = snprintf(initdata, NPOW_04, "%d", dst_nodata);
-    if (nchar < 0 || nchar >= NPOW_04){ 
+    nchar = snprintf(initdata, NPOW_10, "%d", dst_nodata);
+    if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling nodata\n"); return FAILURE;}
      
     papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);

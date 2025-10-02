@@ -56,7 +56,7 @@ char bname[NPOW_10];
 char domain[NPOW_10];
 enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
 int prodlen[11] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[11][NPOW_02] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE" };
+char prodname[11][NPOW_10] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE" };
 
 int prodtype[11] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
 
@@ -122,7 +122,7 @@ int b;
 brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
   if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
@@ -131,7 +131,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }

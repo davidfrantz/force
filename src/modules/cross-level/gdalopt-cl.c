@@ -39,12 +39,12 @@ int o = 0;
 
   switch (format){
     case _FMT_ENVI_:
-      copy_string(gdalopt->extension,   NPOW_04, "dat");
-      copy_string(gdalopt->driver,      NPOW_04, "ENVI");
+      copy_string(gdalopt->extension,   NPOW_10, "dat");
+      copy_string(gdalopt->driver,      NPOW_10, "ENVI");
       break;
     case _FMT_GTIFF_:
-      copy_string(gdalopt->extension,   NPOW_04, "tif");
-      copy_string(gdalopt->driver,      NPOW_04, "GTiff");
+      copy_string(gdalopt->extension,   NPOW_10, "tif");
+      copy_string(gdalopt->driver,      NPOW_10, "GTiff");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "ZSTD");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
@@ -61,8 +61,8 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "256");
       break;
     case _FMT_COG_:
-      copy_string(gdalopt->extension,   NPOW_04, "tif");
-      copy_string(gdalopt->driver,      NPOW_04, "COG");
+      copy_string(gdalopt->extension,   NPOW_10, "tif");
+      copy_string(gdalopt->driver,      NPOW_10, "COG");
       copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
       copy_string(gdalopt->option[o++], NPOW_10, "ZSTD");
       copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
@@ -79,8 +79,8 @@ int o = 0;
       copy_string(gdalopt->option[o++], NPOW_10, "AVERAGE");
       break;
     case _FMT_JPEG_:
-      copy_string(gdalopt->extension,   NPOW_04, "jpg");
-      copy_string(gdalopt->driver,      NPOW_04, "JPEG");
+      copy_string(gdalopt->extension,   NPOW_10, "jpg");
+      copy_string(gdalopt->driver,      NPOW_10, "JPEG");
       break;
     case _FMT_CUSTOM_:
       break;
@@ -118,13 +118,13 @@ bool b_ext = false;
   for (i=0; i<nrows; i++){
 
     if (strcmp(tagval[i][_TV_TAG_], "DRIVER") == 0){
-      copy_string(gdalopt->driver, NPOW_04, tagval[i][_TV_VAL_]);
+      copy_string(gdalopt->driver, NPOW_10, tagval[i][_TV_VAL_]);
       b_driver = true;
     } else if (strcmp(tagval[i][_TV_TAG_], "EXTENSION") == 0){
-      copy_string(gdalopt->extension, NPOW_04, tagval[i][_TV_VAL_]);
+      copy_string(gdalopt->extension, NPOW_10, tagval[i][_TV_VAL_]);
       b_ext = true;
     } else {
-      if (o >= (NPOW_06-1)){
+      if (o >= (NPOW_10-1)){
         printf("too many GDAL output options."); 
         exit(FAILURE);
       }

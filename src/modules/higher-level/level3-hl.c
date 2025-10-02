@@ -48,7 +48,7 @@ int b, nb, nbands;
 int o, nprod = 4;
 int error = 0;
 enum { _ref_, _inf_, _scr_, _ovv_ };
-char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
+char prodname[4][NPOW_10] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
 bool explode[4] = { false, phl->explode, phl->explode, false };
 int prodlen[4] = { 0, _INF_LENGTH_, _SCR_LENGTH_, _RGB_LENGTH_ };
@@ -119,7 +119,7 @@ brick_t *brick = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 double res, res_;
 int nx, ny, nx_, ny_; 
@@ -174,7 +174,7 @@ int cx, cy, cx_, cy_, cc_;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }

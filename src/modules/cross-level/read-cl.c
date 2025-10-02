@@ -40,7 +40,7 @@ char *ptr = NULL;
 const char *separator = " =";
 char ***tagval = NULL;
 int n = 0;
-int n_buf = NPOW_00;
+int n_buf = 1;
 
 
 

@@ -44,7 +44,7 @@ extern "C" {
 
 typedef struct {
   char name[NPOW_10];    // name of brick
-  char product[NPOW_03]; // product short name
+  char product[NPOW_10]; // product short name
   char dname[NPOW_10];   // dirpath  for product
   char fname[NPOW_10];   // filename for product
   char provdir[NPOW_10]; // dirpath  for provenance folder

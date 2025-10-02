@@ -66,7 +66,7 @@ brick_t *brick = NULL;
   alloc((void**)&brick->nodata,     nb, sizeof(int));
   alloc((void**)&brick->scale,      nb, sizeof(float));
   alloc((void**)&brick->wavelength, nb, sizeof(float));
-  alloc_2D((void***)&brick->unit, nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&brick->unit, nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->domain, nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->bandname,   nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->sensor,     nb, NPOW_10, sizeof(char));
@@ -110,7 +110,7 @@ int datatype = get_brick_datatype(brick);
   re_alloc((void**)&brick->nodata,       nb0, nb, sizeof(int));
   re_alloc((void**)&brick->scale,        nb0, nb, sizeof(float));
   re_alloc((void**)&brick->wavelength,   nb0, nb, sizeof(float));
-  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
@@ -521,7 +521,7 @@ void init_brick(brick_t *brick){
 
 
   copy_string(brick->name,      NPOW_10, "NA");
-  copy_string(brick->product,   NPOW_03, "NA");
+  copy_string(brick->product,   NPOW_10, "NA");
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
   copy_string(brick->provdir,   NPOW_10, "NA");
@@ -590,7 +590,7 @@ int b;
     brick->nodata[b] = 0;
     brick->scale[b] = 0;
     brick->wavelength[b] = 0;
-    copy_string(brick->unit[b],     NPOW_04, "NA");
+    copy_string(brick->unit[b],     NPOW_10, "NA");
     copy_string(brick->domain[b],   NPOW_10, "NA");
     copy_string(brick->bandname[b], NPOW_10, "NA");
     copy_string(brick->sensor[b],   NPOW_10, "NA");
@@ -847,7 +847,7 @@ void get_brick_name(brick_t *brick, char name[], size_t size){
 void set_brick_product(brick_t *brick, const char *product){
   
 
-  copy_string(brick->product, NPOW_03, product);
+  copy_string(brick->product, NPOW_10, product);
 
   return;
 }
@@ -2001,7 +2001,7 @@ float get_brick_wavelength(brick_t *brick, int b){
 void set_brick_unit(brick_t *brick, int b, const char *unit){
 
 
-  copy_string(brick->unit[b], NPOW_04, unit);
+  copy_string(brick->unit[b], NPOW_10, unit);
 
   return;
 }

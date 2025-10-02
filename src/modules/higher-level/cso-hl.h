@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 typedef struct {
-  short **cso_[NPOW_08];
+  short **cso_[_BYTE_LEN_];
   date_t *d_cso;
 } cso_t;
 

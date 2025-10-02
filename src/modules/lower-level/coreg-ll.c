@@ -1630,7 +1630,7 @@ match_t dm;
 int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI){
 int p, nx, ny, nc, nb, band, err, year, month, dy;
 double res;
-char fname[NPOW_10], cyear[NPOW_03];
+char fname[NPOW_10], cyear[NPOW_10];
 int nchar;
 short nodata;
 short  **target = NULL;
@@ -1676,8 +1676,8 @@ int success = FAILURE;
   dy = 0;
   while (success == FAILURE && dy < 50){
     
-    nchar = snprintf(cyear, NPOW_03, "%04d", year-dy);
-    if (nchar < 0 || nchar >= NPOW_03){
+    nchar = snprintf(cyear, NPOW_10, "%04d", year-dy);
+    if (nchar < 0 || nchar >= NPOW_10){
       printf("Buffer Overflow in assembling pattern\n"); return FAILURE;}
 
     success = findfile_starts(pl2->d_coreg, cyear, NULL, fname, NPOW_10);

@@ -115,7 +115,7 @@ int b;
 brick_t *brick = NULL;
 char dname[NPOW_10];
 char fname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -125,7 +125,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }

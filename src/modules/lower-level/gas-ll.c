@@ -653,14 +653,14 @@ int year, month, day;
 
   // initialize
   wvp = avg = -1;
-  alloc((void**)&source, NPOW_02, sizeof(char));
+  alloc((void**)&source, NPOW_10, sizeof(char));
 
 
   // use wvp from parameter file
   if (strcmp(pl2->d_wvp, "NULL") == 0){
 
     wvp = avg = pl2->wvp;
-    copy_string(source, NPOW_02, "PRM");
+    copy_string(source, NPOW_10, "PRM");
 
     #ifdef FORCE_DEBUG
     printf("Use wvp from parameter file: %.2f\n", wvp);
@@ -709,10 +709,10 @@ int year, month, day;
             wvp = atof(tokenptr);
             if (k == 0){
               avg = wvp;
-              copy_string(source, NPOW_02, "AVG");
+              copy_string(source, NPOW_10, "AVG");
             } else {
               tokenptr = strtok(NULL, separator);
-              copy_string(source, NPOW_02, tokenptr);
+              copy_string(source, NPOW_10, tokenptr);
             }
           }
 

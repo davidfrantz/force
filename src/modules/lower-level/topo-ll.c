@@ -466,7 +466,7 @@ small  *cdem_ = NULL;
   atc->dem.avg = (float)(sum/num);
   atc->dem.max += 0.001; // add 1m
 
-  atc->dem.cnum = NPOW_08 - 1;
+  atc->dem.cnum = _BYTE_LEN_ - 1;
   atc->dem.step = (atc->dem.max-atc->dem.min)/atc->dem.cnum;
   
   

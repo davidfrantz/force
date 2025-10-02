@@ -32,7 +32,7 @@ typedef struct {
   int      prodlen;
   char   **bandname;
   date_t  *date;
-  char     prodname[NPOW_03];
+  char     prodname[NPOW_10];
   int      prodtype;
   int      enable;
   int      write;
@@ -48,7 +48,7 @@ brick_t **compile_udf(ard_t *ard, udf_t *udf, par_hl_t *phl, cube_t *cube, int n
 int info_udf_pyp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "PYP");
+  copy_string(info[o].prodname, NPOW_10, "PYP");
   info[o].prodlen  = phl->udf.pyp.nb;
   info[o].bandname = phl->udf.pyp.bandname;
   info[o].date     = phl->udf.pyp.date;
@@ -63,7 +63,7 @@ int info_udf_pyp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 int info_udf_rsp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "RSP");
+  copy_string(info[o].prodname, NPOW_10, "RSP");
   info[o].prodlen  = phl->udf.rsp.nb;
   info[o].bandname = phl->udf.rsp.bandname;
   info[o].date     = phl->udf.rsp.date;
@@ -152,7 +152,7 @@ int b;
 brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -162,7 +162,7 @@ int nchar;
   set_brick_product(brick, info->prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, info->prodname);
+    copy_string(subname, NPOW_10, info->prodname);
   } else {
     subname[0] = '\0';
   }

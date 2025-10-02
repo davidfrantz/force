@@ -34,6 +34,8 @@ Enum definitions
 extern "C" {
 #endif
 
+enum { _STR_LEN_ = 1024, _BYTE_LEN_ = 256 };
+
 // common numbers
 enum { NPOW_00 = 1,    NPOW_01 = 2,     NPOW_02 = 4,     NPOW_03 = 8, 
        NPOW_04 = 16,   NPOW_05 = 32,    NPOW_06 = 64,    NPOW_07 = 128,   
@@ -43,7 +45,7 @@ enum { NPOW_00 = 1,    NPOW_01 = 2,     NPOW_02 = 4,     NPOW_03 = 8,
 
 typedef struct{
   int en;
-  char tag[NPOW_04];
+  char tag[NPOW_10];
 } tagged_enum_t;
 
 // function return codes
