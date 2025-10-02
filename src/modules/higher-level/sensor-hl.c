@@ -70,7 +70,9 @@ int get_sensor_name(char *name, size_t size, json_t *def_sensor){
   }
   if (json_is_string(def_name)) {
       copy_string(name, size, json_string_value(def_name));
+      #ifdef FORCE_DEBUG
       printf("Sensor: %s\n", name);
+      #endif
   } else {
       fprintf(stderr, "Error: Item `Name` is not a string.\n");
       return FAILURE;
@@ -135,7 +137,9 @@ char **band_names = NULL;
         json_t *def_band_name = json_array_get(def_band_names, b);
         if (json_is_string(def_band_name)){
           copy_string(band_names[b], NPOW_10, json_string_value(def_band_name));
+          #ifdef FORCE_DEBUG
           printf("  %02d: %s\n", b+1, band_names[b]);
+          #endif
         } else {
           fprintf(stderr, "Error: Element %d in `band_names` array is not a string.\n", b+1);
           return FAILURE;
@@ -194,7 +198,9 @@ int get_band_intersection(int *n_intersect, char ***intersect_bands, int n_senso
 
   re_alloc_2D((void***)&buffer, nbands[s_first], NPOW_10, ctr, NPOW_10, sizeof(char));
 
+  #ifdef FORCE_DEBUG
   printf("Number of overlapping bands: %d\n", ctr);
+  #endif
 
   *n_intersect = ctr;
   *intersect_bands = buffer;
@@ -238,7 +244,9 @@ int get_band_union(int *n_union, char ***union_bands, int n_sensors, int *nbands
 
   re_alloc_2D((void***)&buffer, n_all, NPOW_10, ctr, NPOW_10, sizeof(char));
 
+  #ifdef FORCE_DEBUG
   printf("Number of unioned bands: %d\n", ctr);
+  #endif
 
   *n_union = ctr;
   *union_bands = buffer;
@@ -336,7 +344,6 @@ char **band_names = NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int retrieve_sensor(sen_t *sen){
 
-printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs to be re-implemented!!! Currently non-functional, might even crash!\n\n");
   int *nbands = NULL;
   alloc((void**)&nbands, sen->n, sizeof(int));
 
@@ -428,7 +435,6 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
 
   
   #ifdef FORCE_DEBUG
-  #endif
   printf("Waveband mapping:\n");
   for (int s=0; s<sen->n; s++){
     printf("Sensor # %02d: %s with %d retained bands:\n", s, sen->sensor[s], sen->n_bands);
@@ -437,6 +443,7 @@ printf("\nDEVELOP ALERT: band synthesizing logic for spectral adjustment needs t
     }
     printf("\n");
   }
+  #endif
 
   return SUCCESS;
 }

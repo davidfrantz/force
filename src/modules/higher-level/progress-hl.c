@@ -190,14 +190,14 @@ void forward_processing_unit(progress_t *progress, team_t *subset){
   subset->tile_number = 
     floor(subset->processing_unit / 
     (float)progress->dim_chunks.cells);
-printf("tile number: %d\n", subset->tile_number);
+
   subset->tile[_X_] = progress->tiles[_X_][subset->tile_number]; 
   subset->tile[_Y_] = progress->tiles[_Y_][subset->tile_number];
 
   subset->chunk_number = 
     subset->processing_unit - 
     (subset->tile_number * progress->dim_chunks.cells);
-printf("chunk number: %d\n", subset->chunk_number);
+
   subset->chunk[_Y_] = 
     floor(subset->chunk_number / progress->dim_chunks.cols);
   subset->chunk[_X_] = 
