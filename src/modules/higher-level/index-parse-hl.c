@@ -83,7 +83,9 @@ int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t
         json_t *def_band_name = json_array_get(def_index, b);
         if (json_is_string(def_band_name)){
           copy_string(names[b], NPOW_10, json_string_value(def_band_name));
+          #ifdef FORCE_DEBUG
           printf("  %02d: %s\n", b+1, names[b]);
+          #endif
         } else {
           fprintf(stderr, "Error: Element %d in %s array is not a string.\n", b+1, index_name);
           return FAILURE;
@@ -100,28 +102,6 @@ int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t
   return SUCCESS;
 }
 
-/*
-  for (int b_available=0; b_available<sen->n_bands; b_available++){
-    use_bands[b_available] = true;
-  }
-  index->n_bands[i] = sen->n_bands;
-  alloc_2D((void***)&index->band_names[i], sen->n_bands, NPOW_10, sizeof(char));
-  memcpy(index->band_names[i], sen->band_names, sen->n_bands * NPOW_10 * sizeof(char));
-*/  
-
-/*
-  for (int b_available=0; b_available<sen->n_bands; b_available++){
-    if (strings_equal(sen->band_names[b_available], index->names[i])){
-      use_bands[b_available] = true;
-      break;
-    }
-  }
-  index->n_bands[i] = 1;
-  alloc_2D((void***)&index->band_names[i], 1, NPOW_10, sizeof(char));
-  copy_string(index->band_names[i][0], NPOW_10, index->names[i]);
-*/
-
-
 int get_required_bands(char ***required_band_names, int *n_required, int *index_type, char *index_name, sen_t *sen, json_t *def_indices){
 int error = 0;
 char **names = NULL;
@@ -131,8 +111,10 @@ int n_names = 0;
 // special case: band name as index: use that band directly
 if (vector_contains((const char **)sen->band_names, sen->n_bands, index_name)){
   
+  *index_type = _INDEX_TYPE_BAND_;
+    #ifdef FORCE_DEBUG
     printf("Use band name as index directly.\n");
-    *index_type = _INDEX_TYPE_BAND_;
+    #endif
     
     n_names = 1;
     alloc_2D((void***)&names, n_names, NPOW_10, sizeof(char));
@@ -141,8 +123,10 @@ if (vector_contains((const char **)sen->band_names, sen->n_bands, index_name)){
   // special case: SMA index: use all bands
   } else if (strings_equal(index_name, "SMA")){
 
-    printf("SMA index requires all bands.\n");
     *index_type = _INDEX_TYPE_SMA_;
+    #ifdef FORCE_DEBUG
+    printf("SMA index requires all bands.\n");
+    #endif
     
     n_names = sen->n_bands;
     alloc_2D((void***)&names, n_names, NPOW_10, sizeof(char));
@@ -151,8 +135,10 @@ if (vector_contains((const char **)sen->band_names, sen->n_bands, index_name)){
    // common case: index defined by equation, get required bands from JSON definition
   } else {
 
-    printf("Index %s requires specific bands.\n", index_name);
     *index_type = _INDEX_TYPE_EQUATION_;
+    #ifdef FORCE_DEBUG
+    printf("Index %s requires specific bands.\n", index_name);
+    #endif
 
     if (get_index_bandnames(&names, &n_names, index_name, def_indices) != SUCCESS){
       fprintf(stderr, "Error: Could not load index definition for %s.\n", index_name);
@@ -180,7 +166,9 @@ int error = 0;
     for (int b_available=0; b_available<sen->n_bands; b_available++){
 
       if (strings_equal(sen->band_names[b_available], required_band_names[b_required])){
+        #ifdef FORCE_DEBUG
         printf("  Required band %s is available.\n", required_band_names[b_required]);
+        #endif
         use_band[b_available] = true;
         found = true;
         break;
@@ -211,12 +199,16 @@ int remove_unused_bands(bool *use_band, sen_t *sen){
 
     if (use_band[b_available]) {
 
+      #ifdef FORCE_DEBUG
       printf("  Keeping used band %s.\n", sen->band_names[b_available]);
+      #endif
       b_available++;
 
     } else {
 
+      #ifdef FORCE_DEBUG
       printf("  Removing unused band %s.\n", sen->band_names[b_available]);
+      #endif
 
       // Shift left
       for (int i=b_available; i<n_used - 1; i++) {
@@ -239,6 +231,33 @@ int remove_unused_bands(bool *use_band, sen_t *sen){
   sen->n_bands = n_used;
 
   return SUCCESS;
+}
+
+
+/** This function frees the index parameters
+--- index:  index parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void free_indices(index_t *index){
+
+  if (index->type != NULL) free((void*)index->type); 
+  index->type = NULL;
+
+  if (index->band_names != NULL){
+    for (int i=0; i<index->n; i++){
+      if (index->band_names[i] != NULL){
+        free_2D((void**)index->band_names[i], index->n_bands[i]);
+        index->band_names[i] = NULL;
+     }
+    }
+    free((void*)index->band_names);
+  }
+  index->band_names = NULL;
+
+  if (index->n_bands != NULL) free((void*)index->n_bands); 
+  index->n_bands = NULL;
+
+  return;
 }
 
 /** This function checks that each index can be computed with the given
@@ -300,7 +319,6 @@ int retrieve_indices(index_t *index, sen_t *sen){
 
 
   #ifdef FORCE_DEBUG
-  #endif
   printf("Waveband mapping after index parsing:\nIndices: ");
   for (int i=0; i<index->n; i++) printf(" %s", index->names[i]);
   printf("\n");
@@ -311,6 +329,7 @@ int retrieve_indices(index_t *index, sen_t *sen){
     }
     printf("\n");
   }
+  #endif
 
   return SUCCESS;
 }

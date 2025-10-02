@@ -816,6 +816,8 @@ void free_param_higher(par_hl_t *phl){
     free_2D((void**)phl->sen2.band_names, phl->sen2.n_bands);
   }
 
+  if (phl->type == _HL_TSA_) free_indices(&phl->tsa.index);
+
   if (phl->type == _HL_ML_) free_mcl(&phl->mcl);
 
 

@@ -53,6 +53,7 @@ typedef struct {
   int *n_bands;       // number of bands required for each index
 } index_t;
 
+void free_indices(index_t *index);
 int retrieve_indices(index_t *index, sen_t *sen);
 
 #ifdef __cplusplus
