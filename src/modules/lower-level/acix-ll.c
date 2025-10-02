@@ -69,37 +69,37 @@ bool y_found = false;
   while (fgets(buffer, NPOW_10, fp) != NULL){
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    tokenptr = strtok_r(buffer, separator);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator);
       // Landsat sensor
       if (strcmp(tag, "BAND01_L1T_IMAGE_CORNER_LINES") == 0){
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *uly = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *ury = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *lry = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *lly = atoi(tokenptr);
         y_found = true;
       } else if (strcmp(tag, "BAND01_L1T_IMAGE_CORNER_SAMPS") == 0){
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *ulx = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *urx = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *lrx = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator);
         //printf("tag: %s, ptr: %s\n", tag, tokenptr);
         *llx = atoi(tokenptr);
         x_found = true;

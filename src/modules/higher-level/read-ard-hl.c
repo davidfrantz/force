@@ -184,19 +184,30 @@ int product_ard(char product[], int size, char *bname){
   copy_string(buffer, NPOW_10, bname);
 
   const char *separator = "_.";
-  char *ptr = strtok(buffer, separator);
+  char *saveptr = NULL;
+  char *ptr = strtok_r(buffer, separator, &saveptr);
 
+  
   int ctr = 0;
+  bool found = false;
   while (ptr != NULL){
-    ptr = strtok(NULL, separator);
-    if (ctr == 2 && ptr != NULL){
-      copy_string(product, size, ptr);
+    if (ctr == 3){
+      copy_string(product, NPOW_10, ptr);
+      found = true;
       break;
     }
+    ptr = strtok_r(NULL, separator, &saveptr);
     ctr++;
   }
 
+  if (!found){
+    fprintf(stderr, "Could not extract product from basename: %s\n", bname);
+    return FAILURE;
+  }
+
+  #ifdef FORCE_DEBUG
   printf("Product is: %s\n", product);
+  #endif
 
   return SUCCESS;
 }
@@ -215,32 +226,37 @@ int sensor_ard(int *sid, sen_t *sen, char *bname){
   copy_string(buffer, NPOW_10, bname);
 
   const char *separator = "_.";
-  char *ptr = strtok(buffer, separator);
-  char sensor[NPOW_10] = "\0";
+  char *saveptr = NULL;
+  char *ptr = strtok_r(buffer, separator, &saveptr);
+  char sensor[NPOW_10] = {0};
 
   int ctr = 0;
+  bool found = false;
   while (ptr != NULL){
-    ptr = strtok(NULL, separator);
-    if (ctr == 1 && ptr != NULL){
+    if (ctr == 2){
       copy_string(sensor, NPOW_10, ptr);
-      printf("substring is: %s %d\n", ptr, ctr);
+      found = true;
       break;
     }
+    ptr = strtok_r(NULL, separator, &saveptr);
     ctr++;
   }
 
-  *sid = vector_contains_pos((const char**)sen->sensor, sen->n, sensor);
-
-  if (*sid >= 0){
-    #ifdef FORCE_DEBUG
-    printf("sensor is: %s, ID is %d\n", sensor, *sid);
-    #endif
-    return SUCCESS;
+  if (!found){
+    fprintf(stderr, "Could not extract sensor from basename: %s\n", bname);
+    return FAILURE;
   }
-  
-  fprintf(stderr, "Could not identify sensor %s in image basename.\n", sensor);
-  return FAILURE;
 
+  if ((*sid = vector_contains_pos((const char**)sen->sensor, sen->n, sensor)) < 0){
+    fprintf(stderr, "Could not identify sensor %s in image basename.\n", sensor);
+    return FAILURE;
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("sensor is: %s, ID is %d\n", sensor, *sid);
+  #endif
+
+  return SUCCESS;
 }
 
 
@@ -364,7 +380,7 @@ int nchar;
       printf("getting date of ARD failed (%s)\n", d.LIST[i]->d_name); 
       exit(FAILURE);
     }
-    print_date(&date);
+
     if (date.ce < phl->date_range[_MIN_].ce) continue;
     if (date.ce > phl->date_range[_MAX_].ce) continue;
     if (!phl->date_doys[date.doy]) continue;
@@ -961,10 +977,10 @@ int b_disc, nb_disc;
 int nx_disc, ny_disc, nc_disc;
 double res_disc;
 double geotran_disc[_GT_LEN_];
-const char *projection_disc = NULL;
+char projection_disc[NPOW_10];
 
 char bname[NPOW_10];
-char prd[NPOW_02] = "TBD";
+char prd[NPOW_10] = "TBD";
 date_t date;
 
 double width, height, x_offset, y_offset;
@@ -998,8 +1014,7 @@ double tol = 5e-3;
       printf("getting date of ARD failed (%s)\n", bname); 
       exit(FAILURE);
     }
-    print_date(&date);
-    if (product_ard(prd, NPOW_02, bname) != SUCCESS){
+    if (product_ard(prd, NPOW_10, bname) != SUCCESS){
       printf("getting product of ARD failed (%s)\n", bname); 
       exit(FAILURE);
     }
@@ -1071,7 +1086,7 @@ double tol = 5e-3;
 
   GDALGetGeoTransform(dataset, geotran_disc); 
   res_disc = geotran_disc[_GT_RES_];
-  projection_disc = GDALGetProjectionRef(dataset);
+  copy_string(projection_disc, NPOW_10, GDALGetProjectionRef(dataset));
 
   #ifdef FORCE_DEBUG
   print_dvector(geotran_disc, "Geotransformation", _GT_LEN_, 10, 2);
@@ -1278,8 +1293,8 @@ int mosaic_pixels[2], chunk_pixels[2];
 int chunk_to_add_relative[2], chunk_to_add[2], chunk_layout[2];
 int tile_to_add[2];
 char fname[NPOW_10], *pch = NULL;;
-char c_tc[NPOW_04];
-char c_tn[NPOW_04];
+char c_tc[NPOW_10];
+char c_tn[NPOW_10];
 int nchar;
 
 
@@ -1317,8 +1332,8 @@ int nchar;
   // copy file name
   copy_string(fname, NPOW_10, file);
 
-  nchar = snprintf(c_tc, NPOW_04, "X%04d_Y%04d", tile_central[_X_], tile_central[_Y_]);
-  if (nchar < 0 || nchar >= NPOW_04){ 
+  nchar = snprintf(c_tc, NPOW_10, "X%04d_Y%04d", tile_central[_X_], tile_central[_Y_]);
+  if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling tile\n"); return NULL;}
 
 
@@ -1364,15 +1379,15 @@ int nchar;
     } else {
 
       // new filename
-      nchar = snprintf(c_tn, NPOW_04, "X%04d_Y%04d", tile_to_add[_X_], tile_to_add[_Y_]);
-      if (nchar < 0 || nchar >= NPOW_04){ 
+      nchar = snprintf(c_tn, NPOW_10, "X%04d_Y%04d", tile_to_add[_X_], tile_to_add[_Y_]);
+      if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling tile\n"); return NULL;}
       
       if ((pch = strstr(fname, c_tc)) == NULL){
         printf("error in assembling filename for neighboring chunk.\n"); return NULL;
       } else strncpy(pch, c_tn, 11);
 
-      copy_string(c_tc, NPOW_04, c_tn);
+      copy_string(c_tc, NPOW_10, c_tn);
           
       
       #ifdef FORCE_DEBUG

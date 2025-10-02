@@ -83,6 +83,7 @@ void parse_args(int argc, char *argv[], args_t *args){
 int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
+char *saveptr = NULL;
 const char *separator = ",";
 int i;
 
@@ -112,11 +113,11 @@ int i;
         break;
       case 'o':
         copy_string(buffer, NPOW_10, optarg);
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
           if (i < 2) args->geo[i] = atof(ptr);
-          ptr = strtok(NULL, separator);
+          ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){
@@ -126,7 +127,7 @@ int i;
         break;
       case 't':
         copy_string(buffer, NPOW_10, optarg);
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
           if (i < 2) args->tile_size[i] = atof(ptr);
@@ -134,7 +135,7 @@ int i;
             fprintf(stderr, "Tile size must be > 0.\n");
             usage(argv[0], FAILURE);  
           }
-          ptr = strtok(NULL, separator);
+          ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){

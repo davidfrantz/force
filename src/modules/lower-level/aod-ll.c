@@ -104,17 +104,18 @@ float *aod_lut = NULL;
   // process line by line
   while (fgets(buffer, NPOW_10, fp) != NULL){
 
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
 
-    site_x = atof(tokenptr); tokenptr = strtok(NULL, separator);
-    site_y = atof(tokenptr); tokenptr = strtok(NULL, separator);
+    site_x = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+    site_y = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
     diff_x = center_x-site_x; diff_y = center_y-site_y;
 
     dist = sqrt(diff_x*diff_x+diff_y*diff_y);
     if (dist < min_dist){
       min_dist = dist;
-      co[0] = atof(tokenptr); tokenptr = strtok(NULL, separator);
-      co[1] = atof(tokenptr); tokenptr = strtok(NULL, separator);
+      co[0] = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+      co[1] = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
       co[2] = atof(tokenptr);
     }
 

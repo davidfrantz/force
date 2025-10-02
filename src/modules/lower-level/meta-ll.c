@@ -300,13 +300,14 @@ GDALDatasetH fp_;
     if (strstr(buffer, "END_GROUP = L1_METADATA_FILE")) break;
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
       // Landsat sensor
       if (strcmp(tag, "SPACECRAFT_ID") == 0){
@@ -504,11 +505,11 @@ GDALDatasetH fp_;
         row = atoi(tokenptr);
       } else if (strcmp(tag, "ACQUISITION_DATE") == 0 ||
                  strcmp(tag, "DATE_ACQUIRED") == 0){
-        tokenptr2 = strtok(tokenptr, separator2);
+        tokenptr2 = strtok_r(tokenptr, separator2, &saveptr);
         date.year = atoi(tokenptr2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
         date.month = atoi(tokenptr2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
         date.day = atoi(tokenptr2);
         date.doy = md2doy(date.month, date.day);
         date.week = doy2week(date.doy);
@@ -516,9 +517,9 @@ GDALDatasetH fp_;
       } else if (strcmp(tag, "SCENE_CENTER_TIME") == 0 ||
                  strcmp(tag, "SCENE_CENTER_SCAN_TIME") == 0){
         date.hh = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator, &saveptr);
         date.mm = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator, &saveptr);
         date.ss = atoi(tokenptr);
         date.tz = 0;
 
@@ -723,20 +724,21 @@ int svgrid = 5000;
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
 
       // Sentinel ID
       if (strcmp(tag, "SPACECRAFT_NAME") == 0){
 
-        tokenptr2 = strtok(tokenptr, separator2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(tokenptr, separator2, &saveptr);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
 
         if ((atoi(tokenptr2+0)) != 2){
           printf("unknown/unsupported sensor ID! "); return FAILURE;
@@ -869,18 +871,18 @@ int svgrid = 5000;
 
       // acquisition variables
       } else if (strcmp(tag, "PRODUCT_START_TIME") == 0){
-        tokenptr3 = strtok(tokenptr, separator3);
+        tokenptr3 = strtok_r(tokenptr, separator3, &saveptr);
         date.year = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.month = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.day = atoi(tokenptr3);
         date.doy = md2doy(date.month, date.day);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.hh = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.mm = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.ss = atoi(tokenptr3);
         date.tz = 0;
         date.week = doy2week(date.doy);
@@ -894,7 +896,7 @@ int svgrid = 5000;
             for (b=0; b<nb; b++) set_brick_scale(DN, b, atoi(tokenptr));
           }
           tag = tokenptr;
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
 
       // additive scaling factor (since baseline 4.0)
@@ -907,7 +909,7 @@ int svgrid = 5000;
             char_to_float(tokenptr, &meta->cal[b].radd);
           }
           tag = tokenptr;
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
         #ifdef FORCE_DEBUG
         if (b >= 0) printf("additive scaling factor for band %d: %f\n", b, meta->cal[b].radd);
@@ -945,13 +947,14 @@ int svgrid = 5000;
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
       // nx/ny/res of highest resolution bands
       if (strcmp(tag, "resolution") == 0){
@@ -969,7 +972,7 @@ int svgrid = 5000;
 
       // sun/view grids
       } else if (strcmp(tag, "COL_STEP") == 0){
-        while (atoi(tokenptr) == 0) tokenptr = strtok(NULL, separator);
+        while (atoi(tokenptr) == 0) tokenptr = strtok_r(NULL, separator, &saveptr);
 
         if (svgrid != atoi(tokenptr)){
           printf("SUN_VIEW_GRID is incompatible with Sentinel-2 metadata. "); return FAILURE;}
@@ -992,14 +995,14 @@ int svgrid = 5000;
         d = 0;
         while (tokenptr != NULL){
           if (strcmp(tokenptr, "bandId") == 0){
-            tokenptr = strtok(NULL, separator);
+            tokenptr = strtok_r(NULL, separator, &saveptr);
             b = atoi(tokenptr);
           }
           if (strcmp(tokenptr, "detectorId") == 0){
-            tokenptr = strtok(NULL, separator);
+            tokenptr = strtok_r(NULL, separator, &saveptr);
             d = atoi(tokenptr) - 1;
           }
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
       } else if (strcmp(tag, "/Viewing_Incidence_Angles_Grids") == 0){
         v = false;
@@ -1035,7 +1038,7 @@ int svgrid = 5000;
             }
           }
 
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
           j++;
 
         }

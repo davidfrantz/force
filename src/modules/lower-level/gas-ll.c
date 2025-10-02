@@ -695,10 +695,11 @@ int year, month, day;
 
           buffer[strcspn(buffer, "\r\n#")] = 0;
 
-          tokenptr = strtok(buffer, separator);
+          char *saveptr = NULL;
+          tokenptr = strtok_r(buffer, separator, &saveptr);
 
-          site_x = atof(tokenptr); tokenptr = strtok(NULL, separator);
-          site_y = atof(tokenptr); tokenptr = strtok(NULL, separator);
+          site_x = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+          site_y = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
           diff_x = center_x-site_x; diff_y = center_y-site_y;
 
           dist = sqrt(diff_x*diff_x+diff_y*diff_y);
@@ -711,7 +712,7 @@ int year, month, day;
               avg = wvp;
               copy_string(source, NPOW_10, "AVG");
             } else {
-              tokenptr = strtok(NULL, separator);
+              tokenptr = strtok_r(NULL, separator, &saveptr);
               copy_string(source, NPOW_10, tokenptr);
             }
           }

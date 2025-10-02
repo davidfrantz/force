@@ -59,7 +59,8 @@ int n_buf = 1;
 
     buffer[strcspn(buffer, "\r\n")] = 0;
 
-    if ((ptr = strtok(buffer, separator)) == NULL){
+    char *saveptr = NULL;
+    if ((ptr = strtok_r(buffer, separator, &saveptr)) == NULL){
       printf("could not read tag/value pair from:\n  %s\n", fname);
       free_3D((void***)tagval, n_buf, _TV_LENGTH_);
       return NULL;
@@ -67,7 +68,7 @@ int n_buf = 1;
       copy_string(tagval[n][_TV_TAG_], NPOW_10, ptr);
     }
 
-    if ((ptr = strtok(NULL, separator)) == NULL){
+    if ((ptr = strtok_r(NULL, separator, &saveptr)) == NULL){
       printf("could not read tag/value pair from:\n  %s\n", fname);
       free_3D((void***)tagval, n_buf, _TV_LENGTH_);
       return NULL;

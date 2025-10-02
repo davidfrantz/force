@@ -147,9 +147,10 @@ float **coord = NULL;
     if (fgets(buffer, NPOW_10, fp) == NULL){
       printf("error reading coordinate file.\n"); exit(1); }
 
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     coord[0][c] = atof(tokenptr); // X
-    tokenptr = strtok(NULL, separator);
+    tokenptr = strtok_r(NULL, separator, &saveptr);
     coord[1][c] = atof(tokenptr); // Y
 
   }
@@ -274,7 +275,8 @@ float tmp, min[3];
 
     k = 0;
 
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
 
     while (tokenptr != NULL){
 
@@ -301,7 +303,7 @@ float tmp, min[3];
       } else if (k == 16){ gring[nline][1][3] = atof(tokenptr); // Gring Y 4
       }
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
       k++;
     }
 
@@ -656,7 +658,8 @@ const char *separator = ",";
 
       while (fgets(buffer, NPOW_10, fp) != NULL){
         if (strstr(buffer, pattern) != NULL){
-          str = strtok(buffer, separator);
+          char *saveptr = NULL;
+          str = strtok_r(buffer, separator, &saveptr);
           copy_string(basename, NPOW_10, str);
           ok = true;
         }
@@ -982,9 +985,10 @@ float x, y;
     if (fgets(buffer, NPOW_10, fp) == NULL){
       printf("invalid wvp table!\n"); exit(1);}
 
-    tokenptr = strtok(buffer, separator);
-    x = atof(tokenptr); tokenptr = strtok(NULL, separator);
-    y = atof(tokenptr); tokenptr = strtok(NULL, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
+    x = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+    y = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
 
     if (fabs(x-COO[0][c]) > 0.0001 || fabs(y-COO[1][c]) > 0.0001){
       printf("Invalid wvp table! Coordinates are messed up..\n"); exit(1);}

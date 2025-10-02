@@ -45,10 +45,11 @@ int n = -1; // start at -1 to ignore tag
 
   buffer[strcspn(buffer, "\r\n#")] = 0;
 
-  ptr = strtok(buffer, separator);
+  char *saveptr = NULL;
+  ptr = strtok_r(buffer, separator, &saveptr);
 
   while (ptr != NULL){
-    ptr = strtok(NULL, separator);
+    ptr = strtok_r(NULL, separator, &saveptr);
     n++;
   }
 
@@ -74,10 +75,12 @@ char *ptr = NULL;
 const char *separator = " =\n";
 
 
-  ptr = strtok(str, separator);
+  char *saveptr = NULL;
+  ptr = strtok_r(str, separator, &saveptr);
 
-  while ((ptr = strtok(NULL, separator)) != NULL){
-    copy_string(param[num++], NPOW_10, ptr);}
+  while ((ptr = strtok_r(NULL, separator, &saveptr)) != NULL){
+    copy_string(param[num++], NPOW_10, ptr);
+  }
 
   *n = num;
   return true;
@@ -287,7 +290,8 @@ int n = 0;
 
   while (fgets(buffer, NPOW_10, fpar) != NULL){
     buffer[strcspn(buffer, "\r\n#")] = 0;
-    if ((ptr = strtok(buffer, separator)) == NULL) continue;
+    char *saveptr = NULL;
+    if ((ptr = strtok_r(buffer, separator, &saveptr)) == NULL) continue;
     if (strcmp(ptr, tag) == 0) n++;
   }
   fseek(fpar, 0, SEEK_SET);
@@ -812,7 +816,8 @@ const char *separator = " =";
   printf("%s\n", buffer);
   #endif
 
-  ptr = strtok(buffer, separator);
+  char *saveptr = NULL;
+  ptr = strtok_r(buffer, separator, &saveptr);
   tag = ptr;
 
   if (tag == NULL) return;
@@ -823,7 +828,7 @@ const char *separator = " =";
 
     if (strcmp(tag, params->par[i].name) == 0){
 
-      if ((ptr = strtok(NULL, separator)) == NULL) return;
+      if ((ptr = strtok_r(NULL, separator, &saveptr)) == NULL) return;
 
       params->par[i].set = true;
 
@@ -870,12 +875,12 @@ const char *separator = " =";
         copy_string(buffer, NPOW_16, buf);
         buffer[strcspn(buffer, "\r\n#")] = 0;
 
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         tag = ptr;
 
         n = 0;
 
-        while ((ptr = strtok(NULL, separator)) != NULL){
+        while ((ptr = strtok_r(NULL, separator, &saveptr)) != NULL){
 
           switch (params->par[i].type){
             case _PAR_INT_:

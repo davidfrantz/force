@@ -77,6 +77,7 @@ void parse_args(int argc, char *argv[], args_t *args){
 int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
+char *saveptr = NULL;
 const char *separator = ",";
 int i;
 
@@ -101,11 +102,11 @@ int i;
         exit(SUCCESS);
       case 'p':
         copy_string(buffer, NPOW_10, optarg);
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
           if (i < 2) args->geo[i] = atof(ptr);
-          ptr = strtok(NULL, separator);
+          ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){
