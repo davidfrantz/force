@@ -13,7 +13,8 @@ FORCE natively supports the integrated processing and analysis of
 
 * Landsat 4/5 TM,
 * Landsat 7 ETM+,
-* Landsat 8 OLI and
+* Landsat 8 OLI,
+* Landsat 9 OLI, and
 * Sentinel-2 A/B MSI.
 
 Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or environmental variables.
