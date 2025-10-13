@@ -1,0 +1,10 @@
+{
+  "description": "R-G-B generic sensor",
+  "name": "R-G-B",
+  "bands": 3,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED"
+  ]
+}

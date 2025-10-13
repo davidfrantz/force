@@ -55,7 +55,7 @@ char bname[NPOW_10];
 char domain[NPOW_10];
 enum { _set_, _setclass_ };
 int prodlen[2] = { phl->mcl.nmodelset, phl->mcl.nclass_all_sets };
-char prodname[5][NPOW_02] = { "MLP", "MLI", "MLU", "RFP", "RFM" };
+char prodname[5][NPOW_10] = { "MLP", "MLI", "MLU", "RFP", "RFM" };
 int prodtype[5] = { _set_, _set_, _set_, _setclass_, _set_ };
 bool enable[5] = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
 bool write[5]  = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
@@ -143,7 +143,7 @@ int b;
 brick_t *brick = NULL;
 char dname[NPOW_10];
 char fname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -153,7 +153,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }
@@ -172,7 +172,7 @@ int nchar;
   set_brick_filename(brick, fname);
 
   if (write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }

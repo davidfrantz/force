@@ -8,9 +8,10 @@ Installation instructions
 
 FORCE is mostly written in C/C++: Thus, it needs to be compiled. Administrator rights are not necessarily required, unless you want to install to the system-wide search path (e.g. to make it available to multiple users).
 
-This recipe assumes that you have installed all :ref:`depend`.
-Alternatively, you can use a Docker base image that includes all dependencies, e.g. [davidfrantz/base](https://hub.docker.com/r/davidfrantz/base).
-We are however suggesting to consider simply using FORCE with Docker or Singularity, see :ref:`docker`.
+This recipe assumes that you have installed all dependencies. 
+Please refer to the ``Dockerfile`` within the FORCE repository for figuring out the dependencies.
+
+We are however strongly suggesting to consider using FORCE with Docker or other container technologies, see :ref:`docker`.
 
 
 1. Go to the directory, where you usually store source code, e.g.
@@ -63,7 +64,7 @@ We are however suggesting to consider simply using FORCE with Docker or Singular
 
   .. code-block:: bash
 
-    force
+    force-info
 
   If the program cannot be found, you will likely need to add this directory to your search path ``$PATH`` (see `here <https://opensource.com/article/17/6/set-path-linux>`_). This might happen if you have used a custom installation directory.
   

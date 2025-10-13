@@ -52,15 +52,14 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_char_par(params,    "FILE_TILE",             _CHAR_TEST_NULL_OR_EXIST_, &pl2->f_tile);
   register_char_par(params,    "FILE_DEM",              _CHAR_TEST_NULL_OR_EXIST_, &pl2->fdem);
   register_char_par(params,    "DIR_COREG_BASE",        _CHAR_TEST_NULL_OR_EXIST_, &pl2->d_coreg);
-  register_double_par(params,  "TILE_SIZE",             0, INT_MAX, &pl2->tilesize);
-  register_double_par(params,  "BLOCK_SIZE",            0, INT_MAX, &pl2->chunksize);
+  register_doublevec_par(params, "TILE_SIZE",           0, INT_MAX, 2, &pl2->tile_size, &pl2->n_tile_size);
   register_double_par(params,  "RESOLUTION_LANDSAT",    0, INT_MAX, &pl2->res_landsat);
   register_double_par(params,  "RESOLUTION_SENTINEL2",  0, INT_MAX, &pl2->res_sentinel2);
   register_bool_par(params,    "DO_REPROJ",             &pl2->doreproj);
   register_bool_par(params,    "DO_TILE",               &pl2->dotile);
   register_double_par(params,  "ORIGIN_LAT",            -90, 90, &pl2->orig_lat);
   register_double_par(params,  "ORIGIN_LON",            -180, 180, &pl2->orig_lon);
-  register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, &pl2->proj_, &pl2->nproj_);
+  register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, -1, &pl2->proj_, &pl2->nproj_);
   register_enum_par(params,    "RESAMPLING",            _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->resample);
   register_enum_par(params,    "RES_MERGE",             _TAGGED_ENUM_RES_MERGE_, _RES_MERGE_LENGTH_, &pl2->resmerge);
   register_int_par(params,     "TIER",                  1, 3, &pl2->tier);
@@ -74,7 +73,9 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_bool_par(params,    "STRICT_WATER_VAPOR",    &pl2->wvp_strict);
   register_bool_par(params,    "IMPULSE_NOISE",         &pl2->impulse);
   register_bool_par(params,    "BUFFER_NODATA",         &pl2->bufnodata);
+  register_bool_par(params,    "USE_DEM_DATABASE",      &pl2->use_dem_database);
   register_int_par(params,     "DEM_NODATA",            SHRT_MIN, SHRT_MAX, &pl2->dem_nodata);
+  register_enum_par(params,    "DEM_RESAMPLING",        _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->dem_resample);
   register_int_par(params,     "COREG_BASE_NODATA",     SHRT_MIN, SHRT_MAX, &pl2->coreg_nodata);
   register_bool_par(params,    "ERASE_CLOUDS",          &pl2->erase_cloud);
   register_float_par(params,   "MAX_CLOUD_COVER_FRAME", 1, 100, &pl2->maxcc);
@@ -176,7 +177,7 @@ char  bname[NPOW_10] = "\0";
       
       strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
 
-      if (findfile(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
+      if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
          printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
       copy_string(pl2->d_level1, NPOW_10, bname);
@@ -244,6 +245,16 @@ char  bname[NPOW_10] = "\0";
 
   if (pl2->dotopo && !fileexist(pl2->fdem)){
     printf("FILE_DEM does not exist in the file system. Give a DEM, or use DOTOPO = FALSE + FILE_DEM = NULL (surface will be assumed flat, z = 0m). "); return FAILURE;}
+
+  if (pl2->use_dem_database && (strcmp(pl2->fdem, "NULL") == 0)) {
+    printf("If USE_DEM_DATABASE = TRUE, FILE_DEM cannot be NULL.\n");
+    return FAILURE;
+  }
+
+  if (pl2->use_dem_database && (!fileexist(pl2->fdem))) {
+    printf("If USE_DEM_DATABASE = TRUE, FILE_DEM needs to exist.\n");
+    return FAILURE;
+  }
 
   if (pl2->format != _FMT_CUSTOM_){
     default_gdaloptions(pl2->format, &pl2->gdalopt);

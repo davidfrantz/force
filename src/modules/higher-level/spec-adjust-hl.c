@@ -48,7 +48,7 @@ int spectral_predict(ard_t ard, small *mask_, int nc, int sid);
 #define _SPECHOMO_MIN_WEIGHT_ 1.0 - _SPECHOMO_GOOD_SAM_/_SPECHOMO_POOR_SAM_
 #define _SPECHOMO_MED_WEIGHT_ 1.0 - _SPECHOMO_MEDI_SAM_/_SPECHOMO_POOR_SAM_
 
-const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_04] = {
+const char _SPECHOMO_SENSOR_[_SPECHOMO_N_SEN_][NPOW_10] = {
   "LND04", "LND05", "LND07", "LND08", "LND09", "MOD01", "MOD02" };
 
 const char _SPECHOMO_SRC_DOMAIN_[_SPECHOMO_N_SRC_][NPOW_10] = {
@@ -976,7 +976,7 @@ double pred, wpred[_SPECHOMO_N_DST_], wsum;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int spectral_adjust(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl){
 int t, s, nc;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 bool adjust = false;
 small *mask_ = NULL;
 
@@ -989,7 +989,7 @@ small *mask_ = NULL;
   // import mask (if available)
   if (mask != NULL){
     if ((mask_ = get_band_small(mask, 0)) == NULL){
-      printf("Error getting processing mask."); return FAILURE;}
+      printf("Error getting processing mask.\n"); return FAILURE;}
   }
 
   nc = get_brick_chunkncells(ard[0].DAT);
@@ -997,7 +997,7 @@ small *mask_ = NULL;
   // for each time step
   for (t=0; t<nt; t++){
 
-    get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+    get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
 
     // is the sensor adjustable?
     for (s=0, adjust=false; s<_SPECHOMO_N_SEN_; s++){
@@ -1011,11 +1011,27 @@ small *mask_ = NULL;
     printf("adjusting %s: %d\n", sensor, adjust);
     #endif
 
+    if (!adjust){
+      if (get_brick_nbands(ard[t].DAT) !=  _SPECHOMO_N_DST_){
+        printf("Non-adjustable sensor %s is not compatible.\n", sensor);
+        exit(FAILURE);
+      }
+      for (int b=0; b<_SPECHOMO_N_DST_; b++){
+        if (find_domain(ard[t].DAT, _SPECHOMO_DST_DOMAIN_[b]) < 0){ 
+          printf("Couldn't find target domain %s. ", _SPECHOMO_DST_DOMAIN_[b]);
+          printf("Non-adjustable sensor %s is not compatible.\n", sensor);
+          exit(FAILURE);
+        }
+      }
+    }
+
     if (!adjust) continue;
 
     // perform the adjustment
     if (spectral_predict(ard[t], mask_, nc, s) == FAILURE){
-      printf("failed to compute spectral prediction. "); return FAILURE;}
+      printf("failed to compute spectral prediction.\n"); 
+      exit(FAILURE);
+    }
 
   }
 

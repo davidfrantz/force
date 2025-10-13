@@ -22,7 +22,7 @@ FORCE natively supports the integrated processing and analysis of
   * Landsat 4/5 TM, 
   * Landsat 7 ETM+, 
   * Landsat 8/9 OLI and 
-  * Sentinel-2 A/B MSI.
+  * Sentinel-2 A/B/C MSI.
 
 Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or environmental variables.
 
@@ -41,13 +41,7 @@ Related Links
 
 **Get help**, and help others in the FORCE self-help `discussion group <https://github.com/davidfrantz/force/discussions>`_
 
-**Follow** the FORCE project at `ResearchGate <https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring>`_.
-
-**Stay updated**, and follow me on `Twitter <https://twitter.com/d__frantz>`_
-
-**You are using FORCE? Spread the word**, and use the `#FORCE_EO <https://twitter.com/search?q=%23FORCE_EO&src=recent_search_click>`_ hashtag in your tweets!
-
-
+**Stay updated**, and follow me on `Bluesky <https://bsky.app/profile/dfrantz.bsky.social>`_
 
 
 .. toctree::
@@ -67,24 +61,12 @@ Related Links
 
 .. toctree::
    :maxdepth: 1
-   :caption: Usage Policy
-   :hidden:
-
-   policy/citation.rst
-   policy/development.rst
-   policy/license.rst
-
-
-.. toctree::
-   :maxdepth: 1
    :caption: Setup
    :hidden:
 
    setup/requirements.rst
-   setup/depend.rst
-   setup/depend_opt.rst
-   setup/install.rst
    setup/docker.rst
+   setup/install.rst
 
 
 .. toctree::
@@ -114,3 +96,12 @@ Related Links
    refs.rst
    refs-applied.rst
 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Usage Policy
+   :hidden:
+
+   policy/citation.rst
+   policy/development.rst
+   policy/license.rst

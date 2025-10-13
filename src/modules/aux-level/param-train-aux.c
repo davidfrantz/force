@@ -47,7 +47,7 @@ void register_train(params_t *params, par_train_t *train){
   register_int_par(params,      "RESPONSE_VARIABLE",     1, INT_MAX, &train->response_var);
   register_float_par(params,    "PERCENT_TRAIN",         0.001, 100, &train->per_train);
   register_bool_par(params,     "RANDOM_SPLIT",          &train->random_split);
-  register_charvec_par(params,  "FEATURE_WEIGHTS",       _CHAR_TEST_NONE_, &train->class_weights, &train->nclass_weights);
+  register_charvec_par(params,  "FEATURE_WEIGHTS",       _CHAR_TEST_NONE_, -1, &train->class_weights, &train->nclass_weights);
   register_enum_par(params,     "ML_METHOD",             _TAGGED_ENUM_ML_, _ML_LENGTH_, &train->method);
   register_int_par(params,      "RF_NTREE",              0, INT_MAX, &train->rf.ntree);
   register_float_par(params,    "RF_OOB_ACCURACY",       0, INT_MAX, &train->rf.oob_accuracy);
@@ -60,8 +60,8 @@ void register_train(params_t *params, par_train_t *train){
   register_float_par(params,    "SVM_ACCURACY",          0, INT_MAX, &train->sv.accuracy);
   register_int_par(params,      "SVM_KFOLD",             1, INT_MAX, &train->sv.kfold);
   register_float_par(params,    "SVM_P",                 0, INT_MAX, &train->sv.P);
-  register_floatvec_par(params, "SVM_C_GRID",            0, INT_MAX, &train->sv.Cgrid, &train->sv.nCgrid);
-  register_floatvec_par(params, "SVM_GAMMA_GRID",        0, INT_MAX, &train->sv.Gammagrid, &train->sv.nGammagrid);
+  register_floatvec_par(params, "SVM_C_GRID",            0, INT_MAX, -1, &train->sv.Cgrid, &train->sv.nCgrid);
+  register_floatvec_par(params, "SVM_GAMMA_GRID",        0, INT_MAX, -1, &train->sv.Gammagrid, &train->sv.nGammagrid);
 
 
   return;

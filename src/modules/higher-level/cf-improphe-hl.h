@@ -34,6 +34,7 @@ Continuous Field ImproPhe header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/pca-cl.h"
 #include "../cross-level/cite-cl.h"
+#include "../cross-level/cube-cl.h"
 #include "../higher-level/read-ard-hl.h"
 #include "../higher-level/improphe-hl.h"
 

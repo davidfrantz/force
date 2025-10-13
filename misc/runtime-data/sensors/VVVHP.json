@@ -1,0 +1,9 @@
+{
+  "description": "Generic VV+VH Polarimetric sensor",
+  "name": "VVVHP",
+  "bands": 2,
+  "band_names": [
+    "VV",
+    "VH"
+  ]
+}

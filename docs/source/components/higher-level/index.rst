@@ -42,6 +42,7 @@ Multiple :ref:`hl-submodules` are available, which either process ARD or feature
 
    hl-input.rst
    hl-compute.rst
+   hl-format.rst
    hl-aux.rst
    hl-submodules.rst
 

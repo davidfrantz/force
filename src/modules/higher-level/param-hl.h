@@ -38,6 +38,8 @@ Higher Level Processing paramater header
 #include "../cross-level/param-cl.h"
 #include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
+#include "../higher-level/sensor-hl.h"
+#include "../higher-level/index-parse-hl.h"
 
 
 #ifdef __cplusplus
@@ -68,49 +70,6 @@ typedef struct {
   float above_noise;
   float below_noise;
 } par_qai_t;
-
-// Level 2 band dictionary
-typedef struct {
-  int    n;
-  int    *senid;
-  int    nb;
-  int  **band;
-  char **domain; 
-  char **sensor;
-  char   target[NPOW_10];
-  char  *main_product;
-  char  *quality_product;
-
-  int spec_adjust; // spectral band adjustment to S2A?
-
-  int blue;
-  int green;
-  int red;
-  int rededge1;
-  int rededge2;
-  int rededge3;
-  int bnir;
-  int nir;
-  int swir0;
-  int swir1;
-  int swir2;
-  int vv;
-  int vh;
-
-  float w_blue;
-  float w_green;
-  float w_red;
-  float w_rededge1;
-  float w_rededge2;
-  float w_rededge3;
-  float w_bnir;
-  float w_nir;
-  float w_swir0;
-  float w_swir1;
-  float w_swir2;
-  float w_vv;
-  float w_vh;
-} par_sen_t;
 
 // BAP scoring
 typedef struct {
@@ -145,6 +104,10 @@ typedef struct {
   int use_hazy; // use ultra-hazy data?
   int select; // select or weight?
   int combine; // how to combine scores?
+
+  int band_dst;
+  int band_hot;
+  int band_vzn;
 
   int score_type;
   par_scr_t w;          // scoring struct for weigting parameters
@@ -277,11 +240,10 @@ typedef struct {
   par_sta_t sta;
 } par_stm_t;
 
+
 // general TSA
 typedef struct {
-  int n;                 // number of indices
-  int  *index;           // index type
-  char **index_name;     // short name index type
+  index_t index; // index definitions
   int otss;           // flag: output time series brick
   int standard;
 
@@ -418,11 +380,7 @@ typedef struct {
 typedef struct {
   int ref;
   int qai;
-  int dst;
-  int aod;
-  int hot;
-  int vzn;
-  int wvp;
+  int aux;
   int imp;
 } par_prd_t;
 
@@ -447,12 +405,13 @@ typedef struct {
   int ntx, nty;
   double radius;
   double res;
-  double blocksize;
+  double *chunk_size; // size of chunks to read and process
+  int n_chunk_size;   // number of sizes that were written (should be 2)
   int psf;             // flag: point spread function
 
   // sensors
-  par_sen_t sen;     // Level-2 sensor dictionary
-  par_sen_t sen2;    // secondary Level-2 sensor dictionary
+  sen_t sen;     // Level-2 sensor dictionary
+  sen_t sen2;    // secondary Level-2 sensor dictionary
 
   // features
   par_ftr_t ftr;
@@ -469,6 +428,7 @@ typedef struct {
 
   // temporal parameters
   date_t *date_range; // date range for the analysis (continous time period)
+  date_t date_ignore_lnd07; // date after which LND07 should be ignored (deorbiting)
   int ndate, ndoy;
   int *doy_range;
   int date_doys[366];        // doys   that should be used (modulates date_from, date_to)
@@ -489,6 +449,7 @@ typedef struct {
   int cthread;
   int stream;
   int pretty_progress;
+  int fail_if_empty;    // warn (false) or error (true) without IO
 
   // products
   par_prd_t prd;

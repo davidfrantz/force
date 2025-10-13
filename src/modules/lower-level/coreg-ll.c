@@ -68,7 +68,7 @@ typedef struct{
   double rmse;
 } match_t;
 
-int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata);
+int coreg(short **target, short *base, brick_t *QAI, double res, int nx, int ny, int nb, int band, short nodata);
 int cumulative_scale(int toplayer, int *scales);
 void free_pyramids(short ***pyramids_, int nlayer);
 void build_pyramids(short *image, brick_t *QAI, int nx, int ny, short nodata, int nlayer, int *scales, short ***pyramids, int **nx_pyr, int **ny_pyr);
@@ -97,7 +97,7 @@ match_t dense_matching(short ***pyramids_, int *nx_pyr, int *ny_pyr, short nodat
 --- nodata:  nodata value
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coreg(short **target, short *base, brick_t *QAI, float res, int nx, int ny, int nb, int band, short nodata){
+int coreg(short **target, short *base, brick_t *QAI, double res, int nx, int ny, int nb, int band, short nodata){
 int h, max_h, b;
 int i, j, p;
 double SAM, SAM_original;
@@ -351,6 +351,20 @@ int *ny_ = NULL;
     #endif
   }
 
+  #ifdef FORCE_DEBUG
+  for (layer=0; layer<nlayer; layer++){
+    brick_t *BRICK = NULL; short *brick_ = NULL;
+    char fname[NPOW_10];
+    BRICK = copy_brick(QAI, 1, _DT_SHORT_); 
+    sprintf(fname, "COREG_PYRAMID-LAYER-%d", layer+1);
+    set_brick_filename(BRICK, fname);
+    set_brick_nrows(BRICK, ny_[layer]);
+    set_brick_ncols(BRICK, nx_[layer]);
+    brick_ = get_band_short(BRICK, 0);  memmove(brick_, pyramids_[layer],  nx_[layer]*ny_[layer]*sizeof(short));
+    print_brick_info(BRICK); set_brick_open(BRICK, OPEN_CREATE); write_brick(BRICK); free_brick(BRICK);
+  }
+  #endif
+
   #ifdef FORCE_CLOCK
   proctime_print("building pyramids", TIME);
   #endif
@@ -407,7 +421,7 @@ int nx_new, ny_new;
         p = i*nx+j;
         p_new = i_new*nx_new+j_new;
 
-        if (image_[p] == nodata){
+        if (blurred_[p] == nodata){
           pyramid_[p_new] = nodata;
         } else {
           pyramid_[p_new] = blurred_[p];
@@ -420,6 +434,9 @@ int nx_new, ny_new;
   }
 
   free(blurred_); free(pfFilter);
+
+
+
 
   *nx_new_ = nx_new;
   *ny_new_ = ny_new;
@@ -1612,8 +1629,8 @@ match_t dm;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI){
 int p, nx, ny, nc, nb, band, err, year, month, dy;
-float res;
-char fname[NPOW_10], cyear[NPOW_03];
+double res;
+char fname[NPOW_10], cyear[NPOW_10];
 int nchar;
 short nodata;
 short  **target = NULL;
@@ -1659,18 +1676,18 @@ int success = FAILURE;
   dy = 0;
   while (success == FAILURE && dy < 50){
     
-    nchar = snprintf(cyear, NPOW_03, "%04d-", year-dy);
-    if (nchar < 0 || nchar >= NPOW_03){
+    nchar = snprintf(cyear, NPOW_10, "%04d", year-dy);
+    if (nchar < 0 || nchar >= NPOW_10){
       printf("Buffer Overflow in assembling pattern\n"); return FAILURE;}
 
-    success = findfile(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
+    success = findfile_starts(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
     dy++;
   }
   
   //printf("%s %d %d\n", cyear, year, month-1);
 
   if (!fileexist(fname)){
-    printf("could not retrieve base image. First 5 digits = 'YYYY-'. "); return FAILURE;}
+    printf("could not retrieve base image. First 4 digits = 'YYYY'. "); return FAILURE;}
 
   #ifdef FORCE_DEBUG
   printf("reference image: %s\n", fname);

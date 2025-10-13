@@ -32,7 +32,7 @@ typedef struct {
   int      prodlen;
   char   **bandname;
   date_t  *date;
-  char     prodname[NPOW_03];
+  char     prodname[NPOW_10];
   int      prodtype;
   int      enable;
   int      write;
@@ -48,7 +48,7 @@ brick_t **compile_udf(ard_t *ard, udf_t *udf, par_hl_t *phl, cube_t *cube, int n
 int info_udf_pyp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "PYP");
+  copy_string(info[o].prodname, NPOW_10, "PYP");
   info[o].prodlen  = phl->udf.pyp.nb;
   info[o].bandname = phl->udf.pyp.bandname;
   info[o].date     = phl->udf.pyp.date;
@@ -63,7 +63,7 @@ int info_udf_pyp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 int info_udf_rsp(brick_compile_info_t *info, int o, udf_t *udf, par_hl_t *phl){
 
 
-  copy_string(info[o].prodname, NPOW_02, "RSP");
+  copy_string(info[o].prodname, NPOW_10, "RSP");
   info[o].prodlen  = phl->udf.rsp.nb;
   info[o].bandname = phl->udf.rsp.bandname;
   info[o].date     = phl->udf.rsp.date;
@@ -152,7 +152,7 @@ int b;
 brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -162,7 +162,7 @@ int nchar;
   set_brick_product(brick, info->prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, info->prodname);
+    copy_string(subname, NPOW_10, info->prodname);
   } else {
     subname[0] = '\0';
   }
@@ -184,7 +184,7 @@ int nchar;
   set_brick_filename(brick, fname);
   
   if (info->write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }
@@ -222,7 +222,7 @@ udf_t udf_;
 brick_t **UDF;
 small *mask_ = NULL;
 int nprod = 0;
-int nb, nx, ny, nc;
+int nb_main, nb_aux, nx, ny, nc;
 short nodata;
 
 
@@ -230,8 +230,16 @@ short nodata;
   nx = get_brick_chunkncols(ard[0].DAT);
   ny = get_brick_chunknrows(ard[0].DAT);
   nc = get_brick_chunkncells(ard[0].DAT);
-  nb = get_brick_nbands(ard[0].DAT);
+
+
+  nb_main = get_brick_nbands(ard[0].DAT);
   nodata = get_brick_nodata(ard[0].DAT, 0);
+
+  if (phl->prd.aux) {
+    nb_aux = get_brick_nbands(ard[0].AUX);
+  } else {
+    nb_aux = 0; 
+  }
 
   // import mask (if available)
   if (mask != NULL){
@@ -240,8 +248,8 @@ short nodata;
   }
 
   // initialize python and R udf
-  init_pyp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.pyp);
-  init_rsp(ard, NULL, _HL_UDF_, NULL, nb, nt, &phl->udf.rsp);
+  init_pyp(ard, NULL, _HL_UDF_, NULL, nb_main, nb_aux, nt, &phl->udf.pyp);
+  init_rsp(ard, NULL, _HL_UDF_, NULL, nb_main, nb_aux, nt, &phl->udf.rsp);
 
   // compile products + bricks
   if ((UDF = compile_udf(ard, &udf_, phl, cube, nt, &nprod)) == NULL || nprod == 0){
@@ -253,10 +261,10 @@ short nodata;
 
 
   python_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
-    nx, ny, nc, nb, nt, nodata, &phl->udf.pyp, phl->cthread);
+    nx, ny, nc, nb_main, nb_aux, nt, nodata, &phl->udf.pyp, phl->cthread);
 
   rstats_udf(ard, &udf_, NULL, mask_, _HL_UDF_, NULL, 
-    nx, ny, nc, nb, nt, nodata, &phl->udf.rsp, phl->cthread);
+    nx, ny, nc, nb_main, nb_aux, nt, nodata, &phl->udf.rsp, phl->cthread);
 
   // terminate python and R udf
   term_pyp(&phl->udf.pyp);

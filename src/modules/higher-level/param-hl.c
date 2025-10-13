@@ -43,7 +43,6 @@ void register_smp(params_t *params, par_hl_t *phl);
 void register_txt(params_t *params, par_hl_t *phl);
 void register_lsm(params_t *params, par_hl_t *phl);
 void register_lib(params_t *params, par_hl_t *phl);
-int check_bandlist(par_tsa_t *tsa, par_sen_t *sen);
 void alloc_ftr(par_ftr_t *ftr);
 void free_ftr(par_ftr_t *ftr);
 void alloc_mcl(par_mcl_t *mcl);
@@ -54,7 +53,6 @@ int parse_pol(par_pol_t *pol);
 int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
 int parse_quality(par_qai_t *qai);
-int parse_sensor(par_sen_t *sen);
 
 
 /** This function registers common higher level parameters that are parsed
@@ -72,14 +70,15 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_char_par(params,    "DIR_MASK",   _CHAR_TEST_NULL_OR_EXIST_, &phl->d_mask);
   register_char_par(params,    "BASE_MASK",  _CHAR_TEST_NULL_OR_BASE_,  &phl->b_mask);
   register_char_par(params,    "FILE_TILE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->f_tile);
-  register_intvec_par(params,  "X_TILE_RANGE", -999, 9999, &phl->tx, &phl->ntx);
-  register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, &phl->ty, &phl->nty);
+  register_intvec_par(params,  "X_TILE_RANGE", -999, 9999, 2, &phl->tx, &phl->ntx);
+  register_intvec_par(params,  "Y_TILE_RANGE", -999, 9999, 2, &phl->ty, &phl->nty);
   register_double_par(params,  "RESOLUTION", 0, FLT_MAX, &phl->res);
-  register_double_par(params,  "BLOCK_SIZE", 0, FLT_MAX, &phl->blocksize);
+  register_doublevec_par(params, "CHUNK_SIZE", 0, FLT_MAX, 2, &phl->chunk_size, &phl->n_chunk_size);
   register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &phl->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   register_bool_par(params,    "OUTPUT_SUBFOLDERS", &phl->subfolders);
+  register_bool_par(params,    "FAIL_IF_EMPTY", &phl->fail_if_empty);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
   register_int_par(params,     "NTHREAD_WRITE",   1, INT_MAX, &phl->othread);
@@ -99,13 +98,15 @@ void register_higher(params_t *params, par_hl_t *phl){
 void register_ard1(params_t *params, par_hl_t *phl){
 
 
-  register_enumvec_par(params, "SENSORS", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen.senid, &phl->sen.n);
+  register_charvec_par(params, "SENSORS", _CHAR_TEST_NONE_, -1, &phl->sen.sensor, &phl->sen.n);
+  register_char_par(params,    "TARGET_SENSOR", _CHAR_TEST_NONE_, &phl->sen.target);
   register_char_par(params,    "PRODUCT_TYPE_MAIN",    _CHAR_TEST_NONE_, &phl->sen.main_product);
   register_char_par(params,    "PRODUCT_TYPE_QUALITY", _CHAR_TEST_NONE_, &phl->sen.quality_product);
   register_bool_par(params,    "SPECTRAL_ADJUST", &phl->sen.spec_adjust);
-  register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, &phl->qai.flags, &phl->qai.nflags);
-  register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", &phl->date_range, &phl->ndate);
-  register_intvec_par(params,  "DOY_RANGE", 1, 365, &phl->doy_range, &phl->ndoy);
+  register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, -1, &phl->qai.flags, &phl->qai.nflags);
+  register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", 2, &phl->date_range, &phl->ndate);
+  register_intvec_par(params,  "DOY_RANGE", 1, 365, 2, &phl->doy_range, &phl->ndoy);
+  register_date_par(params,    "DATE_IGNORE_LANDSAT_7", "1900-01-01", "2099-12-31", &phl->date_ignore_lnd07);
 
   return;
 }
@@ -143,8 +144,12 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_bool_par(params,  "SELECT", &phl->bap.select);
   register_enum_par(params,  "COMBINE_SCORES",  _TAGGED_ENUM_SCR_COMB_, _SCR_COMB_LENGTH_, &phl->bap.combine);
 
-  register_floatvec_par(params, "DOY_SCORE", 0, 1, &phl->bap.Ds, &phl->bap.nDs);
-  register_intvec_par(params,   "DOY_STATIC", 1, 365, &phl->bap.Dt, &phl->bap.nDt);
+  // additional aux products
+  register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
+    _CHAR_TEST_NONE_, -1, &phl->sen.aux_products, &phl->sen.n_aux_products);
+
+  register_floatvec_par(params, "DOY_SCORE", 0, 1, 3, &phl->bap.Ds, &phl->bap.nDs);
+  register_intvec_par(params,   "DOY_STATIC", 1, 365, 3, &phl->bap.Dt, &phl->bap.nDt);
 
   register_bool_par(params,  "OFF_SEASON", &phl->bap.offsea);
   register_bool_par(params,  "USE_CLOUDY", &phl->bap.use_cloudy);
@@ -165,7 +170,7 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_double_par(params, "SCORE_VZEN_WEIGHT",   0, 1, &phl->bap.w.v);
 
   register_char_par(params,    "DIR_LSP", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
-  register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, &phl->con.fname, &phl->con.n);
+  register_charvec_par(params, "BASE_LSP", _CHAR_TEST_NULL_OR_BASE_, 3, &phl->con.fname, &phl->con.n);
   register_int_par(params,     "LSP_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_bool_par(params,    "LSP_DO", &phl->bap.pac.lsp);
   register_int_par(params,     "LSP_1ST_YEAR", 1900, 2100, &phl->bap.pac.y0);
@@ -185,7 +190,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
 
 
   // TS parameters
-  register_enumvec_par(params, "INDEX", _TAGGED_ENUM_IDX_, _IDX_LENGTH_, &phl->tsa.index, &phl->tsa.n);
+  register_charvec_par(params, "INDEX", _CHAR_TEST_NONE_, -1, &phl->tsa.index.names, &phl->tsa.index.n);
   register_enum_par(params,    "STANDARDIZE_TSS", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.standard);
   register_bool_par(params,    "OUTPUT_TSS", &phl->tsa.otss);
 
@@ -200,18 +205,18 @@ void register_tsa(params_t *params, par_hl_t *phl){
   // interpolation parameters
   register_enum_par(params,    "INTERPOLATE", _TAGGED_ENUM_INT_, _INT_LENGTH_, &phl->tsa.tsi.method);
   register_int_par(params,     "MOVING_MAX",  1, 365, &phl->tsa.tsi.mov_max);
-  register_intvec_par(params,  "RBF_SIGMA",   1, 365, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
+  register_intvec_par(params,  "RBF_SIGMA",   1, 365, -1, &phl->tsa.tsi.rbf_sigma, &phl->tsa.tsi.rbf_nk);
   register_float_par(params,   "RBF_CUTOFF",  0, 1, &phl->tsa.tsi.rbf_cutoff);
   register_int_par(params,     "HARMONIC_MODES",  1, 3, &phl->tsa.tsi.harm_nmodes);
   register_bool_par(params,    "HARMONIC_TREND",  &phl->tsa.tsi.harm_trend);
-  register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
+  register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", 2, &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
   register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);
 
   // STM parameters
-  register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
+  register_enumvec_par(params, "STM", _TAGGED_ENUM_STA_, _STA_LENGTH_, -1, &phl->tsa.stm.sta.metrics, &phl->tsa.stm.sta.nmetrics);
   register_bool_par(params,    "OUTPUT_STM", &phl->tsa.stm.ostm);
 
   // folding parameters
@@ -238,7 +243,7 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_float_par(params,   "POL_MID_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.mid);
   register_float_par(params,   "POL_END_THRESHOLD",   0.01, 0.99, &phl->tsa.pol.end);
   register_bool_par(params,    "POL_ADAPTIVE",        &phl->tsa.pol.adaptive);
-  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
+  register_enumvec_par(params, "POL", _TAGGED_ENUM_POL_, _POL_LENGTH_, -1, &phl->tsa.pol.metrics, &phl->tsa.pol.nmetrics);
   register_enum_par(params,    "STANDARDIZE_POL", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.pol.standard);
   register_bool_par(params,    "OUTPUT_PCT",        &phl->tsa.pol.opct);
   register_bool_par(params,    "OUTPUT_POL",        &phl->tsa.pol.opol);
@@ -273,7 +278,7 @@ void register_cso(params_t *params, par_hl_t *phl){
 
 
   register_int_par(params,     "MONTH_STEP", 1, 12, &phl->cso.step);
-  register_enumvec_par(params, "CSO", _TAGGED_ENUM_STA_, _STA_LENGTH_, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
+  register_enumvec_par(params, "CSO", _TAGGED_ENUM_STA_, _STA_LENGTH_, -1, &phl->cso.sta.metrics, &phl->cso.sta.nmetrics);
 
   return;
 }
@@ -287,7 +292,7 @@ void register_cso(params_t *params, par_hl_t *phl){
 void register_imp(params_t *params, par_hl_t *phl){
 
 
-  register_intvec_par(params,  "SEASONAL_WINDOW",      1, 365, &phl->imp.dwin, &phl->imp.bwin);
+  register_intvec_par(params,  "SEASONAL_WINDOW",      1, 365, -1, &phl->imp.dwin, &phl->imp.bwin);
   register_double_par(params,  "KERNEL_SIZE",          0, 1e6, &phl->imp.pred_radius);
   register_double_par(params,  "KERNEL_TEXT",          0, 1e6, &phl->imp.text_radius);
 
@@ -305,10 +310,10 @@ void register_cfi(params_t *params, par_hl_t *phl){
 
   register_imp(params, phl);
   register_char_par(params,    "DIR_COARSE",  _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
-  register_charvec_par(params, "BASE_COARSE", _CHAR_TEST_BASE_, &phl->con.fname, &phl->con.n);
+  register_charvec_par(params, "BASE_COARSE", _CHAR_TEST_BASE_, -1, &phl->con.fname, &phl->con.n);
   register_int_par(params,     "COARSE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_int_par(params,     "COARSE_1ST_YEAR",      1900, 2100, &phl->cfi.y0);
-  register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, &phl->cfi.years, &phl->cfi.nyears);
+  register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, -1, &phl->cfi.years, &phl->cfi.nyears);
 
   return;
 }
@@ -323,7 +328,7 @@ void register_l2i(params_t *params, par_hl_t *phl){
 
   
   register_imp(params, phl);
-  register_enumvec_par(params, "SENSORS_LOWRES", _TAGGED_ENUM_SEN_, _SEN_LENGTH_, &phl->sen2.senid, &phl->sen2.n);
+  register_charvec_par(params, "SENSORS_LOWRES", _CHAR_TEST_NONE_, -1, &phl->sen2.sensor, &phl->sen2.n);
 
   return;
 }
@@ -350,7 +355,7 @@ int i;
   register_bool_par(params,  "OUTPUT_RFM", &phl->mcl.orfm);
 
   for (i=0; i<phl->mcl.nmodelset; i++) register_charvec_par(params,  "FILE_MODEL",
-    _CHAR_TEST_BASE_, &phl->mcl.f_model[i], &phl->mcl.nmodel[i]);
+    _CHAR_TEST_BASE_, -1, &phl->mcl.f_model[i], &phl->mcl.nmodel[i]);
 
   return;
 }
@@ -366,7 +371,7 @@ int i;
 
 
   for (i=0; i<phl->ftr.ntags; i++) register_charvec_par(params,  "INPUT_FEATURE",
-    _CHAR_TEST_NONE_, &phl->ftr.cfeature[i], &phl->ftr.ifeature[i]);
+    _CHAR_TEST_NONE_, -1, &phl->ftr.cfeature[i], &phl->ftr.ifeature[i]);
 
   register_int_par(params,  "FEATURE_NODATA", SHRT_MIN, SHRT_MAX, &phl->ftr.nodata);
   register_bool_par(params, "FEATURE_EXCLUDE", &phl->ftr.exclude);
@@ -403,7 +408,7 @@ void register_txt(params_t *params, par_hl_t *phl){
 
   register_double_par(params,  "TXT_RADIUS",    0, 1e6,  &phl->txt.radius);
   register_int_par(params,     "TXT_ITERATION", 1, 1000, &phl->txt.iter);
-  register_enumvec_par(params, "TXT", _TAGGED_ENUM_TXT_, _TXT_LENGTH_, &phl->txt.metrics, &phl->txt.nmetrics);
+  register_enumvec_par(params, "TXT", _TAGGED_ENUM_TXT_, _TXT_LENGTH_, -1, &phl->txt.metrics, &phl->txt.nmetrics);
   register_char_par(params,    "TXT_BASE",  _CHAR_TEST_NONE_, &phl->txt.base);
 
   return;
@@ -420,10 +425,10 @@ void register_lsm(params_t *params, par_hl_t *phl){
 
   register_double_par(params,  "LSM_RADIUS",    0, 1e6,  &phl->lsm.radius);
   register_int_par(params,     "LSM_MIN_PATCHSIZE",    0, 1e6,  &phl->lsm.minpatchsize);
-  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, &phl->lsm.query, &phl->lsm.nquery);
-  register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, &phl->lsm.threshold, &phl->lsm.nthreshold);
+  register_enumvec_par(params, "LSM_THRESHOLD_TYPE", _TAGGED_ENUM_QUERY_, _QUERY_LENGTH_, -1, &phl->lsm.query, &phl->lsm.nquery);
+  register_intvec_par(params,  "LSM_THRESHOLD", SHRT_MIN, SHRT_MAX, -1, &phl->lsm.threshold, &phl->lsm.nthreshold);
   register_bool_par(params,    "LSM_ALL_PIXELS", &phl->lsm.allpx);
-  register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, &phl->lsm.metrics, &phl->lsm.nmetrics);
+  register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, -1, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
   register_enum_par(params,    "LSM_KERNEL_SHAPE", _TAGGED_ENUM_KERNEL_, _KERNEL_LENGTH_, &phl->lsm.kernel);
 
@@ -440,7 +445,7 @@ void register_lib(params_t *params, par_hl_t *phl){
 
 
   register_char_par(params,    "DIR_LIBRARY",  _CHAR_TEST_EXIST_, &phl->lib.d_lib);
-  register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  &phl->lib.f_lib, &phl->lib.n_lib);
+  register_charvec_par(params, "FILE_LIBRARY", _CHAR_TEST_BASE_,  -1, &phl->lib.f_lib, &phl->lib.n_lib);
   register_bool_par(params,    "LIB_RESCALE",  &phl->lib.rescale);
   register_char_par(params,    "LIB_BASE",     _CHAR_TEST_NONE_,  &phl->lib.base);
 
@@ -459,272 +464,17 @@ void register_udf(params_t *params, par_hl_t *phl){
   register_char_par(params,    "FILE_PYTHON",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.pyp.f_code);
   register_enum_par(params,    "PYTHON_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.pyp.type);
   register_bool_par(params,    "OUTPUT_PYP",    &phl->udf.pyp.out);
-
+  
   // R UDF plug-in parameters
   register_char_par(params,    "FILE_RSTATS",  _CHAR_TEST_NULL_OR_EXIST_, &phl->udf.rsp.f_code);
   register_enum_par(params,    "RSTATS_TYPE",  _TAGGED_ENUM_UDF_, _UDF_LENGTH_, &phl->udf.rsp.type);
   register_bool_par(params,    "OUTPUT_RSP",   &phl->udf.rsp.out);
 
+  // additional aux products
+  register_charvec_par(params, "REQUIRE_AUX_PRODUCTS", 
+    _CHAR_TEST_NONE_, -1, &phl->sen.aux_products, &phl->sen.n_aux_products);
+
   return;
-}
-
-
-/** This function checks that each index can be computed with the given
-+++ set of sensors. It also kicks out unused bands to remove I/O
---- tsa:    TSA parameters
---- sen:    sensor parameters
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int check_bandlist(par_tsa_t *tsa, par_sen_t *sen){
-int idx, b, nb = _WVL_LENGTH_, k, s;
-bool v[_WVL_LENGTH_] = { 
-  false, false, false, false, false,
-  false, false, false, false, false,
-  false, false };
-int *band_ptr[_WVL_LENGTH_] = { 
-  &sen->blue, &sen->green, &sen->red,
-  &sen->rededge1, &sen->rededge2, &sen->rededge3,
-  &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
-  &sen->vv, &sen->vh };
-
-
-  alloc_2D((void***)&tsa->index_name, tsa->n, NPOW_02, sizeof(char));
-
-  // for each requested index, flag required wavelength, 
-  // set short index name for filename
-  for (idx=0; idx<tsa->n; idx++){
-
-    switch (tsa->index[idx]){
-      case _IDX_BLU_:
-        v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BLU");
-        break;
-      case _IDX_GRN_:
-        v[_WVL_GREEN_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "GRN");
-        break;
-      case _IDX_RED_:
-        v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RED");
-        break;
-      case _IDX_NIR_:
-        v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NIR");
-        break;
-      case _IDX_SW0_:
-        v[_WVL_SWIR0_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW0");
-        break;
-      case _IDX_SW1_:
-        v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW1");
-        break;
-      case _IDX_SW2_:
-        v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SW2");
-        break;
-      case _IDX_RE1_:
-        v[_WVL_REDEDGE1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE1");
-        break;
-      case _IDX_RE2_:
-        v[_WVL_REDEDGE2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE2");
-        break;
-      case _IDX_RE3_:
-        v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "RE3");
-        break;
-      case _IDX_BNR_:
-        v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BNR");
-        break;
-      case _IDX_NDV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDV");
-        break;
-      case _IDX_EVI_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "EVI"); 
-        break;
-      case _IDX_NBR_:
-        v[_WVL_NIR_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NBR"); 
-        break;
-      case _IDX_ARV_:
-        v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ARV"); 
-        break;
-      case _IDX_SAV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = v[_WVL_BLUE_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SAV"); 
-        break;
-      case _IDX_SRV_:
-        v[_WVL_RED_] = v[_WVL_BLUE_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "SRV"); 
-        break;
-      case _IDX_TCB_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCB"); 
-        break;
-      case _IDX_TCG_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCG"); 
-        break;
-      case _IDX_TCW_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCW"); 
-        break;
-      case _IDX_TCD_:
-        v[_WVL_BLUE_] = v[_WVL_GREEN_] = v[_WVL_RED_]   = true;
-        v[_WVL_NIR_]  = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "TCD"); 
-        break;
-      case _IDX_NDB_:
-        v[_WVL_SWIR1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDB"); 
-        break;
-      case _IDX_NDW_:
-        v[_WVL_GREEN_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDW"); 
-        break;
-      case _IDX_MNW_:
-        v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MNW"); 
-        break;
-      case _IDX_NDS_:
-        v[_WVL_GREEN_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDS"); 
-        break;
-      case _IDX_SMA_:
-        for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-        copy_string(tsa->index_name[idx], NPOW_02, "SMA"); 
-        tsa->sma.v = true;
-        break;
-      case _IDX_BVV_:
-        v[_WVL_VV_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BVV"); 
-        break;
-      case _IDX_BVH_:
-        v[_WVL_VH_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "BVH"); 
-        break;
-      case _IDX_NDT_:
-        v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDT"); 
-        break;
-      case _IDX_NDM_:
-        v[_WVL_NIR_] = v[_WVL_SWIR1_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NDM"); 
-        break;
-      case _IDX_KNV_:
-        v[_WVL_NIR_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "KNV");
-        break;
-      case _IDX_ND1_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ND1");
-        break;
-      case _IDX_ND2_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "ND2");
-        break;
-      case _IDX_CRE_:
-        v[_WVL_REDEDGE1_] = v[_WVL_REDEDGE3_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CRE");
-        break;
-      case _IDX_NR1_:
-        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR1");
-        break;
-      case _IDX_NR2_:
-        v[_WVL_REDEDGE2_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR2");
-        break;
-      case _IDX_NR3_:
-        v[_WVL_REDEDGE3_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "NR3");
-        break;
-      case _IDX_N1n_:
-        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N1N");
-        break;
-      case _IDX_N2n_:
-        v[_WVL_REDEDGE2_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N2N");
-        break;
-      case _IDX_N3n_:
-        v[_WVL_REDEDGE3_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "N3N");
-        break;
-      case _IDX_Mre_:
-        v[_WVL_REDEDGE1_] = v[_WVL_BNIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MRE");
-        break;
-      case _IDX_Mrn_:
-        v[_WVL_REDEDGE1_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "MRN");
-        break;
-      case _IDX_CCI_:
-        v[_WVL_GREEN_] = v[_WVL_RED_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CCI");
-        break;
-      case _IDX_EV2_:
-        v[_WVL_RED_] = v[_WVL_NIR_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "EV2");
-        break;
-      case _IDX_CSW_:
-        v[_WVL_NIR_] = v[_WVL_SWIR1_] = v[_WVL_SWIR2_] = true;
-        copy_string(tsa->index_name[idx], NPOW_02, "CSW");
-        break;
-      default:
-        printf("unknown INDEX\n");
-        break;
-    }
-  }
-
-
-  // check if index can be computed with the given sensor combination
-  // remove unused bands from each sensor to reduce I/O
-  for (b=0; b<nb; b++){
-    if (v[b]  && *band_ptr[b] <  0){
-      printf("cannot compute index, band is missing (check SENSORS). ");
-      return FAILURE;
-    }
-    if (!v[b] && *band_ptr[b] >= 0 && !sen->spec_adjust){
-      for (s=0; s<sen->n; s++){ sen->band[s][*band_ptr[b]] = -1;}; *band_ptr[b] = -1;
-    }
-  }
-
-  // set target bands
-  if (sen->spec_adjust){
-    for (b=0; b<nb; b++) v[b] = (*band_ptr[b] >= 0);
-  } else {
-    for (b=0, k=0; b<nb; b++){
-      if (v[b]) *band_ptr[b] = k++;
-    }
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("filtered bandlist with requested indices:\n");
-  for (s=0; s<sen->n; s++){
-    printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
-    printf("\n");
-  }
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
-  printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
-  printf("bnir  %02d, nir   %02d, swir1 %02d\n", sen->bnir, sen->nir, sen->swir1);
-  printf("swir2 %02d  vv    %02d, vh    %02d\n", sen->swir2, sen->vv, sen->vh);
-  #endif
-
-  return SUCCESS;
 }
 
 
@@ -1026,187 +776,6 @@ int i;
 }
 
 
-/** This function reparses sensor parameters (special para-
-+++ meter that cannot be parsed with the general parser).
-+++ This function builds a Level 2 sensor dictionary, which is needed to
-+++ generate multi-sensor products. It computes the most restrictive over-
-+++ lap between matching bands, determine rules how to read these, and de-
-+++ fines commonly used wavelengths.
---- sen:    sensor parameters
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int parse_sensor(par_sen_t *sen){
-int s, ss, b, bb, c;
-char upper[NPOW_10] = "UPPER";
-const int  ns = _SEN_LENGTH_, nb = _WVL_LENGTH_;
-const char sensor[_SEN_LENGTH_][NPOW_10] = {
-  "LND04", "LND05", "LND07",
-  "LND08", "LND09", "SEN2A", 
-  "SEN2B", "SEN2C", "SEN2D",
-  "sen2a", "sen2b", "sen2c",
-  "sen2d",
-  "LNDLG", "SEN2L", "SEN2H", 
-  "R-G-B", "S1AIA", "S1AID", 
-  "S1BIA", "S1BID", "VVVHP", 
-  "MOD01", "MOD02", "MODIS" };
-bool adjustable[_SEN_LENGTH_] = {
-  true,  true,  true,  
-  true,  true,  true,  
-  true,  true,  true,
-  false, false, false,
-  false,
-  false, false, false, 
-  false, false, false, 
-  false, false, false, 
-  true,  true,  false };
-const int  band[_SEN_LENGTH_][_WVL_LENGTH_] = {
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 4 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 5 TM   (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 7 ETM+ (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 8 OLI  (legacy bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat 9 OLI  (legacy bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2A MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2B MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2C MSI (land surface bands)
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2D MSI (land surface bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2A MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2B MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2C MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 7, 0, 0, 0,  0, 0, 0 },  // Sentinel-2D MSI (high-res bands)
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Landsat legacy bands
-  { 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 10, 0, 0 },  // Sentinel-2 land surface bands
-  { 1, 2, 3, 0, 0, 0, 0, 4, 0, 5,  6, 0, 0 },  // Sentinel-2 high-res bands
-  { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0 },  // VIS bands
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1A IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Ascending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // Sentinel-1B IW Descending
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 2 },  // VV/VH polarized
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Terra
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 },  // MODIS Aqua
-  { 1, 2, 3, 0, 0, 0, 0, 4, 5, 6,  7, 0, 0 }}; // MODIS
-char domains[_WVL_LENGTH_][NPOW_10] = {
-  "BLUE", "GREEN", "RED", "REDEDGE1", "REDEDGE2",
-  "REDEDGE3", "BROADNIR", "NIR", "SWIR0", "SWIR1", "SWIR2",
-  "VV", "VH" };
-bool vs[_SEN_LENGTH_], vb[_WVL_LENGTH_];
-int *band_ptr[_WVL_LENGTH_] = {
-  &sen->blue, &sen->green, &sen->red, &sen->rededge1, &sen->rededge2,
-  &sen->rededge3, &sen->bnir, &sen->nir, &sen->swir0, &sen->swir1, &sen->swir2,
-  &sen->vv, &sen->vh };
-
-
-  // set appr. wavelength
-  sen->w_blue     = 0.492;
-  sen->w_green    = 0.559;
-  sen->w_red      = 0.665;
-  sen->w_rededge1 = 0.704;
-  sen->w_rededge2 = 0.739;
-  sen->w_rededge3 = 0.780;
-  sen->w_bnir     = 0.833;
-  sen->w_nir      = 0.864;
-  sen->w_swir0    = 1.240;
-  sen->w_swir1    = 1.610;
-  sen->w_swir2    = 2.186;
-  sen->w_vv       = 554657630000;
-  sen->w_vh       = 554657630000;
-
-
-  // match available sensors with requested sensors
-  for (s=0; s<ns; s++) vs[s] = false;
-  for (s=0; s<sen->n; s++) vs[sen->senid[s]] = true;
-
-  // check if spectral band adjustment is possible
-  for (s=0; s<sen->n; s++){
-    if (sen->spec_adjust && !adjustable[sen->senid[s]]){
-      printf("Spectral adjustment not implemented for sensor %s.\n", sensor[sen->senid[s]]); 
-      return FAILURE;
-    }
-  }
-
-  // kick out bands that are incomplete
-  for (b=0, bb=0; b<nb; b++){
-
-    for (s=0, vb[b]=true; s<ns; s++){
-      if (vs[s] && band[s][b] == 0) vb[b] = false;
-    }
-
-    if (sen->spec_adjust && !vb[b] && band[_SEN_SEN2A_][b] > 0) vb[b] = true;
-
-    if (vb[b]){
-      *band_ptr[b] = bb++;
-    } else {
-      *band_ptr[b] = -1;
-    }
-
-  }
-
-  if ((sen->nb = bb) == 0){ printf("no band overlap for requested sensors.\n"); return FAILURE;}
-
-
-  // set target sensor
-  if (sen->nb == 6){
-    copy_string(sen->target, NPOW_10, "LNDLG");
-  } else if (sen->nb == 10){
-    copy_string(sen->target, NPOW_10, "SEN2L");
-  } else if (sen->nb == 4){
-    copy_string(sen->target, NPOW_10, "SEN2H");
-  } else if (sen->nb == 3){
-    copy_string(sen->target, NPOW_10, "R-G-B");
-  } else if (sen->nb == 7){
-    copy_string(sen->target, NPOW_10, "MODIS");
-  } else if (sen->nb == 2){
-    copy_string(sen->target, NPOW_10, "VVVHP");
-  } else {
-    printf("unknown sensors.\n"); return FAILURE;
-  }
-
-
-  // build sensor struct
-  alloc_2D((void***)&sen->sensor, sen->n,  NPOW_10, sizeof(char));
-  alloc_2D((void***)&sen->band,   sen->n,  sen->nb, sizeof(int));
-  alloc_2D((void***)&sen->domain, sen->nb, NPOW_10, sizeof(char));
-
-  for (b=0, bb=0; b<nb; b++){
-    if (!vb[b]) continue;
-    copy_string(sen->domain[bb], NPOW_10, domains[b]);
-    for (s=0, ss=0; s<ns; s++){
-      if (!vs[s]) continue;
-      for (c=0; c<5; c++) upper[c] = toupper(sensor[s][c]);
-      copy_string(sen->sensor[ss], NPOW_10, upper);
-      sen->band[ss][bb] = band[s][b];
-      ss++;
-    }
-    bb++;
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("blue  %02d, green %02d, red   %02d\n", sen->blue, sen->green, sen->red);
-  printf("re_1  %02d, re_2  %02d, re_3  %02d\n", sen->rededge1, sen->rededge2, sen->rededge3);
-  printf("bnir  %02d, nir   %02d, swir0 %02d\n", sen->bnir, sen->nir, sen->swir0);
-  printf("swir1 %02d, swir2 %02d\n", sen->swir1, sen->swir2); 
-  printf("vv    %02d, vh    %02d\n", sen->vv, sen->vh);
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("waveband mapping:\n");
-  for (b=0; b<nb; b++) printf("%s %d\n", domains[b], vb[b]);
-  printf("\n");
-  printf("%d bands, target sensor: %s\n", sen->nb, sen->target);
-  #endif
-
-  #ifdef FORCE_DEBUG
-  printf("processing with %d sensors and %d bands\n", sen->n, sen->nb);
-  for (s=0; s<sen->n; s++){
-    printf("%s: ", sen->sensor[s]);
-    for (b=0; b<sen->nb; b++) printf("%2d ", sen->band[s][b]); 
-    printf("\n");
-  }
-  #endif
-
-  return SUCCESS;
-}
-
 
 /** public functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
@@ -1237,19 +806,17 @@ void free_param_higher(par_hl_t *phl){
 
   if (phl->input_level1 == _INP_QAI_ ||
       phl->input_level1 == _INP_ARD_){
-    free_2D((void**)phl->sen.sensor, phl->sen.n);
-    free_2D((void**)phl->sen.band,   phl->sen.n);
-    free_2D((void**)phl->sen.domain, phl->sen.nb);
+    free_2D((void**)phl->sen.band_number, phl->sen.n);
+    free_2D((void**)phl->sen.band_names, phl->sen.n_bands);
   }
 
   if (phl->input_level2 == _INP_QAI_ ||
       phl->input_level2 == _INP_ARD_){
-    free_2D((void**)phl->sen2.sensor, phl->sen2.n);
-    free_2D((void**)phl->sen2.band,   phl->sen2.n);
-    free_2D((void**)phl->sen2.domain, phl->sen2.nb);
+    free_2D((void**)phl->sen2.band_number, phl->sen2.n);
+    free_2D((void**)phl->sen2.band_names, phl->sen2.n_bands);
   }
 
-  if (phl->type == _HL_TSA_) free_2D((void**)phl->tsa.index_name, phl->tsa.n); 
+  if (phl->type == _HL_TSA_) free_indices(&phl->tsa.index);
 
   if (phl->type == _HL_ML_) free_mcl(&phl->mcl);
 
@@ -1417,15 +984,15 @@ double tol = 5e-3;
 
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&
-    parse_sensor(&phl->sen) != SUCCESS){
+    retrieve_sensor(&phl->sen) != SUCCESS){
     printf("Compiling sensors failed.\n"); return FAILURE;}
     
   if ((phl->input_level2 == _INP_QAI_ ||
        phl->input_level2 == _INP_ARD_) &&
-    parse_sensor(&phl->sen2) != SUCCESS){
+    retrieve_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
-    
-  if (phl->type == _HL_TSA_ && check_bandlist(&phl->tsa, &phl->sen) == FAILURE){
+
+  if (phl->type == _HL_TSA_ && retrieve_indices(&phl->tsa.index, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}
 
   if (phl->type == _HL_TSA_) parse_sta(&phl->tsa.stm.sta);
@@ -1445,7 +1012,38 @@ double tol = 5e-3;
   if (phl->input_level1 != _INP_QAI_) phl->prd.ref = true;
   phl->prd.qai = true;
 
+  if (phl->sen.n_aux_products > 0) phl->prd.aux = true;
 
+  if (phl->sen.n_aux_products != 0 && strcmp(phl->sen.aux_products[0], "NULL") == 0) phl->prd.aux = false;
+
+  if (phl->prd.aux && !phl->prd.ref){
+    printf("aux products cannot be used when reflectance product is not used.\n");
+    return FAILURE;
+  }
+
+
+
+  // check chunk size
+  if (fmod(phl->chunk_size[_X_], phl->res) > tol ||
+      fmod(phl->chunk_size[_Y_], phl->res) > tol){
+    printf("CHUNK_SIZE must be a multiple of RESOLUTION.\n");
+    return FAILURE;
+  }
+
+  // check chunk size against 0
+  if (phl->chunk_size[_X_] <= 0.0 ||
+      phl->chunk_size[_Y_] <= 0.0){
+    printf("CHUNK_SIZE must be positive.\n");
+    return FAILURE;
+  }
+
+    // check resolution against 0
+  if (phl->res <= 0.0){
+    printf("RESOLUTION must be positive.\n");
+    return FAILURE;
+  }
+
+  
   // compile temporal window
   if ((phl->input_level1 == _INP_QAI_ ||
        phl->input_level1 == _INP_ARD_) &&
@@ -1553,11 +1151,40 @@ double tol = 5e-3;
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
     }
 
-    // choose products
-    if (phl->bap.w.c > 0) phl->prd.dst = true;
-    if (phl->bap.w.h > 0) phl->prd.hot = true;
-    if (phl->bap.w.v > 0) phl->prd.vzn = true;
-    
+    // check whether products and weights are consistent
+    if (phl->bap.w.c > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "DST")){
+      printf("A cloud distance weight is given, but DST auxiliary product is not specified.\n");
+      return FAILURE;
+    }
+    if (phl->bap.w.h > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "HOT")){
+      printf("A haze weight is given, but HOT auxiliary product is not specified.\n");
+      return FAILURE;
+    }
+    if (phl->bap.w.v > 0 && 
+      !vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "VZN")){
+      printf("A view zenith weight is given, but VZN auxiliary product is specified.\n");
+      return FAILURE;
+    }
+
+    if (fequal(phl->bap.w.c, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "DST")){
+      printf("A cloud distance weight is not given, but DST auxiliary product is specified.\n");
+      return FAILURE;
+    }
+    if (fequal(phl->bap.w.h, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "HOT")){
+      printf("A haze weight is not given, but HOT auxiliary product is specified.\n");
+      return FAILURE;
+    }
+    if (fequal(phl->bap.w.v, 0) && 
+    vector_contains((const char**)phl->sen.aux_products, phl->sen.n_aux_products, "VZN")){
+      printf("A view zenith weight is not given, but VZN auxiliary product is specified.\n");
+      return FAILURE;
+    }
+
+
     if (phl->bap.pac.lsp) phl->input_level2 = _INP_CON_;
 
   }
@@ -1593,6 +1220,12 @@ double tol = 5e-3;
   }
 
   if (phl->type == _HL_TSA_){
+
+    if (vector_contains((const char**)phl->tsa.index.names, phl->tsa.index.n, "SMA")){
+      phl->tsa.sma.v = true;
+    } else {
+      phl->tsa.sma.v = false;
+    }
 
     if (phl->tsa.sma.orms && !phl->tsa.sma.v){
       phl->tsa.sma.orms = false;

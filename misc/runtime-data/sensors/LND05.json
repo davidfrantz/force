@@ -1,0 +1,13 @@
+{
+  "description": "Landsat 5 Thematic Mapper",
+  "name": "LND05",
+  "bands": 6,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "NIR",
+    "SWIR1",
+    "SWIR2"
+  ]
+}

@@ -77,6 +77,7 @@ void parse_args(int argc, char *argv[], args_t *args){
 int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
+char *saveptr = NULL;
 const char *separator = ",";
 int i;
 
@@ -101,11 +102,11 @@ int i;
         exit(SUCCESS);
       case 'p':
         copy_string(buffer, NPOW_10, optarg);
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
           if (i < 2) args->geo[i] = atof(ptr);
-          ptr = strtok(NULL, separator);
+          ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){
@@ -159,7 +160,7 @@ int i;
 int main(int argc, char *argv[]){
 args_t args;
 coord_t map, tile;
-int t_ulx, t_uly, ti, tj, ci, cj, chunk;
+int t_ulx, t_uly, ti, tj;
 cube_t *cube = NULL;
 
 
@@ -172,7 +173,7 @@ cube_t *cube = NULL;
 
 
   // get target coordinates in target css coordinates
-  if ((warp_geo_to_any(args.geo[_X_],  args.geo[_Y_], &map.x, &map.y, cube->proj)) == FAILURE){
+  if ((warp_geo_to_any(args.geo[_X_],  args.geo[_Y_], &map.x, &map.y, cube->projection)) == FAILURE){
     printf("Computing target coordinates in dst_srs failed!\n"); return FAILURE;}
 
 
@@ -180,24 +181,16 @@ cube_t *cube = NULL;
   tile_find(map.x, map.y, &tile.x, &tile.y, &t_ulx, &t_uly, cube);
 
   // find pixel in tile
-  tj = (int)((map.x-tile.x)/cube->res);
-  ti = (int)((tile.y-map.y)/cube->res);
+  tj = (int)((map.x-tile.x)/cube->resolution);
+  ti = (int)((tile.y-map.y)/cube->resolution);
 
-  // find chunk in tile
-  chunk = (int)(ti/cube->cy);
-
-  // find pixel in chunk
-  cj = tj;
-  ci = ti - chunk*cube->cy;
 
   // Print to stdout
   printf("Point { LON/LAT (%.2f,%.2f) | X/Y (%.2f,%.2f) }\n"
           "       is in tile X%04d_Y%04d at pixel J/I %d/%d\n"
-          "       is in chunk %d at position J/I %d/%d\n"
           "       considering a resolution of %.2f\n",
     args.geo[_X_], args.geo[_Y_], map.x, map.y, 
-    t_ulx, t_uly, tj, ti,
-    chunk, cj, ci, cube->res);
+    t_ulx, t_uly, tj, ti, cube->resolution);
 
           
   free_datacube(cube);

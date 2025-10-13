@@ -48,7 +48,7 @@ brick_t **L2I = NULL;
 int o, nprod = nt;
 int error = 0;
 int prodlen;
-char prodname[NPOW_02] = "IMP";
+char prodname[NPOW_10] = "IMP";
 short ****ptr = NULL;
 
 
@@ -95,8 +95,8 @@ short ****ptr = NULL;
 brick_t *compile_l2i_brick(brick_t *from, int nb, bool write, char *prodname, par_hl_t *phl){
 int b;
 brick_t *brick = NULL;
-char sensor[NPOW_04];
-char date[NPOW_04];
+char sensor[NPOW_10];
+char date[NPOW_10];
 char fname[NPOW_10];
 char dname[NPOW_10];
 int nchar;
@@ -107,8 +107,8 @@ int nchar;
   set_brick_name(brick, "FORCE Texture");
   set_brick_product(brick, prodname);
 
-  get_brick_compactdate(from, 0, date, NPOW_04);
-  get_brick_sensor(from, 0, sensor, NPOW_04);
+  get_brick_compactdate(from, 0, date, NPOW_10);
+  get_brick_sensor(from, 0, sensor, NPOW_10);
 
   //printf("dirname should be assemlbed in write_brick, check with L2\n");
   nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, 
@@ -124,7 +124,7 @@ int nchar;
   set_brick_filename(brick, fname);
 
   if (write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }

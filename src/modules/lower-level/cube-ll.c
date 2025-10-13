@@ -42,7 +42,7 @@ multicube_t *start_datacube(par_ll_t *pl2, brick_t *brick);
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tile_level2(par_ll_t *pl2, cube_t *cube, brick_t **LEVEL2, int nprod){
-int i, j, p, np, nx, ny, b, nb, prod;
+int i, j, p, np, b, prod;
 char dname[NPOW_10];
 int nchar;
 double geotran[6];
@@ -61,7 +61,6 @@ brick_t **CUBED   = NULL;
 short   **level2_ = NULL;
 short   **cubed_  = NULL;
 double ncld, ndata; // cloud cover
-double scale, res;
 int cube_nx, cube_ny, cube_nc;
 
 
@@ -87,31 +86,27 @@ int cube_nx, cube_ny, cube_nc;
   alloc((void**)&CUBED, nprod, sizeof(brick_t*));
 
   for (prod=0; prod<(nprod); prod++){
-    nb = get_brick_nbands(LEVEL2[prod]);
-    res = get_brick_res(LEVEL2[prod]);
-    scale = cube->res/res;
+    int nb = get_brick_nbands(LEVEL2[prod]);
+    double scale = cube->resolution / get_brick_res(LEVEL2[prod]);
     CUBED[prod] = copy_brick(LEVEL2[prod], nb, _DT_NONE_);
     set_brick_geotran(CUBED[prod], geotran);
-    set_brick_ncols(CUBED[prod], (int)(cube->nx*scale));
-    set_brick_nrows(CUBED[prod], (int)(cube->ny*scale));
-    set_brick_chunkncols(CUBED[prod], (int)(cube->cx*scale));
-    set_brick_chunknrows(CUBED[prod], (int)(cube->cy*scale));
-    allocate_brick_bands(CUBED[prod], nb, (int)(cube->nc*scale), _DT_SHORT_);
+    set_brick_ncols(CUBED[prod], (int)(cube->dim_tile_pixels.cols*scale));
+    set_brick_nrows(CUBED[prod], (int)(cube->dim_tile_pixels.rows*scale));
+    allocate_brick_bands(CUBED[prod], nb, get_brick_ncells(CUBED[prod]), _DT_SHORT_);
   }
 
 
 //    #pragma omp for collapse(2) schedule(guided)
-  for (ty=cube->tminy; ty<=cube->tmaxy; ty++){
-  for (tx=cube->tminx; tx<=cube->tmaxx; tx++){
+  for (ty=cube->tile_extent[_Y_][_MIN_]; ty<=cube->tile_extent[_Y_][_MAX_]; ty++){
+  for (tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
 
     // if tile is not allowlisted (if specified), skip
     if (tile_allowlisted(tiles_x, tiles_y, tiles_k, tx, ty) == FAILURE) continue;
 
     // upper left coordinate of current tile
-    tulx = cube->origin_map.x + tx*cube->tilesize;
-    tuly = cube->origin_map.y - ty*cube->tilesize;
+    tulx = cube->origin_map.x + tx*cube->tile_size[_X_];
+    tuly = cube->origin_map.y - ty*cube->tile_size[_Y_];
 
-    
     empty = true;
     ndata = ncld = 0.0;
 
@@ -120,19 +115,19 @@ int cube_nx, cube_ny, cube_nc;
       
       if (prod > 0 && empty) break;
 
-      nb = get_brick_nbands(LEVEL2[prod]);
-      nx  = get_brick_ncols(LEVEL2[prod]);
-      ny  = get_brick_nrows(LEVEL2[prod]);
-      res = get_brick_res(LEVEL2[prod]);
-      scale = cube->res/res;
-      cube_nx = (int)(cube->nx*scale);
-      cube_ny = (int)(cube->ny*scale);
-      cube_nc = (int)(cube->nc*scale);
+      int nb = get_brick_nbands(LEVEL2[prod]);
+      int nx  = get_brick_ncols(LEVEL2[prod]);
+      int ny  = get_brick_nrows(LEVEL2[prod]);
+      double res = get_brick_res(LEVEL2[prod]);
+      double scale = cube->resolution/res;
+      cube_nx = (int)(cube->dim_tile_pixels.cols*scale);
+      cube_ny = (int)(cube->dim_tile_pixels.rows*scale);
+      cube_nc = cube_nx*cube_ny;
 
       // image offset relative to current tile
       jstart = floor((tulx-ulx)/res); // changed from round to floor
       istart = floor((uly-tuly)/res); // changed from round to floor
-      
+
       #ifdef FORCE_DEBUG
       printf("ul: %f/%f, offset: %d/%d\n", tulx, tuly, jstart, istart);
       #endif
@@ -193,7 +188,7 @@ int cube_nx, cube_ny, cube_nc;
       geotran[0] = tulx;
       geotran[3] = tuly;
 
-      nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", cube->dname, tx, ty);
+      nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", cube->dir_path, tx, ty);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
 
@@ -250,7 +245,7 @@ int nchar;
   time_t TIME; time(&TIME);
   #endif
   
-  nchar = snprintf(dname, NPOW_10, "%s/%s", pl2->d_level2, meta->refsys);
+  nchar = snprintf(dname, NPOW_10, "%s/%s", pl2->d_level2, meta->refsys_id);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling dirname\n"); return FAILURE;}
   
@@ -299,59 +294,51 @@ double tol = 5e-3;
   multicube->cover[0] = true;
   cube = multicube->cube[0];
 
-  copy_string(cube->dname, NPOW_10, pl2->d_level2);
+  copy_string(cube->dir_path, NPOW_10, pl2->d_level2);
 
 
   if (pl2->doreproj){
 
-    cube->res = pl2->res;
-    copy_string(cube->proj, NPOW_10, pl2->proj);
-    
+    cube->resolution = pl2->res;
+    copy_string(cube->projection, NPOW_10, pl2->proj);
+
   } else {
 
-    cube->res = get_brick_res(brick);
+    cube->resolution = get_brick_res(brick);
     get_brick_proj(brick, utm_proj, NPOW_10);
-    copy_string(cube->proj, NPOW_10, utm_proj);
+    copy_string(cube->projection, NPOW_10, utm_proj);
     
   }
 
   if (pl2->dotile){
 
-    cube->tilesize  = pl2->tilesize;
-    cube->chunksize = pl2->chunksize;
+    if (pl2->n_tile_size != 2){
+      printf("TILE_SIZE must have two values (X and Y). ");
+      free_multicube(multicube);
+      return NULL;
+    }
 
-    if (fmod(cube->tilesize, cube->res) > tol){
+    cube->tile_size[_X_] = pl2->tile_size[_X_];
+    cube->tile_size[_Y_] = pl2->tile_size[_Y_];
+
+    if (fmod(cube->tile_size[_X_], cube->resolution) > tol || 
+        fmod(cube->tile_size[_Y_], cube->resolution) > tol){
       printf("TILE_SIZE must be a multiple of RESOLUTION. ");
       printf("If DO_REPROJ = FALSE, the image resolution overrides the RESOLUTION parameter. ");
       free_multicube(multicube);
       return NULL;
     }
-    if (fmod(cube->chunksize, cube->res) > tol){
-      printf("BLOCK_SIZE must be a multiple of RESOLUTION. ");
-      printf("If DO_REPROJ = FALSE, the image resolution overrides the RESOLUTION parameter. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-    if (fmod(cube->tilesize, cube->chunksize) > tol){
-      printf("TILE_SIZE must be a multiple of BLOCK_SIZE. ");
-      free_multicube(multicube);
-      return NULL;
-    }
 
-    cube->nx = floor(cube->tilesize/cube->res);
-    cube->ny = cube->nx;
-    cube->nc = cube->nx*cube->ny;
-
-    cube->cx = cube->nx;
-    cube->cy = floor(cube->chunksize/cube->res);
-    cube->cc = cube->cx*cube->cy;
+    cube->dim_tile_pixels.cols = floor(cube->tile_size[_X_]/cube->resolution);
+    cube->dim_tile_pixels.rows = floor(cube->tile_size[_Y_]/cube->resolution);
+    cube->dim_tile_pixels.cells = cube->dim_tile_pixels.cols*cube->dim_tile_pixels.rows;
 
     cube->origin_geo.x = pl2->orig_lon;
     cube->origin_geo.y = pl2->orig_lat;
 
     if ((warp_geo_to_any(cube->origin_geo.x,  cube->origin_geo.y,
                         &cube->origin_map.x, &cube->origin_map.y,
-                         cube->proj)) == FAILURE){
+                         cube->projection)) == FAILURE){
       printf("Computing tile origin in dst_srs failed. ");
       free_multicube(multicube);
       return NULL;
@@ -367,7 +354,7 @@ double tol = 5e-3;
 
       // UL
       if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
-                          utm_proj, cube->proj)) == FAILURE){
+                          utm_proj, cube->projection)) == FAILURE){
         printf("computing upper left in dst_srs failed. ");
         free_multicube(multicube);
         return NULL;
@@ -375,7 +362,7 @@ double tol = 5e-3;
 
       // UR
       if ((warp_any_to_any(utm_lrx, utm_uly, &urx, &ury,
-                          utm_proj, cube->proj)) == FAILURE){
+                          utm_proj, cube->projection)) == FAILURE){
         printf("computing upper left in dst_srs failed. ");
         free_multicube(multicube);
         return NULL;
@@ -383,7 +370,7 @@ double tol = 5e-3;
       
       // LR
       if ((warp_any_to_any(utm_lrx, utm_lry, &lrx, &lry,
-                          utm_proj, cube->proj)) == FAILURE){
+                          utm_proj, cube->projection)) == FAILURE){
         printf("computing lower right in dst_srs failed. ");
         free_multicube(multicube);
         return NULL;
@@ -391,7 +378,7 @@ double tol = 5e-3;
 
       // LL
       if ((warp_any_to_any(utm_ulx, utm_lry, &llx, &lly,
-                          utm_proj, cube->proj)) == FAILURE){
+                          utm_proj, cube->projection)) == FAILURE){
         printf("computing lower right in dst_srs failed. ");
         free_multicube(multicube);
         return NULL;
@@ -409,33 +396,33 @@ double tol = 5e-3;
       printf("tile LL: %d %d\n", t_llx, t_lly);
       #endif
 
-      cube->tminx = INT_MAX;
-      if (t_ulx < cube->tminx) cube->tminx = t_ulx;
-      if (t_urx < cube->tminx) cube->tminx = t_urx;
-      if (t_lrx < cube->tminx) cube->tminx = t_lrx;
-      if (t_llx < cube->tminx) cube->tminx = t_llx;
+      cube->tile_extent[_X_][_MIN_] = INT_MAX;
+      if (t_ulx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_ulx;
+      if (t_urx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_urx;
+      if (t_lrx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_lrx;
+      if (t_llx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_llx;
 
-      cube->tminy = INT_MAX;
-      if (t_uly < cube->tminy) cube->tminy = t_uly;
-      if (t_ury < cube->tminy) cube->tminy = t_ury;
-      if (t_lry < cube->tminy) cube->tminy = t_lry;
-      if (t_lly < cube->tminy) cube->tminy = t_lly;
+      cube->tile_extent[_Y_][_MIN_] = INT_MAX;
+      if (t_uly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_uly;
+      if (t_ury < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_ury;
+      if (t_lry < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lry;
+      if (t_lly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lly;
 
-      cube->tmaxx = INT_MIN;
-      if (t_ulx > cube->tmaxx) cube->tmaxx = t_ulx;
-      if (t_urx > cube->tmaxx) cube->tmaxx = t_urx;
-      if (t_lrx > cube->tmaxx) cube->tmaxx = t_lrx;
-      if (t_llx > cube->tmaxx) cube->tmaxx = t_llx;
+      cube->tile_extent[_X_][_MAX_] = INT_MIN;
+      if (t_ulx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_ulx;
+      if (t_urx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_urx;
+      if (t_lrx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_lrx;
+      if (t_llx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_llx;
 
-      cube->tmaxy = INT_MIN;
-      if (t_uly > cube->tmaxy) cube->tmaxy = t_uly;
-      if (t_ury > cube->tmaxy) cube->tmaxy = t_ury;
-      if (t_lry > cube->tmaxy) cube->tmaxy = t_lry;
-      if (t_lly > cube->tmaxy) cube->tmaxy = t_lly;
+      cube->tile_extent[_Y_][_MAX_] = INT_MIN;
+      if (t_uly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_uly;
+      if (t_ury > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_ury;
+      if (t_lry > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lry;
+      if (t_lly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lly;
 
-      cube->tnx = cube->tmaxx-cube->tminx+1;
-      cube->tny = cube->tmaxy-cube->tminy+1;
-      cube->tnc = cube->tnx*cube->tny;
+      cube->dim_tiles.cols = cube->tile_extent[_X_][_MAX_] - cube->tile_extent[_X_][_MIN_] + 1;
+      cube->dim_tiles.rows = cube->tile_extent[_Y_][_MAX_] - cube->tile_extent[_Y_][_MIN_] + 1;
+      cube->dim_tiles.cells = cube->dim_tiles.cols * cube->dim_tiles.rows;
 
     }
 
@@ -448,26 +435,13 @@ double tol = 5e-3;
 
   } else {
 
-    cube->tilesize  = 0;
-    cube->chunksize = 0;
-
-    cube->nx = cube->cx = 0;
-    cube->ny = cube->cy = 0;
-    cube->nc = cube->cc = 0;
-
-    cube->origin_geo.x = 0;
-    cube->origin_geo.y = 0;
-    cube->origin_map.x = 0;
-    cube->origin_map.y = 0;
-
-    cube->tminx = 0;
-    cube->tminy = 0;
-    cube->tmaxx = 0;
-    cube->tmaxy = 0;
-
-    cube->tnx = 0;
-    cube->tny = 0;
-    cube->tnc = 0;
+    // no tiling
+    memset(cube->tile_size, 0, 2*sizeof(double));
+    memset(&cube->dim_tile_pixels, 0, sizeof(dim_t));
+    memset(&cube->origin_geo, 0, sizeof(coord_t));
+    memset(&cube->origin_map, 0, sizeof(coord_t));
+    memset(cube->tile_extent, 0, 2*2*sizeof(int));
+    memset(&cube->dim_tiles, 0, sizeof(dim_t));
 
   }
 

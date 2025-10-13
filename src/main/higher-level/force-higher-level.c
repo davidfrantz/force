@@ -25,15 +25,16 @@ This program is the FORCE Higher Level Processing System
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
+#include <stdio.h>     // core input and output functions
+#include <stdlib.h>    // standard general utilities library
 
-#include <ctype.h>   // testing and mapping characters
-#include <unistd.h>  // standard symbolic constants and types 
+#include <ctype.h>     // testing and mapping characters
+#include <unistd.h>    // standard symbolic constants and types 
+#include <sys/types.h> // data types
 
 #include "../../modules/cross-level/const-cl.h"
 #include "../../modules/cross-level/utils-cl.h"
-#include "../../modules/cross-level/brick-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
 #include "../../modules/cross-level/tile-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/cite-cl.h"
@@ -140,6 +141,7 @@ int         *nprod    = NULL;
 GDALDriverH driver;
 progress_t  pro;
 off_t ibytes = 0, obytes = 0;
+int         exit_code = SUCCESS;
 
 
   /** INITIALIZING
@@ -166,13 +168,12 @@ off_t ibytes = 0, obytes = 0;
   
 
   // copy and read datacube definition
-  if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher, phl->blocksize)) == NULL){
+  if ((cube = copy_datacube_def(phl->d_lower, phl->d_higher)) == NULL){
     printf("Copying datacube definition failed.\n"); return FAILURE;}
 
   // update datacube with parameters
   update_datacube_extent(cube, phl->tx[_MIN_], phl->tx[_MAX_], phl->ty[_MIN_], phl->ty[_MAX_]);
   update_datacube_res(cube, phl->res);
-  update_gdaloptions_blocksize(phl->format, &phl->gdalopt, cube->cx, cube->cy);
 
   // compile active tiles
   if (tile_active(phl->f_tile, cube) == FAILURE){
@@ -183,13 +184,13 @@ off_t ibytes = 0, obytes = 0;
 
 
   // allocate array of Level 2 structs
-  alloc((void**)&ARD1,   pro.npu, sizeof(ard_t*));
-  alloc((void**)&ARD2,   pro.npu, sizeof(ard_t*));
-  alloc((void**)&MASK,   pro.npu, sizeof(brick_t*));
-  alloc((void**)&OUTPUT, pro.npu, sizeof(brick_t**));
-  alloc((void**)&nprod,  pro.npu, sizeof(int));
-  alloc((void**)&nt1,    pro.npu, sizeof(int));
-  alloc((void**)&nt2,    pro.npu, sizeof(int));
+  alloc((void**)&ARD1,   pro.n_processing_units, sizeof(ard_t*));
+  alloc((void**)&ARD2,   pro.n_processing_units, sizeof(ard_t*));
+  alloc((void**)&MASK,   pro.n_processing_units, sizeof(brick_t*));
+  alloc((void**)&OUTPUT, pro.n_processing_units, sizeof(brick_t**));
+  alloc((void**)&nprod,  pro.n_processing_units, sizeof(int));
+  alloc((void**)&nt1,    pro.n_processing_units, sizeof(int));
+  alloc((void**)&nt2,    pro.n_processing_units, sizeof(int));
 
 
   // enable nested threading
@@ -239,7 +240,7 @@ off_t ibytes = 0, obytes = 0;
 
   }
 
-  warn_if_no_io(ibytes, obytes, phl);
+  exit_code = handle_no_io(ibytes, obytes, phl);
 
   cite_push(phl->d_higher);
 
@@ -265,6 +266,6 @@ off_t ibytes = 0, obytes = 0;
   #endif
 
 
-  return SUCCESS;
+  return exit_code;
 }
 

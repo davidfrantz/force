@@ -34,7 +34,7 @@ This file contains functions for plugging-in R UDFs into FORCE
 
 void init_snowfall(int n);
 void parse_rstats(const char *string);
-void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf);
+void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf);
 
 
 /** public functions
@@ -174,15 +174,15 @@ char *r_argv[] = { "R", "--silent" };
     );
     findFun(install("force_rstats_"), R_GlobalEnv); // make sure parsing worked
     // wrapper fun
-   } else if (udf->type == _UDF_BLOCK_){
-    // wrapper for 'force_rstats_block'
-    findFun(install("force_rstats_block"), R_GlobalEnv);
+   } else if (udf->type == _UDF_CHUNK_){
+    // wrapper for 'force_rstats_chunk'
+    findFun(install("force_rstats_chunk"), R_GlobalEnv);
     parse_rstats(
       "force_rstats_ <- function(array){                                     \n"
       "  dates_str <- paste(years, months, days, sep='-')                    \n"
       "  dates <- as.Date(dates_str, format='%Y-%m-%d')                      \n"
       "  array <- replace(array, array == na_value, NA)                      \n"
-      "  result <- force_rstats_block(array, dates, sensors, bandnames, ncpu)\n"
+      "  result <- force_rstats_chunk(array, dates, sensors, bandnames, ncpu)\n"
       "  result <- replace(result, is.na(result), na_value)                  \n"
       "  storage.mode(result) <- 'integer'                                   \n"
       "  return(result)                                                      \n"
@@ -246,10 +246,9 @@ par_udf_t *udf;
 --- udf:       user-defined code parameters
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_rsp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
+void init_rsp(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf){
 SEXP bandnames;
 date_t date;
-int b;
 
 
   #ifdef FORCE_DEBUG
@@ -266,7 +265,7 @@ int b;
   }
 
 
-  rstats_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+  rstats_label_dimensions(ard, ts, submodule, idx_name, nb_main, nb_aux, nt, udf);
 
 
   PROTECT(bandnames = R_tryEval(lang1(install("force_rstats_init_")), R_GlobalEnv, NULL));
@@ -282,7 +281,7 @@ int b;
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
   alloc((void**)&udf->date, udf->nb, sizeof(date_t));
 
-  for (b=0; b<udf->nb; b++){
+  for (int b = 0; b < udf->nb; b++){
 
     copy_string(udf->bandname[b], NPOW_10, CHAR(STRING_ELT(bandnames, b)));
 
@@ -346,10 +345,9 @@ void term_rsp(par_udf_t *udf){
 --- udf:       user-defined code parameters
 +++ Return:    void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb, int nt, par_udf_t *udf){
-int b, t;
+void rstats_label_dimensions(ard_t *ard, tsa_t *ts, int submodule, char *idx_name, int nb_main, int nb_aux, int nt, par_udf_t *udf){
 date_t date;
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char bandname[NPOW_10];
 
 SEXP dim_nt, dim_nb;
@@ -363,7 +361,7 @@ SEXP sensors, bandnames;
   UNPROTECT(1);
 
   PROTECT(dim_nb = allocVector(INTSXP, 1));
-  INTEGER(dim_nb)[0] = nb;
+  INTEGER(dim_nb)[0] = nb_main + nb_aux;
   defineVar(install("nb"), dim_nb, R_GlobalEnv);
   UNPROTECT(1);
 
@@ -371,30 +369,35 @@ SEXP sensors, bandnames;
   PROTECT(months    = allocVector(INTSXP, nt));
   PROTECT(days      = allocVector(INTSXP, nt));
   PROTECT(sensors   = allocVector(STRSXP, nt));
-  PROTECT(bandnames = allocVector(STRSXP, nb));
+  PROTECT(bandnames = allocVector(STRSXP, nb_main + nb_aux));
 
 
   // copy C data to R objects
   if (submodule == _HL_UDF_){
 
-    for (t=0; t<nt; t++){
+    for (int t = 0; t < nt; t++){
       date = get_brick_date(ard[t].DAT, 0);
       INTEGER(years)[t]  = date.year;
       INTEGER(months)[t] = date.month;
       INTEGER(days)[t]   = date.day;
-      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_04);
+      get_brick_sensor(ard[t].DAT, 0, sensor, NPOW_10);
       SET_STRING_ELT(sensors, t, mkChar(sensor));
 
     }
 
-    for (b=0; b<nb; b++){
-      get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
-      SET_STRING_ELT(bandnames, b, mkChar(bandname));
+    for (int b = 0; b < (nb_main + nb_aux); b++){
+      if (b < nb_main){
+        get_brick_bandname(ard[0].DAT, b, bandname, NPOW_10);
+        SET_STRING_ELT(bandnames, b, mkChar(bandname));
+      } else {
+        get_brick_bandname(ard[0].AUX, b-nb_main, bandname, NPOW_10);
+        SET_STRING_ELT(bandnames, b, mkChar(bandname));
+      }
     }
 
   } else if (submodule == _HL_TSA_){
 
-    for (t=0; t<nt; t++){
+    for (int t = 0; t < nt; t++){
       INTEGER(years)[t]  = ts->d_tsi[t].year;
       INTEGER(months)[t] = ts->d_tsi[t].month;
       INTEGER(days)[t]   = ts->d_tsi[t].day; 
@@ -436,10 +439,9 @@ SEXP sensors, bandnames;
 --- cthread:   number of computing threads
 +++ Return:    SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb, int nt, short nodata, par_udf_t *udf, int cthread){
-int b, t, p;
+int rstats_udf(ard_t *ard, udf_t *udf_, tsa_t *ts, small *mask_, int submodule, char *idx_name, int nx, int ny, int nc, int nb_main, int nb_aux, int nt, short nodata, par_udf_t *udf, int cthread){
 size_t k;
-int *array_ = NULL, value;
+int *array_ = NULL;
 int nvalid = 0;
 SEXP na_value, ncpu;
 SEXP dim, array;
@@ -455,7 +457,7 @@ int *rstats_return_ = NULL;
   printf("starting to run R interface\n");
   #endif
 
-  rstats_label_dimensions(ard, ts, submodule, idx_name, nb, nt, udf);
+  rstats_label_dimensions(ard, ts, submodule, idx_name, nb_main, nb_aux, nt, udf);
 
 
   PROTECT(na_value = allocVector(INTSXP, 1));
@@ -470,7 +472,7 @@ int *rstats_return_ = NULL;
 
   // how many valid pixels?
   if (udf->type == _UDF_PIXEL_){
-    for (p=0; p<nc; p++){
+    for (int p = 0; p < nc; p++){
       if (mask_ != NULL && !mask_[p]) continue;
       nvalid++;
     }
@@ -479,12 +481,12 @@ int *rstats_return_ = NULL;
   if (udf->type == _UDF_PIXEL_){
     PROTECT(dim = allocVector(INTSXP, 3));
     INTEGER(dim)[0] = nt;
-    INTEGER(dim)[1] = nb;
+    INTEGER(dim)[1] = nb_main + nb_aux;
     INTEGER(dim)[2] = nvalid;
-  } else if (udf->type == _UDF_BLOCK_){
+  } else if (udf->type == _UDF_CHUNK_){
     PROTECT(dim = allocVector(INTSXP, 4));
     INTEGER(dim)[0] = nt;
-    INTEGER(dim)[1] = nb;
+    INTEGER(dim)[1] = nb_main + nb_aux;
     INTEGER(dim)[2] = ny;
     INTEGER(dim)[3] = nx;
   } else {
@@ -500,16 +502,22 @@ int *rstats_return_ = NULL;
 
   k = 0;
 
-  for (p=0; p<nc; p++){
-  for (b=0; b<nb; b++){
-  for (t=0; t<nt; t++){
+  for (int p = 0; p < nc; p++){
+  for (int b = 0; b < (nb_main + nb_aux); b++){
+  for (int t = 0; t < nt; t++){
 
-    value = nodata;
+    int value = nodata;
 
     if (mask_ != NULL && !mask_[p]){
       if (udf->type == _UDF_PIXEL_) continue;
     } else  if (submodule == _HL_UDF_){
-        if (ard[t].msk[p]) value = ard[t].dat[b][p];
+        if (ard[t].msk[p]){
+          if (b < nb_main){
+             value = ard[t].dat[b][p];
+          } else {
+            value = ard[t].aux[b-nb_main][p];
+          }
+        }
     } else if (submodule == _HL_TSA_){
         value = ts->tsi_[t][p];
     }
@@ -529,12 +537,12 @@ int *rstats_return_ = NULL;
 
   k =  0;
 
-  for (p=0; p<nc; p++){
-  for (b=0; b<udf->nb; b++){
+  for (int p = 0; p < nc; p++){
+  for (int b = 0; b < udf->nb; b++){
 
-    value = nodata;
+    int value = nodata;
 
-    if (udf->type == _UDF_BLOCK_ ||
+    if (udf->type == _UDF_CHUNK_ ||
        (udf->type == _UDF_PIXEL_ && 
        (mask_ == NULL || (mask_ != NULL && mask_[p])))){
       value = rstats_return_[k++];

@@ -5,7 +5,7 @@ Docker / Singularity support
 
 If you wish to use FORCE with docker you can do it in two ways: 
 
-* download a **prebuilt image** from Docker hub
+* download a **prebuilt image** from Docker hub (recommended)
 * create a **local build** with Dockerfile
 
 If you wish to use FORCE with Singularity, please see the instructions :ref:`below <singularity>`. 
@@ -24,7 +24,7 @@ The easiest way to use FORCE with Docker is to use a prebuilt image pulled from 
     docker pull \
       davidfrantz/force
 
-This downloads the latest, fully featured FORCE (3.x) on your local machine.
+This downloads the latest, fully featured FORCE on your local machine.
 You may want to do this regularly to always run the latest version of FORCE!
 
 Check if this works:
@@ -32,7 +32,7 @@ Check if this works:
   .. code-block:: bash
 
     docker run \
-      davidfrantz/force force
+      davidfrantz/force force-info
 
 This displays general information about FORCE, as well as the version number.
 
@@ -47,6 +47,8 @@ If you want to use a specific version - or the develop branch that includes the 
     # develop version
     docker run \
       davidfrantz/force:dev
+
+Refer to `DockerHub <https://hub.docker.com/r/davidfrantz/force>`_ for all available tags/versions.
 
 
 .. _docker_build:
@@ -73,10 +75,10 @@ After downloading or building your own image, you can run it as a container like
   .. code-block:: bash
 
     # using the prebuilt image
-    docker run davidfrantz/force force
+    docker run davidfrantz/force force-info
 
     # using a custom built image
-    docker run my-force force
+    docker run my-force force-info
 
 The Docker container is isolated from your host, thus FORCE will not be able to see your local files.
 To share a volume, e.g. for input/output data, you can map a local folder to a folder within the container:
@@ -145,7 +147,7 @@ The simplest way is to directly run the Docker image:
 
 .. code-block:: bash
 
-    singularity exec docker://davidfrantz/force:latest force
+    singularity exec docker://davidfrantz/force:latest force-info
 
 This will automatically pull the Docker image from Docker Hub, and convert it to a Singularity image.
 The image can be updated by regularly doing:
@@ -160,4 +162,4 @@ You can also create a local copy of the image by explicitly doing the conversion
 
     singularity build force.sif docker://davidfrantz/force:latest
 
-    singularity exec force.sif force
+    singularity exec force.sif force-info

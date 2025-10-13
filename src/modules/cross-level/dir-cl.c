@@ -49,7 +49,7 @@ bool fileexist(char *fname){
 --- size:     length of the buffer
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int findfile(char *dir_path, char *pattern, char *filter, char fname[], int size){
+int findfile_pattern(const char *dir_path, const char *pattern, const char *filter, char fname[], int size){
 DIR *dp;
 int nchar;
 struct dirent *ep;
@@ -85,6 +85,57 @@ struct dirent *ep;
     }
 
     (void) closedir(dp);
+
+  } else perror("Couldn't open the directory");
+
+  fname[0] = '\0';
+
+  return FAILURE;
+}
+
+
+/** This function searches the given directory for a file, which starts
++++ with the given pattern. The first match will be returned. NULL will be re-
++++ turned if no file was found.
+--- dir_path: directory
+--- pattern:  pattern (must be at the start of the filename)
+--- filter:   an additional filter, e.g. for file extensions, 
+              NULL to disable filtering
+--- fname:    buffer that will hold the filename
+--- size:     length of the buffer
++++ Return:   SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int findfile_starts(const char *dir_path, const char *pattern, const char *filter, char fname[], int size){
+DIR *dp;
+int nchar;
+struct dirent *ep;
+
+  dp = opendir(dir_path);
+
+  if (dp != NULL){
+
+    while ((ep = readdir(dp))){
+
+      if (ep->d_name && strncmp(ep->d_name, pattern, strlen(pattern)) == 0){
+
+        if (filter != NULL && !strstr(ep->d_name, filter)) continue;
+
+        if (strlen(dir_path)+strlen(ep->d_name)+1 > size){
+            printf("array is too short for holding filename.\n");
+            fname[0] = '\0';
+            (void) closedir(dp);
+            return FAILURE;
+        } else {
+
+            nchar = snprintf(fname, size, "%s/%s", dir_path, ep->d_name);
+            if (nchar < 0 || nchar >= size){ 
+                printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+            (void) closedir(dp);
+            return SUCCESS;
+        }
+      }
+    }
+
 
   } else perror("Couldn't open the directory");
 

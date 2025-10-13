@@ -54,23 +54,23 @@ char fdate[NPOW_10];
 int o, nprod = phl->cso.sta.nmetrics;
 int error = 0;
 
-char prodname[NPOW_08][NPOW_03];
+char prodname[_BYTE_LEN_][NPOW_10];
 int nchar;
-short ***ptr[NPOW_08];
+short ***ptr[_BYTE_LEN_];
 
 
-  if (phl->cso.sta.num > -1) copy_string(prodname[phl->cso.sta.num], NPOW_03, "NUM");
-  if (phl->cso.sta.min > -1) copy_string(prodname[phl->cso.sta.min], NPOW_03, "MIN");
-  if (phl->cso.sta.max > -1) copy_string(prodname[phl->cso.sta.max], NPOW_03, "MAX");
-  if (phl->cso.sta.rng > -1) copy_string(prodname[phl->cso.sta.rng], NPOW_03, "RNG");
-  if (phl->cso.sta.iqr > -1) copy_string(prodname[phl->cso.sta.iqr], NPOW_03, "IQR");
-  if (phl->cso.sta.avg > -1) copy_string(prodname[phl->cso.sta.avg], NPOW_03, "AVG");
-  if (phl->cso.sta.std > -1) copy_string(prodname[phl->cso.sta.std], NPOW_03, "STD");
-  if (phl->cso.sta.skw > -1) copy_string(prodname[phl->cso.sta.skw], NPOW_03, "SKW");
-  if (phl->cso.sta.krt > -1) copy_string(prodname[phl->cso.sta.krt], NPOW_03, "KRT");
+  if (phl->cso.sta.num > -1) copy_string(prodname[phl->cso.sta.num], NPOW_10, "NUM");
+  if (phl->cso.sta.min > -1) copy_string(prodname[phl->cso.sta.min], NPOW_10, "MIN");
+  if (phl->cso.sta.max > -1) copy_string(prodname[phl->cso.sta.max], NPOW_10, "MAX");
+  if (phl->cso.sta.rng > -1) copy_string(prodname[phl->cso.sta.rng], NPOW_10, "RNG");
+  if (phl->cso.sta.iqr > -1) copy_string(prodname[phl->cso.sta.iqr], NPOW_10, "IQR");
+  if (phl->cso.sta.avg > -1) copy_string(prodname[phl->cso.sta.avg], NPOW_10, "AVG");
+  if (phl->cso.sta.std > -1) copy_string(prodname[phl->cso.sta.std], NPOW_10, "STD");
+  if (phl->cso.sta.skw > -1) copy_string(prodname[phl->cso.sta.skw], NPOW_10, "SKW");
+  if (phl->cso.sta.krt > -1) copy_string(prodname[phl->cso.sta.krt], NPOW_10, "KRT");
   for (q=0; q<phl->cso.sta.nquantiles; q++){
-    nchar = snprintf(prodname[phl->cso.sta.qxx[q]], NPOW_03, "Q%02.0f", phl->cso.sta.q[q]*100);
-    if (nchar < 0 || nchar >= NPOW_03){
+    nchar = snprintf(prodname[phl->cso.sta.qxx[q]], NPOW_10, "Q%02.0f", phl->cso.sta.q[q]*100);
+    if (nchar < 0 || nchar >= NPOW_10){
       printf("Buffer Overflow in assembling prodname\n"); return NULL;}
   }
 
@@ -141,7 +141,7 @@ brick_t *brick = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -151,7 +151,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
     if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }
@@ -174,7 +174,7 @@ int nchar;
   
 
   if (write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }

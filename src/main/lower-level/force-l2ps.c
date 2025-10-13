@@ -37,7 +37,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include "../../modules/cross-level/string-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/cite-cl.h"
-#include "../../modules/cross-level/brick-cl.h"
+#include "../../modules/cross-level/brick_base-cl.h"
 #include "../../modules/cross-level/cube-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
 #include "../../modules/cross-level/vector-cl.h"
@@ -78,7 +78,7 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - 'image-dir':      extracted Level 1 image\n");
-  printf("  - 'parameter-file': ML parameter file\n");
+  printf("  - 'parameter-file': LEVEL2 parameter file\n");
   printf("\n");
   // option -d is hidden from user and only used from force caller
 
@@ -216,11 +216,6 @@ GDALDriverH driver;
 
     // skip inactive cubes
     if (!multicube->cover[c]) continue;
-
-    // update blocksize in GDAL options
-    update_gdaloptions_blocksize(pl2->format, &pl2->gdalopt, 
-      multicube->cube[c]->cx, multicube->cube[c]->cy);
-
 
     /** read Digital Numbers + projection
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/

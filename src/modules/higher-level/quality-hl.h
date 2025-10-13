@@ -33,7 +33,7 @@ Higher Level quality screening
 #include <stdbool.h>  // boolean data type
 
 #include "../cross-level/quality-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../higher-level/read-ard-hl.h"
 
 

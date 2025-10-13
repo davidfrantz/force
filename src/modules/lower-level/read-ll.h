@@ -35,7 +35,8 @@ Read Level 1 header
 #include "gdal.h"           // public (C callable) GDAL entry points
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/brick_io-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/sun-cl.h"
 #include "../cross-level/imagefuns-cl.h"

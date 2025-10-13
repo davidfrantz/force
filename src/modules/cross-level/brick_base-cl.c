@@ -25,7 +25,7 @@ This file contains functions for organizing bricks in memory, and output
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#include "brick-cl.h"
+#include "brick_base-cl.h"
 
 /** Geospatial Data Abstraction Library (GDAL) **/
 #include "cpl_conv.h"       // various convenience functions for CPL
@@ -33,7 +33,10 @@ This file contains functions for organizing bricks in memory, and output
 #include "gdal.h"           // public (C callable) GDAL entry points
 #include "cpl_multiproc.h"  // CPL Multi-Threading
 #include "gdalwarper.h"     // GDAL warper related entry points and defs
+
+#ifdef __cplusplus
 #include "ogr_spatialref.h" // coordinate systems services
+#endif
 
 
 /** This function allocates a brick
@@ -63,10 +66,10 @@ brick_t *brick = NULL;
   alloc((void**)&brick->nodata,     nb, sizeof(int));
   alloc((void**)&brick->scale,      nb, sizeof(float));
   alloc((void**)&brick->wavelength, nb, sizeof(float));
-  alloc_2D((void***)&brick->unit, nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&brick->unit, nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->domain, nb, NPOW_10, sizeof(char));
   alloc_2D((void***)&brick->bandname,   nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&brick->sensor,     nb, NPOW_04, sizeof(char));
+  alloc_2D((void***)&brick->sensor,     nb, NPOW_10, sizeof(char));
   alloc((void**)&brick->date, nb, sizeof(date_t));
   
   init_brick_bands(brick);
@@ -107,10 +110,10 @@ int datatype = get_brick_datatype(brick);
   re_alloc((void**)&brick->nodata,       nb0, nb, sizeof(int));
   re_alloc((void**)&brick->scale,        nb0, nb, sizeof(float));
   re_alloc((void**)&brick->wavelength,   nb0, nb, sizeof(float));
-  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc_2D((void***)&brick->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_04, nb, NPOW_04, sizeof(char));
+  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
   re_alloc((void**)&brick->date,         nb0, nb, sizeof(date_t));
 
   if (reallocate_brick_bands(brick, nb) == FAILURE){
@@ -136,7 +139,7 @@ brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
 int b, p;
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0 || from->chunk[_Y_] < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
   } else {
     if ((brick = allocate_brick(nb, from->cc, datatype)) == NULL) return NULL;
@@ -163,10 +166,11 @@ int b, p;
   set_brick_chunknrows(brick, from->cy);
   set_brick_chunkwidth(brick, from->cwidth);
   set_brick_chunkheight(brick, from->cheight);
-  set_brick_nchunks(brick, from->nchunk);
-  set_brick_chunk(brick, from->chunk);
-  set_brick_tilex(brick, from->tx);
-  set_brick_tiley(brick, from->ty);
+  set_brick_chunk_dim(brick, &from->dim_chunk);
+  set_brick_chunkx(brick, from->chunk[_X_]);
+  set_brick_chunky(brick, from->chunk[_Y_]);
+  set_brick_tilex(brick, from->tile[_X_]);
+  set_brick_tiley(brick, from->tile[_Y_]);
   set_brick_proj(brick, from->proj);
   set_brick_par(brick, from->par);
 
@@ -378,7 +382,7 @@ brick_t *crop_brick(brick_t *from, double radius){
 brick_t *brick = NULL; 
 int b, nb;
 int pix;
-double res;
+double resolution;
 int nx,  ny;
 int nx_, ny_, nc_;
 int i, j, p, p_;
@@ -394,39 +398,53 @@ int datatype;
   }
 
   nb = get_brick_nbands(from);
-  res = get_brick_res(from);
+  resolution = get_brick_res(from);
   datatype = get_brick_datatype(from);
   
   brick = copy_brick(from, nb, _DT_NONE_);
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0){
     nx = get_brick_ncols(from);
-    ny = get_brick_nrows(from);
   } else {
     nx = get_brick_chunkncols(from);
+  }
+
+  if (from->chunk[_Y_] < 0){
+    ny = get_brick_nrows(from);
+  } else {
     ny = get_brick_chunknrows(from);
   }
 
-  pix = (int)(radius/res);
+  pix = (int)(radius/resolution);
   nx_ = nx - 2*pix;
   ny_ = ny - 2*pix;
   nc_ = nx_*ny_;
 
-  if (from->chunk < 0){
+  if (from->chunk[_X_] < 0){
     set_brick_ncols(brick, nx_);
-    set_brick_nrows(brick, ny_);
   } else {
     set_brick_chunkncols(brick, nx_);
+  }
+
+  if (from->chunk[_Y_] < 0){
+    set_brick_nrows(brick, ny_);
+  } else {
     set_brick_chunknrows(brick, ny_);
   }
+  
   allocate_brick_bands(brick, nb, nc_, datatype);
   
   #ifdef FORCE_DEBUG
   int nc;
-  if (from->chunk < 0){
-    nc = get_brick_ncells(from);
+  if (from->chunk[_X_] < 0){
+    nc = get_brick_ncols(from);
   } else {
-    nc = get_brick_chunkncells(from);
+    nc = get_brick_chunkncols(from);
+  }
+  if (from->chunk[_Y_] < 0){
+    nc *= get_brick_nrows(from);
+  } else {
+    nc *= get_brick_chunknrows(from);
   }
   printf("cropping %d -> %d cols\n", nx, nx_);
   printf("cropping %d -> %d rows\n", ny, ny_);
@@ -500,11 +518,10 @@ int datatype;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_brick(brick_t *brick){
-int i;
 
 
   copy_string(brick->name,      NPOW_10, "NA");
-  copy_string(brick->product,   NPOW_03, "NA");
+  copy_string(brick->product,   NPOW_10, "NA");
   copy_string(brick->dname,     NPOW_10, "NA");
   copy_string(brick->fname,     NPOW_10, "NA");
   copy_string(brick->provdir,   NPOW_10, "NA");
@@ -526,16 +543,16 @@ int i;
   brick->cx =  0;
   brick->cy =  0;
   brick->cc =  0;
-  brick->res = 0;
-  for (i=0; i<6; i++) brick->geotran[i] = 0;
+  memset(&brick->geotran, 0, _GT_LEN_*sizeof(double));
   brick->width  = 0;
   brick->height = 0;
   brick->cwidth  = 0;
   brick->cheight = 0;
-  brick->chunk = -1;
-  brick->nchunk = 0;
-  brick->tx = 0;
-  brick->ty = 0;
+  brick->chunk[_X_] = -1;
+  brick->chunk[_Y_] = -1;
+  memset(&brick->dim_chunk, 0, sizeof(dim_t));
+  brick->tile[_X_] = 0;
+  brick->tile[_Y_] = 0;
 
   copy_string(brick->proj,NPOW_10, "NA");
   copy_string(brick->par, NPOW_14, "NA");
@@ -573,10 +590,10 @@ int b;
     brick->nodata[b] = 0;
     brick->scale[b] = 0;
     brick->wavelength[b] = 0;
-    copy_string(brick->unit[b],     NPOW_04, "NA");
+    copy_string(brick->unit[b],     NPOW_10, "NA");
     copy_string(brick->domain[b],   NPOW_10, "NA");
     copy_string(brick->bandname[b], NPOW_10, "NA");
-    copy_string(brick->sensor[b],   NPOW_04, "NA");
+    copy_string(brick->sensor[b],   NPOW_10, "NA");
     init_date(&brick->date[b]);
   }
 
@@ -602,18 +619,20 @@ int b, p;
   for (p=0; p<brick->nprovenance; p++) printf("input #%04d: %s\n", brick->nprovenance+1, brick->provenance[p]);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
     brick->nx, brick->ny, brick->nc, 
-    brick->res, brick->nb);
+    brick->geotran[_GT_RES_], brick->nb);
   printf("width: %.1f, height: %.1f\n", 
     brick->width, brick->height);
-  printf("chunking: nx: %d, ny: %d, nc: %d, width: %.1f, height: %.1f, #: %d\n", 
-    brick->cx, brick->cy, brick->cc, brick->cwidth, brick->cheight, brick->nchunk);
-  printf("active chunk: %d, tile X%04d_Y%04d\n", brick->chunk, brick->tx, brick->ty);
+  printf("chunking: nx: %d, ny: %d, nc: %d, width: %.1f, height: %.1f, #: %d x %d = %d\n", 
+    brick->cx, brick->cy, brick->cc, brick->cwidth, brick->cheight, 
+    brick->dim_chunk.cols, brick->dim_chunk.rows, brick->dim_chunk.cells);
+  printf("active chunk: X:%d, Y:%d, tile X%04d_Y%04d\n", 
+    brick->chunk[_X_], brick->chunk[_Y_], brick->tile[_X_], brick->tile[_Y_]);
   printf("ulx: %.3f, uly: %.3f\n", 
-    brick->geotran[0], brick->geotran[3]);
+    brick->geotran[_GT_ULX_], brick->geotran[_GT_ULY_]);
   printf("geotran: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n", 
-    brick->geotran[0], brick->geotran[1],
-    brick->geotran[2], brick->geotran[3],
-    brick->geotran[4], brick->geotran[5]);
+    brick->geotran[_GT_ULX_], brick->geotran[_GT_XRES_],
+    brick->geotran[_GT_XROT_], brick->geotran[_GT_ULY_],
+    brick->geotran[_GT_YROT_], brick->geotran[_GT_YRES_]);
   printf("proj: %s\n", brick->proj);
   printf("par: %s\n", brick->par);
 
@@ -642,1020 +661,6 @@ void print_brick_band_info(brick_t *brick, int b){
 }
 
 
-/** This function outputs a brick
---- brick:  brick
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int write_brick(brick_t *brick){
-int f, b, b_, p, o;
-int b_brick, b_file, nbands, nfiles;
-int ***bands = NULL;
-char *lock = NULL;
-double timeout;
-GDALDatasetH fp_copy = NULL;
-GDALDatasetH fp_finish = NULL;
-GDALDatasetH fp = NULL;
-GDALDatasetH fo = NULL;
-GDALRasterBandH band = NULL;
-GDALDriverH driver_physical = NULL;
-GDALDriverH driver_memory   = NULL;
-GDALDriverH driver_create   = NULL;
-GDALDataType file_datatype;
-int create;
-char **driver_metadata = NULL;
-char **options = NULL;
-float *buf = NULL;
-float now, old;
-int xoff_write, yoff_write, nx_write, ny_write;
-
-FILE *fprov = NULL;
-char provname[NPOW_10];
-
-char bname[NPOW_10];
-char fname[NPOW_10];
-int nchar;
-
-char version[NPOW_10];
-
-char ldate[NPOW_05];
-char lwritetime[NPOW_05];
-date_t today;
-
-char c_update[2][NPOW_04] = { "create", "update" };
-bool update;
-
-
-char **fp_meta = NULL;
-char **band_meta = NULL;
-char **sys_meta = NULL;
-int n_fp_meta = NPOW_10; // adjust later
-int n_band_meta = NPOW_10; // adjust later
-int n_sys_meta = 0;
-int i = 0;
-
-
-  if (brick == NULL || brick->open == OPEN_FALSE) return SUCCESS;
-
-  #ifdef FORCE_DEBUG
-  print_brick_info(brick);
-  #endif
-  
-
-  //CPLPushErrorHandler(CPLQuietErrorHandler);
-
-  alloc_2DC((void***)&fp_meta,   n_fp_meta,   NPOW_14, sizeof(char));
-  alloc_2DC((void***)&band_meta, n_band_meta, NPOW_14, sizeof(char));
-  sys_meta = system_info(&n_sys_meta);
-
-  get_version(version, NPOW_10);
-  copy_string(fp_meta[i++], NPOW_14, "FORCE_version");
-  copy_string(fp_meta[i++], NPOW_14, version);
-  
-  copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
-  copy_string(fp_meta[i++], NPOW_14, brick->name);
-  
-  copy_string(fp_meta[i++], NPOW_14, "FORCE_product");
-  copy_string(fp_meta[i++], NPOW_14, brick->product);
-  
-  copy_string(fp_meta[i++], NPOW_14, "FORCE_param");
-  copy_string(fp_meta[i++], NPOW_14, brick->par);
-
-
-  // how many bands to output?
-  for (b=0, b_=0; b<brick->nb; b++) b_ += brick->save[b];
-
-  if (brick->explode){
-    nfiles = b_;
-    nbands = 1;
-  } else {
-    nfiles = 1;
-    nbands = b_;
-  }
-
-  enum { _brick_, _FILE_};
-  alloc_3D((void****)&bands, NPOW_01, nfiles, nbands, sizeof(int));
-  // dim 1: 2 slots - brick and file
-  // dim 2: output files
-  // dim 3: band numbers
-
-  for (b=0, b_=0; b<brick->nb; b++){
-    
-    if (!brick->save[b]) continue;
-    
-    if (brick->explode){
-      bands[_brick_][b_][0] = b;
-      bands[_FILE_][b_][0]  = 1;
-    } else {
-      bands[_brick_][0][b_] = b;
-      bands[_FILE_][0][b_]  = b_+1;
-    }
-
-    b_++;
-    
-  }
-  
-  
-  //CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
-  
-  // get driver
-  if ((driver_physical = GDALGetDriverByName(brick->format.driver)) == NULL){
-    printf("%s driver not found\n", brick->format.driver); return FAILURE;}
-  if ((driver_memory   = GDALGetDriverByName("MEM")) == NULL){
-    printf("%s driver not found\n", "MEM"); return FAILURE;}
-
-  driver_metadata = GDALGetMetadata(driver_physical, NULL);
-  //CSLPrint(driver_metadata, NULL);
-
-  create = CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATE, false);
-  if (!create && !CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATECOPY, false)){
-    printf("%s driver does not support creating, nor create-copying datasets\n", brick->format.driver);
-    return FAILURE;
-  }
-
-  if (create){
-    driver_create = driver_physical;
-  } else {
-    driver_create = driver_memory;
-  }
-
-  //CSLDestroy(driver_metadata);
-  driver_metadata   = NULL;
-
-  // set GDAL output options
-  for (o=0; o<brick->format.n; o+=2){
-    #ifdef FORCE_DEBUG
-    printf("setting options %s = %s\n",  brick->format.option[o], brick->format.option[o+1]);
-    #endif
-    options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
-  }
-
-  switch (brick->datatype){
-    case _DT_SHORT_:
-      file_datatype = GDT_Int16;
-      break;
-    case _DT_SMALL_:
-      file_datatype = GDT_Byte;
-      break;
-    case _DT_FLOAT_:
-      file_datatype = GDT_Float32;
-      break;
-    case _DT_INT_:
-      file_datatype = GDT_Int32;
-      break;
-    case _DT_USHORT_:
-      file_datatype = GDT_UInt16;
-      break;
-    default:
-      printf("unknown datatype for writing brick. ");
-      return FAILURE;
-  }
-
-
-  // output path
-  if ((lock = (char*)CPLLockFile(brick->dname, 60)) == NULL){
-    printf("Unable to lock directory %s (timeout: %ds). ", brick->dname, 60);
-    return FAILURE;}
-  createdir(brick->dname);
-  CPLUnlockFile(lock);
-  lock = NULL;
-
-  // provenance file
-  current_date(&today);
-  nchar = snprintf(provname, NPOW_10, "%s/provenance_%04d%02d%02d.csv", 
-    brick->provdir, today.year, today.month, today.day);
-  if (nchar < 0 || nchar >= NPOW_10){ 
-    printf("Buffer Overflow in assembling provenance file\n"); return FAILURE;}     
-
-
-  for (f=0; f<nfiles; f++){
-    
-    if (brick->explode){
-      nchar = snprintf(bname, NPOW_10, "_%s", brick->bandname[bands[_brick_][f][0]]);
-      if (nchar < 0 || nchar >= NPOW_10){ 
-        printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
-    } else bname[0] = '\0';
-  
-    nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", brick->dname, 
-      brick->fname, bname, brick->format.extension);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
-
-    timeout = lock_timeout(get_brick_size(brick));
-
-    if ((lock = (char*)CPLLockFile(fname, timeout)) == NULL){
-      printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, brick->nx, brick->ny);
-      return FAILURE;}
-
-
-    // mosaicking into existing file
-    // read and rewrite brick (safer when using compression)
-    if (brick->open != OPEN_CREATE && brick->open != OPEN_BLOCK && fileexist(fname)){
-
-      update = true;
-
-      // read brick
-      #ifdef FORCE_DEBUG
-      printf("reading existing file.\n");
-      #endif
-
-      if ((fo = GDALOpen(fname, GA_ReadOnly)) == NULL){
-        printf("Unable to open %s. ", fname); return FAILURE;}
-
-      if (GDALGetRasterCount(fo) != nbands){
-        printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          nbands, GDALGetRasterCount(fo)); 
-        return FAILURE;}
-      if (GDALGetRasterXSize(fo) != brick->nx){
-        printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          brick->nx, GDALGetRasterXSize(fo)); 
-        return FAILURE;}
-      if (GDALGetRasterYSize(fo) != brick->ny){
-        printf("Number of rows %d do not match for UPDATE/MERGE mode (file: %d). ", 
-          brick->ny, GDALGetRasterYSize(fo)); 
-        return FAILURE;}
-
-      alloc((void**)&buf, brick->nc, sizeof(float));
-
-      for (b=0; b<nbands; b++){
-
-        b_brick = bands[_brick_][f][b];
-        b_file  = bands[_FILE_][f][b];
-        
-        band = GDALGetRasterBand(fo, b_file);
-
-        if (GDALRasterIO(band, GF_Read, 0, 0, brick->nx, brick->ny, buf, 
-          brick->nx, brick->ny, GDT_Float32, 0, 0) == CE_Failure){
-          printf("Unable to read %s. ", fname); return FAILURE;} 
-
-
-        for (p=0; p<brick->nc; p++){
-
-          now = get_brick(brick, b_brick, p);
-          old = buf[p];
-
-          // if both old and now are valid: keep now or merge now and old
-          if (now != brick->nodata[b_brick] && old != brick->nodata[b_brick]){
-            if (brick->open == OPEN_MERGE) set_brick(brick, b_brick, p, (now+old)/2.0);
-          // if only old is valid, take old value
-          } else if (now == brick->nodata[b_brick] && old != brick->nodata[b_brick]){
-            set_brick(brick, b_brick, p, old);
-          }
-          // if only now is valid, nothing to do
-
-        }
-
-      }
-
-      GDALClose(fo);
-
-      free((void*)buf);
-
-    } else {
-      update = false;
-    }
-
-
-    // open for block mode or write from scratch
-    if (brick->open == OPEN_BLOCK && fileexist(fname) && brick->chunk > 0){
-      if ((fp = GDALOpen(fname, GA_Update)) == NULL){
-        printf("Unable to open %s. ", fname); return FAILURE;}
-    } else {
-      if ((fp = GDALCreate(driver_create, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
-        printf("Error creating file %s. ", fname); return FAILURE;}
-    }
-      
-    if (brick->open == OPEN_BLOCK){
-      if (brick->chunk < 0){
-        printf("attempting to write invalid chunk\n");
-        return FAILURE;
-      }
-      nx_write     = brick->cx;
-      ny_write     = brick->cy;
-      xoff_write   = 0;
-      yoff_write   = brick->chunk*brick->cy;
-    } else {
-      nx_write     = brick->nx;
-      ny_write     = brick->ny;
-      xoff_write   = 0;
-      yoff_write   = 0;
-    }
-
-
-    for (b=0; b<nbands; b++){
-
-      b_brick = bands[_brick_][f][b];
-      b_file  = bands[_FILE_][f][b];
-
-      band = GDALGetRasterBand(fp, b_file);
-
-      switch (brick->datatype){
-        case _DT_SHORT_:
-          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, brick->vshort[b_brick], 
-            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-            printf("Unable to write %s. ", fname); return FAILURE;}
-          break;
-        case _DT_SMALL_:
-          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, brick->vsmall[b_brick], 
-            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-            printf("Unable to write %s. ", fname); return FAILURE;} 
-          break;
-        case _DT_FLOAT_:
-          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, brick->vfloat[b_brick], 
-            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-            printf("Unable to write %s. ", fname); return FAILURE;} 
-          break;
-        case _DT_INT_:
-          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, brick->vint[b_brick], 
-            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-            printf("Unable to write %s. ", fname); return FAILURE;} 
-          break;
-        case _DT_USHORT_:
-          if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
-            nx_write, ny_write, brick->vushort[b_brick], 
-            nx_write, ny_write, file_datatype, 0, 0) == CE_Failure){
-            printf("Unable to write %s. ", fname); return FAILURE;} 
-          break;
-
-        default:
-          printf("unknown datatype for writing brick. ");
-          return FAILURE;
-      }
-
-      GDALSetDescription(band, brick->bandname[b_brick]);
-      GDALSetRasterNoDataValue(band, brick->nodata[b_brick]);
-
-    }
-
-    // write essential geo-metadata
-    #pragma omp critical
-    {
-      GDALSetGeoTransform(fp, brick->geotran);
-      GDALSetProjection(fp,   brick->proj);
-    }
-
-
-    // copy to physical file. This is needed for drivers that do not support CREATE
-    if (!create){
-      if ((fp_copy = GDALCreateCopy(driver_physical, fname, fp, FALSE, options, NULL, NULL)) == NULL){
-        printf("Error creating file %s. ", fname); return FAILURE;}
-      fp_finish = fp_copy;
-    } else {
-      fp_finish = fp;
-    }
-
-    for (i=0; i<n_sys_meta; i+=2) GDALSetMetadataItem(fp_finish, sys_meta[i], sys_meta[i+1], "FORCE");
-    for (i=0; i<n_fp_meta;  i+=2) GDALSetMetadataItem(fp_finish, fp_meta[i],  fp_meta[i+1],  "FORCE");
-
-    for (b=0; b<nbands; b++){
-
-      b_brick = bands[_brick_][f][b];
-      b_file  = bands[_FILE_][f][b];
-
-      i = 0;
-
-      copy_string(band_meta[i++], NPOW_14, "Domain");
-      copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
-      copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
-
-      copy_string(band_meta[i++], NPOW_14, "Scale");
-      nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
-      if (nchar < 0 || nchar >= NPOW_14){ 
-        printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
-
-      copy_string(band_meta[i++], NPOW_14, "Sensor");
-      copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
-
-      get_brick_longdate(brick, b_brick, ldate, NPOW_05-1);
-      copy_string(band_meta[i++], NPOW_14, "Date");
-      copy_string(band_meta[i++], NPOW_14, ldate);
-
-
-      band = GDALGetRasterBand(fp_finish, b_file);
-
-      for (i=0; i<n_band_meta; i+=2) GDALSetMetadataItem(band, band_meta[i], band_meta[i+1], "FORCE");
-
-    }
- 
-    if (!create) GDALClose(fp_copy);
-    GDALClose(fp);
-
-  
-    CPLUnlockFile(lock);
-  
-    // write provenance info
-    if (brick->nprovenance > 0 && brick->chunk <= 0){
-
-      if ((lock = (char*)CPLLockFile(provname, timeout)) == NULL){
-        printf("Unable to lock file %s (timeout: %fs). ", provname, timeout);
-        return FAILURE;}
-
-      if (fileexist(provname)){
-
-        if ((fprov = fopen(provname, "a")) == NULL){
-          printf("Unable to re-open provenance file!\n"); 
-          return FAILURE;}
-
-      } else {
-
-        if ((fprov = fopen(provname, "w")) == NULL){
-          printf("Unable to create provenance file!\n"); 
-          return FAILURE;}
-
-        fprintf(fprov, "%s,%s,%s,%s\n", "file", "origin", "mode", "creation");
-
-      }
-
-      current_date(&today);
-      long_date(today.year, today.month, today.day, today.hh, today.mm, today.ss, today.tz, lwritetime, NPOW_05);
-
-      fprintf(fprov, "%s,", fname);
-      for (p=0; p<(brick->nprovenance-1); p++) fprintf(fprov, "%s;", brick->provenance[p]);
-      fprintf(fprov, "%s,%s,%s\n", brick->provenance[p], c_update[update], lwritetime);
-
-      fclose(fprov);
-
-      CPLUnlockFile(lock);
-
-    }
-  
-
-  }
-
-  if (options   != NULL){ CSLDestroy(options);                      options   = NULL;}
-  if (fp_meta   != NULL){ free_2DC((void**)fp_meta);                fp_meta   = NULL;}
-  if (band_meta != NULL){ free_2DC((void**)band_meta);              band_meta = NULL;}
-  if (sys_meta  != NULL){ free_2DC((void**)sys_meta);               sys_meta  = NULL;}
-  if (bands     != NULL){ free_3D((void***)bands, NPOW_01, nfiles); bands     = NULL;}
-
-  //CPLPopErrorHandler();
-
-  return SUCCESS;
-}
-
-
-/** This function reprojects a brick into any other projection. The extent
-+++ of the warped image is unknown, thus it needs to be estimated first.
-+++ The reprojection might be performed in chunks if the number of pixels
-+++ is too large to do it in one step.
---- tile:    will the warped image be tiled? If yes, the extent is aligned
-             with the tiling scheme
---- rsm:     resampling method
---- threads: number of threads to perform warping
---- from:    source brick (modified)
---- cube:    datacube definition (holds all projection parameters)
-+++ Return:  SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube){
-int i, j, p, k, b, b_, chunk_nb, nb;
-GDALDriverH driver;
-GDALDatasetH src_dataset;
-GDALDatasetH dst_dataset;
-GDALRasterBandH src_band;
-GDALDataType dt = GDT_Int16;
-GDALWarpOptions *wopt = NULL;
-GDALWarpOperation woper;
-GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
-void *transformer = NULL;
-char src_proj[NPOW_10];
-double src_geotran[6];
-double dst_geotran[6];
-short *src_ = NULL;
-short **buf_ = NULL;
-short nodata;
-int src_nx, src_ny, src_nc;
-int dst_nx, dst_ny, dst_nc;
-double tmpx, tmpy;
-size_t src_dim, chunk_nx, chunk_ny;
-//size_t max_mem = 1342177280; // 1.25GB
-//size_t max_mem = 1073741824; // 1GB
-size_t max_mem = 805306368; // 0.75GB
-char nthread[NPOW_04];
-int nchar;
-char **papszWarpOptions = NULL;
-
-
-  #ifdef FORCE_CLOCK
-  time_t TIME; time(&TIME);
-  #endif
-
-
-  // register drivers and fetch in-memory driver
-  if ((driver = GDALGetDriverByName("MEM")) == NULL){
-    printf("could not fetch in-memory driver. "); return FAILURE;}
-
-
-
-  nb = get_brick_nbands(src);
-  src_nx = get_brick_ncols(src);
-  src_ny = get_brick_nrows(src);
-  src_nc = get_brick_ncells(src);
-  get_brick_geotran(src, src_geotran, 6);
-  get_brick_proj(src, src_proj, NPOW_10);
-
-  // create source image
-  if ((src_dataset = GDALCreate(driver, "mem", src_nx, src_ny, nb, dt, NULL)) == NULL){
-    printf("could not create src image. "); return FAILURE;}
-  if (GDALSetProjection(src_dataset, src_proj) == CE_Failure){
-    printf("could not set src projection. "); return FAILURE;}
-  if (GDALSetGeoTransform(src_dataset, src_geotran) == CE_Failure){
-    printf("could not set src geotransformation. "); return FAILURE;}
-    
-    // "copy" data to source image
-  for (b=0; b<nb; b++){
-    src_band = GDALGetRasterBand(src_dataset, b+1);
-    if ((src_ = get_band_short(src, b)) == NULL) return FAILURE;
-    if (GDALRasterIO(src_band, GF_Write, 0, 0, src_nx, src_ny, 
-      src_, src_nx, src_ny, dt, 0, 0 ) == CE_Failure){
-      printf("could not 'copy' src data. "); return FAILURE;}
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("WKT of brick: %s\n", src_proj);
-  #endif
-
-
-  /** approx. extent of destination dataset, align with datacube
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-  // create transformer between source and destination
-  if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
-    NULL, cube->proj, false, 0, 2)) == NULL){
-    printf("could not create image to image transformer. "); return FAILURE;}
-
-  // estimate approximate extent
-  if (GDALSuggestedWarpOutput(src_dataset, GDALGenImgProjTransform, 
-    transformer, dst_geotran, &dst_nx, &dst_ny) == CE_Failure){
-    printf("could not suggest dst extent. "); return FAILURE;}
-
-  // align with output grid of data cube
-  if (tile){
-
-    if (tile_align(cube, dst_geotran[0], dst_geotran[3], &tmpx, &tmpy) == SUCCESS){
-      dst_geotran[0] = tmpx;
-      dst_geotran[3] = tmpy;
-    } else {
-      printf("could not align with datacube. "); return FAILURE;
-    }
-
-  }
-  
-  // convert computed resolution to actual dst resolution
-  // add some rows and columns, just to be sure
-  dst_nx = dst_nx * dst_geotran[1] / cube->res + 10;
-  dst_ny = dst_ny * dst_geotran[5] / cube->res * -1 + 10;
-  dst_nc = dst_nx*dst_ny;
-  dst_geotran[1] = cube->res; dst_geotran[5] = -1 * cube->res; 
-
-  // destroy transformer
-  GDALDestroyGenImgProjTransformer(transformer);
-
-  #ifdef FORCE_DEBUG
-  printf("src nx/ny: %d/%d\n",  src_nx, src_ny);
-  print_dvector(src_geotran, "src geotransf.", 6, 1, 2);
-  printf("dst nx/ny: %d/%d\n", dst_nx, dst_ny);
-  print_dvector(dst_geotran, "dst geotransf.", 6, 1, 2);
-  #endif
-
-
-
-  /** check how many bands to do simultaneously
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-  if (nb == 1){
-    chunk_nb = 1;
-  } else {
-    chunk_nb = nb;
-    while ((size_t)src_nc*(size_t)chunk_nb*sizeof(short) > max_mem) chunk_nb--;
-    if (chunk_nb < 1) chunk_nb = 1;
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("warp %d bands of %d bands simultaneously\n", chunk_nb, nb);
-  #endif
-
-
-  // iterate over chunks of bands (this is more expensive than warping all bands at once,
-  // but way less expensive than each band at once. it helps to stay below RAM limit of 8GB
-  for (b=0; b<nb; b+=chunk_nb){
-
-    if (b+chunk_nb > nb) chunk_nb = nb-b;
-
- 
-    /** "create" the destination dataset
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-    if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, chunk_nb, dt, NULL)) == NULL){
-      printf("could not create dst image. "); return FAILURE;}
-    if (GDALSetProjection(dst_dataset, cube->proj) == CE_Failure){
-      printf("could not set dst projection. "); return FAILURE;}
-    if (GDALSetGeoTransform(dst_dataset, dst_geotran) == CE_Failure){
-      printf("could not set dst geotransformation. "); return FAILURE;}
-
-      
-    /** create accurate transformer between source and destination
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-    if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
-      dst_dataset, cube->proj, false, 0, 2)) == NULL){
-      printf("could not create image to image transformer. "); return FAILURE;}
-
-
-    // buffer to hold warped image
-    alloc_2DC((void***)&buf_, chunk_nb, dst_nc, sizeof(short));
-    for (b_=0; b_<chunk_nb; b_++){
-      if ((nodata = get_brick_nodata(src, b+b_)) != 0){
-        #pragma omp parallel shared(b_, dst_nc, buf_, nodata) default(none) 
-        {
-          #pragma omp for schedule(static)
-          for (p=0; p<dst_nc; p++) buf_[b_][p] = nodata;
-        }
-      }
-    }
-
-    
-    /** set warping options
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-    wopt = GDALCreateWarpOptions();
-    wopt->hSrcDS = src_dataset;
-    wopt->hDstDS = NULL;
-    wopt->dfWarpMemoryLimit = max_mem;
-    wopt->eResampleAlg = resample[rsm];
-    wopt->nBandCount = chunk_nb;
-    wopt->panSrcBands = (int*)CPLMalloc(sizeof(int)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->panSrcBands[b_] = b_+b+1;
-    wopt->panDstBands = (int*)CPLMalloc(sizeof(int)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->panDstBands[b_] = b_+b+1;
-    wopt->pTransformerArg = transformer;
-    wopt->pfnTransformer = GDALGenImgProjTransform;
-    wopt->eWorkingDataType = dt;
-
-    wopt->padfSrcNoDataReal = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfSrcNoDataReal[b_] = get_brick_nodata(src, b_+b);
-    wopt->padfSrcNoDataImag = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfSrcNoDataImag[b_] = 0;
-
-    wopt->padfDstNoDataReal = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataReal[b_] = get_brick_nodata(src, b_+b);
-    wopt->padfDstNoDataImag = (double*)CPLMalloc(sizeof(double)*chunk_nb);
-    for (b_=0; b_<chunk_nb; b_++) wopt->padfDstNoDataImag[b_] = 0;
-
-    nchar = snprintf(nthread, NPOW_04, "%d", threads);
-    if (nchar < 0 || nchar >= NPOW_04){ 
-      printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
-
-    papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
-    papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", "-9999");
-    wopt->papszWarpOptions = CSLDuplicate(papszWarpOptions);
-
-
-    /** check if we can warp the image in one operation or need chunks
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-    chunk_nx = src_nx; chunk_ny = src_ny; k = 0;
-    //while ((src_dim = chunk_nx*chunk_ny*(size_t)nb*sizeof(short)) > INT_MAX){
-    while ((src_dim = (size_t)chunk_nx*(size_t)chunk_ny*(size_t)chunk_nb*sizeof(short)) > max_mem){
-      if (k % 2 == 0) chunk_nx/=2; else chunk_ny/=2;
-      k++;}
-    
-    #ifdef FORCE_DEBUG
-    printf("\nImage brick is warped in %d chunks.\n", k+1);
-    #endif
-
-    /** warp the image, use chunks if necessary
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-    if (woper.Initialize(wopt) == CE_Failure){
-        printf("could not initialize warper. "); return FAILURE;}
-
-    for (i=0; i<src_ny; i+=chunk_ny){
-    for (j=0; j<src_nx; j+=chunk_nx){
-      if (woper.WarpRegionToBuffer(0, 0, dst_nx, dst_ny, buf_[0],
-        dt, j, i, chunk_nx, chunk_ny) == CE_Failure){
-        printf("could not warp. "); return FAILURE;}
-    }
-    }
-
-    GDALDestroyGenImgProjTransformer(wopt->pTransformerArg);
-    GDALDestroyWarpOptions(wopt);
-  
-    for (b_=0; b_<chunk_nb; b_++){
-      re_alloc((void**)&src->vshort[b_+b], src_nc, dst_nc, sizeof(short));
-      memmove(src->vshort[b_+b], buf_[b_], dst_nc*sizeof(short));
-    }
-
-    free((void*)buf_[0]); free((void*)buf_); buf_ = NULL;
-
-    GDALClose(dst_dataset);
-
-    #ifdef FORCE_DEBUG
-    printf("\n%d bands were warped in %d chunks.\n", chunk_nb, k+1);
-    #endif
-    
-  }
-
-  GDALClose(src_dataset);
-
-
-  // update geo metadata
-  set_brick_geotran(src, dst_geotran);
-  set_brick_ncols(src, dst_nx);
-  set_brick_nrows(src, dst_ny);
-  set_brick_proj(src, cube->proj);
-
-
-  #ifdef FORCE_DEBUG
-  print_brick_info(src);
-  #endif
-
-  #ifdef FORCE_CLOCK
-  proctime_print("warping brick to brick", TIME);
-  #endif
-
-  return SUCCESS;
-}
-
-
-/** This function reprojects an image from disc into any other projection. 
-+++ The extent of the warped image is known, and a target brick needs to 
-+++ be given, which defines extent, projection etc. 
-+++ The reprojection might be performed in chunks if the number of pixels
-+++ is too large to do it in one step.
---- rsm:         resampling method
---- threads:     number of threads to perform warping
---- fname:       filename
---- dst:         destination brick (modified)
---- src_b:       which band to warp?    (band in file)
---- dst_b:       which band to warp to? (band in destination brick)
---- src_nodata:  nodata value of band in file
-+++ Return:      SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata){
-GDALDatasetH src_dataset;
-GDALDatasetH dst_dataset;
-//GDALRasterBandH src_band;
-GDALDriverH driver;
-GDALDataType dt = GDT_Float32;
-GDALWarpOptions *wopt;
-GDALWarpOperation woper;
-GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
-CPLErr eErr = CE_Failure;
-void *transformer = NULL;
-float *buf = NULL;
-const char *src_proj = NULL;
-char dst_proj[NPOW_10];
-double dst_geotran[6];
-int i, j, p, np, k, k_do;
-int dst_nodata;
-int nc_done_, nc_done = 0;
-int src_nb, dst_nb;
-int dst_nx, dst_ny;
-int chunk_nx, chunk_ny;
-int chunk_xoff, chunk_yoff;
-float tmp;
-char nthread[NPOW_04];
-char initdata[NPOW_04];
-int nchar;
-char **papszWarpOptions = NULL;
-
-
-  #ifdef FORCE_CLOCK
-  time_t TIME; time(&TIME);
-  #endif
-
-#ifdef FORCE_DEBUG
-printf("warp_from_disc_to_known_brick should handle multiband src and dst images\n");
-#endif
-  
-  // register drivers and fetch in-memory driver
-  if ((driver = GDALGetDriverByName("MEM")) == NULL){
-    printf("could not fetch in-memory driver. "); return FAILURE;}
-
-
-  /** "create" source dataset
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-  if ((src_dataset = GDALOpen(fname, GA_ReadOnly)) == NULL){
-    printf("unable to open image for warping: %s\n", fname); return FAILURE;}
-
- 
-  #ifdef FORCE_DEBUG
-  printf("src nodata is %d, band is %d, dataset is %s\n", src_nodata, src_b+1, fname);
-  #endif
-
-  src_proj = GDALGetProjectionRef(src_dataset);
-  CPLAssert(src_proj != NULL && strlen(src_proj) > 0);
-  src_nb = GDALGetRasterCount(src_dataset);
-  
-  if (src_b >= src_nb){
-    printf("Requested band %d is out of bounds %d (disc)! ", src_b, src_nb); return FAILURE;}
-
-  #ifdef FORCE_DEBUG
-  printf("WKT of image on disc: %s\n", src_proj);
-  #endif
-  
-
-  /** "create" the destination dataset
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-  get_brick_geotran(dst, dst_geotran, 6);
-  get_brick_proj(dst, dst_proj, NPOW_10);
-  dst_nodata = get_brick_nodata(dst, 0);
-  dst_nb = get_brick_nbands(dst);
-  dst_nx = get_brick_ncols(dst);
-  dst_ny = get_brick_nrows(dst);
-
-  if (dst_b >= dst_nb){
-    printf("Requested band %d is out of bounds %d (brick)! ", dst_b, dst_nb); return FAILURE;}
-
-  if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, 1, dt, NULL)) == NULL){
-    printf("could not create dst image. "); return FAILURE;}
-  if (GDALSetProjection(dst_dataset, dst_proj)){
-    printf("could not set dst projection. "); return FAILURE;}
-  if (GDALSetGeoTransform(dst_dataset, dst_geotran)){
-    printf("could not set dst geotransformation. "); return FAILURE;}
-
-  #ifdef FORCE_DEBUG
-  printf("warp to UL-X: %.0f / UL-Y: %.0f @ res: %.0f\n", dst_geotran[0], dst_geotran[3], dst_geotran[1]);
-  #endif
-  
-
-  /** create accurate transformer between source and destination
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-  if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
-    dst_dataset, dst_proj, false, 0, 2)) == NULL){
-    printf("could not create image to image transformer. "); return FAILURE;}
-  
-
-  /** set warping options
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-
-  wopt = GDALCreateWarpOptions();
-  wopt->hSrcDS = src_dataset;
-  wopt->hDstDS = NULL;
-  wopt->eResampleAlg = resample[rsm];
-  wopt->nBandCount = 1;
-  wopt->panSrcBands = 
-    (int *) CPLMalloc(sizeof(int)*wopt->nBandCount);
-  wopt->panSrcBands[0] = src_b+1;
-  wopt->panDstBands = 
-    (int *) CPLMalloc(sizeof(int)*wopt->nBandCount);
-  wopt->panDstBands[0] = src_b+1;
-  wopt->pTransformerArg = transformer;
-  wopt->pfnTransformer = GDALGenImgProjTransform;
-  wopt->eWorkingDataType = dt;
-
-  wopt->padfSrcNoDataReal =
-    (double*) CPLMalloc(sizeof(double)*wopt->nBandCount);
-  wopt->padfSrcNoDataReal[0] = src_nodata;
-  wopt->padfSrcNoDataImag =
-    (double*) CPLMalloc(sizeof(double)*wopt->nBandCount);
-  wopt->padfSrcNoDataImag[0] = 0.0;
-
-  wopt->padfDstNoDataReal =
-    (double*) CPLMalloc(sizeof(double)*wopt->nBandCount);
-  wopt->padfDstNoDataReal[0] = dst_nodata;
-  wopt->padfDstNoDataImag =
-    (double*) CPLMalloc(sizeof(double)*wopt->nBandCount);
-  wopt->padfDstNoDataImag[0] = 0.0;
-
-  nchar = snprintf(nthread, NPOW_04, "%d", threads);
-  if (nchar < 0 || nchar >= NPOW_04){ 
-    printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
-    
-  nchar = snprintf(initdata, NPOW_04, "%d", dst_nodata);
-  if (nchar < 0 || nchar >= NPOW_04){ 
-    printf("Buffer Overflow in assembling nodata\n"); return FAILURE;}
-   
-  papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
-  papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", initdata);
-  wopt->papszWarpOptions = CSLDuplicate(papszWarpOptions);
-
-  // set nodata in destination image
-  if (dst_nodata != 0){
-    #pragma omp parallel shared(dst_nx, dst_ny, dst, dst_b, dst_nodata) default(none) 
-    {
-      #pragma omp for schedule(static)
-      for (p=0; p<dst_nx*dst_ny; p++) set_brick(dst, dst_b, p, dst_nodata);
-    }
-  }
-
-  // warp
-  woper.Initialize(wopt);
-
-  chunk_xoff = 0; chunk_yoff = 0;
-  chunk_nx = dst_nx; chunk_ny = dst_ny;
-  k = 0, k_do = 0;
-
-  // start with whole image, if unsuccessful, warp in chunks
-  while (eErr != CE_None && chunk_ny > 1){
-
-    #ifdef FORCE_DEBUG
-    printf("try to warp %d x %d pix, x / y offset %d / %d. ", 
-      chunk_nx, chunk_ny, chunk_xoff, chunk_yoff);
-    #endif
-
-    alloc((void**)&buf, chunk_nx*chunk_ny, sizeof(float));
-    if (dst_nodata != 0){
-      #pragma omp parallel shared(chunk_nx, chunk_ny, buf, dst_nodata) default(none) 
-      {
-        #pragma omp for schedule(static)
-        for (np=0; np<chunk_nx*chunk_ny; np++) buf[np] = dst_nodata;
-      }
-    }
-
-    // warp
-    eErr = woper.WarpRegionToBuffer(chunk_xoff, chunk_yoff, chunk_nx, chunk_ny, buf, dt, 0, 0, 0, 0);
- 
-    if (eErr == CE_Failure){
-
-      #ifdef FORCE_DEBUG
-      printf("Failed. Try smaller chunks.\n");
-      #endif
-
-      // decrease size
-      if (k++ % 2 == 0){
-        tmp = ceil(chunk_ny/2.0); chunk_ny = tmp;
-      } else {
-        tmp = ceil(chunk_nx/2.0); chunk_nx = tmp;
-      }
-
-    } else {
-
-      #ifdef FORCE_DEBUG
-      printf("OK.\n");
-      #endif
-
-      // copy buffer to image
-      nc_done_ = 0;
-      
-      #pragma omp parallel private(j, p, np) shared(dst_nx, dst_ny, chunk_nx, chunk_ny, chunk_xoff, chunk_yoff, buf, dst, dst_b, dst_nodata) reduction(+: nc_done_) default(none) 
-      {
-
-        #pragma omp for schedule(static)
-        for (i=chunk_yoff; i<chunk_yoff+chunk_ny; i++){
-        for (j=chunk_xoff; j<chunk_xoff+chunk_nx; j++){
-          if (i >= dst_ny || j >= dst_nx) continue;
-          p  = i*dst_nx+j;
-          np = (i-chunk_yoff)*chunk_nx + (j-chunk_xoff);
-          set_brick(dst, dst_b, p, buf[np]);
-          buf[np] = dst_nodata;
-          nc_done_++;
-        }
-        }
-
-      }
-      
-      nc_done += nc_done_;
-
-      // if part of image is still missing, increase offsets
-      if (nc_done < dst_nx*dst_ny){
-        if (chunk_yoff < dst_ny && chunk_ny < dst_ny){
-          chunk_yoff+=chunk_ny;
-        } else if (chunk_xoff < dst_nx && chunk_nx < dst_nx){
-          chunk_xoff+=chunk_nx;
-        }
-        eErr = CE_Failure;
-      } else {
-        eErr = CE_None;
-      }
-
-      k_do++;
-
-    }
-
-    free((void*)buf);
-
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("\nImage was warped in %d chunks.\n", k_do);
-  #endif
-
-
-  /** close & clean
-  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-  GDALDestroyGenImgProjTransformer(wopt->pTransformerArg);
-  GDALDestroyWarpOptions(wopt);
-  GDALClose(src_dataset);
-  GDALClose(dst_dataset);
-
-  #ifdef FORCE_CLOCK
-  proctime_print("warping disc to brick", TIME);
-  #endif
-
-  return SUCCESS;
-}
-
-
 /** This function convertes the pixel location from one brick to another.
 +++ The bricks differ in spatial resolution.
 --- from:   source brick
@@ -1668,10 +673,10 @@ int i_from, i_to;
 int j_from, j_to;
 
   i_from = floor(p_from/from->nx);
-  i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return i_to*to->nx+j_to;
 }
@@ -1691,10 +696,10 @@ int i_from;
 int j_from;
 
   i_from = floor(p_from/from->nx);
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return;
 }
@@ -1715,11 +720,11 @@ int i_from;
 int j_from;
 
   i_from = floor(p_from/from->nx);
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   j_from = p_from-i_from*from->nx;
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
-  
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+
   *p_to = (*i_to)*to->nx+(*j_to);
 
   return;
@@ -1738,9 +743,8 @@ int convert_brick_ji2p(brick_t *from, brick_t *to, int i_from, int j_from){
 int i_to;
 int j_to;
 
-  i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
-
+  i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return i_to*to->nx+j_to;
 }
@@ -1758,8 +762,8 @@ int j_to;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void convert_brick_ji2ji(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to){
 
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
 
   return;
 }
@@ -1778,8 +782,8 @@ void convert_brick_ji2ji(brick_t *from, brick_t *to, int i_from, int j_from, int
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void convert_brick_ji2jip(brick_t *from, brick_t *to, int i_from, int j_from, int *i_to, int *j_to, int *p_to){
 
-  *i_to = floor(i_from*from->geotran[1]/to->geotran[1]);
-  *j_to = floor(j_from*from->geotran[1]/to->geotran[1]);
+  *i_to = floor(i_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
+  *j_to = floor(j_from*from->geotran[_GT_RES_]/to->geotran[_GT_RES_]);
   *p_to = (*i_to)*to->nx+(*j_to);
 
   return;
@@ -1843,7 +847,7 @@ void get_brick_name(brick_t *brick, char name[], size_t size){
 void set_brick_product(brick_t *brick, const char *product){
   
 
-  copy_string(brick->product, NPOW_03, product);
+  copy_string(brick->product, NPOW_10, product);
 
   return;
 }
@@ -2200,7 +1204,7 @@ void set_brick_ncols(brick_t *brick, int nx){
 
   brick->nx = nx;
   brick->nc = brick->nx*brick->ny;
-  brick->width = brick->nx*brick->res;
+  brick->width = brick->nx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2227,7 +1231,7 @@ void set_brick_nrows(brick_t *brick, int ny){
 
   brick->ny = ny;
   brick->nc = brick->nx*brick->ny;
-  brick->height = brick->ny*brick->res;
+  brick->height = brick->ny*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2297,7 +1301,7 @@ void set_brick_chunkncols(brick_t *brick, int cx){
 
   brick->cx = cx;
   brick->cc = brick->cx*brick->cy;
-  brick->cwidth = brick->cx*brick->res;
+  brick->cwidth = brick->cx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2324,7 +1328,7 @@ void set_brick_chunknrows(brick_t *brick, int cy){
 
   brick->cy = cy;
   brick->cc = brick->cx*brick->cy;
-  brick->cheight = brick->cy*brick->res;
+  brick->cheight = brick->cy*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2365,53 +1369,145 @@ int get_brick_chunkncells(brick_t *brick){
 }
 
 
-/** This function sets the chunk ID of a brick
+/** This function sets the chunk X-ID of a brick
 --- brick:  brick
---- chunk:  chunk ID
+--- chunk:  chunk x-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_chunk(brick_t *brick, int chunk){
-  
-  if (chunk >= 0 && chunk >= brick->nchunk) printf("current chunk %d is higher than max chunks %d.\n", chunk, brick->nchunk);
+void set_brick_chunkx(brick_t *brick, int chunkx){
 
-  brick->chunk = chunk;
-  
+  if (chunkx >= 0 && chunkx >= brick->dim_chunk.cols){
+    printf("current chunk %d is higher than chunks in X-direction %d.\n", 
+      chunkx, brick->dim_chunk.cols);
+  }
+
+  brick->chunk[_X_] = chunkx;
+
   return;
 }
 
 
-/** This function gets the chunk ID of a brick
+/** This function gets the chunk X-ID of a brick
 --- brick:  brick
-+++ Return: chunk ID
++++ Return: chunk X-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_brick_chunk(brick_t *brick){
-  
-  return brick->chunk;
+int get_brick_chunkx(brick_t *brick){
+
+  return brick->chunk[_X_];
 }
 
 
-/** This function sets the number of chunks of a brick
+/** This function sets the chunk Y-ID of a brick
 --- brick:  brick
---- nchunk: number of chunks
+--- chunk:  chunk y-ID
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void set_brick_nchunks(brick_t *brick, int nchunk){
-  
-  if (nchunk < 0) printf("nchunks %d < 0.\n", nchunk);
+void set_brick_chunky(brick_t *brick, int chunky){
 
-  brick->nchunk = nchunk;
-  
+  if (chunky >= 0 && chunky >= brick->dim_chunk.rows){
+    printf("current chunk %d is higher than chunks in Y-direction %d.\n", 
+      chunky, brick->dim_chunk.rows);
+  }
+
+  brick->chunk[_Y_] = chunky;
+
   return;
 }
 
 
-/** This function gets the number of chunks of a brick
+/** This function gets the chunk Y-ID of a brick
 --- brick:  brick
-+++ Return: number of chunks
++++ Return: chunk Y-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_brick_nchunks(brick_t *brick){
+int get_brick_chunky(brick_t *brick){
   
-  return brick->nchunk;
+  return brick->chunk[_Y_];
+}
+
+
+/** This function sets the chunk dimensions in X-direction of a brick
+--- brick:  brick
+--- ncol:   number of columns in chunk
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim_x(brick_t *brick, int ncol){
+dim_t dim;
+
+  dim.cols = ncol;
+  dim.rows = brick->dim_chunk.rows;
+  dim.cells = dim.cols * dim.rows;
+
+  set_brick_chunk_dim(brick, &dim);
+
+}
+
+
+/** This function sets the chunk dimensions in X-direction of a brick
+--- brick:  brick
+--- ncol:   number of columns in chunk
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim_y(brick_t *brick, int nrow){
+dim_t dim;
+
+  dim.cols = brick->dim_chunk.cols;
+  dim.rows = nrow;
+  dim.cells = dim.cols * dim.rows;
+
+  set_brick_chunk_dim(brick, &dim);
+
+}
+
+
+/** This function gets the chunk dimensions in X-direction of a brick
+--- brick:  brick
++++ Return: number of chunk columns in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_x(brick_t *brick){
+  return brick->dim_chunk.cols;
+}
+
+
+/** This function gets the chunk dimensions in Y-direction of a brick
+--- brick:  brick
++++ Return: number of chunk rows in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_y(brick_t *brick){
+  return brick->dim_chunk.rows;
+}
+
+/** This function gets the number of chunks in a brick
+--- brick:  brick
++++ Return: number of chunks in image
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_brick_chunk_dim_n(brick_t *brick){
+  return brick->dim_chunk.cells;
+}
+
+
+/** This function sets the chunk dimensions of a brick
+--- brick:  brick
+--- dim:    chunk dimensions
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_chunk_dim(brick_t *brick, dim_t *dim){
+
+  if (dim->cols < 0 || dim->rows < 0) printf("chunk dimensions %d||%d < 0.\n", dim->cols, dim->rows);
+  if (dim->cols * dim->rows != dim->cells) printf("chunk X/Y dimensions do not match with # of chunk  cells.\n");
+
+  brick->dim_chunk = *dim;
+
+  return;
+}
+
+
+/** This function gets the chunk dimensions of a brick
+--- brick:  brick
++++ Return: chunk dimensions
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+dim_t get_brick_chunk_dim(brick_t *brick){
+
+  return brick->dim_chunk;
 }
 
 
@@ -2424,7 +1520,7 @@ void set_brick_tilex(brick_t *brick, int tx){
   
   if (tx >= 9999 || tx < -999) printf("tile-x is out of bounds.\n");
 
-  brick->tx = tx;
+  brick->tile[_X_] = tx;
   
   return;
 }
@@ -2436,7 +1532,7 @@ void set_brick_tilex(brick_t *brick, int tx){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int get_brick_tilex(brick_t *brick){
   
-  return brick->tx;
+  return brick->tile[_X_];
 }
 
 
@@ -2449,8 +1545,8 @@ void set_brick_tiley(brick_t *brick, int ty){
   
   if (ty >= 9999 || ty < -999) printf("tile-y is out of bounds.\n");
 
-  brick->ty = ty;
-  
+  brick->tile[_Y_] = ty;
+
   return;
 }
 
@@ -2460,8 +1556,8 @@ void set_brick_tiley(brick_t *brick, int ty){
 +++ Return: tile Y-ID
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int get_brick_tiley(brick_t *brick){
-  
-  return brick->ty;
+
+  return brick->tile[_Y_];
 }
 
 
@@ -2474,11 +1570,10 @@ void set_brick_res(brick_t *brick, double res){
 
   if (res <= 0) printf("resolution must be > 0.\n");
 
-  brick->res = res;
-  brick->geotran[1] = res;
-  brick->geotran[5] = res*-1;
-  brick->width  = brick->nx*brick->res;
-  brick->height = brick->ny*brick->res;
+  brick->geotran[_GT_XRES_] = res;
+  brick->geotran[_GT_YRES_] = res * -1;
+  brick->width  = brick->nx * res;
+  brick->height = brick->ny * res;
 
   return;
 }
@@ -2489,8 +1584,8 @@ void set_brick_res(brick_t *brick, double res){
 +++ Return: resolution
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_res(brick_t *brick){
-  
-  return brick->res;
+
+  return brick->geotran[_GT_RES_];
 }
 
 
@@ -2501,7 +1596,7 @@ double get_brick_res(brick_t *brick){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_ulx(brick_t *brick, double ulx){
 
-  brick->geotran[0] = ulx;
+  brick->geotran[_GT_ULX_] = ulx;
 
   return;
 }
@@ -2512,8 +1607,8 @@ void set_brick_ulx(brick_t *brick, double ulx){
 +++ Return: UL-X coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_ulx(brick_t *brick){
-  
-  return brick->geotran[0];
+
+  return brick->geotran[_GT_ULX_];
 }
 
 
@@ -2523,8 +1618,8 @@ double get_brick_ulx(brick_t *brick){
 +++ Return: X coordinate of a column
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_x(brick_t *brick, int j){
-  
-  return (brick->geotran[0] + j*brick->geotran[1]);
+
+  return (brick->geotran[_GT_ULX_] + j*brick->geotran[_GT_RES_]);
 }
 
 
@@ -2535,7 +1630,7 @@ double get_brick_x(brick_t *brick, int j){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_uly(brick_t *brick, double uly){
 
-  brick->geotran[3] = uly;
+  brick->geotran[_GT_ULY_] = uly;
 
   return;
 }
@@ -2546,8 +1641,8 @@ void set_brick_uly(brick_t *brick, double uly){
 +++ Return: UL-Y coordinate
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_uly(brick_t *brick){
-  
-  return brick->geotran[3];
+
+  return brick->geotran[_GT_ULY_];
 }
 
 
@@ -2557,8 +1652,8 @@ double get_brick_uly(brick_t *brick){
 +++ Return: Y coordinate of a row 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double get_brick_y(brick_t *brick, int i){
-  
-  return (brick->geotran[3] + i*brick->geotran[5]);
+
+  return (brick->geotran[_GT_ULY_] + i*brick->geotran[_GT_RES_]);
 }
 
 
@@ -2594,13 +1689,12 @@ double geox, geoy;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_geotran(brick_t *brick, double *geotran){
 
-  brick->res = geotran[1];
-  brick->geotran[0] = geotran[0];
-  brick->geotran[1] = geotran[1];
-  brick->geotran[2] = geotran[2];
-  brick->geotran[3] = geotran[3];
-  brick->geotran[4] = geotran[4];
-  brick->geotran[5] = geotran[5];
+  brick->geotran[_GT_XRES_] = geotran[_GT_XRES_];
+  brick->geotran[_GT_YRES_] = geotran[_GT_YRES_];
+  brick->geotran[_GT_ULX_]  = geotran[_GT_ULX_];
+  brick->geotran[_GT_ULY_]  = geotran[_GT_ULY_];
+  brick->geotran[_GT_XROT_] = geotran[_GT_XROT_];
+  brick->geotran[_GT_YROT_] = geotran[_GT_YROT_];
 
   return;
 }
@@ -2614,15 +1708,15 @@ void set_brick_geotran(brick_t *brick, double *geotran){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_geotran(brick_t *brick, double geotran[], size_t size){
 
-  if (size != 6){
+  if (size != _GT_LEN_){
     printf("array is not compatible for getting geotran.\n"); return;}
 
-  geotran[0] = brick->geotran[0];
-  geotran[1] = brick->geotran[1];
-  geotran[2] = brick->geotran[2];
-  geotran[3] = brick->geotran[3];
-  geotran[4] = brick->geotran[4];
-  geotran[5] = brick->geotran[5];
+  geotran[_GT_ULX_] = brick->geotran[_GT_ULX_];
+  geotran[_GT_ULY_] = brick->geotran[_GT_ULY_];
+  geotran[_GT_XRES_] = brick->geotran[_GT_XRES_];
+  geotran[_GT_YRES_] = brick->geotran[_GT_YRES_];
+  geotran[_GT_XROT_] = brick->geotran[_GT_XROT_];
+  geotran[_GT_YROT_] = brick->geotran[_GT_YROT_];
   
   return;
 }
@@ -2634,10 +1728,10 @@ void get_brick_geotran(brick_t *brick, double geotran[], size_t size){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_width(brick_t *brick, double width){
-  
-  if (width != brick->nx*brick->res) printf("width does not match with nx*res.\n");
 
-  brick->width = brick->nx*brick->res;
+  if (width != brick->nx*brick->geotran[_GT_RES_]) printf("width does not match with nx*res.\n");
+
+  brick->width = brick->nx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2659,11 +1753,11 @@ double get_brick_width(brick_t *brick){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_height(brick_t *brick, double height){
-  
-  if (height != brick->ny*brick->res) printf("height does not match with ny*res.\n");
 
-  brick->height = brick->ny*brick->res;
-  
+  if (height != brick->ny*brick->geotran[_GT_RES_]) printf("height does not match with ny*res.\n");
+
+  brick->height = brick->ny*brick->geotran[_GT_RES_];
+
   return;
 }
 
@@ -2684,10 +1778,10 @@ double get_brick_height(brick_t *brick){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_chunkwidth(brick_t *brick, double cwidth){
-  
-  if (cwidth != brick->cx*brick->res) printf("chunking width does not match with cx*res.\n");
 
-  brick->cwidth = brick->cx*brick->res;
+  if (cwidth != brick->cx*brick->geotran[_GT_RES_]) printf("chunking width does not match with cx*res.\n");
+
+  brick->cwidth = brick->cx*brick->geotran[_GT_RES_];
 
   return;
 }
@@ -2709,11 +1803,11 @@ double get_brick_chunkwidth(brick_t *brick){
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_chunkheight(brick_t *brick, double cheight){
-  
-  if (cheight != brick->cy*brick->res) printf("chunking height does not match with cy*res.\n");
 
-  brick->cheight = brick->cy*brick->res;
-  
+  if (cheight != brick->cy*brick->geotran[_GT_RES_]) printf("chunking height does not match with cy*res.\n");
+
+  brick->cheight = brick->cy*brick->geotran[_GT_RES_];
+
   return;
 }
 
@@ -2907,7 +2001,7 @@ float get_brick_wavelength(brick_t *brick, int b){
 void set_brick_unit(brick_t *brick, int b, const char *unit){
 
 
-  copy_string(brick->unit[b], NPOW_04, unit);
+  copy_string(brick->unit[b], NPOW_10, unit);
 
   return;
 }
@@ -3000,7 +2094,7 @@ void get_brick_bandname(brick_t *brick, int b, char bandname[], size_t size){
 void set_brick_sensor(brick_t *brick, int b, const char *sensor){
 
 
-  copy_string(brick->sensor[b], NPOW_04, sensor);
+  copy_string(brick->sensor[b], NPOW_10, sensor);
 
   return;
 }

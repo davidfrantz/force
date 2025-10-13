@@ -1,0 +1,9 @@
+{
+  "description": "Sentinel-1C Descending Interferometric Wide Swath",
+  "name": "S1CID",
+  "bands": 2,
+  "band_names": [
+    "VV",
+    "VH"
+  ]
+}

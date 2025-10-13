@@ -37,7 +37,7 @@ Contact: fschug@wisc.edu
 
 
 // check if all needed
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/stats-cl.h"

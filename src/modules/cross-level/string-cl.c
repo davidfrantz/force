@@ -212,3 +212,60 @@ errno = 0;
   return SUCCESS;
 }
 
+
+/** Check if two strings are equal
++++ This function checks if two strings are equal.
++++ It returns true if they are equal, false otherwise.
+--- str1:    first string
+--- str2:    second string
++++ Return:  true (1) if equal, false (0) otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool strings_equal(const char *str1, const char *str2) {
+
+  if (strcmp(str1, str2) == 0) {
+    return true;
+  }
+
+  return false;
+}
+
+
+/** Check if a vector of strings contains a given string
++++ This function checks if a vector of strings contains a given string.
++++ It returns true if the string is found, false otherwise.
+--- vector:  array of strings
+--- size:    size of the array
+--- target:  string to search for
++++ Return:  true (1) if found, false (0) otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool vector_contains(const char **vector, size_t size, const char *target) {
+  
+  for (size_t i = 0; i < size; i++) {
+    if (strings_equal(vector[i], target)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+/** Check if a vector of strings contains a given string
++++ This function checks if a vector of strings contains a given string.
++++ It returns the index of the string if found, -1 otherwise.
+--- vector:  array of strings
+--- size:    size of the array
+--- target:  string to search for
++++ Return:  index of the string if found, -1 otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int vector_contains_pos(const char **vector, size_t size, const char *target) {
+  
+  for (size_t i = 0; i < size; i++) {
+    if (strings_equal(vector[i], target)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+

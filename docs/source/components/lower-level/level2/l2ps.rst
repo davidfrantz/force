@@ -31,7 +31,7 @@ Usage
 
 The direct usage of force-l2ps is recommended for debugging or for detailed output.
 The debugging mode also features extensive output where images for many processing steps are saved.
-Note that these images are intended for software development and do not necessarily have intuitive file names; metadata or projections are also not appended.
+Note that these images are intended for software development and do not necessarily have intuitive file names.
 If debug output is required, the software needs to be re-compiled, which should only be done by expert users.
 If DEBUG is activated, :ref:`level2-bulk` does not allow you to process multiple images or to use parallel processing (your system will be unresponsive because too much data is simultaneously written to the disc, and parallel calls to force-l2ps would overwrite the debugging images).
 

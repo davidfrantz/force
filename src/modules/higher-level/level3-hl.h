@@ -34,6 +34,7 @@ Level 3 Processing header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../cross-level/cite-cl.h"
+#include "../cross-level/cube-cl.h"
 #include "../higher-level/read-ard-hl.h"
 
 

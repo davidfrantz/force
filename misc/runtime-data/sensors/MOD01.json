@@ -1,0 +1,14 @@
+{
+  "description": "TERRA MODIS",
+  "name": "MOD01",
+  "bands": 7,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "NIR",
+    "SWIR0",
+    "SWIR1",
+    "SWIR2"
+  ]
+}

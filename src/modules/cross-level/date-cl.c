@@ -623,7 +623,8 @@ date_t d;
 
   copy_string(buffer, NPOW_10, string);
   buffer[strcspn(buffer, "\r\n#")] = 0;
-  ptr = strtok(buffer, separator);
+  char *saveptr = NULL;
+  ptr = strtok_r(buffer, separator, &saveptr);
 
   init_date(&d);
 
