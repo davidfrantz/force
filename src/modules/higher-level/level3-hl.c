@@ -279,24 +279,33 @@ bool water;
   }
 
   if (phl->bap.w.c > 0) {
-    if (phl->bap.band_dst = find_domain(ard[0].AUX, "DST") < 0){
+    if ((phl->bap.band_dst = find_domain(ard[0].AUX, "DST")) < 0){
       printf("Error: no DST band in auxiliary file.\n");
       return NULL;
     }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for DST.\n", phl->bap.band_dst);
+    #endif
   }
 
   if (phl->bap.w.h > 0) {
-    if (phl->bap.band_hot = find_domain(ard[0].AUX, "HOT") < 0){
+    if ((phl->bap.band_hot = find_domain(ard[0].AUX, "HOT")) < 0){
       printf("Error: no HOT band in auxiliary file.\n");
       return NULL;
     }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for HOT.\n", phl->bap.band_hot);
+    #endif
   }
 
   if (phl->bap.w.v > 0) {
-    if (phl->bap.band_vzn = find_domain(ard[0].AUX, "VZN") < 0){
+    if ((phl->bap.band_vzn = find_domain(ard[0].AUX, "VZN")) < 0){
       printf("Error: no VZN band in auxiliary file.\n");
       return NULL;
     }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for VZN.\n", phl->bap.band_vzn);
+    #endif
   }
 
   #pragma omp parallel private(tdist,score,cor,hmean,hsd,water) firstprivate(target) shared(ard,lsp,l3,nt,nb,nc,lsp_nodata,nodata,mask_,phl,LEVEL3) default(none)
