@@ -295,10 +295,11 @@ GDALDriverH driver;
 
   }
 
+  cite_push(pl2->d_level2);
+  
   free_param_lower(pl2); free_metadata(meta); free_multicube(multicube);
   free_brick(DN);
 
-  cite_push(pl2->d_level2);
   
   CPLPopErrorHandler();
 
