@@ -111,7 +111,7 @@ typedef struct {
 
   int score_type;
   par_scr_t w;          // scoring struct for weigting parameters
-  float dreq, vreq;     // cloud / view zenith scoring  
+  float dreq, vreq, hreq;     // cloud / view zenith scoring  
 
   par_pac_t pac;
 
