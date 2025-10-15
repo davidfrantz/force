@@ -640,7 +640,7 @@ float vz;
     // haze score
     if (bap->w.h > 0){
       score[t].h = 1.0 / (1.0 + exp((10.0/200.0) * 
-                ((float)ard[t].aux[bap->band_hot][p] + 150.0)));
+                ((float)ard[t].aux[bap->band_hot][p] + (bap->hreq*(-1.0)) ));
     } else score[t].h = 0.0;
 
     // correlation score
