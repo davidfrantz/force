@@ -12,9 +12,4 @@ Release: 13.10.2025
   - in ``force-higher-level``, LEVEL3 module:
     **Bugfix:** Fixed a bug that caused the program to not properly use the auxiliary files when multiple of them were present.
     Thanks to Oleg Zheleznyy for reporting this issue.
-  
-  - in ``force-higher-level``, LEVEL3 module:
-    Oleg Zheleznyy contributed a new parameter ``HREQ`` that allows the used to tweak the HOT value that should receive 
-    an haze score of 0.5. This is useful when the user wants to adjust the haze scoring to better fit their specific requirements.
 
-  

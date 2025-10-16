@@ -1,0 +1,21 @@
+.. _v3902:
+
+FORCE v. 3.9.02
+===============
+
+Release: 16.10.2025
+
+**Read through the changelog of :ref:`v3900` closely. In this version, there are some important changes that may affect your workflows!**
+
+- **FORCE L2PS**
+
+    - in ``force-l2ps``, fixed a segmentation fault that occurred due to an untimely deallocation of memory.
+      Thanks to Vincent Schut for reporting this issue.
+
+- **FORCE HLPS**
+
+  - in ``force-higher-level``, LEVEL3 module:
+    Oleg Zheleznyy contributed a new parameter ``HREQ`` that allows the used to tweak the HOT value that should receive 
+    an haze score of 0.5. This is useful when the user wants to adjust the haze scoring to better fit their specific requirements.
+
+  
