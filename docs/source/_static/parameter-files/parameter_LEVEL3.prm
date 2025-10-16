@@ -306,6 +306,10 @@ SCORE_VZEN_WEIGHT = 0.0
 # needs to be given in meters.
 # Type: Float. Valid values: [1,...
 DREQ = 3000
+# This parameter indicates the value of the haze optical score (HOT), at which 
+# the haze score is at 0.5.
+# Type: Float. Valid values: [-600,600]
+HREQ = -150
 # This parameter indicates the view zenith angle at which the view zenith score
 # approaches 0.0. The angle needs to be given in degree. 
 # Type: Float. Valid values: [1,90]

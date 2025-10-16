@@ -1324,6 +1324,13 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   fprintf(fp, "DREQ = 3000\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter indicates the value of the haze optical score (HOT), at which \n");
+    fprintf(fp, "# the haze score is at 0.5.\n");
+    fprintf(fp, "# Type: Float. Valid values: [-600,600]\n");
+  }
+  fprintf(fp, "HREQ = -150\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter indicates the view zenith angle at which the view zenith score\n");
     fprintf(fp, "# approaches 0.0. The angle needs to be given in degree. \n");
     fprintf(fp, "# Type: Float. Valid values: [1,90]\n");
