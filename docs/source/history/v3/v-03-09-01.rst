@@ -9,7 +9,7 @@ Release: 13.10.2025
 
 - **FORCE HLPS**
 
-  - in ``force-higher-level``, all LEVEL3 module:
+  - in ``force-higher-level``, LEVEL3 module:
     **Bugfix:** Fixed a bug that caused the program to not properly use the auxiliary files when multiple of them were present.
     Thanks to Oleg Zheleznyy for reporting this issue.
-  
+
