@@ -43,13 +43,12 @@ extern "C" {
 #endif
 
 typedef struct {
-  char name[NPOW_10];    // name of brick
-  char product[NPOW_10]; // product short name
-  char dname[NPOW_10];   // dirpath  for product
-  char fname[NPOW_10];   // filename for product
-  char provdir[NPOW_10]; // dirpath  for provenance folder
-  char  **provenance;    // input data
-  int nprovenance;       // number of input data
+  string_t name;    // name of brick
+  string_t product; // product short name
+  string_t dname;   // dirpath  for product
+  string_t fname;   // filename for product
+  string_t provdir; // dirpath  for provenance folder
+  string_vector_t  provenance; // input provenance files
   int sid;               // sensor ID
   int open;              // open mode
   int explode;           // explode to single-bands?
@@ -72,20 +71,20 @@ typedef struct {
   int chunk[2];           // ID of chunk
   dim_t dim_chunk;        // # chunks dimensions
   int tile[2];            // ID of tile
-  char proj[NPOW_10];      // projection
+  string_t proj;      // projection
 
-  char par[NPOW_14];       // parameterization
+  string_t par;       // parameterization
 
   bool  *save;           // save band?
   int   *nodata;         // nodata value
   float *scale;          // scale factor
 
-  float *wavelength;     // wavelength
-  char  **unit;          // wavelength unit
-  char  **domain;        // band domain (e.g. NIR)
-  char  **bandname;      // band name
-  char  **sensor;        // sensor ID
-  date_t *date;          // date
+  float *wavelength;        // wavelength
+  string_vector_t unit;     // wavelength unit
+  string_vector_t domain;   // band domain (e.g. NIR)
+  string_vector_t bandname; // band name
+  string_vector_t sensor;   // sensor ID
+  date_t *date;             // date
                          
   short  **vshort;       // data (z/xy flattened by line)
   float  **vfloat;       // data (z/xy flattened by line)

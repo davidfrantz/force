@@ -44,7 +44,7 @@ This file contains functions for organizing bricks in memory, and output
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int write_brick(brick_t *brick){
-  int f, b, b_, p, o;
+  int f, b, b_;
   int b_brick, b_file, nbands, nfiles;
   int ***bands = NULL;
   char *lock = NULL;
@@ -109,13 +109,13 @@ int write_brick(brick_t *brick){
     copy_string(fp_meta[i++], NPOW_14, version);
     
     copy_string(fp_meta[i++], NPOW_14, "FORCE_description");
-    copy_string(fp_meta[i++], NPOW_14, brick->name);
+    copy_string(fp_meta[i++], NPOW_14, brick->name.string);
     
     copy_string(fp_meta[i++], NPOW_14, "FORCE_product");
-    copy_string(fp_meta[i++], NPOW_14, brick->product);
+    copy_string(fp_meta[i++], NPOW_14, brick->product.string);
     
     copy_string(fp_meta[i++], NPOW_14, "FORCE_param");
-    copy_string(fp_meta[i++], NPOW_14, brick->par);
+    copy_string(fp_meta[i++], NPOW_14, brick->par.string);
   
   
     // how many bands to output?
@@ -155,8 +155,8 @@ int write_brick(brick_t *brick){
     //CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
     
     // get driver
-    if ((driver_physical = GDALGetDriverByName(brick->format.driver)) == NULL){
-      printf("%s driver not found\n", brick->format.driver); return FAILURE;}
+    if ((driver_physical = GDALGetDriverByName(brick->format.driver.string)) == NULL){
+      printf("%s driver not found\n", brick->format.driver.string); return FAILURE;}
     if ((driver_memory   = GDALGetDriverByName("MEM")) == NULL){
       printf("%s driver not found\n", "MEM"); return FAILURE;}
   
@@ -165,7 +165,7 @@ int write_brick(brick_t *brick){
   
     create = CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATE, false);
     if (!create && !CSLFetchBoolean(driver_metadata, GDAL_DCAP_CREATECOPY, false)){
-      printf("%s driver does not support creating, nor create-copying datasets\n", brick->format.driver);
+      printf("%s driver does not support creating, nor create-copying datasets\n", brick->format.driver.string);
       return FAILURE;
     }
   
@@ -179,11 +179,23 @@ int write_brick(brick_t *brick){
     driver_metadata   = NULL;
   
     // set GDAL output options
-    for (o=0; o<brick->format.n; o+=2){
+    if (brick->format.options[_TV_TAG_].number != brick->format.options[_TV_VAL_].number){
+      printf("Error: Number of GDAL option tags and values do not match.\n");
+      return FAILURE;
+    }
+
+    for (int o=0; o<brick->format.options[_TV_TAG_].number; o++){
       #ifdef FORCE_DEBUG
-      printf("setting options %s = %s\n",  brick->format.option[o], brick->format.option[o+1]);
+      printf("setting options %s = %s\n",  
+        brick->format.options[_TV_TAG_].string[o], 
+        brick->format.options[_TV_VAL_].string[o]
+      );
       #endif
-      options = CSLSetNameValue(options, brick->format.option[o], brick->format.option[o+1]);
+      options = CSLSetNameValue(
+        options, 
+        brick->format.options[_TV_TAG_].string[o],
+        brick->format.options[_TV_VAL_].string[o]
+      );
     }
   
     switch (brick->datatype){
@@ -209,17 +221,17 @@ int write_brick(brick_t *brick){
   
   
     // output path
-    if ((lock = (char*)CPLLockFile(brick->dname, 60)) == NULL){
-      printf("Unable to lock directory %s (timeout: %ds). ", brick->dname, 60);
+    if ((lock = (char*)CPLLockFile(brick->dname.string, 60)) == NULL){
+      printf("Unable to lock directory %s (timeout: %ds). ", brick->dname.string, 60);
       return FAILURE;}
-    createdir(brick->dname);
+    createdir(brick->dname.string);
     CPLUnlockFile(lock);
     lock = NULL;
   
     // provenance file
     current_date(&today);
     nchar = snprintf(provname, NPOW_10, "%s/provenance_%04d%02d%02d.csv", 
-      brick->provdir, today.year, today.month, today.day);
+      brick->provdir.string, today.year, today.month, today.day);
     if (nchar < 0 || nchar >= NPOW_10){ 
       printf("Buffer Overflow in assembling provenance file\n"); return FAILURE;}     
   
@@ -227,13 +239,13 @@ int write_brick(brick_t *brick){
     for (f=0; f<nfiles; f++){
       
       if (brick->explode){
-        nchar = snprintf(bname, NPOW_10, "_%s", brick->bandname[bands[_brick_][f][0]]);
+        nchar = snprintf(bname, NPOW_10, "_%s", brick->bandname.string[bands[_brick_][f][0]]);
         if (nchar < 0 || nchar >= NPOW_10){ 
           printf("Buffer Overflow in assembling band ID\n"); return FAILURE;}      
       } else bname[0] = '\0';
-    
-      nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", brick->dname, 
-        brick->fname, bname, brick->format.extension);
+
+      nchar = snprintf(fname, NPOW_10, "%s/%s%s.%s", brick->dname.string, 
+        brick->fname.string, bname, brick->format.extension.string);
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
   
@@ -285,7 +297,7 @@ int write_brick(brick_t *brick){
             printf("Unable to read %s. ", fname); return FAILURE;} 
   
   
-          for (p=0; p<brick->nc; p++){
+          for (int p=0; p<brick->nc; p++){
   
             now = get_brick(brick, b_brick, p);
             old = buf[p];
@@ -387,7 +399,7 @@ int write_brick(brick_t *brick){
             return FAILURE;
         }
   
-        GDALSetDescription(band, brick->bandname[b_brick]);
+        GDALSetDescription(band, brick->bandname.string[b_brick]);
         GDALSetRasterNoDataValue(band, brick->nodata[b_brick]);
   
       }
@@ -396,7 +408,7 @@ int write_brick(brick_t *brick){
       #pragma omp critical
       {
         GDALSetGeoTransform(fp, brick->geotran);
-        GDALSetProjection(fp,   brick->proj);
+        GDALSetProjection(fp, brick->proj.string);
       }
   
   
@@ -420,23 +432,23 @@ int write_brick(brick_t *brick){
         i = 0;
   
         copy_string(band_meta[i++], NPOW_14, "Domain");
-        copy_string(band_meta[i++], NPOW_14, brick->domain[b_brick]);
-  
+        copy_string(band_meta[i++], NPOW_14, brick->domain.string[b_brick]);
+
         copy_string(band_meta[i++], NPOW_14, "Wavelength");
         nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->wavelength[b_brick]); i++;
         if (nchar < 0 || nchar >= NPOW_14){ 
           printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
   
         copy_string(band_meta[i++], NPOW_14, "Wavelength_unit");
-        copy_string(band_meta[i++], NPOW_14, brick->unit[b_brick]);
-  
+        copy_string(band_meta[i++], NPOW_14, brick->unit.string[b_brick]);
+
         copy_string(band_meta[i++], NPOW_14, "Scale");
         nchar = snprintf(band_meta[i], NPOW_14, "%.3f", brick->scale[b_brick]); i++;
         if (nchar < 0 || nchar >= NPOW_14){ 
           printf("Buffer Overflow in assembling band metadata\n"); return FAILURE;}
   
         copy_string(band_meta[i++], NPOW_14, "Sensor");
-        copy_string(band_meta[i++], NPOW_14, brick->sensor[b_brick]);
+        copy_string(band_meta[i++], NPOW_14, brick->sensor.string[b_brick]);
   
         get_brick_longdate(brick, b_brick, ldate, NPOW_10-1);
         copy_string(band_meta[i++], NPOW_14, "Date");
@@ -456,7 +468,7 @@ int write_brick(brick_t *brick){
       CPLUnlockFile(lock);
     
       // write provenance info
-      if (brick->nprovenance > 0 && 
+      if (brick->provenance.number > 0 && 
           brick->chunk[_X_] <= 0 && 
           brick->chunk[_Y_] <= 0){
   
@@ -484,9 +496,9 @@ int write_brick(brick_t *brick){
         long_date(today.year, today.month, today.day, today.hh, today.mm, today.ss, today.tz, lwritetime, NPOW_10);
   
         fprintf(fprov, "%s,", fname);
-        for (p=0; p<(brick->nprovenance-1); p++) fprintf(fprov, "%s;", brick->provenance[p]);
-        fprintf(fprov, "%s,%s,%s\n", brick->provenance[p], c_update[update], lwritetime);
-  
+        for (int p=0; p<(brick->provenance.number-1); p++) fprintf(fprov, "%s;", brick->provenance.string[p]);
+        fprintf(fprov, "%s,%s,%s\n", brick->provenance.string[brick->provenance.number-1], c_update[update], lwritetime);
+
         fclose(fprov);
   
         CPLUnlockFile(lock);
@@ -518,7 +530,7 @@ brick_t *brick  = NULL;
 short   *brick_short_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
-gdalopt_t format;
+gdalopt_t format = {0};
 int b, nbands;
 dim_t dim;
 double geotran[_GT_LEN_];
@@ -585,10 +597,11 @@ const char *projection = NULL;
   set_brick_nprovenance(brick, 1);
   set_brick_provenance(brick, 0, file);
   
-  default_gdaloptions(_FMT_GTIFF_, &format);
-  
   set_brick_open(brick,   OPEN_FALSE);
+
+  default_gdaloptions(_FMT_GTIFF_, &format);
   set_brick_format(brick, &format);
+  free_gdaloptions(&format);
   
   GDALClose(dataset); // only close after projection has been copied!
   
