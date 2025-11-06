@@ -1286,7 +1286,7 @@ brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI){
 int i, j, p, i_, j_, p_, b;
 int nx, ny, nx_, ny_, nc_;
 double res, res_, step, scale;
-gdalopt_t format;
+gdalopt_t format = {0};
 char fname[NPOW_10];
 char product[NPOW_10];
 char sensor[NPOW_10];
@@ -1321,8 +1321,11 @@ enum { R, G, B };
   scale = 2500;
 
   OVV = copy_brick(QAI, 3, _DT_NONE_);
+
   default_gdaloptions(_FMT_JPEG_, &format);
   set_brick_format(OVV, &format);
+  free_gdaloptions(&format);
+
   set_brick_res(OVV, res_);
   set_brick_ncols(OVV, nx_);
   set_brick_nrows(OVV, ny_);
