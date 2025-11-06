@@ -41,15 +41,16 @@ extern "C" {
 #endif
 
 typedef struct {
-  char driver[NPOW_10];        // GDAL driver short name
-  char extension[NPOW_10];     // file extension
-  char option[NPOW_10][NPOW_10]; // GDAL output options
-  int n;                   // number of GDAL output options
+  string_t driver;    // GDAL driver short name
+  string_t extension; // file extension
+  string_vector_t options[_TV_LENGTH_]; // GDAL output options as string vector (tag and value)
 } gdalopt_t;
 
 void default_gdaloptions(int format, gdalopt_t *gdalopt);
 void parse_gdaloptions(char *fname, gdalopt_t *gdalopt);
 void print_gdaloptions(gdalopt_t *gdalopt);
+void copy_gdaloptions(gdalopt_t *dst, gdalopt_t *src);
+void free_gdaloptions(gdalopt_t *gdalopt);
 
 #ifdef __cplusplus
 }

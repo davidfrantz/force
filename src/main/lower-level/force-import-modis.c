@@ -143,7 +143,7 @@ short val = 0;
 
 void set_meta(brick_t *BRICK, date_t *date, double geotran[6], int nx, int ny, const char *proj, int tx, int ty, const char *sensor, const char *prd, const char *dout){
 char fname[NPOW_10];
-gdalopt_t format;
+gdalopt_t format = {0};
 int nchar;
 
 
@@ -152,10 +152,12 @@ int nchar;
     printf("Buffer Overflow in assembling output name name\n"); exit(FAILURE);}
 
 
-  default_gdaloptions(_FMT_GTIFF_, &format);
-
   set_brick_open(BRICK, 1);
+
+  default_gdaloptions(_FMT_GTIFF_, &format);
   set_brick_format(BRICK, &format);
+  free_gdaloptions(&format);
+
   set_brick_explode(BRICK, 0);
 
   set_brick_res(BRICK, geotran[1]);
@@ -425,7 +427,7 @@ short nodata = -9999;
 
   free((void*)modqa_);
   
-
+  GDALDestroy();
 
   return SUCCESS;
 }

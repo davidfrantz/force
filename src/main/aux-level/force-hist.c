@@ -212,6 +212,8 @@ int row;
 
   free_table(&counts);
 
+  GDALDestroy();
+
   return SUCCESS;
 }
 

@@ -149,6 +149,9 @@ void free_param_lower(par_ll_t *pl2){
 
 
   if (pl2 == NULL) return;
+
+  free_gdaloptions(&pl2->gdalopt);
+
   free((void*)pl2); pl2 = NULL;
 
   return;

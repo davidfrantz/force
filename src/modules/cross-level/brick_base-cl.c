@@ -49,6 +49,10 @@ brick_t *allocate_brick(int nb, int nc, int datatype){
 brick_t *brick = NULL;
 
 
+  #ifdef FORCE_DEBUG
+  printf("allocating brick with %d bands and %d cells of datatype %d\n", nb, nc, datatype);
+  #endif
+  
   if (nb < 1){
     printf("cannot allocate %d-band brick.\n", nb); 
     return NULL;}
@@ -66,10 +70,10 @@ brick_t *brick = NULL;
   alloc((void**)&brick->nodata,     nb, sizeof(int));
   alloc((void**)&brick->scale,      nb, sizeof(float));
   alloc((void**)&brick->wavelength, nb, sizeof(float));
-  alloc_2D((void***)&brick->unit, nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&brick->domain, nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&brick->bandname,   nb, NPOW_10, sizeof(char));
-  alloc_2D((void***)&brick->sensor,     nb, NPOW_10, sizeof(char));
+  alloc_string_vector(&brick->unit, nb, 1);
+  alloc_string_vector(&brick->domain, nb, 1);
+  alloc_string_vector(&brick->bandname, nb, 1);
+  alloc_string_vector(&brick->sensor, nb, 1);
   alloc((void**)&brick->date, nb, sizeof(date_t));
   
   init_brick_bands(brick);
@@ -110,10 +114,10 @@ int datatype = get_brick_datatype(brick);
   re_alloc((void**)&brick->nodata,       nb0, nb, sizeof(int));
   re_alloc((void**)&brick->scale,        nb0, nb, sizeof(float));
   re_alloc((void**)&brick->wavelength,   nb0, nb, sizeof(float));
-  re_alloc_2D((void***)&brick->unit,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&brick->domain,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&brick->bandname, nb0, NPOW_10, nb, NPOW_10, sizeof(char));
-  re_alloc_2D((void***)&brick->sensor,   nb0, NPOW_10, nb, NPOW_10, sizeof(char));
+  re_alloc_string_vector(&brick->unit, nb, brick->unit.length);
+  re_alloc_string_vector(&brick->domain, nb, brick->domain.length);
+  re_alloc_string_vector(&brick->bandname, nb, brick->bandname.length);
+  re_alloc_string_vector(&brick->sensor,   nb, brick->sensor.length);
   re_alloc((void**)&brick->date,         nb0, nb, sizeof(date_t));
 
   if (reallocate_brick_bands(brick, nb) == FAILURE){
@@ -137,7 +141,7 @@ int datatype = get_brick_datatype(brick);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t *copy_brick(brick_t *from, int nb, int datatype){
 brick_t *brick = NULL; 
-int b, p;
+
 
   if (from->chunk[_X_] < 0 || from->chunk[_Y_] < 0){
     if ((brick = allocate_brick(nb, from->nc, datatype)) == NULL) return NULL;
@@ -146,16 +150,16 @@ int b, p;
   }
 
 
-  set_brick_name(brick, from->name);
-  set_brick_product(brick, from->product);
-  set_brick_dirname(brick, from->dname);
-  set_brick_filename(brick, from->fname);
+  set_brick_name(brick, from->name.string);
+  set_brick_product(brick, from->product.string);
+  set_brick_dirname(brick, from->dname.string);
+  set_brick_filename(brick, from->fname.string);
   set_brick_sensorid(brick, from->sid);
 
-  set_brick_provdir(brick, from->provdir);
-  set_brick_nprovenance(brick, from->nprovenance);
-  for (p=0; p<from->nprovenance; p++){
-    set_brick_provenance(brick, p, from->provenance[p]);
+  set_brick_provdir(brick, from->provdir.string);
+  set_brick_nprovenance(brick, from->provenance.number);
+  for (int p=0; p<from->provenance.number; p++){
+    set_brick_provenance(brick, p, from->provenance.string[p]);
   }
 
   set_brick_geotran(brick, from->geotran);
@@ -171,17 +175,17 @@ int b, p;
   set_brick_chunky(brick, from->chunk[_Y_]);
   set_brick_tilex(brick, from->tile[_X_]);
   set_brick_tiley(brick, from->tile[_Y_]);
-  set_brick_proj(brick, from->proj);
-  set_brick_par(brick, from->par);
+  set_brick_proj(brick, from->proj.string);
+  set_brick_par(brick, from->par.string);
 
   set_brick_format(brick, &from->format);
   set_brick_open(brick, from->open);
   set_brick_explode(brick, from->explode);
 
   if (nb == from->nb){
-    for (b=0; b<nb; b++) copy_brick_band(brick, b, from, b);
+    for (int b=0; b<nb; b++) copy_brick_band(brick, b, from, b);
   } else {
-    for (b=0; b<nb; b++) copy_brick_band(brick, b, from, 0);
+    for (int b=0; b<nb; b++) copy_brick_band(brick, b, from, 0);
   }
 
   return brick;
@@ -193,12 +197,17 @@ int b, p;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void free_brick(brick_t *brick){
-int nb;
 
   if (brick == NULL) return;
   
-  nb = get_brick_nbands(brick);
-  
+  free_string(&brick->name);
+  free_string(&brick->product);
+  free_string(&brick->dname);
+  free_string(&brick->fname);
+  free_string(&brick->provdir);
+  free_string(&brick->proj);
+  free_string(&brick->par);
+
   if (brick->save        != NULL) free((void*)brick->save);
   if (brick->nodata      != NULL) free((void*)brick->nodata);
   if (brick->scale       != NULL) free((void*)brick->scale);
@@ -210,19 +219,17 @@ int nb;
   brick->wavelength  = NULL;
   brick->date        = NULL;
 
-  if (brick->provenance != NULL) free_2D((void**)brick->provenance, brick->nprovenance);
-  brick->provenance = NULL;
+  free_string_vector(&brick->provenance);
 
-  if (brick->unit     != NULL) free_2D((void**)brick->unit,     nb);
-  if (brick->domain   != NULL) free_2D((void**)brick->domain,   nb);
-  if (brick->bandname != NULL) free_2D((void**)brick->bandname, nb);
-  if (brick->sensor   != NULL) free_2D((void**)brick->sensor,   nb);
-  brick->unit     = NULL;
-  brick->domain   = NULL;
-  brick->bandname = NULL;
-  brick->sensor   = NULL;
+  free_string_vector(&brick->unit);
+  free_string_vector(&brick->domain);
+  free_string_vector(&brick->bandname);
+  free_string_vector(&brick->sensor);
+
+  free_gdaloptions(&brick->format);
   
   free_brick_bands(brick);
+
 
   free((void*)brick);
   brick = NULL;
@@ -333,10 +340,10 @@ void copy_brick_band(brick_t *brick, int b, brick_t *from, int b_from){
   set_brick_nodata(brick, b, from->nodata[b_from]);
   set_brick_scale(brick, b, from->scale[b_from]);
   set_brick_wavelength(brick, b, from->wavelength[b_from]);
-  set_brick_unit(brick, b, from->unit[b_from]);
-  set_brick_domain(brick, b, from->domain[b_from]);
-  set_brick_bandname(brick, b, from->bandname[b_from]);
-  set_brick_sensor(brick, b, from->sensor[b_from]);
+  set_brick_unit(brick, b, from->unit.string[b_from]);
+  set_brick_domain(brick, b, from->domain.string[b_from]);
+  set_brick_bandname(brick, b, from->bandname.string[b_from]);
+  set_brick_sensor(brick, b, from->sensor.string[b_from]);
   set_brick_date(brick, b, from->date[b_from]);
 
   return;
@@ -520,14 +527,15 @@ int datatype;
 void init_brick(brick_t *brick){
 
 
-  copy_string(brick->name,      NPOW_10, "NA");
-  copy_string(brick->product,   NPOW_10, "NA");
-  copy_string(brick->dname,     NPOW_10, "NA");
-  copy_string(brick->fname,     NPOW_10, "NA");
-  copy_string(brick->provdir,   NPOW_10, "NA");
+  fill_string(&brick->name, "NA");
+  fill_string(&brick->product, "NA");
+  fill_string(&brick->dname, "NA");
+  fill_string(&brick->fname, "NA");
+  fill_string(&brick->provdir, "NA");
 
-  brick->nprovenance = 0;
-  brick->provenance  = NULL;
+  brick->provenance.string = NULL;
+  brick->provenance.number = 0;
+  brick->provenance.length = 0;
 
   brick->sid = -1;
   default_gdaloptions(_FMT_GTIFF_, &brick->format);
@@ -554,19 +562,19 @@ void init_brick(brick_t *brick){
   brick->tile[_X_] = 0;
   brick->tile[_Y_] = 0;
 
-  copy_string(brick->proj,NPOW_10, "NA");
-  copy_string(brick->par, NPOW_14, "NA");
+  fill_string(&brick->proj, "NA");
+  fill_string(&brick->par, "NA");
 
   brick->save   = NULL;
   brick->nodata = NULL;
   brick->scale  = NULL;
 
   brick->wavelength = NULL;
-  brick->unit = NULL;
-  brick->domain = NULL;
-  brick->bandname   = NULL;
-  brick->sensor     = NULL;
-  brick->date       = NULL;
+  brick->unit.string = NULL; brick->unit.number = 0; brick->unit.length = 0;
+  brick->domain.string = NULL; brick->domain.number = 0; brick->domain.length = 0;
+  brick->bandname.string = NULL; brick->bandname.number = 0; brick->bandname.length = 0;
+  brick->sensor.string = NULL; brick->sensor.number = 0; brick->sensor.length = 0;
+  brick->date = NULL;
 
   brick->vshort  = NULL;
   brick->vfloat  = NULL;
@@ -590,10 +598,10 @@ int b;
     brick->nodata[b] = 0;
     brick->scale[b] = 0;
     brick->wavelength[b] = 0;
-    copy_string(brick->unit[b],     NPOW_10, "NA");
-    copy_string(brick->domain[b],   NPOW_10, "NA");
-    copy_string(brick->bandname[b], NPOW_10, "NA");
-    copy_string(brick->sensor[b],   NPOW_10, "NA");
+    fill_string_vector(&brick->unit, b, "NA");
+    fill_string_vector(&brick->domain, b, "NA");
+    fill_string_vector(&brick->bandname, b, "NA");
+    fill_string_vector(&brick->sensor, b, "NA");
     init_date(&brick->date[b]);
   }
 
@@ -606,17 +614,16 @@ int b;
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_brick_info(brick_t *brick){
-int b, p;
 
 
-  printf("\nbrick info for %s - %s - SID %d\n", brick->name, brick->product, brick->sid);
+  printf("\nbrick info for %s - %s - SID %d\n", brick->name.string, brick->product.string, brick->sid);
   printf("open: %d, explode %d\n", 
     brick->open, brick->explode);
   print_gdaloptions(&brick->format);
   printf("datatype %d with %d bytes\n", 
     brick->datatype, brick->byte);
-  printf("filename: %s/%s\n", brick->dname, brick->fname);
-  for (p=0; p<brick->nprovenance; p++) printf("input #%04d: %s\n", brick->nprovenance+1, brick->provenance[p]);
+  printf("filename: %s/%s\n", brick->dname.string, brick->fname.string);
+  for (int p=0; p<brick->provenance.number; p++) printf("input #%04d: %s\n", p+1, brick->provenance.string[p]);
   printf("nx: %d, ny: %d, nc: %d, res: %.3f, nb: %d\n", 
     brick->nx, brick->ny, brick->nc, 
     brick->geotran[_GT_RES_], brick->nb);
@@ -633,10 +640,10 @@ int b, p;
     brick->geotran[_GT_ULX_], brick->geotran[_GT_XRES_],
     brick->geotran[_GT_XROT_], brick->geotran[_GT_ULY_],
     brick->geotran[_GT_YROT_], brick->geotran[_GT_YRES_]);
-  printf("proj: %s\n", brick->proj);
-  printf("par: %s\n", brick->par);
+  printf("proj: %s\n", brick->proj.string);
+  printf("par: %s\n", brick->par.string);
 
-  for (b=0; b<brick->nb; b++) print_brick_band_info(brick, b);
+  for (int b=0; b<brick->nb; b++) print_brick_band_info(brick, b);
 
   printf("\n");
 
@@ -654,7 +661,7 @@ void print_brick_band_info(brick_t *brick, int b){
   printf("++band # %d - save %d, nodata: %d, scale: %f\n", 
     b, brick->save[b], brick->nodata[b], brick->scale[b]);
   printf("wvl: %f, domain: %s, band name: %s, sensor ID: %s\n", 
-    brick->wavelength[b], brick->domain[b], brick->bandname[b], brick->sensor[b]);
+    brick->wavelength[b], brick->domain.string[b], brick->bandname.string[b], brick->sensor.string[b]);
   print_date(&brick->date[b]);
     
   return;
@@ -818,7 +825,7 @@ char domain_[NPOW_10];
 void set_brick_name(brick_t *brick, const char *name){
 
 
-  copy_string(brick->name, NPOW_10, name);
+  fill_string(&brick->name, name);
 
   return;
 }
@@ -833,7 +840,7 @@ void set_brick_name(brick_t *brick, const char *name){
 void get_brick_name(brick_t *brick, char name[], size_t size){
 
 
-  copy_string(name, size, brick->name);
+  copy_string(name, size, brick->name.string);
 
   return;
 }
@@ -847,7 +854,7 @@ void get_brick_name(brick_t *brick, char name[], size_t size){
 void set_brick_product(brick_t *brick, const char *product){
   
 
-  copy_string(brick->product, NPOW_10, product);
+  fill_string(&brick->product, product);
 
   return;
 }
@@ -862,7 +869,7 @@ void set_brick_product(brick_t *brick, const char *product){
 void get_brick_product(brick_t *brick, char product[], size_t size){
 
 
-  copy_string(product, size, brick->product);
+  copy_string(product, size, brick->product.string);
 
   return;
 }
@@ -876,7 +883,7 @@ void get_brick_product(brick_t *brick, char product[], size_t size){
 void set_brick_provdir(brick_t *brick, const char *provdir){
 
 
-  copy_string(brick->provdir, NPOW_10, provdir);
+  fill_string(&brick->provdir, provdir);
 
   return;
 }
@@ -891,7 +898,7 @@ void set_brick_provdir(brick_t *brick, const char *provdir){
 void get_brick_provdir(brick_t *brick, char provdir[], size_t size){
 
 
-  copy_string(provdir, size, brick->provdir);
+  copy_string(provdir, size, brick->provdir.string);
 
   return;
 }
@@ -905,7 +912,7 @@ void get_brick_provdir(brick_t *brick, char provdir[], size_t size){
 void set_brick_dirname(brick_t *brick, const char *dname){
 
 
-  copy_string(brick->dname, NPOW_10, dname);
+  fill_string(&brick->dname, dname);
 
   return;
 }
@@ -920,7 +927,7 @@ void set_brick_dirname(brick_t *brick, const char *dname){
 void get_brick_dirname(brick_t *brick, char dname[], size_t size){
 
 
-  copy_string(dname, size, brick->dname);
+  copy_string(dname, size, brick->dname.string);
 
   return;
 }
@@ -934,7 +941,7 @@ void get_brick_dirname(brick_t *brick, char dname[], size_t size){
 void set_brick_filename(brick_t *brick, const char *fname){
 
 
-  copy_string(brick->fname, NPOW_10, fname);
+  fill_string(&brick->fname, fname);
 
   return;
 }
@@ -949,7 +956,7 @@ void set_brick_filename(brick_t *brick, const char *fname){
 void get_brick_filename(brick_t *brick, char fname[], size_t size){
 
 
-  copy_string(fname, size, brick->fname);
+  copy_string(fname, size, brick->fname.string);
 
   return;
 }
@@ -962,18 +969,16 @@ void get_brick_filename(brick_t *brick, char fname[], size_t size){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_nprovenance(brick_t *brick, int n){
-  
 
-  if (brick->nprovenance > 0 && brick->nprovenance != n && brick->provenance != NULL){
-    free_2D((void**)brick->provenance, brick->nprovenance);
-    brick->provenance = NULL;
+  if (brick->provenance.number > 0 && brick->provenance.number != n && brick->provenance.string != NULL){
+    free_string_vector(&brick->provenance);
   }
 
-  if (brick->provenance == NULL){
-    alloc_2D((void***)&brick->provenance, n, NPOW_10, sizeof(char));
+  if (brick->provenance.string == NULL){
+    alloc_string_vector(&brick->provenance, n, 1);
   }
 
-  brick->nprovenance = n;
+  brick->provenance.number = n;
 
   return;
 }
@@ -984,8 +989,8 @@ void set_brick_nprovenance(brick_t *brick, int n){
 +++ Return: number
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int get_brick_nprovenance(brick_t *brick){
-  
-  return brick->nprovenance;
+
+  return brick->provenance.number;
 }
 
 
@@ -998,7 +1003,7 @@ int get_brick_nprovenance(brick_t *brick){
 void set_brick_provenance(brick_t *brick, int id, const char *pname){
 
 
-  copy_string(brick->provenance[id], NPOW_10, pname);
+  fill_string_vector(&brick->provenance, id, pname);
 
   return;
 }
@@ -1014,7 +1019,7 @@ void set_brick_provenance(brick_t *brick, int id, const char *pname){
 void get_brick_provenance(brick_t *brick, int id, char pname[], size_t size){
 
 
-  copy_string(pname, size, brick->provenance[id]);
+  copy_string(pname, size, brick->provenance.string[id]);
 
   return;
 }
@@ -1051,8 +1056,7 @@ int get_brick_sensorid(brick_t *brick){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_format(brick_t *brick, gdalopt_t *format){
 
-
-  brick->format = *format;
+  copy_gdaloptions(&brick->format, format);
 
   return;
 }
@@ -1674,7 +1678,7 @@ double geox, geoy;
   mapy = get_brick_y(brick, i);
 
   // geo coordinate
-  warp_any_to_geo(mapx, mapy, &geox, &geoy, brick->proj);
+  warp_any_to_geo(mapx, mapy, &geox, &geoy, brick->proj.string);
   
   *lon = geox;
   *lat = geoy;
@@ -1830,7 +1834,7 @@ double get_brick_chunkheight(brick_t *brick){
 void set_brick_proj(brick_t *brick, const char *proj){
 
 
-  copy_string(brick->proj, NPOW_10, proj);
+  fill_string(&brick->proj, proj);
   
   return;
 }
@@ -1845,7 +1849,7 @@ void set_brick_proj(brick_t *brick, const char *proj){
 void get_brick_proj(brick_t *brick, char proj[], size_t size){
 
 
-  copy_string(proj, size, brick->proj);
+  copy_string(proj, size, brick->proj.string);
   
   return;
 }
@@ -1859,7 +1863,7 @@ void get_brick_proj(brick_t *brick, char proj[], size_t size){
 void set_brick_par(brick_t *brick, const char *par){
 
 
-  copy_string(brick->par, NPOW_14, par);
+  fill_string(&brick->par, par);
 
   return;
 }
@@ -1874,7 +1878,7 @@ void set_brick_par(brick_t *brick, const char *par){
 void get_brick_par(brick_t *brick, char par[], size_t size){
 
 
-  copy_string(par, size, brick->par);
+  copy_string(par, size, brick->par.string);
 
   return;
 }
@@ -2000,8 +2004,7 @@ float get_brick_wavelength(brick_t *brick, int b){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_unit(brick_t *brick, int b, const char *unit){
 
-
-  copy_string(brick->unit[b], NPOW_10, unit);
+  fill_string_vector(&brick->unit, b, unit);
 
   return;
 }
@@ -2016,8 +2019,7 @@ void set_brick_unit(brick_t *brick, int b, const char *unit){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_unit(brick_t *brick, int b, char unit[], size_t size){
 
-
-  copy_string(unit, size, brick->unit[b]);
+  copy_string(unit, size, brick->unit.string[b]);
 
   return;
 }
@@ -2031,8 +2033,7 @@ void get_brick_unit(brick_t *brick, int b, char unit[], size_t size){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_domain(brick_t *brick, int b, const char *domain){
 
-
-  copy_string(brick->domain[b], NPOW_10, domain);
+  fill_string_vector(&brick->domain, b, domain);
 
   return;
 }
@@ -2047,8 +2048,7 @@ void set_brick_domain(brick_t *brick, int b, const char *domain){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_domain(brick_t *brick, int b, char domain[], size_t size){
 
-
-  copy_string(domain, size, brick->domain[b]);
+  copy_string(domain, size, brick->domain.string[b]);
 
   return;
 }
@@ -2062,8 +2062,7 @@ void get_brick_domain(brick_t *brick, int b, char domain[], size_t size){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_bandname(brick_t *brick, int b, const char *bandname){
 
-
-  copy_string(brick->bandname[b], NPOW_10, bandname);
+  fill_string_vector(&brick->bandname, b, bandname);
 
   return;
 }
@@ -2078,8 +2077,7 @@ void set_brick_bandname(brick_t *brick, int b, const char *bandname){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_bandname(brick_t *brick, int b, char bandname[], size_t size){
 
-  
-  copy_string(bandname, size, brick->bandname[b]);
+  copy_string(bandname, size, brick->bandname.string[b]);
 
   return;
 }
@@ -2093,8 +2091,7 @@ void get_brick_bandname(brick_t *brick, int b, char bandname[], size_t size){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void set_brick_sensor(brick_t *brick, int b, const char *sensor){
 
-
-  copy_string(brick->sensor[b], NPOW_10, sensor);
+  fill_string_vector(&brick->sensor, b, sensor);
 
   return;
 }
@@ -2109,8 +2106,7 @@ void set_brick_sensor(brick_t *brick, int b, const char *sensor){
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void get_brick_sensor(brick_t *brick, int b, char sensor[], size_t size){
 
-
-  copy_string(sensor, size, brick->sensor[b]);
+  copy_string(sensor, size, brick->sensor.string[b]);
 
   return;
 }

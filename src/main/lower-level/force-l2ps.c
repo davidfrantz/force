@@ -303,6 +303,7 @@ GDALDriverH driver;
   
   CPLPopErrorHandler();
 
+  GDALDestroy();
 
   printf("Success! "); proctime_print("Processing time", TIME);
 

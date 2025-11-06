@@ -265,6 +265,7 @@ int         exit_code = SUCCESS;
   CPLPopErrorHandler();
   #endif
 
+  GDALDestroy();
 
   return exit_code;
 }

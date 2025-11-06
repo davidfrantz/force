@@ -337,6 +337,8 @@ enum { _BYFILE_, _BYBAND_, _INTERLEN_ };
 
   free_2D((void**)args.fsrc, args.n);
 
+  GDALDestroy();
+
   return SUCCESS; 
 }
 

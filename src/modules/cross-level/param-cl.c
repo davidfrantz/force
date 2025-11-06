@@ -139,7 +139,7 @@ params_t *params = NULL;
 
   alloc((void**)&params, 1, sizeof(params_t));
   params->n    = 0;
-  params->nmax = _BYTE_LEN_;
+  params->nmax = 10;
 
   alloc((void**)&params->par, params->nmax, sizeof(par_t));
   alloc((void**)&params->log, NPOW_14,      sizeof(char));
@@ -160,7 +160,7 @@ void reallocate_params(params_t *params){
 
   re_alloc((void**)&params->par, params->nmax, params->nmax*2, sizeof(par_t));
 
-  params->nmax *= 2;
+  params->nmax += 2;
 
   return;
 }
@@ -855,10 +855,6 @@ const char *separator = " =";
             *params->par[i].date_ = parse_date(ptr);
             break;
           case _PAR_CHAR_:
-            if (strlen(ptr) >= NPOW_10){
-              printf("cannot copy parameter, string too long.\n");
-              exit(FAILURE);
-            }
             copy_string(*params->par[i].char_, NPOW_10, ptr);
             break;
           default:
@@ -902,10 +898,6 @@ const char *separator = " =";
               params->par[i].date_vec_[0][n] = parse_date(ptr);
               break;
             case _PAR_CHAR_:
-              if (strlen(ptr) >= NPOW_10){
-                printf("cannot copy parameter, string too long.\n");
-                exit(FAILURE);
-              }
               copy_string(params->par[i].char_vec_[0][n], NPOW_10, ptr);
               break;
             default:

@@ -824,6 +824,8 @@ void free_param_higher(par_hl_t *phl){
 
   if (phl->input_level1 == _INP_FTR_) free_ftr(&phl->ftr);
 
+  free_gdaloptions(&phl->gdalopt);
+
   free((void*)phl); phl = NULL;
 
   return;
