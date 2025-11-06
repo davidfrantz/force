@@ -221,6 +221,8 @@ small **qim_ = NULL;
   free_brick(QAI);
   free_brick(QIM);
 
+  GDALDestroy();
+
   return SUCCESS;
 }
 

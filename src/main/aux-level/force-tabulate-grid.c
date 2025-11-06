@@ -325,6 +325,8 @@ cube_t *cube = NULL;
   //GDALClose(fp);
   OGR_DS_Destroy(fp);
 
+  GDALDestroy();
+
 
   return SUCCESS;
 }

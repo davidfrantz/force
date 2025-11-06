@@ -442,6 +442,8 @@ OGRGeometryH point;
   free_table(&sample_size);
   free_2D((void**)dictionary, length);
 
+  GDALDestroy();
+
   return SUCCESS;
 }
 

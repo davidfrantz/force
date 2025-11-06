@@ -427,7 +427,7 @@ short nodata = -9999;
 
   free((void*)modqa_);
   
-
+  GDALDestroy();
 
   return SUCCESS;
 }
