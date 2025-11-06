@@ -961,7 +961,7 @@ short   *brick_short_ = NULL;
 small   *brick_small_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
-gdalopt_t format;
+gdalopt_t format = {0};
 
 short *read_buf  = NULL;
 short *psf_buf   = NULL;
@@ -1237,10 +1237,11 @@ double tol = 5e-3;
   set_brick_nprovenance(brick, 1);
   set_brick_provenance(brick, 0, file);
 
-  default_gdaloptions(_FMT_GTIFF_, &format);
+  set_brick_open(brick, OPEN_FALSE);
 
-  set_brick_open(brick,   OPEN_FALSE);
+  default_gdaloptions(_FMT_GTIFF_, &format);
   set_brick_format(brick, &format);
+  free_gdaloptions(&format);
   
   //printf("some of the ARD metadata should be read from disc. TBI\n");
   for (b=0; b<nb; b++) set_brick_nodata(brick, b, nodata);
