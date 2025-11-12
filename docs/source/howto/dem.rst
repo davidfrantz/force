@@ -60,6 +60,7 @@ If possible, it is advised to use a finer resolution.
 However, as it is hard to acquire high spatial resolution DEMs, especially for larger areas, lower resolution works too.
 Often, we use the 30m SRTM DEM or 30m ASTER DEM, or a combination thereof, e.g. SRTM filled with ASTER (SRTM is a bit better, but there are holes in mountainous regions, and coverage is only 60°N-60°S).
 
+The GLO-30 DEM aka Copernicus DEM can be obtained from `Copernicus Data Ecosystem <https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM>`_.
 The SRTM DEM can be obtained from `EarthExplorer <https://earthexplorer.usgs.gov/>`_.
 The ASTER DEM can be obtained from `EarthData <https://search.earthdata.nasa.gov/search/>`_ or `Japan Space Systems <https://ssl.jspacesystems.or.jp/ersdac/GDEM/E/>`_.
 Both are free of charge.
@@ -132,6 +133,73 @@ The filepath of this file needs to given in the FORCE L2PS parameter file:
 
 ``FILE_DEM = /data/Dagobah/global/dem/srtm.vrt``
 
+
+Level 2 processing with `USE_DEM_DATABASE`
+------------------------------------------
+
+Starting from the FORCE v.3.9.0 Level 2 processing can be done using the abovementioned regional or global DEM mosaic, or the collection of WRS-2- or MGRT-tile specific DEMs. The latter option is enabled through the ``USE_DEM_DATABASE`` parameter in the LEVEL2 parameter file. Whenever ``USE_DEM_DATABASE = TRUE`` the ``FILE_DEM`` needs to point to a folder with a collection of VRTs generated for each Landsat of Sentinel-2 tile. **Using the tile-specific DEM is highly recommended for the GLO-30 Copernicus DEM**, which data are distributed in *six latitude bands*, each with a a specific longitude reduction factor. Consequently, using the GLO-30 DEM through a single mosaic may result in a considerable deviation from the nominal (i.e., 30m) and effective resolution of the DEM. This difference is especially excarbated when a mosaic is created for areas spanning low to high latitude regions. 
+
+.. admonition:: Detailed information
+
+   For more information, please read this
+   `discussion <https://github.com/davidfrantz/force/discussions/371>`_.
+
+To overcome these limitations, the DEM DATABASE should comprise a 'local' DEM for each WRS-2 and MGRT tile. 
+A precomputed global collections of WRS-2- and MGRS-specific VRTs are available `HERE <https://box.hu-berlin.de/d/68b20fa1d761442da0d8/>`_. The distributed archives include only the VRT files. The Copernicus GLO-30 DEM tiles must already be present in the user's computational environment.
+VRTs are built with relative paths and must be placed in a directory located at the same level as the copernicus directory containing the DEM tiles.
+Landsat and Sentinel-2 specific VRTs can be deposited in the same parent directory.
+
+.. code-block:: bash
+
+   higher-level-dir
+   ├── DEM_VRT
+   │   ├── MGRS_T01CDH.vrt
+   │   ├── MGRS_T01CDJ.vrt
+   │   ...
+   │   ├── WRS-2_013001.vrt
+   │   ├── WRS-2_013002.vrt
+   │   ...
+   │   ├── MGRS_T60XWF.vrt
+   │   ...
+   │   └── WRS-2_221015.vrt
+   ├── copernicus
+   │   ├── Copernicus_DSM_10_N00_00_E006_00_DEM.tif
+   │   ├── Copernicus_DSM_10_N00_00_E009_00_DEM.tif
+   │   ...
+   │   └── Copernicus_DSM_10_S90_00_W180_00_DEM.tif
+   ...
+
+Since the GLO-30 tiles from the Caucasus area are under embargo, under the aforementioned link, we provide SRTM tiles from this region (SRTM_Caucasus.tar), and respective WRS-2 (WRS-2_VRT_Caucasus.tar) and MGRS (MGRS_VRT_Caucasus.tar) collections of VRTs.
+
+To allow for a seamless incorporation of the SRTM DEM data, the SRTM tiles from the SRTM_Caucasus.tar need to be placed in a srtm_aster directory located at the same level as copernicus and DEM_VRT directories.
+
+.. code-block:: bash
+
+   higher-level-dir
+   ├── DEM_VRT
+   │   ├── MGRS_T01CDH.vrt
+   │   ├── MGRS_T01CDJ.vrt
+   │   ...
+   │   ├── WRS-2_013001.vrt
+   │   ├── WRS-2_013002.vrt
+   │   ...
+   │   ├── MGRS_T60XWF.vrt
+   │   ...
+   │   └── WRS-2_221015.vrt
+   ├── copernicus
+   │   ├── Copernicus_DSM_10_N00_00_E006_00_DEM.tif
+   │   ├── Copernicus_DSM_10_N00_00_E009_00_DEM.tif
+   │   ...
+   │   ├── Copernicus_DSM_10_S90_00_W180_00_DEM.tif
+   ├── srtm_aster
+   │   ├── n38_e045_1arc_v3
+   │   ├── n38_e046_1arc_v3
+   │   ...
+   │   └── n41_e049_1arc_v3
+   ...
+
+
+Furthermore, the respective VRT files available in the global VRT distribution need to be overwritten with VRTs available in the WRS-2_VRT_Caucasus.tar and MGRS-2_VRT_Caucasus.tar archives.
 
 ------------
 
