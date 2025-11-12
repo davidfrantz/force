@@ -137,7 +137,7 @@ The filepath of this file needs to given in the FORCE L2PS parameter file:
 Level 2 processing with `USE_DEM_DATABASE`
 ------------------------------------------
 
-Starting from the FORCE v.3.9.0 Level 2 processing can be done using the abovementioned regional or global DEM mosaic, or the collection of WRS-2- or MGRT-tile specific DEMs. The latter option is enabled through the ``USE_DEM_DATABASE`` parameter in the LEVEL2 parameter file. Whenever ``USE_DEM_DATABASE = TRUE`` the ``FILE_DEM`` needs to point to a folder with a collection of VRTs generated for each Landsat of Sentinel-2 tile. **Using the tile-specific DEM is highly recommended for the GLO-30 Copernicus DEM**, which data are distributed in *six latitude bands*, each with a a specific longitude reduction factor. Consequently, using the GLO-30 DEM through a single mosaic may result in a considerable deviation from the nominal (i.e., 30m) and effective resolution of the DEM. This difference is especially excarbated when a mosaic is created for areas spanning low to high latitude regions. 
+Starting from the FORCE v. 3.9.0 Level 2 processing can be done using the abovementioned regional or global DEM mosaic, or the collection of WRS-2- or MGRT-tile specific DEMs. The latter option is enabled through the ``USE_DEM_DATABASE`` parameter in the LEVEL2 parameter file. Whenever ``USE_DEM_DATABASE = TRUE`` the ``FILE_DEM`` needs to point to a folder with a collection of VRTs generated for each Landsat or Sentinel-2 tile. **Using the tile-specific DEM is highly recommended for the GLO-30 Copernicus DEM**, which data are distributed in *six latitude bands*, each with a specific longitude reduction factor. Consequently, using the GLO-30 DEM through a single mosaic may result in a considerable deviation from the nominal (i.e., 30m) and effective resolution of the DEM. This difference is especially exacerbated when a mosaic is created for areas spanning low to high latitude regions. 
 
 .. admonition:: Detailed information
 
@@ -171,7 +171,7 @@ Landsat and Sentinel-2 specific VRTs can be deposited in the same parent directo
 
 Since the GLO-30 tiles from the Caucasus area are under embargo, under the aforementioned link, we provide SRTM tiles from this region (SRTM_Caucasus.tar), and respective WRS-2 (WRS-2_VRT_Caucasus.tar) and MGRS (MGRS_VRT_Caucasus.tar) collections of VRTs.
 
-To allow for a seamless incorporation of the SRTM DEM data, the SRTM tiles from the SRTM_Caucasus.tar need to be placed in a srtm_aster directory located at the same level as copernicus and DEM_VRT directories.
+To allow for a seamless incorporation of the SRTM DEM data, the SRTM tiles from the SRTM_Caucasus.tar need to be placed in an srtm_aster directory located at the same level as copernicus and DEM_VRT directories.
 
 .. code-block:: bash
 
@@ -200,6 +200,8 @@ To allow for a seamless incorporation of the SRTM DEM data, the SRTM tiles from 
 
 
 Furthermore, the respective VRT files available in the global VRT distribution need to be overwritten with VRTs available in the WRS-2_VRT_Caucasus.tar and MGRS-2_VRT_Caucasus.tar archives.
+
+
 
 ------------
 
