@@ -26,12 +26,13 @@ BASE_MASK = NULL
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
 # Output format, which is either uncompressed flat binary image format aka
-# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with LZW and hori-
-# zontal differencing; BigTiff support is enabled; the Tiff is structured 
-# with striped blocks according to the TILE_SIZE (X) and BLOCK_SIZE (Y) speci-
-# fications. Metadata are written to the ENVI header or directly into the Tiff
+# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-
+# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled 
+# with 256x256 px blocks.
+# Metadata are written to the ENVI header or directly into the Tiff
 # to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,
 # an external .aux.xml file is additionally generated.
+# Note that COG output is only possible when the chunk size matches the tile size.
 # Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}
 OUTPUT_FORMAT = GTiff
 # File that contains custom GDAL output options. This is only used if 
@@ -53,13 +54,18 @@ OUTPUT_EXPLODE = FALSE
 # structure the output.
 # Type: Logical. Valid values: {TRUE,FALSE}
 OUTPUT_SUBFOLDERS = FALSE
+# This parameter controls whether FORCE raises a warning or an error 
+# if no read or written bytes are detected. The default (FALSE) will 
+# result in a warning.
+# Type: Logical. Valid values: {TRUE,FALSE}
+FAIL_IF_EMPTY = FALSE
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
 # This module is using a streaming mechanism to speed up processing. There
 # are three processing teams (3 Threads) that simultaneously handle Input,
-# Processing, and Output. Example: when Block 2 is being processed, data
-# from Block 3 are already being input and results from Block 1 are being
+# Processing, and Output. Example: when chunk 2 is being processed, data
+# from chunk 3 are already being input and results from chunk 1 are being
 # output. Each team can have multiple sub-threads to speed up the work. The
 # number of threads to use for each team is given by following parameters.
 # Type: Integer. Valid range: [1,...
@@ -96,17 +102,17 @@ Y_TILE_RANGE = 0 0
 # Optional. If NULL, the complete analysis extent is processed
 # Type: full file path
 FILE_TILE = NULL
-# This parameter can be used to override the default blocksize of the input
-# images (as specified in the datacube-definition.prj file). This can be
-# necessary if the default blocksize is too large for your system and you
-# cannot fit all necessary data into RAM. Note that processing of larger
-# blocksizes is more efficient. The tilesize must be dividable by the blocksize
-# without remainder. Set to 0, to use the default blocksize
-# Type: Double. Valid range: 0 or [RESOLUTION,TILE_SIZE]
-BLOCK_SIZE = 0
-# Analysis resolution. The tile (and block) size must be dividable by this
+# This parameter is used to define the size of the sub-tile processing units.
+# Most efficient is to use a chunk size that coincides with the tile size. Using 
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# The tilesize must be dividable by the chunk size without remainder.
+# Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
+# parameter is not permitted anymore.
+# Type: Integer list. Valid range: ]0,TILE_SIZE]
+CHUNK_SIZE = 0 0
+# Analysis resolution. The tile (and chunk) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
-# Type: Double. Valid range: ]0,BLOCK_SIZE]
+# Type: Double. Valid range: ]0,CHUNK_SIZE]
 RESOLUTION = 10
 # How to reduce spatial resolution for cases when the image resolution is higher
 # than the analysis resolution. If FALSE, the resolution is degraded using Nearest
@@ -125,23 +131,17 @@ USE_L2_IMPROPHE = FALSE
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
 # Sensors to be used in the analysis. Multi-sensor analyses are restricted
-# to the overlapping bands. Following sensors are available: LND04 (6-band
-# Landsat 4 TM), LND05 (6-band Landsat 5 TM), LND07 (6-band Landsat 7 ETM+),
-# LND08/09 (6-band Landsat 8-9 OLI), SEN2[A-D] (10-band Sentinel-2[A-D])
-# sen2[a-d] (4-band Sentinel-2[A-D])
-# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-
-# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID
-# (2-band VV-VH Sentinel-1B IW descending), MOD01 (7-band Terra MODIS), MOD02.
-# (7-band Aqua MODIS).
-# The resulting outputs are named according to their band designation, i.e. 
-# LNDLG (6-band Landsat legacy bands), SEN2L (10-band Sentinel-2 land surface
-# bands), SEN2H (4-band Sentinel-2 high-res bands), R-G-B (3-band visual) or
-# VVVHP (VV/VH polarized), MODIS (7-band MODIS).
-# BAP Composites with such a band designation can be input again (e.g. 
-# SENSORS = LNDLG).
-# Type: Character list. Valid values: {LND04,LND05,LND07,LND08,LND09,SEN2A,
-#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID,MOD01,MOD02,LNDLG,SEN2L,SEN2H,R-G-B,VVVHP,MODIS}
+# to the overlapping bands. Each sensor needs a sensor definition in the runtime-data
+# directory. New sensors can be added by the user. New bandnames can be added, too.
+# Type: Character list. 
 SENSORS = LND08 LND09 SEN2A SEN2B SEN2C
+# Target sensor that represents the combination of input sensors.
+# A sensor definition for this target sensor needs to exist to make sure that processing 
+# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2, 
+# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2 
+# sensors, the target sensor could be SEN2L. Valid values are the same as for SENSORS.
+# Type: Character list. 
+TARGET_SENSOR = LNDLG
 # Main product type to be used. Usually, this is a reflectance product like BOA.
 # When using composites, you may use BAP. This can be anything, but make sure that
 # the string can uniquely identify your product. As an example, do not use LEVEL2.
@@ -202,6 +202,11 @@ DATE_RANGE = 2010-01-01 2019-12-31
 # will use all October-March observations from 2010-2019.
 # Type: Integer list. Valid values: [1,365]
 DOY_RANGE = 1 365
+# Landat 7 was de-orbited in 2019. Landsat 7 data might be available 
+# in your data cube even though you might not want to use it anymore. 
+# This parameters sets the date after which Landsat 7 data should be ignored.
+# Type: Date. Format: YYYY-MM-DD
+DATE_IGNORE_LANDSAT_7 = 2099-12-31
 
 # Best Available Pixel (BAP) compositing
 # ------------------------------------------------------------------------
@@ -229,6 +234,10 @@ SELECT = TRUE
 # The weigting of scores is applied in both cases.
 # Type: Character. Valid values: {ADDITIVE,MULTIPLICATIVE}
 COMBINE_SCORES = ADDITIVE
+# Which auxiliary products should be used? These should match with the usage of
+# the scores below. Give NULL to disable using any auxiliary product.
+# Type: Character. Valid values: {DST,HOT,VZN}
+REQUIRE_AUX_PRODUCTS = DST HOT
 # These parameters specify the function values used for fitting the DOY
 # scoring functions. The function type is automatically chosen from the 
 # given values, i.e.
@@ -297,6 +306,10 @@ SCORE_VZEN_WEIGHT = 0.0
 # needs to be given in meters.
 # Type: Float. Valid values: [1,...
 DREQ = 3000
+# This parameter indicates the value of the haze optical score (HOT), at which 
+# the haze score is at 0.5.
+# Type: Float. Valid values: [-600,600]
+HREQ = -150
 # This parameter indicates the view zenith angle at which the view zenith score
 # approaches 0.0. The angle needs to be given in degree. 
 # Type: Float. Valid values: [1,90]
