@@ -1058,12 +1058,12 @@ int svgrid = 5000;
 
   // interpolate the grids
   // angles are given at grid intersections, we need one value per cell
-  interpolate_sunview_grid(s_sz, sv_nx, sv_ny, meta->s2.nodata);
-  interpolate_sunview_grid(s_sa, sv_nx, sv_ny, meta->s2.nodata);
+  interpolate_sunview_grid(&s_sz, sv_nx, sv_ny, meta->s2.nodata);
+  interpolate_sunview_grid(&s_sa, sv_nx, sv_ny, meta->s2.nodata);
   for (b=0; b<nb; b++){
     for (d=0; d<nd; d++){
-      interpolate_sunview_grid(s_vz[b][d], sv_nx, sv_ny, meta->s2.nodata);
-      interpolate_sunview_grid(s_va[b][d], sv_nx, sv_ny, meta->s2.nodata);
+      interpolate_sunview_grid(&s_vz[b][d], sv_nx, sv_ny, meta->s2.nodata);
+      interpolate_sunview_grid(&s_va[b][d], sv_nx, sv_ny, meta->s2.nodata);
     }
   }
   sv_nx--;
@@ -1350,7 +1350,7 @@ int nchar;
 --- nodata:   nodata value
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata){
+void interpolate_sunview_grid(float **int_grid, int int_nx, int int_ny, float nodata){
 int i, j, ii, jj;
 int cell_nx, cell_ny;
 int cell_p, int_p;
@@ -1374,8 +1374,8 @@ float sum, num;
 
       int_p = (i+ii) * int_ny + (j+jj);
 
-      if (int_grid[int_p] > 0){
-        sum += int_grid[int_p];
+      if ((*int_grid)[int_p] > 0){
+        sum += (*int_grid)[int_p];
         num++;
       }
     }
@@ -1390,8 +1390,8 @@ float sum, num;
   }
   }
 
-  memmove(int_grid, cell_grid, cell_nx*cell_ny*sizeof(float));
-  re_alloc((void**)&int_grid, int_nx*int_ny, cell_nx*cell_ny, sizeof(float));
+  memmove(*int_grid, cell_grid, cell_nx*cell_ny*sizeof(float));
+  re_alloc((void**)int_grid, int_nx*int_ny, cell_nx*cell_ny, sizeof(float));
   free((void*)cell_grid);
 
   return;
