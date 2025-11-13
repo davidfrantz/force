@@ -1234,7 +1234,7 @@ int nchar;
     copy_string(add2, NPOW_10, "1");
   } else {
     add1[0] = '\0';
-    add1[0] = '\0';
+    add2[0] = '\0';
   }
 
   if (type == 0){
