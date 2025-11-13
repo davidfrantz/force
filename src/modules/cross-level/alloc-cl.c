@@ -168,14 +168,18 @@ int i;
 
   re_alloc((void**)&arr, n1_now, n1, sizeof(void*));
 
-  if (n1_now < n1){
-    for (i=n1_now; i<n1; i++) alloc((void**)&arr[i], n2, size);
-    #ifdef FORCE_DEBUG
-    for (i=n1_now; i<n1; i++) printf("allocated element %d of length %lu and size %lu\n", i, n2, size);
-    #endif
-  }
+  for (i=0; i<n1; i++){
 
-  for (i=0; i<n1_now; i++) re_alloc((void**)&arr[i], n2_now, n2, size);
+    if (i >= n1_now){
+      alloc((void**)&arr[i], n2, size);
+      #ifdef FORCE_DEBUG
+      printf("allocated element %d of length %lu of size %lu\n", i, n2, size);
+      #endif
+    } else {
+      re_alloc((void**)&arr[i], n2_now, n2, size);
+    }
+
+  }
 
   *ptr = arr;
   return;
