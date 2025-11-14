@@ -509,7 +509,6 @@ float wlon, elon, nlat, slat, dboff[3] = { 0, 360, -360 };
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void compile_modis_wvp(char *dir_geo, char *dir_hdf, date_t d_now, char *sen, int nc, float **COO, double **avg, double **count, char *key){
 char geoname[NPOW_10];
-char pattern[NPOW_10], ftp_pattern[NPOW_10], doy[4];
 char httplist[NPOW_10];
 char loclist[NPOW_10];
 char basename[NPOW_10];
@@ -616,12 +615,20 @@ const char *separator = ",";
     // for every remaining granule: get correct HDF name, download if not there and process
     for (i=0; i<ni; i++){
 
+      // example file name, to be overwritten
+      char pattern[NPOW_10] = "MOD05_L2.A2021202.0020.061.2021202161526.hdf";
+      char doy[4] = "202";
+      char ftp_pattern[NPOW_10];
+
       // appr. HDF name with wildcards
-      strncpy(pattern, sen, 3);
-      strncpy(pattern+3, "05_L2", 5);
-      strncpy(pattern+8, id[ptr[i]]+5, 14);
+      overwrite_string_part(pattern, 0, sen, 3);
+      overwrite_string_part(pattern, 3, "05_L2", 5);
+      overwrite_string_part(pattern, 8, id[ptr[i]]+5, 14);
       pattern[22] = '\0';
-      strncpy(doy, pattern+14, 3); doy[3] = '\0';
+  
+      overwrite_string_part(doy, 0, pattern+14, 3);
+      doy[3] = '\0';
+
       nchar = snprintf(ftp_pattern, NPOW_10, 
         "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/%s05_L2/%4d/%s/%s*", 
         sen, d_now.year, doy, pattern);

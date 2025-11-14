@@ -158,7 +158,7 @@ void reallocate_params(params_t *params){
 
   if (params->n < params->nmax) return;
 
-  re_alloc((void**)&params->par, params->nmax, params->nmax*2, sizeof(par_t));
+  re_alloc((void**)&params->par, params->nmax, params->nmax+2, sizeof(par_t));
 
   params->nmax += 2;
 

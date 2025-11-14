@@ -84,7 +84,7 @@ int print_metadata(meta_t *meta, int nb);
 int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, brick_t **dn);
 int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, brick_t **dn);
 void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type);
-void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata);
+void interpolate_sunview_grid(float **int_grid, int int_nx, int int_ny, float nodata);
 void collapse_view_grid(float ***grid, int nb, int nd, int nx, int ny, float nodata);
 int parse_metadata_mission(par_ll_t *pl2);
 int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission);

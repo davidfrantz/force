@@ -38,8 +38,8 @@ alloc-cl: prepare $(CROSS_DIR)/alloc-cl.c
 brick_base-cl: prepare $(CROSS_DIR)/brick_base-cl.c
 	$(G11) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/brick_base-cl.c -o $(OBJDIR)/brick_base-cl.o $(GDAL_LIBS)
 
-brick_io-cl: prepare $(CROSS_DIR)/brick_io-cl.c
-	$(G11) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/brick_io-cl.c -o $(OBJDIR)/brick_io-cl.o $(GDAL_LIBS)
+brick_io-cl: prepare $(CROSS_DIR)/brick_io-cl.cpp
+	$(G11) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/brick_io-cl.cpp -o $(OBJDIR)/brick_io-cl.o $(GDAL_LIBS)
 
 cite-cl: prepare $(CROSS_DIR)/cite-cl.c
 	$(GCC) -c $(CROSS_DIR)/cite-cl.c -o $(OBJDIR)/cite-cl.o

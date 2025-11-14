@@ -25,6 +25,7 @@ higher: \
     read-ard-hl \
     read-aux-hl \
     sample-hl \
+	sensor-hl \
     spec-adjust-hl \
     standardize-hl \
     stm-hl \

@@ -851,6 +851,10 @@ const char *projection = NULL;
   
       GDALDestroyGenImgProjTransformer(wopt->pTransformerArg);
       GDALDestroyWarpOptions(wopt);
+      wopt = NULL;
+
+      CSLDestroy(papszWarpOptions);
+      papszWarpOptions = NULL;
     
       for (b_=0; b_<chunk_nb; b_++){
         re_alloc((void**)&src->vshort[b_+b], src_nc, dst_nc, sizeof(short));
@@ -1151,6 +1155,9 @@ const char *projection = NULL;
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
     GDALDestroyGenImgProjTransformer(wopt->pTransformerArg);
     GDALDestroyWarpOptions(wopt);
+    wopt = NULL;
+    CSLDestroy(papszWarpOptions);
+    papszWarpOptions = NULL;
     GDALClose(src_dataset);
     GDALClose(dst_dataset);
   
