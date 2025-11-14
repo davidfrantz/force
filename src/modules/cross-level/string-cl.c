@@ -177,6 +177,35 @@ size_t suffix_len;
 }
 
 
+
+/** Overwrites part of a string with substring
++++ This function overwrites part of a string with a given replacement string.
++++ It is checked that the buffer doesn't overflow; error if so.
+--- source:      source string
+--- offset:      offset where to insert the replacement string
+--- replace:     replacement string
+--- replace_len: length of the replacement string
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void overwrite_string_part(char *source, size_t offset, const char *replace, size_t replace_len){
+
+
+  if (replace_len > strlen(replace)){
+    printf("Error: Replacement string length (%lu) exceeds length of replacement string (%lu).\n", replace_len, strlen(replace));
+    exit(1);
+  }
+
+  if (offset + replace_len > strlen(source)){
+    printf("Error: Offset (%lu) plus replacement length (%lu) exceeds source length (%lu).\n", offset, replace_len, strlen(source));
+    exit(1);
+  }
+  
+  memcpy(source + offset, replace, replace_len);
+
+  return;
+}
+
+
 int char_to_int(const char *src, int *val){
 long int temp_val;
 char *temp;
