@@ -57,8 +57,8 @@ enum { _set_, _setclass_ };
 int prodlen[2] = { phl->mcl.nmodelset, phl->mcl.nclass_all_sets };
 char prodname[5][NPOW_10] = { "MLP", "MLI", "MLU", "RFP", "RFM" };
 int prodtype[5] = { _set_, _set_, _set_, _setclass_, _set_ };
-bool enable[5] = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
-bool write[5]  = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
+int enable[5] = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
+int write[5]  = { phl->mcl.omlp, phl->mcl.omli, phl->mcl.omlu, phl->mcl.orfp, phl->mcl.orfm };
 short ***ptr[5] = { &ml->mlp_, &ml->mli_, &ml->mlu_, &ml->rfp_, &ml->rfm_ };
 
 

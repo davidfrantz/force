@@ -59,10 +59,10 @@ char prodname[7][NPOW_10] = { "ERO", "DIL", "OPN", "CLS", "GRD", "THT", "BHT" };
                              
 int prodtype[7] = { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 
-bool enable[7] = {  phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
+int enable[7] = {  phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
                     phl->txt.ogrd, phl->txt.otht, phl->txt.obht };
 
-bool write[7]  = { phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
+int write[7]  = { phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
                    phl->txt.ogrd, phl->txt.otht, phl->txt.obht };
 
 short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, &txt->tht_, &txt->bht_ };
