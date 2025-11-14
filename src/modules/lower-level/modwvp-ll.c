@@ -147,9 +147,10 @@ float **coord = NULL;
     if (fgets(buffer, NPOW_10, fp) == NULL){
       printf("error reading coordinate file.\n"); exit(1); }
 
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     coord[0][c] = atof(tokenptr); // X
-    tokenptr = strtok(NULL, separator);
+    tokenptr = strtok_r(NULL, separator, &saveptr);
     coord[1][c] = atof(tokenptr); // Y
 
   }
@@ -274,7 +275,8 @@ float tmp, min[3];
 
     k = 0;
 
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
 
     while (tokenptr != NULL){
 
@@ -301,7 +303,7 @@ float tmp, min[3];
       } else if (k == 16){ gring[nline][1][3] = atof(tokenptr); // Gring Y 4
       }
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
       k++;
     }
 
@@ -507,7 +509,6 @@ float wlon, elon, nlat, slat, dboff[3] = { 0, 360, -360 };
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void compile_modis_wvp(char *dir_geo, char *dir_hdf, date_t d_now, char *sen, int nc, float **COO, double **avg, double **count, char *key){
 char geoname[NPOW_10];
-char pattern[NPOW_10], ftp_pattern[NPOW_10], doy[4];
 char httplist[NPOW_10];
 char loclist[NPOW_10];
 char basename[NPOW_10];
@@ -614,12 +615,20 @@ const char *separator = ",";
     // for every remaining granule: get correct HDF name, download if not there and process
     for (i=0; i<ni; i++){
 
+      // example file name, to be overwritten
+      char pattern[NPOW_10] = "MOD05_L2.A2021202.0020.061.2021202161526.hdf";
+      char doy[4] = "202";
+      char ftp_pattern[NPOW_10];
+
       // appr. HDF name with wildcards
-      strncpy(pattern, sen, 3);
-      strncpy(pattern+3, "05_L2", 5);
-      strncpy(pattern+8, id[ptr[i]]+5, 14);
+      overwrite_string_part(pattern, 0, sen, 3);
+      overwrite_string_part(pattern, 3, "05_L2", 5);
+      overwrite_string_part(pattern, 8, id[ptr[i]]+5, 14);
       pattern[22] = '\0';
-      strncpy(doy, pattern+14, 3); doy[3] = '\0';
+  
+      overwrite_string_part(doy, 0, pattern+14, 3);
+      doy[3] = '\0';
+
       nchar = snprintf(ftp_pattern, NPOW_10, 
         "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/%s05_L2/%4d/%s/%s*", 
         sen, d_now.year, doy, pattern);
@@ -656,7 +665,8 @@ const char *separator = ",";
 
       while (fgets(buffer, NPOW_10, fp) != NULL){
         if (strstr(buffer, pattern) != NULL){
-          str = strtok(buffer, separator);
+          char *saveptr = NULL;
+          str = strtok_r(buffer, separator, &saveptr);
           copy_string(basename, NPOW_10, str);
           ok = true;
         }
@@ -874,22 +884,22 @@ float ctr = 0;
   for (c=0; c<nc; c++){
     if (!aqua){
       WVP[c] = modavg[c];
-      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+      if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
     } else {
       if (modavg[c] < 9999 && mydavg[c] < 9999){
         if (modctr[c] >= mydctr[c]){
           WVP[c] = modavg[c];
-          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
         } else {
           WVP[c] = mydavg[c];
-          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
+          if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MYD");
         }
       } else if (modavg[c] < 9999 && mydavg[c] >= 9999){
         WVP[c] = modavg[c];
-        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MOD");
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MOD");
       } else if (modavg[c] >= 9999 && mydavg[c] < 9999){
         WVP[c] = mydavg[c];
-        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_02, "MYD");
+        if (WVP[c] < 9999) copy_string(SEN[c], NPOW_10, "MYD");
       }
     }
     if (WVP[c] < 9999) ctr++;
@@ -982,9 +992,10 @@ float x, y;
     if (fgets(buffer, NPOW_10, fp) == NULL){
       printf("invalid wvp table!\n"); exit(1);}
 
-    tokenptr = strtok(buffer, separator);
-    x = atof(tokenptr); tokenptr = strtok(NULL, separator);
-    y = atof(tokenptr); tokenptr = strtok(NULL, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
+    x = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+    y = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
 
     if (fabs(x-COO[0][c]) > 0.0001 || fabs(y-COO[1][c]) > 0.0001){
       printf("Invalid wvp table! Coordinates are messed up..\n"); exit(1);}
@@ -1026,7 +1037,7 @@ double *modctr = NULL, *mydctr = NULL;
   // initialize precipitable water with fill
   for (c=0; c<nc; c++){
     WVP[c] = 9999;
-    copy_string(SEN[c], NPOW_02, "TBD");
+    copy_string(SEN[c], NPOW_10, "TBD");
   }
 
   // if TERRA geometa doesn't exist: download

@@ -30,7 +30,4 @@ Non-native data sources can also be processed, e.g. Sentinel-1 SAR data or envir
 
 **Follow** the FORCE project at [ResearchGate](https://www.researchgate.net/project/FORCE-Framework-for-Operational-Radiometric-Correction-for-Environmental-monitoring)
 
-**Stay updated**, and follow me on [Twitter](https://twitter.com/d__frantz)
-
-**You are using FORCE? Spread the word**, and use the [#FORCE_EO](https://twitter.com/search?q=%23FORCE_EO&src=recent_search_click) hashtag in your tweets!
-
+**Stay updated**, and follow me on [Bluesky](https://bsky.app/profile/dfrantz.bsky.social)

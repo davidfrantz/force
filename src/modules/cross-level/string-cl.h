@@ -33,6 +33,7 @@ String handling header
 #include <string.h>   // string handling functions
 #include <limits.h>   // macro constants of the integer types
 #include <errno.h>    // error numbers
+#include <stdbool.h> // boolean data type
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
@@ -41,12 +42,35 @@ String handling header
 extern "C" {
 #endif
 
+typedef struct {
+  char *string;
+  int length;
+} string_t;
+
+typedef struct {
+  char **string;
+  int length;
+  int number;
+} string_vector_t;
+
 void copy_string(char *dst, size_t size, const char *src);
 void concat_string_2(char *dst, size_t size, const char *src1, const char *src2, const char *delim);
 void concat_string_3(char *dst, size_t size, const char *src1, const char *src2, const char *src3, const char *delim);
 void replace_string(char *src, const char *search, const char *replace, size_t src_len);
+void overwrite_string_part(char *source, size_t offset, const char *replace, size_t replace_len);
 int char_to_int(const char *src, int *val);
 int char_to_float(const char *src, float *val);
+bool strings_equal(const char *str1, const char *str2);
+bool vector_contains(const char **vector, size_t size, const char *target);
+int vector_contains_pos(const char **vector, size_t size, const char *target);
+
+void alloc_string(string_t *str, size_t length);
+void free_string(string_t *str);
+void fill_string(string_t *str, const char *src);
+void alloc_string_vector(string_vector_t *str_vec, size_t number, size_t length);
+void re_alloc_string_vector(string_vector_t *str_vec, size_t new_number, size_t new_length);
+void free_string_vector(string_vector_t *str_vec);
+void fill_string_vector(string_vector_t *str_vec, size_t pos, const char *new_str);
 
 #ifdef __cplusplus
 }

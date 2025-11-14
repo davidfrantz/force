@@ -37,6 +37,8 @@ Cloud and cloud shadow header
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../cross-level/cite-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/brick_io-cl.h"
 #include "../lower-level/atc-ll.h"
 #include "../lower-level/param-ll.h"
 

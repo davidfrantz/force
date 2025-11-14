@@ -157,6 +157,24 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   fprintf(fp, "# USE_DEM_DATABASE = FALSE\n");
 
   if (verbose){
+    fprintf(fp, "# This is the resampling option for reprojection the DEM; you can choose\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
+    fprintf(fp, "# (CC).\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+  }
+  fprintf(fp, "DEM_RESAMPLING = BL\n");
+
+  if (verbose) {
+    fprintf(fp, "# This parameter specifies whether a DEM database should be used.\n");
+    fprintf(fp, "# If TRUE, a predefined DEM database is used for processing, i.e., \n");
+    fprintf(fp, "# a precompiled database containing an individual DEM for each WRS-2 and\n");
+    fprintf(fp, "# MGRS frame. If TRUE, give the directory of the database through FILE_DEM.\n");
+    fprintf(fp, "# If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "USE_DEM_DATABASE = FALSE\n");
+
+  if (verbose){
     fprintf(fp, "# Nodata value of the DEM.\n");
     fprintf(fp, "# Type: Integer. Valid range: [-32768,32767]\n");
   }
@@ -825,7 +843,7 @@ void write_par_hl_extent(FILE *fp, bool verbose){
   fprintf(fp, "CHUNK_SIZE = 0 0\n");
 
   if (verbose){
-    fprintf(fp, "# Analysis resolution. The tile (and block) size must be dividable by this\n");
+    fprintf(fp, "# Analysis resolution. The tile (and chunk) size must be dividable by this\n");
     fprintf(fp, "# resolution without remainder, e.g. 30m resolution with 100km tiles is not possible\n");
     fprintf(fp, "# Type: Double. Valid range: ]0,CHUNK_SIZE]\n");
   }
@@ -1103,6 +1121,12 @@ void write_par_hl_output(FILE *fp, bool verbose){
   }
   fprintf(fp, "FAIL_IF_EMPTY = FALSE\n");
 
+  //if (verbose){
+  //  fprintf(fp, "# If an output file already exists.. Overwrite?\n");
+  //  fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  //}
+  //fprintf(fp, "OUTPUT_OVERWRITE = FALSE\n");
+
   return;
 }
 
@@ -1213,7 +1237,7 @@ void write_par_hl_bap(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character. Valid values: {DST,HOT,VZN}\n");
   }
   fprintf(fp, "REQUIRE_AUX_PRODUCTS = DST HOT\n");
-  
+
   if (verbose){
     fprintf(fp, "# These parameters specify the function values used for fitting the DOY\n");
     fprintf(fp, "# scoring functions. The function type is automatically chosen from the \n");
@@ -1321,12 +1345,11 @@ void write_par_hl_bap(FILE *fp, bool verbose){
   if (verbose){
     fprintf(fp, "# This parameter indicates the value of the haze optical score (HOT), at which \n");
     fprintf(fp, "# the haze score is at 0.5.\n");
-    fprintf(fp, "Type: Float. Valid values: [-600,600]\n");
+    fprintf(fp, "# Type: Float. Valid values: [-600,600]\n");
   }
   fprintf(fp, "HREQ = -150\n");
 
   if (verbose){
-    fprintf(fp, "# Type: Float. Valid values: [1,90]\n");
     fprintf(fp, "# This parameter indicates the view zenith angle at which the view zenith score\n");
     fprintf(fp, "# approaches 0.0. The angle needs to be given in degree. \n");
     fprintf(fp, "# Type: Float. Valid values: [1,90]\n");
@@ -1714,6 +1737,27 @@ void write_par_hl_rsp(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OUTPUT_RSP = FALSE\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level UDF pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_udf(FILE *fp, bool verbose){
+
+  if (verbose){
+    fprintf(fp, "# Which auxiliary products should be used? These products are appended\n");
+    fprintf(fp, "# to the data array that is passed to the UDF! Custom products may be given;\n");
+    fprintf(fp, "# auxiliary products should contain one band only.\n");
+    fprintf(fp, "# Give NULL to disable using any auxiliary product.\n");
+    fprintf(fp, "# Type: Character. Valid values: {DST,HOT,VZN,WVP,AOD,...}\n");
+  }
+  fprintf(fp, "REQUIRE_AUX_PRODUCTS = NULL\n");
 
   return;
 }

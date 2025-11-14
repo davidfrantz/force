@@ -42,8 +42,7 @@ This program initializes a datacube-definition.prj
 typedef struct {
   int n;
   double geo[2]; // lon/lat
-  double tilesize;
-  double chunksize;
+  double tile_size[2];
   char dcube[NPOW_10];
   char proj[NPOW_10];
 } args_t;
@@ -53,7 +52,7 @@ void usage(char *exe, int exit_code){
 
 
   printf("Usage: %s [-h] [-v] [-i] [-d datacube-dir] [-o lon/lat] \n", exe);
-  printf("          [-t tile-size] [-c chunk-size] projection\n");
+  printf("          [-t tile-size] projection\n");
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");
@@ -66,13 +65,10 @@ void usage(char *exe, int exit_code){
   printf("     use geographic coordinates!\n");
   printf("     longitude is X!\n");
   printf("     latitude  is Y!\n");
-  printf("     default: -25,60, is ignored for pre-defined projections!\n");
+  printf("     default: -25,60 (is ignored for pre-defined projections!)\n");
   printf("\n");
   printf("  -t tile-size\n");
-  printf("     default: 30km, is ignored for pre-defined projections!\n");
-  printf("\n");
-  printf("  -c chunk-size\n");
-  printf("     default: 3km, is ignored for pre-defined projections!\n");
+  printf("     default: 30000,30000 (is ignored for pre-defined projections!)\n");
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - Projection (custom WKT string or built-in projection\n");
@@ -87,6 +83,7 @@ void parse_args(int argc, char *argv[], args_t *args){
 int opt;
 char buffer[NPOW_10];
 char *ptr = NULL;
+char *saveptr = NULL;
 const char *separator = ",";
 int i;
 
@@ -94,14 +91,14 @@ int i;
   opterr = 0;
 
   // default parameters
-  args->tilesize = 30000;
-  args->chunksize = 3000;
+  args->tile_size[_X_] = 30000;
+  args->tile_size[_Y_] = 30000;
   args->geo[_X_] = -25;
   args->geo[_Y_] =  60;
   copy_string(args->dcube, 1024, ".");
 
   // optional parameters
-  while ((opt = getopt(argc, argv, "hvid:o:t:c:")) != -1){
+  while ((opt = getopt(argc, argv, "hvid:o:t:")) != -1){
     switch(opt){
       case 'h':
         usage(argv[0], SUCCESS);
@@ -116,11 +113,11 @@ int i;
         break;
       case 'o':
         copy_string(buffer, NPOW_10, optarg);
-        ptr = strtok(buffer, separator);
+        ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
           if (i < 2) args->geo[i] = atof(ptr);
-          ptr = strtok(NULL, separator);
+          ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){
@@ -129,16 +126,20 @@ int i;
         }
         break;
       case 't':
-        args->tilesize = atof(optarg);
-        if (args->tilesize <= 0){
-          fprintf(stderr, "Tile size must be > 0.\n");
-          usage(argv[0], FAILURE);  
+        copy_string(buffer, NPOW_10, optarg);
+        ptr = strtok_r(buffer, separator, &saveptr);
+        i = 0;
+        while (ptr != NULL){
+          if (i < 2) args->tile_size[i] = atof(ptr);
+          if (args->tile_size[i] <= 0){
+            fprintf(stderr, "Tile size must be > 0.\n");
+            usage(argv[0], FAILURE);  
+          }
+          ptr = strtok_r(NULL, separator, &saveptr);
+          i++;
         }
-        break;
-      case 'c':
-        args->chunksize = atof(optarg);
-        if (args->chunksize <= 0){
-          fprintf(stderr, "Chunk size must be > 0.\n");
+        if (i != 2){
+          fprintf(stderr, "Tile size must have 2 numbers.\n");
           usage(argv[0], FAILURE);  
         }
         break;
@@ -192,14 +193,16 @@ multicube_t *multicube = NULL;
 
   pl2.d_level2 = args.dcube;
   copy_string(pl2.proj, NPOW_10, args.proj);
-  pl2.tilesize  = args.tilesize;
-  pl2.chunksize = args.chunksize;
+  alloc((void**)&pl2.tile_size, (pl2.n_tile_size = 2), sizeof(double));
+  pl2.tile_size[_X_] = args.tile_size[_X_];
+  pl2.tile_size[_Y_] = args.tile_size[_Y_];
   pl2.orig_lon = args.geo[_X_];
   pl2.orig_lat = args.geo[_Y_];
 
   if ((multicube = start_multicube(&pl2, NULL)) == NULL){
     printf("Starting datacube(s) failed.\n"); return FAILURE;}
 
+  free((void*)pl2.tile_size);
   free_multicube(multicube);
 
   return SUCCESS;

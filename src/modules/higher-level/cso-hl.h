@@ -34,7 +34,8 @@ CSO Processing header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/cite-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/cube-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/stats-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
@@ -45,7 +46,7 @@ extern "C" {
 #endif
 
 typedef struct {
-  short **cso_[NPOW_08];
+  short **cso_[_BYTE_LEN_];
   date_t *d_cso;
 } cso_t;
 

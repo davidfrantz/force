@@ -38,6 +38,7 @@ Datacube header
 #include "../cross-level/alloc-cl.h"
 #include "../cross-level/dir-cl.h"
 #include "../cross-level/lock-cl.h"
+#include "../cross-level/read-cl.h"
 
 
 #ifdef __cplusplus
@@ -45,20 +46,18 @@ extern "C" {
 #endif
 
 typedef struct {
-  char dname[NPOW_10];  // path of datacube
-  int tminx, tmaxx;   // extent min/max tile
-  int tminy, tmaxy;   // extent min/max tile
-  int tnx, tny, tnc;  // number of tiles (square extent)
-  int *tx, *ty, tn;   // allow-listed tiles
-  double tilesize;     // tile size in desination unit
-  double chunksize;    // vertical chunk size
-  double res;          // spatial resolution
-  int nx, ny, nc;     // number of pixels in tile
-  int cx, cy, cc;     // number of pixels in chunk
-  int cn;             // number of chunks in tile
+  char dir_path[NPOW_10];  // path of datacube
+  char def_path[NPOW_10];  // path of datacube definition
+  char projection[NPOW_10]; // destination projection
   coord_t origin_geo; // origin of grid, geographic
   coord_t origin_map; // origin of grid, destination projection
-  char proj[NPOW_10];   // destination projection
+  int tile_extent[2][2]; // tile extent [_X_, _Y_][_MIN_, _MAX_]
+  double tile_size[2];   // tile size in destination unit
+  double resolution;  // spatial resolution
+  dim_t dim_tiles;     // number of tiles (square extent)
+  dim_t dim_tile_pixels;    // number of pixels per tile
+  int **allowed_tiles; // allow-listed tiles: n x [_X_][_Y_]
+  int n_allowed_tiles; // number of allow-listed tiles
 } cube_t;
 
 typedef struct{
@@ -79,7 +78,7 @@ void update_datacube_extent(cube_t *cube, int tminx, int tmaxx, int tminy, int t
 void update_datacube_res(cube_t *cube, double res);
 int write_datacube_def(cube_t *cube);
 cube_t *read_datacube_def(char *d_read);
-cube_t *copy_datacube_def(char *d_read, char *d_write, double blockoverride);
+cube_t *copy_datacube_def(char *d_read, char *d_write);
 int tile_find(double ulx, double uly, double *tilex, double *tiley, int *idx, int *idy, cube_t *cube);
 int tile_align(cube_t *cube, double ulx, double uly, double *new_ulx, double *new_uly);
 

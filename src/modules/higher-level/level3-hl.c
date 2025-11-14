@@ -48,7 +48,7 @@ int b, nb, nbands;
 int o, nprod = 4;
 int error = 0;
 enum { _ref_, _inf_, _scr_, _ovv_ };
-char prodname[4][NPOW_02] = { "BAP", "INF", "SCR", "OVV" };
+char prodname[4][NPOW_10] = { "BAP", "INF", "SCR", "OVV" };
 bool fullres[4] = { true, true, true, false };
 bool explode[4] = { false, phl->explode, phl->explode, false };
 int prodlen[4] = { 0, _INF_LENGTH_, _SCR_LENGTH_, _RGB_LENGTH_ };
@@ -119,7 +119,7 @@ brick_t *brick = NULL;
 date_t date;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 double res, res_;
 int nx, ny, nx_, ny_; 
@@ -174,7 +174,7 @@ int cx, cy, cx_, cy_, cc_;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }
@@ -193,7 +193,7 @@ int cx, cy, cx_, cy_, cc_;
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
 
-  set_brick_open(brick, OPEN_BLOCK);
+  set_brick_open(brick, OPEN_CHUNK);
   set_brick_format(brick, &phl->gdalopt);
   set_brick_explode(brick, explode);
   set_brick_par(brick, phl->params->log);
@@ -278,6 +278,35 @@ bool water;
     return NULL;
   }
 
+  if (phl->bap.w.c > 0) {
+    if ((phl->bap.band_dst = find_domain(ard[0].AUX, "DST")) < 0){
+      printf("Error: no DST band in auxiliary file.\n");
+      return NULL;
+    }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for DST.\n", phl->bap.band_dst);
+    #endif
+  }
+
+  if (phl->bap.w.h > 0) {
+    if ((phl->bap.band_hot = find_domain(ard[0].AUX, "HOT")) < 0){
+      printf("Error: no HOT band in auxiliary file.\n");
+      return NULL;
+    }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for HOT.\n", phl->bap.band_hot);
+    #endif
+  }
+
+  if (phl->bap.w.v > 0) {
+    if ((phl->bap.band_vzn = find_domain(ard[0].AUX, "VZN")) < 0){
+      printf("Error: no VZN band in auxiliary file.\n");
+      return NULL;
+    }
+    #ifdef FORCE_DEBUG
+    printf("Using AUX band %d for VZN.\n", phl->bap.band_vzn);
+    #endif
+  }
 
   #pragma omp parallel private(tdist,score,cor,hmean,hsd,water) firstprivate(target) shared(ard,lsp,l3,nt,nb,nc,lsp_nodata,nodata,mask_,phl,LEVEL3) default(none)
   {

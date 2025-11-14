@@ -1,0 +1,11 @@
+{
+  "description": "Sentinel-2 generic high-res sensor",
+  "name": "SEN2L",
+  "bands": 4,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "BROADNIR"
+  ]
+}

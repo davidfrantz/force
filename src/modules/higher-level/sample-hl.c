@@ -79,14 +79,14 @@ FILE *fp = NULL;
 --- nproduct:  number of output bricks (returned)
 +++ Return:    empty bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, aux_smp_t *smp, cube_t *cube, int *nproduct){
+brick_t **sample_points(ard_t *features, brick_t *mask, int nf, par_hl_t *phl, table_t *smp, cube_t *cube, int *nproduct){
 small *mask_ = NULL;
 int f, r, s, i, j, p;
-int cx, cy, chunk, tx, ty;
+int cx, cy, chunk[2], tile[2];
 int nr;
 double res;
 coord_t smp_map, smp_map_ul;
-int smp_tx, smp_ty, smp_chunk;
+int smp_tx, smp_ty, smp_chunk[2];
 int smp_tj, smp_ti;
 int error = 0, found = 0, added = 0;
 bool *copied = NULL, valid;
@@ -98,7 +98,7 @@ double minx, maxx, miny, maxy;
 
 
   // if no sample is left, skip all
-  if (smp->nleft == 0){
+  if (smp->n_active_rows == 0){
     *nproduct = 0;
     return NULL;
   }
@@ -108,9 +108,10 @@ double minx, maxx, miny, maxy;
   cx    = get_brick_chunkncols(features[0].DAT);
   cy    = get_brick_chunknrows(features[0].DAT);
   res   = get_brick_res(features[0].DAT);
-  chunk = get_brick_chunk(features[0].DAT);
-  tx    = get_brick_tilex(features[0].DAT);
-  ty    = get_brick_tiley(features[0].DAT);
+  chunk[_X_] = get_brick_chunkx(features[0].DAT);
+  chunk[_Y_] = get_brick_chunky(features[0].DAT);
+  tile[_X_]  = get_brick_tilex(features[0].DAT);
+  tile[_Y_]  = get_brick_tiley(features[0].DAT);
 
 //  nodata = get_brick_nodata(features[0].DAT, 0);
 
@@ -123,28 +124,28 @@ double minx, maxx, miny, maxy;
   }
 
 
-  nr = smp->nr-2;
+  nr = smp->ncol-2;
 
-  alloc((void**)&copied,           smp->ns,     sizeof(bool));
-  alloc_2D((void***)&smp_features, smp->ns, nf, sizeof(double));
-  alloc_2D((void***)&smp_response, smp->ns, nr, sizeof(double));
+  alloc((void**)&copied,           smp->nrow,     sizeof(bool));
+  alloc_2D((void***)&smp_features, smp->nrow, nf, sizeof(double));
+  alloc_2D((void***)&smp_response, smp->nrow, nr, sizeof(double));
 
 
   if (phl->smp.projected){
 
     // corner coordinates of chunk
-    minx = get_brick_x(features[0].DAT, 0);
-    maxx = get_brick_x(features[0].DAT, cx);
-    miny = get_brick_y(features[0].DAT, (chunk+1)*cy);
-    maxy = get_brick_y(features[0].DAT, chunk*cy);
+    minx = get_brick_x(features[0].DAT, chunk[_X_]*cx);
+    maxx = get_brick_x(features[0].DAT, (chunk[_X_]+1)*cx);
+    miny = get_brick_y(features[0].DAT, (chunk[_Y_]+1)*cy);
+    maxy = get_brick_y(features[0].DAT, chunk[_Y_]*cy);
 
   } else {
 
     // corner coordinates of chunk
-    get_brick_geo(features[0].DAT, 0,    chunk*cy,        &geo_ul.x, &geo_ul.y);
-    get_brick_geo(features[0].DAT, cx,   chunk*cy,        &geo_ur.x, &geo_ur.y);
-    get_brick_geo(features[0].DAT, 0,    (chunk+1)*cy,    &geo_ll.x, &geo_ll.y);
-    get_brick_geo(features[0].DAT, cx,   (chunk+1)*cy,    &geo_lr.x, &geo_lr.y);
+    get_brick_geo(features[0].DAT, chunk[_X_]*cx,     chunk[_Y_]*cy,     &geo_ul.x, &geo_ul.y);
+    get_brick_geo(features[0].DAT, (chunk[_X_]+1)*cx, chunk[_Y_]*cy,     &geo_ur.x, &geo_ur.y);
+    get_brick_geo(features[0].DAT, chunk[_X_]*cx,     (chunk[_Y_]+1)*cy, &geo_ll.x, &geo_ll.y);
+    get_brick_geo(features[0].DAT, (chunk[_X_]+1)*cx, (chunk[_Y_]+1)*cy, &geo_lr.x, &geo_lr.y);
 
     // min/max coordinates
     minx = MIN(geo_ul.x, geo_ll.x);
@@ -153,10 +154,10 @@ double minx, maxx, miny, maxy;
     maxy = MAX(geo_ul.y, geo_ur.y);
 
     // edge coordinates of chunk
-    get_brick_geo(features[0].DAT, cx/2, chunk*cy,        &geo_upper.x, &geo_upper.y);
-    get_brick_geo(features[0].DAT, cx/2, (chunk+1)*cy,    &geo_lower.x, &geo_lower.y);
-    get_brick_geo(features[0].DAT, 0,    chunk*cy + cy/2, &geo_left.x,  &geo_left.y);
-    get_brick_geo(features[0].DAT, cx,   chunk*cy + cy/2, &geo_right.x, &geo_right.y);
+    get_brick_geo(features[0].DAT, chunk[_X_]*cx + cx/2, chunk[_Y_]*cy,        &geo_upper.x, &geo_upper.y);
+    get_brick_geo(features[0].DAT, chunk[_X_]*cx + cx/2, (chunk[_Y_]+1)*cy,    &geo_lower.x, &geo_lower.y);
+    get_brick_geo(features[0].DAT, chunk[_X_]*cx,        chunk[_Y_]*cy + cy/2, &geo_left.x,  &geo_left.y);
+    get_brick_geo(features[0].DAT, (chunk[_X_]+1)*cx,    chunk[_Y_]*cy + cy/2, &geo_right.x, &geo_right.y);
 
     // if edge coordinates are outside of corner min/max, expand the box a bit
     if (geo_left.x  < minx) minx -= 2*fabs(geo_left.x -minx);
@@ -167,28 +168,28 @@ double minx, maxx, miny, maxy;
   }
 
 
-  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,r,valid) shared(tx,ty,chunk,res,cx,cy,nf,nr,minx,maxx,miny,maxy,copied,smp_features,smp_response,smp,features,mask_,cube,phl) reduction(+: error, found, added) default(none)
+  #pragma omp parallel private(smp_map,smp_map_ul,smp_tx,smp_ty,smp_tj,smp_ti,smp_chunk,j,i,p,f,r,valid) shared(tile,chunk,res,cx,cy,nf,nr,minx,maxx,miny,maxy,copied,smp_features,smp_response,smp,features,mask_,cube,phl) reduction(+: error, found, added) default(none)
   {
 
     #pragma omp for
-    for (s=0; s<smp->ns; s++){
+    for (s=0; s<smp->nrow; s++){
 
-      if (smp->visited[s]) continue;
+      if (!smp->row_mask[s]) continue;
 
-      if (smp->tab[s][_X_] < minx) continue;
-      if (smp->tab[s][_X_] > maxx) continue;
-      if (smp->tab[s][_Y_] < miny) continue;
-      if (smp->tab[s][_Y_] > maxy) continue;
+      if (smp->data[s][_X_] < minx) continue;
+      if (smp->data[s][_X_] > maxx) continue;
+      if (smp->data[s][_Y_] < miny) continue;
+      if (smp->data[s][_Y_] > maxy) continue;
       
       if (phl->smp.projected){
 
-        smp_map.x = smp->tab[s][_X_];
-        smp_map.y = smp->tab[s][_Y_];
+        smp_map.x = smp->data[s][_X_];
+        smp_map.y = smp->data[s][_Y_];
 
       } else {
 
         // get target coordinates in target css coordinates
-        if ((warp_geo_to_any(smp->tab[s][_X_], smp->tab[s][_Y_], &smp_map.x, &smp_map.y, cube->proj)) == FAILURE){
+        if ((warp_geo_to_any(smp->data[s][_X_], smp->data[s][_Y_], &smp_map.x, &smp_map.y, cube->projection)) == FAILURE){
           printf("Computing target coordinates in dst_srs failed!\n"); 
           error++;
           continue;
@@ -200,21 +201,22 @@ double minx, maxx, miny, maxy;
       tile_find(smp_map.x, smp_map.y, &smp_map_ul.x, &smp_map_ul.y, &smp_tx, &smp_ty, cube);
 
       // if not in current tile, skip
-      if (smp_tx != tx || smp_ty != ty) continue;
+      if (smp_tx != tile[_X_] || smp_ty != tile[_Y_]) continue;
 
       // find pixel in tile
       smp_tj = (int)((smp_map.x-smp_map_ul.x)/res);
       smp_ti = (int)((smp_map_ul.y-smp_map.y)/res);
 
       // find chunk in tile
-      smp_chunk = (int)(smp_ti/cy);
+      smp_chunk[_X_] = (int)(smp_tj/cx);
+      smp_chunk[_Y_] = (int)(smp_ti/cy);
 
       // if not in current chunk, skip
-      if (smp_chunk != chunk) continue;
+      if (smp_chunk[_X_] != chunk[_X_] || smp_chunk[_Y_] != chunk[_Y_]) continue;
 
       // find pixel in chunk
-      j = smp_tj;
-      i = smp_ti - chunk*cy;
+      j = smp_tj - chunk[_X_]*cx;
+      i = smp_ti - chunk[_Y_]*cy;
       p = i*cx+j;
 
       // skip pixels that are masked
@@ -225,11 +227,11 @@ double minx, maxx, miny, maxy;
         smp_features[s][f] = features[f].dat[0][p];
         if (!features[f].msk[p] && phl->ftr.exclude) valid = false;
       }
-     for (r=0; r<nr; r++) smp_response[s][r] = smp->tab[s][_Z_+r];
+     for (r=0; r<nr; r++) smp_response[s][r] = smp->data[s][_Z_+r];
 
 
       // we are done with this sample
-      smp->visited[s] = true;
+      smp->row_mask[s] = false;
       found++;
 
       if (!valid) continue;
@@ -243,25 +245,25 @@ double minx, maxx, miny, maxy;
 
   if (error > 0) printf("there were %d errors in coordinate conversion..\n", error);
 
-  smp->nleft -= found;
+  smp->n_active_rows -= found;
 
 
   if (added > 0){
-    append_table(phl->smp.f_sample,   copied, smp_features, smp->ns, nf, 0);
-    append_table(phl->smp.f_response, copied, smp_response, smp->ns, nr, 6);
-    append_table(phl->smp.f_coords,   copied, smp->tab,     smp->ns, 2,  6);
+    append_table(phl->smp.f_sample,   copied, smp_features, smp->nrow, nf, 0);
+    append_table(phl->smp.f_response, copied, smp_response, smp->nrow, nr, 6);
+    append_table(phl->smp.f_coords,   copied, smp->data,    smp->nrow, 2,  6);
   }
 
 
   #ifdef FORCE_DEBUG
-  if (added > 0) printf("Added %d samples in Tile X%04d_Y%04d Chunk %03d.\n", 
-    added, tx, ty, chunk);
+  if (added > 0) printf("Added %d samples in Tile X%04d_Y%04d Chunk %02d / %02d.\n", 
+    added, tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
   #endif
 
 
   free((void*)copied);
-  free_2D((void**)smp_response, smp->ns);
-  free_2D((void**)smp_features, smp->ns);
+  free_2D((void**)smp_response, smp->nrow);
+  free_2D((void**)smp_features, smp->nrow);
 
   *nproduct = 0;
   return NULL;

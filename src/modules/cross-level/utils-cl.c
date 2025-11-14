@@ -239,7 +239,7 @@ double diff, max, A, B;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_humanreadable_bytes(off_t bytes){
 double dbytes = (double)bytes;
-char unit[9][NPOW_02] = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+char unit[9][NPOW_10] = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 int i = 0;
 
   while (dbytes >= 1024 && i < 8){

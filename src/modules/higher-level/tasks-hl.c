@@ -50,29 +50,30 @@ void read_higher_level (progress_t *pro, off_t *ibytes, brick_t **MASK, ard_t **
 int mask_status;
 off_t bytes = 0;
 
-
   if (!read_this_chunk(pro)) return;
 
+  int pu = pro->next.processing_unit;
+  int tile[2] = { pro->next.tile[_X_], pro->next.tile[_Y_] };
+  int chunk[2] = { pro->next.chunk[_X_], pro->next.chunk[_Y_] };
 
-  MASK[pro->pu_next] = NULL;
-  ARD1[pro->pu_next] = NULL;
-  ARD2[pro->pu_next] = NULL;
-  nt1[pro->pu_next]  = 0;
-  nt2[pro->pu_next]  = 0;
+  MASK[pu] = NULL;
+  ARD1[pu] = NULL;
+  ARD2[pu] = NULL;
+  nt1[pu]  = 0;
+  nt2[pu]  = 0;
 
   measure_progress(pro, _TASK_INPUT_, _CLOCK_TICK_);
 
   omp_set_num_threads(phl->ithread);
 
-  MASK[pro->pu_next] = read_mask(&mask_status, &bytes,
-    pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
+  MASK[pu] = read_mask(&mask_status, &bytes, tile, chunk, cube, phl);
 
-  if (MASK[pro->pu_next] == NULL && mask_status != SUCCESS){
+  if (MASK[pu] == NULL && mask_status != SUCCESS){
     if (mask_status == FAILURE){
-      printf("error reading mask tile X%04d_Y%04d chunk %d.\n", 
-        pro->tx_next, pro->ty_next, pro->chunk_next);
+      printf("error reading mask tile X%04d_Y%04d chunk X:%d Y:%d.\n", 
+        tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
     } else if (mask_status == CANCEL){
-      //printf("no mask data. skip block.\n");
+      //printf("no mask data. skip chunk.\n");
     }
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
@@ -80,42 +81,36 @@ off_t bytes = 0;
 
 
   if (phl->input_level1 == _INP_FTR_){
-    ARD1[pro->pu_next] = read_features(&bytes, &nt1[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
+    ARD1[pu] = read_features(&bytes, &nt1[pu], tile, chunk, cube, phl);
   } else if (phl->input_level1 == _INP_CON_){
-    ARD1[pro->pu_next] = read_confield(&bytes, &nt1[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
+    ARD1[pu] = read_confield(&bytes, &nt1[pu], tile, chunk, cube, phl);
   } else if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-    ARD1[pro->pu_next] = read_ard(&bytes, &nt1[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, &phl->sen, phl);
+    ARD1[pu] = read_ard(&bytes, &nt1[pu], tile, chunk, cube, &phl->sen, phl);
   } else if (phl->input_level1 != _INP_NONE_) {
     printf("unknown input level\n");
   }
 
-  if (ARD1[pro->pu_next] == NULL && nt1[pro->pu_next] < 0){
-    printf("error reading data from tile X%04d_Y%04d chunk %d.\n", 
-      pro->tx_next, pro->ty_next, pro->chunk_next);
+  if (ARD1[pu] == NULL && nt1[pu] < 0){
+    printf("error reading data from tile X%04d_Y%04d chunk X:%d Y:%d.\n", 
+      tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
   }
 
 
   if (phl->input_level2 == _INP_FTR_){
-    ARD2[pro->pu_next] = read_features(&bytes, &nt2[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
+    ARD2[pu] = read_features(&bytes, &nt2[pu], tile, chunk, cube, phl);
   } else if (phl->input_level2 == _INP_CON_){
-    ARD2[pro->pu_next] = read_confield(&bytes, &nt2[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, phl);
+    ARD2[pu] = read_confield(&bytes, &nt2[pu], tile, chunk, cube, phl);
   } else if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-    ARD2[pro->pu_next] = read_ard(&bytes, &nt2[pro->pu_next], 
-      pro->tx_next, pro->ty_next, pro->chunk_next, cube, &phl->sen2, phl);
+    ARD2[pu] = read_ard(&bytes, &nt2[pu], tile, chunk, cube, &phl->sen2, phl);
   } else if (phl->input_level2 != _INP_NONE_){
     printf("unknown input level\n");
   }
 
-  if (ARD2[pro->pu_next] == NULL && nt2[pro->pu_next] < 0){
-    printf("error reading secondary data from tile X%04d_Y%04d chunk %d.\n", 
-      pro->tx_next, pro->ty_next, pro->chunk_next);
+  if (ARD2[pu] == NULL && nt2[pu] < 0){
+    printf("error reading secondary data from tile X%04d_Y%04d chunk X:%d Y:%d.\n", 
+      tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
   }
@@ -149,8 +144,11 @@ bool error = false;
 
   if (!compute_this_chunk(pro)) return;
 
-  OUTPUT[pro->pu] = NULL;
-  nprod[pro->pu]  = 0;
+  int pu = pro->now.processing_unit;
+
+
+  OUTPUT[pu] = NULL;
+  nprod[pu]  = 0;
 
 
   measure_progress(pro, _TASK_COMPUTE_, _CLOCK_TICK_);
@@ -158,25 +156,25 @@ bool error = false;
   omp_set_num_threads(phl->cthread);
 
 
-  if (nt1[pro->pu] > 0){
-    if (screen_qai(ARD1[pro->pu], nt1[pro->pu], MASK[pro->pu], &phl->qai, phl->input_level1) != SUCCESS) error = true;
+  if (nt1[pu] > 0){
+    if (screen_qai(ARD1[pu], nt1[pu], MASK[pu], &phl->qai, phl->input_level1) != SUCCESS) error = true;
     if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-      if (screen_noise(ARD1[pro->pu], nt1[pro->pu], MASK[pro->pu], &phl->qai) == FAILURE) error = true;
+      if (screen_noise(ARD1[pu], nt1[pu], MASK[pu], &phl->qai) == FAILURE) error = true;
     }
   } else {
     error = true;
   }
 
-  if (nt2[pro->pu] > 0){
-    if (screen_qai(ARD2[pro->pu], nt2[pro->pu], MASK[pro->pu], &phl->qai, phl->input_level2) != SUCCESS) error = true;
+  if (nt2[pu] > 0){
+    if (screen_qai(ARD2[pu], nt2[pu], MASK[pu], &phl->qai, phl->input_level2) != SUCCESS) error = true;
     if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-      if (screen_noise(ARD2[pro->pu], nt2[pro->pu], MASK[pro->pu], &phl->qai) == FAILURE) error = true;
+      if (screen_noise(ARD2[pu], nt2[pu], MASK[pu], &phl->qai) == FAILURE) error = true;
     }
   }
 
 
   if (!error && phl->input_level1 == _INP_ARD_){
-    if (spectral_adjust(ARD1[pro->pu], MASK[pro->pu], nt1[pro->pu], phl) == FAILURE) error = true;
+    if (spectral_adjust(ARD1[pu], MASK[pu], nt1[pu], phl) == FAILURE) error = true;
   }
 
 
@@ -184,48 +182,48 @@ bool error = false;
 
     switch (phl->type){
       case _HL_BAP_:
-        OUTPUT[pro->pu] = level3(ARD1[pro->pu], ARD2[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], nt2[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = level3(ARD1[pu], ARD2[pu], MASK[pu], 
+          nt1[pu], nt2[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_TSA_:
-        OUTPUT[pro->pu] = time_series_analysis(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, &aux->endmember, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = time_series_analysis(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, &aux->endmember, cube, &nprod[pu]);
         break;
       case _HL_CSO_:
-        OUTPUT[pro->pu] = clear_sky_observations(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = clear_sky_observations(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_ML_:
-        OUTPUT[pro->pu] = machine_learning(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, &aux->ml, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = machine_learning(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, &aux->ml, cube, &nprod[pu]);
         break;
       case _HL_SMP_:
-        OUTPUT[pro->pu] = sample_points(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, &aux->sample, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = sample_points(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, &aux->sample, cube, &nprod[pu]);
         break;
       case _HL_TXT_:
-        OUTPUT[pro->pu] = texture(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = texture(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_LSM_:
-        OUTPUT[pro->pu] = landscape_metrics(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = landscape_metrics(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_L2I_:
-        OUTPUT[pro->pu] = level2_improphe(ARD1[pro->pu], ARD2[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], nt2[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = level2_improphe(ARD1[pu], ARD2[pu], MASK[pu], 
+          nt1[pu], nt2[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_CFI_:
-        OUTPUT[pro->pu] = confield_improphe(ARD1[pro->pu], ARD2[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], nt2[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = confield_improphe(ARD1[pu], ARD2[pu], MASK[pu], 
+          nt1[pu], nt2[pu], phl, cube, &nprod[pu]);
         break;
       case _HL_LIB_:
-        OUTPUT[pro->pu] = library_completeness(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, &aux->library, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = library_completeness(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, aux->libraries, aux->n_libraries, cube, &nprod[pu]);
         break;
       case _HL_UDF_:
-        OUTPUT[pro->pu] = udf_plugin(ARD1[pro->pu], MASK[pro->pu], 
-          nt1[pro->pu], phl, cube, &nprod[pro->pu]);
+        OUTPUT[pu] = udf_plugin(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, cube, &nprod[pu]);
         break;
       default:
         printf("unknown processing module\n");
@@ -235,9 +233,9 @@ bool error = false;
   }
 
   
-  free_ard(ARD1[pro->pu], nt1[pro->pu]);
-  free_ard(ARD2[pro->pu], nt2[pro->pu]);
-  free_brick(MASK[pro->pu]);
+  free_ard(ARD1[pu], nt1[pu]);
+  free_ard(ARD2[pu], nt2[pu]);
+  free_brick(MASK[pu]);
 
   measure_progress(pro, _TASK_COMPUTE_, _CLOCK_TOCK_);
 
@@ -263,12 +261,17 @@ int o;
 
 
   if (!write_this_chunk(pro, nprod)) return;
-  if (OUTPUT[pro->pu_prev] == NULL) return;
+
+  int pu = pro->last.processing_unit;
+  int tile[2] = { pro->last.tile[_X_], pro->last.tile[_Y_] };
+
+
+  if (OUTPUT[pu] == NULL) return;
 
 
   measure_progress(pro, _TASK_OUTPUT_, _CLOCK_TICK_);
 
-  nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, pro->tx_prev, pro->ty_prev);
+  nchar = snprintf(dname, NPOW_10, "%s/X%04d_Y%04d", phl->d_higher, tile[_X_], tile[_Y_]);
   if (nchar < 0 || nchar >= NPOW_10){ 
     printf("Buffer Overflow in assembling filename\n"); exit(1);}
 
@@ -285,20 +288,20 @@ int o;
 
     omp_set_num_threads(phl->othread);
   
-    #pragma omp parallel shared(OUTPUT,pro,nprod,phl) reduction(+: bytes) default(none)
+    #pragma omp parallel shared(OUTPUT,pu,nprod,phl) reduction(+: bytes) default(none)
     {
 
       CPLPushErrorHandler(CPLQuietErrorHandler);
       CPLSetConfigOption("GDAL_PAM_ENABLED", "YES");
 
       #pragma omp for schedule(dynamic,1)
-      for (o=0; o<nprod[pro->pu_prev]; o++){
-        if (phl->radius > 0) OUTPUT[pro->pu_prev][o] = crop_brick(
-          OUTPUT[pro->pu_prev][o], phl->radius);
-        write_brick(OUTPUT[pro->pu_prev][o]);
-        if (OUTPUT[pro->pu_prev][o] != NULL && 
-            get_brick_open(OUTPUT[pro->pu_prev][o]) != OPEN_FALSE){
-            bytes += get_brick_size(OUTPUT[pro->pu_prev][o]);
+      for (o=0; o<nprod[pu]; o++){
+        if (phl->radius > 0) OUTPUT[pu][o] = crop_brick(
+          OUTPUT[pu][o], phl->radius);
+        write_brick(OUTPUT[pu][o]);
+        if (OUTPUT[pu][o] != NULL && 
+            get_brick_open(OUTPUT[pu][o]) != OPEN_FALSE){
+            bytes += get_brick_size(OUTPUT[pu][o]);
         }
       }
 
@@ -310,9 +313,9 @@ int o;
 
   }
 
-  for (o=0; o<nprod[pro->pu_prev]; o++) free_brick(OUTPUT[pro->pu_prev][o]);
-  free((void*)OUTPUT[pro->pu_prev]);
-  OUTPUT[pro->pu_prev] = NULL;
+  for (o=0; o<nprod[pu]; o++) free_brick(OUTPUT[pu][o]);
+  free((void*)OUTPUT[pu]);
+  OUTPUT[pu] = NULL;
 
   *obytes = bytes;
 
@@ -322,16 +325,19 @@ int o;
 }
 
 
-/** This function prints a warning if no input or output was detected
+/** This function prints a message if no input or output was detected
++++ and possibly instructs the caller to return an error if the
++++ strict flag is set to true
 +++ Special behaviour when sampling module is used
 --- ibytes:   number of bytes read
 --- obytes:   number of bytes written
 --- phl:      HL parameters
-+++ Return:   void
++++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void warn_if_no_io(off_t ibytes, off_t obytes, par_hl_t *phl){
+int handle_no_io(off_t ibytes, off_t obytes, par_hl_t *phl){
 bool warn_i = true;
 bool warn_o = true;
+int exit_code = SUCCESS;
 
 
   if (phl->type == _HL_SMP_){
@@ -356,10 +362,15 @@ bool warn_o = true;
 
   if ((warn_i && ibytes == 0) || (warn_o && obytes == 0)){
     printf("________________________________________\n");
-    printf("Warning: no input or output detected. If\n"
-           "unintentional, triple-check for mis-\n"
-           "matching entries in\n"
-           "  DIR_MASK\n"
+    if (phl->fail_if_empty){
+      printf("Error: no input or output detected.\n"
+             "Triple-check for mismatching entries in\n");
+    } else {
+      printf("Warning: no input or output detected. If\n"
+             "unintentional, triple-check for mis-\n"
+             "matching entries in\n");
+    }
+    printf("  DIR_MASK\n"
            "  BASE_MASK\n"
            "  X_TILE_RANGE\n"
            "  Y_TILE_RANGE\n"
@@ -371,9 +382,11 @@ bool warn_o = true;
            "and make sure that your input file type\n"
            "  is one of .dat .bsq .bil .tif .vrt\n");
     printf("________________________________________\n");
+
+    if (phl->fail_if_empty) exit_code = FAILURE;
   }
 
 
-  return;
+  return exit_code;
 }
 

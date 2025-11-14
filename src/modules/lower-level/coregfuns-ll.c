@@ -924,7 +924,7 @@ int k1, k2, l1, l2;
     for (i=start; i<iHeight-h; i+=step){ // old: for (i = 0; i <= iHeight - w; i++)
     for (j=start; j<iWidth -h; j+=step){ // old: for (j = 0; j <= iWidth - w; j++)
 
-      if (pImg[i*iWidth + j] == nodata) continue;
+      //if (pImg[i*iWidth + j] == nodata) continue;
 
       dCurSum = 0;
       fsum = 0;
@@ -936,7 +936,10 @@ int k1, k2, l1, l2;
       }
       }
 
-      if (ABS(fsum) < 1e-10) continue;
+      if (ABS(fsum) < 1e-10){
+        pImgNew[i*iWidth + j] = nodata;
+        continue;
+      }
 
       dCurSum /= fsum;
       pImgNew[i*iWidth + j] = (short)(dCurSum + 1e-10);
@@ -955,7 +958,7 @@ int k1, k2, l1, l2;
     for (j=0; j<iWidth; j+=step){
     for (i=0; i<h;      i+=step){
 
-      if (pImg[i*iWidth + j] == nodata) continue;
+      //if (pImg[i*iWidth + j] == nodata) continue;
 
       dCurSum = 0;
       fsum = 0;
@@ -970,7 +973,11 @@ int k1, k2, l1, l2;
         fsum += dFilter[k*w + l];
       }
       }
-      if (ABS(fsum) < 1e-10) continue;
+
+      if (ABS(fsum) < 1e-10){
+        pImgNew[i*iWidth + j] = nodata;
+        continue;
+      }
 
       dCurSum /= fsum;
       pImgNew[i*iWidth + j] = (short)(dCurSum + 1e-10);
@@ -992,7 +999,7 @@ int k1, k2, l1, l2;
     for (j=0;     j<iWidth;  j+=step){
     for (i=start; i<iHeight; i+=step){
 
-      if (pImg[i*iWidth + j] == nodata) continue;
+      //if (pImg[i*iWidth + j] == nodata) continue;
 
       dCurSum = 0;
       fsum = 0;
@@ -1007,7 +1014,11 @@ int k1, k2, l1, l2;
         fsum += dFilter[k*w + l];
       }
       }
-      if (ABS(fsum) < 1e-10) continue;
+
+      if (ABS(fsum) < 1e-10){
+        pImgNew[i*iWidth + j] = nodata;
+        continue;
+      }
 
       dCurSum /= fsum;
       pImgNew[i*iWidth + j] = (short)(dCurSum + 1e-10);
@@ -1026,7 +1037,7 @@ int k1, k2, l1, l2;
     for (i=0; i<iHeight; i+=step){
     for (j=0; j<h;       j+=step){
 
-      if (pImg[i*iWidth + j] == nodata) continue;
+      //if (pImg[i*iWidth + j] == nodata) continue;
 
       dCurSum = 0;
       fsum = 0;
@@ -1041,7 +1052,11 @@ int k1, k2, l1, l2;
         fsum += dFilter[k*w + l];
       }
       }
-      if (ABS(fsum) < 1e-10) continue;
+
+      if (ABS(fsum) < 1e-10){
+        pImgNew[i*iWidth + j] = nodata;
+        continue;
+      }
 
       dCurSum /= fsum;
       pImgNew[i*iWidth + j] = (short)(dCurSum + 1e-10);
@@ -1063,7 +1078,7 @@ int k1, k2, l1, l2;
     for (i=0;     i<iHeight; i+=step){
     for (j=start; j<iWidth;  j+=step){
       
-      if (pImg[i*iWidth + j] == nodata) continue;
+      //if (pImg[i*iWidth + j] == nodata) continue;
 
       dCurSum = 0;
       fsum = 0;
@@ -1078,7 +1093,11 @@ int k1, k2, l1, l2;
         fsum += dFilter[k*w + l];
       }
       }
-      if (ABS(fsum) < 1e-10) continue;
+
+      if (ABS(fsum) < 1e-10){
+        pImgNew[i*iWidth + j] = nodata;
+        continue;
+      }
 
       dCurSum /= fsum;
       pImgNew[i*iWidth + j] = (short)(dCurSum + 1e-10);

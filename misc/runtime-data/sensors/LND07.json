@@ -1,0 +1,13 @@
+{
+  "description": "Landsat 7 Enhanced Thematic Mapper",
+  "name": "LND07",
+  "bands": 6,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "NIR",
+    "SWIR1",
+    "SWIR2"
+  ]
+}

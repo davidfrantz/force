@@ -55,7 +55,8 @@ typedef struct {
 } dir_t;
 
 bool fileexist(char *fname);
-int findfile(char *dir_path, char *pattern, char *filter, char fname[], int size);
+int findfile_pattern(const char *dir_path, const char *pattern, const char *filter, char fname[], int size);
+int findfile_starts(const char *dir_path, const char *pattern, const char *filter, char fname[], int size);
 int countfile(char *dir_path, char *pattern);
 int createdir(char *dir_path);
 void extension(char* path, char extension[], int size);

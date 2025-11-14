@@ -34,6 +34,8 @@ Enum definitions
 extern "C" {
 #endif
 
+enum { _STR_LEN_ = 1024, _BYTE_LEN_ = 256 };
+
 // common numbers
 enum { NPOW_00 = 1,    NPOW_01 = 2,     NPOW_02 = 4,     NPOW_03 = 8, 
        NPOW_04 = 16,   NPOW_05 = 32,    NPOW_06 = 64,    NPOW_07 = 128,   
@@ -43,7 +45,7 @@ enum { NPOW_00 = 1,    NPOW_01 = 2,     NPOW_02 = 4,     NPOW_03 = 8,
 
 typedef struct{
   int en;
-  char tag[NPOW_04];
+  char tag[NPOW_10];
 } tagged_enum_t;
 
 // function return codes
@@ -55,6 +57,11 @@ enum { _X_, _Y_, _Z_ };
 
 // range
 enum { _MIN_, _MAX_ };
+
+// geotransform
+enum { _GT_ULX_, _GT_XRES_, _GT_YROT_, _GT_ULY_, _GT_XROT_, _GT_YRES_, _GT_LEN_ };
+// alias for _GT_XRES_
+#define _GT_RES_ 1
 
 // modules
 enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_, 
@@ -110,19 +117,12 @@ enum { _QAI_OFF_,      _QAI_CLD_OPQ_, _QAI_CLD_UNC_,  _QAI_CLD_CIR_,
        _QAI_SLP_,      _QAI_WVP_,     _QAI_LENGTH_ };
 
 // output option
-enum { OPEN_FALSE,   // do not write
-       OPEN_CREATE,  // create file from scratch
-       OPEN_UPDATE,  // read file, and update values
-       OPEN_MERGE,   // read file, and merge values
-       OPEN_BLOCK }; // write block into file
-
-// sensors
-enum { _SEN_LND04_, _SEN_LND05_, _SEN_LND07_, _SEN_LND08_, _SEN_LND09_, 
-       _SEN_SEN2A_, _SEN_SEN2B_, _SEN_SEN2C_, _SEN_SEN2D_, _SEN_sen2a_, 
-       _SEN_sen2b_, _SEN_sen2c_, _SEN_sen2d_, _SEN_LNDLG_, _SEN_SEN2L_, 
-       _SEN_SEN2H_, _SEN_RGB_,   _SEN_S1AIA_, _SEN_S1AID_, _SEN_S1BIA_, 
-       _SEN_S1BID_, _SEN_VVVHP_, _SEN_MOD01_, _SEN_MOD02_, _SEN_MODIS_, 
-       _SEN_LENGTH_ };
+enum { OPEN_FALSE,     // do not write
+       OPEN_CREATE,    // create file from scratch
+       OPEN_UPDATE,    // read file, and update values
+       OPEN_MERGE,     // read file, and merge values
+       OPEN_QAI_MERGE, // read file, and merge QAI values
+       OPEN_CHUNK };   // write chunk into file
 
 // wavelength domains
 enum { _WVL_BLUE_,     _WVL_GREEN_,    _WVL_RED_,   _WVL_REDEDGE1_, 
@@ -151,16 +151,6 @@ enum { _SCR_COMB_ADD_, _SCR_COMB_MUL_, _SCR_COMB_LENGTH_ };
 
 // interpolation method
 enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
-
-// spectral indices
-enum { _IDX_BLU_, _IDX_GRN_, _IDX_RED_, _IDX_NIR_, _IDX_SW1_, _IDX_SW2_, 
-       _IDX_RE1_, _IDX_RE2_, _IDX_RE3_, _IDX_BNR_, _IDX_NDV_, _IDX_EVI_, 
-       _IDX_NBR_, _IDX_ARV_, _IDX_SAV_, _IDX_SRV_, _IDX_TCB_, _IDX_TCG_, 
-       _IDX_TCW_, _IDX_TCD_, _IDX_NDB_, _IDX_NDW_, _IDX_MNW_, _IDX_NDS_,
-       _IDX_SMA_, _IDX_BVV_, _IDX_BVH_, _IDX_NDT_, _IDX_NDM_, _IDX_SW0_,
-       _IDX_KNV_, _IDX_ND1_, _IDX_ND2_, _IDX_CRE_, _IDX_NR1_, _IDX_NR2_,
-       _IDX_NR3_, _IDX_N1n_, _IDX_N2n_, _IDX_N3n_, _IDX_Mre_, _IDX_Mrn_,
-       _IDX_CCI_, _IDX_EV2_, _IDX_CSW_, _IDX_LENGTH_};
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
@@ -277,7 +267,7 @@ enum { _TASK_INPUT_, _TASK_COMPUTE_, _TASK_OUTPUT_,
 enum { _CLOCK_NULL_, _CLOCK_TICK_, _CLOCK_TOCK_, _CLOCK_LENGTH_ };
 
 // user-defined function type
-enum { _UDF_PIXEL_, _UDF_BLOCK_, _UDF_LENGTH_ };
+enum { _UDF_PIXEL_, _UDF_CHUNK_, _UDF_LENGTH_ };
 
 // tag and value
 enum { _TV_TAG_, _TV_VAL_, _TV_LENGTH_ };
@@ -289,13 +279,14 @@ enum { _PROJ_CUSTOM_, _PROJ_EQUI7_, _PROJ_GLANCE7_, _PROJ_LENGTH_ };
 enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_, 
        _CONTINENT_NA_, _CONTINENT_OC_, _CONTINENT_SA_, _CONTINENT_LENGTH_ };
 
+// index type
+enum { _INDEX_TYPE_BAND_, _INDEX_TYPE_EQUATION_, _INDEX_TYPE_SMA_, _INDEX_TYPE_LEN_ };
+
 // tagged enums
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];
-extern const tagged_enum_t _TAGGED_ENUM_SEN_[_SEN_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_];
-extern const tagged_enum_t _TAGGED_ENUM_IDX_[_IDX_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_HEMI_[_HEMI_LENGTH_];

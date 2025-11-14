@@ -33,7 +33,7 @@ Level 1 metadata header
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../lower-level/table-ll.h"
 #include "../lower-level/param-ll.h"
 
@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 typedef struct {
-  char  orig_band[NPOW_03];   // Band ID in original file name
+  char  orig_band[NPOW_10];   // Band ID in original file name
   char  fname[NPOW_10]; // file name
   int   fill;           // fill value
   int   rsr_band;       // ID in RSR table
@@ -67,7 +67,8 @@ typedef struct {
   int dtype;           // data type (bytes)
   int sat;             // saturation value
   cal_t *cal;          // calibration DN->TOA reflectance / BT
-  char refsys[NPOW_04];  // worldwide reference system ID
+  char refsys_type[NPOW_10]; // reference system type
+  char refsys_id[NPOW_10];  // reference system ID
   int tier;            // tier level
   s2_meta s2;          // Sentinel-2 calibration specific
 } meta_t;
@@ -83,7 +84,7 @@ int print_metadata(meta_t *meta, int nb);
 int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, brick_t **dn);
 int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, brick_t **dn);
 void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type);
-void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata);
+void interpolate_sunview_grid(float **int_grid, int int_nx, int int_ny, float nodata);
 void collapse_view_grid(float ***grid, int nb, int nd, int nx, int ny, float nodata);
 int parse_metadata_mission(par_ll_t *pl2);
 int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission);

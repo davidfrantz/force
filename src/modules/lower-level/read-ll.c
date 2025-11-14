@@ -38,8 +38,8 @@ This file contains functions for reading Level 1 data
 int read_level1(meta_t *meta, int mission, brick_t *DN, par_ll_t *pl2){
 int b, nb, nx, ny, nc;
 int nx_, ny_, xoff_ = 0, yoff_ = 0;
-float res, res_;
-double geotran[6];
+double res, res_;
+double geotran[_GT_LEN_];
 ushort **dn_ = NULL;
 GDALDatasetH dataset;
 GDALRasterBandH band;
@@ -97,7 +97,7 @@ int threads;
       nx_ = GDALGetRasterXSize(dataset);
       ny_ = GDALGetRasterYSize(dataset);
       GDALGetGeoTransform(dataset, geotran);
-      res_ = geotran[1];
+      res_ = geotran[_GT_RES_];
 
       if (mission == SENTINEL2){
         xoff_ = floor(meta->s2.left*res/res_);

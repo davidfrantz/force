@@ -55,14 +55,14 @@ char bname[NPOW_10];
 char domain[NPOW_10];
 enum { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 int prodlen[7] = { phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[7][NPOW_02] = { "ERO", "DIL", "OPN", "CLS", "GRD", "THT", "BHT" };
+char prodname[7][NPOW_10] = { "ERO", "DIL", "OPN", "CLS", "GRD", "THT", "BHT" };
                              
 int prodtype[7] = { _ero_, _dil_, _opn_, _cls_, _grd_, _tht_, _bht_ };
 
-bool enable[7] = {  phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
+int enable[7] = {  phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
                     phl->txt.ogrd, phl->txt.otht, phl->txt.obht };
 
-bool write[7]  = { phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
+int write[7]  = { phl->txt.oero, phl->txt.odil, phl->txt.oopn, phl->txt.ocls, 
                    phl->txt.ogrd, phl->txt.otht, phl->txt.obht };
 
 short ***ptr[7] = { &txt->ero_, &txt->dil_, &txt->opn_, &txt->cls_, &txt->grd_, &txt->tht_, &txt->bht_ };
@@ -122,7 +122,7 @@ int b;
 brick_t *brick = NULL;
 char fname[NPOW_10];
 char dname[NPOW_10];
-char subname[NPOW_03];
+char subname[NPOW_10];
 int nchar;
 
 
@@ -132,7 +132,7 @@ int nchar;
   set_brick_product(brick, prodname);
 
   if (phl->subfolders){
-    copy_string(subname, NPOW_03, prodname);
+    copy_string(subname, NPOW_10, prodname);
   } else {
     subname[0] = '\0';
   }
@@ -152,7 +152,7 @@ int nchar;
   
   
   if (write){
-    set_brick_open(brick, OPEN_BLOCK);
+    set_brick_open(brick, OPEN_CHUNK);
   } else {
     set_brick_open(brick, OPEN_FALSE);
   }

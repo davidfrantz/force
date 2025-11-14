@@ -634,13 +634,13 @@ float vz;
     // cloud distance score
     if (bap->w.c > 0){
       score[t].c = 1.0 / (1.0 + exp((-10.0/bap->dreq) * 
-                ((float)ard[t].dst[p] - (bap->dreq/2.0)) ));
+                ((float)ard[t].aux[bap->band_dst][p] - (bap->dreq/2.0)) ));
     } else score[t].c = 0.0;
 
     // haze score
     if (bap->w.h > 0){
       score[t].h = 1.0 / (1.0 + exp((10.0/200.0) * 
-                ((float)ard[t].hot[p] + 150.0)));
+                ((float)ard[t].aux[bap->band_hot][p] + (bap->hreq*(-1.0))) ));
     } else score[t].h = 0.0;
 
     // correlation score
@@ -651,7 +651,7 @@ float vz;
 
     // view zenith score
     if (bap->w.v > 0){
-      vz = ((float)ard[t].vzn[p])*0.01;
+      vz = ((float)ard[t].aux[bap->band_vzn][p])*0.01;
       if (vz < 0 || vz > 180){ score[t].v = 0.0;
       } else { score[t].v = 1.0 / (1.0 + exp(10.0/bap->vreq * 
                           (vz - (bap->vreq/2.0))));

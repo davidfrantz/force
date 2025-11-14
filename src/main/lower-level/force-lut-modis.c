@@ -220,7 +220,7 @@ int nchar;
     printf("error parsing coordinates.\n"); exit(1);}
 
   alloc((void**)&WVP, nc, sizeof(float));
-  alloc_2D((void***)&SEN, nc, NPOW_02, sizeof(char));
+  alloc_2D((void***)&SEN, nc, NPOW_10, sizeof(char));
 
 
   /** Step 1: daily Look-up-tables

@@ -248,7 +248,7 @@ int svgrid = 5000;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_atc_xyz(atc_t *atc){
 int nb = get_brick_nbands(atc->xy_mod);
-int z, nz = NPOW_08;
+int z, nz = _BYTE_LEN_;
 char fname[NPOW_10];
 int nchar;
 
@@ -270,7 +270,7 @@ int nchar;
   alloc((void**)&atc->xyz_F,     nz, sizeof(brick_t*));
   alloc((void**)&atc->xyz_Tg,    nz, sizeof(brick_t*));
 
-  for (z=0; z<NPOW_08; z++){
+  for (z=0; z<_BYTE_LEN_; z++){
 
     nchar = snprintf(fname, NPOW_10, "ATC-OD-Z%03d", z);
     if (nchar < 0 || nchar >= NPOW_10){ 
@@ -411,7 +411,7 @@ void free_atc_xy(atc_t *atc){
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void free_atc_xyz(atc_t *atc){
-int z, nz = NPOW_08;
+int z, nz = _BYTE_LEN_;
 
   if (atc->xyz_od != NULL){
     for (z=0; z<nz; z++){
@@ -573,7 +573,7 @@ void free_atc(atc_t *atc){
 +++ Return: reshaped parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 float **atc_get_band_reshaped(brick_t **xyz, int b){
-int z, nz = NPOW_08;
+int z, nz = _BYTE_LEN_;
 float **reshape = NULL;
 
   alloc((void**)&reshape, nz, sizeof(float*));

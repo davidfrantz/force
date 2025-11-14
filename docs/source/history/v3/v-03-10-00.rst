@@ -1,0 +1,17 @@
+.. _v31000:
+
+FORCE v. 3.10.00
+===============
+
+Release: 06.11.2025
+
+**Read through the changelog of :ref:`v3900` closely. In this version, there are some important changes that may affect your workflows!**
+
+- **General**
+
+    - Vincent Schut noticed that FORCE 3.9.x was using more memory than previous versions.
+      This version fixes this by introducing dynamic strings.
+      Additionally, a memory leak in HLPS v3.8.01 was discovered (though that was already fixed in 3.9.x).
+
+
+  

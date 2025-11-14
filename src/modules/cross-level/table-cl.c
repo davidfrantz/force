@@ -43,8 +43,8 @@ const char *separator = " ,\t";
 int line = 0;
 int row  = 0;
 int col  = 0;
-int nrow_buf = NPOW_00;
-int ncol_buf = NPOW_00;
+int nrow_buf = 1;
+int ncol_buf = 1;
 double mx, vx, k, sum;
 double minimum, maximum;
 
@@ -82,7 +82,8 @@ double minimum, maximum;
     
     buffer[strcspn(buffer, "\r\n")] = 0;
 
-    ptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    ptr = strtok_r(buffer, separator, &saveptr);
     col = 0;
 
     // parse one line
@@ -94,14 +95,14 @@ double minimum, maximum;
         // skip 1st item if there are row names
         // if there is no other item after, exit with error
         if (has_row_names && col == 0){
-          if ((ptr = strtok(NULL, separator)) == NULL){
+          if ((ptr = strtok_r(NULL, separator, &saveptr)) == NULL){
             printf("unable to read table %s. malformed col_names.\n", fname);
             exit(FAILURE);
           }
         }
 
         copy_string(table.col_names[col], NPOW_10, ptr);
-        ptr = strtok(NULL, separator);
+        ptr = strtok_r(NULL, separator, &saveptr);
         col++;
 
         // if too many cols, add twice of previous cols to buffer
@@ -117,14 +118,14 @@ double minimum, maximum;
         // if there is no other item after, exit with error
         if (has_row_names && col == 0){
           copy_string(table.row_names[row], NPOW_10, ptr);
-          if ((ptr = strtok(NULL, separator)) == NULL){
+          if ((ptr = strtok_r(NULL, separator, &saveptr)) == NULL){
             printf("unable to read table %s. malformed row_names.\n", fname);
             exit(FAILURE);
           }
         }
 
         table.data[row][col] = atof(ptr); 
-        ptr = strtok(NULL, separator);
+        ptr = strtok_r(NULL, separator, &saveptr);
         col++;
 
         // if too many cols, add twice of previous cols to buffer

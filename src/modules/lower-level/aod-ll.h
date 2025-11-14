@@ -32,7 +32,7 @@ Aerosol Optical Depth header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta-ll.h"
@@ -81,11 +81,11 @@ typedef struct {
 
 float *aodfileread(par_ll_t *pl2, atc_t *atc);
 int extract_dark_target(atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP, int type, darkobj_t **DOBJ);
-int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, float res, darkobj_t *dobj, int num, int type);
+int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, double res, darkobj_t *dobj, int num, int type);
 speclib_t *water_lib(int nb, meta_t *meta);
 speclib_t *land_lib(int nb, meta_t *meta);
 speclib_t *veg_lib(int nb, int blue, int green, int red);
-int aod_lib_to_target(atc_t *atc, float res, bool multi, darkobj_t dobj, speclib_t *lib, int type, float **aodest);
+int aod_lib_to_target(atc_t *atc, double res, bool multi, darkobj_t dobj, speclib_t *lib, int type, float **aodest);
 int aod_linear_fit(atc_t *atc, float *logaod, float *angb, float *angn);
 int aod_polynomial_fit(atc_t *atc, int naod, float *logaod, float *a0, float *a1, float *a2);
 int aod_map(atc_t *atc, dark_t *dark);

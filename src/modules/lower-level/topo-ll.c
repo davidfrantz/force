@@ -161,7 +161,7 @@ int smooth_topography(brick_t *DEM){
 int i, j, ii, jj, ni, nj, p, np, nx, ny, nc, k;
 float *buf = NULL;
 float sum, num;
-float res;
+double res;
 float *dem_ = NULL;
 float nodata;
 
@@ -180,12 +180,12 @@ float nodata;
 
 
   if (res >= 30) return SUCCESS;
-  
+
   #ifdef FORCE_DEV
   printf("smooth_topo should consider actual pixel size of DEM...\n");
   #endif
 
-  k = 30/res;
+  k = 30.0 / res;
 
   alloc((void**)&buf, nc, sizeof(float));
 
@@ -253,7 +253,7 @@ ushort *asp_  = NULL;
 float  *dem_  = NULL;
 float nodata;
 float slope, aspect;
-float res;
+double res;
 bool valid;
 
 
@@ -466,7 +466,7 @@ small  *cdem_ = NULL;
   atc->dem.avg = (float)(sum/num);
   atc->dem.max += 0.001; // add 1m
 
-  atc->dem.cnum = NPOW_08 - 1;
+  atc->dem.cnum = _BYTE_LEN_ - 1;
   atc->dem.step = (atc->dem.max-atc->dem.min)/atc->dem.cnum;
   
   
@@ -637,7 +637,7 @@ brick_t *DEM = NULL;
 
   // warp DEM to MEM or use flat DEM (z = 0m)
   if (strcmp(pl2->fdem, "NULL") != 0){
-    if ((warp_from_disc_to_known_brick(1, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
+    if ((warp_from_disc_to_known_brick(pl2->dem_resample, pl2->nthread, pl2->fdem, DEM, 0, 0, pl2->dem_nodata)) != SUCCESS){
       printf("Reprojecting of DEM failed! "); return FAILURE;}
   }
 
@@ -743,7 +743,8 @@ double cov, varx, vary, num;
 double offset, gain;
 float c_, h0, f, cf;
 float *cor_ = NULL;
-float tmp, res;
+float tmp;
+double res;
 float *swir_ = NULL;
 float rho_p, tss, tsd, szen, ms;
 int k, nk = 0, *K = NULL;
@@ -1016,7 +1017,7 @@ small *dem_ = NULL;
 
   // cellsize in fine pixels
   cell_size = floor(get_brick_res(CDEM)/get_brick_res(FDEM));
-  
+
   nx = get_brick_ncols(FDEM);
   ny = get_brick_nrows(FDEM);
 

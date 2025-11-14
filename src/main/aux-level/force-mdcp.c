@@ -175,6 +175,7 @@ const char *bname = NULL;
   GDALClose(src);
   GDALClose(dst);
 
+  GDALDestroy();
 
   return SUCCESS; 
 }

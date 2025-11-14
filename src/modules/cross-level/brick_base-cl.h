@@ -21,26 +21,19 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Image header
+Brick base header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef IMAGE_CL_H
-#define IMAGE_CL_H
+#ifndef BRICK_BASE_CL_H
+#define BRICK_BASE_CL_H
 
 #include <stdio.h>   // core input and output functions
-#include <string.h>  // string handling functions
+#include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/string-cl.h"
 #include "../cross-level/date-cl.h"
-#include "../cross-level/datesys-cl.h"
-#include "../cross-level/alloc-cl.h"
 #include "../cross-level/warp-cl.h"
-#include "../cross-level/dir-cl.h"
-#include "../cross-level/lock-cl.h"
-#include "../cross-level/cube-cl.h"
-#include "../cross-level/sys-cl.h"
 #include "../cross-level/utils-cl.h"
 #include "../cross-level/gdalopt-cl.h"
 
@@ -50,13 +43,12 @@ extern "C" {
 #endif
 
 typedef struct {
-  char name[NPOW_10];    // name of brick
-  char product[NPOW_03]; // product short name
-  char dname[NPOW_10];   // dirpath  for product
-  char fname[NPOW_10];   // filename for product
-  char provdir[NPOW_10]; // dirpath  for provenance folder
-  char  **provenance;    // input data
-  int nprovenance;       // number of input data
+  string_t name;    // name of brick
+  string_t product; // product short name
+  string_t dname;   // dirpath  for product
+  string_t fname;   // filename for product
+  string_t provdir; // dirpath  for provenance folder
+  string_vector_t  provenance; // input provenance files
   int sid;               // sensor ID
   int open;              // open mode
   int explode;           // explode to single-bands?
@@ -71,29 +63,28 @@ typedef struct {
   int cx;                // number of chunking columns
   int cy;                // number of chunking rows
   int cc;                // number of chunking cells
-  double res;             // resolution
   double geotran[6];     // geotransformation
   double width;           // width of image (nx*res)
   double height;          // height of image (ny*res)
   double cwidth;          // chunking width of image (nx*res)
   double cheight;         // chunking height of image (ny*res)
-  int chunk;             // ID of chunk
-  int nchunk;             // # of chunks
-  int tx, ty;            // ID of tile
-  char proj[NPOW_10];      // projection
+  int chunk[2];           // ID of chunk
+  dim_t dim_chunk;        // # chunks dimensions
+  int tile[2];            // ID of tile
+  string_t proj;      // projection
 
-  char par[NPOW_14];       // parameterization
+  string_t par;       // parameterization
 
   bool  *save;           // save band?
   int   *nodata;         // nodata value
   float *scale;          // scale factor
 
-  float *wavelength;     // wavelength
-  char  **unit;          // wavelength unit
-  char  **domain;        // band domain (e.g. NIR)
-  char  **bandname;      // band name
-  char  **sensor;        // sensor ID
-  date_t *date;          // date
+  float *wavelength;        // wavelength
+  string_vector_t unit;     // wavelength unit
+  string_vector_t domain;   // band domain (e.g. NIR)
+  string_vector_t bandname; // band name
+  string_vector_t sensor;   // sensor ID
+  date_t *date;             // date
                          
   short  **vshort;       // data (z/xy flattened by line)
   float  **vfloat;       // data (z/xy flattened by line)
@@ -112,11 +103,8 @@ void     free_brick(brick_t *brick);
 void     copy_brick_band(brick_t *brick, int b, brick_t *from, int b_from);
 brick_t *copy_brick(brick_t *from, int nb, int datatype);
 brick_t *crop_brick(brick_t *from, double radius);
-int      warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube);
-int      warp_from_disc_to_known_brick(int rsm, int threads, const char *fname, brick_t *dst, int src_b, int dst_b, int src_nodata);
 void     init_brick_bands(brick_t *brick);
 void     init_brick(brick_t *brick);
-int      write_brick(brick_t *brick);
 void     print_brick_band_info(brick_t *brick, int b);
 void     print_brick_info(brick_t *brick);
 int      convert_brick_p2p(brick_t *from, brick_t *to, int p_from);
@@ -169,10 +157,17 @@ void     set_brick_chunknrows(brick_t *brick, int cy);
 int      get_brick_chunknrows(brick_t *brick);
 void     set_brick_chunkncells(brick_t *brick, int cc);
 int      get_brick_chunkncells(brick_t *brick);
-void     set_brick_chunk(brick_t *brick, int chunk);
-int      get_brick_chunk(brick_t *brick);
-void     set_brick_nchunks(brick_t *brick, int nchunk);
-int      get_brick_nchunks(brick_t *brick);
+void     set_brick_chunkx(brick_t *brick, int chunkx);
+int      get_brick_chunkx(brick_t *brick);
+void     set_brick_chunky(brick_t *brick, int chunky);
+int      get_brick_chunky(brick_t *brick);
+void     set_brick_chunk_dim_x(brick_t *brick, int ncol);
+void     set_brick_chunk_dim_y(brick_t *brick, int nrow);
+void     set_brick_chunk_dim(brick_t *brick, dim_t *dim);
+int get_brick_chunk_dim_x(brick_t *brick);
+int get_brick_chunk_dim_y(brick_t *brick);
+int get_brick_chunk_dim_n(brick_t *brick);
+dim_t    get_brick_chunk_dim(brick_t *brick);
 void     set_brick_tilex(brick_t *brick, int tx);
 int      get_brick_tilex(brick_t *brick);
 void     set_brick_tiley(brick_t *brick, int ty);

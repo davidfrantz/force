@@ -14,6 +14,10 @@ I strongly suggest to read the :ref:`tut-ard` tutorial before.
 .. admonition:: Info
 
    *This tutorial uses FORCE v. 3.5*
+   
+   Please note that while this tutorial covers the original usage of the coregistration capabilities FORCE offers, it is possible
+   to coregister Landsat images with a Landsat time series as of version ``v. 3.8.00``! This may be beneficial when incorporating
+   Landsat Tier 2 data into a data cube.
 
 
 What is the problem?

@@ -1,0 +1,15 @@
+.. _v3901:
+
+FORCE v. 3.9.01
+===============
+
+Release: 13.10.2025
+
+**Read through the changelog of :ref:`v3900` closely. In this version, there are some important changes that may affect your workflows!**
+
+- **FORCE HLPS**
+
+  - in ``force-higher-level``, LEVEL3 module:
+    **Bugfix:** Fixed a bug that caused the program to not properly use the auxiliary files when multiple of them were present.
+    Thanks to Oleg Zheleznyy for reporting this issue.
+

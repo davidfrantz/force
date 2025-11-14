@@ -28,49 +28,76 @@ This file contains functions for organizing bricks in memory, and output
 #include "gdalopt-cl.h"
 
 
+static const char *GTIFF_OPTIONS[][2] = {
+    {"COMPRESS",   "ZSTD"},
+    {"PREDICTOR",  "2"},
+    {"INTERLEAVE", "BAND"},
+    {"BIGTIFF",    "YES"},
+    {"TILED",      "YES"},
+    {"BLOCKXSIZE", "256"},
+    {"BLOCKYSIZE", "256"}
+};
+#define GTIFF_OPTION_COUNT (sizeof(GTIFF_OPTIONS)/sizeof(GTIFF_OPTIONS[0]))
+
+static const char *COG_OPTIONS[][2] = {
+    {"COMPRESS",            "ZSTD"},
+    {"PREDICTOR",           "YES"},
+    {"INTERLEAVE",          "TILE"},
+    {"BLOCKSIZE",           "256"},
+    {"BIGTIFF",             "YES"},
+    {"OVERVIEW_RESAMPLING", "AVERAGE"}
+};
+#define COG_OPTION_COUNT (sizeof(COG_OPTIONS)/sizeof(COG_OPTIONS[0]))
+
+
 /** This function sets default GDAL output options
 --- format:  Default format
 --- gdalopt: GDAL options (returned)
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void default_gdaloptions(int format, gdalopt_t *gdalopt){
-int o = 0;
+int nchar[_TV_LENGTH_] = {0};
 
+
+  if (_TV_LENGTH_ != 2){
+    printf("Error: _TV_LENGTH_ is expected to be 2.\n");
+    exit(1);
+  }
 
   switch (format){
     case _FMT_ENVI_:
-      copy_string(gdalopt->extension,   NPOW_04, "dat");
-      copy_string(gdalopt->driver,      NPOW_04, "ENVI");
-      break;
+    fill_string(&gdalopt->extension, "dat");
+    fill_string(&gdalopt->driver, "ENVI");
+    break;
     case _FMT_GTIFF_:
-      copy_string(gdalopt->extension,   NPOW_04, "tif");
-      copy_string(gdalopt->driver,      NPOW_04, "GTiff");
-      copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
-      copy_string(gdalopt->option[o++], NPOW_10, "LZW");
-      copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
-      copy_string(gdalopt->option[o++], NPOW_10, "2");
-      copy_string(gdalopt->option[o++], NPOW_10, "INTERLEAVE");
-      copy_string(gdalopt->option[o++], NPOW_10, "BAND");
-      copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
-      copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      fill_string(&gdalopt->extension, "tif");
+      fill_string(&gdalopt->driver, "GTiff");
+      for (int j=0; j<_TV_LENGTH_; j++){
+        for (size_t i=0; i<GTIFF_OPTION_COUNT; i++){
+          nchar[j] = (strlen(GTIFF_OPTIONS[i][j]) > nchar[j]) ? strlen(GTIFF_OPTIONS[i][j]) : nchar[j];
+        }
+        alloc_string_vector(&gdalopt->options[j], GTIFF_OPTION_COUNT, nchar[j]);
+        for (size_t i=0; i<GTIFF_OPTION_COUNT; i++){
+          fill_string_vector(&gdalopt->options[j], i, GTIFF_OPTIONS[i][j]);
+        }
+      }
       break;
     case _FMT_COG_:
-      copy_string(gdalopt->extension,   NPOW_04, "tif");
-      copy_string(gdalopt->driver,      NPOW_04, "COG");
-      copy_string(gdalopt->option[o++], NPOW_10, "COMPRESS");
-      copy_string(gdalopt->option[o++], NPOW_10, "LZW");
-      copy_string(gdalopt->option[o++], NPOW_10, "PREDICTOR");
-      copy_string(gdalopt->option[o++], NPOW_10, "YES");
-      copy_string(gdalopt->option[o++], NPOW_10, "INTERLEAVE");
-      copy_string(gdalopt->option[o++], NPOW_10, "PIXEL");
-      copy_string(gdalopt->option[o++], NPOW_10, "BIGTIFF");
-      copy_string(gdalopt->option[o++], NPOW_10, "YES");
-      copy_string(gdalopt->option[o++], NPOW_10, "TILED");
-      copy_string(gdalopt->option[o++], NPOW_10, "YES");
+      fill_string(&gdalopt->extension, "tif");
+      fill_string(&gdalopt->driver, "COG");
+      for (int j=0; j<_TV_LENGTH_; j++){
+        for (size_t i=0; i<COG_OPTION_COUNT; i++){
+          nchar[j] = (strlen(COG_OPTIONS[i][j]) > nchar[j]) ? strlen(COG_OPTIONS[i][j]) : nchar[j];
+        }
+        alloc_string_vector(&gdalopt->options[j], COG_OPTION_COUNT, nchar[j]);
+        for (size_t i=0; i<COG_OPTION_COUNT; i++){
+          fill_string_vector(&gdalopt->options[j], i, COG_OPTIONS[i][j]);
+        }
+      }
       break;
     case _FMT_JPEG_:
-      copy_string(gdalopt->extension,   NPOW_04, "jpg");
-      copy_string(gdalopt->driver,      NPOW_04, "JPEG");
+      fill_string(&gdalopt->extension, "jpg");
+      fill_string(&gdalopt->driver, "JPEG");
       break;
     case _FMT_CUSTOM_:
       break;
@@ -78,45 +105,6 @@ int o = 0;
       printf("unknown format.\n");
       exit(FAILURE);
   }
-
-  gdalopt->n = o;
-
-
-  return;
-}
-
-
-/** This function updates the blocksize in GDAL output options
---- format:  Default format
---- gdalopt: GDAL options (returned)
-+++ Return:  void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void update_gdaloptions_blocksize(int format, gdalopt_t *gdalopt, int cx, int cy){
-int nchar;
-int o = gdalopt->n;
-char blockxsize[NPOW_10];
-char blockysize[NPOW_10];
-
-
-  if (format != _FMT_GTIFF_) return;
-
-  if (cx > 0){
-    nchar = snprintf(blockxsize, NPOW_10, "%d", cx);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling BLOCKXSIZE\n"); exit(FAILURE);}
-    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKXSIZE");
-    copy_string(gdalopt->option[o++], NPOW_10, blockxsize);
-  }
-  if (cy > 0){
-    nchar = snprintf(blockysize, NPOW_10, "%d", cy);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling BLOCKYSIZE\n"); exit(FAILURE);}
-    copy_string(gdalopt->option[o++], NPOW_10, "BLOCKYSIZE");
-    copy_string(gdalopt->option[o++], NPOW_10, blockysize);
-  }
-
-  gdalopt->n = o;
-
 
   return;
 }
@@ -128,35 +116,49 @@ char blockysize[NPOW_10];
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void parse_gdaloptions(char *fname, gdalopt_t *gdalopt){
-int i, o = 0;
 int nrows;
+int nchar[_TV_LENGTH_] = {0};
 char ***tagval = NULL;
 bool b_driver = false;
 bool b_ext = false;
 
 
-  tagval = read_tagvalue(fname, &nrows);
+  if (_TV_LENGTH_ != 2){
+    printf("Error: _TV_LENGTH_ is expected to be 2.\n");
+    exit(1);
+  }
 
-  for (i=0; i<nrows; i++){
+  tagval = read_tagvalue(fname, &nrows);
+  if (tagval == NULL){
+    printf("Reading GDAL options failed.\n");
+    exit(FAILURE);
+  }
+
+
+  for (int i=0; i<nrows; i++){
+    nchar[0] = (strlen(tagval[i][_TV_TAG_]) > nchar[_TV_TAG_]) ? strlen(tagval[i][_TV_TAG_]) : nchar[_TV_TAG_];
+    nchar[1] = (strlen(tagval[i][_TV_VAL_]) > nchar[_TV_VAL_]) ? strlen(tagval[i][_TV_VAL_]) : nchar[_TV_VAL_];
+  }
+
+  alloc_string_vector(&gdalopt->options[_TV_TAG_],  nrows - 2, nchar[_TV_TAG_]);
+  alloc_string_vector(&gdalopt->options[_TV_VAL_],  nrows - 2, nchar[_TV_VAL_]);
+
+  for (int i=0, o=0; i<nrows; i++){
 
     if (strcmp(tagval[i][_TV_TAG_], "DRIVER") == 0){
-      copy_string(gdalopt->driver, NPOW_04, tagval[i][_TV_VAL_]);
+      fill_string(&gdalopt->driver, tagval[i][_TV_VAL_]);
       b_driver = true;
     } else if (strcmp(tagval[i][_TV_TAG_], "EXTENSION") == 0){
-      copy_string(gdalopt->extension, NPOW_04, tagval[i][_TV_VAL_]);
+      fill_string(&gdalopt->extension, tagval[i][_TV_VAL_]);
       b_ext = true;
     } else {
-      if (o >= (NPOW_06-1)){
-        printf("too many GDAL output options."); 
-        exit(FAILURE);
-      }
-      copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_TAG_]);
-      copy_string(gdalopt->option[o++], NPOW_10, tagval[i][_TV_VAL_]);
+      fill_string_vector(&gdalopt->options[_TV_TAG_], o, tagval[i][_TV_TAG_]);
+      fill_string_vector(&gdalopt->options[_TV_VAL_], o, tagval[i][_TV_VAL_]);
+      o++;
     }
 
   }
 
-  gdalopt->n = o;
 
   if (!b_driver){
     printf("Driver not found in GDAL options file (e.g. DRIVER = COG)\n");
@@ -183,15 +185,70 @@ bool b_ext = false;
 +++ Return:  void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_gdaloptions(gdalopt_t *gdalopt){
-int o;
 
 
   printf("GDAL output options :::\n");
-  printf("Driver:    %s\n", gdalopt->driver);
-  printf("Extension: %s\n", gdalopt->extension);
-  for (o=0; o<gdalopt->n; o+=2){
-    printf("Option %2d: %s = %s\n", o, gdalopt->option[o], gdalopt->option[o+1]);
+  printf("Driver:    %s\n", gdalopt->driver.string);
+  printf("Extension: %s\n", gdalopt->extension.string);
+
+  if (gdalopt->options[_TV_TAG_].number != gdalopt->options[_TV_VAL_].number){
+    printf("Error: Number of GDAL option tags and values do not match.\n");
+    exit(1);
   }
+
+  for (int o=0; o<gdalopt->options[_TV_TAG_].number; o++){
+    printf("Option %2d: %s = %s\n", 
+      o, 
+      gdalopt->options[_TV_TAG_].string[o], 
+      gdalopt->options[_TV_VAL_].string[o]);
+  }
+
+  return;
+}
+
+
+/** This function copies GDAL output options
+--- dst:    destination GDAL options
+--- src:    source GDAL options
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void copy_gdaloptions(gdalopt_t *dst, gdalopt_t *src){
+
+  free_gdaloptions(dst); // to not leak memory
+
+  fill_string(&dst->driver, src->driver.string);
+  fill_string(&dst->extension, src->extension.string);
+
+  if (src->options[_TV_TAG_].number != src->options[_TV_VAL_].number){
+    printf("Error: Number of GDAL option tags and values do not match.\n");
+    exit(1);
+  }
+
+  if (src->options[_TV_TAG_].number > 0){
+    alloc_string_vector(&dst->options[_TV_TAG_], src->options[_TV_TAG_].number, src->options[_TV_TAG_].length);
+    alloc_string_vector(&dst->options[_TV_VAL_], src->options[_TV_VAL_].number, src->options[_TV_VAL_].length);
+    for (int o=0; o<src->options[_TV_TAG_].number; o++){
+      fill_string_vector(&dst->options[_TV_TAG_], o, src->options[_TV_TAG_].string[o]);
+      fill_string_vector(&dst->options[_TV_VAL_], o, src->options[_TV_VAL_].string[o]);
+    }
+  } else {
+    dst->options[_TV_TAG_].string = NULL;
+    dst->options[_TV_VAL_].string = NULL;
+  }
+
+  return;
+}
+
+/** This function frees GDAL output options
+--- gdalopt: GDAL options
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void free_gdaloptions(gdalopt_t *gdalopt){
+
+  free_string(&gdalopt->driver);
+  free_string(&gdalopt->extension);
+  if (gdalopt->options[_TV_TAG_].number > 0) free_string_vector(&gdalopt->options[_TV_TAG_]);
+  if (gdalopt->options[_TV_VAL_].number > 0) free_string_vector(&gdalopt->options[_TV_VAL_]);
 
   return;
 }

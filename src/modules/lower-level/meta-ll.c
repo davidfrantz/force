@@ -131,7 +131,7 @@ void free_calibration(cal_t *cal){
 int init_calibration(cal_t *cal){
 
   copy_string(cal->fname,     NPOW_10, "NULL");
-  copy_string(cal->orig_band, NPOW_03, "NULL");
+  copy_string(cal->orig_band, NPOW_10, "NULL");
 
   cal->fill     = SHRT_MIN;
 
@@ -179,7 +179,7 @@ printf("init and check for brick struct, too?\n");
 //    printf("error in resolution. "); return FAILURE;}
 //  if (meta->map_ul_x == fill || meta->map_ul_y == fill){
 //    printf("error in map ul. "); return FAILURE;}
-//  if (atof(meta->refsys) == 0){
+//  if (atof(meta->refsys_id) == 0){
 //    printf("error in path/row. "); return FAILURE;}/  //if (meta->date.day == fill){
   //  printf("error in date.day. "); return FAILURE;}
   //if (meta->date.doy == fill){
@@ -245,7 +245,7 @@ char basename[NPOW_10];
 
   printf("dtype: %d\n", meta->dtype);
   printf("sat: %d\n", meta->sat);
-  printf("refsys   = %s\n", meta->refsys);
+  printf("refsys   = %s %s\n", meta->refsys_type, meta->refsys_id);
   //printf("res: %d\n", meta->res);
   //printf("yyyy/mm/dd + doy = %04d/%02d/%02d + %03d\n", meta->date.year, meta->date.month, meta->date.day, meta->date.doy);
   //printf("hh/mm/ss= %02d/%02d/%02d\n", meta->date.hh, meta->date.mm, meta->date.ss);
@@ -274,7 +274,7 @@ char *tokenptr = NULL;
 char *tokenptr2 = NULL;
 char *separator = " =\":";
 char *separator2 = "-";
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 int b, b_temp = 0, nb = 0, b_rsr, lid = 0, path = 0, row = 0;
@@ -286,7 +286,7 @@ GDALDatasetH fp_;
   #endif
 
   // scan directory for MTL.txt file
-  if (findfile(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
     printf("Unable to find Landsat metadata (MTL file)! "); return FAILURE;}
 
   // open MTL file
@@ -300,13 +300,14 @@ GDALDatasetH fp_;
     if (strstr(buffer, "END_GROUP = L1_METADATA_FILE")) break;
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
       // Landsat sensor
       if (strcmp(tag, "SPACECRAFT_ID") == 0){
@@ -328,8 +329,8 @@ GDALDatasetH fp_;
         set_brick_nprovenance(DN, 1);
         set_brick_provenance(DN, 0, pl2->d_level1);
 
-        nchar = snprintf(sensor, NPOW_04, "LND%02d", lid);
-        if (nchar < 0 || nchar >= NPOW_04){
+        nchar = snprintf(sensor, NPOW_10, "LND%02d", lid);
+        if (nchar < 0 || nchar >= NPOW_10){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
@@ -367,84 +368,84 @@ GDALDatasetH fp_;
         b = 0;
         if (lid >= 8){
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "1");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "ULTRABLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "2");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "BLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "3");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "GREEN");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "4");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "RED");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "5");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "NIR");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "9");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "9");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "CIRRUS");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "6");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR1");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "7");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR2");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "10");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "10");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "TEMP");
           b++;
 
         } else {
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "1");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "1");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "BLUE");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "2");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "2");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "GREEN");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "3");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "3");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "RED");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "4");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "4");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "NIR");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "5");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "5");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR1");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "7");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "7");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "SWIR2");
           b++;
 
-          copy_string(meta->cal[b].orig_band, NPOW_03, "6");
+          copy_string(meta->cal[b].orig_band, NPOW_10, "6");
           meta->cal[b].rsr_band = b_rsr++;
           set_brick_domain(DN, b, "TEMP");
           b++;
@@ -504,11 +505,11 @@ GDALDatasetH fp_;
         row = atoi(tokenptr);
       } else if (strcmp(tag, "ACQUISITION_DATE") == 0 ||
                  strcmp(tag, "DATE_ACQUIRED") == 0){
-        tokenptr2 = strtok(tokenptr, separator2);
+        tokenptr2 = strtok_r(tokenptr, separator2, &saveptr);
         date.year = atoi(tokenptr2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
         date.month = atoi(tokenptr2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
         date.day = atoi(tokenptr2);
         date.doy = md2doy(date.month, date.day);
         date.week = doy2week(date.doy);
@@ -516,9 +517,9 @@ GDALDatasetH fp_;
       } else if (strcmp(tag, "SCENE_CENTER_TIME") == 0 ||
                  strcmp(tag, "SCENE_CENTER_SCAN_TIME") == 0){
         date.hh = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator, &saveptr);
         date.mm = atoi(tokenptr);
-        tokenptr = strtok(NULL, separator);
+        tokenptr = strtok_r(NULL, separator, &saveptr);
         date.ss = atoi(tokenptr);
         date.tz = 0;
 
@@ -596,8 +597,10 @@ GDALDatasetH fp_;
   set_brick_filename(DN, "DIGITAL-NUMBERS");
   set_brick_par(DN, pl2->params->log);
 
-  nchar = snprintf(meta->refsys, NPOW_04, "%03d%03d", path, row);
-  if (nchar < 0 || nchar >= NPOW_04){
+  copy_string(meta->refsys_type, NPOW_10, "WRS-2");
+
+  nchar = snprintf(meta->refsys_id, NPOW_10, "%03d%03d", path, row);
+  if (nchar < 0 || nchar >= NPOW_10){
     printf("Buffer Overflow in assembling WRS-2\n"); return FAILURE;}
 
 
@@ -662,7 +665,7 @@ float ***s_vz = NULL, ***s_va = NULL;
 bool s = false, v = false, z = false, a = false;
 char d_img[NPOW_10];
 char id_img[NPOW_10];
-char sensor[NPOW_04];
+char sensor[NPOW_10];
 char domain[NPOW_10];
 int nchar;
 date_t date;
@@ -701,8 +704,8 @@ int svgrid = 5000;
   directoryname(d_top_1, d_top_2, NPOW_10);
 
   // scan directory for xml file
-  if (findfile(d_top_2, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(d_top_2, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
+      findfile_pattern(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding top-level S2 metadata file failed. ");
     return FAILURE;
   }
@@ -721,27 +724,28 @@ int svgrid = 5000;
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
 
       // Sentinel ID
       if (strcmp(tag, "SPACECRAFT_NAME") == 0){
 
-        tokenptr2 = strtok(tokenptr, separator2);
-        tokenptr2 = strtok(NULL, separator2);
+        tokenptr2 = strtok_r(tokenptr, separator2, &saveptr);
+        tokenptr2 = strtok_r(NULL, separator2, &saveptr);
 
         if ((atoi(tokenptr2+0)) != 2){
           printf("unknown/unsupported sensor ID! "); return FAILURE;
         }
 
-        nchar = snprintf(sensor, NPOW_04, "SEN%s", tokenptr2);
-        if (nchar < 0 || nchar >= NPOW_04){
+        nchar = snprintf(sensor, NPOW_10, "SEN%s", tokenptr2);
+        if (nchar < 0 || nchar >= NPOW_10){
           printf("Buffer Overflow in assembling sensor\n"); return FAILURE;}
 
         for (b=0; b<nb; b++) set_brick_sensor(DN, b, sensor);
@@ -765,67 +769,67 @@ int svgrid = 5000;
 
         b = 0;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "01");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "01");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "ULTRABLUE");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "02");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "02");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "BLUE");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "03");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "03");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "GREEN");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "04");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "04");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "RED");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "05");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "05");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE1");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "06");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "06");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE2");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "07");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "07");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "REDEDGE3");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "08");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "08");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "BROADNIR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "8A");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "8A");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "NIR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "09");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "09");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "VAPOR");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "10");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "10");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "CIRRUS");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "11");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "11");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "SWIR1");
         b++;
 
-        copy_string(meta->cal[b].orig_band, NPOW_03, "12");
+        copy_string(meta->cal[b].orig_band, NPOW_10, "12");
         meta->cal[b].rsr_band = b_rsr++;
         set_brick_domain(DN, b, "SWIR2");
         b++;
@@ -843,18 +847,19 @@ int svgrid = 5000;
           if (nchar < 0 || nchar >= NPOW_10){
             printf("Buffer Overflow in assembling image ID\n"); return FAILURE;}
 
-          if (findfile(d_img, id_img, NULL, meta->cal[b].fname, NPOW_10) == FAILURE){
+          if (findfile_pattern(d_img, id_img, NULL, meta->cal[b].fname, NPOW_10) == FAILURE){
             printf("Unable to find image %s. ", id_img); return FAILURE;}
 
         }
 
+        copy_string(meta->refsys_type, NPOW_10, "MGRS");
 
         if (strlen(pl2->b_level1) > 50){ // old, long naming convention
-          strncpy(meta->refsys, pl2->b_level1+49, 6);
+          strncpy(meta->refsys_id, pl2->b_level1+49, 6);
         } else { // new, compact naming convention
-          strncpy(meta->refsys, pl2->b_level1+4, 6);
+          strncpy(meta->refsys_id, pl2->b_level1+4, 6);
         }
-        meta->refsys[6] = '\0';
+        meta->refsys_id[6] = '\0';
 
       // product type
       } else if (strcmp(tag, "PROCESSING_LEVEL") == 0){
@@ -866,18 +871,18 @@ int svgrid = 5000;
 
       // acquisition variables
       } else if (strcmp(tag, "PRODUCT_START_TIME") == 0){
-        tokenptr3 = strtok(tokenptr, separator3);
+        tokenptr3 = strtok_r(tokenptr, separator3, &saveptr);
         date.year = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.month = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.day = atoi(tokenptr3);
         date.doy = md2doy(date.month, date.day);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.hh = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.mm = atoi(tokenptr3);
-        tokenptr3 = strtok(NULL, separator3);
+        tokenptr3 = strtok_r(NULL, separator3, &saveptr);
         date.ss = atoi(tokenptr3);
         date.tz = 0;
         date.week = doy2week(date.doy);
@@ -891,7 +896,7 @@ int svgrid = 5000;
             for (b=0; b<nb; b++) set_brick_scale(DN, b, atoi(tokenptr));
           }
           tag = tokenptr;
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
 
       // additive scaling factor (since baseline 4.0)
@@ -904,7 +909,7 @@ int svgrid = 5000;
             char_to_float(tokenptr, &meta->cal[b].radd);
           }
           tag = tokenptr;
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
         #ifdef FORCE_DEBUG
         if (b >= 0) printf("additive scaling factor for band %d: %f\n", b, meta->cal[b].radd);
@@ -924,8 +929,8 @@ int svgrid = 5000;
   /** parse granule xml **/
 
   // scan directory for xml file
-  if (findfile(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
+      findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding granule metadata file failed. "); return FAILURE;
   }
 
@@ -942,13 +947,14 @@ int svgrid = 5000;
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
     // get tag
-    tokenptr = strtok(buffer, separator);
+    char *saveptr = NULL;
+    tokenptr = strtok_r(buffer, separator, &saveptr);
     tag=tokenptr;
 
     // extract parameters by comparing tag
     while (tokenptr != NULL){
 
-      tokenptr = strtok(NULL, separator);
+      tokenptr = strtok_r(NULL, separator, &saveptr);
 
       // nx/ny/res of highest resolution bands
       if (strcmp(tag, "resolution") == 0){
@@ -966,7 +972,7 @@ int svgrid = 5000;
 
       // sun/view grids
       } else if (strcmp(tag, "COL_STEP") == 0){
-        while (atoi(tokenptr) == 0) tokenptr = strtok(NULL, separator);
+        while (atoi(tokenptr) == 0) tokenptr = strtok_r(NULL, separator, &saveptr);
 
         if (svgrid != atoi(tokenptr)){
           printf("SUN_VIEW_GRID is incompatible with Sentinel-2 metadata. "); return FAILURE;}
@@ -989,14 +995,14 @@ int svgrid = 5000;
         d = 0;
         while (tokenptr != NULL){
           if (strcmp(tokenptr, "bandId") == 0){
-            tokenptr = strtok(NULL, separator);
+            tokenptr = strtok_r(NULL, separator, &saveptr);
             b = atoi(tokenptr);
           }
           if (strcmp(tokenptr, "detectorId") == 0){
-            tokenptr = strtok(NULL, separator);
+            tokenptr = strtok_r(NULL, separator, &saveptr);
             d = atoi(tokenptr) - 1;
           }
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
         }
       } else if (strcmp(tag, "/Viewing_Incidence_Angles_Grids") == 0){
         v = false;
@@ -1032,7 +1038,7 @@ int svgrid = 5000;
             }
           }
 
-          tokenptr = strtok(NULL, separator);
+          tokenptr = strtok_r(NULL, separator, &saveptr);
           j++;
 
         }
@@ -1052,12 +1058,12 @@ int svgrid = 5000;
 
   // interpolate the grids
   // angles are given at grid intersections, we need one value per cell
-  interpolate_sunview_grid(s_sz, sv_nx, sv_ny, meta->s2.nodata);
-  interpolate_sunview_grid(s_sa, sv_nx, sv_ny, meta->s2.nodata);
+  interpolate_sunview_grid(&s_sz, sv_nx, sv_ny, meta->s2.nodata);
+  interpolate_sunview_grid(&s_sa, sv_nx, sv_ny, meta->s2.nodata);
   for (b=0; b<nb; b++){
     for (d=0; d<nd; d++){
-      interpolate_sunview_grid(s_vz[b][d], sv_nx, sv_ny, meta->s2.nodata);
-      interpolate_sunview_grid(s_va[b][d], sv_nx, sv_ny, meta->s2.nodata);
+      interpolate_sunview_grid(&s_vz[b][d], sv_nx, sv_ny, meta->s2.nodata);
+      interpolate_sunview_grid(&s_va[b][d], sv_nx, sv_ny, meta->s2.nodata);
     }
   }
   sv_nx--;
@@ -1228,7 +1234,7 @@ int nchar;
     copy_string(add2, NPOW_10, "1");
   } else {
     add1[0] = '\0';
-    add1[0] = '\0';
+    add2[0] = '\0';
   }
 
   if (type == 0){
@@ -1344,7 +1350,7 @@ int nchar;
 --- nodata:   nodata value
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void interpolate_sunview_grid(float *int_grid, int int_nx, int int_ny, float nodata){
+void interpolate_sunview_grid(float **int_grid, int int_nx, int int_ny, float nodata){
 int i, j, ii, jj;
 int cell_nx, cell_ny;
 int cell_p, int_p;
@@ -1368,8 +1374,8 @@ float sum, num;
 
       int_p = (i+ii) * int_ny + (j+jj);
 
-      if (int_grid[int_p] > 0){
-        sum += int_grid[int_p];
+      if ((*int_grid)[int_p] > 0){
+        sum += (*int_grid)[int_p];
         num++;
       }
     }
@@ -1384,8 +1390,8 @@ float sum, num;
   }
   }
 
-  memmove(int_grid, cell_grid, cell_nx*cell_ny*sizeof(float));
-  re_alloc((void**)&int_grid, int_nx*int_ny, cell_nx*cell_ny, sizeof(float));
+  memmove(*int_grid, cell_grid, cell_nx*cell_ny*sizeof(float));
+  re_alloc((void**)int_grid, int_nx*int_ny, cell_nx*cell_ny, sizeof(float));
   free((void*)cell_grid);
 
   return;
@@ -1449,11 +1455,11 @@ int parse_metadata_mission(par_ll_t *pl2){
 int mission;
 char metaname[NPOW_10];
 
-  if (findfile(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
     mission = LANDSAT;
     pl2->res = pl2->res_landsat;
-  } else if (findfile(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == SUCCESS ||
-             findfile(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
+  } else if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == SUCCESS ||
+             findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
     mission = SENTINEL2;
     pl2->res = pl2->res_sentinel2;
   } else {
@@ -1465,6 +1471,39 @@ char metaname[NPOW_10];
   #endif
 
   return mission;
+}
+
+
+/** This function appends the reference system to the DEM name
+--- pl2:    L2 parameters
+--- meta:   metadata
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int append_reference_system_to_dem(par_ll_t *pl2, meta_t *meta) {
+char dir_name[NPOW_10];
+int nchar;
+
+  if (pl2->use_dem_database) {
+
+    copy_string(dir_name, NPOW_10, pl2->fdem);
+
+    nchar = snprintf(pl2->fdem, NPOW_10, "%s/%s_%s.vrt", dir_name, meta->refsys_type, meta->refsys_id);
+    if (nchar < 0 || nchar >= NPOW_10){ 
+      printf("Buffer Overflow in assembling string for DEM database\n"); 
+      return FAILURE;
+    }
+  
+    if (!fileexist(pl2->fdem)) {
+      printf("DEM database file %s does not exist!\n", pl2->fdem);
+      return FAILURE;
+    }
+
+    #ifdef FORCE_DEBUG
+    printf("DEM database file: %s\n", pl2->fdem);
+    #endif
+  }
+
+  return SUCCESS;
 }
 
 
@@ -1494,6 +1533,10 @@ printf("there are still some things to do int meta. checking etc\n");
     default:
       printf("unknown mission. ");
       return FAILURE;
+  }
+
+  if (append_reference_system_to_dem(pl2, meta) != SUCCESS) {
+    return FAILURE;
   }
 
   *metadata = meta;

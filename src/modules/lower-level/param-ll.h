@@ -80,8 +80,8 @@ typedef struct {
   
   double orig_lat;      // origin latitude
   double orig_lon;      // origin longitude
-  double tilesize;      // tilesize
-  double chunksize;     // chunksize
+  double *tile_size;    // tilesize
+  int n_tile_size;      // number of tilesize values
   double res_landsat;   // output resolution Landsat
   double res_sentinel2; // output resolution S2
   double res;           // output resolution
@@ -105,6 +105,8 @@ typedef struct {
   int doenv;   // flag: environment reflectance
 
   int dem_nodata;    // DEM nodata
+  int dem_resample;  // resampling option for DEM
+  int use_dem_database; // flag: use DEM database
   int coreg_nodata;  // Master nodata
   
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile

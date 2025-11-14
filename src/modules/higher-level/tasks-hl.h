@@ -28,11 +28,13 @@ Higher level tasks header
 #ifndef TASKS_HL_H
 #define TASKS_HL_H
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
+#include <stdio.h>     // core input and output functions
+#include <stdlib.h>    // standard general utilities library
+#include <sys/types.h> // data types
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/brick_io-cl.h"
 #include "../cross-level/cube-cl.h"
 #include "../cross-level/lock-cl.h"
 #include "../higher-level/progress-hl.h"
@@ -61,7 +63,7 @@ extern "C" {
 void read_higher_level (progress_t *pro, off_t *ibytes, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl);
 void compute_higher_level (progress_t *pro, brick_t **MASK, ard_t **ARD1, ard_t **ARD2, int *nt1, int *nt2, cube_t *cube, par_hl_t *phl, aux_t *aux, brick_t ***OUTPUT, int *nprod);
 void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, par_hl_t *phl);
-void warn_if_no_io(off_t ibytes, off_t obytes, par_hl_t *phl);
+int handle_no_io(off_t ibytes, off_t obytes, par_hl_t *phl);
 
 #ifdef __cplusplus
 }

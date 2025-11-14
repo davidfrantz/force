@@ -653,14 +653,14 @@ int year, month, day;
 
   // initialize
   wvp = avg = -1;
-  alloc((void**)&source, NPOW_02, sizeof(char));
+  alloc((void**)&source, NPOW_10, sizeof(char));
 
 
   // use wvp from parameter file
   if (strcmp(pl2->d_wvp, "NULL") == 0){
 
     wvp = avg = pl2->wvp;
-    copy_string(source, NPOW_02, "PRM");
+    copy_string(source, NPOW_10, "PRM");
 
     #ifdef FORCE_DEBUG
     printf("Use wvp from parameter file: %.2f\n", wvp);
@@ -695,10 +695,11 @@ int year, month, day;
 
           buffer[strcspn(buffer, "\r\n#")] = 0;
 
-          tokenptr = strtok(buffer, separator);
+          char *saveptr = NULL;
+          tokenptr = strtok_r(buffer, separator, &saveptr);
 
-          site_x = atof(tokenptr); tokenptr = strtok(NULL, separator);
-          site_y = atof(tokenptr); tokenptr = strtok(NULL, separator);
+          site_x = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
+          site_y = atof(tokenptr); tokenptr = strtok_r(NULL, separator, &saveptr);
           diff_x = center_x-site_x; diff_y = center_y-site_y;
 
           dist = sqrt(diff_x*diff_x+diff_y*diff_y);
@@ -709,10 +710,10 @@ int year, month, day;
             wvp = atof(tokenptr);
             if (k == 0){
               avg = wvp;
-              copy_string(source, NPOW_02, "AVG");
+              copy_string(source, NPOW_10, "AVG");
             } else {
-              tokenptr = strtok(NULL, separator);
-              copy_string(source, NPOW_02, tokenptr);
+              tokenptr = strtok_r(NULL, separator, &saveptr);
+              copy_string(source, NPOW_10, tokenptr);
             }
           }
 

@@ -44,7 +44,7 @@ float water_probability(int nc, float cldprob, short *temp_, short *sw1_, short 
 int cloud_probability(int nthread, int npix, int nclear, int nland, int *ncloud, float cldprob, float *cc, float *lowt, float *hight, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
 int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t *QAI, small *lnd_, small *cld_, short **SPR);
 int cloud_parallax(int nclear, int nland, int npix, int *ncloud, float *cc, brick_t *TOA, brick_t *QAI, small *pcp_, small *clr_, small *lnd_, small *brt_, short *var_, small **CLD);
-int shadow_position(float h, int x, int y, float res, int g, float **sun, float **view, int *newx, int *newy);
+int shadow_position(float h, int x, int y, double res, int g, float **sun, float **view, int *newx, int *newy);
 int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *EXP, small *cld_, short *spr_, small **SHD);
 
 
@@ -60,7 +60,8 @@ int shadow_matching(float shdprob, float lowtemp, float hightemp, atc_t *atc, br
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 float finalize_cloud(par_ll_t *pl2, int npix, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM, small *fcld_, small *fshd_){
 int p, nx, ny, nc, k = 0;
-float res, pct;
+double res;
+float pct;
 float z, cir_thr;
 small *dem_     = NULL;
 short *cirrus_  = NULL;
@@ -763,7 +764,7 @@ int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t
 int i, j, p, k = 0, nx, ny, nc, b, nb = 2;
 int nthr;
 int err = 0;
-float res;
+double res;
 float maxdist;
 short bck;
 float lo = 0.175;
@@ -1360,7 +1361,7 @@ small *cld_  = NULL;
 --- newy:   location of object in real world (returned)
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int shadow_position(float h, int x, int y, float res, int g, float **sun, float **view, int *newx, int *newy){
+int shadow_position(float h, int x, int y, double res, int g, float **sun, float **view, int *newx, int *newy){
 float dist_across, dist_cast;
 float dx_across, dx_cast;
 float dy_across, dy_cast;
@@ -1410,7 +1411,8 @@ int skip, influence = 8;
 int nobj, id, size_max = 0, size;
 int *P = NULL, *best_P = NULL;
 double *qtemp = NULL; // need to be double for GSL quantile function
-float res, radius, core, basetemp;
+double res;
+float radius, core, basetemp;
 float base_min, base_max, base_step, base;
 float best_match, match, shadow, total;
 int x, y;
@@ -1437,7 +1439,7 @@ short  *temp_      = NULL;
   ny   = get_brick_nrows(QAI);
   nc   = get_brick_ncells(QAI);
   res  = get_brick_res(QAI);
-  
+
   if ((sun_  =  get_bands_float(atc->xy_sun))  == NULL) return FAILURE;
   if ((view_ =  get_bands_float(atc->xy_view)) == NULL) return FAILURE;
   if ((slp_  = get_band_ushort(EXP, ZEN))       == NULL) return FAILURE;
@@ -1862,7 +1864,7 @@ small *shd_   = NULL;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int cloud_distance(brick_t *QAI, int nodata, short *DIST){
 int p, nx, ny, nc, k=0;
-float res, dist;
+double res, dist;
 small  *TO_DIST    = NULL;
 ushort *DIST_PIX = NULL;
 

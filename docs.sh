@@ -1,11 +1,11 @@
 #!/bin/bash
 
-make -j aux
+make -j force-parameter
 
 MOD=$(bin/force-parameter -m | grep -v 'available modules' | sed 's/^ *//' | cut -d ':' -f 1)
 
 for m in $MOD; do
-  bin/force-parameter docs/source/_static/parameter-files/parameter_$m.prm $m
+  bin/force-parameter "docs/source/_static/parameter-files/parameter_$m.prm" "$m"
 done
 
 make clean

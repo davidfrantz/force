@@ -32,7 +32,8 @@ TSA Processing header
 #include <stdlib.h>  // standard general utilities library
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/cube-cl.h"
 #include "../higher-level/param-hl.h"
 #include "../higher-level/read-ard-hl.h"
 
@@ -63,7 +64,7 @@ typedef struct {
   char **bandnames_tsi;
 } tsa_t;
 
-#include "../higher-level/index-hl.h"
+#include "../higher-level/index-compute-hl.h"
 #include "../higher-level/interpolate-hl.h"
 #include "../higher-level/stm-hl.h"
 #include "../higher-level/fold-hl.h"
@@ -73,7 +74,7 @@ typedef struct {
 #include "../higher-level/py-udf-hl.h"
 #include "../higher-level/r-udf-hl.h"
 
-brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, aux_emb_t *endmember, cube_t *cube, int *nproduct);
+brick_t **time_series_analysis(ard_t *ard, brick_t *mask, int nt, par_hl_t *phl, table_t *endmember, cube_t *cube, int *nproduct);
 
 
 #ifdef __cplusplus

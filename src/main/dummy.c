@@ -37,13 +37,12 @@ This program is for testing small things. Needs to be compiled on demand
 /** OpenMP **/
 #include <omp.h> // multi-platform shared memory multiprocessing
 
-#include "cross-level/param-cl.h"
-#include "cross-level/alloc-cl.h"
-#include "cross-level/dir-cl.h"
-#include "cross-level/const-cl.h"
-#include "cross-level/stats-cl.h"
-#include "cross-level/brick-cl.h"
-#include "cross-level/warp-cl.h"
+#include "../modules/cross-level/alloc-cl.h"
+#include "../modules/cross-level/const-cl.h"
+#include "../modules/cross-level/quality-cl.h"
+#include "../modules/cross-level/sys-cl.h"
+#include "../modules/cross-level/string-cl.h"
+
 
 //#include "higher-level/read-ard-hl.h"
 
@@ -54,15 +53,25 @@ This program is for testing small things. Needs to be compiled on demand
 //#include "ogr_spatialref.h" // coordinate systems services
 
 
-
 int main ( int argc, char *argv[] ){
-char test[44] = "The quick brown fox jumps over the lazy dog";
 
-  printf("Before: %s\n", test);
-  replace_string(test, "fox", "koal", 44);
-  printf("After:  %s\n", test);
+  char pattern[100] = "MOD05_L2.A2021202.0020.061.2021202161526.hdf";
+  char doy[4] = "ABC";
 
-  return 0; 
+  overwrite_string_part(pattern, 0, "MCD", 3);
+  overwrite_string_part(pattern, 3, "07_L1", 5);
+  pattern[22] = '\0';
+  
+  overwrite_string_part(doy, 0, pattern+14, 3);
+  doy[3] = '\0';
+
+  puts(pattern);
+  puts(doy);
+
+  exit(0);
+
+
+   return 0; 
 }
 
 

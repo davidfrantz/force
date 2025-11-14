@@ -1,0 +1,14 @@
+{
+  "description": "MODIS generic sensor",
+  "name": "MODIS",
+  "bands": 7,
+  "band_names": [
+    "BLUE",
+    "GREEN",
+    "RED",
+    "NIR",
+    "SWIR0",
+    "SWIR1",
+    "SWIR2"
+  ]
+}

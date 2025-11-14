@@ -28,12 +28,14 @@ Reading ARD header
 #ifndef READARD_HL_H
 #define READARD_HL_H
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
+#include <stdio.h>     // core input and output functions
+#include <stdlib.h>    // standard general utilities library
+#include <sys/types.h> // data types
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick-cl.h"
+#include "../cross-level/brick_base-cl.h"
+#include "../cross-level/cube-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../higher-level/param-hl.h"
@@ -46,30 +48,22 @@ extern "C" {
 typedef struct {
   brick_t *DAT;
   brick_t *QAI;
-  brick_t *DST;
-  brick_t *AOD;
-  brick_t *HOT;
-  brick_t *VZN;
-  brick_t *WVP;
+  brick_t *AUX;
   brick_t *MSK;
   short  **dat;  // quantitative data (reflectance, or index)
   short   *qai;  // quality assurance information (bit-coding)
-  short   *dst;  // cloud / cloud shadow distance
-  short   *aod;  // aerosol optical depth @ 550 nm
-  short   *hot;  // haze optimized transformation
-  short   *vzn;  // view zenith angle
-  short   *wvp;  // water vapor
+  short  **aux;  // auxiliary products
   small   *msk;  // encoded mask
   //int     sid;  // sensor id
   //date_t  date; // acquisition date
 } ard_t;
 
-brick_t *read_mask(int *success, off_t *ibytes, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_features(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_confield(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_hl_t *phl);
-ard_t *read_ard(off_t *ibytes, int *nt, int tx, int ty, int chunk, cube_t *cube, par_sen_t *sen, par_hl_t *phl);
-brick_t *read_block(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double partial_x, double partial_y);
-brick_t *add_blocks(char *file, int ard_type, par_sen_t *sen, int read_b, int read_nb, short nodata, int datatype, int chunk, int tx, int ty, cube_t *cube, bool psf, double radius, brick_t *ARD);
+brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
+ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
+ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
+ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl);
+brick_t *read_chunk(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y);
+brick_t *add_chunks(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double radius, brick_t *ARD);
 int free_ard(ard_t *ard, int nt);
 
 #ifdef __cplusplus
