@@ -126,7 +126,6 @@ int opt;
 
 int main(int argc, char *argv[]){
 args_t args;
-char *pch   = NULL;
 char oname[NPOW_10];
 brick_t *QAI = NULL;
 brick_t *QIM = NULL;
@@ -148,11 +147,15 @@ small **qim_ = NULL;
 
   // output filename
   basename_without_ext(args.finp, oname, NPOW_10);
-  if (strstr(oname, "_QAI")  != NULL) pch = strstr(oname, "_QAI");
-  if (strstr(oname, "_INF")  != NULL) pch = strstr(oname, "_INF");
-  if (pch == NULL){
-    printf("Wrong product given. Give QAI or INF product\n"); return FAILURE;}
-  strncpy(pch, "_QIM", 4);
+  if (strstr(oname, "_QAI")  != NULL){
+    replace_string(oname, "_QAI", "_QIM", NPOW_10);
+  } else if (strstr(oname, "_INF")  != NULL){
+    replace_string(oname, "_INF", "_QIM", NPOW_10);
+  } else {
+    printf("Wrong product given. Give QAI or INF product\n"); 
+    return FAILURE;
+  }
+  
   
   set_brick_provdir(QIM, args.dout);
   set_brick_nprovenance(QIM, 1);
