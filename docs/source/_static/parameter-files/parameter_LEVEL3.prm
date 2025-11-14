@@ -202,7 +202,7 @@ DATE_RANGE = 2010-01-01 2019-12-31
 # will use all October-March observations from 2010-2019.
 # Type: Integer list. Valid values: [1,365]
 DOY_RANGE = 1 365
-# Landat 7 was de-orbited in 2019. Landsat 7 data might be available 
+# Landsat 7 was de-orbited in 2019. Landsat 7 data might be available 
 # in your data cube even though you might not want to use it anymore. 
 # This parameters sets the date after which Landsat 7 data should be ignored.
 # Type: Date. Format: YYYY-MM-DD
