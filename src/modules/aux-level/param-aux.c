@@ -1260,10 +1260,9 @@ void write_par_hl_bap(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter specifies the minimum DOY score, with which images are considered for \n");
-    fprintf(fp, "# compositing. For the sigmoid function, only one value is necessary (second value is \n");
-    fprintf(fp, "# not used). For the Gaussian function, one or two values can be submitted (for the start \n");
-    fprintf(fp, "# of the season and the end of the season). If only one value is submitted, it is used for \n");
-    fprintf(fp, "# both the start and the end of the season. To exclude all DOYs before and after the target \n");
+    fprintf(fp, "# compositing. For the sigmoid function, only one value is necessary (second value should be \n");
+    fprintf(fp, "# removed). For the Gaussian function, two values must be submitted (for the start \n");
+    fprintf(fp, "# of the season and the end of the season). To exclude all DOYs before and after the target \n");
     fprintf(fp, "# start and end dates respectively, set this parameter values to the first and last values \n");
     fprintf(fp, "# in DOY_SCORE (for Gaussian function), or the lowest value in DOY_SCORE (Sigmoid function).\n");
     fprintf(fp, "# Type: Float list, 1 or 2 values. Valid values: [0,1]\n");
