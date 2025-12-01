@@ -403,6 +403,55 @@ double xm, ym, xv, yv, cv;
 }
 
 
+/** This function tests if a pixel score is below the seasonal cutoff.
+--- score:  score parameters
+--- t:      time index
+--- tdist:  temporal distance to target
+--- bap:    bap parameters
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool seasonal_cutoff(par_scr_t *score, int t, int *tdist, par_bap_t *bap){
+
+  // apply the seasonal cutoff separately for right-end Gaussian tail, and the rest
+  if (
+    (bap->score_type == _SCR_TYPE_GAUSS_ && 
+      tdist[t] < 0 && score[t].d < bap->seasonal_cutoff[0]) ||
+    (bap->score_type == _SCR_TYPE_GAUSS_ && 
+      tdist[t] > 0 && score[t].d < bap->seasonal_cutoff[1]) ||
+    ((bap->score_type == _SCR_TYPE_SIG_DES_ || bap->score_type == _SCR_TYPE_SIG_ASC_) && 
+      score[t].d < bap->seasonal_cutoff[0])){
+    return true;
+  }
+
+  return false;
+}
+
+
+/** This function tests if a pixel score is below any of the cutoffs.
+--- score:  score parameters
+--- t:      time index
+--- tdist:  temporal distance to target
+--- bap:    bap parameters
+--- hmean:  mean of haze score
+--- hsd:    std. dev. of haze score
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool score_cutoff(par_scr_t *score, int t, int *tdist, par_bap_t *bap, float hmean, float hsd){
+
+  // seasonal cutoff
+  if (seasonal_cutoff(score, t, tdist, bap)) return true;
+
+  // haze, cloud, view zenith cutoffs
+  if (bap->w.h > 0 && score[t].h < bap->hazy_cutoff && 
+      hmean > 0.01 && hsd > 0.01) return true;
+  if (bap->w.c > 0 && score[t].c < bap->cloudy_cutoff) return true;
+  if (bap->w.v > 0 && score[t].v < bap->vzen_cutoff) return true;
+
+  return false;
+}
+
+
+
 /** This function computes haze statistics, which are used to discard very
 +++ hazy pixels.
 --- ard:    ARD
@@ -414,14 +463,13 @@ double xm, ym, xv, yv, cv;
 --- sd:     std. dev. of HOT
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int haze_stats(ard_t *ard, int nt, int p, par_scr_t *score, par_bap_t *bap, float *mean, float *sd){
+int haze_stats(ard_t *ard, int nt, int p, par_scr_t *score, int *tdist, par_bap_t *bap, float *mean, float *sd){
 double n = 0, m = 0, v = 0;
 int t;
 
   for (t=0; t<nt; t++){
     
-    if (!ard[t].msk[p] || 
-       (!bap->offsea && score[t].d < 0.01)) continue;
+    if (!ard[t].msk[p] || seasonal_cutoff(score, t, tdist, bap)) continue;
 
     if (dequal(++n, 1)){
       m = score[t].h;
@@ -718,18 +766,7 @@ double max_score = -1;
 
     if (!ard[t].msk[p]) continue;
 
-    // apply the cutoff separately for right-end Gaussian tail, and the rest
-    if (bap->score_type == _SCR_TYPE_GAUSS_ && tdist[t] < 0 && bap->Dc[0] > 0.0){
-      if (!bap->offsea && score[t].d < bap->Dc[0]) continue;
-    } else if (bap->score_type == _SCR_TYPE_GAUSS_ && tdist[t] > 0 && bap->Dc[1] > 0.0){ 
-      if (!bap->offsea && score[t].d < bap->Dc[1] ) continue;
-    } else if ((bap->score_type == _SCR_TYPE_SIG_DES_ || bap->score_type == _SCR_TYPE_SIG_ASC_) && bap->Dc[0] > 0.0){
-      if (!bap->offsea && score[t].d < bap->Dc[0]) continue;
-    }
-
-    if (!bap->use_hazy && bap->w.h  > 0 && score[t].h  < 0.01 && 
-        hmean > 0.01 && hsd > 0.01) continue;
-    if (!bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
+    if (score_cutoff(score, t, tdist, bap, hmean, hsd)) continue;
 
     n++;
 
@@ -825,19 +862,7 @@ double sum_r = 0, sum_v = 0;
 
     if (!ard[t].msk[p]) continue;
 
-    // apply the seasonal cutoff separately for right-end Gaussian tail, and the rest
-    if (bap->score_type == _SCR_TYPE_GAUSS_ && tdist[t] < 0 && bap->Dc[0] > 0.0){
-      if (!bap->offsea && score[t].d < bap->Dc[0]) continue;
-    } else if (bap->score_type == _SCR_TYPE_GAUSS_ && tdist[t] > 0 && bap->Dc[1] > 0.0){ 
-      if (!bap->offsea && score[t].d < bap->Dc[1] ) continue;
-    } else if ((bap->score_type == _SCR_TYPE_SIG_DES_ || bap->score_type == _SCR_TYPE_SIG_ASC_) && bap->Dc[0] > 0.0){
-      if (!bap->offsea && score[t].d < bap->Dc[0]) continue;
-    }
-    
-    if (!bap->use_hazy && bap->w.h  > 0 && score[t].h  < 0.01 && 
-        hmean > 0.01 && hsd > 0.01) continue;
-    if (!bap->use_cloudy && bap->w.c > 0 && score[t].c < 0.01) continue;
-
+    if (score_cutoff(score, t, tdist, bap, hmean, hsd)) continue;
 
     for (b=0; b<nb; b++) sum_reflection[b] += (ard[t].dat[b][p] * score[t].t);
     sum_total += score[t].t;
