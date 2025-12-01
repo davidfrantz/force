@@ -343,9 +343,9 @@ bool water;
 
       // compute BAP
       if (phl->bap.select){
-        bap_compositing(ard, &l3, nt, nb, nodata, p, score, target, tdist, hmean, hsd, water, &phl->bap);
+        bap_compositing(ard, &l3, nt, nb, nodata, p, score, tdist, hmean, hsd, water, &phl->bap);
       } else {
-        bap_weighting(ard, &l3, nt, nb, nodata, p, score, target, tdist, hmean, hsd, water, &phl->bap);
+        bap_weighting(ard, &l3, nt, nb, nodata, p, score, tdist, hmean, hsd, water, &phl->bap);
       }
 
       if (phl->bap.pac.lsp) free((void*)target);
