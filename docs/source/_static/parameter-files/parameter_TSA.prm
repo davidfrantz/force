@@ -103,8 +103,8 @@ Y_TILE_RANGE = 0 0
 # Type: full file path
 FILE_TILE = NULL
 # This parameter is used to define the size of the sub-tile processing units.
-# Most efficient is to use a chunk size that coincides with the tile size. Using 
-# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# Most efficient is to use a chunk size that coincides with the tile size. Using
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM.
 # The tilesize must be dividable by the chunk size without remainder.
 # Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
 # parameter is not permitted anymore.
@@ -133,14 +133,14 @@ USE_L2_IMPROPHE = FALSE
 # Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Each sensor needs a sensor definition in the runtime-data
 # directory. New sensors can be added by the user. New bandnames can be added, too.
-# Type: Character list. 
+# Type: Character list.
 SENSORS = LND08 LND09 SEN2A SEN2B SEN2C
 # Target sensor that represents the combination of input sensors.
-# A sensor definition for this target sensor needs to exist to make sure that processing 
-# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2, 
-# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2 
+# A sensor definition for this target sensor needs to exist to make sure that processing
+# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2,
+# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2
 # sensors, the target sensor could be SEN2L. Valid values are the same as for SENSORS.
-# Type: Character list. 
+# Type: Character list.
 TARGET_SENSOR = LNDLG
 # Main product type to be used. Usually, this is a reflectance product like BOA.
 # When using composites, you may use BAP. This can be anything, but make sure that
@@ -202,23 +202,17 @@ DATE_RANGE = 2010-01-01 2019-12-31
 # will use all October-March observations from 2010-2019.
 # Type: Integer list. Valid values: [1,365]
 DOY_RANGE = 1 365
-# Landat 7 was de-orbited in 2019. Landsat 7 data might be available 
-# in your data cube even though you might not want to use it anymore. 
+# Landsat 7 was de-orbited in 2019. Landsat 7 data might be available
+# in your data cube even though you might not want to use it anymore.
 # This parameters sets the date after which Landsat 7 data should be ignored.
 # Type: Date. Format: YYYY-MM-DD
 DATE_IGNORE_LANDSAT_7 = 2099-12-31
 
 # SPECTRAL INDEX
 # ------------------------------------------------------------------------
-# Perform the time series analysis using the specified band or index.
-# Multiple indices can be processed at once to avoid multiple reads of the
-# same file. Only necessary bands will be input. You will be alerted if the
-# index cannot be computed based on the requested SENSORS. The index SMA is
-# a linear spectral mixture analysis and is dependent on the parameters
-# specified in the SPECTRAL MIXTURE ANALYSIS section below.
 # Any index defined in indices.json can be used, as well as SMA,
 # or any band name present in the SENSORS band combination
-# Type: Character list. 
+# Type: Character list.
 INDEX = NDVI EVI NBR RED NIR
 # Standardize the TSS time series with pixel mean and/or standard deviation?
 # Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}
