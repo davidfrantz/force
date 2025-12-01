@@ -1250,14 +1250,26 @@ void write_par_hl_bap(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter specifies whether all available data within the requested time\n");
     fprintf(fp, "# frame are used – or only from the season of interest. If FALSE, the composites \n");
     fprintf(fp, "# only consider data for the period, in which the intra-annual score is higher \n");
-    fprintf(fp, "# than 0.01. If there is no clear-sky data within this period, data gaps are \n");
-    fprintf(fp, "# possible. If TRUE, all data from the requested years are used, thus the risk\n");
-    fprintf(fp, "# of having data gaps is lower. However, it is possible that data from unwanted\n");
-    fprintf(fp, "# parts of the year are selected.\n");
+    fprintf(fp, "# than OFF_SEASON_CUTOFF parameter (see below). If there is no clear-sky data \n");
+    fprintf(fp, "# within this period, data gaps are possible. If TRUE, all data from the requested \n");
+    fprintf(fp, "# years are used, thus the risk of having data gaps is lower. However, it is \n");
+    fprintf(fp, "# possible that data from unwanted parts of the year are selected. \n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
   fprintf(fp, "OFF_SEASON = FALSE\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter specifies the minimum DOY score, with which images are considered for \n");
+    fprintf(fp, "# compositing. For the sigmoid function, only one value is necessary (second value is \n");
+    fprintf(fp, "# not used). For the Gaussian function, one or two values can be submitted (for the start \n");
+    fprintf(fp, "# of the season and the end of the season). If only one value is submitted, it is used for \n");
+    fprintf(fp, "# both the start and the end of the season. To exclude all DOYs before and after the target \n");
+    fprintf(fp, "# start and end dates respectively, set this parameter values to the first and last values \n");
+    fprintf(fp, "# in DOY_SCORE (for Gaussian function), or the lowest value in DOY_SCORE (Sigmoid function).\n");
+    fprintf(fp, "# Type: Float list, 1 or 2 values. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "OFF_SEASON_CUTOFF = 0.01 0.01\n");
+  
   if (verbose){
     fprintf(fp, "# This parameter specifies whether observations with a cloud score of less than 1%%\n");
     fprintf(fp, "# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,\n");
