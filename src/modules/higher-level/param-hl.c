@@ -1149,10 +1149,22 @@ double tol = 5e-3;
     if (phl->bap.Ds[1] > phl->bap.Ds[0] &&
         phl->bap.Ds[1] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_GAUSS_; // gaussian
+      if (phl->bap.nDc != 2){
+        printf("For Gaussian scoring, exactly two off-season cutoffs must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[0] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
+      if (phl->bap.nDc != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
+      if (phl->bap.nDc != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     }
 
     // check whether products and weights are consistent
