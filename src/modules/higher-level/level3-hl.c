@@ -339,7 +339,7 @@ bool water;
       if (water) water_score(ard, nt, p, score);
 
       // mean and sd of haze score
-      haze_stats(ard, nt, p, score, &phl->bap, &hmean, &hsd);
+      haze_stats(ard, nt, p, score, tdist, &phl->bap, &hmean, &hsd);
 
       // compute BAP
       if (phl->bap.select){
