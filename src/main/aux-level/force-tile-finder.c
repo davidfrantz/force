@@ -39,9 +39,11 @@ input coordinate.
 #include "../../modules/cross-level/warp-cl.h"
 
 
+enum { _TYPE_GEO_, _TYPE_PROJ_, _N_TYPES_ };
 typedef struct {
   int n;
-  double geo[2]; // lon/lat
+  double coord[2]; // X, Y
+  int type;       // coordinate type
   double res;
   char dcube[NPOW_10];
 } args_t;
@@ -50,16 +52,18 @@ typedef struct {
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] [-p lon,lat] [-r resolution] datacube-dir\n", exe);
+  printf("Usage: %s [-h] [-v] [-i] [-p x,y] [-t type] [-r resolution] datacube-dir\n", exe);
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");
   printf("  -i  = show program's purpose\n");
   printf("\n");
-  printf("  -p lon,lat  = point of interest\n");
-  printf("     use geographic coordinates!\n");
-  printf("     longitude is X!\n");
-  printf("     latitude  is Y!\n");
+  printf("  -p x,y = point of interest\n");
+  printf("  -t type = coordinate type\n");
+  printf("     type can be 'geo' (default) or 'proj'\n");
+  printf("     Tip: when using geographic coordinates, remember\n");
+  printf("       - longitude is X!\n");
+  printf("       - latitude  is Y!\n");
   printf("\n");
   printf("  -r resolution  = target resolution\n");
   printf("     this is needed to compute the pixel number\n");
@@ -85,12 +89,13 @@ int i;
   opterr = 0;
 
   // default parameters
-  args->geo[_X_] =  6.675589; // where FORCE was "born"
-  args->geo[_Y_] = 49.748134;
+  args->coord[_X_] =  6.675589; // where FORCE was "born"
+  args->coord[_Y_] = 49.748134;
+  args->type = _TYPE_GEO_;
   args->res =  10;
 
   // optional parameters
-  while ((opt = getopt(argc, argv, "hvip:r:")) != -1){
+  while ((opt = getopt(argc, argv, "hvip:t:r:")) != -1){
     switch(opt){
       case 'h':
         usage(argv[0], SUCCESS);
@@ -105,12 +110,22 @@ int i;
         ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
-          if (i < 2) args->geo[i] = atof(ptr);
+          if (i < 2) args->coord[i] = atof(ptr);
           ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
         if (i != 2){
           fprintf(stderr, "Coordinate must have 2 numbers.\n");
+          usage(argv[0], FAILURE);  
+        }
+        break;
+      case 't':
+        if (strcmp(optarg, "geo") == 0){
+          args->type = _TYPE_GEO_;
+        } else if (strcmp(optarg, "proj") == 0){
+          args->type = _TYPE_PROJ_;
+        } else {
+          fprintf(stderr, "Unknown coordinate type '%s'.\n", optarg);
           usage(argv[0], FAILURE);  
         }
         break;
@@ -159,7 +174,7 @@ int i;
 
 int main(int argc, char *argv[]){
 args_t args;
-coord_t map, tile;
+coord_t geo, map, tile;
 int t_ulx, t_uly, ti, tj;
 cube_t *cube = NULL;
 
@@ -173,8 +188,20 @@ cube_t *cube = NULL;
 
 
   // get target coordinates in target css coordinates
-  if ((warp_geo_to_any(args.geo[_X_],  args.geo[_Y_], &map.x, &map.y, cube->projection)) == FAILURE){
-    printf("Computing target coordinates in dst_srs failed!\n"); return FAILURE;}
+  if (args.type == _TYPE_PROJ_){
+    map.x = args.coord[_X_];
+    map.y = args.coord[_Y_];
+    if ((warp_any_to_geo(args.coord[_X_],  args.coord[_Y_], &geo.x, &geo.y, cube->projection)) == FAILURE){
+      printf("Computing target coordinates in Lat/Lon failed!\n"); return FAILURE;}
+  } else if (args.type == _TYPE_GEO_){
+    geo.x = args.coord[_X_];
+    geo.y = args.coord[_Y_];
+    // warp geographic coordinates to target projection
+    if ((warp_geo_to_any(args.coord[_X_],  args.coord[_Y_], &map.x, &map.y, cube->projection)) == FAILURE){
+      printf("Computing target coordinates in dst_srs failed!\n"); return FAILURE;}
+  } else {
+    printf("Unknown coordinate type %d\n", args.type); return FAILURE;
+  }
 
 
   // find the tile the target coordinates fall into
@@ -189,7 +216,7 @@ cube_t *cube = NULL;
   printf("Point { LON/LAT (%.2f,%.2f) | X/Y (%.2f,%.2f) }\n"
           "       is in tile X%04d_Y%04d at pixel J/I %d/%d\n"
           "       considering a resolution of %.2f\n",
-    args.geo[_X_], args.geo[_Y_], map.x, map.y, 
+    geo.x, geo.y, map.x, map.y, 
     t_ulx, t_uly, tj, ti, cube->resolution);
 
           
