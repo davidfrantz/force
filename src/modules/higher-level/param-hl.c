@@ -151,9 +151,10 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_floatvec_par(params, "DOY_SCORE", 0, 1, 3, &phl->bap.Ds, &phl->bap.nDs);
   register_intvec_par(params,   "DOY_STATIC", 1, 365, 3, &phl->bap.Dt, &phl->bap.nDt);
 
-  register_bool_par(params,  "OFF_SEASON", &phl->bap.offsea);
-  register_bool_par(params,  "USE_CLOUDY", &phl->bap.use_cloudy);
-  register_bool_par(params,  "USE_HAZY", &phl->bap.use_hazy);
+  register_floatvec_par(params, "OFF_SEASON_CUTOFF", 0, 1, -1, &phl->bap.seasonal_cutoff,  &phl->bap.n_seasonal_cutoff);
+  register_float_par(params,  "CLOUDY_CUTOFF", 0, 1, &phl->bap.cloudy_cutoff);
+  register_float_par(params,  "HAZY_CUTOFF", 0, 1, &phl->bap.hazy_cutoff);
+  register_float_par(params,  "VZEN_CUTOFF", 0, 1, &phl->bap.vzen_cutoff);
   register_float_par(params, "DREQ", 1, FLT_MAX, &phl->bap.dreq);
   register_float_par(params, "HREQ", -600, 600, &phl->bap.hreq);
   register_float_par(params, "VREQ", 1, 90, &phl->bap.vreq);
@@ -1148,10 +1149,22 @@ double tol = 5e-3;
     if (phl->bap.Ds[1] > phl->bap.Ds[0] &&
         phl->bap.Ds[1] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_GAUSS_; // gaussian
+      if (phl->bap.n_seasonal_cutoff != 2){
+        printf("For Gaussian scoring, exactly two off-season cutoffs must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[0] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
+      if (phl->bap.n_seasonal_cutoff != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
+      if (phl->bap.n_seasonal_cutoff != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     }
 
     // check whether products and weights are consistent

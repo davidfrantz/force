@@ -103,8 +103,8 @@ Y_TILE_RANGE = 0 0
 # Type: full file path
 FILE_TILE = NULL
 # This parameter is used to define the size of the sub-tile processing units.
-# Most efficient is to use a chunk size that coincides with the tile size. Using 
-# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# Most efficient is to use a chunk size that coincides with the tile size. Using
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM.
 # The tilesize must be dividable by the chunk size without remainder.
 # Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
 # parameter is not permitted anymore.

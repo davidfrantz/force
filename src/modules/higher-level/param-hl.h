@@ -99,9 +99,11 @@ typedef struct {
   int *Dt;            // target DOYs
   int nDt, nDs;
   float *Ds;           // function values for target DOYs
-  int offsea; // use off-season data?
-  int use_cloudy; // use ultra-cloudy data?
-  int use_hazy; // use ultra-hazy data?
+  float *seasonal_cutoff;      // DOY score cutoff
+  int n_seasonal_cutoff;
+  float cloudy_cutoff; // use ultra-cloudy data?
+  float hazy_cutoff; // use ultra-hazy data?
+  float vzen_cutoff; // use bad view zenith data?
   int select; // select or weight?
   int combine; // how to combine scores?
 

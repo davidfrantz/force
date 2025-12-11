@@ -48,11 +48,13 @@ target_t *compile_target_static(par_bap_t *bap);
 target_t *compile_target_adaptive(par_bap_t *bap, ard_t *lsp, int p, short nodata);
 bool pixel_is_water(ard_t *ard, int nt, int p);
 int corr_matrix(ard_t *ard, int nt, int nb, int p, float **cor);
-int haze_stats(ard_t *ard, int nt, int p, par_scr_t *score, par_bap_t *bap, float *mean, float *sd);
+bool seasonal_cutoff(par_scr_t *score, int t, int *tdist, par_bap_t *bap);
+bool score_cutoff(par_scr_t *score, int t, int *tdist, par_bap_t *bap, float hmean, float hsd);
+int haze_stats(ard_t *ard, int nt, int p, par_scr_t *score, int *tdist, par_bap_t *bap, float *mean, float *sd);
 int water_score(ard_t *ard, int nt, int p, par_scr_t *score);
 int parametric_score(ard_t *ard, int nt, int p, target_t *target, float **cor, par_scr_t *score, int *tdist, par_bap_t *bap);
-int bap_compositing(ard_t *ard, level3_t *level3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap);
-int bap_weighting(ard_t *ard, level3_t *level3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap);
+int bap_compositing(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap);
+int bap_weighting(ard_t *ard, level3_t *l3, int nt, int nb, short nodata, int p, par_scr_t *score, int *tdist, float hmean, float hsd, bool water, par_bap_t *bap);
 int bap_overview(level3_t *l3, int nx, int ny, int nb, double res, short nodata);
 
 #ifdef __cplusplus
