@@ -11,7 +11,6 @@ Rudimentary checks are performed when using this file.
 
 The following parameter descriptions are a print-out of ``force-parameter``, which can generate an empty parameter file skeleton.
 
-.. .. include:: ../../../_static/parameter-files/parameter_CSO.prm
-.. include:: ../../../_static/parameter-files/parameter_*.prm
+.. include:: ../../../_static/parameter-files/parameter_CSO.prm
   :code: shell
 
