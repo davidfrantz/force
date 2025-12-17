@@ -26,16 +26,19 @@ Develop version
     as well as available sensors and indices. More features will be added in the future once the runtime data expands.
     
     - Example to show the installation path of the runtime data:
+  
       .. code-block:: console 
       
         $ force-runtime-data -p
 
     - Example to show all available sensors and their band names:
+  
       .. code-block:: console
 
         $ force-runtime-data -s
 
     - Example to show all available indices and their required bands:
+  
       .. code-block:: console
 
         $ force-runtime-data -x
