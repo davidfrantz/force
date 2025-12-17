@@ -51,7 +51,7 @@ int load_sensor_definition(json_t **def_sensor, char *sensor_name){
   concat_string_2(file_sensor, NPOW_10, sensor_name, ".json", "");
 
   char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data/sensors", file_sensor, "/");
+  concat_string_3(path_sensor, NPOW_10, d_exe, _FORCE_SENSOR_DIR_, file_sensor, "/");
 
   load_sensor_definition_from_path(def_sensor, path_sensor);
 
@@ -370,7 +370,7 @@ void print_all_sensor_definitions(){
   char d_exe[NPOW_10];
 
   get_install_directory(d_exe, NPOW_10);
-  concat_string_2(d.name, NPOW_10, d_exe, "force-misc/runtime-data/sensors", "/");
+  concat_string_2(d.name, NPOW_10, d_exe, _FORCE_SENSOR_DIR_, "/");
 
   if (!fileexist(d.name)){
     fprintf(stderr, "Error: Sensor definitions directory does not exist: %s\n", d.name);

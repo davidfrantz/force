@@ -128,7 +128,7 @@ args_t args = {0};
     get_install_directory(d_exe, NPOW_10);
 
     char d_runtime_data[NPOW_10];
-    concat_string_2(d_runtime_data, NPOW_10, d_exe, "force-misc/runtime-data", "/");
+    concat_string_2(d_runtime_data, NPOW_10, d_exe, _FORCE_RUNTIME_DATA_DIR_, "/");
 
     if (!fileexist(d_runtime_data)){
       fprintf(stderr, "Error: Runtime data directory does not exist: %s\n", d_runtime_data);

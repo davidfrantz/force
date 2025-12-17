@@ -40,7 +40,7 @@ int load_index_definitions(json_t **def_indices){
   get_install_directory(d_exe, NPOW_10);
 
   char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data", "indices.json", "/");
+  concat_string_2(path_sensor, NPOW_10, d_exe, _FORCE_INDEX_FILE_, "/");
 
   json_error_t error;
   json_t *def;

@@ -43,7 +43,7 @@ FILE *fp = NULL;
 
 
   get_install_directory(dname_exe, NPOW_10);
-  concat_string_3(fname_version,  NPOW_10, dname_exe, "force-misc", "force-version.txt", "/");
+  concat_string_2(fname_version,  NPOW_10, dname_exe, _FORCE_VERSION_FILE_, "/");
 
   if (!(fp = fopen(fname_version, "r"))){
     printf("unable to open version file %s\n", fname_version); exit(FAILURE);}
