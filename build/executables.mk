@@ -21,6 +21,7 @@ include $(BUILDDIR)/executables/force-stratified-sample.mk
 include $(BUILDDIR)/executables/force-tabulate-grid.mk
 include $(BUILDDIR)/executables/force-tile-finder.mk
 include $(BUILDDIR)/executables/force-train.mk
+include $(BUILDDIR)/executables/force-runtime-data.mk
 
 exe: \
   force-cube-init \
@@ -37,4 +38,5 @@ exe: \
   force-stratified-sample \
   force-tabulate-grid \
   force-tile-finder \
-  force-train
+  force-train \
+  force-runtime-data

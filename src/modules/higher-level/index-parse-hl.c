@@ -23,6 +23,11 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "index-parse-hl.h"
 
+int load_index_definitions(json_t **def_indices);
+int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t *def_indices);
+int get_required_bands(char ***required_band_names, int *n_required, int *index_type, char *index_name, sen_t *sen, json_t *def_indices);
+int check_available_bands(char **required_band_names, int n_required, bool *use_band, sen_t *sen);
+int remove_unused_bands(bool *use_band, sen_t *sen);
 
 /** Load index definitions from a JSON file into a Jansson json_t struct.
 +++ The returned struct must be freed with json_decref after use.
@@ -48,6 +53,49 @@ int load_index_definitions(json_t **def_indices){
   *def_indices = def;
 
   return SUCCESS;
+}
+
+
+/** Print all index definitions to stdout.
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_index_definitions(){
+
+  json_t *def_indices = NULL;
+  if (load_index_definitions(&def_indices) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse index definitions.\n");
+    exit(FAILURE);
+  }
+
+  void *iter = json_object_iter(def_indices);
+  while (iter){
+
+    const char *index_name = json_object_iter_key(iter);
+    printf("Index: %s\n", index_name);
+
+    char **band_names = NULL;
+    int nbands = 0;
+
+    if (get_index_bandnames(&band_names, &nbands, (char *)index_name, def_indices) != SUCCESS){
+      fprintf(stderr, "Error: Could not load index definition for %s.\n", index_name);
+      exit(FAILURE);
+    }
+
+    printf("  Required bands: %d\n", nbands);
+    for (int b=0; b<nbands; b++){
+      printf("  %02d: %s\n", b+1, band_names[b]);
+    }
+    printf("\n");
+
+    free_2D((void**)band_names, nbands); band_names = NULL;
+
+    iter = json_object_iter_next(def_indices, iter);
+
+  }
+
+  json_decref(def_indices);
+
+  return;
 }
 
 

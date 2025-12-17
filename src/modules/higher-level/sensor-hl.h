@@ -58,7 +58,7 @@ typedef struct {
   int spec_adjust; // spectral band adjustment to S2A?
 } sen_t;
 
-
+void print_all_sensor_definitions();
 int retrieve_sensor(sen_t *sen);
 
 #ifdef __cplusplus

@@ -55,6 +55,7 @@ typedef struct {
 
 void free_indices(index_t *index);
 int retrieve_indices(index_t *index, sen_t *sen);
+void print_index_definitions();
 
 #ifdef __cplusplus
 }

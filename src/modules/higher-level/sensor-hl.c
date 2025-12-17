@@ -24,6 +24,18 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 #include "sensor-hl.h"
 
 
+int load_sensor_definition(json_t **def_sensor, char *sensor_name);
+int load_sensor_definition_from_path(json_t **def_sensor, char *path_sensor);
+int get_sensor_name(char *name, size_t size, json_t *def_sensor);
+int get_sensor_band_number(int *nbands, json_t *def_sensor);
+int get_sensor_bandnames(char ***names, int nbands, json_t *def_sensor);
+int get_band_intersection(int *n_intersect, char ***intersect_bands, int n_sensors, int *nbands, char ***band_names);
+int get_band_union(int *n_union, char ***union_bands, int n_sensors, int *nbands, char ***band_names);
+int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names);
+int check_target_sensor(sen_t *sen);
+void print_sensor_definition(json_t *def_sensor);
+
+
 /** Load a sensor definition from a JSON file into a Jansson json_t struct.
 +++ The returned struct must be freed with json_decref after use.
 --- def_sensor: Pointer to json_t* to receive the loaded JSON object
@@ -40,6 +52,20 @@ int load_sensor_definition(json_t **def_sensor, char *sensor_name){
 
   char path_sensor[NPOW_10];
   concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data/sensors", file_sensor, "/");
+
+  load_sensor_definition_from_path(def_sensor, path_sensor);
+
+  return SUCCESS;
+}
+
+
+/** Load a sensor definition from a JSON file into a Jansson json_t struct.
++++ The returned struct must be freed with json_decref after use.
+--- def_sensor: Pointer to json_t* to receive the loaded JSON object
+--- path_sensor: Path to the sensor JSON file
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int load_sensor_definition_from_path(json_t **def_sensor, char *path_sensor){
 
   json_error_t error;
   json_t *def;
@@ -335,6 +361,99 @@ char **band_names = NULL;
 }
 
 
+/** Print all sensor definitions to stdout.
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_all_sensor_definitions(){
+  
+  dir_t d;
+  char d_exe[NPOW_10];
+
+  get_install_directory(d_exe, NPOW_10);
+  concat_string_2(d.name, NPOW_10, d_exe, "force-misc/runtime-data/sensors", "/");
+
+  if (!fileexist(d.name)){
+    fprintf(stderr, "Error: Sensor definitions directory does not exist: %s\n", d.name);
+    exit(FAILURE);
+  }
+
+  // directory listing
+  if ((d.N = scandir(d.name, &d.LIST, 0, alphasort)) < 0){
+    fprintf(stderr, "Error: scanning directory failed: %s\n", d.name);
+    exit(FAILURE);
+  }
+
+  if (d.N < 1){
+    fprintf(stderr, "Error: No sensor definitions found in %s\n", d.name);
+    exit(FAILURE);
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("found %d files, filtering now\n", d.N);
+  #endif
+
+  for (int i=0; i<d.N; i++){
+
+    // filter expected extensions
+    char ext[NPOW_10];    
+    extension(d.LIST[i]->d_name, ext, NPOW_10);
+    if (strcmp(ext, ".json") != 0) continue;
+
+    char path[NPOW_10];
+    concat_string_2(path, NPOW_10, d.name, d.LIST[i]->d_name, "/");
+
+    json_t *def_sensor = NULL;
+    if (load_sensor_definition_from_path(&def_sensor, path) != SUCCESS){
+      fprintf(stderr, "Error: Could not parse sensor definition for %s.\n", d.LIST[i]->d_name);
+      continue;
+    }
+    print_sensor_definition(def_sensor);
+    json_decref(def_sensor);
+
+  }
+
+  free_2D((void**)d.LIST, d.N);
+  d.LIST = NULL;
+
+  return;
+}
+
+
+void print_sensor_definition(json_t *def_sensor){
+ 
+ 
+  // get sensor name
+  char name[NPOW_10];
+  if (get_sensor_name(name, NPOW_10, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse sensor name\n");
+    exit(FAILURE);
+  }
+  
+  // get number of bands
+  int nbands;
+  if (get_sensor_band_number(&nbands, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse number of bands.\n");
+    exit(FAILURE);
+  }
+
+  // get band names
+  char **band_names = NULL;
+  if (get_sensor_bandnames(&band_names, nbands, def_sensor) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse band names.\n");
+    exit(FAILURE) ;
+  }
+
+  printf("Sensor: %s\n", name);
+  printf("  Number of bands: %d\n", nbands);
+  for (int b=0; b<nbands; b++){
+    printf("  %02d: %s\n", b+1, band_names[b]);
+  }
+  printf("\n");
+
+  free_2D((void**)band_names, nbands); band_names = NULL;
+
+  return;
+}
 
 
 /** Parse all sensor definitions and determine overlapping bands.

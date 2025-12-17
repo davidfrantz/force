@@ -21,5 +21,23 @@ Develop version
   - force-tile-finder now allows to input either geographic (lon/lat) or projected (x/y) coordinates.
     The coordinate type can be specified via the new -t option (values: "geo" or "proj").
     The program still outputs both coordinate types for the given point, as well as the corresponding tile indices and pixel indices within that tile.
+  - new program: force-runtime-data
+    This program provides information about the FORCE runtime data installation, including the current location of this data, 
+    as well as available sensors and indices. More features will be added in the future once the runtime data expands.
+    
+    - Example to show the installation path of the runtime data:
+      .. code-block:: console 
+      
+        $ force-runtime-data -p
+
+    - Example to show all available sensors and their band names:
+      .. code-block:: console
+
+        $ force-runtime-data -s
+
+    - Example to show all available indices and their required bands:
+      .. code-block:: console
+
+        $ force-runtime-data -x
 
 .. no changes to last release yet
