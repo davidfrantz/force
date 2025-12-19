@@ -1,33 +1,95 @@
 {
-  "NDVI": ["NIR", "RED"],
-  "EVI": ["NIR", "RED", "BLUE"],
-  "NBR": ["NIR", "SWIR2"],
-  "NDTI": ["SWIR1", "SWIR2"],
-  "ARVI": ["NIR", "RED", "BLUE"],
-  "SAVI": ["NIR", "RED", "BLUE"],
-  "SARVI": ["NIR", "RED", "BLUE"],
-  "TC-BRIGHT": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"],
-  "TC-GREEN": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"],
-  "TC-WET": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"],
-  "TC-DI": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"],
-  "NDBI": ["SWIR1", "NIR"],
-  "NDWI": ["GREEN", "NIR"],
-  "MNDWI": ["GREEN", "SWIR1"],
-  "NDMI": ["NIR", "SWIR1"],
-  "NDSI": ["GREEN", "SWIR1"],
-  "kNDVI": ["NIR", "RED"],
-  "NDRE1": ["REDEDGE2", "REDEDGE1"],
-  "NDRE2": ["REDEDGE3", "REDEDGE1"],
-  "CIre": ["REDEDGE3", "REDEDGE1"],
-  "NDVIre1": ["BROADNIR", "REDEDGE1"],
-  "NDVIre2": ["BROADNIR", "REDEDGE2"],
-  "NDVIre3": ["BROADNIR", "REDEDGE3"],
-  "NDVIre1n": ["NIR", "REDEDGE1"],
-  "NDVIre2n": ["NIR", "REDEDGE2"],
-  "NDVIre3n": ["NIR", "REDEDGE3"],
-  "MSRre": ["BROADNIR", "REDEDGE1"],
-  "MSRren": ["NIR", "REDEDGE1"],
-  "CCI": ["GREEN", "RED"],
-  "EVI2": ["NIR", "RED"],
-  "ContRemSWIR": ["SWIR1", "NIR", "SWIR2"]
+  "NDVI": {
+    "band_names": ["NIR", "RED"]
+  },
+  "EVI": {
+    "band_names": ["NIR", "RED", "BLUE"]
+  },
+  "NBR": {
+    "band_names": ["NIR", "SWIR2"]
+  },
+  "NDTI": {
+    "band_names": ["SWIR1", "SWIR2"]
+  },
+  "ARVI": {
+    "band_names": ["NIR", "RED", "BLUE"]
+  },
+  "SAVI": {
+    "band_names": ["NIR", "RED", "BLUE"]
+  },
+  "SARVI": {
+    "band_names": ["NIR", "RED", "BLUE"]
+  },
+  "TC-BRIGHT": {
+    "band_names": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"]
+  },
+  "TC-GREEN": {
+    "band_names": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"]
+  },
+  "TC-WET": {
+    "band_names": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"]
+  },
+  "TC-DI": {
+    "band_names": ["BLUE", "GREEN", "RED", "NIR", "SWIR1", "SWIR2"]
+  },
+  "NDBI": {
+    "band_names": ["SWIR1", "NIR"]
+  },
+  "NDWI": {
+    "band_names": ["GREEN", "NIR"]
+  },
+  "MNDWI": {
+    "band_names": ["GREEN", "SWIR1"]
+  },
+  "NDMI": {
+    "band_names": ["NIR", "SWIR1"]
+  },
+  "NDSI": {
+    "band_names": ["GREEN", "SWIR1"]
+  },
+  "kNDVI": {
+    "band_names": ["NIR", "RED"]
+  },
+  "NDRE1": {
+    "band_names": ["REDEDGE2", "REDEDGE1"]
+  },
+  "NDRE2": {
+    "band_names": ["REDEDGE3", "REDEDGE1"]
+  },
+  "CIre": {
+    "band_names": ["REDEDGE3", "REDEDGE1"]
+  },
+  "NDVIre1": {
+    "band_names": ["BROADNIR", "REDEDGE1"]
+  },
+  "NDVIre2": {
+    "band_names": ["BROADNIR", "REDEDGE2"]
+  },
+  "NDVIre3": {
+    "band_names": ["BROADNIR", "REDEDGE3"]
+  },
+  "NDVIre1n": {
+    "band_names": ["NIR", "REDEDGE1"]
+  },
+  "NDVIre2n": {
+    "band_names": ["NIR", "REDEDGE2"]
+  },
+  "NDVIre3n": {
+    "band_names": ["NIR", "REDEDGE3"]
+  },
+  "MSRre": {
+    "band_names": ["BROADNIR", "REDEDGE1"]
+  },
+  "MSRren": {
+    "band_names": ["NIR", "REDEDGE1"]
+  },
+  "CCI": {
+    "band_names": ["GREEN", "RED"]
+  },
+  "EVI2": {
+    "band_names": ["NIR", "RED"]
+  },
+  "ContRemSWIR": {
+    "band_names": ["SWIR1", "NIR", "SWIR2"]
+  }
 }

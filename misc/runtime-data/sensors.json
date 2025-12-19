@@ -1,0 +1,335 @@
+{
+  "LND04": {
+    "description": "Landsat 4 Thematic Mapper",
+    "name": "LND04",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "LND05": {
+    "description": "Landsat 5 Thematic Mapper",
+    "name": "LND05",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "LND07": {
+    "description": "Landsat 7 Enhanced Thematic Mapper",
+    "name": "LND07",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "LND08": {
+    "description": "Landsat 8 Operational Land Imager",
+    "name": "LND08",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "LND09": {
+    "description": "Landsat 9 Operational Land Imager",
+    "name": "LND09",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "LNDLG": {
+    "description": "Landsat Legacy generic sensor",
+    "name": "LNDLG",
+    "bands": 6,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "MOD01": {
+    "description": "TERRA MODIS",
+    "name": "MOD01",
+    "bands": 7,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR0",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "MOD02": {
+    "description": "AQUA MODIS",
+    "name": "MOD02",
+    "bands": 7,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR0",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "MODIS": {
+    "description": "MODIS generic sensor",
+    "name": "MODIS",
+    "bands": 7,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "NIR",
+      "SWIR0",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "RGB": {
+    "description": "R-G-B generic sensor",
+    "name": "R-G-B",
+    "bands": 3,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED"
+    ]
+  },
+  "S1AIA": {
+    "description": "Sentinel-1A Ascending Interferometric Wide Swath",
+    "name": "S1AIA",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "S1AID": {
+    "description": "Sentinel-1A Descending Interferometric Wide Swath",
+    "name": "S1AID",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "S1BIA": {
+    "description": "Sentinel-1C Ascending Interferometric Wide Swath",
+    "name": "S1BIA",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "S1BID": {
+    "description": "Sentinel-1B Descending Interferometric Wide Swath",
+    "name": "S1BID",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "S1CIA": {
+    "description": "Sentinel-1B Ascending Interferometric Wide Swath",
+    "name": "S1CIA",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "S1CID": {
+    "description": "Sentinel-1C Descending Interferometric Wide Swath",
+    "name": "S1CID",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  },
+  "sen2a": {
+    "description": "Sentinel-2A MSI high-res bands",
+    "name": "SEN2A",
+    "bands": 4,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "BROADNIR"
+    ]
+  },
+  "SEN2A": {
+    "description": "Sentinel-2A MSI",
+    "name": "SEN2A",
+    "bands": 10,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "REDEDGE1",
+      "REDEDGE2",
+      "REDEDGE3",
+      "BROADNIR",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "sen2b": {
+    "description": "Sentinel-2B MSI high-res bands",
+    "name": "SEN2B",
+    "bands": 4,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "BROADNIR"
+    ]
+  },
+  "SEN2B": {
+    "description": "Sentinel-2B MSI high-res bands",
+    "name": "SEN2B",
+    "bands": 10,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "REDEDGE1",
+      "REDEDGE2",
+      "REDEDGE3",
+      "BROADNIR",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "sen2c": {
+    "description": "Sentinel-2C MSI high-res bands",
+    "name": "SEN2C",
+    "bands": 4,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "BROADNIR"
+    ]
+  },
+  "SEN2C": {
+    "description": "Sentinel-2C MSI high-res bands",
+    "name": "SEN2C",
+    "bands": 10,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "REDEDGE1",
+      "REDEDGE2",
+      "REDEDGE3",
+      "BROADNIR",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "sen2d": {
+    "description": "Sentinel-2D MSI high-res bands",
+    "name": "SEN2D",
+    "bands": 4,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "BROADNIR"
+    ]
+  },
+  "SEN2D": {
+    "description": "Sentinel-2D MSI high-res bands",
+    "name": "SEN2D",
+    "bands": 10,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "REDEDGE1",
+      "REDEDGE2",
+      "REDEDGE3",
+      "BROADNIR",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "sen2l": {
+    "description": "Sentinel-2 generic high-res sensor",
+    "name": "SEN2L",
+    "bands": 4,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "BROADNIR"
+    ]
+  },
+  "SEN2L": {
+    "description": "Sentinel-2 generic sensor",
+    "name": "SEN2L",
+    "bands": 10,
+    "band_names": [
+      "BLUE",
+      "GREEN",
+      "RED",
+      "REDEDGE1",
+      "REDEDGE2",
+      "REDEDGE3",
+      "BROADNIR",
+      "NIR",
+      "SWIR1",
+      "SWIR2"
+    ]
+  },
+  "VVVHP": {
+    "description": "Generic VV+VH Polarimetric sensor",
+    "name": "VVVHP",
+    "bands": 2,
+    "band_names": [
+      "VV",
+      "VH"
+    ]
+  }
+}
