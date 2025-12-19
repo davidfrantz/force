@@ -1,0 +1,176 @@
+Index: NDVI
+  Required bands: 2
+  01: NIR
+  02: RED
+
+Index: EVI
+  Required bands: 3
+  01: NIR
+  02: RED
+  03: BLUE
+
+Index: NBR
+  Required bands: 2
+  01: NIR
+  02: SWIR2
+
+Index: NDTI
+  Required bands: 2
+  01: SWIR1
+  02: SWIR2
+
+Index: ARVI
+  Required bands: 3
+  01: NIR
+  02: RED
+  03: BLUE
+
+Index: SAVI
+  Required bands: 3
+  01: NIR
+  02: RED
+  03: BLUE
+
+Index: SARVI
+  Required bands: 3
+  01: NIR
+  02: RED
+  03: BLUE
+
+Index: TC-BRIGHT
+  Required bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Index: TC-GREEN
+  Required bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Index: TC-WET
+  Required bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Index: TC-DI
+  Required bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Index: NDBI
+  Required bands: 2
+  01: SWIR1
+  02: NIR
+
+Index: NDWI
+  Required bands: 2
+  01: GREEN
+  02: NIR
+
+Index: MNDWI
+  Required bands: 2
+  01: GREEN
+  02: SWIR1
+
+Index: NDMI
+  Required bands: 2
+  01: NIR
+  02: SWIR1
+
+Index: NDSI
+  Required bands: 2
+  01: GREEN
+  02: SWIR1
+
+Index: kNDVI
+  Required bands: 2
+  01: NIR
+  02: RED
+
+Index: NDRE1
+  Required bands: 2
+  01: REDEDGE2
+  02: REDEDGE1
+
+Index: NDRE2
+  Required bands: 2
+  01: REDEDGE3
+  02: REDEDGE1
+
+Index: CIre
+  Required bands: 2
+  01: REDEDGE3
+  02: REDEDGE1
+
+Index: NDVIre1
+  Required bands: 2
+  01: BROADNIR
+  02: REDEDGE1
+
+Index: NDVIre2
+  Required bands: 2
+  01: BROADNIR
+  02: REDEDGE2
+
+Index: NDVIre3
+  Required bands: 2
+  01: BROADNIR
+  02: REDEDGE3
+
+Index: NDVIre1n
+  Required bands: 2
+  01: NIR
+  02: REDEDGE1
+
+Index: NDVIre2n
+  Required bands: 2
+  01: NIR
+  02: REDEDGE2
+
+Index: NDVIre3n
+  Required bands: 2
+  01: NIR
+  02: REDEDGE3
+
+Index: MSRre
+  Required bands: 2
+  01: BROADNIR
+  02: REDEDGE1
+
+Index: MSRren
+  Required bands: 2
+  01: NIR
+  02: REDEDGE1
+
+Index: CCI
+  Required bands: 2
+  01: GREEN
+  02: RED
+
+Index: EVI2
+  Required bands: 2
+  01: NIR
+  02: RED
+
+Index: ContRemSWIR
+  Required bands: 3
+  01: SWIR1
+  02: NIR
+  03: SWIR2
+

@@ -1,0 +1,225 @@
+Sensor: LND04
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: LND05
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: LND07
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: LND08
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: LND09
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: LNDLG
+  Number of bands: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor: MOD01
+  Number of bands: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor: MOD02
+  Number of bands: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor: MODIS
+  Number of bands: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor: R-G-B
+  Number of bands: 3
+  01: BLUE
+  02: GREEN
+  03: RED
+
+Sensor: S1AIA
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: S1AID
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: S1BIA
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: S1BID
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: S1CIA
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: S1CID
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: SEN2A
+  Number of bands: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor: SEN2B
+  Number of bands: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor: SEN2C
+  Number of bands: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor: SEN2D
+  Number of bands: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor: SEN2L
+  Number of bands: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor: VVVHP
+  Number of bands: 2
+  01: VV
+  02: VH
+
+Sensor: SEN2A
+  Number of bands: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor: SEN2B
+  Number of bands: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor: SEN2C
+  Number of bands: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor: SEN2D
+  Number of bands: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor: SEN2L
+  Number of bands: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
