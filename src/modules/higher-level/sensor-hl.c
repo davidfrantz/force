@@ -24,161 +24,114 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 #include "sensor-hl.h"
 
 
-int load_sensor_definition(json_t **def_sensor, char *sensor_name);
-int load_sensor_definition_from_path(json_t **def_sensor, char *path_sensor);
-int get_sensor_name(char *name, size_t size, json_t *def_sensor);
-int get_sensor_band_number(int *nbands, json_t *def_sensor);
-int get_sensor_bandnames(char ***names, int nbands, json_t *def_sensor);
+int load_sensor_runtime_data(json_t **def_sensors);
 int get_band_intersection(int *n_intersect, char ***intersect_bands, int n_sensors, int *nbands, char ***band_names);
 int get_band_union(int *n_union, char ***union_bands, int n_sensors, int *nbands, char ***band_names);
 int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names);
-int check_target_sensor(sen_t *sen);
-void print_sensor_definition(json_t *def_sensor);
+int check_target_sensor(sen_t *sen, json_t *def_all_sensors);
 
 
-/** Load a sensor definition from a JSON file into a Jansson json_t struct.
+/** Load sensor definitions from the JSON runtime data into a Jansson json_t struct.
 +++ The returned struct must be freed with json_decref after use.
---- def_sensor: Pointer to json_t* to receive the loaded JSON object
---- sensor_name: Name of the sensor (e.g. "SEN2A")
+--- def_sensors: Pointer to json_t* to receive the loaded JSON object
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_sensor_definition(json_t **def_sensor, char *sensor_name){
+int load_sensor_runtime_data(json_t **def_sensors){
 
   char d_exe[NPOW_10];
   get_install_directory(d_exe, NPOW_10);
 
-  char file_sensor[NPOW_10];
-  concat_string_2(file_sensor, NPOW_10, sensor_name, ".json", "");
+  char path_json[NPOW_10];
+  concat_string_2(path_json, NPOW_10, d_exe, _FORCE_SENSOR_FILE_, "/");
 
-  char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, _FORCE_SENSOR_DIR_, file_sensor, "/");
-
-  load_sensor_definition_from_path(def_sensor, path_sensor);
-
-  return SUCCESS;
-}
-
-
-/** Load a sensor definition from a JSON file into a Jansson json_t struct.
-+++ The returned struct must be freed with json_decref after use.
---- def_sensor: Pointer to json_t* to receive the loaded JSON object
---- path_sensor: Path to the sensor JSON file
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_sensor_definition_from_path(json_t **def_sensor, char *path_sensor){
-
-  json_error_t error;
   json_t *def;
-  def = json_load_file(path_sensor, 0, &error);
-  if (!def){
-    fprintf(stderr, "Error: %s\n", error.text);
+
+  if (load_json(&def, path_json) != SUCCESS){
+    fprintf(stderr, "Error loading JSON file %s\n", path_json);
     return FAILURE;
   }
 
-  *def_sensor = def;
+  *def_sensors = def;
 
   return SUCCESS;
 }
 
 
-/** Extract the sensor name from a JSON sensor definition.
---- name: Buffer to store the sensor name
---- size: Size of the buffer
---- def_sensor: JSON object with sensor definition
-+++ Return: SUCCESS/FAILURE
+/** Print all sensor definitions from the runtime data to stdout.
++++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_sensor_name(char *name, size_t size, json_t *def_sensor){
+void print_sensor_runtime_data(){
 
-  json_t *def_name = json_object_get(def_sensor, "name");
-  if (def_name == NULL) {
-      fprintf(stderr, "Error: Item `Name` not found.\n");
-      return FAILURE;
-  }
-  if (json_is_string(def_name)) {
-      copy_string(name, size, json_string_value(def_name));
-      #ifdef FORCE_DEBUG
-      printf("Sensor: %s\n", name);
-      #endif
-  } else {
-      fprintf(stderr, "Error: Item `Name` is not a string.\n");
-      return FAILURE;
+  json_t *def_all_sensors = NULL;
+  if (load_sensor_runtime_data(&def_all_sensors) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse sensor definitions.\n");
+    exit(FAILURE);
   }
 
-  return SUCCESS;
-}
+  int error = 0;
 
+  void *iter = json_object_iter(def_all_sensors);
+  while (iter){
 
-/** Extract the number of bands from a JSON sensor definition.
---- nbands: Pointer to int to receive the number of bands
---- def_sensor: JSON object with sensor definition
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_sensor_band_number(int *nbands, json_t *def_sensor){
+    const char *request_name = json_object_iter_key(iter);
+    printf("Sensor request name: %s\n", request_name);
 
-  json_t *def_bands = json_object_get(def_sensor, "bands");
-  if (def_bands == NULL) {
-      fprintf(stderr, "Error: Item `Bands` not found.\n");
-      return FAILURE;
+    char name[NPOW_10];
+    if (get_json_string(name, NPOW_10, "name", json_object_iter_value(iter)) != SUCCESS) {
+      fprintf(stderr, "Error: Could not get sensor name for %s.\n", request_name);
+      error++;
+      iter = json_object_iter_next(def_all_sensors, iter);
+      continue;
+    }
+    printf("  Sensor ID in file names: %s\n", name);
+
+    char description[NPOW_10];
+    if (get_json_string(description, NPOW_10, "description", json_object_iter_value(iter)) != SUCCESS) {
+      fprintf(stderr, "Error: Could not get sensor description for %s.\n", request_name);
+      error++;
+      iter = json_object_iter_next(def_all_sensors, iter);
+      continue;
+    }
+    printf("  Description: %s\n", description);
+
+    int n_bands = 0;
+    if (get_json_integer(&n_bands, "bands", json_object_iter_value(iter)) != SUCCESS) {
+      fprintf(stderr, "Error: Could not get number of bands for %s.\n", request_name);
+      error++;
+      iter = json_object_iter_next(def_all_sensors, iter);
+      continue;
+    }
+    printf("  Number of bands: %d\n", n_bands);
+
+    int n_band_names = 0;
+    char **band_names = NULL;
+    if (get_json_string_array(&band_names, &n_band_names, "band_names", json_object_iter_value(iter)) != SUCCESS) {
+      fprintf(stderr, "Error: Could not get band names for %s.\n", request_name);
+      error++;
+      iter = json_object_iter_next(def_all_sensors, iter);
+      continue;
+    }
+    printf("  Number of band names: %d\n", n_band_names);
+    for (int b=0; b<n_band_names; b++){
+      printf("  %02d: %s\n", b+1, band_names[b]);
+    }
+    printf("\n");
+
+    free_2D((void**)band_names, n_band_names); 
+    band_names = NULL;
+
+    iter = json_object_iter_next(def_all_sensors, iter);
+
   }
-  if (json_is_integer(def_bands)) {
-      *nbands = (int)json_integer_value(def_bands);
-      if (*nbands < 1){
-        fprintf(stderr, "Error: Item `Bands` is less than 1.\n");
-        return FAILURE;
-      }
-  } else {
-      fprintf(stderr, "Error: Item `Bands` is not an integer.\n");
-      return FAILURE;
-  }
-
-  return SUCCESS;
-}
-
-
-/** Extract the band names from a JSON sensor definition.
-+++ Allocates a 2D array of strings for band names.
---- names: Pointer to char** to receive band names (must be freed with free_2D)
---- nbands: Number of bands
---- def_sensor: JSON object with sensor definition
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_sensor_bandnames(char ***names, int nbands, json_t *def_sensor){
-char **band_names = NULL;
-
-
-  alloc_2D((void***)&band_names, nbands, NPOW_10, sizeof(char));
   
-  json_t *def_band_names = json_object_get(def_sensor, "band_names");
+  json_decref(def_all_sensors);
 
-  if (def_band_names == NULL) {
-      fprintf(stderr, "Error: Item `band_names` not found\n");
-      return FAILURE;
-  }
-  if (json_is_array(def_band_names)) {
-    if (json_array_size(def_band_names) != nbands) {
-        fprintf(stderr, "Error: Size of `band_names` array  does not match `Bands` value.\n");
-        return FAILURE;
-    }
-    for (int b=0; b<nbands; b++){
-        json_t *def_band_name = json_array_get(def_band_names, b);
-        if (json_is_string(def_band_name)){
-          copy_string(band_names[b], NPOW_10, json_string_value(def_band_name));
-          #ifdef FORCE_DEBUG
-          printf("  %02d: %s\n", b+1, band_names[b]);
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in `band_names` array is not a string.\n", b+1);
-          return FAILURE;
-        }
-    }
-  } else {
-    fprintf(stderr, "Error: Item `band_names` is not an array.\n");
-    return FAILURE;
+  if (error > 0){
+    fprintf(stderr, "Encountered %d error(s) while parsing sensor definitions.\n", error);
+    exit(FAILURE);
   }
 
-  *names = band_names;
-
-  return SUCCESS;
+  return;
 }
 
 
@@ -309,151 +262,57 @@ int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names){
 --- sen: Pointer to par_sen_t struct
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int check_target_sensor(sen_t *sen){
-int nbands = 0;
+int check_target_sensor(sen_t *sen, json_t *def_all_sensors){
+int n_bands = 0;
+int n_band_names = 0;
 char **band_names = NULL;
 
 
-  // get full sensor definition
-  json_t *def_sensor = NULL;
-  if (load_sensor_definition(&def_sensor, sen->target) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse target sensor definition for %s.\n", sen->target);
+  json_t *def_target = NULL;
+  if (get_json_object(&def_target, sen->target, def_all_sensors) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse sensor definition for target sensor %s.\n", sen->target);
     return FAILURE;
   }
 
   // get sensor name
-  if (get_sensor_name(sen->target, NPOW_10, def_sensor) != SUCCESS){
+  if (get_json_string(sen->target, NPOW_10, "name", def_target) != SUCCESS){
     fprintf(stderr, "Error: Could not parse target sensor name for %s.\n", sen->target);
     return FAILURE;
   }
   
-  // get number of bands
-  if (get_sensor_band_number(&nbands, def_sensor) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse number of bands for %s.\n", sen->target);
+  if (get_json_integer(&n_bands, "bands", def_target) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse number of bands for target sensor %s.\n", sen->target);
     return FAILURE;
   }
 
-  // get band names
-  if (get_sensor_bandnames(&band_names, nbands, def_sensor) != SUCCESS){
+  // get band names and number
+  if (get_json_string_array(&band_names, &n_band_names, "band_names", def_target) != SUCCESS){
     fprintf(stderr, "Error: Could not parse band names for %s.\n", sen->target);
     return FAILURE;
   }
 
-  // clean up
-  json_decref(def_sensor);
-
-
-  if (nbands != sen->n_bands){
-    fprintf(stderr, "Error: Target sensor %s has %d bands, but %d bands were determined from input sensor combination.\n", sen->target, nbands, sen->n_bands);
+  if (n_bands != n_band_names){
+    fprintf(stderr, "Error: Target sensor %s has inconsistent band definition: %d bands, but %d band names.\n", sen->target, n_bands, n_band_names);
     return FAILURE;
   }
 
-  for (int b=0; b<nbands; b++){
-    if (!vector_contains((const char **)band_names, nbands, sen->band_names[b])){
+  if (n_band_names != sen->n_bands){
+    fprintf(stderr, "Error: Target sensor %s has %d bands, but %d bands were determined from input sensor combination.\n", sen->target, n_band_names, sen->n_bands);
+    return FAILURE;
+  }
+
+  for (int b=0; b<n_band_names; b++){
+    if (!vector_contains((const char **)band_names, n_band_names, sen->band_names[b])){
       fprintf(stderr, "Error: Band %s in target sensor %s is not part of the determined band set from input sensors.\n", sen->band_names[b], sen->target);
       return FAILURE;
     }
   }
 
-  free_2D((void**)band_names, nbands); band_names = NULL;
+  free_2D((void**)band_names, n_band_names); band_names = NULL;
 
   return SUCCESS;
 }
 
-
-/** Print all sensor definitions to stdout.
-+++ Return: void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_all_sensor_definitions(){
-  
-  dir_t d;
-  char d_exe[NPOW_10];
-
-  get_install_directory(d_exe, NPOW_10);
-  concat_string_2(d.name, NPOW_10, d_exe, _FORCE_SENSOR_DIR_, "/");
-
-  if (!fileexist(d.name)){
-    fprintf(stderr, "Error: Sensor definitions directory does not exist: %s\n", d.name);
-    exit(FAILURE);
-  }
-
-  // directory listing
-  if ((d.N = scandir(d.name, &d.LIST, 0, alphasort)) < 0){
-    fprintf(stderr, "Error: scanning directory failed: %s\n", d.name);
-    exit(FAILURE);
-  }
-
-  if (d.N < 1){
-    fprintf(stderr, "Error: No sensor definitions found in %s\n", d.name);
-    exit(FAILURE);
-  }
-
-  #ifdef FORCE_DEBUG
-  printf("found %d files, filtering now\n", d.N);
-  #endif
-
-  for (int i=0; i<d.N; i++){
-
-    // filter expected extensions
-    char ext[NPOW_10];    
-    extension(d.LIST[i]->d_name, ext, NPOW_10);
-    if (strcmp(ext, ".json") != 0) continue;
-
-    char path[NPOW_10];
-    concat_string_2(path, NPOW_10, d.name, d.LIST[i]->d_name, "/");
-
-    json_t *def_sensor = NULL;
-    if (load_sensor_definition_from_path(&def_sensor, path) != SUCCESS){
-      fprintf(stderr, "Error: Could not parse sensor definition for %s.\n", d.LIST[i]->d_name);
-      continue;
-    }
-    print_sensor_definition(def_sensor);
-    json_decref(def_sensor);
-
-  }
-
-  free_2D((void**)d.LIST, d.N);
-  d.LIST = NULL;
-
-  return;
-}
-
-
-void print_sensor_definition(json_t *def_sensor){
- 
- 
-  // get sensor name
-  char name[NPOW_10];
-  if (get_sensor_name(name, NPOW_10, def_sensor) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse sensor name\n");
-    exit(FAILURE);
-  }
-  
-  // get number of bands
-  int nbands;
-  if (get_sensor_band_number(&nbands, def_sensor) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse number of bands.\n");
-    exit(FAILURE);
-  }
-
-  // get band names
-  char **band_names = NULL;
-  if (get_sensor_bandnames(&band_names, nbands, def_sensor) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse band names.\n");
-    exit(FAILURE) ;
-  }
-
-  printf("Sensor: %s\n", name);
-  printf("  Number of bands: %d\n", nbands);
-  for (int b=0; b<nbands; b++){
-    printf("  %02d: %s\n", b+1, band_names[b]);
-  }
-  printf("\n");
-
-  free_2D((void**)band_names, nbands); band_names = NULL;
-
-  return;
-}
 
 
 /** Parse all sensor definitions and determine overlapping bands.
@@ -478,44 +337,43 @@ int retrieve_sensor(sen_t *sen){
 
   int error = 0;
 
+  // get all sensor definitions
+  json_t *def_all_sensors = NULL;
+  if (load_sensor_runtime_data(&def_all_sensors) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse sensor definitions.\n");
+    return FAILURE;
+  }
+
   for (int s=0; s<sen->n; s++){
 
-    // get full sensor definition
     json_t *def_sensor = NULL;
-    if (load_sensor_definition(&def_sensor, sen->sensor[s]) != SUCCESS){
-      fprintf(stderr, "Error: Could not parse sensor definition for %s.\n", sen->sensor[s]);
-      error++;
-      continue;
+    if (get_json_object(&def_sensor, sen->sensor[s], def_all_sensors) != SUCCESS){
+      fprintf(stderr, "Error: Could not parse sensor definition for sensor %s.\n", sen->sensor[s]);
+      return FAILURE;
     }
 
     // get sensor name
-    if (get_sensor_name(sen->sensor[s], NPOW_10, def_sensor) != SUCCESS){
+    if (get_json_string(sen->sensor[s], NPOW_10, "name", def_sensor) != SUCCESS){
       fprintf(stderr, "Error: Could not parse sensor name for %s.\n", sen->sensor[s]);
       error++;
+      continue;
     }
     
-    // get number of bands
-    if (get_sensor_band_number(&nbands[s], def_sensor) != SUCCESS){
-      fprintf(stderr, "Error: Could not parse number of bands for %s.\n", sen->sensor[s]);
-      error++;
-    }
-
-    // get band names
-    if (get_sensor_bandnames(&band_names[s], nbands[s], def_sensor) != SUCCESS){
+    // get band names and number
+    if (get_json_string_array(&band_names[s], &nbands[s], "band_names", def_sensor) != SUCCESS){
       fprintf(stderr, "Error: Could not parse band names for %s.\n", sen->sensor[s]);
       error++;
+      continue;
     }
-
-    // clean up
-    json_decref(def_sensor);
-
+ 
   }
 
   if (error > 0){
     fprintf(stderr, "Error: Could not parse sensor definition(s).\n");
+    json_decref(def_all_sensors);
     return FAILURE;
   }
-
+  
   // determine overlapping bands
   if (!sen->spec_adjust){
     if (get_band_intersection(&sen->n_bands, &sen->band_names, sen->n, nbands, band_names) != SUCCESS){
@@ -528,26 +386,27 @@ int retrieve_sensor(sen_t *sen){
       return FAILURE;
     }
   }
-
+  
   // ugly hack to make sure spectral adjustment works when no target sensor is included in SENSORS
   if (sen->spec_adjust){
     re_alloc_2D((void***)&sen->sensor, sen->n, NPOW_10, sen->n-1, NPOW_10, sizeof(char));
     sen->n--;
   }
-
+  
   // determine bands to read
   if (get_band_numbers_to_read(sen, nbands, band_names) != SUCCESS){
     fprintf(stderr, "Error: Could not determine bands to read.\n");
     return FAILURE;
   }
-
+  
   // compare with target sensor if combination is sensible
-  if (check_target_sensor(sen) != SUCCESS){
+  if (check_target_sensor(sen, def_all_sensors) != SUCCESS){
     fprintf(stderr, "Error: Target sensor is not compatible with selected input sensors.\n");
     return FAILURE;
   }
-
+  
   // clean up
+  json_decref(def_all_sensors);
   for (int s=0; s<sen->n; s++) free_2D((void**)band_names[s], nbands[s]);
   free((void*)band_names); band_names = NULL;
   free((void*)nbands); nbands = NULL;

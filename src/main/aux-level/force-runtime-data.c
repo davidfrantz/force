@@ -139,13 +139,9 @@ args_t args = {0};
 
   }
 
-  if (args.print_sensors){
-    print_all_sensor_definitions();
-  }
+  if (args.print_sensors) print_sensor_runtime_data();
 
-  if (args.print_indices){
-    print_index_definitions();
-  }
+  if (args.print_indices) print_index_runtime_data();
 
   return SUCCESS;
 }

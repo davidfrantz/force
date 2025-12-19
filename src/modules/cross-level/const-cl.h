@@ -36,7 +36,7 @@ extern "C" {
 
 // Directory and file names for runtime data (as macros)
 #define _FORCE_RUNTIME_DATA_DIR_   "force-misc/runtime-data"
-#define _FORCE_SENSOR_DIR_         "force-misc/runtime-data/sensors"
+#define _FORCE_SENSOR_FILE_        "force-misc/runtime-data/sensors.json"
 #define _FORCE_INDEX_FILE_         "force-misc/runtime-data/indices.json"
 #define _FORCE_VERSION_FILE_       "force-misc/force-version.txt"
 

@@ -36,8 +36,7 @@ Index parsing header
 #include "../cross-level/string-cl.h"
 #include "../cross-level/sys-cl.h"
 #include "../higher-level/sensor-hl.h"
-
-#include <jansson.h> // JSON library
+#include "../cross-level/json-cl.h"
 
 
 #ifdef __cplusplus
@@ -55,7 +54,7 @@ typedef struct {
 
 void free_indices(index_t *index);
 int retrieve_indices(index_t *index, sen_t *sen);
-void print_index_definitions();
+void print_index_runtime_data();
 
 #ifdef __cplusplus
 }

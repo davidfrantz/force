@@ -35,8 +35,7 @@ Sensor header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/sys-cl.h"
-
-#include <jansson.h> // JSON library
+#include "../cross-level/json-cl.h"
 
 
 #ifdef __cplusplus
@@ -58,7 +57,7 @@ typedef struct {
   int spec_adjust; // spectral band adjustment to S2A?
 } sen_t;
 
-void print_all_sensor_definitions();
+void print_sensor_runtime_data();
 int retrieve_sensor(sen_t *sen);
 
 #ifdef __cplusplus
