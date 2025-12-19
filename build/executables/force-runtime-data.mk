@@ -2,6 +2,7 @@ force-runtime-data: \
   alloc-cl \
   dir-cl \
   index-parse-hl \
+  json-cl \
   konami-cl \
   string-cl \
   utils-cl \
@@ -12,6 +13,7 @@ force-runtime-data: \
 	$(OBJDIR)/alloc-cl.o \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/index-parse-hl.o \
+	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/utils-cl.o \

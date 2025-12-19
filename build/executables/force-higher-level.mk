@@ -18,6 +18,7 @@ force-higher-level: \
   gdalopt-cl \
   imagefuns-cl \
   improphe-hl \
+  json-cl \
   konami-cl \
   l2-improphe-hl \
   level3-hl \
@@ -76,6 +77,7 @@ force-higher-level: \
 	$(OBJDIR)/gdalopt-cl.o \
 	$(OBJDIR)/imagefuns-cl.o \
 	$(OBJDIR)/improphe-hl.o \
+	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/l2-improphe-hl.o \
 	$(OBJDIR)/level3-hl.o \

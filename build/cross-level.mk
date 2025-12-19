@@ -15,6 +15,7 @@ cross: \
     enum-cl \
     gdalopt-cl \
     imagefuns-cl \
+	json-cl \
     konami-cl \
     lock-cl \
     param-cl \
@@ -67,6 +68,9 @@ gdalopt-cl: prepare $(CROSS_DIR)/gdalopt-cl.c
 
 imagefuns-cl: prepare $(CROSS_DIR)/imagefuns-cl.c
 	$(GCC) -c $(CROSS_DIR)/imagefuns-cl.c -o $(OBJDIR)/imagefuns-cl.o
+
+json-cl: prepare $(CROSS_DIR)/json-cl.c
+	$(GCC) -c $(CROSS_DIR)/json-cl.c -o $(OBJDIR)/json-cl.o
 
 konami-cl: prepare $(CROSS_DIR)/konami-cl.c
 	$(GCC) -c $(CROSS_DIR)/konami-cl.c -o $(OBJDIR)/konami-cl.o
