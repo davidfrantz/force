@@ -120,7 +120,7 @@ At minimum, the citation of following paper is requested:
 Each FORCE module will generate a "CITEME" file with suggestions for references
  to be cited. This list is based on the specific parameterization you are using
 
-Usefule resources:
+Useful resources:
 - Code, issues, discussions etc.: https://github.com/davidfrantz/force
 - Documentation and tutorials: https://force-eo.readthedocs.io
 - Docker images: https://hub.docker.com/r/davidfrantz/force/
