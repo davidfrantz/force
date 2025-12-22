@@ -41,7 +41,7 @@ ARG build=all
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
-COPY --chown=1000:1000 . .
+COPY --link --chown=1000:1000 . .
 
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
@@ -58,7 +58,7 @@ FROM davidfrantz/base:latest AS force
 # Use numerical UID/GID to avoid name resolving issues with the non-default
 # Docker builders.
 ADD --link --chown=1000:1000 --exclude=.github https://github.com/davidfrantz/force-udf.git $HOME/udf
-COPY --chown=1000:1000 --from=force_builder $HOME/bin $HOME/bin
+COPY --link --chown=1000:1000 --from=force_builder $HOME/bin $HOME/bin
 
 WORKDIR /home/ubuntu
 
