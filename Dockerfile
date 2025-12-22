@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 ##########################################################################
 # 
 # This file is part of FORCE - Framework for Operational Radiometric 
@@ -50,14 +51,12 @@ RUN echo "building FORCE" && \
   make clean && \
   cd $HOME && \
   rm -rf $SOURCE_DIR && \
-  force-info && \
-# clone FORCE UDF
-  git clone https://github.com/davidfrantz/force-udf.git
+  force-info
 
 FROM davidfrantz/base:latest AS force
 
+ADD --link --chown=ubuntu:ubuntu --exclude=.github https://github.com/davidfrantz/force-udf.git $HOME/udf
 COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/bin $HOME/bin
-COPY --chown=ubuntu:ubuntu --from=force_builder $HOME/force-udf $HOME/udf
 
 WORKDIR /home/ubuntu
 
