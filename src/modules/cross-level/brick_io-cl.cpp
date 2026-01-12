@@ -686,7 +686,8 @@ const char *projection = NULL;
     }
   
     #ifdef FORCE_DEBUG
-    printf("WKT of brick: %s\n", src_proj);
+    printf("WKT of src (brick): %s\n", src_proj);
+    printf("WKT of dst (cube):  %s\n", cube->projection);
     #endif
   
   
@@ -696,7 +697,7 @@ const char *projection = NULL;
     // create transformer between source and destination
     if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
       NULL, cube->projection, false, 0, 2)) == NULL){
-      printf("could not create image to image transformer. "); return FAILURE;}
+      printf("could not create approximate image to image transformer. "); return FAILURE;}
   
     // estimate approximate extent
     if (GDALSuggestedWarpOutput(src_dataset, GDALGenImgProjTransform, 
@@ -772,7 +773,7 @@ const char *projection = NULL;
       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
       if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
         dst_dataset, cube->projection, false, 0, 2)) == NULL){
-        printf("could not create image to image transformer. "); return FAILURE;}
+        printf("could not create accurate image to image transformer. "); return FAILURE;}
   
   
       // buffer to hold warped image
@@ -967,10 +968,6 @@ const char *projection = NULL;
     if (src_b >= src_nb){
       printf("Requested band %d is out of bounds %d (disc)! ", src_b, src_nb); return FAILURE;}
   
-    #ifdef FORCE_DEBUG
-    printf("WKT of image on disc: %s\n", src_proj);
-    #endif
-    
   
     /** "create" the destination dataset
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
@@ -992,17 +989,20 @@ const char *projection = NULL;
     if (GDALSetGeoTransform(dst_dataset, dst_geotran)){
       printf("could not set dst geotransformation. "); return FAILURE;}
   
+      
     #ifdef FORCE_DEBUG
-    printf("warp to UL-X: %.0f / UL-Y: %.0f @ res: %.0f\n", dst_geotran[0], dst_geotran[3], dst_geotran[1]);
+    printf("WKT of src (disc):  %s\n", src_proj);
+    printf("WKT of dst (brick): %s\n", dst_proj);
+    print_dvector(dst_geotran, "dst geotransf.", _GT_LEN_, 1, 2);
     #endif
-    
+      
   
     /** create accurate transformer between source and destination
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
   
     if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
       dst_dataset, dst_proj, false, 0, 2)) == NULL){
-      printf("could not create image to image transformer. "); return FAILURE;}
+      printf("could not create accurate image to image transformer. "); return FAILURE;}
     
   
     /** set warping options
