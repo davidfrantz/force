@@ -32,7 +32,6 @@ FROM davidfrantz/base:latest AS force_builder
 
 # Environment variables
 ENV SOURCE_DIR=$HOME/src/force
-ENV INSTALL_DIR=$HOME/bin
 
 # build args
 ARG debug=disable
@@ -46,21 +45,14 @@ COPY --link --chown=1000:1000 . .
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
   ./debug.sh $debug && \
-  make -j$(nproc) $build && \
-  make INSTALLDIR=$INSTALL_DIR install && \
-  make clean && \
-  cd $HOME && \
-  rm -rf $SOURCE_DIR && \
-  force-info
+  make -j$(nproc) $build
 
 FROM davidfrantz/base:latest AS force
 
-# Use numerical UID/GID to avoid name resolving issues with the non-default
-# Docker builders.
-ADD --link --chown=1000:1000 --exclude=.github https://github.com/davidfrantz/force-udf.git $HOME/udf
-COPY --link --chown=1000:1000 --from=force_builder $HOME/bin $HOME/bin
+ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git /usr/local/bin/force/force-udf
+COPY --link --chown=root:root --from=force_builder $HOME/src/force/bin /usr/local/bin/force
 
-WORKDIR /home/ubuntu
+ENV PATH="$PATH:/usr/local/bin/force"
 
 ENV R_HOME=/usr/lib/R
 ENV LD_LIBRARY_PATH=$R_HOME/lib
