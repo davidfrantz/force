@@ -54,7 +54,7 @@ RUN echo "building FORCE" && \
 
 FROM internal_base AS force
 
-ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git /usr/local/bin/force/force-udf
+ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git#1.20260112113534 /usr/local/bin/force/force-udf
 COPY --link --chown=root:root --from=force_builder $HOME/src/force/bin /usr/local/bin/force
 
 ENV PATH="$PATH:/usr/local/bin/force"
