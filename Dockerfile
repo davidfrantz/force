@@ -28,7 +28,10 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest AS internal_base
+#
+# To find sha256: docker pull davidfrantz/base:VERSION followed by
+# docker inspect davidfrantz/base:VERSION and get the sha from RepoDigests.
+FROM davidfrantz/base:1.20260113143410.3.11.3@sha256:16a89ca8ab0702423d7ed13e5c3bbf673db9725c27f77e5bb444132705fb1807 AS internal_base
 
 FROM internal_base AS force_builder
 
