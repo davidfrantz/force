@@ -3,6 +3,20 @@
 Develop version
 ===============
 
+- **General changes**
+
+  - A lot of work has been done on improving the Docker builds and images.
+    Many thanks to Peter Johnsson for his help with this! Most things won't be visible to the user, but should improve stability and security.
+  - Due to some difficulties in installing the sf R-package, an older version of GDAL has been unknowingly resurfaced in the Docker container.
+    Thanks to Benjamin Jakimow for reporting this issue.
+    This has now been temporarily fixed by NOT installing the sf package in the Docker container.
+    A more permanent fix will be implemented in the future.
+    For now, note that ``force-map-accuracy`` will not work in the Docker container for the time being, 
+    i.e., for dev versions after ``3.10.04-dev:::2026-01-16_17:**:**``.
+    Please use an older Docker image ``3.10.04`` or a dev image before ``3.10.04-dev:::2026-01-16_17:**:**`` to use this program.
+    This only affects the Docker container, not selfmade FORCE installations.
+    This only affects the ``force-map-accuracy`` program, not any other program.
+
 - **FORCE HLPS**
 
   - in ``force-higher-level``, LEVEL3 module:
