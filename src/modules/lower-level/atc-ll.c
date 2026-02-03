@@ -48,7 +48,7 @@ int r = 1, b, nb = get_brick_nbands(DN);
 
 
   /** nodata value **/
-  atc->nodata = -9999;
+  atc->nodata = _FORCE_NO_DATA_;
 
     /** initialize Henyey-Greenstein parameters for faster computation
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/

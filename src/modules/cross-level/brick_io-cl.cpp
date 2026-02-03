@@ -646,6 +646,7 @@ const char *projection = NULL;
   //size_t max_mem = 1073741824; // 1GB
   size_t max_mem = 805306368; // 0.75GB
   char nthread[NPOW_10];
+  char c_nodata[NPOW_10];
   int nchar;
   char **papszWarpOptions = NULL;
   
@@ -820,8 +821,12 @@ const char *projection = NULL;
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
   
+      nchar = snprintf(c_nodata, NPOW_10, "%d", nodata);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling c_nodata\n"); return FAILURE;}
+
       papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
-      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", "-9999");
+      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", c_nodata);
       wopt->papszWarpOptions = CSLDuplicate(papszWarpOptions);
   
   

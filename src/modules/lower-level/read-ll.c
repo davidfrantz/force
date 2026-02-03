@@ -357,7 +357,7 @@ float dn_scale, toa_scale;
 
   nb = get_brick_nbands(DN);
   nc = get_brick_ncells(DN);
-  nodata = -9999;
+  nodata = _FORCE_NO_DATA_;
 
   TOA = copy_brick(DN, nb, _DT_SHORT_);
   
