@@ -64,7 +64,7 @@ void usage(char *exe, int exit_code){
   printf("  -i  = show program's purpose\n");
   printf("\n");
   printf("  -o output-file  = output file path with extension,\n");
-  printf("     defaults to './accuracy-assessment.txt'\n");
+  printf("     defaults to './accuracy-assessment.md'\n");
   printf("  -c count-file  = csv table with pixel counts per class\n");
   printf("     2 columns named class and count\n");
   printf("  -s sample-file = vector file (or csv table) with predicted and reference class labels\n");
@@ -89,7 +89,7 @@ bool given_a = false;
   opterr = 0;
 
   // default parameters
-  copy_string(args->file_output,  NPOW_10, "accuracy-assessment.txt");
+  copy_string(args->file_output,  NPOW_10, "accuracy-assessment.md");
  
   // optional parameters
   while ((opt = getopt(argc, argv, "hvio:c:s:a:")) != -1){
@@ -606,52 +606,91 @@ args_t args;
     exit(FAILURE);
   }
 
-  fprintf(fout, ("Traditional Accuracy assessment\n");
-  fprintf(fout, ("-----------------------------------------------------------------\n");
-  fprintf(fout, ("\n");
-  fprintf(fout, ("Traditional confusion matrix, expressed in terms of pixel counts:\n");
-  fprintf(fout, ("\n");
-  print(confusion_counts)
-  fprintf(fout, ("\n");
-  fprintf(fout, "Overall Accuracy (OA): %.3f\n", classical_accuracy.overall);
-  fprintf(fout, ("\n");
-  print_stats <- cbind(
-    sprintf("%.2f", acc_traditional$pa),
-    sprintf("%.2f", acc_traditional$ua),
-    sprintf("%.2f", acc_traditional$oe),
-    sprintf("%.2f", acc_traditional$ce)
-  )
-  colnames(print_stats) <- c("Producer's Accuracy", "User's Accuracy", "Error of Omission", "Error of Commission")
-  rownames(print_stats) <- classes
-  print(print_stats, quote = FALSE)
-  fprintf(fout, ("\n");
-  fprintf(fout, ("\n");
-  fprintf(fout, ("Area-Adjusted Accuracy\n");
-  fprintf(fout, ("-----------------------------------------------------------------\n");
-  fprintf(fout, ("\n");
-  fprintf(fout, ("Confusion matrix, expressed in terms of proportion of area:\n");
-  fprintf(fout, ("\n");
-  print(confusion_adjusted)
-  fprintf(fout, ("\n");
-  fprintf(fout, (sprintf("Overall Accuracy (OA): %.2f \u00b1 %.2f\n", acc_adjusted$oa, oa_se));
-  fprintf(fout, ("\n");
-  print_stats <- cbind(
-    sprintf("%.2f \u00b1 %.2f", acc_adjusted$pa, pa_se),
-    sprintf("%.2f \u00b1 %.2f", acc_adjusted$ua, ua_se),
-    sprintf("%.2f \u00b1 %.2f", acc_adjusted$oe, pa_se),
-    sprintf("%.2f \u00b1 %.2f", acc_adjusted$ce, ua_se)
-  )
-  colnames(print_stats) <- c("Producer's Accuracy", "User's Accuracy", "Error of Omission", "Error of Commission")
-  rownames(print_stats) <- classes
-  print(print_stats, quote = FALSE)
-  fprintf(fout, ("\n");
-  print_area <- cbind(
-    sprintf("%.2f \u00b1 %.2f", area_adjusted, confidence_area_adjusted),
-    sprintf("%.2f", count$area)
-  )
-  colnames(print_area) <- c("Estimated Area", "Mapped Area")
-  rownames(print_area) <- classes
-  print(print_area, quote = FALSE)
+  fprintf(fout, "# Traditional Accuracy assessment\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "## Traditional confusion matrix, expressed in terms of pixel counts:\n");
+  fprintf(fout, "\n");
+
+  fprintf(fout, "| |");
+  for (int j=0; j<classes.n; j++) fprintf(fout, " %d |", classes.id[j]);
+  fprintf(fout, "\n| --- |");
+  for (int j=0; j<classes.n; j++) fprintf(fout, " --- |");
+  for (int i=0; i<classes.n; i++){
+    fprintf(fout, "\n| %d |", classes.id[i]);
+    for (int j=0; j<classes.n; j++){
+      fprintf(fout, " %d |", (int)classical_confusion.matrix[i][j]);
+    }
+  }
+  fprintf(fout, "\n");
+
+
+  fprintf(fout, "\n");
+  fprintf(fout, "Overall Accuracy (OA): %.3f\n", 
+    classical_accuracy.overall);
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+  fprintf(fout, "| --- | --- | --- | --- | --- |");
+  for (int i=0; i<classes.n; i++){
+    fprintf(fout, "\n| %d | %.3f | %.3f | %.3f | %.3f |", 
+      classes.id[i],
+      classical_accuracy.class[i][_ACC_PA_],
+      classical_accuracy.class[i][_ACC_UA_],
+      classical_accuracy.class[i][_ACC_OE_],
+      classical_accuracy.class[i][_ACC_CE_]
+    );
+  }
+  fprintf(fout, "\n");
+
+
+
+  fprintf(fout, "\n\n");
+  fprintf(fout, "# Area-Adjusted Accuracy\n");
+  fprintf(fout, "-----------------------------------------------------------------\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "## Confusion matrix, expressed in terms of proportion of area:\n");
+  fprintf(fout, "\n");
+
+  fprintf(fout, "| |");
+  for (int j=0; j<classes.n; j++) fprintf(fout, " %d |", classes.id[j]);
+  fprintf(fout, "\n| --- |");
+  for (int j=0; j<classes.n; j++) fprintf(fout, " --- |");
+  for (int i=0; i<classes.n; i++){
+    fprintf(fout, "\n| %d |", classes.id[i]);
+    for (int j=0; j<classes.n; j++){
+      fprintf(fout, " %.3f |", adjusted_confusion.matrix[i][j]);
+    }
+  }
+  fprintf(fout, "\n");
+
+  fprintf(fout, "\n");
+  fprintf(fout, "Overall Accuracy (OA): %.3f \u00b1 %.3f\n", 
+    adjusted_accuracy.overall, standard_error.overall);
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+  fprintf(fout, "| --- | --- | --- | --- | --- |");
+  for (int i=0; i<classes.n; i++){
+    fprintf(fout, "\n| %d | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f |", 
+      classes.id[i],
+      adjusted_accuracy.class[i][_ACC_PA_], standard_error.class[i][_ACC_PA_],
+      adjusted_accuracy.class[i][_ACC_UA_], standard_error.class[i][_ACC_UA_],
+      adjusted_accuracy.class[i][_ACC_OE_], standard_error.class[i][_ACC_OE_],
+      adjusted_accuracy.class[i][_ACC_CE_], standard_error.class[i][_ACC_CE_]
+    );
+  }
+  fprintf(fout, "\n");
+
+
+  fprintf(fout, "\n");
+  fprintf(fout, "| Mapped Area | Estimated Area |\n");
+  fprintf(fout, "| --- | --- |");
+  for (int i=0; i<classes.n; i++){
+    fprintf(fout, "\n| %d | %.3f | %.3f \u00b1 %.3f |", 
+      classes.id[i], 
+      classes.area[i], 
+      classes.adjusted_area[i], 
+      classes.confidence_adjusted_area[i]);
+  }
+  fprintf(fout, "\n");
 
   fclose(fout);
 
