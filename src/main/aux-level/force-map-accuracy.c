@@ -549,6 +549,148 @@ void compute_confidence_of_producers_accuracy(confusion_t *classical_confusion, 
   return;
 }
 
+void generate_report(char *file_output, class_t *classes, confusion_t *classical_confusion, confusion_t *adjusted_confusion, accuracy_t *classical_accuracy, accuracy_t *adjusted_accuracy, accuracy_t *standard_error){
+
+  FILE *fout = fopen(file_output, "w");
+  if (fout == NULL){
+    fprintf(stderr, "Could not open output file for writing: %s\n", file_output);
+    exit(FAILURE);
+  }
+
+  fprintf(fout, "# Traditional Accuracy assessment\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "## Traditional confusion matrix, expressed in terms of pixel counts:\n");
+  fprintf(fout, "\n");
+
+  fprintf(fout, "| |");
+  for (int j=0; j<classes->n; j++) fprintf(fout, " %d |", classes->id[j]);
+  fprintf(fout, "\n| --- |");
+  for (int j=0; j<classes->n; j++) fprintf(fout, " --- |");
+  for (int i=0; i<classes->n; i++){
+    fprintf(fout, "\n| %d |", classes->id[i]);
+    for (int j=0; j<classes->n; j++){
+      fprintf(fout, " %d |", (int)classical_confusion->matrix[i][j]);
+    }
+  }
+  fprintf(fout, "\n");
+
+
+  fprintf(fout, "\n");
+  fprintf(fout, "Overall Accuracy (OA): %.3f\n", 
+    classical_accuracy->overall);
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+  fprintf(fout, "| --- | --- | --- | --- | --- |");
+  for (int i=0; i<classes->n; i++){
+    fprintf(fout, "\n| %d | %.3f | %.3f | %.3f | %.3f |", 
+      classes->id[i],
+      classical_accuracy->class[i][_ACC_PA_],
+      classical_accuracy->class[i][_ACC_UA_],
+      classical_accuracy->class[i][_ACC_OE_],
+      classical_accuracy->class[i][_ACC_CE_]
+    );
+  }
+  fprintf(fout, "\n");
+
+
+
+  fprintf(fout, "\n\n");
+  fprintf(fout, "# Area-Adjusted Accuracy\n");
+  fprintf(fout, "-----------------------------------------------------------------\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "## Confusion matrix, expressed in terms of proportion of area:\n");
+  fprintf(fout, "\n");
+
+  fprintf(fout, "| |");
+  for (int j=0; j<classes->n; j++) fprintf(fout, " %d |", classes->id[j]);
+  fprintf(fout, "\n| --- |");
+  for (int j=0; j<classes->n; j++) fprintf(fout, " --- |");
+  for (int i=0; i<classes->n; i++){
+    fprintf(fout, "\n| %d |", classes->id[i]);
+    for (int j=0; j<classes->n; j++){
+      fprintf(fout, " %.3f |", adjusted_confusion->matrix[i][j]);
+    }
+  }
+  fprintf(fout, "\n");
+
+  fprintf(fout, "\n");
+  fprintf(fout, "Overall Accuracy (OA): %.3f \u00b1 %.3f\n", 
+    adjusted_accuracy->overall, standard_error->overall);
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+  fprintf(fout, "| --- | --- | --- | --- | --- |");
+  for (int i=0; i<classes->n; i++){
+    fprintf(fout, "\n| %d | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f |", 
+      classes->id[i],
+      adjusted_accuracy->class[i][_ACC_PA_], standard_error->class[i][_ACC_PA_],
+      adjusted_accuracy->class[i][_ACC_UA_], standard_error->class[i][_ACC_UA_],
+      adjusted_accuracy->class[i][_ACC_OE_], standard_error->class[i][_ACC_OE_],
+      adjusted_accuracy->class[i][_ACC_CE_], standard_error->class[i][_ACC_CE_]
+    );
+  }
+  fprintf(fout, "\n");
+
+
+  fprintf(fout, "\n");
+  fprintf(fout, "| Mapped Area | Estimated Area |\n");
+  fprintf(fout, "| --- | --- |");
+  for (int i=0; i<classes->n; i++){
+    fprintf(fout, "\n| %d | %.3f | %.3f \u00b1 %.3f |", 
+      classes->id[i], 
+      classes->area[i], 
+      classes->adjusted_area[i], 
+      classes->confidence_adjusted_area[i]);
+  }
+  fprintf(fout, "\n");
+
+  fclose(fout);
+
+  return;
+}
+
+void free_memory(confusion_t *classical_confusion, confusion_t *adjusted_confusion, class_t *classes, label_t *labels, accuracy_t *classical_accuracy, accuracy_t *adjusted_accuracy, accuracy_t *standard_error){
+
+  if (classical_confusion->matrix != NULL) free_2D((void**)classical_confusion->matrix, classical_confusion->n);
+  if (classical_confusion->row_sum != NULL) free((void*)classical_confusion->row_sum);
+  if (classical_confusion->col_sum != NULL) free((void*)classical_confusion->col_sum);
+  classical_confusion->matrix = NULL;
+  classical_confusion->row_sum = NULL;
+  classical_confusion->col_sum = NULL;
+
+  if (adjusted_confusion->matrix != NULL) free_2D((void**)adjusted_confusion->matrix, adjusted_confusion->n);
+  if (adjusted_confusion->row_sum != NULL) free((void*)adjusted_confusion->row_sum);
+  if (adjusted_confusion->col_sum != NULL) free((void*)adjusted_confusion->col_sum);
+  adjusted_confusion->matrix = NULL;
+  adjusted_confusion->row_sum = NULL;
+  adjusted_confusion->col_sum = NULL;
+
+  if (classes->id != NULL) free((void*)classes->id);
+  if (classes->count != NULL) free((void*)classes->count);
+  if (classes->area != NULL) free((void*)classes->area);
+  if (classes->weight != NULL) free((void*)classes->weight);
+  if (classes->adjusted_area != NULL) free((void*)classes->adjusted_area);
+  if (classes->confidence_adjusted_area != NULL) free((void*)classes->confidence_adjusted_area);
+  classes->id = NULL;
+  classes->count = NULL;
+  classes->area = NULL;
+  classes->weight = NULL;
+  classes->adjusted_area = NULL;
+  classes->confidence_adjusted_area = NULL;
+
+  if (labels->map != NULL) free((void*)labels->map);
+  if (labels->reference != NULL) free((void*)labels->reference);
+  labels->map = NULL;
+  labels->reference = NULL;
+
+  if (classical_accuracy->class != NULL) free_2D((void**)classical_accuracy->class, classes->n);
+  if (adjusted_accuracy->class != NULL) free_2D((void**)adjusted_accuracy->class, classes->n);
+  if (standard_error->class != NULL) free_2D((void**)standard_error->class, classes->n);
+  classical_accuracy->class = NULL;
+  adjusted_accuracy->class = NULL;
+  standard_error->class = NULL;
+
+  return;
+}
 
 int main(int argc, char *argv[]){
 args_t args;
@@ -599,123 +741,10 @@ args_t args;
   // Olofsson et al. 2014, eq. 7
   compute_confidence_of_producers_accuracy(&classical_confusion, &classes, &adjusted_accuracy, &standard_error);
 
+  generate_report(args.file_output, &classes, &classical_confusion, &adjusted_confusion, &classical_accuracy, &adjusted_accuracy, &standard_error);
 
-  FILE *fout = fopen(args.file_output, "w");
-  if (fout == NULL){
-    fprintf(stderr, "Could not open output file for writing: %s\n", args.file_output);
-    exit(FAILURE);
-  }
+  free_memory(&classical_confusion, &adjusted_confusion, &classes, &labels, &classical_accuracy, &adjusted_accuracy, &standard_error);
 
-  fprintf(fout, "# Traditional Accuracy assessment\n");
-  fprintf(fout, "\n");
-  fprintf(fout, "## Traditional confusion matrix, expressed in terms of pixel counts:\n");
-  fprintf(fout, "\n");
-
-  fprintf(fout, "| |");
-  for (int j=0; j<classes.n; j++) fprintf(fout, " %d |", classes.id[j]);
-  fprintf(fout, "\n| --- |");
-  for (int j=0; j<classes.n; j++) fprintf(fout, " --- |");
-  for (int i=0; i<classes.n; i++){
-    fprintf(fout, "\n| %d |", classes.id[i]);
-    for (int j=0; j<classes.n; j++){
-      fprintf(fout, " %d |", (int)classical_confusion.matrix[i][j]);
-    }
-  }
-  fprintf(fout, "\n");
-
-
-  fprintf(fout, "\n");
-  fprintf(fout, "Overall Accuracy (OA): %.3f\n", 
-    classical_accuracy.overall);
-  fprintf(fout, "\n");
-  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
-  fprintf(fout, "| --- | --- | --- | --- | --- |");
-  for (int i=0; i<classes.n; i++){
-    fprintf(fout, "\n| %d | %.3f | %.3f | %.3f | %.3f |", 
-      classes.id[i],
-      classical_accuracy.class[i][_ACC_PA_],
-      classical_accuracy.class[i][_ACC_UA_],
-      classical_accuracy.class[i][_ACC_OE_],
-      classical_accuracy.class[i][_ACC_CE_]
-    );
-  }
-  fprintf(fout, "\n");
-
-
-
-  fprintf(fout, "\n\n");
-  fprintf(fout, "# Area-Adjusted Accuracy\n");
-  fprintf(fout, "-----------------------------------------------------------------\n");
-  fprintf(fout, "\n");
-  fprintf(fout, "## Confusion matrix, expressed in terms of proportion of area:\n");
-  fprintf(fout, "\n");
-
-  fprintf(fout, "| |");
-  for (int j=0; j<classes.n; j++) fprintf(fout, " %d |", classes.id[j]);
-  fprintf(fout, "\n| --- |");
-  for (int j=0; j<classes.n; j++) fprintf(fout, " --- |");
-  for (int i=0; i<classes.n; i++){
-    fprintf(fout, "\n| %d |", classes.id[i]);
-    for (int j=0; j<classes.n; j++){
-      fprintf(fout, " %.3f |", adjusted_confusion.matrix[i][j]);
-    }
-  }
-  fprintf(fout, "\n");
-
-  fprintf(fout, "\n");
-  fprintf(fout, "Overall Accuracy (OA): %.3f \u00b1 %.3f\n", 
-    adjusted_accuracy.overall, standard_error.overall);
-  fprintf(fout, "\n");
-  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
-  fprintf(fout, "| --- | --- | --- | --- | --- |");
-  for (int i=0; i<classes.n; i++){
-    fprintf(fout, "\n| %d | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f |", 
-      classes.id[i],
-      adjusted_accuracy.class[i][_ACC_PA_], standard_error.class[i][_ACC_PA_],
-      adjusted_accuracy.class[i][_ACC_UA_], standard_error.class[i][_ACC_UA_],
-      adjusted_accuracy.class[i][_ACC_OE_], standard_error.class[i][_ACC_OE_],
-      adjusted_accuracy.class[i][_ACC_CE_], standard_error.class[i][_ACC_CE_]
-    );
-  }
-  fprintf(fout, "\n");
-
-
-  fprintf(fout, "\n");
-  fprintf(fout, "| Mapped Area | Estimated Area |\n");
-  fprintf(fout, "| --- | --- |");
-  for (int i=0; i<classes.n; i++){
-    fprintf(fout, "\n| %d | %.3f | %.3f \u00b1 %.3f |", 
-      classes.id[i], 
-      classes.area[i], 
-      classes.adjusted_area[i], 
-      classes.confidence_adjusted_area[i]);
-  }
-  fprintf(fout, "\n");
-
-  fclose(fout);
-
-
-  free_2D((void**)classical_confusion.matrix, classical_confusion.n);
-  free((void*)classical_confusion.row_sum);
-  free((void*)classical_confusion.col_sum);
-
-  free_2D((void**)adjusted_confusion.matrix, adjusted_confusion.n);
-  free((void*)adjusted_confusion.row_sum);
-  free((void*)adjusted_confusion.col_sum);
-
-  free((void*)classes.id);
-  free((void*)classes.count);
-  free((void*)classes.area);
-  free((void*)classes.weight);
-  free((void*)classes.adjusted_area);
-  free((void*)classes.confidence_adjusted_area);
-
-  free((void*)labels.map);
-  free((void*)labels.reference);
-
-  free_2D((void**)classical_accuracy.class, classes.n);
-  free_2D((void**)adjusted_accuracy.class, classes.n);
-  free_2D((void**)standard_error.class, classes.n);
 
   return SUCCESS;
 }
