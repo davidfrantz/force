@@ -59,7 +59,7 @@ void compile_validation_classes(char *file_input_count, double pixel_area, class
   print_table(&map_histogram, false, false);
   printf("column %s in column %d\n", "class", col_class);
   printf("column %s in column %d\n", "count", col_count);
-  printf("table has %d classes\n", n_classes);
+  printf("table has %d classes\n", map_histogram.nrow);
   #endif
   
   classes->n = map_histogram.nrow;
