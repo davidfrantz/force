@@ -32,4 +32,11 @@ Develop version
       $ force-runtime-data -s # show available sensors and their band names
       $ force-runtime-data -x # show available indices and their required bands
 
+  - force-map-accuracy is now re-written in C. This avoids to rely on the sf package
+    which caused some trouble in the Docker image as it caused a GDAL version conflict.
+    The output format has been changed to markdown for nicer rendering.
+    Apart from this, there is not really a change in usage. 
+    Not that it really matters, but it is also faster now.
+
+
 .. no changes to last release yet
