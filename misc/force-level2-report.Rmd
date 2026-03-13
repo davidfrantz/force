@@ -1,15 +1,43 @@
 ---
-title: "FORCE Level 2 Processing Report"
+  title: "FORCE Level 2 Processing Report"
 date: "`r Sys.Date()`"
 output: html_document
 params:
   dlog: "log"
-  ftable: NULL
+ftable: NULL
 ---
-
-```{r load-packages, include = FALSE}
+  
+  ```{r load-packages, include = FALSE}
 require(dplyr)
-require(plotly)
+require(tidyr)
+require(echarts4r)
+```
+
+
+```{r define_barplot, echo = FALSE, warning = FALSE}
+e_bars_stacked <- function(df, x){
+  cols <- setdiff(names(df), x)
+  
+  fig <- df |>
+    e_charts_(x)
+  
+  for (col in cols) {
+    fig <- do.call(e_bar, list(fig, as.name(col), name = col, stack = "stack"))
+  }
+  fig
+}
+
+theme <- "macarons"
+
+e_common(theme = theme)
+
+get_theme_colors <- function(theme = "auritus"){
+  path <- system.file("htmlwidgets/lib/echarts-6.0.0/themes", package = "echarts4r")
+  file <- paste0(path, "/", theme, ".js")
+  js_lines <- readLines(file)
+  palette <- unlist(regmatches(js_lines, gregexpr("#[0-9a-fA-F]{6}", js_lines)))
+}
+colors <- get_theme_colors(theme)
 ```
 
 ```{r load-data, include = FALSE}
@@ -20,9 +48,9 @@ log <- "character" %>% vector(nlog)
 id <- "character" %>% vector(nlog)
 
 for (i in 1:nlog) {
-
+  
   tmp <- readLines(flog[i])
-
+  
   if (length(grep("Image:", tmp)) > 0){
     id[i] <- tmp %>% 
       grep("Image:", ., value = TRUE) %>%
@@ -35,12 +63,12 @@ for (i in 1:nlog) {
       gsub("/ ", "", .) %>%
       basename()
   }
-
+  
   log[i] <- tmp %>%
     paste(collapse = " ") %>%
     gsub(".*Start core processing", "", .) %>%
     gsub("Core processing signaled.*", "", .)
-                      
+  
 }
 ```
 
@@ -57,11 +85,11 @@ status <- status %>% as.factor()
 nfail <- sum(status == "Error")
 
 mm <- log %>%
-     gsub(".*([0-9]{2}) mins.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*([0-9]{2}) mins.*", "\\1", .) %>%
+  as.numeric()
 ss <- log %>%
-     gsub(".*([0-9]{2}) secs.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*([0-9]{2}) secs.*", "\\1", .) %>%
+  as.numeric()
 time <- mm + ss / 60
 
 id_split <- id %>% strsplit("_")
@@ -69,46 +97,46 @@ id_split <- id %>% strsplit("_")
 sensor <- id_split %>% sapply("[", 1)
 
 date <- id_split %>%
-       sapply(function(x) {
-         grep("^[0-9]{8}", x, value = TRUE) %>%
-         first() }) %>%
-       substr(1, 8) %>%
-       strptime("%Y%m%d")
+  sapply(function(x) {
+    grep("^[0-9]{8}", x, value = TRUE) %>%
+      first() }) %>%
+  substr(1, 8) %>%
+  strptime("%Y%m%d")
 
 dc <- log %>%
-     gsub(".*dc: ([^%]*)%.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*dc: ([^%]*)%.*", "\\1", .) %>%
+  as.numeric()
 
 cc <- log %>%
-     gsub(".*cc: ([^%]*)%.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*cc: ([^%]*)%.*", "\\1", .) %>%
+  as.numeric()
 
 sc <- log %>%
-     gsub(".*sc: ([^%]*)%.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*sc: ([^%]*)%.*", "\\1", .) %>%
+  as.numeric()
 
 wc <- log %>%
-     gsub(".*wc: ([^%]*)%.*", "\\1", .) %>%
-     as.numeric()
+  gsub(".*wc: ([^%]*)%.*", "\\1", .) %>%
+  as.numeric()
 
 ac <- 100 %>%
-     `-`(cc + sc) %>%
-     pmax(0)
+  `-`(cc + sc) %>%
+  pmax(0)
 lc <- 100 %>%
-     `-`(cc + sc + wc) %>%
-     pmax(0)
+  `-`(cc + sc + wc) %>%
+  pmax(0)
 
 aod <- log %>%
-      gsub(".*AOD: (.*)\\. #.*", "\\1", .) %>%
-      as.numeric()
+  gsub(".*AOD: (.*)\\. #.*", "\\1", .) %>%
+  as.numeric()
 
 nwater <- log %>%
-         gsub(".*# of targets: ([0-9]*)/.*", "\\1", .) %>%
-         as.integer()
+  gsub(".*# of targets: ([0-9]*)/.*", "\\1", .) %>%
+  as.integer()
 
 nveg <- log %>%
-         gsub(".*# of targets: [0-9]*/([0-9]*).*", "\\1", .) %>%
-         as.integer()
+  gsub(".*# of targets: [0-9]*/([0-9]*).*", "\\1", .) %>%
+  as.integer()
 
 aod_status <- rep("NA", nlog)
 aod_status[(nwater + nveg) == 0] <- "AOD estimation failed"
@@ -116,47 +144,47 @@ aod_status[(nwater + nveg)  > 0] <- "AOD estimation successful"
 aod_status <- aod_status %>% as.factor()
 
 nchip <- log %>%
-        gsub(".* ([0-9]*) product.*", "\\1", .) %>%
-        as.integer()
+  gsub(".* ([0-9]*) product.*", "\\1", .) %>%
+  as.integer()
 
 data <- data.frame(status,
-                  sensor,
-                  nchip,
-                  time,
-                  date,
-                  year  = format(date, "%Y"),
-                  month = format(date, "%m"),
-                  week  = format(date, "%W"),
-                  doy       = format(date, "%j"),
-                  yearhalf  = paste(
-                                   format(date, "%Y"),
-                                   format(date, "%m") %>%
-                                          as.integer() %>%
-                                          `/`(6) %>%
-                                          ceiling(),
-                                   sep = "-"
-                            ),
-                  yearquarter  = paste(
-                                   format(date, "%Y"),
-                                   format(date, "%m") %>%
-                                          as.integer() %>%
-                                          `/`(3) %>%
-                                          ceiling(),
-                                   sep = "-"
-                            ),
-                  yearmonth = format(date, "%Y-%m"),
-                  dc,
-                  cc,
-                  sc,
-                  wc,
-                  ac,
-                  lc,
-                  aod_status,
-                  aod,
-                  nwater,
-                  nveg,
-                  log,
-                  id)
+                   sensor,
+                   nchip,
+                   time,
+                   date,
+                   year  = format(date, "%Y"),
+                   month = format(date, "%m"),
+                   week  = format(date, "%W"),
+                   doy       = format(date, "%j"),
+                   yearhalf  = paste(
+                     format(date, "%Y"),
+                     format(date, "%m") %>%
+                       as.integer() %>%
+                       `/`(6) %>%
+                       ceiling(),
+                     sep = "-"
+                   ),
+                   yearquarter  = paste(
+                     format(date, "%Y"),
+                     format(date, "%m") %>%
+                       as.integer() %>%
+                       `/`(3) %>%
+                       ceiling(),
+                     sep = "-"
+                   ),
+                   yearmonth = format(date, "%Y-%m"),
+                   dc,
+                   cc,
+                   sc,
+                   wc,
+                   ac,
+                   lc,
+                   aod_status,
+                   aod,
+                   nwater,
+                   nveg,
+                   log,
+                   id)
 ```
 
 
@@ -166,10 +194,11 @@ data <- data.frame(status,
 `r nfail` images failed.
 
 ```{r plot-status, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(status),
-              labels = ~status, values = ~n, type = "pie")
-fig
+data |>
+  count(status, name = "Number") |>
+  e_charts(status) |>
+  e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
+  e_tooltip(trigger = "item")
 ```
 
 
@@ -184,62 +213,106 @@ if (nfail > 0) {
 
 The following plots count the number of processed Level 1 images per sensor, year, month and week.
 *Processing status is not taken into account.*
-
-
+  
+  
 ```{r plot-l1-sensor, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor),
-              x = ~sensor, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"))
-fig
+data %>% 
+  count(sensor, name = "Number") %>%
+  arrange(sensor) |>
+  e_charts(sensor) |>
+  e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
+  e_tooltip(trigger = "item") |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-year, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, year),
-              x = ~year, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(year = as.factor(year)) |>
+  count(sensor, year, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(year) |>
+  e_bars_stacked("year") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-yearhalf, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, yearhalf),
-              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearhalf = as.factor(yearhalf)) |>
+  count(sensor, yearhalf, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearhalf) |>
+  e_bars_stacked("yearhalf") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-yearquarter, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, yearquarter),
-              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearquarter = as.factor(yearquarter)) |>
+  count(sensor, yearquarter, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearquarter) |>
+  e_bars_stacked("yearquarter") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-yearmonth, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, yearmonth),
-              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearmonth = as.factor(yearmonth)) |>
+  count(sensor, yearmonth, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearmonth) |>
+  e_bars_stacked("yearmonth") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-month, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, month),
-              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(month = as.factor(month)) |>
+  count(sensor, month, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(month) |>
+  e_bars_stacked("month") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l1-week, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     count(sensor, week),
-              x = ~week, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(week = as.factor(week)) |>
+  count(sensor, week, name = "Number") %>%
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(week) |>
+  e_bars_stacked("week") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 
@@ -248,66 +321,110 @@ fig
 The following plots count the number of processed Level 2 image chips per sensor, year, month and week.
 
 ```{r plot-l2-sensor, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~sensor, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"))
-fig
+data %>% 
+  group_by(sensor) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  e_charts(sensor) |>
+  e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
+  e_tooltip(trigger = "item") |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-year, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, year) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~year, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(year = as.factor(year)) |>
+  group_by(sensor, year) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(year) |>
+  e_bars_stacked("year") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-yearhalf, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, yearhalf) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~yearhalf, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearhalf = as.factor(yearhalf)) |>
+  group_by(sensor, yearhalf) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearhalf) |>
+  e_bars_stacked("yearhalf") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-yearquarter, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, yearquarter) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~yearquarter, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearquarter = as.factor(yearquarter)) |>
+  group_by(sensor, yearquarter) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearquarter) |>
+  e_bars_stacked("yearquarter") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-yearmonth, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, yearmonth) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~yearmonth, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(yearmonth = as.factor(yearmonth)) |>
+  group_by(sensor, yearmonth) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(yearmonth) |>
+  e_bars_stacked("yearmonth") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-month, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, month) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(month = as.factor(month)) |>
+  group_by(sensor, month) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(month) |>
+  e_bars_stacked("month") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-l2-week, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(sensor, week) %>%
-                     summarise(n = sum(nchip, na.rm = TRUE), .groups = "drop"),
-              x = ~week, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L2 images"), barmode = "stack")
-fig
+data %>% 
+  mutate(week = as.factor(week)) |>
+  group_by(sensor, week) %>%
+  summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(week) |>
+  e_bars_stacked("week") |>
+  e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 
@@ -319,126 +436,166 @@ Snow and cloud are not mutually exclusive, i.e. a cloud can be classified as sno
 Clear scene includes any valid pixels not tagged as cloud, cloud shadow or snow.
 Clear land further excludes water pixels.
 *Processing status is not taken into account.*
-
-```{r plot-cover, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data,
-                y = ~dc, name = "data", type = "box") %>%
-      add_trace(y = ~cc, name = "cloud") %>%
-      add_trace(y = ~sc, name = "snow") %>%
-      add_trace(y = ~wc, name = "water") %>%
-      add_trace(y = ~ac, name = "clear scene") %>%
-      add_trace(y = ~lc, name = "clear land") %>%
-      layout(yaxis = list(title = "% cover"))
-fig
+  
+  ```{r plot-cover, echo = FALSE, warning = FALSE}
+data %>% 
+  pivot_longer(cols = c("dc", "cc", "sc", "wc", "ac", "lc"), names_to = "cover", values_to = "Number") |>
+  mutate(cover = gsub("dc", "data", cover)) |>
+  mutate(cover = gsub("cc", "cloud", cover)) |>
+  mutate(cover = gsub("sc", "snow", cover)) |>
+  mutate(cover = gsub("wc", "water", cover)) |>
+  mutate(cover = gsub("ac", "all land", cover)) |>
+  mutate(cover = gsub("lc", "clear land", cover)) |>
+  group_by(cover) |>
+  e_charts() |>
+  e_boxplot(Number) |>
+  e_y_axis(name = "% cover", nameLocation = "middle") |>
+  e_tooltip(trigger = "item")
 ```
 
 The following plots show the mean cover per year, month and week.
 
 
 ```{r plot-cover-by-year, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(year) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~year, y = ~dc, name = "data",
-              type = "scatter", mode = "lines+markers") %>%
-    add_trace(x = ~year, y = ~cc, name = "cloud") %>%
-    add_trace(x = ~year, y = ~sc, name = "snow") %>%
-    add_trace(x = ~year, y = ~wc, name = "water") %>%
-    add_trace(x = ~year, y = ~ac, name = "clear all") %>%
-    add_trace(x = ~year, y = ~lc, name = "clear land") %>%
-    layout(yaxis = list(title = "% cover"))
-fig
+data %>% 
+  mutate(year = as.factor(year)) |>
+  group_by(year) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(year) |>
+  e_charts(year) |>
+  e_line(dc, name = "data") |>
+  e_line(cc, name = "cloud") |>
+  e_line(sc, name = "snow") |>
+  e_line(wc, name = "water") |>
+  e_line(ac, name = "clear all") |>
+  e_line(lc, name = "clear land") |>
+  e_y_axis(name = "% cover", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("coverage")
 ```
 
 ```{r plot-cover-by-month, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(month) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~month, y = ~dc, name = "data",
-              type = "scatter", mode = "lines+markers") %>%
-    add_trace(x = ~month, y = ~cc, name = "cloud") %>%
-    add_trace(x = ~month, y = ~sc, name = "snow") %>%
-    add_trace(x = ~month, y = ~wc, name = "water") %>%
-    add_trace(x = ~month, y = ~ac, name = "clear all") %>%
-    add_trace(x = ~month, y = ~lc, name = "clear land") %>%
-    layout(yaxis = list(title = "% cover"))
-fig
+data %>% 
+  mutate(month = as.factor(month)) |>
+  group_by(month) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(month) |>
+  e_charts(month) |>
+  e_line(dc, name = "data") |>
+  e_line(cc, name = "cloud") |>
+  e_line(sc, name = "snow") |>
+  e_line(wc, name = "water") |>
+  e_line(ac, name = "clear all") |>
+  e_line(lc, name = "clear land") |>
+  e_y_axis(name = "% cover", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("coverage")
 ```
 
 ```{r plot-cover-by-week, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     group_by(week) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~week, y = ~dc, name = "data",
-              type = "scatter", mode = "lines+markers") %>%
-    add_trace(x = ~week, y = ~cc, name = "cloud") %>%
-    add_trace(x = ~week, y = ~sc, name = "snow") %>%
-    add_trace(x = ~week, y = ~wc, name = "water") %>%
-    add_trace(x = ~week, y = ~ac, name = "clear all") %>%
-    add_trace(x = ~week, y = ~lc, name = "clear land") %>%
-    layout(yaxis = list(title = "% cover"))
-fig
+data %>% 
+  mutate(week = as.factor(week)) |>
+  group_by(week) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(week) |>
+  e_charts(week) |>
+  e_line(dc, name = "data") |>
+  e_line(cc, name = "cloud") |>
+  e_line(sc, name = "snow") |>
+  e_line(wc, name = "water") |>
+  e_line(ac, name = "clear all") |>
+  e_line(lc, name = "clear land") |>
+  e_y_axis(name = "% cover", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("coverage")
 ```
 
 
 # Aerosol Optical depth
 
 ```{r plot-aod-status, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success") %>%
-                     count(aod_status),
-              labels = ~aod_status, values = ~n, type = "pie")
-fig
+data |>
+  filter(status == "Success") |>
+  count(aod_status, name = "Number") |>
+  e_charts(aod_status) |>
+  e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
+  e_tooltip(trigger = "item")
 ```
 
 ```{r plot-aod-targets, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success"),
-                y = ~nwater, name = "dark water", type = "box") %>%
-      add_trace(y = ~nveg, name = "dark dense vegetation")
-fig
+data |>
+  filter(status == "Success") |>
+  pivot_longer(cols = c("nwater", "nveg"), names_to = "target", values_to = "Number") |>
+  mutate(target = gsub("nwater", "dark water", target)) |>
+  mutate(target = gsub("nveg", "dark dense vegetation", target)) |>
+  group_by(target) |>
+  e_charts() |>
+  e_boxplot(Number) |>
+  e_y_axis(name = "# of targets", nameLocation = "middle") |>
+  e_tooltip(trigger = "item")
 ```
 
 ```{r plot-aod, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success"),
-                y = ~aod, name = "AOD", type = "box")
-fig
+data |>
+  filter(status == "Success") |>
+  e_charts() |>
+  e_density(aod) |>
+  e_y_axis(name = "AOD", nameLocation = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_legend(show = FALSE)
 ```
 
 ```{r plot-aod-by-year, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success") %>%
-                     group_by(year) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~year, y = ~aod, name = "AOD",
-              type = "scatter", mode = "lines+markers") %>%
-      layout(yaxis = list(title = "AOD"))
-fig
+data %>% 
+  filter(status == "Success") |>
+  mutate(year = as.factor(year)) |>
+  group_by(year) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(year) |>
+  e_charts(year) |>
+  e_line(aod, name = "AOD") |>
+  e_y_axis(name = "AOD", nameLocation = "middle") |>
+  e_legend(show = FALSE) |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom()
 ```
 
 
 ```{r plot-aod-by-month, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success") %>%
-                     group_by(month) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~month, y = ~aod, name = "AOD",
-              type = "scatter", mode = "lines+markers") %>%
-      layout(yaxis = list(title = "AOD"))
-fig
+data %>% 
+  filter(status == "Success") |>
+  mutate(month = as.factor(month)) |>
+  group_by(month) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(month) |>
+  e_charts(month) |>
+  e_line(aod, name = "AOD") |>
+  e_y_axis(name = "AOD", nameLocation = "middle") |>
+  e_legend(show = FALSE) |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom()
 ```
 
 
 ```{r plot-aod-by-week, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Success") %>%
-                     group_by(week) %>%
-                     summarise_all(mean, na.rm = TRUE),
-              x = ~week, y = ~aod, name = "AOD",
-              type = "scatter", mode = "lines+markers") %>%
-      layout(yaxis = list(title = "AOD"))
-fig
+data %>% 
+  filter(status == "Success") |>
+  mutate(week = as.factor(week)) |>
+  group_by(week) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE) |>
+  arrange(week) |>
+  e_charts(week) |>
+  e_line(aod, name = "AOD") |>
+  e_y_axis(name = "AOD", nameLocation = "middle") |>
+  e_legend(show = FALSE) |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom()
 ```
 
 
@@ -449,25 +606,37 @@ Coregistration failed for
 Level 1 images.
 
 ```{r plot-month-coreg, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Coregistration failed") %>%
-                     count(sensor, month),
-              x = ~month, y = ~n, color = ~sensor, type = "bar") %>%
-      layout(yaxis = list(title = "# of L1 images"), barmode = "stack")
-fig
+
+data %>% 
+  filter(status == "Coregistration failed") |>
+  mutate(month = as.factor(month)) |>
+  count(sensor, month, name = "Number") |>
+  arrange(sensor) |>
+  pivot_wider(names_from = sensor, values_from = Number) |>
+  arrange(month) |>
+  e_bars_stacked("month") |>
+  e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
+  e_legend(right = 0, orient = "vertical", top = "middle") |>
+  e_tooltip(trigger = "axis") |>
+  e_datazoom() |>
+  e_group("sensor")
 ```
 
 ```{r plot-cover-coreg, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data %>%
-                     filter(status == "Coregistration failed"),
-                y = ~dc, name = "data", type = "box") %>%
-      add_trace(y = ~cc, name = "cloud") %>%
-      add_trace(y = ~sc, name = "snow") %>%
-      add_trace(y = ~wc, name = "water") %>%
-      add_trace(y = ~ac, name = "clear all") %>%
-      add_trace(y = ~lc, name = "clear land") %>%
-      layout(yaxis = list(title = "% cover"))
-fig
+data %>% 
+  filter(status == "Coregistration failed") |>
+  pivot_longer(cols = c("dc", "cc", "sc", "wc", "ac", "lc"), names_to = "cover", values_to = "Number") |>
+  mutate(cover = gsub("dc", "data", cover)) |>
+  mutate(cover = gsub("cc", "cloud", cover)) |>
+  mutate(cover = gsub("sc", "snow", cover)) |>
+  mutate(cover = gsub("wc", "water", cover)) |>
+  mutate(cover = gsub("ac", "all land", cover)) |>
+  mutate(cover = gsub("lc", "clear land", cover)) |>
+  group_by(cover) |>
+  e_charts() |>
+  e_boxplot(Number) |>
+  e_y_axis(name = "# cover", nameLocation = "middle") |>
+  e_tooltip(trigger = "item")
 ```
 
 
@@ -478,10 +647,24 @@ The runtime is the required real-time of each process (time between process star
 This measure may deviate from CPU-time due to multithreading etc. 
 
 ```{r plot-runtime, echo = FALSE, warning = FALSE}
-fig <- plot_ly(data = data,
-              x = status, y = ~time, color = ~sensor, type = "box") %>%
-      layout(yaxis = list(title = "runtime [minutes]"), boxmode = "group")
-fig
+p1 <- data %>% 
+  filter(status == "Success") |>
+  group_by(sensor) |>
+  e_charts(elementId = "runtime1") |>
+  e_boxplot(time) |>
+  e_y_axis(name = "runtime [minutes]", nameLocation = "middle") |>
+  e_tooltip(trigger = "item")
+
+p2 <- data %>% 
+  filter(status == "Too cloudy") |>
+  group_by(sensor) |>
+  e_charts(elementId = "runtime2") |>
+  e_boxplot(time) |>
+  e_y_axis(name = "runtime [minutes]", nameLocation = "middle") |>
+  e_tooltip(trigger = "item") |> 
+  e_connect(c("runtime1", "runtime2")) # connect
+
+e_arrange(p1, p2)
 ```
 
 ```{r write-csv, echo = FALSE, warning = FALSE}
