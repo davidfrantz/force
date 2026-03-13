@@ -26,7 +26,7 @@ e_bars_stacked <- function(df, x){
   fig
 }
 
-theme <- "macarons"
+theme <- "westeros"
 
 e_common(theme = theme)
 
