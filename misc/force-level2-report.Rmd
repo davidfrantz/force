@@ -1,18 +1,17 @@
 ---
-  title: "FORCE Level 2 Processing Report"
+title: "FORCE Level 2 Processing Report"
 date: "`r Sys.Date()`"
 output: html_document
 params:
   dlog: "log"
-ftable: NULL
+  ftable: NULL
 ---
   
-  ```{r load-packages, include = FALSE}
+```{r load-packages, include = FALSE}
 require(dplyr)
 require(tidyr)
 require(echarts4r)
 ```
-
 
 ```{r define_barplot, echo = FALSE, warning = FALSE}
 e_bars_stacked <- function(df, x){
@@ -71,10 +70,6 @@ for (i in 1:nlog) {
   
 }
 ```
-
-
-
-
 
 ```{r prepare-data, include = FALSE}
 status <- rep("Error", nlog)
@@ -187,10 +182,9 @@ data <- data.frame(status,
                    id)
 ```
 
+## Processing status
 
-# Processing status
-
-`r nlog` Level 1 images were processed. 
+`r nlog` Level 1 images were processed.
 `r nfail` images failed.
 
 ```{r plot-status, echo = FALSE, warning = FALSE}
@@ -201,20 +195,17 @@ data |>
   e_tooltip(trigger = "item")
 ```
 
-
 ```{r failed-images, echo = FALSE}
 if (nfail > 0) {
   data %>% filter(status == "Error") %>% select(log)
 }
 ```
 
-
-# Number of Level 1 images
+## Number of Level 1 images
 
 The following plots count the number of processed Level 1 images per sensor, year, month and week.
 *Processing status is not taken into account.*
-  
-  
+
 ```{r plot-l1-sensor, echo = FALSE, warning = FALSE}
 data %>% 
   count(sensor, name = "Number") %>%
@@ -315,8 +306,7 @@ data %>%
   e_group("sensor")
 ```
 
-
-# Number of Level 2 images
+## Number of Level 2 images
 
 The following plots count the number of processed Level 2 image chips per sensor, year, month and week.
 
@@ -427,17 +417,16 @@ data %>%
   e_group("sensor")
 ```
 
-
-# Coverages
+## Coverages
 
 Data cover is the percentage of valid pixels in an input image, i.e. excl. the black border or SLC-off stripes.
-Cloud cover includes opaque clouds + buffer, cloud shadows + buffer and cirrus clouds. 
+Cloud cover includes opaque clouds + buffer, cloud shadows + buffer and cirrus clouds.
 Snow and cloud are not mutually exclusive, i.e. a cloud can be classified as snow, too.
 Clear scene includes any valid pixels not tagged as cloud, cloud shadow or snow.
 Clear land further excludes water pixels.
 *Processing status is not taken into account.*
   
-  ```{r plot-cover, echo = FALSE, warning = FALSE}
+```{r plot-cover, echo = FALSE, warning = FALSE}
 data %>% 
   pivot_longer(cols = c("dc", "cc", "sc", "wc", "ac", "lc"), names_to = "cover", values_to = "Number") |>
   mutate(cover = gsub("dc", "data", cover)) |>
@@ -454,7 +443,6 @@ data %>%
 ```
 
 The following plots show the mean cover per year, month and week.
-
 
 ```{r plot-cover-by-year, echo = FALSE, warning = FALSE}
 data %>% 
@@ -516,8 +504,7 @@ data %>%
   e_group("coverage")
 ```
 
-
-# Aerosol Optical depth
+## Aerosol Optical depth
 
 ```{r plot-aod-status, echo = FALSE, warning = FALSE}
 data |>
@@ -566,7 +553,6 @@ data %>%
   e_datazoom()
 ```
 
-
 ```{r plot-aod-by-month, echo = FALSE, warning = FALSE}
 data %>% 
   filter(status == "Success") |>
@@ -581,7 +567,6 @@ data %>%
   e_tooltip(trigger = "axis") |>
   e_datazoom()
 ```
-
 
 ```{r plot-aod-by-week, echo = FALSE, warning = FALSE}
 data %>% 
@@ -598,11 +583,10 @@ data %>%
   e_datazoom()
 ```
 
+## Coregistration
 
-# Coregistration
-
-Coregistration failed for 
-`r data %>% filter(status == "Coregistration failed") %>% nrow()` 
+Coregistration failed for
+`r data %>% filter(status == "Coregistration failed") %>% nrow()`
 Level 1 images.
 
 ```{r plot-month-coreg, echo = FALSE, warning = FALSE}
@@ -639,12 +623,11 @@ data %>%
   e_tooltip(trigger = "item")
 ```
 
+## Runtime
 
-# Runtime
-
-The following plot summarizes the runtime for each image by sensor and processing status. 
+The following plot summarizes the runtime for each image by sensor and processing status.
 The runtime is the required real-time of each process (time between process start and end).
-This measure may deviate from CPU-time due to multithreading etc. 
+This measure may deviate from CPU-time due to multithreading etc.
 
 ```{r plot-runtime, echo = FALSE, warning = FALSE}
 p1 <- data %>% 
@@ -670,4 +653,3 @@ e_arrange(p1, p2)
 ```{r write-csv, echo = FALSE, warning = FALSE}
 write.csv(data, file = params$ftable, row.names = FALSE)
 ```
-
