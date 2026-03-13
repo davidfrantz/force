@@ -559,7 +559,10 @@ void generate_report(char *file_output, class_t *classes, confusion_t *classical
 
   fprintf(fout, "# Traditional Accuracy assessment\n");
   fprintf(fout, "\n");
-  fprintf(fout, "## Traditional confusion matrix, expressed in terms of pixel counts:\n");
+  fprintf(fout, "## Confusion matrix\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "The confusion matrix is expressed in terms of pixel counts,\n");
+  fprintf(fout, "the rows represent the predicted/map classes and the columns represent the reference classes.\n");
   fprintf(fout, "\n");
 
   fprintf(fout, "| |");
@@ -573,21 +576,25 @@ void generate_report(char *file_output, class_t *classes, confusion_t *classical
     }
   }
   fprintf(fout, "\n");
-
-
   fprintf(fout, "\n");
-  fprintf(fout, "Overall Accuracy (OA): %.3f\n", 
-    classical_accuracy->overall);
+  
+  fprintf(fout, "Overall Accuracy (OA): %.3f%%\n", 
+    classical_accuracy->overall * 100.0);
   fprintf(fout, "\n");
-  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+
+    fprintf(fout, "## Class accuracies\n");
+  fprintf(fout, "\n");
+  fprintf(fout,  "Accuracy metrics are expressed in %%.\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |\n");
   fprintf(fout, "| --- | --- | --- | --- | --- |");
   for (int i=0; i<classes->n; i++){
     fprintf(fout, "\n| %d | %.3f | %.3f | %.3f | %.3f |", 
       classes->id[i],
-      classical_accuracy->class[i][_ACC_PA_],
-      classical_accuracy->class[i][_ACC_UA_],
-      classical_accuracy->class[i][_ACC_OE_],
-      classical_accuracy->class[i][_ACC_CE_]
+      classical_accuracy->class[i][_ACC_PA_] * 100.0,
+      classical_accuracy->class[i][_ACC_UA_] * 100.0,
+      classical_accuracy->class[i][_ACC_OE_] * 100.0,
+      classical_accuracy->class[i][_ACC_CE_] * 100.0
     );
   }
   fprintf(fout, "\n");
@@ -596,9 +603,11 @@ void generate_report(char *file_output, class_t *classes, confusion_t *classical
 
   fprintf(fout, "\n\n");
   fprintf(fout, "# Area-Adjusted Accuracy\n");
-  fprintf(fout, "-----------------------------------------------------------------\n");
   fprintf(fout, "\n");
-  fprintf(fout, "## Confusion matrix, expressed in terms of proportion of area:\n");
+  fprintf(fout, "## Confusion matrix\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "The confusion matrix is expressed in terms of area percentage,\n");
+  fprintf(fout, "the rows represent the predicted/map classes and the columns represent the reference classes.\n");
   fprintf(fout, "\n");
 
   fprintf(fout, "| |");
@@ -608,32 +617,38 @@ void generate_report(char *file_output, class_t *classes, confusion_t *classical
   for (int i=0; i<classes->n; i++){
     fprintf(fout, "\n| %d |", classes->id[i]);
     for (int j=0; j<classes->n; j++){
-      fprintf(fout, " %.3f |", adjusted_confusion->matrix[i][j]);
+      fprintf(fout, " %.3f |", adjusted_confusion->matrix[i][j]*100.0);
     }
   }
   fprintf(fout, "\n");
+  fprintf(fout, "\n");
 
+  fprintf(fout, "Overall Accuracy (OA): %.3f%% \u00b1 %.3f\n", 
+    adjusted_accuracy->overall * 100.0, standard_error->overall * 100.0);
   fprintf(fout, "\n");
-  fprintf(fout, "Overall Accuracy (OA): %.3f \u00b1 %.3f\n", 
-    adjusted_accuracy->overall, standard_error->overall);
+  
+  fprintf(fout, "## Class accuracies\n");
   fprintf(fout, "\n");
-  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |");
+  fprintf(fout,  "Accuracy metrics are expressed in %%.\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Producer's Accuracy | User's Accuracy | Error of Omission | Error of Commission |\n");
   fprintf(fout, "| --- | --- | --- | --- | --- |");
   for (int i=0; i<classes->n; i++){
     fprintf(fout, "\n| %d | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f | %.3f \u00b1 %.3f |", 
       classes->id[i],
-      adjusted_accuracy->class[i][_ACC_PA_], standard_error->class[i][_ACC_PA_],
-      adjusted_accuracy->class[i][_ACC_UA_], standard_error->class[i][_ACC_UA_],
-      adjusted_accuracy->class[i][_ACC_OE_], standard_error->class[i][_ACC_OE_],
-      adjusted_accuracy->class[i][_ACC_CE_], standard_error->class[i][_ACC_CE_]
+      adjusted_accuracy->class[i][_ACC_PA_] * 100.0, standard_error->class[i][_ACC_PA_] * 100.0,
+      adjusted_accuracy->class[i][_ACC_UA_] * 100.0, standard_error->class[i][_ACC_UA_] * 100.0,
+      adjusted_accuracy->class[i][_ACC_OE_] * 100.0, standard_error->class[i][_ACC_OE_] * 100.0,
+      adjusted_accuracy->class[i][_ACC_CE_] * 100.0, standard_error->class[i][_ACC_CE_] * 100.0
     );
   }
   fprintf(fout, "\n");
-
-
   fprintf(fout, "\n");
-  fprintf(fout, "| Mapped Area | Estimated Area |\n");
-  fprintf(fout, "| --- | --- |");
+
+  fprintf(fout, "## Area estimates\n");
+  fprintf(fout, "\n");
+  fprintf(fout, "| | Mapped Area | Estimated Area |\n");
+  fprintf(fout, "| --- | --- | --- |");
   for (int i=0; i<classes->n; i++){
     fprintf(fout, "\n| %d | %.3f | %.3f \u00b1 %.3f |", 
       classes->id[i], 
