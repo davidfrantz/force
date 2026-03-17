@@ -11,7 +11,6 @@ include $(BUILDDIR)/executables/force-higher-level.mk
 include $(BUILDDIR)/executables/force-hist.mk
 include $(BUILDDIR)/executables/force-import-modis.mk
 include $(BUILDDIR)/executables/force-l2ps.mk
-include $(BUILDDIR)/executables/force-lut-modis.mk
 include $(BUILDDIR)/executables/force-map-accuracy.mk
 include $(BUILDDIR)/executables/force-mdcp.mk
 include $(BUILDDIR)/executables/force-parameter.mk
@@ -29,7 +28,6 @@ exe: \
   force-hist \
   force-import-modis \
   force-l2ps \
-  force-lut-modis \
   force-map-accuracy \
   force-mdcp \
   force-parameter \

@@ -36,10 +36,6 @@ GSL_INCLUDES = $(shell gsl-config --cflags)
 GSL_LIBS = $(shell gsl-config --libs)
 GSL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu -DHAVE_INLINE=1 -DGSL_RANGE_CHECK=0
 
-CURL_INCLUDES = -I/usr/include/curl -I/usr/include/x86_64-linux-gnu/curl
-CURL_LIBS = -L/usr/lib/x86_64-linux-gnu -lcurl
-CURL_FLAGS = -Wl,-rpath=/usr/lib/x86_64-linux-gnu
-
 OPENCV_INCLUDES = $(shell pkg-config --cflags opencv4)
 OPENCV_LIBS = $(shell pkg-config --libs opencv4)
 OPENCV_FLAGS = -Wl,-rpath=/usr/local/lib
@@ -82,9 +78,9 @@ MISCDIR = misc
 
 
 # Targets
-all: check-tools prepare exe bash rstats python external misc
+all: check-tools prepare exe bash rstats python misc
 with_tests: all tests
-.PHONY: prepare check-tools bash rstats python external misc \
+.PHONY: prepare check-tools bash rstats python misc \
   install clean all with_tests exe tests auch higher lower cross
 
 # Compile targets
@@ -123,10 +119,6 @@ python: prepare
 	@for file in $(PYTHONDIR)/*.py; do \
 		cp $$file $(BINDIR)/$$(basename $$file .py); \
 	done
-
-# re-branded tools [with permission]
-external: prepare
-	cp $(shell which landsatlinks) $(BINDIR)/force-level1-landsat
 
 # misc files
 misc: prepare

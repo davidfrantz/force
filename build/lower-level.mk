@@ -15,7 +15,6 @@ lower: \
     gas-ll \
     glance7-ll \
     meta-ll \
-    modwvp-ll \
     param-ll \
     radtran-ll \
     read-ll \
@@ -59,9 +58,6 @@ glance7-ll: prepare $(LOWER_DIR)/glance7-ll.c
 
 meta-ll: prepare $(LOWER_DIR)/meta-ll.c
 	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(LOWER_DIR)/meta-ll.c -o $(OBJDIR)/meta-ll.o $(GDAL_LIBS)
-
-modwvp-ll: prepare $(LOWER_DIR)/modwvp-ll.c
-	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(LOWER_DIR)/modwvp-ll.c -o $(OBJDIR)/modwvp-ll.o $(GDAL_LIBS)
 
 param-ll: prepare $(LOWER_DIR)/param-ll.c
 	$(GCC) -c $(LOWER_DIR)/param-ll.c -o $(OBJDIR)/param-ll.o

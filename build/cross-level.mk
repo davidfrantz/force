@@ -11,7 +11,6 @@ cross: \
     date-cl \
     datesys-cl \
     dir-cl \
-    download-cl \
     enum-cl \
     gdalopt-cl \
     imagefuns-cl \
@@ -56,9 +55,6 @@ datesys-cl : prepare $(CROSS_DIR)/datesys-cl.c
 
 dir-cl: prepare $(CROSS_DIR)/dir-cl.c
 	$(GCC) -c $(CROSS_DIR)/dir-cl.c -o $(OBJDIR)/dir-cl.o
-
-download-cl: prepare $(CROSS_DIR)/download-cl.c
-	$(GCC) $(CURL_INCLUDES) $(CURL_FLAGS) -c $(CROSS_DIR)/download-cl.c -o $(OBJDIR)/download-cl.o $(CURL_LIBS)
 
 enum-cl: prepare $(CROSS_DIR)/enum-cl.c
 	$(GCC) -c $(CROSS_DIR)/enum-cl.c -o $(OBJDIR)/enum-cl.o

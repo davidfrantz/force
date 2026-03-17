@@ -3,7 +3,6 @@
 # commented requirements are ignored
 
 requirements:
-  - curl-config
   - dos2unix
   - g++
   - gcc
@@ -19,7 +18,6 @@ requirements:
   - gdalwarp
   - gdalsrsinfo
   - gsl-config
-  - landsatlinks
   - lockfile-create
   - lockfile-remove
   - ogr2ogr
