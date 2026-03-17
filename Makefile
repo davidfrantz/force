@@ -78,9 +78,9 @@ MISCDIR = misc
 
 
 # Targets
-all: check-tools prepare exe bash rstats python external misc
+all: check-tools prepare exe bash rstats python misc
 with_tests: all tests
-.PHONY: prepare check-tools bash rstats python external misc \
+.PHONY: prepare check-tools bash rstats python misc \
   install clean all with_tests exe tests auch higher lower cross
 
 # Compile targets
@@ -119,10 +119,6 @@ python: prepare
 	@for file in $(PYTHONDIR)/*.py; do \
 		cp $$file $(BINDIR)/$$(basename $$file .py); \
 	done
-
-# re-branded tools [with permission]
-external: prepare
-	cp $(shell which landsatlinks) $(BINDIR)/force-level1-landsat
 
 # misc files
 misc: prepare

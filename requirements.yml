@@ -18,7 +18,6 @@ requirements:
   - gdalwarp
   - gdalsrsinfo
   - gsl-config
-  - landsatlinks
   - lockfile-create
   - lockfile-remove
   - ogr2ogr
