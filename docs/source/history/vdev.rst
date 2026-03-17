@@ -17,6 +17,18 @@ Develop version
     This only affects the Docker container, not selfmade FORCE installations.
     This only affects the ``force-map-accuracy`` program, not any other program.
 
+**FORCE L1AS**
+
+  - All download capabilities were removed from FORCE. 
+    Specifically, ``force-level1-landsat``, ``force-level1-csd`` and ``force-lut-modis`` were removed.
+    Please see https://github.com/davidfrantz/force/issues/418 for more details.
+
+**FORCE L2PS**
+
+  - All download capabilities were removed from FORCE. 
+    Specifically, ``force-level1-landsat``, ``force-level1-csd`` and ``force-lut-modis`` were removed.
+    Please see https://github.com/davidfrantz/force/issues/418 for more details.
+
 - **FORCE HLPS**
 
   - in ``force-higher-level``, LEVEL3 module:
