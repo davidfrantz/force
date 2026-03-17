@@ -87,6 +87,12 @@ Related Links
    components/higher-level/index.rst
    components/auxilliary/index.rst
 
+.. toctree::
+   :maxdepth: 4
+   :caption: FORCE ecosystem
+   :hidden:
+
+   ecosystem/eco_overview.rst
 
 .. toctree::
    :maxdepth: 1
