@@ -24,7 +24,6 @@ requirements:
   - ogrinfo
   - opencv_version
   - parallel
-  - pip3
   - python3
   - R
   - rename
