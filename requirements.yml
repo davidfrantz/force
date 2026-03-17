@@ -3,7 +3,6 @@
 # commented requirements are ignored
 
 requirements:
-  - curl-config
   - dos2unix
   - g++
   - gcc
