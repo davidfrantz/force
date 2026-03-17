@@ -1,7 +1,17 @@
-.. _wvdb-format:
+.. _wvdb:
 
-WVDB format
-===========
+Water vapor database
+====================
+
+
+A water vapor database (WVDB) is used for atmospheric correction of **Landsat** data in :ref:`l2ps`.
+
+The water vapor database is *not necessary for Sentinel-2* because water vapor can be estimated from the images themselves.
+
+The database holds water vapor values for the central coordinates of each WRS-2 frame. If available, day-specific values are used. If not, a monthly climatology is used instead.
+
+The uncertainty of using the climatology was assessed in this paper: 
+Frantz, D., Stellmes, M., & Hostert, P. (2019). A Global MODIS Water Vapor Database for the Operational Atmospheric Correction of Historic and Recent Landsat Imagery. Remote Sensing, 11, 257. https://doi.org/10.3390/rs11030257
 
 The Water Vapor Database consists of two sets of tables, which both must be located in the directory given in ``DIR_WVPLUT`` in the Level 2 :ref:`l2-param`.
 
