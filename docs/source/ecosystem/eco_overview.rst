@@ -34,3 +34,13 @@ QGIS Plugins
 Other
 -----
 
+https://github.com/vudongpham/FORCE-Live
+
+https://github.com/leonsnill/geeo
+
+https://github.com/felixlobert/force-sar
+
+https://github.com/Florian-Katerndahl/haze
+
+https://github.com/maxfreu/ForceCubeAccess.jl
+
