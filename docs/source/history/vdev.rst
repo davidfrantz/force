@@ -28,6 +28,8 @@ Develop version
   - All download capabilities were removed from FORCE. 
     Specifically, ``force-level1-landsat``, ``force-level1-csd`` and ``force-lut-modis`` were removed.
     Please see https://github.com/davidfrantz/force/issues/418 for more details.
+  - More resampling methods were added, including Cubic Spline, Lanczos, Average, Mode, Max, Min, Median, Q1, Q3, Sum, and RMS.
+    Feature requested by Vu-Dong Pham.
 
 - **FORCE HLPS**
 
