@@ -894,7 +894,7 @@ int i, i_, j, j_, p, p_, ii, jj, ni, nj, np, np_;
 int nx,  ny,  nc;
 int nx_, ny_, nc_;
 int ncld = 0;
-int nodata = -9999;
+int nodata = _FORCE_NO_DATA_;
 int nk = 5;
 float **kernel = NULL;
 double sum_re3, sum_nir, sum_bnir, sum_var, num, min_var;

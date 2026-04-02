@@ -516,7 +516,7 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COREG_BASE_NODATA = -9999\n");
+  fprintf(fp, "COREG_BASE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -1452,7 +1452,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata value for the LSP.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "LSP_NODATA = -9999\n");
+  fprintf(fp, "LSP_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -2136,7 +2136,7 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COARSE_NODATA = -9999\n");
+  fprintf(fp, "COARSE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -2199,7 +2199,7 @@ void write_par_hl_feature(FILE *fp, bool verbose){
     fprintf(fp, "# Nodata value of the features.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "FEATURE_NODATA = -9999\n");
+  fprintf(fp, "FEATURE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   if (verbose){
     fprintf(fp, "# Should nodata values be excluded if any feature is nodata (TRUE). Or just\n");
