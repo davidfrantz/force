@@ -150,9 +150,11 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# This is the resampling option for reprojection the DEM; you can choose\n");
-    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
-    fprintf(fp, "# (CC).\n");
-    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),\n");
+    fprintf(fp, "# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),\n");
+    fprintf(fp, "# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and\n");
+    fprintf(fp, "# RMS (RMS).\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}\n");
   }  
   fprintf(fp, "DEM_RESAMPLING = BL\n");
   
@@ -259,9 +261,12 @@ void write_par_ll_cube(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This is the resampling option for the reprojection; you can choose\n");
-    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
-    fprintf(fp, "# (CC); not used if DO_REPROJ = FALSE.\n");
-    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),\n");
+    fprintf(fp, "# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),\n");
+    fprintf(fp, "# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and\n");
+    fprintf(fp, "# RMS (RMS).\n");
+    fprintf(fp, "# Not used if DO_REPROJ = FALSE.\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}\n");
   }
   fprintf(fp, "RESAMPLING = CC\n");
 

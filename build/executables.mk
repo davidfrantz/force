@@ -10,9 +10,8 @@ include $(BUILDDIR)/executables/force-cube-init.mk
 include $(BUILDDIR)/executables/force-higher-level.mk
 include $(BUILDDIR)/executables/force-hist.mk
 include $(BUILDDIR)/executables/force-import-modis.mk
-include $(BUILDDIR)/executables/force-info.mk
 include $(BUILDDIR)/executables/force-l2ps.mk
-include $(BUILDDIR)/executables/force-lut-modis.mk
+include $(BUILDDIR)/executables/force-map-accuracy.mk
 include $(BUILDDIR)/executables/force-mdcp.mk
 include $(BUILDDIR)/executables/force-parameter.mk
 include $(BUILDDIR)/executables/force-qai-inflate.mk
@@ -28,9 +27,8 @@ exe: \
   force-higher-level \
   force-hist \
   force-import-modis \
-  force-info \
   force-l2ps \
-  force-lut-modis \
+  force-map-accuracy \
   force-mdcp \
   force-parameter \
   force-qai-inflate \

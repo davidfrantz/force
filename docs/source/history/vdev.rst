@@ -17,6 +17,20 @@ Develop version
     This only affects the Docker container, not selfmade FORCE installations.
     This only affects the ``force-map-accuracy`` program, not any other program.
 
+**FORCE L1AS**
+
+  - All download capabilities were removed from FORCE. 
+    Specifically, ``force-level1-landsat``, ``force-level1-csd`` and ``force-lut-modis`` were removed.
+    Please see https://github.com/davidfrantz/force/issues/418 for more details.
+
+**FORCE L2PS**
+
+  - All download capabilities were removed from FORCE. 
+    Specifically, ``force-level1-landsat``, ``force-level1-csd`` and ``force-lut-modis`` were removed.
+    Please see https://github.com/davidfrantz/force/issues/418 for more details.
+  - More resampling methods were added, including Cubic Spline, Lanczos, Average, Mode, Max, Min, Median, Q1, Q3, Sum, and RMS.
+    Feature requested by Vu-Dong Pham.
+
 - **FORCE HLPS**
 
   - in ``force-higher-level``, LEVEL3 module:
@@ -45,5 +59,12 @@ Develop version
       $ force-runtime-data -p # show the installation path of the runtime data
       $ force-runtime-data -s # show available sensors and their band names
       $ force-runtime-data -x # show available indices and their required bands
+
+  - force-map-accuracy is now re-written in C. This avoids to rely on the sf package
+    which caused some trouble in the Docker image as it caused a GDAL version conflict.
+    The output format has been changed to markdown for nicer rendering.
+    Apart from this, there is not really a change in usage. 
+    Not that it really matters, but it is also faster now.
+
 
 .. no changes to last release yet

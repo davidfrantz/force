@@ -630,7 +630,13 @@ const char *projection = NULL;
   GDALDataType dt = GDT_Int16;
   GDALWarpOptions *wopt = NULL;
   GDALWarpOperation woper;
-  GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
+  GDALResampleAlg resample[14] = { 
+    GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic,
+    GRA_CubicSpline, GRA_Lanczos, GRA_Average,
+    GRA_Mode, GRA_Max, GRA_Min,
+    GRA_Med, GRA_Q1, GRA_Q3,
+    GRA_Sum, GRA_RMS
+  };
   void *transformer = NULL;
   char src_proj[NPOW_10];
   double src_geotran[_GT_LEN_];

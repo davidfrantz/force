@@ -132,55 +132,67 @@
   "S1AIA": {
     "description": "Sentinel-1A Ascending Interferometric Wide Swath",
     "name": "S1AIA",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "S1AID": {
     "description": "Sentinel-1A Descending Interferometric Wide Swath",
     "name": "S1AID",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "S1BIA": {
     "description": "Sentinel-1C Ascending Interferometric Wide Swath",
     "name": "S1BIA",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "S1BID": {
     "description": "Sentinel-1B Descending Interferometric Wide Swath",
     "name": "S1BID",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "S1CIA": {
     "description": "Sentinel-1B Ascending Interferometric Wide Swath",
     "name": "S1CIA",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "S1CID": {
     "description": "Sentinel-1C Descending Interferometric Wide Swath",
     "name": "S1CID",
-    "bands": 2,
+    "bands": 4,
     "band_names": [
       "VV",
-      "VH"
+      "VH",
+      "HH",
+      "HV"
     ]
   },
   "sen2a": {
@@ -330,6 +342,17 @@
     "band_names": [
       "VV",
       "VH"
+    ]
+  },
+    "FULLP": {
+    "description": "Generic Full Polarimetric sensor",
+    "name": "FULLP",
+    "bands": 4,
+    "band_names": [
+      "VV",
+      "VH",
+      "HH",
+      "HV"
     ]
   }
 }

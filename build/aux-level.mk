@@ -5,7 +5,8 @@ AUX_DIR=$(SRCDIR)/modules/aux-level
 aux: \
     param-aux \
     param_train-aux \
-    train-aux
+    train-aux \
+	validation-aux
 
 param-aux: prepare $(AUX_DIR)/param-aux.c
 	$(GCC) -c $(AUX_DIR)/param-aux.c -o $(OBJDIR)/param-aux.o
@@ -15,3 +16,6 @@ param_train-aux: prepare $(AUX_DIR)/param-train-aux.c
 
 train-aux: prepare $(AUX_DIR)/train-aux.cpp
 	$(G11) $(OPENCV_INCLUDES) $(OPENCV_FLAGS) -c $(AUX_DIR)/train-aux.cpp -o $(OBJDIR)/train-aux.o $(OPENCV_LIBS)
+
+validation-aux: prepare $(AUX_DIR)/validation-aux.c
+	$(GCC) $(GDAL_INCLUDES) -c $(AUX_DIR)/validation-aux.c -o $(OBJDIR)/validation-aux.o $(GDAL_LIBS)
