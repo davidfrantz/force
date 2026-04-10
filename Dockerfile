@@ -30,6 +30,13 @@
 # https://github.com/davidfrantz/base_image
 FROM davidfrantz/base:latest AS internal_base
 
+# Refresh package list & upgrade existing packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+# Disable interactive frontends.
+export DEBIAN_FRONTEND=noninteractive && \
+apt-get -y update && apt-get -y upgrade
+
 FROM internal_base AS force_builder
 
 # Environment variables
