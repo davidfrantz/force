@@ -39,6 +39,31 @@ ENV SOURCE_DIR=$HOME/src/force
 ARG debug=disable
 ARG build=all
 
+# Refresh package list & upgrade existing packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+# Disable interactive frontends.
+export DEBIAN_FRONTEND=noninteractive && \
+apt-get -y update && apt-get -y upgrade && \
+# Install required tools.
+apt-get -y install --no-install-recommends \
+  # speed up building, only effective for local builds
+  ccache \
+  # GCC compiler etc.
+  build-essential \
+  # build requirement for OpenCV/FORCE
+  pkgconf \
+  # Numerical library, dynamically linked in FORCE
+  libgsl0-dev \
+  # JSON parsing, dynamically linked in FORCE
+  libjansson-dev \
+  # force-higher-level UDFs, dynamically linked in FORCE
+  python3-dev \
+  # force-higher-level UDFs, dynamically linked in FORCE
+  # standalone force-sample-size script
+  # force-level2-report uses Rmarkdown
+  r-base
+
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
 WORKDIR $SOURCE_DIR
