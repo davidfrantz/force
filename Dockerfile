@@ -28,7 +28,9 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest AS force_builder
+FROM davidfrantz/base:latest AS internal_base
+
+FROM internal_base AS force_builder
 
 # Environment variables
 ENV SOURCE_DIR=$HOME/src/force
@@ -47,7 +49,7 @@ RUN echo "building FORCE" && \
   ./debug.sh $debug && \
   make -j$(nproc) $build
 
-FROM davidfrantz/base:latest AS force
+FROM internal_base AS force
 
 ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git /usr/local/bin/force/force-udf
 COPY --link --chown=root:root --from=force_builder $HOME/src/force/bin /usr/local/bin/force
