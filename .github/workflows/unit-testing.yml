@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
       - name: Build image
         run: |
           SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
