@@ -28,6 +28,17 @@ The `CDSE_Sentinel2_downloader <https://github.com/vudongpham/CDSE_Sentinel2_dow
 Python tool to retrieve Sentinel-2 Level 1C products from the Copernicus Data Space Ecosystem through the OData API.
 It provides built-in support for checking download links against FORCE logfiles and only retrieve unprocessed images.
 
+CDSETool
+++++++++
+
+`CDSETool <https://github.com/CDSETool/CDSETool>`_ is a Python tool to find
+and retrieve products from the Copernicus Data Space Ecosystem through the OData API.
+CDSETool contains a command line interface, but can also be used as a library.
+There is support for downloading individual files from products, and multiple downloads
+can be performed concurrently.
+
+QGIS Plugins
+------------
 
 Processing
 ----------
