@@ -62,9 +62,11 @@ FILE_DEM = NULL
 # Type: Logical. Valid values: {TRUE,FALSE}
 # USE_DEM_DATABASE = FALSE
 # This is the resampling option for reprojection the DEM; you can choose
-# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution
-# (CC).
-# Type: Character. Valid values: {NN,BL,CC}
+# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),
+# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),
+# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and
+# RMS (RMS).
+# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}
 DEM_RESAMPLING = BL
 # Nodata value of the DEM.
 # Type: Integer. Valid range: [-32768,32767]
@@ -128,9 +130,12 @@ ORIGIN_LAT = 60
 # Type: Character. Valid values: {<WKT>,EQUI7,GLANCE7}
 PROJECTION = GLANCE7
 # This is the resampling option for the reprojection; you can choose
-# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution
-# (CC); not used if DO_REPROJ = FALSE.
-# Type: Character. Valid values: {NN,BL,CC}
+# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),
+# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),
+# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and
+# RMS (RMS).
+# Not used if DO_REPROJ = FALSE.
+# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}
 RESAMPLING = CC
 
 # RADIOMETRIC CORRECTION OPTIONS

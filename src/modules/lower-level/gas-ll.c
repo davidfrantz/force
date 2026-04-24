@@ -249,7 +249,7 @@ float **xyz_s_m = NULL;
   set_brick_product(WVP, "WVP");
   set_brick_filename(WVP, "WVP");
   set_brick_bandname(WVP, 0, "WVP");
-  set_brick_nodata(WVP, 0, -9999);
+  set_brick_nodata(WVP, 0, _FORCE_NO_DATA_);
 
   nx = get_brick_ncols(WVP);
   ny = get_brick_nrows(WVP);

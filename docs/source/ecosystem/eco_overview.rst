@@ -7,8 +7,8 @@ This page provides provides a curated list of software tools and resources
 that are related to or can be used in conjunction with FORCE.
 
 
-Download tools
---------------
+Download
+--------
 
 landsatlinks
 ++++++++++++
@@ -40,16 +40,40 @@ can be performed concurrently.
 QGIS Plugins
 ------------
 
+Processing
+----------
+
+
+Visualization
+-------------
+
+
+
+
+EnMAP-Box
+
+FORCE4Q https://force4q.readthedocs.io/en/develop/ by Andreas Janz
+
+Raster Timeseries Manager https://raster-timeseries-manager.readthedocs.io/en/latest/ by Andreas Janz
+
+Raster Data Plotting https://raster-data-plotting.readthedocs.io/en/latest/ by Andreas Janz
+
+EO Time Series Viewer https://eo-time-series-viewer.readthedocs.io/en/latest/ by Benjamin Jakimow
+
+Bit Flag Renderer https://bit-flag-renderer.readthedocs.io/en/latest/ by Benjamin Jakimow
+
+
+
 Other
 -----
 
-https://github.com/vudongpham/FORCE-Live
+https://github.com/vudongpham/FORCE-Live by Vu-Dong Pham
 
-https://github.com/leonsnill/geeo
+https://github.com/leonsnill/geeo by Leon Nill
 
-https://github.com/felixlobert/force-sar
+https://github.com/felixlobert/force-sar by Felix Lobert
 
-https://github.com/Florian-Katerndahl/haze
+https://github.com/Florian-Katerndahl/haze by Florian Katerndahl
 
-https://github.com/maxfreu/ForceCubeAccess.jl
+https://github.com/maxfreu/ForceCubeAccess.jl by Max Freudenberg
 

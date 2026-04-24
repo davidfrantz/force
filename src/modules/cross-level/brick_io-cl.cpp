@@ -630,7 +630,13 @@ const char *projection = NULL;
   GDALDataType dt = GDT_Int16;
   GDALWarpOptions *wopt = NULL;
   GDALWarpOperation woper;
-  GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
+  GDALResampleAlg resample[14] = { 
+    GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic,
+    GRA_CubicSpline, GRA_Lanczos, GRA_Average,
+    GRA_Mode, GRA_Max, GRA_Min,
+    GRA_Med, GRA_Q1, GRA_Q3,
+    GRA_Sum, GRA_RMS
+  };
   void *transformer = NULL;
   char src_proj[NPOW_10];
   double src_geotran[_GT_LEN_];
@@ -646,6 +652,7 @@ const char *projection = NULL;
   //size_t max_mem = 1073741824; // 1GB
   size_t max_mem = 805306368; // 0.75GB
   char nthread[NPOW_10];
+  char c_nodata[NPOW_10];
   int nchar;
   char **papszWarpOptions = NULL;
   
@@ -820,8 +827,12 @@ const char *projection = NULL;
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
   
+      nchar = snprintf(c_nodata, NPOW_10, "%d", nodata);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling c_nodata\n"); return FAILURE;}
+
       papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
-      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", "-9999");
+      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", c_nodata);
       wopt->papszWarpOptions = CSLDuplicate(papszWarpOptions);
   
   

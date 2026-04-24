@@ -350,7 +350,7 @@ int t;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int corr_matrix(ard_t *ard, int nt, int nb, int p, float **cor){
-int t, u, b, nodata = -9999;
+int t, u, b, nodata = _FORCE_NO_DATA_;
 double xm, ym, xv, yv, cv;
 
   for (t=0; t<nt; t++) memset(cor[t], 0, sizeof(float)*nt);

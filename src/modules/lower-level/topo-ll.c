@@ -775,7 +775,7 @@ float **xyz_tsd = NULL;
   set_brick_product(CF, "CFC");
   set_brick_filename(CF, "DEM-C-FACTOR");
   set_brick_bandname(CF, 0, "C-Factor");
-  set_brick_nodata(CF, 0, -9999);
+  set_brick_nodata(CF, 0, _FORCE_NO_DATA_);
 
   nx  = get_brick_ncols(QAI);
   ny  = get_brick_nrows(QAI);

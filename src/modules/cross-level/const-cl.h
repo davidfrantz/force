@@ -63,6 +63,8 @@ typedef struct {
 #define _R2D_CONV_  57.29577951308232286465
 #define _D2R_CONV_   0.01745329251994329547
 
+#define _FORCE_NO_DATA_ -9999
+
 // compiler options
 //#define FORCE_CLOCK
 //#define FORCE_DEBUG

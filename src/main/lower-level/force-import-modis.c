@@ -286,7 +286,6 @@ float wvl[7] = { 0.469, 0.555, 0.645, 0.858, 1.240, 1.640, 2.130 };
 double geotran[6];
 const char *proj_;
 char proj[NPOW_10];
-short nodata = -9999;
 
 
   parse_args(argc, argv, &args);
@@ -379,7 +378,7 @@ short nodata = -9999;
     CPLFree(sdsname);
     GDALClose(fs);
     
-    set_meta_band(BOA, b, 10000, nodata, sensor, domain[b], wvl[b], "micrometers", &date);
+    set_meta_band(BOA, b, 10000, _FORCE_NO_DATA_, sensor, domain[b], wvl[b], "micrometers", &date);
 
   }
 
@@ -410,7 +409,7 @@ short nodata = -9999;
   GDALClose(fp);
 
 
-  compile_qai(QAI, modqa_, boa_, nc, nb, sensor, nodata);
+  compile_qai(QAI, modqa_, boa_, nc, nb, sensor, _FORCE_NO_DATA_);
 
   set_meta(BOA, &date, geotran, nx, ny, proj, tx, ty, sensor, "BOA", dtile);
   set_meta(QAI, &date, geotran, nx, ny, proj, tx, ty, sensor, "QAI", dtile);

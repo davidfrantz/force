@@ -29,7 +29,11 @@ This file contains tagged enum definitions
 
 
 const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_] = {
-  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" }};
+  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" },
+  { _RESAMPLE_CSP_, "CSP" }, { _RESAMPLE_LZ_, "LZ" }, { _RESAMPLE_AVG_, "AVG" },
+  { _RESAMPLE_MODE_, "MODE" }, { _RESAMPLE_MAX_, "MAX" }, { _RESAMPLE_MIN_, "MIN" },
+  { _RESAMPLE_MED_, "MED" }, { _RESAMPLE_Q1_, "Q1" }, { _RESAMPLE_Q3_, "Q3" },
+  { _RESAMPLE_SUM_, "SUM" }, { _RESAMPLE_RMS_, "RMS" }};
 
 const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_] = {
   { _RES_MERGE_NONE_,     "NONE" },     { _RES_MERGE_REGRESSION_, "REGRESSION" }, 

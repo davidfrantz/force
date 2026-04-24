@@ -32,6 +32,7 @@ Aux parameter header
 #include <stdlib.h>  // standard general utilities library
 #include <stdbool.h> // boolean data type
 
+#include "../cross-level/const-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
