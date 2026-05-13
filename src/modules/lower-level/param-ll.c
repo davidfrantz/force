@@ -171,26 +171,23 @@ char  bname[NPOW_10] = "\0";
 
   pl2->params = allocate_params();
   
-  if (pl2->d_level1 != NULL){
+  // if .SAFE directory (S2) was given, use 1st granule
+  extension(pl2->d_level1, ext, NPOW_10);
+
+  if (strcmp(ext, ".SAFE") == 0){
     
-    // if .SAFE directory (S2) was given, use 1st granule
-    extension(pl2->d_level1, ext, NPOW_10);
+    strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
 
-    if (strcmp(ext, ".SAFE") == 0){
-      
-      strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
+    if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
+        printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
-      if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
-         printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
+    copy_string(pl2->d_level1, NPOW_10, bname);
 
-      copy_string(pl2->d_level1, NPOW_10, bname);
+  }
 
-    }
+  basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
+  //printf("%s: ", pl2->b_level1);
 
-    basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
-    //printf("%s: ", pl2->b_level1);
-  } else {
-    printf("No input image given!\n"); return FAILURE;}
 
 
   // open parameter file

@@ -643,7 +643,7 @@ const char *projection = NULL;
   double dst_geotran[_GT_LEN_];
   short *src_ = NULL;
   short **buf_ = NULL;
-  short nodata;
+  short nodata = 0;
   int src_nx, src_ny, src_nc;
   int dst_nx, dst_ny, dst_nc;
   double tmpx, tmpy;

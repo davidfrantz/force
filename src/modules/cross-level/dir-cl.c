@@ -61,7 +61,7 @@ struct dirent *ep;
 
     while ((ep = readdir(dp))){
 
-      if (ep->d_name && strstr(ep->d_name, pattern)){
+      if (strstr(ep->d_name, pattern)){
 
         if (filter != NULL && !strstr(ep->d_name, filter)) continue;
 
@@ -116,7 +116,7 @@ struct dirent *ep;
 
     while ((ep = readdir(dp))){
 
-      if (ep->d_name && strncmp(ep->d_name, pattern, strlen(pattern)) == 0){
+      if (strncmp(ep->d_name, pattern, strlen(pattern)) == 0){
 
         if (filter != NULL && !strstr(ep->d_name, filter)) continue;
 
@@ -159,7 +159,7 @@ int k = 0;
 
   if (dp != NULL){
     while ((ep = readdir(dp))){
-      if (ep->d_name && strstr(ep->d_name, pattern)) k++;
+      if (strstr(ep->d_name, pattern)) k++;
     }
     (void) closedir(dp);
   } else perror("Couldn't open the directory");
