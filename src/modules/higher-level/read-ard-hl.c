@@ -1396,12 +1396,18 @@ short nodata;
         printf("Buffer Overflow in assembling tile\n"); return NULL;}
       
       if ((pch = strstr(fname, c_tc)) == NULL){
-        printf("error in assembling filename for neighboring chunk.\n"); return NULL;
-      } else strncpy(pch, c_tn, 11);
+        printf("error in assembling filename for neighboring chunk.\n"); 
+        return NULL;
+      }
 
+      if (strlen(c_tn) != 11 || strlen(c_tc) != 11){
+        printf("error in assembling filename for neighboring chunk. Tile name has wrong format.\n");
+        return NULL;
+      } 
+
+      memcpy(pch, c_tn, 11);
       copy_string(c_tc, NPOW_10, c_tn);
-          
-      
+
       #ifdef FORCE_DEBUG
       printf("\nneighboring chunk %d %d:\n", chunk_to_add_relative[_X_], chunk_to_add_relative[_Y_]);
       printf("X%04d_Y%04d -> X%04d_Y%04d\n", tile_central[_X_], tile_central[_Y_], tile_to_add[_X_], tile_to_add[_Y_]);

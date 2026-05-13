@@ -285,7 +285,7 @@ date_t date;
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
   alloc((void**)&udf->date, udf->nb, sizeof(date_t));
 
-  for (size_t b = 0; b < udf->nb; b++){
+  for (int b = 0; b < udf->nb; b++){
 
     py_bandname = PyList_GetItem(py_return, b);
     py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");

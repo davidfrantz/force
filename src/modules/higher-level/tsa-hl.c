@@ -881,7 +881,7 @@ int nchar;
   set_brick_explode(brick, phl->explode);
   set_brick_par(brick, phl->params->log);
 
-  sprintf(domain, "%s_%s", phl->tsa.index.names[idx], info->prodname);
+  concat_string_2(domain, NPOW_10, phl->tsa.index.names[idx], info->prodname, "_");
 
   for (b=0; b<info->prodlen; b++){
     set_brick_save(brick, b, true);
