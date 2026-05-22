@@ -101,33 +101,15 @@ To avoid issues with file permissions, you can map your local user to the user w
       davidfrantz/force \
       force-level2 /opt/data/parameters.prm
 
-For the download tools, you need to share credentials between host and container.
-The credentials are usually stored in ``$HOME/.boto``, ``$HOME/.scihub``, and ``$HOME/.laads``.
-To make these files available, you need to attach the folder containing these files as a mounted volume, and set a Docker runtime environment variable pointing to that mounted folder location.
-
-  .. code-block:: bash
-
-    # --env sets the environment variable
-    # this command will only print the container's FORCE_CREDENTIALS variable
-    # should be:
-    # FORCE_CREDENTIALS=/app/credentials
-    docker run \
-      -v /my/local/folder:/opt/data \
-      --user "$(id -u):$(id -g)" \
-      --env FORCE_CREDENTIALS=/app/credentials \
-      -v $HOME:/app/credentials \
-      davidfrantz/force \
-      force-level1-csd -h
-
 If you wish to enter the running container's terminal run it with an additional ``-it`` flag. 
 In that case you can use this terminal just as you were on a Linux machine.
 
-If this is too long for you, you can hide all this behind an alias (or define a function).
+If this is too long for you, you can hide all this behind an alias (or better define a function).
 For an alias, add a line to ``$HOME/.bashrc`` (log off and on to take effect):
 
   .. code-block:: bash
 
-    alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\" --env FORCE_CREDENTIALS=/app/credentials -v $HOME:/app/credentials davidfrantz/force"
+    alias dforce="docker run -v /my/local/folder:/opt/data --user \"$(id -u):$(id -g)\" davidfrantz/force"
 
 After defining the alias, you can call FORCE with correct user and mounted volume - but less Docker boilerplate commands:
 
