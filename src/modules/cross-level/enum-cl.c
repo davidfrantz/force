@@ -44,6 +44,10 @@ const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_] = {
   { _FMT_COG_, "COG" },   { _FMT_JPEG_, "JPEG" },
   { _FMT_CUSTOM_, "CUSTOM"}};
 
+const tagged_enum_t _TAGGED_ENUM_READ_ERR_[_READ_ERR_LENGTH_] = {
+  { _READ_ERR_STOP_, "STOP" }, { _READ_ERR_SKIP_, "SKIP" }, 
+  { _READ_ERR_YOLO_, "YOLO" }};
+
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },
   { _QAI_CLD_UNC_,  "CLOUD_BUFFER" }, { _QAI_CLD_CIR_,  "CLOUD_CIRRUS" },

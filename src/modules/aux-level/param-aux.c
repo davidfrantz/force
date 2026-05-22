@@ -1046,6 +1046,30 @@ void write_par_hl_time(FILE *fp, bool verbose){
   return;
 }
 
+/** This function writes parameters into a parameter skeleton file: higher
++++ level input pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_input(FILE *fp, bool verbose){
+
+  fprintf(fp, "\n# INPUT OPTIONS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR = SKIP\n");
+
+}
 
 /** This function writes parameters into a parameter skeleton file: higher
 +++ level output pars

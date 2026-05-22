@@ -78,6 +78,7 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   register_bool_par(params,    "OUTPUT_SUBFOLDERS", &phl->subfolders);
+  register_enum_par(params,    "READ_ERROR", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error);
   register_bool_par(params,    "FAIL_IF_EMPTY", &phl->fail_if_empty);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);

@@ -90,6 +90,9 @@ enum { _DT_NONE_,  _DT_SHORT_, _DT_SMALL_,
 // output formats
 enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_CUSTOM_, _FMT_LENGTH_ };
 
+enum { _READ_ERR_STOP_, _READ_ERR_SKIP_, 
+       _READ_ERR_YOLO_, _READ_ERR_LENGTH_ };
+
 // t-test tailtype
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };
 
@@ -290,6 +293,7 @@ enum { _INDEX_TYPE_BAND_, _INDEX_TYPE_EQUATION_, _INDEX_TYPE_SMA_, _INDEX_TYPE_L
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_READ_ERR_[_READ_ERR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];

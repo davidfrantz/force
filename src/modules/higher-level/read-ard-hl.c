@@ -643,10 +643,26 @@ off_t bytes = 0;
   
   
   if (error > 0){
-    printf("%d reading error(s).\n", error); 
-    free_ard(features, phl->ftr.nfeature);
-    *nt = -1;
-    return NULL;
+
+    if (phl->action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (phl->action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      return NULL;
+    } else if (phl->action_if_read_error == _READ_ERR_YOLO_){
+      printf("%d reading errors. Continue processing - may the FORCE be with you.\n", error); 
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   #ifdef FORCE_CLOCK
@@ -740,10 +756,27 @@ off_t bytes = 0;
   
   
   if (error > 0){
-    printf("%d reading errors.\n", error); 
-    free_ard(con, phl->con.n);
-    *nt = -1;
-    return NULL;
+
+
+   if (phl->action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (phl->action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      return NULL;
+    } else if (phl->action_if_read_error == _READ_ERR_YOLO_){
+      printf("%d reading errors. Continue processing - may the FORCE be with you.\n", error); 
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   #ifdef FORCE_CLOCK
@@ -906,10 +939,26 @@ off_t bytes = 0;
   }
   
   if (error > 0){
-    printf("%d reading errors.\n", error); 
-    free_ard(ard, dir.n);
-    *nt = -1;
-    return NULL;
+
+    if (phl->action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free_ard(ard, dir.n);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (phl->action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free_ard(ard, dir.n);
+      *nt = -1;
+      return NULL;
+    } else if (phl->action_if_read_error == _READ_ERR_YOLO_){
+      printf("%d reading errors. Continue processing - may the FORCE be with you.\n", error); 
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free_ard(ard, dir.n);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   // copy all provenance to 1st date
