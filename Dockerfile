@@ -28,7 +28,12 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest AS force_builder
+#
+# To find sha256: docker pull davidfrantz/base:VERSION followed by
+# docker inspect davidfrantz/base:VERSION and get the sha from RepoDigests.
+FROM davidfrantz/base:1.20260113143410.3.11.3@sha256:16a89ca8ab0702423d7ed13e5c3bbf673db9725c27f77e5bb444132705fb1807 AS internal_base
+
+FROM internal_base AS force_builder
 
 # Environment variables
 ENV SOURCE_DIR=$HOME/src/force
@@ -47,9 +52,9 @@ RUN echo "building FORCE" && \
   ./debug.sh $debug && \
   make -j$(nproc) $build
 
-FROM davidfrantz/base:latest AS force
+FROM internal_base AS force
 
-ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git /usr/local/bin/force/force-udf
+ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git#1.20260112113534 /usr/local/bin/force/force-udf
 COPY --link --chown=root:root --from=force_builder $HOME/src/force/bin /usr/local/bin/force
 
 ENV PATH="$PATH:/usr/local/bin/force"
