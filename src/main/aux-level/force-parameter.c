@@ -217,6 +217,7 @@ FILE *fp;
   if (args.level == _HIGHER_LEVEL_){
     write_par_hl_dirs(fp, args.comments);
     write_par_hl_mask(fp, args.comments);
+    write_par_hl_input(fp, args.comments);
     write_par_hl_output(fp, args.comments);
     write_par_hl_thread(fp, args.comments);
     write_par_hl_extent(fp, args.comments);
@@ -271,11 +272,13 @@ FILE *fp;
   if (args.module == _HL_CFI_){
     write_par_hl_imp(fp, args.comments);
     write_par_hl_cfi(fp, args.comments);
+    write_par_hl_secondary_input(fp, args.comments);
   }
 
   if (args.module == _HL_L2I_){
     write_par_hl_imp(fp, args.comments);
     write_par_hl_l2i(fp, args.comments);
+    write_par_hl_secondary_input(fp, args.comments);
   }
 
   if (args.module == _HL_TXT_){

@@ -477,7 +477,7 @@ int n;
 --- phl:     HL parameters
 +++ Return: image brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
+brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error){
 brick_t *MASK = NULL;
 small *mask_ = NULL;
 int nc, p;
@@ -512,10 +512,37 @@ int n = 0;
   // read mask
   concat_string_2(fname, NPOW_10, dir.name, dir.list[0], "/");
   if ((MASK = read_chunk(fname, _ARD_MSK_, NULL, 1, 1, _DT_SMALL_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, 0, 0)) == NULL){
-      printf("Error reading mask %s.\n", fname); *success = FAILURE; return NULL;}
+    free_2D((void**)dir.list, dir.N); dir.list = NULL;
+    free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "Error reading mask %s. Stopping processing.\n", fname);
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("Error reading mask %s. Skip this chunk!\n", fname);
+      *success = CANCEL;
+      return NULL;
+    } else {
+      fprintf(stderr, "Unknown action for read error. Stopping processing.\n");
+      exit(FAILURE);
+    }
+  }
+
   if (phl->radius > 0){
     if ((MASK = add_chunks(fname, _ARD_MSK_, NULL, 1, 1, _DT_SMALL_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, phl->radius, MASK)) == NULL){
-      printf("Error adding masks %s.\n", fname); *success = FAILURE; return NULL;}
+      free_2D((void**)dir.list, dir.N); dir.list = NULL;
+      free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
+      if (action_if_read_error == _READ_ERR_STOP_){
+        fprintf(stderr, "Error adding masks %s. Stopping processing.\n", fname);
+        exit(FAILURE);
+      } else if (action_if_read_error == _READ_ERR_SKIP_){
+        printf("Error adding masks %s. Skip this chunk!\n", fname);
+        *success = CANCEL;
+        return NULL;
+      } else {
+        fprintf(stderr, "Unknown action for read error. Stopping processing.\n");
+        exit(FAILURE);
+      }
+    }
   }
   //if ((MASK = read_mask_chunk(fname, 255, chunk, tx, ty, cube)) == NULL){
   //    printf("Error reading mask %s.\n", fname); *success = FAILURE; return NULL;}
@@ -525,9 +552,19 @@ int n = 0;
 
   nc = get_brick_chunkncells(MASK);
   if ((mask_ = get_band_small(MASK, 0)) == NULL){
-    printf("Error getting processing mask."); 
     free_brick(MASK);
-    *success = FAILURE; return NULL;}
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "Error getting processing mask. Stopping processing.\n");
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("Error getting processing mask. Skip this chunk!\n");
+      *success = CANCEL;
+      return NULL;
+    } else {
+      fprintf(stderr, "Unknown action for read error. Stopping processing.\n");
+      exit(FAILURE);
+    }
+  }
 
   (*ibytes) += get_brick_size(MASK);
 
@@ -566,7 +603,7 @@ int n = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
+ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error){
 int f, p;
 char fname[NPOW_10];
 int nchar;
@@ -585,6 +622,7 @@ off_t bytes = 0;
 
 
   // check if all features do exist
+  int nfeature = 0;
   for (f=0; f<phl->ftr.nfeature; f++){
     nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->d_lower, tile[_X_], tile[_Y_], phl->ftr.bname[f]);
     if (nchar < 0 || nchar >= NPOW_10){ 
@@ -592,12 +630,30 @@ off_t bytes = 0;
       *nt = 0; 
       return NULL;
     }
-    if (!fileexist(fname)){
-      *nt = 0;
-      return NULL;
-    }
+    if (fileexist(fname)) nfeature++;
   }
 
+  if (nfeature == 0){
+    //printf("no feature in this chunk. skip this chunk!\n");
+    *nt = 0;
+    return NULL;
+  }
+
+  if (nfeature < phl->ftr.nfeature){
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "Only %d out of %d features found. Stopping processing.\n", nfeature, phl->ftr.nfeature);
+      *nt = 0;
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("Only %d out of %d features found. Skip this chunk!\n", nfeature, phl->ftr.nfeature);
+      *nt = 0;
+      return NULL;
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      *nt = 0;
+      exit(FAILURE);
+    }
+  }
 
   alloc((void**)&features, phl->ftr.nfeature, sizeof(ard_t));
 
@@ -643,10 +699,24 @@ off_t bytes = 0;
   
   
   if (error > 0){
-    printf("%d reading error(s).\n", error); 
-    free_ard(features, phl->ftr.nfeature);
-    *nt = -1;
-    return NULL;
+
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      return NULL;
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free_ard(features, phl->ftr.nfeature);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   #ifdef FORCE_CLOCK
@@ -669,7 +739,7 @@ off_t bytes = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl){
+ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error){
 int f;
 char fname[NPOW_10];
 int nchar;
@@ -688,6 +758,7 @@ off_t bytes = 0;
 
 
   // check if all features do exist
+  int ncon = 0;
   for (f=0; f<phl->con.n; f++){
     nchar = snprintf(fname, NPOW_10, "%s/X%04d_Y%04d/%s", phl->con.dname, tile[_X_], tile[_Y_], phl->con.fname[f]);
     if (nchar < 0 || nchar >= NPOW_10){ 
@@ -695,12 +766,31 @@ off_t bytes = 0;
       *nt = 0; 
       return NULL;
     }
-    if (!fileexist(fname)){
-      *nt = 0;
-      return NULL;
-    }
+    if (fileexist(fname)) ncon++;
   }
 
+  if (ncon == 0){
+    //printf("no continuous fields in this chunk. skip this chunk!\n");
+    *nt = 0;
+    return NULL;
+  }
+
+
+  if (ncon < phl->con.n){
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "Only %d out of %d continuous fields found. Stopping processing.\n", ncon, phl->con.n);
+      *nt = 0;
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("Only %d out of %d continuous fields found. Skip this chunk!\n", ncon, phl->con.n);
+      *nt = 0;
+      return NULL;
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      *nt = 0;
+      exit(FAILURE);
+    }
+  }
 
   alloc((void**)&con, phl->con.n, sizeof(ard_t));
 
@@ -740,10 +830,27 @@ off_t bytes = 0;
   
   
   if (error > 0){
-    printf("%d reading errors.\n", error); 
-    free_ard(con, phl->con.n);
-    *nt = -1;
-    return NULL;
+
+
+   if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      return NULL;
+    } else if (action_if_read_error == _READ_ERR_YOLO_){
+      printf("%d reading errors. Continue processing - may the FORCE be with you.\n", error); 
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free_ard(con, phl->con.n);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   #ifdef FORCE_CLOCK
@@ -768,7 +875,7 @@ off_t bytes = 0;
 --- phl:    HL parameters
 +++ Return: ARD
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl){
+ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl, int action_if_read_error){
 int t, b, p, nb, nc;
 char fname[NPOW_10];
 char bname[NPOW_10];
@@ -776,6 +883,7 @@ char temp[NPOW_10];
 dir_t dir;
 ard_t *ard = NULL;
 int error = 0;
+bool *error_index = NULL;
 off_t bytes = 0;
 
 
@@ -799,25 +907,34 @@ off_t bytes = 0;
 
 
   alloc((void**)&ard, dir.n, sizeof(ard_t));
+  alloc((void**)&error_index, dir.n, sizeof(bool));
   
 
-  #pragma omp parallel private(bname,fname,temp,p,b,nc,nb) shared(ard,dir,phl,sen,cube,chunk,tile) reduction(+: error, bytes) default(none)
+  #pragma omp parallel private(bname,fname,temp,p,b,nc,nb) shared(ard,dir,phl,sen,cube,chunk,tile,error_index,action_if_read_error) reduction(+: error, bytes) default(none)
   {
 
     #pragma omp for
     for (t=0; t<dir.n; t++){
 
       // read main product
-      if (phl->prd.ref && error == 0){
+      if (phl->prd.ref && (error == 0 || action_if_read_error == _READ_ERR_YOLO_)){
         copy_string(bname, 1024, dir.list[t]);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DAT = read_chunk(fname, _ARD_REF_, sen, 0, 0, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL ||
             (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
-          printf("Error reading main product %s.\n", fname); error++; continue;}
+          printf("Error reading main product %s.\n", fname); 
+          error++; 
+          error_index[t] = true; 
+          continue;
+        }
         if (phl->radius > 0){
           if ((ard[t].DAT = add_chunks(fname, _ARD_REF_, sen, 0, 0, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, phl->radius, ard[t].DAT)) == NULL ||
               (ard[t].dat = get_bands_short(ard[t].DAT)) == NULL){
-            printf("Error adding main products %s.\n", fname); error++; continue;}
+            printf("Error adding main products %s.\n", fname); 
+            error++; 
+            error_index[t] = true;
+            continue;
+          }
         }
         bytes += get_brick_size(ard[t].DAT);
       } else {
@@ -827,24 +944,36 @@ off_t bytes = 0;
 
 
       // read quality product
-      if (phl->prd.qai && error == 0){
+      if (phl->prd.qai && (error == 0 || action_if_read_error == _READ_ERR_YOLO_)){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, sen->quality_product, NPOW_10);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if (strcmp(sen->quality_product, "NULL") != 0){
           if ((ard[t].QAI = read_chunk(fname, _ARD_AUX_, sen, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, 0, 0)) == NULL ||
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-            printf("Error reading QAI product %s.\n", fname); error++; continue;}
+            printf("Error reading QAI product %s.\n", fname); 
+            error++; 
+            error_index[t] = true; 
+            continue;
+          }
           if (phl->radius > 0){
             if ((ard[t].QAI = add_chunks(fname, _ARD_AUX_, sen, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, false, phl->radius, ard[t].QAI)) == NULL ||
                 (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-              printf("Error adding QAI products %s.\n", fname); error++; continue;}
+              printf("Error adding QAI products %s.\n", fname); 
+              error++; 
+              error_index[t] = true; 
+              continue;
+            }
           }
           bytes += get_brick_size(ard[t].QAI);
         } else {
           if ((ard[t].QAI = copy_brick(ard[t].DAT, 1, _DT_SHORT_)) == NULL || 
               (ard[t].qai = get_band_short(ard[t].QAI, 0)) == NULL){
-            printf("Error compiling feature %s.\n", fname); error++; continue;}
+            printf("Error compiling feature %s.\n", fname); 
+            error++; 
+            error_index[t] = true; 
+            continue;
+          }
             
           nc = get_brick_chunkncells(ard[t].DAT);
           nb = get_brick_nbands(ard[t].DAT);
@@ -863,11 +992,12 @@ off_t bytes = 0;
         ard[t].qai = NULL;
       }
 
-      if (phl->prd.aux && error == 0){
+      if (phl->prd.aux && (error == 0 || action_if_read_error == _READ_ERR_YOLO_)){
 
         if (ard[t].DAT == NULL){
           printf("Error reading AUX products. Main product not available.\n"); 
           error++; 
+          error_index[t] = true;
           continue;
         }
 
@@ -882,10 +1012,18 @@ off_t bytes = 0;
           replace_string(bname, sen->main_product, phl->sen.aux_products[prd], NPOW_10);
           concat_string_2(fname, NPOW_10, dir.name, bname, "/");
           if ((aux_brick = read_chunk(fname, _ARD_AUX_, sen, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL){
-            printf("Error reading %s product %s.\n", phl->sen.aux_products[prd], fname); error++; continue;}
+            printf("Error reading %s product %s.\n", phl->sen.aux_products[prd], fname); 
+            error++; 
+            error_index[t] = true; 
+            continue;
+          }
           if (phl->radius > 0){
             if ((aux_brick = add_chunks(fname, _ARD_AUX_, sen, 1, 1, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, phl->radius, aux_brick)) == NULL){
-              printf("Error adding %s products %s.\n", phl->sen.aux_products[prd], fname); error++; continue;}
+              printf("Error adding %s products %s.\n", phl->sen.aux_products[prd], fname); 
+              error++; 
+              error_index[t] = true; 
+              continue;
+            }
           }
           
           // copy to multiband aux brick in ARD
@@ -906,10 +1044,32 @@ off_t bytes = 0;
   }
   
   if (error > 0){
-    printf("%d reading errors.\n", error); 
-    free_ard(ard, dir.n);
-    *nt = -1;
-    return NULL;
+
+    if (action_if_read_error == _READ_ERR_STOP_){
+      fprintf(stderr, "%d reading errors. Stopping processing.\n", error);
+      free((void**)error_index); error_index = NULL;
+      free_ard(ard, dir.n);
+      *nt = -1;
+      exit(FAILURE);
+    } else if (action_if_read_error == _READ_ERR_SKIP_){
+      printf("%d reading errors. Skip processing of this block.\n", error); 
+      free((void**)error_index); error_index = NULL;
+      free_ard(ard, dir.n);
+      *nt = -1;
+      return NULL;
+    } else if (action_if_read_error == _READ_ERR_YOLO_){
+      printf("%d reading errors. Continue processing - may the FORCE be with you.\n", error); 
+      // need to sanitize the ARD list, otherwise we will run into issues 
+      // in the processing functions due to incomplete memory allocations
+      sanitize_ard(ard, error_index, &dir.n);
+    } else {
+      printf("Unknown action for read error. Stopping processing.\n");
+      free((void**)error_index); error_index = NULL;
+      free_ard(ard, dir.n);
+      *nt = -1;
+      exit(FAILURE);
+    }
+
   }
 
   // copy all provenance to 1st date
@@ -925,7 +1085,7 @@ off_t bytes = 0;
 
   free_2D((void**)dir.list, dir.N); dir.list = NULL;
   free_2D((void**)dir.LIST, dir.N); dir.LIST = NULL;
-  
+  free((void**)error_index); error_index = NULL;
 
   #ifdef FORCE_CLOCK
   proctime_print("read ARD", TIME);
@@ -1518,6 +1678,73 @@ short nodata;
 }
 
 
+/** This function sanitizes the ARD when a reading error occurred, 
++++ and the user chose to continue processing. 
+--- ard:         ARD
+--- error_index: array of error indices
+--- nt:          number of datasets
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int sanitize_ard(ard_t *ard, bool *error_index, int *nt){
+
+  int n = *nt;
+
+  for (int dst=0; dst<n; dst++){
+
+    if (!error_index[dst]) continue;
+
+    free_ard_layers(&ard[dst]); // free the layers of the dataset with error
+
+    for (int src=dst+1; src<n; src++){
+
+      if (!error_index[src]){
+
+        // copy data from src to dst
+        ard[dst].DAT = ard[src].DAT; ard[src].DAT = NULL;
+        ard[dst].dat = ard[src].dat; ard[src].dat = NULL;
+        ard[dst].QAI = ard[src].QAI; ard[src].QAI = NULL;
+        ard[dst].qai = ard[src].qai; ard[src].qai = NULL;
+        ard[dst].MSK = ard[src].MSK; ard[src].MSK = NULL;
+        ard[dst].msk = ard[src].msk; ard[src].msk = NULL;
+        ard[dst].AUX = ard[src].AUX; ard[src].AUX = NULL;
+        ard[dst].aux = ard[src].aux; ard[src].aux = NULL;
+
+        error_index[dst] = false; // this item is now clean
+        error_index[src] = true;  // this item will be filled again in next loop
+
+        break; // break after copying from the first clean item
+
+      }
+
+    }
+
+  }
+
+  // how many errors do we have?
+  int n_error = 0;
+  for (int i=0; i<n; i++) if (error_index[i]) n_error++;
+  
+  *nt = n - n_error;
+
+  return SUCCESS;
+}
+
+
+/** This function frees the ARD layers (DAT, QAI, MSK, AUX) of a single dataset
+--- ard:    ARD dataset
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int free_ard_layers(ard_t *ard){
+
+  if (ard->DAT != NULL){ free_brick(ard->DAT); ard->DAT = NULL;}
+  if (ard->QAI != NULL){ free_brick(ard->QAI); ard->QAI = NULL;}
+  if (ard->MSK != NULL){ free_brick(ard->MSK); ard->MSK = NULL;}
+  if (ard->AUX != NULL){ free_brick(ard->AUX); ard->AUX = NULL;}
+
+  return SUCCESS;
+}
+
+
 /** This function frees the ARD
 --- ard:    ARD
 --- nt:     number of datasets
@@ -1527,10 +1754,7 @@ int free_ard(ard_t *ard, int nt){
 int t;
 
   for (t=0; t<nt; t++){
-    if (ard[t].DAT != NULL){ free_brick(ard[t].DAT); ard[t].DAT = NULL;}
-    if (ard[t].QAI != NULL){ free_brick(ard[t].QAI); ard[t].QAI = NULL;}
-    if (ard[t].MSK != NULL){ free_brick(ard[t].MSK); ard[t].MSK = NULL;}
-    if (ard[t].AUX != NULL){ free_brick(ard[t].AUX); ard[t].AUX = NULL;}
+    free_ard_layers(&ard[t]);
   }
   free((void*)ard);
   ard = NULL;

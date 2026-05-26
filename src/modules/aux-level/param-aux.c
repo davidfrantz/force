@@ -783,6 +783,15 @@ void write_par_hl_mask(FILE *fp, bool verbose){
   }
   fprintf(fp, "BASE_MASK = NULL\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of the mask. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default).\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP}\n");
+  }
+  fprintf(fp, "READ_ERROR_MASK = SKIP\n");
+
   return;
 }
 
@@ -937,6 +946,18 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
   fprintf(fp, "PRODUCT_TYPE_QUALITY = QAI\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of primary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_PRIMARY = SKIP\n");
+
+  if (verbose){
     fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
     fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, \n");
     fprintf(fp, "# LND08, LND09, MOD01, MOD02.\n");
@@ -1046,6 +1067,30 @@ void write_par_hl_time(FILE *fp, bool verbose){
   return;
 }
 
+/** This function writes parameters into a parameter skeleton file: higher
++++ level input pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_input(FILE *fp, bool verbose){
+
+  fprintf(fp, "\n# INPUT OPTIONS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR = SKIP\n");
+
+}
 
 /** This function writes parameters into a parameter skeleton file: higher
 +++ level output pars
@@ -2165,6 +2210,31 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
     // fprintf(fp, "#   SEN2B,SEN2C,SEN2D,sen2a,sen2b,sen2c,sen2d,S1AIA,S1BIA,S1AID,S1BID}\n");
   }
   fprintf(fp, "SENSORS_LOWRES = LND07 LND08 LND09\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level secondary input pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_secondary_input(FILE *fp, bool verbose){
+
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of secondary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_SECONDARY = SKIP\n");
 
   return;
 }

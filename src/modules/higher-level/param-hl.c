@@ -78,6 +78,8 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   register_bool_par(params,    "OUTPUT_SUBFOLDERS", &phl->subfolders);
+  register_enum_par(params,    "READ_ERROR_MASK", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_mask);
+  register_enum_par(params,    "READ_ERROR_PRIMARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_primary);
   register_bool_par(params,    "FAIL_IF_EMPTY", &phl->fail_if_empty);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
@@ -316,6 +318,7 @@ void register_cfi(params_t *params, par_hl_t *phl){
   register_int_par(params,     "COARSE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_int_par(params,     "COARSE_1ST_YEAR",      1900, 2100, &phl->cfi.y0);
   register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, -1, &phl->cfi.years, &phl->cfi.nyears);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
 
   return;
 }
@@ -331,6 +334,7 @@ void register_l2i(params_t *params, par_hl_t *phl){
   
   register_imp(params, phl);
   register_charvec_par(params, "SENSORS_LOWRES", _CHAR_TEST_NONE_, -1, &phl->sen2.sensor, &phl->sen2.n);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
 
   return;
 }
@@ -1026,6 +1030,23 @@ double tol = 5e-3;
   }
 
 
+  // check read-error flag
+  if ((phl->input_level1 == _INP_FTR_ || phl->input_level1 == _INP_CON_) && 
+      phl->action_if_read_error_primary == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with Feature or Continuous Field inputs.\n");
+    return FAILURE;
+  }
+
+  if ((phl->input_level2 == _INP_FTR_ || phl->input_level2 == _INP_CON_) && 
+      phl->action_if_read_error_secondary == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with Feature or Continuous Field inputs.\n");
+    return FAILURE;
+  }
+
+  if (phl->action_if_read_error_mask == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with mask inputs.\n");
+    return FAILURE;
+  }
 
   // check chunk size
   if (fmod(phl->chunk_size[_X_], phl->res) > tol ||

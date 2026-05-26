@@ -66,26 +66,20 @@ off_t bytes = 0;
 
   omp_set_num_threads(phl->ithread);
 
-  MASK[pu] = read_mask(&mask_status, &bytes, tile, chunk, cube, phl);
+  MASK[pu] = read_mask(&mask_status, &bytes, tile, chunk, cube, phl, phl->action_if_read_error_mask);
 
-  if (MASK[pu] == NULL && mask_status != SUCCESS){
-    if (mask_status == FAILURE){
-      printf("error reading mask tile X%04d_Y%04d chunk X:%d Y:%d.\n", 
-        tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
-    } else if (mask_status == CANCEL){
-      //printf("no mask data. skip chunk.\n");
-    }
+  if (MASK[pu] == NULL && mask_status == CANCEL){
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
   }
 
 
   if (phl->input_level1 == _INP_FTR_){
-    ARD1[pu] = read_features(&bytes, &nt1[pu], tile, chunk, cube, phl);
+    ARD1[pu] = read_features(&bytes, &nt1[pu], tile, chunk, cube, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 == _INP_CON_){
-    ARD1[pu] = read_confield(&bytes, &nt1[pu], tile, chunk, cube, phl);
+    ARD1[pu] = read_confield(&bytes, &nt1[pu], tile, chunk, cube, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-    ARD1[pu] = read_ard(&bytes, &nt1[pu], tile, chunk, cube, &phl->sen, phl);
+    ARD1[pu] = read_ard(&bytes, &nt1[pu], tile, chunk, cube, &phl->sen, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 != _INP_NONE_) {
     printf("unknown input level\n");
   }
@@ -99,11 +93,11 @@ off_t bytes = 0;
 
 
   if (phl->input_level2 == _INP_FTR_){
-    ARD2[pu] = read_features(&bytes, &nt2[pu], tile, chunk, cube, phl);
+    ARD2[pu] = read_features(&bytes, &nt2[pu], tile, chunk, cube, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 == _INP_CON_){
-    ARD2[pu] = read_confield(&bytes, &nt2[pu], tile, chunk, cube, phl);
+    ARD2[pu] = read_confield(&bytes, &nt2[pu], tile, chunk, cube, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-    ARD2[pu] = read_ard(&bytes, &nt2[pu], tile, chunk, cube, &phl->sen2, phl);
+    ARD2[pu] = read_ard(&bytes, &nt2[pu], tile, chunk, cube, &phl->sen2, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 != _INP_NONE_){
     printf("unknown input level\n");
   }
