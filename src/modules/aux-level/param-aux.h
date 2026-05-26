@@ -61,7 +61,6 @@ void write_par_hl_sensor(FILE *fp, bool verbose);
 void write_par_hl_qai(FILE *fp, bool verbose);
 void write_par_hl_noise(FILE *fp, bool verbose);
 void write_par_hl_time(FILE *fp, bool verbose);
-void write_par_hl_input(FILE *fp, bool verbose);
 void write_par_hl_output(FILE *fp, bool verbose);
 void write_par_hl_thread(FILE *fp, bool verbose);
 void write_par_hl_bap(FILE *fp, bool verbose);
