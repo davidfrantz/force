@@ -22,6 +22,12 @@ DIR_MASK = NULL
 # Masks need to be binary with 0 = off / 1 = on
 # Type: Basename of file
 BASE_MASK = NULL
+# This parameter controls how FORCE deals with input errors of the mask. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default).
+# Type: Character. Valid values: {STOP, SKIP}
+READ_ERROR_MASK = SKIP
 
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------

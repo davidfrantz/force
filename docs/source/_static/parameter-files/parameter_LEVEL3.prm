@@ -22,6 +22,12 @@ DIR_MASK = NULL
 # Masks need to be binary with 0 = off / 1 = on
 # Type: Basename of file
 BASE_MASK = NULL
+# This parameter controls how FORCE deals with input errors of the mask. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default).
+# Type: Character. Valid values: {STOP, SKIP}
+READ_ERROR_MASK = SKIP
 
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
@@ -157,6 +163,15 @@ PRODUCT_TYPE_MAIN = BOA
 # flags as defined with SCREEN_QAI.
 # Type: Character. Valid values: {QAI,INF,NULL,...}
 PRODUCT_TYPE_QUALITY = QAI
+# This parameter controls how FORCE deals with input errors of primary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_PRIMARY = SKIP
 # Perform a spectral adjustment to Sentinel-2?
 # This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
