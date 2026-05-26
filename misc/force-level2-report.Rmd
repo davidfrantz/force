@@ -192,7 +192,8 @@ data |>
   count(status, name = "Number") |>
   e_charts(status) |>
   e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage") 
 ```
 
 ```{r failed-images, echo = FALSE}
@@ -213,6 +214,7 @@ data %>%
   e_charts(sensor) |>
   e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
   e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_group("sensor") |>
   e_connect_group("sensor")
 ```
@@ -228,6 +230,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -243,6 +246,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -258,6 +262,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -273,6 +278,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -288,6 +294,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -303,6 +310,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -319,6 +327,7 @@ data %>%
   e_charts(sensor) |>
   e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
   e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_group("sensor")
 ```
 
@@ -334,6 +343,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -350,6 +360,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -366,6 +377,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -382,6 +394,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -398,6 +411,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -414,6 +428,7 @@ data %>%
   e_y_axis(name = "# of L2 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -440,7 +455,8 @@ data %>%
   e_charts() |>
   e_boxplot(Number) |>
   e_y_axis(name = "% cover", nameLocation = "middle") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage")
 ```
 
 The following plots show the mean cover per year, month and week.
@@ -461,6 +477,7 @@ data %>%
   e_y_axis(name = "% cover", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("coverage") |>
   e_connect_group("coverage")
@@ -482,6 +499,7 @@ data %>%
   e_y_axis(name = "% cover", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("coverage")
 ```
@@ -502,6 +520,7 @@ data %>%
   e_y_axis(name = "% cover", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("coverage")
 ```
@@ -514,7 +533,8 @@ data |>
   count(aod_status, name = "Number") |>
   e_charts(aod_status) |>
   e_pie(Number, radius = c("30%", "70%"), roseType = "radius") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage")
 ```
 
 ```{r plot-aod-targets, echo = FALSE, warning = FALSE}
@@ -527,7 +547,8 @@ data |>
   e_charts() |>
   e_boxplot(Number) |>
   e_y_axis(name = "# of targets", nameLocation = "middle") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage")
 ```
 
 ```{r plot-aod, echo = FALSE, warning = FALSE}
@@ -537,6 +558,7 @@ data |>
   e_density(aod) |>
   e_y_axis(name = "AOD", nameLocation = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_legend(show = FALSE)
 ```
 
@@ -552,6 +574,7 @@ data %>%
   e_y_axis(name = "AOD", nameLocation = "middle") |>
   e_legend(show = FALSE) |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom()
 ```
 
@@ -567,6 +590,7 @@ data %>%
   e_y_axis(name = "AOD", nameLocation = "middle") |>
   e_legend(show = FALSE) |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom()
 ```
 
@@ -582,6 +606,7 @@ data %>%
   e_y_axis(name = "AOD", nameLocation = "middle") |>
   e_legend(show = FALSE) |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom()
 ```
 
@@ -604,6 +629,7 @@ data %>%
   e_y_axis(name = "# of L1 images", nameLocation = "middle") |>
   e_legend(right = 0, orient = "vertical", top = "middle") |>
   e_tooltip(trigger = "axis") |>
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_datazoom() |>
   e_group("sensor")
 ```
@@ -622,7 +648,8 @@ data %>%
   e_charts() |>
   e_boxplot(Number) |>
   e_y_axis(name = "# cover", nameLocation = "middle") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage")
 ```
 
 ## Runtime
@@ -638,7 +665,8 @@ p1 <- data %>%
   e_charts(elementId = "runtime1") |>
   e_boxplot(time) |>
   e_y_axis(name = "runtime [minutes]", nameLocation = "middle") |>
-  e_tooltip(trigger = "item")
+  e_tooltip(trigger = "item") |>
+  e_toolbox_feature(feature = "saveAsImage")
 
 p2 <- data %>% 
   filter(status == "Too cloudy") |>
@@ -647,6 +675,7 @@ p2 <- data %>%
   e_boxplot(time) |>
   e_y_axis(name = "runtime [minutes]", nameLocation = "middle") |>
   e_tooltip(trigger = "item") |> 
+  e_toolbox_feature(feature = "saveAsImage") |>
   e_connect(c("runtime1", "runtime2")) # connect
 
 e_arrange(p1, p2)
