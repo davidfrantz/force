@@ -43,6 +43,14 @@ Develop version
     These are flat-out ignored for the compositing process.
     Setting these parameters to 0.0 will allow all observations to be considered.
     Thanks to Oleg Zheleznyy for proposing and contributing to this feature.
+  - in ``force-higher-level``, there are up to three additional paramaters, which allow fine-tuning 
+    the behaviour in case of reading errors in the input data. This is usually only relevant when
+    the input data cube is not properly maintained, e.g., when some files are missing or corrupted.
+    These parameters are ``READ_ERROR_MASK``, ``READ_ERROR_PRIMARY`` and ``READ_ERROR_SECONDARY``.
+    Usable values (depending on context) are ``STOP``, ``SKIP``, and ``YOLO``. ``STOP`` will stop the program with an error message, ``SKIP`` will skip the problematic block of data and continue with the rest. ``YOLO`` will ignore any errors and tries to proceed. Obviously, use this with caution. All 
+    option will print warning/error messages, so make sure to check your logs/stdout. ``YOLO`` is only
+    available for ARD-type input data. Note that those parameters only act on reading errors, not on
+    empty tiles. Feature requested by Vu-Dong Pham.
 
 - **FORCE AUX**
 
