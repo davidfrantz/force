@@ -841,7 +841,7 @@ off_t bytes = 0;
     for (t=0; t<dir.n; t++){
 
       // read main product
-      if (phl->prd.ref && error == 0){
+      if (phl->prd.ref && (error == 0 || phl->action_if_read_error == _READ_ERR_YOLO_)){
         copy_string(bname, 1024, dir.list[t]);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
         if ((ard[t].DAT = read_chunk(fname, _ARD_REF_, sen, 0, 0, _DT_SHORT_, phl->chunk_size, chunk, cube->tile_size, tile, cube->resolution, phl->psf, 0, 0)) == NULL ||
@@ -860,7 +860,7 @@ off_t bytes = 0;
 
 
       // read quality product
-      if (phl->prd.qai && error == 0){
+      if (phl->prd.qai && (error == 0 || phl->action_if_read_error == _READ_ERR_YOLO_)){
         copy_string(bname, 1024, dir.list[t]); // clean copy
         replace_string(bname, sen->main_product, sen->quality_product, NPOW_10);
         concat_string_2(fname, NPOW_10, dir.name, bname, "/");
@@ -896,7 +896,7 @@ off_t bytes = 0;
         ard[t].qai = NULL;
       }
 
-      if (phl->prd.aux && error == 0){
+      if (phl->prd.aux && (error == 0 || phl->action_if_read_error == _READ_ERR_YOLO_)){
 
         if (ard[t].DAT == NULL){
           printf("Error reading AUX products. Main product not available.\n"); 
