@@ -451,7 +451,9 @@ typedef struct {
   int cthread;
   int stream;
   int pretty_progress;
-  int action_if_read_error; // what to do if a read error occurs
+  int action_if_read_error_mask;      // what to do if a read error occurs
+  int action_if_read_error_primary;   // what to do if a read error occurs
+  int action_if_read_error_secondary; // what to do if a read error occurs
   int fail_if_empty;    // warn (false) or error (true) without IO
 
   // products

@@ -80,6 +80,7 @@ void write_par_hl_cso(FILE *fp, bool verbose);
 void write_par_hl_imp(FILE *fp, bool verbose);
 void write_par_hl_cfi(FILE *fp, bool verbose);
 void write_par_hl_l2i(FILE *fp, bool verbose);
+void write_par_hl_secondary_input(FILE *fp, bool verbose);
 void write_par_hl_feature(FILE *fp, bool verbose);
 void write_par_hl_txt(FILE *fp, bool verbose);
 void write_par_hl_lsm(FILE *fp, bool verbose);
