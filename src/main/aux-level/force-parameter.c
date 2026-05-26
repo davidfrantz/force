@@ -217,7 +217,6 @@ FILE *fp;
   if (args.level == _HIGHER_LEVEL_){
     write_par_hl_dirs(fp, args.comments);
     write_par_hl_mask(fp, args.comments);
-    write_par_hl_input(fp, args.comments);
     write_par_hl_output(fp, args.comments);
     write_par_hl_thread(fp, args.comments);
     write_par_hl_extent(fp, args.comments);
