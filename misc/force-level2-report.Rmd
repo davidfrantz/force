@@ -201,7 +201,8 @@ data |>
 
 ```{r failed-images, echo = FALSE}
 if (nfail > 0) {
-  data %>% filter(status == "Error") %>% select(log)
+  pos <- which(data$status == "Error")
+  cbind(flog[pos], data$log[pos])
 }
 ```
 
