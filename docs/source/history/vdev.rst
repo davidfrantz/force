@@ -30,6 +30,8 @@ Develop version
     Please see https://github.com/davidfrantz/force/issues/418 for more details.
   - More resampling methods were added, including Cubic Spline, Lanczos, Average, Mode, Max, Min, Median, Q1, Q3, Sum, and RMS.
     Feature requested by Vu-Dong Pham.
+  - ``force-level2-report`` has a new option ``-t`` to choose the theme of the generated charts.
+    Available themes are inherited from ``echarts4r`` - look in their documentation for more details. 
 
 - **FORCE HLPS**
 
