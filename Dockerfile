@@ -58,18 +58,14 @@ apt-get -y install --no-install-recommends \
   ccache \
   # GCC compiler etc.
   build-essential \
-  # build requirement for OpenCV/FORCE
+  # needed to find OpenCV
   pkgconf \
   # Numerical library, dynamically linked in FORCE
   libgsl0-dev \
   # JSON parsing, dynamically linked in FORCE
   libjansson-dev \
   # force-higher-level UDFs, dynamically linked in FORCE
-  python3-dev \
-  # force-higher-level UDFs, dynamically linked in FORCE
-  # standalone force-sample-size script
-  # force-level2-report uses Rmarkdown
-  r-base
+  python3-dev
 
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
