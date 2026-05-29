@@ -49,6 +49,9 @@ Usage: $PROG [-hvi] [-o] dir-log
   -v = show version
   -i = show program's purpose
 
+  -t = theme for the report, default is "westeros", 
+        see echarts4r documentation for available themes
+
   -o = output file
         defaults to FORCE_L2PS_YYYYMMDD-HHMMSS.html
 
@@ -64,16 +67,18 @@ cmd_not_found "$REPORT_EXE";
 file_not_found "$REPORT_TEMPLATE";
 
 # now get the options --------------------------------------------------------------------
-ARGS=`getopt -o hvio: --long help,version,info,output: -n "$0" -- "$@"`
+ARGS=$(getopt -o hvit:o: --long help,version,info,theme:,output: -n "$0" -- "$@")
 if [ $? != 0 ] ; then help; fi
 eval set -- "$ARGS"
 
+THEME="westeros" # default theme (echarts4r)
 
 while :; do
   case "$1" in
     -h|--help) help ;;
     -v|--version) force_version; exit 0;;
     -i|--info) echo "Generate Level 2 processing report"; exit 0;;
+    -t|--theme) THEME="$2"; shift ;;
     -o|--output) OUTREPORT="$2"; shift ;;
     -- ) shift; break ;;
     * ) break ;;
@@ -122,4 +127,4 @@ debug "binary directory: $BIN"
 debug "log directory: $LOGDIR"
 debug "output: $OUTREPORT"
 
-$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTREPORT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR', ftable = '$OUTTABLE'))"
+$REPORT_EXE -e "rmarkdown::render('$REPORT_TEMPLATE', output_file = '$OUTREPORT', intermediates_dir = '$OUTDIR', params = list(dlog = '$LOGDIR', ftable = '$OUTTABLE', theme = '$THEME'))"

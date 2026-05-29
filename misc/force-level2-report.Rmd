@@ -5,6 +5,7 @@ output: html_document
 params:
   dlog: "log"
   ftable: NULL
+  theme: NULL
 ---
   
 ```{r load-packages, include = FALSE}
@@ -26,17 +27,19 @@ e_bars_stacked <- function(df, x){
   fig
 }
 
-theme <- "westeros"
-
-e_common(theme = theme)
+e_common(theme = params$theme)
 
 get_theme_colors <- function(theme = "auritus"){
   path <- system.file("htmlwidgets/lib/echarts-6.0.0/themes", package = "echarts4r")
   file <- paste0(path, "/", theme, ".js")
+  if (!file.exists(file)){
+    available <- tools::file_path_sans_ext(list.files(path, pattern = "\\.js$"))
+    stop("Unknown theme '", theme, "'. Available themes: ", paste(sort(available), collapse = ", "))
+  }
   js_lines <- readLines(file)
   palette <- unlist(regmatches(js_lines, gregexpr("#[0-9a-fA-F]{6}", js_lines)))
 }
-colors <- get_theme_colors(theme)
+colors <- get_theme_colors(params$theme)
 ```
 
 ```{r load-data, include = FALSE}
@@ -198,17 +201,19 @@ data |>
 
 ```{r failed-images, echo = FALSE}
 if (nfail > 0) {
-  data %>% filter(status == "Error") %>% select(log)
+  pos <- which(data$status == "Error")
+  cbind(flog[pos], data$log[pos])
 }
 ```
 
 ## Number of Level 1 images
 
 The following plots count the number of processed Level 1 images per sensor, year, month and week.
-*Processing status is not taken into account.*
-
+*Processing status is not taken into account - unless an Error occured.*
+  
 ```{r plot-l1-sensor, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   count(sensor, name = "Number") %>%
   arrange(sensor) |>
   e_charts(sensor) |>
@@ -221,6 +226,7 @@ data %>%
 
 ```{r plot-l1-year, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(year = as.factor(year)) |>
   count(sensor, year, name = "Number") %>%
   arrange(sensor) |>
@@ -237,6 +243,7 @@ data %>%
 
 ```{r plot-l1-yearhalf, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(yearhalf = as.factor(yearhalf)) |>
   count(sensor, yearhalf, name = "Number") %>%
   arrange(sensor) |>
@@ -253,6 +260,7 @@ data %>%
 
 ```{r plot-l1-yearquarter, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(yearquarter = as.factor(yearquarter)) |>
   count(sensor, yearquarter, name = "Number") %>%
   arrange(sensor) |>
@@ -269,6 +277,7 @@ data %>%
 
 ```{r plot-l1-yearmonth, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(yearmonth = as.factor(yearmonth)) |>
   count(sensor, yearmonth, name = "Number") %>%
   arrange(sensor) |>
@@ -285,6 +294,7 @@ data %>%
 
 ```{r plot-l1-month, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(month = as.factor(month)) |>
   count(sensor, month, name = "Number") %>%
   arrange(sensor) |>
@@ -301,6 +311,7 @@ data %>%
 
 ```{r plot-l1-week, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status != "Error") |>
   mutate(week = as.factor(week)) |>
   count(sensor, week, name = "Number") %>%
   arrange(sensor) |>
@@ -317,10 +328,11 @@ data %>%
 
 ## Number of Level 2 images
 
-The following plots count the number of processed Level 2 image chips per sensor, year, month and week.
+The following plots count the number of processed Level 2 image chips per sensor, year, month and week. Only Successfully processed images are shown.
 
 ```{r plot-l2-sensor, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   group_by(sensor) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
   arrange(sensor) |>
@@ -333,6 +345,7 @@ data %>%
 
 ```{r plot-l2-year, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(year = as.factor(year)) |>
   group_by(sensor, year) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -350,6 +363,7 @@ data %>%
 
 ```{r plot-l2-yearhalf, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(yearhalf = as.factor(yearhalf)) |>
   group_by(sensor, yearhalf) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -367,6 +381,7 @@ data %>%
 
 ```{r plot-l2-yearquarter, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(yearquarter = as.factor(yearquarter)) |>
   group_by(sensor, yearquarter) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -384,6 +399,7 @@ data %>%
 
 ```{r plot-l2-yearmonth, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(yearmonth = as.factor(yearmonth)) |>
   group_by(sensor, yearmonth) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -401,6 +417,7 @@ data %>%
 
 ```{r plot-l2-month, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(month = as.factor(month)) |>
   group_by(sensor, month) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -418,6 +435,7 @@ data %>%
 
 ```{r plot-l2-week, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(week = as.factor(week)) |>
   group_by(sensor, week) %>%
   summarise(Number = sum(nchip, na.rm = TRUE), .groups = "drop") |>
@@ -440,10 +458,12 @@ Cloud cover includes opaque clouds + buffer, cloud shadows + buffer and cirrus c
 Snow and cloud are not mutually exclusive, i.e. a cloud can be classified as snow, too.
 Clear scene includes any valid pixels not tagged as cloud, cloud shadow or snow.
 Clear land further excludes water pixels.
-*Processing status is not taken into account.*
+
+Only Successfully processed images are shown.
   
 ```{r plot-cover, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   pivot_longer(cols = c("dc", "cc", "sc", "wc", "ac", "lc"), names_to = "cover", values_to = "Number") |>
   mutate(cover = gsub("dc", "data", cover)) |>
   mutate(cover = gsub("cc", "cloud", cover)) |>
@@ -463,6 +483,7 @@ The following plots show the mean cover per year, month and week.
 
 ```{r plot-cover-by-year, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(year = as.factor(year)) |>
   group_by(year) %>%
   summarise_if(is.numeric, mean, na.rm = TRUE) |>
@@ -485,6 +506,7 @@ data %>%
 
 ```{r plot-cover-by-month, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(month = as.factor(month)) |>
   group_by(month) %>%
   summarise_if(is.numeric, mean, na.rm = TRUE) |>
@@ -506,6 +528,7 @@ data %>%
 
 ```{r plot-cover-by-week, echo = FALSE, warning = FALSE}
 data %>% 
+  filter(status == "Success") |>
   mutate(week = as.factor(week)) |>
   group_by(week) %>%
   summarise_if(is.numeric, mean, na.rm = TRUE) |>
