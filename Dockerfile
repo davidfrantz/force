@@ -28,7 +28,16 @@
 
 # base installation to speed up build process
 # https://github.com/davidfrantz/base_image
-FROM davidfrantz/base:latest AS force_builder
+FROM davidfrantz/base:latest AS internal_base
+
+# Refresh package list & upgrade existing packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+# Disable interactive frontends.
+export DEBIAN_FRONTEND=noninteractive && \
+apt-get -y update && apt-get -y upgrade
+
+FROM internal_base AS force_builder
 
 # Environment variables
 ENV SOURCE_DIR=$HOME/src/force
@@ -36,6 +45,27 @@ ENV SOURCE_DIR=$HOME/src/force
 # build args
 ARG debug=disable
 ARG build=all
+
+# Refresh package list & upgrade existing packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+# Disable interactive frontends.
+export DEBIAN_FRONTEND=noninteractive && \
+apt-get -y update && apt-get -y upgrade && \
+# Install required tools.
+apt-get -y install --no-install-recommends \
+  # speed up building, only effective for local builds
+  ccache \
+  # GCC compiler etc.
+  build-essential \
+  # needed to find OpenCV
+  pkgconf \
+  # Numerical library, dynamically linked in FORCE
+  libgsl0-dev \
+  # JSON parsing, dynamically linked in FORCE
+  libjansson-dev \
+  # force-higher-level UDFs, dynamically linked in FORCE
+  python3-dev
 
 # Copy src to SOURCE_DIR
 RUN mkdir -p $SOURCE_DIR
@@ -47,7 +77,7 @@ RUN echo "building FORCE" && \
   ./debug.sh $debug && \
   make -j$(nproc) $build
 
-FROM davidfrantz/base:latest AS force
+FROM internal_base AS force
 
 ADD --link --chown=root:root --exclude=.github https://github.com/davidfrantz/force-udf.git /usr/local/bin/force/force-udf
 COPY --link --chown=root:root --from=force_builder $HOME/src/force/bin /usr/local/bin/force
