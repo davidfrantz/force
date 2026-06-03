@@ -91,5 +91,8 @@
   },
   "ContRemSWIR": {
     "band_names": ["SWIR1", "NIR", "SWIR2"]
+  },
+  "DWSI": {
+    "band_names": ["NIR", "GREEN", "SWIR1", "RED"]
   }
 }
