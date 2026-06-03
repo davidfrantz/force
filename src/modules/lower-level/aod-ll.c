@@ -752,7 +752,7 @@ float coef[3], coefbest[3];
       //for (w=0; w<lib->n; w++){aodest[w][0] = 0.2; for (b=1; b<nb; b++) aodest[w][b] = aodest[w][b]*0.8;}
 
       /** fit aerosol model to each pair of target and library spectrum **/
-      for (w=0, wbest=-1, rsqbest=0; w<lib->n; w++){
+      for (w=0, wbest=-1, rsqbest=0, fitbest=0; w<lib->n; w++){
 
         // skip spectrum if any estimated AOD < 0
         for (b=0, valid=true; b<nb; b++){
