@@ -80,7 +80,7 @@ par_udf_t *udf;
 
   Py_Initialize();
 
-  import_array();
+  import_array1(FAILURE);
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
