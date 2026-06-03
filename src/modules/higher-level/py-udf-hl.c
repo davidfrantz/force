@@ -80,7 +80,7 @@ par_udf_t *udf;
 
   Py_Initialize();
 
-  import_array();
+  import_array1(FAILURE);
 
   PyRun_SimpleString("from multiprocessing.pool import Pool");
   PyRun_SimpleString("import numpy as np");
@@ -383,12 +383,14 @@ char bandname[NPOW_10];
   pylab.month    = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
   pylab.day      = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
 
-  pylab.desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
-  pylab.desc_sensor->elsize = NPOW_10;
+  PyObject *py_str_descr_sensor = PyUnicode_FromFormat("S%d", NPOW_10);
+  PyArray_DescrConverter(py_str_descr_sensor, &pylab.desc_sensor);
+  Py_DECREF(py_str_descr_sensor);
   pylab.sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nt, pylab.desc_sensor);
 
-  pylab.desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
-  pylab.desc_bandname->elsize = NPOW_10;
+  PyObject *py_str_descr_bandname = PyUnicode_FromFormat("S%d", NPOW_10);
+  PyArray_DescrConverter(py_str_descr_bandname, &pylab.desc_bandname);
+  Py_DECREF(py_str_descr_bandname);
   pylab.bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nb, pylab.desc_bandname);
 
   year_     = (int*)PyArray_DATA(pylab.year);

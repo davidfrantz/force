@@ -268,7 +268,7 @@ date_t date;
 
 GDALDatasetH fp, fs;
 GDALRasterBandH band;
-char **sds = NULL;
+CSLConstList sds = NULL;
 char *sdsname = NULL;
 char KeyName[NPOW_10];
 
@@ -425,7 +425,14 @@ char proj[NPOW_10];
   free_brick(QAI);
 
   free((void*)modqa_);
-  
+
+  // sds is owned by GDAL and must not be freed by application. 
+  // It is a NULL-terminated list of strings in the form "KEY=VALUE".
+  // Setting to NULL is not necessary, but 
+  // to be sure that we do not accidentally use it for other purposes, 
+  // we set it to NULL here.
+  sds = NULL;
+
   GDALDestroy();
 
   return SUCCESS;
