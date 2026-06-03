@@ -405,6 +405,12 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy "
     "of land change. Remote sensing of Environment, 148, 42-57."
     "http://dx.doi.org/10.1016/j.rse.2012.10.031",
+    false },
+  { "Disease Water Stress Index (DWSI)",
+    "Apan, A., Held, A., Phinn, S., & Markley, J. (2004). Detecting sugarcane "
+    "orange rust disease using EO-1 Hyperion hyperspectral imagery. International "
+    "Journal of Remote Sensing, 25(2), 489-498. "
+    "https://doi.org/10.1080/01431160310001618031",
     false }
 };
 
