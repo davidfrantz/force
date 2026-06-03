@@ -127,8 +127,8 @@ args_t args;
 int b, nb;
 GDALDatasetH src, dst;
 GDALRasterBandH bsrc, bdst;
-char **meta  = NULL;
-char **bmeta = NULL;
+CSLConstList meta  = NULL;
+CSLConstList bmeta = NULL;
 const char *bname = NULL;
 
 

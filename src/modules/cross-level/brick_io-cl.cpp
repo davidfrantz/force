@@ -59,7 +59,7 @@ int write_brick(brick_t *brick){
   GDALDriverH driver_create   = NULL;
   GDALDataType file_datatype;
   int create;
-  char **driver_metadata = NULL;
+  CSLConstList driver_metadata = NULL;
   char **options = NULL;
   float *buf = NULL;
   float now, old;
@@ -175,7 +175,11 @@ int write_brick(brick_t *brick){
       driver_create = driver_memory;
     }
   
-    //CSLDestroy(driver_metadata);
+    // driver_metadata is owned by GDAL and must not be freed by application. 
+    // It is a NULL-terminated list of strings in the form "KEY=VALUE".
+    // Setting to NULL is not necessary, but 
+    // to be sure that we do not accidentally use it for other purposes, 
+    // we set it to NULL here.
     driver_metadata   = NULL;
   
     // set GDAL output options
