@@ -82,7 +82,7 @@ par_udf_t *udf;
 
   import_array1(FAILURE);
 
-  PyRun_SimpleString("from multiprocessing.pool import Pool");
+  PyRun_SimpleString("from multiprocessing import get_context as _mp_get_context");
   PyRun_SimpleString("import numpy as np");
   PyRun_SimpleString("from datetime import date as Date");
   PyRun_SimpleString("import traceback");
@@ -134,7 +134,7 @@ par_udf_t *udf;
       "            print('forcepy_pixel not found.')                                             \n"
       "            return None                                                                   \n"
       "        nDates, nBands, nY, nX = ichunk.shape                                             \n"
-      "        pool = Pool(nproc, initializer=init)                                              \n"
+      "        pool = _mp_get_context('fork').Pool(nproc, initializer=init)                      \n"
       "        date = forcepy_date2epoch(year, month, day)                                       \n"
       "        argss = list()                                                                    \n"
       "        for yi in range(nY):                                                              \n"
