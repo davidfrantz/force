@@ -57,8 +57,8 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_double_par(params,  "RESOLUTION_SENTINEL2",  0, INT_MAX, &pl2->res_sentinel2);
   register_bool_par(params,    "DO_REPROJ",             &pl2->doreproj);
   register_bool_par(params,    "DO_TILE",               &pl2->dotile);
-  register_double_par(params,  "ORIGIN_LAT",            -90, 90, &pl2->orig_lat);
-  register_double_par(params,  "ORIGIN_LON",            -180, 180, &pl2->orig_lon);
+  register_doublevec_par(params, "GRID_ORIGIN",         -DBL_MAX, DBL_MAX, 2, &pl2->orig, &pl2->n_orig);
+  register_enum_par(params,     "GRID_ORIGIN_TYPE",    _TAGGED_ENUM_COORD_TYPE_, _COORD_TYPE_LENGTH_, &pl2->orig_type);
   register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, -1, &pl2->proj_, &pl2->nproj_);
   register_enum_par(params,    "RESAMPLING",            _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->resample);
   register_enum_par(params,    "RES_MERGE",             _TAGGED_ENUM_RES_MERGE_, _RES_MERGE_LENGTH_, &pl2->resmerge);

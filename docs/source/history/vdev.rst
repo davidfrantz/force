@@ -32,6 +32,14 @@ Develop version
     Feature requested by Vu-Dong Pham.
   - ``force-level2-report`` has a new option ``-t`` to choose the theme of the generated charts.
     Available themes are inherited from ``echarts4r`` - look in their documentation for more details. 
+  - In ``force-level2`` / ``force-l2ps``, the setting of the grid origin has been refactored. 
+    It is now necessary to specify the grid origin as a vector of two values (e.g., "``GRID_ORIGIN = -25 60``"), 
+    instead of separate parameters for longitude and latitude.
+    Additionally, it is now possible to specify the type of coordinates used for the grid origin (geographic or projected) 
+    via the new parameter ``GRID_ORIGIN_TYPE``, which can take the values "GEO" or "MAP".
+    This allows for more flexibility in defining the grid origin, especially when "clean" values in the map projection are desired.
+    The first value in the ``GRID_ORIGIN`` vector is always interpreted as the x-coordinate (longitude or easting), and the second value as the y-coordinate (latitude or northing), regardless of the coordinate type.
+    Thanks to Sebastian Hafner for highligting this 
 
 - **FORCE HLPS**
 
@@ -56,8 +64,8 @@ Develop version
 
 - **FORCE AUX**
 
-  - force-tile-finder now allows to input either geographic (lon/lat) or projected (x/y) coordinates.
-    The coordinate type can be specified via the new -t option (values: "geo" or "proj").
+  - force-tile-finder now allows to input either geographic (lon/lat) or projected map (x/y) coordinates.
+    The coordinate type can be specified via the new -t option (values: "geo" or "map").
     The program still outputs both coordinate types for the given point, as well as the corresponding tile indices and pixel indices within that tile.
   - new program: ``force-runtime-data``, which provides information about the FORCE runtime data installation.
     This includes the current location of this data, 

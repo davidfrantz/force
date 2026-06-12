@@ -60,7 +60,7 @@ void usage(char *exe, int exit_code){
   printf("\n");
   printf("  -p x,y = point of interest\n");
   printf("  -t type = coordinate type\n");
-  printf("     type can be 'geo' (default) or 'proj'\n");
+  printf("     type can be 'geo' (default) or 'map'\n");
   printf("     Tip: when using geographic coordinates, remember\n");
   printf("       - longitude is X!\n");
   printf("       - latitude  is Y!\n");
@@ -122,7 +122,7 @@ int i;
       case 't':
         if (strcmp(optarg, "geo") == 0){
           args->type = _TYPE_GEO_;
-        } else if (strcmp(optarg, "proj") == 0){
+        } else if (strcmp(optarg, "map") == 0){
           args->type = _TYPE_PROJ_;
         } else {
           fprintf(stderr, "Unknown coordinate type '%s'.\n", optarg);

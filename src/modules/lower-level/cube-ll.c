@@ -333,16 +333,51 @@ double tol = 5e-3;
     cube->dim_tile_pixels.rows = floor(cube->tile_size[_Y_]/cube->resolution);
     cube->dim_tile_pixels.cells = cube->dim_tile_pixels.cols*cube->dim_tile_pixels.rows;
 
-    cube->origin_geo.x = pl2->orig_lon;
-    cube->origin_geo.y = pl2->orig_lat;
+    if (pl2->orig_type == _COORD_TYPE_GEO_){
+      if (pl2->orig[_X_] < -180 || pl2->orig[_X_] > 180 || 
+          pl2->orig[_Y_] < -90 || pl2->orig[_Y_] > 90){
+        printf("geographic GRID_ORIGIN coordinates cannot exceed the valid range of latitudes and longitudes.\n");
+        printf("  Longitude between -180 and 180.\n");
+        printf("  Latitude must be between -90 and 90.\n");
+        printf("  The correct format of GRID_ORIGIN is: GRID_ORIGIN = lon lat\n");
+        free_multicube(multicube);
+        return NULL;
+      }
+    }
 
-    if ((warp_geo_to_any(cube->origin_geo.x,  cube->origin_geo.y,
-                        &cube->origin_map.x, &cube->origin_map.y,
-                         cube->projection)) == FAILURE){
-      printf("Computing tile origin in dst_srs failed. ");
+    if (pl2->orig_type == _COORD_TYPE_GEO_){
+
+      cube->origin_geo.x = pl2->orig[_X_];
+      cube->origin_geo.y = pl2->orig[_Y_];
+      
+      if ((warp_geo_to_any(cube->origin_geo.x,  cube->origin_geo.y,
+                          &cube->origin_map.x, &cube->origin_map.y,
+                          cube->projection)) == FAILURE){
+        printf("Computing tile origin in map coordinates failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+
+    } else if (pl2->orig_type == _COORD_TYPE_MAP_){
+
+      cube->origin_map.x = pl2->orig[_X_];
+      cube->origin_map.y = pl2->orig[_Y_];
+
+      if ((warp_any_to_geo(cube->origin_map.x,  cube->origin_map.y,
+                          &cube->origin_geo.x, &cube->origin_geo.y,
+                          cube->projection)) == FAILURE){
+        printf("Computing tile origin in geographic coordinates failed. ");
+        free_multicube(multicube);
+        return NULL;
+      }
+
+    } else {
+      printf("Invalid GRID_ORIGIN_TYPE. ");
       free_multicube(multicube);
       return NULL;
     }
+
+
 
     if (brick != NULL){
 
