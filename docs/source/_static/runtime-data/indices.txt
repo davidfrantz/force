@@ -174,3 +174,10 @@ Index: ContRemSWIR
   02: NIR
   03: SWIR2
 
+Index: DWSI
+  Required bands: 4
+  01: NIR
+  02: GREEN
+  03: SWIR1
+  04: RED
+

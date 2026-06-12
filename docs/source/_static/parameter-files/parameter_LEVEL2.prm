@@ -107,15 +107,30 @@ RESOLUTION_LANDSAT = 30
 # pixel resolution.
 # Type: Double. Valid range: ]0,...
 RESOLUTION_SENTINEL2 = 10
-# These are the origin coordinates of the grid system in decimal degree
-# (negative values for West/South). The upper left corner of tile 
-# X0000_Y0000 represents this point. It is a good choice to use a coord-
-# inate that is North-West of your study area – to avoid negative tile
-# numbers. Not used if DO_TILE = FALSE.
-# Type: Double. Valid range: [-180,180]
-# Type: Double. Valid range: [-90,90]
-ORIGIN_LON = -25
-ORIGIN_LAT = 60
+# These are the origin coordinates of the grid system.
+# The upper left corner of tile X0000_Y0000 represents this point. It is a 
+# good choice to use a coordinate that is top-left (usually North-West) of your 
+# study area - to avoid negative tile  numbers. Not used if DO_TILE = FALSE.
+# The coordinate type is defined by GRID_ORIGIN_TYPE. If GRID_ORIGIN_TYPE = GEO,
+# the coordinates are interpreted as geographic coordinates (longitude, latitude) 
+# in decimal degree (negative values for West/South). If GRID_ORIGIN_TYPE = MAP, 
+# the coordinates are interpreted as projected map coordinates (easting, northing) 
+# in the unit of the target projection (commonly meters). 
+# The order of the coordinates is always x (longitude or easting) first, 
+# and y (latitude or northing) second, regardless of the coordinate type. Remember 
+# that longitude = x, latitude = y!!! 
+# The valid range for the geographic coordinates is: [-180,180] and [-90,90]. 
+# For map coordinates, the valid range depends on the target projection and cannot 
+# be pre-defined by FORCE. You may encounter errors if the coordinates are outside 
+# the valid range. If you use a predefined projection (e.g., EQUI7 or GLANCE7), the 
+# grid origin is internally set to specific values that are optimal for these 
+# projections, and the parameters GRID_ORIGIN and GRID_ORIGIN_TYPE are ignored.
+# Type: Double. Valid range: depends on context.
+GRID_ORIGIN = -25 60
+# The coordinate type of GRID_ORIGIN.
+# See GRID_ORIGIN for details.
+# Character. Valid values: {GEO,MAP}
+GRID_ORIGIN_TYPE = GEO
 # This defines the target coordinate system. If DO_REPROJ = FALSE, the
 # projection string can be NULL. The coordinate system must either be
 # given as WKT string - or can be a predefined coordinate/grid system.
