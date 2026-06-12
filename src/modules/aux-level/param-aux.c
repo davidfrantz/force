@@ -232,16 +232,34 @@ void write_par_ll_cube(FILE *fp, bool verbose){
   fprintf(fp, "RESOLUTION_SENTINEL2 = 10\n");
 
   if (verbose){
-    fprintf(fp, "# These are the origin coordinates of the grid system in decimal degree\n");
-    fprintf(fp, "# (negative values for West/South). The upper left corner of tile \n");
-    fprintf(fp, "# X0000_Y0000 represents this point. It is a good choice to use a coord-\n");
-    fprintf(fp, "# inate that is North-West of your study area – to avoid negative tile\n");
-    fprintf(fp, "# numbers. Not used if DO_TILE = FALSE.\n");
-    fprintf(fp, "# Type: Double. Valid range: [-180,180]\n");
-    fprintf(fp, "# Type: Double. Valid range: [-90,90]\n");
+    fprintf(fp, "# These are the origin coordinates of the grid system.\n");
+    fprintf(fp, "# The upper left corner of tile X0000_Y0000 represents this point. It is a \n");
+    fprintf(fp, "# good choice to use a coordinate that is top-left (usually North-West) of your \n");
+    fprintf(fp, "# study area - to avoid negative tile  numbers. Not used if DO_TILE = FALSE.\n");
+    fprintf(fp, "# The coordinate type is defined by GRID_ORIGIN_TYPE. If GRID_ORIGIN_TYPE = GEO,\n");
+    fprintf(fp, "# the coordinates are interpreted as geographic coordinates (longitude, latitude) \n");
+    fprintf(fp, "# in decimal degree (negative values for West/South). If GRID_ORIGIN_TYPE = MAP, \n");
+    fprintf(fp, "# the coordinates are interpreted as projected map coordinates (easting, northing) \n");
+    fprintf(fp, "# in the unit of the target projection (commonly meters). \n");
+    fprintf(fp, "# The order of the coordinates is always x (longitude or easting) first, \n");
+    fprintf(fp, "# and y (latitude or northing) second, regardless of the coordinate type. Remember \n");
+    fprintf(fp, "# that longitude = x, latitude = y!!! \n");
+    fprintf(fp, "# The valid range for the geographic coordinates is: [-180,180] and [-90,90]. \n");
+    fprintf(fp, "# For map coordinates, the valid range depends on the target projection and cannot \n");
+    fprintf(fp, "# be pre-defined by FORCE. You may encounter errors if the coordinates are outside \n");
+    fprintf(fp, "# the valid range. If you use a predefined projection (e.g., EQUI7 or GLANCE7), the \n");
+    fprintf(fp, "# grid origin is internally set to specific values that are optimal for these \n");
+    fprintf(fp, "# projections, and the parameters GRID_ORIGIN and GRID_ORIGIN_TYPE are ignored.\n");
+    fprintf(fp, "# Type: Double. Valid range: depends on context.\n");
   }
-  fprintf(fp, "ORIGIN_LON = -25\n");
-  fprintf(fp, "ORIGIN_LAT = 60\n");
+  fprintf(fp, "GRID_ORIGIN = -25 60\n");
+
+  if (verbose){
+    fprintf(fp, "# The coordinate type of GRID_ORIGIN.\n");
+    fprintf(fp, "# See GRID_ORIGIN for details.\n");
+    fprintf(fp, "# Character. Valid values: {GEO,MAP}\n");
+  }
+  fprintf(fp, "GRID_ORIGIN_TYPE = GEO\n");
 
   if (verbose){
     fprintf(fp, "# This defines the target coordinate system. If DO_REPROJ = FALSE, the\n");

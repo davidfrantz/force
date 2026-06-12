@@ -55,6 +55,9 @@ enum { SUCCESS = 0, FAILURE = 1, CANCEL = 10 };
 // dimensions
 enum { _X_, _Y_, _Z_ };
 
+// type of coordinates
+enum { _COORD_TYPE_GEO_, _COORD_TYPE_MAP_, _COORD_TYPE_LENGTH_ };
+
 // range
 enum { _MIN_, _MAX_ };
 
@@ -290,6 +293,7 @@ enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_,
 enum { _INDEX_TYPE_BAND_, _INDEX_TYPE_EQUATION_, _INDEX_TYPE_SMA_, _INDEX_TYPE_LEN_ };
 
 // tagged enums
+extern const tagged_enum_t _TAGGED_ENUM_COORD_TYPE_[_COORD_TYPE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];

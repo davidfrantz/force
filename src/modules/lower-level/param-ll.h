@@ -30,6 +30,7 @@ Level 2 Processing paramater header
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
+#include <float.h>   // macro constants of the floating-point library
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
@@ -78,8 +79,9 @@ typedef struct {
   char **proj_;       // helper for parsing proj
   int nproj_;         // helper for parsing proj
   
-  double orig_lat;      // origin latitude
-  double orig_lon;      // origin longitude
+  double *orig;         // grid origin
+  int n_orig;           // number of grid origin values
+  int orig_type;        // grid origin type
   double *tile_size;    // tilesize
   int n_tile_size;      // number of tilesize values
   double res_landsat;   // output resolution Landsat

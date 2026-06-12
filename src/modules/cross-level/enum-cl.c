@@ -27,6 +27,8 @@ This file contains tagged enum definitions
 
 #include "enum-cl.h"
 
+const tagged_enum_t _TAGGED_ENUM_COORD_TYPE_[_COORD_TYPE_LENGTH_] = {
+  { _COORD_TYPE_GEO_, "GEO" }, { _COORD_TYPE_MAP_, "MAP" }};
 
 const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_] = {
   { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" },
