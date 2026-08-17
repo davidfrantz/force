@@ -61,6 +61,19 @@ Develop version
     option will print warning/error messages, so make sure to check your logs/stdout. ``YOLO`` is only
     available for ARD-type input data. Note that those parameters only act on reading errors, not on
     empty tiles. Feature requested by Vu-Dong Pham.
+  - in ``force-higher-level``, TSA and CSO modules:
+    The new parameter ``ADAPTIVE_RANGE`` allows to use an adaptive date range for filtering images on a per-pixel basis. 
+    It comes with a set of other new parameters to control the behaviour of this adaptive date range. 
+    Technically, it works like the continuous fields already implemented in FORCE, e.g. in the CFIMP module or the phenology-adaptive compositing. 
+    You require two input images (cubed, Int16), which hold start and end dates for each pixel. 
+    Multiple filtering windows may be given (as multiband images). 
+    The dates need to be given as "Year x 365 + DOY", i.e., the same format as used internally in FORCE, with an optional offset (see parameter ``ADAPTIVE_START``).
+    Note that this option is just a filtering routine. 
+    If you provide multiple windows, you will not receive different products for each window! 
+    Also note that this option might badly interact with other functionality, e.g., deriving phenology metrics.
+    Please also note, that this filtering option (contrary to filters like DATE_RANGE) does not reduce input as we need all the data in RAM to determine the adaptive date range for each pixel.
+    Feature requested by Oleg Zheleznyy.
+
 
 - **FORCE AUX**
 
