@@ -166,6 +166,12 @@ bool error = false;
     }
   }
 
+  if (nt1[pu] > 0 && nt2[pu] > 0 && phl->adaptive_date_range.use){
+    if (screen_adaptive_date_range(
+      ARD1[pu], ARD2[pu], nt1[pu], nt2[pu], 
+      MASK[pu], &phl->adaptive_date_range
+    ) == FAILURE) error = true;
+  }
 
   if (!error && phl->input_level1 == _INP_ARD_){
     if (spectral_adjust(ARD1[pu], MASK[pu], nt1[pu], phl) == FAILURE) error = true;

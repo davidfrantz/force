@@ -371,3 +371,107 @@ small *mask_ = NULL;
   return SUCCESS;
 }
 
+
+/** This function re-codes the quality masks of the ARD, and removes
++++ dates that are outside of the secondary adaptive date range data.
+--- ard:                 ARD
+--- adaptive:            secondary input: adaptive date range data
+--- nt:                  number of ARD products over time
+--- n_adaptive:          number of adaptive date range products
+--- adaptive_date_range: parameters
++++ Return:              SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adaptive, brick_t *mask, par_adr_t *adaptive_date_range){
+
+
+  // just to be sure
+  if (!adaptive_date_range->use) return SUCCESS;
+
+  if (adaptive == NULL || n_adaptive == 0){
+    printf("ADAPTIVE_RANGE requested, but data are not available.\n");
+    return FAILURE;
+  }
+
+  short adaptive_nodata = get_brick_nodata(adaptive[0].DAT, 0);
+
+  if (n_adaptive != 2){
+    printf("more than 2 ADAPTIVE_RANGE files were given. Cannot work with this.\n");
+    return FAILURE;
+  } else if (n_adaptive < 2){
+    printf("less than 2 ADAPTIVE_RANGE files were given. Cannot work with this.\n");
+    return FAILURE;
+  }
+
+  int n_window = get_brick_nbands(adaptive[0].DAT);
+  if (n_window != get_brick_nbands(adaptive[1].DAT)){
+    printf("ADAPTIVE_RANGE files have different number of bands. Cannot work with this.\n");
+    return FAILURE;
+  }
+
+  int nc = get_brick_chunkncells(ard[0].DAT);
+  if (nc != get_brick_chunkncells(adaptive[0].DAT)){
+    printf("ADAPTIVE_RANGE files have different dimensions than ARD files. Cannot work with this.\n");
+    return FAILURE;
+  }
+
+
+  // import mask (if available)
+  small *mask_ = NULL;
+  
+  if (mask != NULL){
+    if ((mask_ = get_band_small(mask, 0)) == NULL){
+      printf("Error getting processing mask."); return FAILURE;}
+  }
+
+
+  #pragma omp parallel shared(ard,nt,adaptive,n_adaptive,mask_,nc,n_window,adaptive_nodata,adaptive_date_range) default(none)
+  {
+
+    #pragma omp for
+    for (int p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]) continue;
+
+      int t = 0;
+      int ce_image = get_brick_ce(ard[t].DAT, 0);
+
+      for (int w=0; w<n_window; w++){
+
+        // skip if the window is invalid
+        if (adaptive[0].dat[w][p] == adaptive_nodata || 
+            adaptive[1].dat[w][p] == adaptive_nodata){
+          continue;
+        }
+
+        // convert adaptive date range to ce
+        int ce_start = adaptive[0].dat[w][p] + adaptive_date_range->start - 1;
+        int ce_end   = adaptive[1].dat[w][p] + adaptive_date_range->start - 1;
+        
+
+        // disable all images before the start of the window
+        while (t < nt && ce_image < ce_start){
+          ard[t].msk[p] = false;
+          t++;
+          if (t < nt) ce_image = get_brick_ce(ard[t].DAT, 0);
+        }
+
+        // fast forward to the end of the window
+        while (t < nt && ce_image <= ce_end){
+          t++;
+          if (t < nt) ce_image = get_brick_ce(ard[t].DAT, 0);
+        }
+
+      }
+
+      // disable all images after the end of the last window
+      while (t < nt){
+        ard[t].msk[p] = false;
+        t++;
+      }
+
+    }
+
+  }
+
+  return SUCCESS;
+}

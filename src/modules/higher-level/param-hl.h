@@ -242,6 +242,11 @@ typedef struct {
   par_sta_t sta;
 } par_stm_t;
 
+// adaptive date range
+typedef struct {
+  int use;
+  int start;
+} par_adr_t;
 
 // general TSA
 typedef struct {
@@ -438,6 +443,9 @@ typedef struct {
   int date_months[13];
   int date_quarters[5];
   int nd, nw, nm, nq, ny;
+
+  // adaptive date range
+  par_adr_t adaptive_date_range;
 
   // miscellaneous
   char *f_gdalopt;   // file for GDAL options
