@@ -890,19 +890,11 @@ double tol = 5e-3;
   } else if (strcmp(buffer, "++PARAM_TSA_START++") == 0){
     phl->type = _HL_TSA_;
     phl->input_level1 = _INP_ARD_;
-    if (phl->adaptive_date_range.use){
-      phl->input_level2 = _INP_CON_;
-    } else {
-      phl->input_level2 = _INP_NONE_;
-    }
+    phl->input_level2 = _INP_NONE_;
   } else if (strcmp(buffer, "++PARAM_CSO_START++") == 0){
     phl->type = _HL_CSO_;
     phl->input_level1 = _INP_QAI_;
-    if (phl->adaptive_date_range.use){
-      phl->input_level2 = _INP_CON_;
-    } else {
-      phl->input_level2 = _INP_NONE_;
-    }
+    phl->input_level2 = _INP_NONE_;
   } else if (strcmp(buffer, "++PARAM_CFIMP_START++") == 0){
     phl->type = _HL_CFI_;
     phl->input_level1 = _INP_ARD_;
@@ -1031,6 +1023,14 @@ double tol = 5e-3;
        phl->input_level2 == _INP_ARD_) &&
     retrieve_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
+
+  if (phl->type == _HL_TSA_ || phl->type == _HL_CSO_){
+    if (phl->adaptive_date_range.use){
+      phl->input_level2 = _INP_CON_;
+    } else {
+      phl->input_level2 = _INP_NONE_;
+    }
+  }
 
   if (phl->type == _HL_TSA_ && retrieve_indices(&phl->tsa.index, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}

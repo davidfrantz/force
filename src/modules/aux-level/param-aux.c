@@ -1124,9 +1124,9 @@ void write_par_hl_adaptive(FILE *fp, bool verbose){
     fprintf(fp, "# 16bit integer. The values in the images are interpreted as continuous days  \n");
     fprintf(fp, "# since ADAPTIVE_START. Start and end dates should not be given in the wrong  \n");
     fprintf(fp, "# order. The windows should not overlap. The windows should be time-ordered. \n");
-    fprintf(fp, "# Type: List with basename of files\n");
+    fprintf(fp, "# Type: List with 2 basenames of files\n");
   }
-  fprintf(fp, "BASE_ADAPTIVE_RANGE = NULL\n");
+  fprintf(fp, "BASE_ADAPTIVE_RANGE = NULL NULL\n");
 
   if (verbose){
     fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
@@ -1143,7 +1143,7 @@ void write_par_hl_adaptive(FILE *fp, bool verbose){
     fprintf(fp, "# Leap years are not taken into account and each year consists of 365 days.\n");
     fprintf(fp, "# Type: Integer. Valid values: [1,2100*365]\n");
   }
-  fprintf(fp, "ADAPTIVE_START = 1\n");
+  fprintf(fp, "ADAPTIVE_START = 736571\n");
 
   return;
 }

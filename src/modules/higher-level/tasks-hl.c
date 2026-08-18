@@ -169,7 +169,7 @@ bool error = false;
   if (nt1[pu] > 0 && nt2[pu] > 0 && phl->adaptive_date_range.use){
     if (screen_adaptive_date_range(
       ARD1[pu], ARD2[pu], nt1[pu], nt2[pu], 
-      MASK[pu], &phl->adaptive_date_range
+      MASK[pu], &phl->adaptive_date_range, phl->input_level1
     ) == FAILURE) error = true;
   }
 

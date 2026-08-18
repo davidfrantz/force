@@ -379,9 +379,10 @@ small *mask_ = NULL;
 --- nt:                  number of ARD products over time
 --- n_adaptive:          number of adaptive date range products
 --- adaptive_date_range: parameters
+--- is_qai:               true if the input only contains QAI
 +++ Return:              SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adaptive, brick_t *mask, par_adr_t *adaptive_date_range){
+int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adaptive, brick_t *mask, par_adr_t *adaptive_date_range, int input_level1){
 
 
   // just to be sure
@@ -408,7 +409,12 @@ int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adapti
     return FAILURE;
   }
 
-  int nc = get_brick_chunkncells(ard[0].DAT);
+  int nc;
+  if (input_level1 == _INP_QAI_){
+    nc = get_brick_chunkncells(ard[0].QAI);
+  } else {
+    nc = get_brick_chunkncells(ard[0].DAT);
+  }
   if (nc != get_brick_chunkncells(adaptive[0].DAT)){
     printf("ADAPTIVE_RANGE files have different dimensions than ARD files. Cannot work with this.\n");
     return FAILURE;
@@ -424,7 +430,7 @@ int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adapti
   }
 
 
-  #pragma omp parallel shared(ard,nt,adaptive,n_adaptive,mask_,nc,n_window,adaptive_nodata,adaptive_date_range) default(none)
+  #pragma omp parallel shared(ard,nt,adaptive,n_adaptive,mask_,nc,n_window,adaptive_nodata,adaptive_date_range,input_level1) default(none)
   {
 
     #pragma omp for
@@ -433,7 +439,13 @@ int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adapti
       if (mask_ != NULL && !mask_[p]) continue;
 
       int t = 0;
-      int ce_image = get_brick_ce(ard[t].DAT, 0);
+      int ce_image;
+
+      if (input_level1 == _INP_QAI_){
+        ce_image = get_brick_ce(ard[t].QAI, 0);
+      } else {
+        ce_image = get_brick_ce(ard[t].DAT, 0);
+      }
 
       for (int w=0; w<n_window; w++){
 
@@ -452,13 +464,25 @@ int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adapti
         while (t < nt && ce_image < ce_start){
           ard[t].msk[p] = false;
           t++;
-          if (t < nt) ce_image = get_brick_ce(ard[t].DAT, 0);
+          if (t < nt){
+            if (input_level1 == _INP_QAI_){
+              ce_image = get_brick_ce(ard[t].QAI, 0);
+            } else {
+              ce_image = get_brick_ce(ard[t].DAT, 0);
+            }
+          }
         }
 
         // fast forward to the end of the window
         while (t < nt && ce_image <= ce_end){
           t++;
-          if (t < nt) ce_image = get_brick_ce(ard[t].DAT, 0);
+          if (t < nt){
+            if (input_level1 == _INP_QAI_){
+              ce_image = get_brick_ce(ard[t].QAI, 0);
+            } else {
+              ce_image = get_brick_ce(ard[t].DAT, 0);
+            }
+          }
         }
 
       }
