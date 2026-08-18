@@ -31,6 +31,7 @@ This file contains functions for parsing parameter files
 void register_higher(params_t *params, par_hl_t *phl);
 void register_ard1(params_t *params, par_hl_t *phl);
 void register_ard2(params_t *params, par_hl_t *phl);
+void register_adr(params_t *params, par_hl_t *phl);
 void register_bap(params_t *params, par_hl_t *phl);
 void register_tsa(params_t *params, par_hl_t *phl);
 void register_cso(params_t *params, par_hl_t *phl);
@@ -129,6 +130,23 @@ void register_ard2(params_t *params, par_hl_t *phl){
   register_float_par(params,   "BELOW_NOISE", 0, FLT_MAX, &phl->qai.below_noise);
 
   return;
+}
+
+
+/** This function registers parameters for adaptive date range filtering
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_adr(params_t *params, par_hl_t *phl){
+
+  // adaptive date range parameters
+  register_bool_par(params,    "ADAPTIVE_RANGE", &phl->adaptive_date_range.use);
+  register_char_par(params,    "DIR_ADAPTIVE_RANGE", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
+  register_charvec_par(params, "BASE_ADAPTIVE_RANGE", _CHAR_TEST_NULL_OR_BASE_, 2, &phl->con.fname, &phl->con.n);
+  register_int_par(params,     "ADAPTIVE_RANGE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
+  register_int_par(params,     "ADAPTIVE_START", 1, 2100*365, &phl->adaptive_date_range.start);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
 }
 
 
@@ -864,7 +882,11 @@ double tol = 5e-3;
   if (strcmp(buffer, "++PARAM_LEVEL3_START++") == 0){
     phl->type = _HL_BAP_;
     phl->input_level1 = _INP_ARD_;
-    phl->input_level2 = _INP_NONE_;
+    if (phl->bap.pac.lsp){
+      phl->input_level2 = _INP_CON_;
+    } else {
+      phl->input_level2 = _INP_NONE_;
+    }
   } else if (strcmp(buffer, "++PARAM_TSA_START++") == 0){
     phl->type = _HL_TSA_;
     phl->input_level1 = _INP_ARD_;
@@ -939,9 +961,11 @@ double tol = 5e-3;
       break;
     case _HL_TSA_:
       register_tsa(phl->params, phl);
+      register_adr(phl->params, phl);
       break;
     case _HL_CSO_:
       register_cso(phl->params, phl);
+      register_adr(phl->params, phl);
       break;
     case _HL_CFI_:
       register_cfi(phl->params, phl);
@@ -999,6 +1023,14 @@ double tol = 5e-3;
        phl->input_level2 == _INP_ARD_) &&
     retrieve_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
+
+  if (phl->type == _HL_TSA_ || phl->type == _HL_CSO_){
+    if (phl->adaptive_date_range.use){
+      phl->input_level2 = _INP_CON_;
+    } else {
+      phl->input_level2 = _INP_NONE_;
+    }
+  }
 
   if (phl->type == _HL_TSA_ && retrieve_indices(&phl->tsa.index, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}
@@ -1220,9 +1252,6 @@ double tol = 5e-3;
       printf("A view zenith weight is not given, but VZN auxiliary product is specified.\n");
       return FAILURE;
     }
-
-
-    if (phl->bap.pac.lsp) phl->input_level2 = _INP_CON_;
 
   }
 

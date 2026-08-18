@@ -494,7 +494,7 @@ void write_par_ll_resmerge(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the method used for improving the spatial reso-\n");
-    fprintf(fp, "# lution of Sentinel-2’s 20 m bands to 10 m. Pixels flagged as cloud or\n");
+    fprintf(fp, "# lution of Sentinel-2's 20 m bands to 10 m. Pixels flagged as cloud or\n");
     fprintf(fp, "# shadow will be skipped. Following methods are available: IMPROPHE uses\n");
     fprintf(fp, "# the ImproPhe code in a spectral-only setup; REGRESSION uses a multi-\n");
     fprintf(fp, "# parameter regression (results are expected to be best, but processing\n");
@@ -1087,6 +1087,69 @@ void write_par_hl_time(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
++++ level adaptive date range pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_adaptive(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# ADAPTIVE DATE RANGE\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# Perform adaptive date range filtering? If TRUE, auxilliary data wil be \n");
+    fprintf(fp, "# used to filter dates on a per-pixel basis. Adaptive date range filtering \n");
+    fprintf(fp, "# is done additionally to other filtering procedures.\n");
+    fprintf(fp, "# Note that this is just a filtering step, and not some sort of grouping!\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "ADAPTIVE_RANGE = FALSE\n");
+
+
+
+ if (verbose){
+    fprintf(fp, "# Adaptive date range datapool (parent directory of tiled continuous fields)\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_ADAPTIVE_RANGE = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# Basenames of the adaptive date range fields (e.g. LSP-SOS.tif LSP_EOS.tif).  \n");
+    fprintf(fp, "# Exactly two files need to be given, one for the start, and one for the end  \n");
+    fprintf(fp, "# of the filtering period. The images can be multi-band images, where each  \n");
+    fprintf(fp, "# band represents a different filtering window. The number of bands need to  \n");
+    fprintf(fp, "# be the same for both files. The data type of the images needs to be signed  \n");
+    fprintf(fp, "# 16bit integer. The values in the images are interpreted as continuous days  \n");
+    fprintf(fp, "# since ADAPTIVE_START. Start and end dates should not be given in the wrong  \n");
+    fprintf(fp, "# order. The windows should not overlap. The windows should be time-ordered. \n");
+    fprintf(fp, "# Type: List with 2 basenames of files\n");
+  }
+  fprintf(fp, "BASE_ADAPTIVE_RANGE = NULL NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
+  }
+  fprintf(fp, "ADAPTIVE_RANGE_NODATA = %d\n", _FORCE_NO_DATA_);
+
+  if (verbose){
+    fprintf(fp, "# This parameter specifies the starting point of the continuous days. \n");
+    fprintf(fp, "# Internally, the data are represented as 'Year x 365 + DOY'. Thus, ADAPTIVE_START\n");
+    fprintf(fp, "# is an offset, which must be given as 'Year x 365 + DOY'. If the values are \n");
+    fprintf(fp, "# provided in this format, use ADAPTIVE_START = 1. If the ADAPTIVE values would be pro-\n");
+    fprintf(fp, "# vided relative to January 1 2000, use ADAPTIVE_START = 730001, i.e. 2000*365+1. \n");
+    fprintf(fp, "# Leap years are not taken into account and each year consists of 365 days.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [1,2100*365]\n");
+  }
+  fprintf(fp, "ADAPTIVE_START = 736571\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
 +++ level output pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
@@ -1469,8 +1532,8 @@ void write_par_hl_pac(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter specifies the starting point of the LSP values. \n");
-    fprintf(fp, "# Internally, the data are represented as ‘Year x 365 + DOY’. Thus, LSP_START\n");
-    fprintf(fp, "# is an offset, which must be given as ‘Year x 365 + DOY’. If the values are \n");
+    fprintf(fp, "# Internally, the data are represented as 'Year x 365 + DOY'. Thus, LSP_START\n");
+    fprintf(fp, "# is an offset, which must be given as 'Year x 365 + DOY'. If the values are \n");
     fprintf(fp, "# provided in this format, use LSP_START = 1. If the LSP values would be pro-\n");
     fprintf(fp, "# vided relative to January 1 2000, use LSP_START = 730001, i.e. 2000*365+1. \n");
     fprintf(fp, "# Leap years are not taken into account and each year consists of 365 days.\n");

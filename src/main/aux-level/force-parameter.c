@@ -256,10 +256,14 @@ FILE *fp;
     write_par_hl_fold(fp, args.comments);
     write_par_hl_pol(fp, args.comments);
     write_par_hl_trend(fp, args.comments);
+    write_par_hl_adaptive(fp, args.comments);
+    write_par_hl_secondary_input(fp, args.comments);
   }
 
   if (args.module == _HL_CSO_){
     write_par_hl_cso(fp, args.comments);
+    write_par_hl_adaptive(fp, args.comments);
+    write_par_hl_secondary_input(fp, args.comments);
   }
 
   if (args.module == _HL_UDF_){

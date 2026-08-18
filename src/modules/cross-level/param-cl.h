@@ -72,6 +72,8 @@ typedef struct {
   char  *log;
 } params_t;
 
+// TODO: maybe implement function to check if multiple parameters were set to the same pointer?!
+
 int length_par(const char *buf);
 date_t parse_date(char *str);
 int parse_enum(char *str, tagged_enum_t *enums, int n_enums);
