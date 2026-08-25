@@ -38,6 +38,7 @@ This program is the FORCE Higher Level Processing System
 #include "../../modules/cross-level/tile-cl.h"
 #include "../../modules/cross-level/konami-cl.h"
 #include "../../modules/cross-level/cite-cl.h"
+#include "../../modules/cross-level/gdalopt-cl.h"
 #include "../../modules/higher-level/progress-hl.h"
 #include "../../modules/higher-level/tasks-hl.h"
 #include "../../modules/higher-level/param-hl.h"
@@ -146,7 +147,16 @@ int         exit_code = SUCCESS;
 
   /** INITIALIZING
   +** *******************************************************************/
-  
+
+  // make GDAL less verbose
+  #ifndef FORCE_DEBUG
+  CPLPushErrorHandler(CPLQuietErrorHandler);
+  #endif
+
+  // register GDAL drivers
+  GDALAllRegister();
+  if ((driver = GDALGetDriverByName("JP2ECW")) != NULL) GDALDeregisterDriver(driver);
+
   parse_args(argc, argv, &args);
 
   phl = allocate_param_higher();
@@ -175,6 +185,9 @@ int         exit_code = SUCCESS;
   update_datacube_extent(cube, phl->tx[_MIN_], phl->tx[_MAX_], phl->ty[_MIN_], phl->ty[_MAX_]);
   update_datacube_res(cube, phl->res);
 
+  // check if output driver supports chunked writing
+  check_update_driver(&phl->gdalopt, phl->chunk_size, cube->tile_size);
+
   // compile active tiles
   if (tile_active(phl->f_tile, cube) == FAILURE){
     printf("Compiling active tiles failed!\n"); return FAILURE;}
@@ -199,16 +212,6 @@ int         exit_code = SUCCESS;
   omp_set_nested(true);
   omp_set_max_active_levels(2);
 
-
-  // make GDAL less verbose
-  #ifndef FORCE_DEBUG
-  CPLPushErrorHandler(CPLQuietErrorHandler);
-  #endif
-
-  // register GDAL drivers
-  GDALAllRegister();
-  if ((driver = GDALGetDriverByName("JP2ECW")) != NULL) GDALDeregisterDriver(driver);
-  
 
   /** LOOP OVER ALL CHUNKS
   +** *******************************************************************/

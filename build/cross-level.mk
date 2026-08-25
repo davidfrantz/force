@@ -60,7 +60,7 @@ enum-cl: prepare $(CROSS_DIR)/enum-cl.c
 	$(GCC) -c $(CROSS_DIR)/enum-cl.c -o $(OBJDIR)/enum-cl.o
 
 gdalopt-cl: prepare $(CROSS_DIR)/gdalopt-cl.c
-	$(GCC) -c $(CROSS_DIR)/gdalopt-cl.c -o $(OBJDIR)/gdalopt-cl.o
+	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/gdalopt-cl.c -o $(OBJDIR)/gdalopt-cl.o $(GDAL_LIBS)
 
 imagefuns-cl: prepare $(CROSS_DIR)/imagefuns-cl.c
 	$(GCC) -c $(CROSS_DIR)/imagefuns-cl.c -o $(OBJDIR)/imagefuns-cl.o
