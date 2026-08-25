@@ -27,6 +27,17 @@ This file contains functions for organizing bricks in memory, and output
 
 #include "gdalopt-cl.h"
 
+/** Geospatial Data Abstraction Library (GDAL) **/
+#include "cpl_conv.h"       // various convenience functions for CPL
+#include "cpl_string.h"     // various convenience functions for strings
+#include "gdal.h"           // public (C callable) GDAL entry points
+#include "gdal_version.h"   // GDAL Version Information
+
+// Ensure compilation on older platforms
+#ifndef GDAL_DCAP_UPDATE
+#define GDAL_DCAP_UPDATE "DCAP_UPDATE"
+#endif
+
 
 static const char *GTIFF_OPTIONS[][2] = {
     {"COMPRESS",   "ZSTD"},
@@ -249,6 +260,54 @@ void free_gdaloptions(gdalopt_t *gdalopt){
   free_string(&gdalopt->extension);
   if (gdalopt->options[_TV_TAG_].number > 0) free_string_vector(&gdalopt->options[_TV_TAG_]);
   if (gdalopt->options[_TV_VAL_].number > 0) free_string_vector(&gdalopt->options[_TV_VAL_]);
+
+  return;
+}
+
+
+/** This function checks if the GDAL driver supports updating when we need it
+--- gdalopt: GDAL options
+--- chunk_size: chunk size
+--- tile_size: tile size
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void check_update_driver(gdalopt_t *gdalopt, double chunk_size[], double tile_size[]){
+
+  // check if chunk size is equal to tile size, then no issue here
+  if (chunk_size[_X_] == tile_size[_X_] && chunk_size[_Y_] == tile_size[_Y_]){
+    return;
+  }
+
+  bool update_supported = true;
+  #if defined(GDAL_VERSION_NUM) && (GDAL_VERSION_NUM >= 3110000)
+    // On GDAL >= 3.11, we check if the driver supports updating, since we need it for chunked writing.
+    // get driver
+    GDALDriverH driver = NULL;
+    if ((driver = GDALGetDriverByName(gdalopt->driver.string)) == NULL){
+      printf("%s driver not found\n", gdalopt->driver.string); exit(FAILURE);}
+    CSLConstList driver_metadata = GDALGetMetadata(driver, NULL);
+    update_supported = CSLFetchBoolean(driver_metadata, GDAL_DCAP_UPDATE, false);
+    // driver_metadata is owned by GDAL and must not be freed by application. 
+    // It is a NULL-terminated list of strings in the form "KEY=VALUE".
+    // Setting to NULL is not necessary, but 
+    // to be sure that we do not accidentally use it for other purposes, 
+    // we set it to NULL here.
+    driver_metadata   = NULL;
+  #else
+    // On GDAL < 3.11, we assume that the driver supports updating, but we 
+    // issue a warning if in debug mode, since we cannot check it.
+    #ifdef FORCE_DEBUG
+      printf("Warning: GDAL version < 3.11, cannot check if %s driver supports updating.\n", gdalopt->driver.string);
+      printf("If you see writing errors, either use CHUNK_SIZE = TILE_SIZE, or use a different output format, e.g. GTiff.\n"); 
+    #endif
+  #endif
+
+  if (!update_supported){
+    printf("%s driver does not support updating, i.e., chunked writing is no option.\n", gdalopt->driver.string);
+    printf("Either use CHUNK_SIZE = TILE_SIZE, or use a different output format, e.g. GTiff.\n"); 
+    exit(FAILURE);
+  }
+  
 
   return;
 }
