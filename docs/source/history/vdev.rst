@@ -34,6 +34,8 @@ Develop version
     This allows for more flexibility in defining the grid origin, especially when "clean" values in the map projection are desired.
     The first value in the ``GRID_ORIGIN`` vector is always interpreted as the x-coordinate (longitude or easting), and the second value as the y-coordinate (latitude or northing), regardless of the coordinate type.
     Thanks to Sebastian Hafner for highligting this 
+  - Fixed a bug, where null-value stripes appeared in nodata regions at the  edges of the input images, when using the ``force-level2`` / ``force-l2ps`` module with co-registration enabled.
+    Thanks to Dominique Weber for reporting this issue.
 
 - **FORCE HLPS**
 
