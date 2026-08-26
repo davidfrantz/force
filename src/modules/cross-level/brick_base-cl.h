@@ -55,6 +55,7 @@ typedef struct {
   int datatype;          // datatype
   int byte;              // number of bytes
   gdalopt_t format;      // GDAL output options
+  bool initialize;       // initialize file before writing to it?
 
   int nb;                // number of images
   int nx;                // number of columns
@@ -132,8 +133,10 @@ void     set_brick_sensorid(brick_t *brick, int sid);
 int      get_brick_sensorid(brick_t *brick);
 void     set_brick_format(brick_t *brick, gdalopt_t *gdalopt);
 gdalopt_t get_brick_format(brick_t *brick);
+void     set_brick_initialize(brick_t *brick, bool initialize);
+bool     get_brick_initialize(brick_t *brick);
 void     set_brick_open(brick_t *brick, int open);
-bool     get_brick_open(brick_t *brick);
+int      get_brick_open(brick_t *brick);
 void     set_brick_explode(brick_t *brick, int explode);
 bool     get_brick_explode(brick_t *brick);
 void     set_brick_datatype(brick_t *brick, int datatype);

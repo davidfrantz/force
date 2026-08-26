@@ -365,7 +365,13 @@ int write_brick(brick_t *brick){
         b_file  = bands[_FILE_][f][b];
   
         band = GDALGetRasterBand(fp, b_file);
-  
+
+        // initialize file before writing chunk to avoid uninitialized data in output image
+        if (brick->initialize){
+          if (GDALFillRaster(band, (double)brick->nodata[b_brick], 0.0) == CE_Failure){
+            printf("Unable to initialize %s. ", fname); return FAILURE;}
+        }
+
         switch (brick->datatype){
           case _DT_SHORT_:
             if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 

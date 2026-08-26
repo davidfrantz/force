@@ -73,7 +73,20 @@ Develop version
     Also note that this option might badly interact with other functionality, e.g., deriving phenology metrics.
     Please also note, that this filtering option (contrary to filters like DATE_RANGE) does not reduce input as we need all the data in RAM to determine the adaptive date range for each pixel.
     Feature requested by Oleg Zheleznyy.
-
+  - In FORCE v. 3.9, the default reation options for GTiff files have been updated to use a gridded tile layout. 
+    This choice has resulted in a decoupling of internal file layout (blocks) and higher level processing units (chunks).
+    In the case of working with masks, and relatively small chunks, this has resulted in data artefacts (within the mask-disabled pixels - so not super critical), where
+    blocks of data have 0-values (instead of the proper nodata value) in the output files. 
+    More details can be found here: https://github.com/davidfrantz/force/issues/430.
+    This behaviour can be mitigated by setting the CHUNK_SIZE paramater to the full tile size.
+    When using the chunking mechanic, a new fix is now implemented, which fully initializes the output image with the proper nodata value, before writing any data to it.
+    In addition, there is a new parameter ``OUTPUT_INITIALIZE`` (default: TRUE), which allows to disable this behaviour, if desired.
+    Thanks to Simon Spengler for reporting this issue.
+  - Some output drivers do not allow updating existing files. Among them, COG.
+    If built against GDAL 3.11 or higher, FORCE will now stop with an error message if chunking is used and the driver does not allow updating existing files. 
+    Either use a different driver, or disable chunking by setting the CHUNK_SIZE parameter to the full tile size.
+    For GDAL versions < 3.11, FORCE will still try to write the output file, but will fail with a GDAL error message. Note that earlier GDAL versions are missing a proper check for this, which is why FORCE cannot stop with an error message in this case.
+    The provided Docker images are built against new GDAL releases, so this should not be an issue for most users.
 
 - **FORCE AUX**
 

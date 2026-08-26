@@ -228,7 +228,7 @@ int         exit_code = SUCCESS;
         } else if (omp_get_thread_num() == 1){
           compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
         } else {
-          output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
+          output_higher_level(&pro, &obytes, OUTPUT, nprod, cube, phl);
         }
 
       }
@@ -237,7 +237,7 @@ int         exit_code = SUCCESS;
 
       read_higher_level(&pro, &ibytes, MASK, ARD1, ARD2, nt1, nt2, cube, phl);
       compute_higher_level(&pro, MASK, ARD1, ARD2, nt1, nt2, cube, phl, aux, OUTPUT, nprod);
-      output_higher_level(&pro, &obytes, OUTPUT, nprod, phl);
+      output_higher_level(&pro, &obytes, OUTPUT, nprod, cube, phl);
 
     }
 

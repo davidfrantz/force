@@ -251,7 +251,7 @@ bool error = false;
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, par_hl_t *phl){
+void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, cube_t *cube, par_hl_t *phl){
 char dname[NPOW_10]; 
 int nchar;
 char *lock = NULL;
@@ -288,7 +288,7 @@ int o;
 
     omp_set_num_threads(phl->othread);
   
-    #pragma omp parallel shared(OUTPUT,pu,nprod,phl) reduction(+: bytes) default(none)
+    #pragma omp parallel shared(OUTPUT,pu,nprod,cube,phl,tile,pro) reduction(+: bytes) default(none)
     {
 
       CPLPushErrorHandler(CPLQuietErrorHandler);
@@ -296,13 +296,26 @@ int o;
 
       #pragma omp for schedule(dynamic,1)
       for (o=0; o<nprod[pu]; o++){
-        if (phl->radius > 0) OUTPUT[pu][o] = crop_brick(
-          OUTPUT[pu][o], phl->radius);
+
+        if (OUTPUT[pu][o] != NULL && 
+            get_brick_open(OUTPUT[pu][o]) == OPEN_CHUNK &&
+            initialize_before_this_chunk(pro, cube, phl)){
+          set_brick_initialize(OUTPUT[pu][o], true);
+        }
+
+        if (phl->radius > 0){
+          OUTPUT[pu][o] = crop_brick(OUTPUT[pu][o], phl->radius);
+        }
+
         write_brick(OUTPUT[pu][o]);
+
         if (OUTPUT[pu][o] != NULL && 
             get_brick_open(OUTPUT[pu][o]) != OPEN_FALSE){
             bytes += get_brick_size(OUTPUT[pu][o]);
+            pro->last_tile_written[_X_] = tile[_X_];
+            pro->last_tile_written[_Y_] = tile[_Y_];
         }
+
       }
 
       CPLPopErrorHandler();

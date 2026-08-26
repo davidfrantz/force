@@ -35,5 +35,6 @@ force-parameter: \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
 	$(OBJDIR)/utils-cl.o \
+	$(GDAL_INCLUDES) $(GDAL_FLAGS) $(GDAL_LIBS) \
 	-lm \
 	-ljansson

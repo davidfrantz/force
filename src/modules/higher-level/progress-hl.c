@@ -130,6 +130,9 @@ void init_progess(progress_t *progress, cube_t *cube, par_hl_t *phl){
   memmove(progress->tiles[_Y_], cube->allowed_tiles[_Y_], cube->n_allowed_tiles*sizeof(int));
   progress->n_tiles = cube->n_allowed_tiles;
 
+  progress->last_tile_written[_X_] = INT_MIN;
+  progress->last_tile_written[_Y_] = INT_MIN;
+
   chunk_layout(cube, phl->chunk_size, &progress->dim_chunks);
 
   progress->last.processing_unit = -3; // init processing unit at -3!
@@ -651,6 +654,33 @@ bool write_this_chunk(progress_t *progress, int *nprod){
 
   return (progress->last.processing_unit >= 0 && 
           nprod[progress->last.processing_unit] > 0);
+}
+
+/** This function checks if a flush is needed before processing a chunk
+--- progress:      progress handle
+--- cube:          cube handle
+--- phl:           parallel higher-level handle
++++ Return:   true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool initialize_before_this_chunk(progress_t *progress, cube_t *cube, par_hl_t *phl){
+
+  // if initialization is disabled, well, then do not initialize
+  if (!phl->initialize) return false;
+
+  // no need to ever initialize if chunk size is equal to tile size
+  if (phl->chunk_size[_X_] == cube->tile_size[_X_] && 
+      phl->chunk_size[_Y_] == cube->tile_size[_Y_]){
+    return false;
+  }
+
+  // if the last tile written is the same as the last tile processed, then no need to initialize
+  // we assume we initialized already on this tile, and we are still processing the same tile
+  if (progress->last.tile[_X_] == progress->last_tile_written[_X_] &&
+      progress->last.tile[_Y_] == progress->last_tile_written[_Y_]){
+    return false;
+  }
+
+  return true;
 }
 
 

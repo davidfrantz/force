@@ -1188,6 +1188,16 @@ void write_par_hl_output(FILE *fp, bool verbose){
   fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter controls whether the output image is initialized before writing \n");
+    fprintf(fp, "# the first chunk. This prevents uninitialized data in the output image for sparse \n");
+    fprintf(fp, "# output scenarios, but might be slower for large images. The parameter is ignored if \n");
+    fprintf(fp, "# CHUNK_SIZE matches the tile size, because in that case the image is created in one \n");
+    fprintf(fp, "# big chunk anyways.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_INITIALIZE = TRUE\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
     fprintf(fp, "# if the stack will be exploded into single-band files.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
