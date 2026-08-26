@@ -180,6 +180,7 @@ brick_t *brick = NULL;
 
   set_brick_format(brick, &from->format);
   set_brick_open(brick, from->open);
+  set_brick_initialize(brick, from->initialize);
   set_brick_explode(brick, from->explode);
 
   if (nb == from->nb){
@@ -540,6 +541,7 @@ void init_brick(brick_t *brick){
   brick->sid = -1;
   default_gdaloptions(_FMT_GTIFF_, &brick->format);
   brick->open = OPEN_FALSE;
+  brick->initialize = false;
   brick->explode = 0;
   brick->datatype = _DT_NONE_;
   brick->byte = 0;
@@ -617,8 +619,8 @@ void print_brick_info(brick_t *brick){
 
 
   printf("\nbrick info for %s - %s - SID %d\n", brick->name.string, brick->product.string, brick->sid);
-  printf("open: %d, explode %d\n", 
-    brick->open, brick->explode);
+  printf("open: %d, explode %d, initialize %d\n", 
+    brick->open, brick->explode, brick->initialize);
   print_gdaloptions(&brick->format);
   printf("datatype %d with %d bytes\n", 
     brick->datatype, brick->byte);
@@ -1071,6 +1073,30 @@ gdalopt_t get_brick_format(brick_t *brick){
 }
 
 
+/** This function sets the initialize option of a brick
+--- brick:  brick
+--- initialize:  initialize before write?
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void set_brick_initialize(brick_t *brick, bool initialize){
+
+  brick->initialize = initialize;
+
+  return;
+}
+
+
+/** This function gets the initialize option of a brick
+--- brick:  brick
++++ Return: initialize before write?
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool get_brick_initialize(brick_t *brick){
+  
+  return brick->initialize;
+}
+
+
+
 /** This function sets the opening option of a brick
 --- brick:  brick
 --- open:   opening option
@@ -1088,7 +1114,7 @@ void set_brick_open(brick_t *brick, int open){
 --- brick:  brick
 +++ Return: opening option
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-bool get_brick_open(brick_t *brick){
+int get_brick_open(brick_t *brick){
   
   return brick->open;
 }

@@ -451,6 +451,7 @@ typedef struct {
   char *f_gdalopt;   // file for GDAL options
   gdalopt_t gdalopt; // GDAL output options
   int format;        // output format
+  int initialize;    // flag: initialize output image before writing first chunk
   int explode;
   int subfolders;
   int owr;             // flag: overwrite output
