@@ -9,13 +9,7 @@ Develop version
     Many thanks to Peter Jonsson for his help with this! Most things won't be visible to the user, but should improve stability and security.
   - Due to some difficulties in installing the sf R-package, an older version of GDAL has been unknowingly resurfaced in the Docker container.
     Thanks to Benjamin Jakimow for reporting this issue.
-    This has now been temporarily fixed by NOT installing the sf package in the Docker container.
-    A more permanent fix will be implemented in the future.
-    For now, note that ``force-map-accuracy`` will not work in the Docker container for the time being, 
-    i.e., for dev versions after ``3.10.04-dev:::2026-01-16_16:23:49``.
-    Please use an older Docker image (e.g., the main release ``3.10.04``) to use this program.
-    This only affects the Docker container, not selfmade FORCE installations.
-    This only affects the ``force-map-accuracy`` program, not any other program.
+    This has now been fixed.
 
 **FORCE L1AS**
 
