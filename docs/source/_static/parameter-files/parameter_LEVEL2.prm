@@ -247,7 +247,7 @@ SHADOW_THRESHOLD = 0.02
 # RESOLUTION MERGING
 # ------------------------------------------------------------------------
 # This parameter defines the method used for improving the spatial reso-
-# lution of Sentinel-2’s 20 m bands to 10 m. Pixels flagged as cloud or
+# lution of Sentinel-2's 20 m bands to 10 m. Pixels flagged as cloud or
 # shadow will be skipped. Following methods are available: IMPROPHE uses
 # the ImproPhe code in a spectral-only setup; REGRESSION uses a multi-
 # parameter regression (results are expected to be best, but processing

@@ -51,6 +51,13 @@ OUTPUT_FORMAT = GTiff
 # give invalid or conflicting options that result in the failure of creating files.
 # Type: full file path
 FILE_OUTPUT_OPTIONS = NULL
+# This parameter controls whether the output image is initialized before writing 
+# the first chunk. This prevents uninitialized data in the output image for sparse 
+# output scenarios, but might be slower for large images. The parameter is ignored if 
+# CHUNK_SIZE matches the tile size, because in that case the image is created in one 
+# big chunk anyways.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_INITIALIZE = TRUE
 # This parameter controls whether the output is written as multi-band image, or
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}

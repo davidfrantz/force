@@ -51,6 +51,13 @@ OUTPUT_FORMAT = GTiff
 # give invalid or conflicting options that result in the failure of creating files.
 # Type: full file path
 FILE_OUTPUT_OPTIONS = NULL
+# This parameter controls whether the output image is initialized before writing 
+# the first chunk. This prevents uninitialized data in the output image for sparse 
+# output scenarios, but might be slower for large images. The parameter is ignored if 
+# CHUNK_SIZE matches the tile size, because in that case the image is created in one 
+# big chunk anyways.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_INITIALIZE = TRUE
 # This parameter controls whether the output is written as multi-band image, or
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
@@ -493,5 +500,47 @@ TREND_CONF = 0.95
 # This can help to reduce the effect of outliers.
 # Type: Logical. Valid values: {TRUE,FALSE}
 CHANGE_PENALTY = FALSE
+
+# ADAPTIVE DATE RANGE
+# ------------------------------------------------------------------------
+# Perform adaptive date range filtering? If TRUE, auxilliary data wil be 
+# used to filter dates on a per-pixel basis. Adaptive date range filtering 
+# is done additionally to other filtering procedures.
+# Note that this is just a filtering step, and not some sort of grouping!
+# Type: Logical. Valid values: {TRUE,FALSE}
+ADAPTIVE_RANGE = FALSE
+# Adaptive date range datapool (parent directory of tiled continuous fields)
+# Type: full directory path
+DIR_ADAPTIVE_RANGE = NULL
+# Basenames of the adaptive date range fields (e.g. LSP-SOS.tif LSP_EOS.tif).  
+# Exactly two files need to be given, one for the start, and one for the end  
+# of the filtering period. The images can be multi-band images, where each  
+# band represents a different filtering window. The number of bands need to  
+# be the same for both files. The data type of the images needs to be signed  
+# 16bit integer. The values in the images are interpreted as continuous days  
+# since ADAPTIVE_START. Start and end dates should not be given in the wrong  
+# order. The windows should not overlap. The windows should be time-ordered. 
+# Type: List with 2 basenames of files
+BASE_ADAPTIVE_RANGE = NULL NULL
+# This parameter defines the nodata value for the continuous fields.
+# Type: Integer. Valid values: [-32768,32767]
+ADAPTIVE_RANGE_NODATA = -9999
+# This parameter specifies the starting point of the continuous days. 
+# Internally, the data are represented as 'Year x 365 + DOY'. Thus, ADAPTIVE_START
+# is an offset, which must be given as 'Year x 365 + DOY'. If the values are 
+# provided in this format, use ADAPTIVE_START = 1. If the ADAPTIVE values would be pro-
+# vided relative to January 1 2000, use ADAPTIVE_START = 730001, i.e. 2000*365+1. 
+# Leap years are not taken into account and each year consists of 365 days.
+# Type: Integer. Valid values: [1,2100*365]
+ADAPTIVE_START = 736571
+# This parameter controls how FORCE deals with input errors of secondary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_SECONDARY = SKIP
 
 ++PARAM_TSA_END++
