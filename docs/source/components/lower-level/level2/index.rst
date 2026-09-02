@@ -48,4 +48,5 @@ FORCE L2PS consists of two main executables:
    param.rst
    format.rst
    depend.rst
-
+   queue.rst
+   wvdb.rst

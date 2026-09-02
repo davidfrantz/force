@@ -58,12 +58,14 @@ typedef struct {
   //date_t  date; // acquisition date
 } ard_t;
 
-brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
-ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
-ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl);
-ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl);
-brick_t *read_chunk(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y);
-brick_t *add_chunks(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, short nodata, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double radius, brick_t *ARD);
+brick_t *read_mask(int *success, off_t *ibytes, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error);
+ard_t *read_features(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error);
+ard_t *read_confield(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, par_hl_t *phl, int action_if_read_error);
+ard_t *read_ard(off_t *ibytes, int *nt, int tile[], int chunk[], cube_t *cube, sen_t *sen, par_hl_t *phl, int action_if_read_error);
+brick_t *read_chunk(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double partial_x, double partial_y);
+brick_t *add_chunks(char *file, int ard_type, sen_t *sen, int read_b, int read_nb, int datatype, double chunk_size[], int chunk[], double tile_size[], int tile[], double resolution, bool psf, double radius, brick_t *ARD);
+int sanitize_ard(ard_t *ard, bool *error_index, int *nt);
+int free_ard_layers(ard_t *ard);
 int free_ard(ard_t *ard, int nt);
 
 #ifdef __cplusplus

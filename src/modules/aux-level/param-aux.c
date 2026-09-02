@@ -150,9 +150,11 @@ void write_par_ll_dem(FILE *fp, bool verbose){
   
   if (verbose){
     fprintf(fp, "# This is the resampling option for reprojection the DEM; you can choose\n");
-    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
-    fprintf(fp, "# (CC).\n");
-    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),\n");
+    fprintf(fp, "# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),\n");
+    fprintf(fp, "# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and\n");
+    fprintf(fp, "# RMS (RMS).\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}\n");
   }  
   fprintf(fp, "DEM_RESAMPLING = BL\n");
   
@@ -230,16 +232,34 @@ void write_par_ll_cube(FILE *fp, bool verbose){
   fprintf(fp, "RESOLUTION_SENTINEL2 = 10\n");
 
   if (verbose){
-    fprintf(fp, "# These are the origin coordinates of the grid system in decimal degree\n");
-    fprintf(fp, "# (negative values for West/South). The upper left corner of tile \n");
-    fprintf(fp, "# X0000_Y0000 represents this point. It is a good choice to use a coord-\n");
-    fprintf(fp, "# inate that is North-West of your study area – to avoid negative tile\n");
-    fprintf(fp, "# numbers. Not used if DO_TILE = FALSE.\n");
-    fprintf(fp, "# Type: Double. Valid range: [-180,180]\n");
-    fprintf(fp, "# Type: Double. Valid range: [-90,90]\n");
+    fprintf(fp, "# These are the origin coordinates of the grid system.\n");
+    fprintf(fp, "# The upper left corner of tile X0000_Y0000 represents this point. It is a \n");
+    fprintf(fp, "# good choice to use a coordinate that is top-left (usually North-West) of your \n");
+    fprintf(fp, "# study area - to avoid negative tile  numbers. Not used if DO_TILE = FALSE.\n");
+    fprintf(fp, "# The coordinate type is defined by GRID_ORIGIN_TYPE. If GRID_ORIGIN_TYPE = GEO,\n");
+    fprintf(fp, "# the coordinates are interpreted as geographic coordinates (longitude, latitude) \n");
+    fprintf(fp, "# in decimal degree (negative values for West/South). If GRID_ORIGIN_TYPE = MAP, \n");
+    fprintf(fp, "# the coordinates are interpreted as projected map coordinates (easting, northing) \n");
+    fprintf(fp, "# in the unit of the target projection (commonly meters). \n");
+    fprintf(fp, "# The order of the coordinates is always x (longitude or easting) first, \n");
+    fprintf(fp, "# and y (latitude or northing) second, regardless of the coordinate type. Remember \n");
+    fprintf(fp, "# that longitude = x, latitude = y!!! \n");
+    fprintf(fp, "# The valid range for the geographic coordinates is: [-180,180] and [-90,90]. \n");
+    fprintf(fp, "# For map coordinates, the valid range depends on the target projection and cannot \n");
+    fprintf(fp, "# be pre-defined by FORCE. You may encounter errors if the coordinates are outside \n");
+    fprintf(fp, "# the valid range. If you use a predefined projection (e.g., EQUI7 or GLANCE7), the \n");
+    fprintf(fp, "# grid origin is internally set to specific values that are optimal for these \n");
+    fprintf(fp, "# projections, and the parameters GRID_ORIGIN and GRID_ORIGIN_TYPE are ignored.\n");
+    fprintf(fp, "# Type: Double. Valid range: depends on context.\n");
   }
-  fprintf(fp, "ORIGIN_LON = -25\n");
-  fprintf(fp, "ORIGIN_LAT = 60\n");
+  fprintf(fp, "GRID_ORIGIN = -25 60\n");
+
+  if (verbose){
+    fprintf(fp, "# The coordinate type of GRID_ORIGIN.\n");
+    fprintf(fp, "# See GRID_ORIGIN for details.\n");
+    fprintf(fp, "# Character. Valid values: {GEO,MAP}\n");
+  }
+  fprintf(fp, "GRID_ORIGIN_TYPE = GEO\n");
 
   if (verbose){
     fprintf(fp, "# This defines the target coordinate system. If DO_REPROJ = FALSE, the\n");
@@ -259,9 +279,12 @@ void write_par_ll_cube(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This is the resampling option for the reprojection; you can choose\n");
-    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution\n");
-    fprintf(fp, "# (CC); not used if DO_REPROJ = FALSE.\n");
-    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC}\n");
+    fprintf(fp, "# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),\n");
+    fprintf(fp, "# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),\n");
+    fprintf(fp, "# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and\n");
+    fprintf(fp, "# RMS (RMS).\n");
+    fprintf(fp, "# Not used if DO_REPROJ = FALSE.\n");
+    fprintf(fp, "# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}\n");
   }
   fprintf(fp, "RESAMPLING = CC\n");
 
@@ -471,7 +494,7 @@ void write_par_ll_resmerge(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter defines the method used for improving the spatial reso-\n");
-    fprintf(fp, "# lution of Sentinel-2’s 20 m bands to 10 m. Pixels flagged as cloud or\n");
+    fprintf(fp, "# lution of Sentinel-2's 20 m bands to 10 m. Pixels flagged as cloud or\n");
     fprintf(fp, "# shadow will be skipped. Following methods are available: IMPROPHE uses\n");
     fprintf(fp, "# the ImproPhe code in a spectral-only setup; REGRESSION uses a multi-\n");
     fprintf(fp, "# parameter regression (results are expected to be best, but processing\n");
@@ -511,7 +534,7 @@ void write_par_ll_coreg(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata values of the coregistration base images.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COREG_BASE_NODATA = -9999\n");
+  fprintf(fp, "COREG_BASE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -778,6 +801,15 @@ void write_par_hl_mask(FILE *fp, bool verbose){
   }
   fprintf(fp, "BASE_MASK = NULL\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of the mask. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default).\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP}\n");
+  }
+  fprintf(fp, "READ_ERROR_MASK = SKIP\n");
+
   return;
 }
 
@@ -932,6 +964,18 @@ void write_par_hl_sensor(FILE *fp, bool verbose){
   fprintf(fp, "PRODUCT_TYPE_QUALITY = QAI\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of primary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_PRIMARY = SKIP\n");
+
+  if (verbose){
     fprintf(fp, "# Perform a spectral adjustment to Sentinel-2?\n");
     fprintf(fp, "# This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, \n");
     fprintf(fp, "# LND08, LND09, MOD01, MOD02.\n");
@@ -1043,6 +1087,69 @@ void write_par_hl_time(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
++++ level adaptive date range pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_adaptive(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# ADAPTIVE DATE RANGE\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# Perform adaptive date range filtering? If TRUE, auxilliary data wil be \n");
+    fprintf(fp, "# used to filter dates on a per-pixel basis. Adaptive date range filtering \n");
+    fprintf(fp, "# is done additionally to other filtering procedures.\n");
+    fprintf(fp, "# Note that this is just a filtering step, and not some sort of grouping!\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "ADAPTIVE_RANGE = FALSE\n");
+
+
+
+ if (verbose){
+    fprintf(fp, "# Adaptive date range datapool (parent directory of tiled continuous fields)\n");
+    fprintf(fp, "# Type: full directory path\n");
+  }
+  fprintf(fp, "DIR_ADAPTIVE_RANGE = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# Basenames of the adaptive date range fields (e.g. LSP-SOS.tif LSP_EOS.tif).  \n");
+    fprintf(fp, "# Exactly two files need to be given, one for the start, and one for the end  \n");
+    fprintf(fp, "# of the filtering period. The images can be multi-band images, where each  \n");
+    fprintf(fp, "# band represents a different filtering window. The number of bands need to  \n");
+    fprintf(fp, "# be the same for both files. The data type of the images needs to be signed  \n");
+    fprintf(fp, "# 16bit integer. The values in the images are interpreted as continuous days  \n");
+    fprintf(fp, "# since ADAPTIVE_START. Start and end dates should not be given in the wrong  \n");
+    fprintf(fp, "# order. The windows should not overlap. The windows should be time-ordered. \n");
+    fprintf(fp, "# Type: List with 2 basenames of files\n");
+  }
+  fprintf(fp, "BASE_ADAPTIVE_RANGE = NULL NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
+  }
+  fprintf(fp, "ADAPTIVE_RANGE_NODATA = %d\n", _FORCE_NO_DATA_);
+
+  if (verbose){
+    fprintf(fp, "# This parameter specifies the starting point of the continuous days. \n");
+    fprintf(fp, "# Internally, the data are represented as 'Year x 365 + DOY'. Thus, ADAPTIVE_START\n");
+    fprintf(fp, "# is an offset, which must be given as 'Year x 365 + DOY'. If the values are \n");
+    fprintf(fp, "# provided in this format, use ADAPTIVE_START = 1. If the ADAPTIVE values would be pro-\n");
+    fprintf(fp, "# vided relative to January 1 2000, use ADAPTIVE_START = 730001, i.e. 2000*365+1. \n");
+    fprintf(fp, "# Leap years are not taken into account and each year consists of 365 days.\n");
+    fprintf(fp, "# Type: Integer. Valid values: [1,2100*365]\n");
+  }
+  fprintf(fp, "ADAPTIVE_START = 736571\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
 +++ level output pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
@@ -1079,6 +1186,16 @@ void write_par_hl_output(FILE *fp, bool verbose){
     fprintf(fp, "# Type: full file path\n");
   }
   fprintf(fp, "FILE_OUTPUT_OPTIONS = NULL\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls whether the output image is initialized before writing \n");
+    fprintf(fp, "# the first chunk. This prevents uninitialized data in the output image for sparse \n");
+    fprintf(fp, "# output scenarios, but might be slower for large images. The parameter is ignored if \n");
+    fprintf(fp, "# CHUNK_SIZE matches the tile size, because in that case the image is created in one \n");
+    fprintf(fp, "# big chunk anyways.\n");
+    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+  }
+  fprintf(fp, "OUTPUT_INITIALIZE = TRUE\n");
 
   if (verbose){
     fprintf(fp, "# This parameter controls whether the output is written as multi-band image, or\n");
@@ -1248,32 +1365,45 @@ void write_par_hl_bap(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter specifies whether all available data within the requested time\n");
-    fprintf(fp, "# frame are used – or only from the season of interest. If FALSE, the composites \n");
-    fprintf(fp, "# only consider data for the period, in which the intra-annual score is higher \n");
-    fprintf(fp, "# than 0.01. If there is no clear-sky data within this period, data gaps are \n");
-    fprintf(fp, "# possible. If TRUE, all data from the requested years are used, thus the risk\n");
-    fprintf(fp, "# of having data gaps is lower. However, it is possible that data from unwanted\n");
-    fprintf(fp, "# parts of the year are selected.\n");
-    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+    fprintf(fp, "# frame are used - or only from the season of interest. Observations with intra-annual \n");
+    fprintf(fp, "# scores lower than this parameter are ignored. If there is no clear-sky data \n");
+    fprintf(fp, "# within this period, data gaps are possible. If zero, all data from the requested \n");
+    fprintf(fp, "# years are used, thus the risk of having data gaps is lower. However, it is \n");
+    fprintf(fp, "# possible that data from unwanted parts of the year are selected. \n");
+    fprintf(fp, "# Specifically, this parameter defines the minimum DOY score, with which images are considered for \n");
+    fprintf(fp, "# compositing. For the sigmoid function, only one value is necessary (second value should be \n");
+    fprintf(fp, "# removed). For the Gaussian function, two values must be submitted (for the start \n");
+    fprintf(fp, "# of the season and the end of the season). To exclude all DOYs before and after the target \n");
+    fprintf(fp, "# start and end dates respectively, set this parameter values to the first and last values \n");
+    fprintf(fp, "# in DOY_SCORE (for Gaussian function), or the lowest value in DOY_SCORE (Sigmoid function).\n");
+    fprintf(fp, "# Type: Float list, 1 or 2 values. Valid values: [0,1]\n");
   }
-  fprintf(fp, "OFF_SEASON = FALSE\n");
-
+  fprintf(fp, "OFF_SEASON_CUTOFF = 0.01 0.01\n");
+  
   if (verbose){
-    fprintf(fp, "# This parameter specifies whether observations with a cloud score of less than 1%%\n");
+    fprintf(fp, "# This parameter specifies whether observations with a cloud score of less than this value\n");
     fprintf(fp, "# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,\n");
     fprintf(fp, "# it will include clouds if there is no better observation.\n");
-    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+    fprintf(fp, "# Type: Float. Valid values: [0,1]\n");
   }
-  fprintf(fp, "USE_CLOUDY = FALSE\n");
+  fprintf(fp, "CLOUDY_CUTOFF = 0.01\n");
 
   if (verbose){
-    fprintf(fp, "# This parameter specifies whether observations with a haze score of less than 1%%\n");
+    fprintf(fp, "# This parameter specifies whether observations with a haze score of less than this value\n");
     fprintf(fp, "# should be candidates. On one hand, this reduces nodata gaps in the composite. On the other hand,\n");
     fprintf(fp, "# it will include haze if there is no better observation.\n");
-    fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
+    fprintf(fp, "# Type: Float. Valid values: [0,1]\n");
   }
-  fprintf(fp, "USE_HAZY = FALSE\n");
+  fprintf(fp, "HAZY_CUTOFF = 0.01\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter specifies whether observations with a view zenith score of less than this value\n");
+    fprintf(fp, "# should be candidates. Can be useful for large-swath sensors.\n");
+    fprintf(fp, "# Type: Float. Valid values: [0,1]\n");
+  }
+  fprintf(fp, "VZEN_CUTOFF = 0.01\n");
+
+  
   if (verbose){
     fprintf(fp, "# This parameter controls the strength of the DOY score.\n");
     fprintf(fp, "# 0 disables the use of this score.\n");
@@ -1412,8 +1542,8 @@ void write_par_hl_pac(FILE *fp, bool verbose){
 
   if (verbose){
     fprintf(fp, "# This parameter specifies the starting point of the LSP values. \n");
-    fprintf(fp, "# Internally, the data are represented as ‘Year x 365 + DOY’. Thus, LSP_START\n");
-    fprintf(fp, "# is an offset, which must be given as ‘Year x 365 + DOY’. If the values are \n");
+    fprintf(fp, "# Internally, the data are represented as 'Year x 365 + DOY'. Thus, LSP_START\n");
+    fprintf(fp, "# is an offset, which must be given as 'Year x 365 + DOY'. If the values are \n");
     fprintf(fp, "# provided in this format, use LSP_START = 1. If the LSP values would be pro-\n");
     fprintf(fp, "# vided relative to January 1 2000, use LSP_START = 730001, i.e. 2000*365+1. \n");
     fprintf(fp, "# Leap years are not taken into account and each year consists of 365 days.\n");
@@ -1434,7 +1564,7 @@ void write_par_hl_pac(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata value for the LSP.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "LSP_NODATA = -9999\n");
+  fprintf(fp, "LSP_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -2118,7 +2248,7 @@ void write_par_hl_cfi(FILE *fp, bool verbose){
     fprintf(fp, "# This parameter defines the nodata value for the continuous fields.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "COARSE_NODATA = -9999\n");
+  fprintf(fp, "COARSE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   return;
 }
@@ -2153,6 +2283,31 @@ void write_par_hl_l2i(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: higher
++++ level secondary input pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_secondary_input(FILE *fp, bool verbose){
+
+
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of secondary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_SECONDARY = SKIP\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
 +++ level feature pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?
@@ -2181,7 +2336,7 @@ void write_par_hl_feature(FILE *fp, bool verbose){
     fprintf(fp, "# Nodata value of the features.\n");
     fprintf(fp, "# Type: Integer. Valid values: [-32768,32767]\n");
   }
-  fprintf(fp, "FEATURE_NODATA = -9999\n");
+  fprintf(fp, "FEATURE_NODATA = %d\n", _FORCE_NO_DATA_);
 
   if (verbose){
     fprintf(fp, "# Should nodata values be excluded if any feature is nodata (TRUE). Or just\n");

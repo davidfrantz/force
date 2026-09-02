@@ -68,6 +68,7 @@ typedef struct {
   int thread[_TASK_LENGTH_];
   int **tiles;
   int n_tiles; // tile layout is irregular
+  int last_tile_written[2]; // last tile written to output
   dim_t dim_chunks; // chunk layout is rectangular
   int n_processing_units; // # of tiles x chunks
   float done;
@@ -79,6 +80,7 @@ void init_progess(progress_t *pro, cube_t *cube, par_hl_t *phl);
 bool read_this_chunk(progress_t *pro);
 bool compute_this_chunk(progress_t *pro);
 bool write_this_chunk(progress_t *pro, int *nprod);
+bool initialize_before_this_chunk(progress_t *progress, cube_t *cube, par_hl_t *phl);
 bool progress(progress_t *pro);
 
 #ifdef __cplusplus

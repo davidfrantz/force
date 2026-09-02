@@ -11,10 +11,10 @@ cross: \
     date-cl \
     datesys-cl \
     dir-cl \
-    download-cl \
     enum-cl \
     gdalopt-cl \
     imagefuns-cl \
+	json-cl \
     konami-cl \
     lock-cl \
     param-cl \
@@ -56,17 +56,17 @@ datesys-cl : prepare $(CROSS_DIR)/datesys-cl.c
 dir-cl: prepare $(CROSS_DIR)/dir-cl.c
 	$(GCC) -c $(CROSS_DIR)/dir-cl.c -o $(OBJDIR)/dir-cl.o
 
-download-cl: prepare $(CROSS_DIR)/download-cl.c
-	$(GCC) $(CURL_INCLUDES) $(CURL_FLAGS) -c $(CROSS_DIR)/download-cl.c -o $(OBJDIR)/download-cl.o $(CURL_LIBS)
-
 enum-cl: prepare $(CROSS_DIR)/enum-cl.c
 	$(GCC) -c $(CROSS_DIR)/enum-cl.c -o $(OBJDIR)/enum-cl.o
 
 gdalopt-cl: prepare $(CROSS_DIR)/gdalopt-cl.c
-	$(GCC) -c $(CROSS_DIR)/gdalopt-cl.c -o $(OBJDIR)/gdalopt-cl.o
+	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/gdalopt-cl.c -o $(OBJDIR)/gdalopt-cl.o $(GDAL_LIBS)
 
 imagefuns-cl: prepare $(CROSS_DIR)/imagefuns-cl.c
 	$(GCC) -c $(CROSS_DIR)/imagefuns-cl.c -o $(OBJDIR)/imagefuns-cl.o
+
+json-cl: prepare $(CROSS_DIR)/json-cl.c
+	$(GCC) -c $(CROSS_DIR)/json-cl.c -o $(OBJDIR)/json-cl.o
 
 konami-cl: prepare $(CROSS_DIR)/konami-cl.c
 	$(GCC) -c $(CROSS_DIR)/konami-cl.c -o $(OBJDIR)/konami-cl.o

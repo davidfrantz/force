@@ -5,6 +5,7 @@ force-parameter: \
   enum-cl \
   gdalopt-cl \
   index-parse-hl \
+  json-cl \
   konami-cl \
   param-aux \
   param-cl \
@@ -23,6 +24,7 @@ force-parameter: \
 	$(OBJDIR)/enum-cl.o \
 	$(OBJDIR)/gdalopt-cl.o \
 	$(OBJDIR)/index-parse-hl.o \
+	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/param-aux.o \
 	$(OBJDIR)/param-cl.o \
@@ -33,5 +35,6 @@ force-parameter: \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
 	$(OBJDIR)/utils-cl.o \
+	$(GDAL_INCLUDES) $(GDAL_FLAGS) $(GDAL_LIBS) \
 	-lm \
 	-ljansson

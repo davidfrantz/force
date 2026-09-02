@@ -2,6 +2,7 @@ force-mdcp: \
   alloc-cl \
   dir-cl \
   index-parse-hl \
+  json-cl \
   konami-cl \
   sensor-hl \
   string-cl \
@@ -12,6 +13,7 @@ force-mdcp: \
 	$(OBJDIR)/alloc-cl.o \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/index-parse-hl.o \
+	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/sensor-hl.o \
 	$(OBJDIR)/string-cl.o \

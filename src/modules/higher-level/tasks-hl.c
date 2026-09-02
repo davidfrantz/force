@@ -66,26 +66,20 @@ off_t bytes = 0;
 
   omp_set_num_threads(phl->ithread);
 
-  MASK[pu] = read_mask(&mask_status, &bytes, tile, chunk, cube, phl);
+  MASK[pu] = read_mask(&mask_status, &bytes, tile, chunk, cube, phl, phl->action_if_read_error_mask);
 
-  if (MASK[pu] == NULL && mask_status != SUCCESS){
-    if (mask_status == FAILURE){
-      printf("error reading mask tile X%04d_Y%04d chunk X:%d Y:%d.\n", 
-        tile[_X_], tile[_Y_], chunk[_X_], chunk[_Y_]);
-    } else if (mask_status == CANCEL){
-      //printf("no mask data. skip chunk.\n");
-    }
+  if (MASK[pu] == NULL && mask_status == CANCEL){
     measure_progress(pro, _TASK_INPUT_, _CLOCK_TOCK_);
     return;
   }
 
 
   if (phl->input_level1 == _INP_FTR_){
-    ARD1[pu] = read_features(&bytes, &nt1[pu], tile, chunk, cube, phl);
+    ARD1[pu] = read_features(&bytes, &nt1[pu], tile, chunk, cube, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 == _INP_CON_){
-    ARD1[pu] = read_confield(&bytes, &nt1[pu], tile, chunk, cube, phl);
+    ARD1[pu] = read_confield(&bytes, &nt1[pu], tile, chunk, cube, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 == _INP_ARD_ || phl->input_level1 == _INP_QAI_){
-    ARD1[pu] = read_ard(&bytes, &nt1[pu], tile, chunk, cube, &phl->sen, phl);
+    ARD1[pu] = read_ard(&bytes, &nt1[pu], tile, chunk, cube, &phl->sen, phl, phl->action_if_read_error_primary);
   } else if (phl->input_level1 != _INP_NONE_) {
     printf("unknown input level\n");
   }
@@ -99,11 +93,11 @@ off_t bytes = 0;
 
 
   if (phl->input_level2 == _INP_FTR_){
-    ARD2[pu] = read_features(&bytes, &nt2[pu], tile, chunk, cube, phl);
+    ARD2[pu] = read_features(&bytes, &nt2[pu], tile, chunk, cube, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 == _INP_CON_){
-    ARD2[pu] = read_confield(&bytes, &nt2[pu], tile, chunk, cube, phl);
+    ARD2[pu] = read_confield(&bytes, &nt2[pu], tile, chunk, cube, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 == _INP_ARD_ || phl->input_level2 == _INP_QAI_){
-    ARD2[pu] = read_ard(&bytes, &nt2[pu], tile, chunk, cube, &phl->sen2, phl);
+    ARD2[pu] = read_ard(&bytes, &nt2[pu], tile, chunk, cube, &phl->sen2, phl, phl->action_if_read_error_secondary);
   } else if (phl->input_level2 != _INP_NONE_){
     printf("unknown input level\n");
   }
@@ -172,6 +166,12 @@ bool error = false;
     }
   }
 
+  if (nt1[pu] > 0 && nt2[pu] > 0 && phl->adaptive_date_range.use){
+    if (screen_adaptive_date_range(
+      ARD1[pu], ARD2[pu], nt1[pu], nt2[pu], 
+      MASK[pu], &phl->adaptive_date_range, phl->input_level1
+    ) == FAILURE) error = true;
+  }
 
   if (!error && phl->input_level1 == _INP_ARD_){
     if (spectral_adjust(ARD1[pu], MASK[pu], nt1[pu], phl) == FAILURE) error = true;
@@ -251,7 +251,7 @@ bool error = false;
 --- phl:      HL parameters
 +++ Return:   void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, par_hl_t *phl){
+void output_higher_level (progress_t *pro, off_t *obytes, brick_t ***OUTPUT, int *nprod, cube_t *cube, par_hl_t *phl){
 char dname[NPOW_10]; 
 int nchar;
 char *lock = NULL;
@@ -288,7 +288,7 @@ int o;
 
     omp_set_num_threads(phl->othread);
   
-    #pragma omp parallel shared(OUTPUT,pu,nprod,phl) reduction(+: bytes) default(none)
+    #pragma omp parallel shared(OUTPUT,pu,nprod,cube,phl,tile,pro) reduction(+: bytes) default(none)
     {
 
       CPLPushErrorHandler(CPLQuietErrorHandler);
@@ -296,13 +296,26 @@ int o;
 
       #pragma omp for schedule(dynamic,1)
       for (o=0; o<nprod[pu]; o++){
-        if (phl->radius > 0) OUTPUT[pu][o] = crop_brick(
-          OUTPUT[pu][o], phl->radius);
+
+        if (OUTPUT[pu][o] != NULL && 
+            get_brick_open(OUTPUT[pu][o]) == OPEN_CHUNK &&
+            initialize_before_this_chunk(pro, cube, phl)){
+          set_brick_initialize(OUTPUT[pu][o], true);
+        }
+
+        if (phl->radius > 0){
+          OUTPUT[pu][o] = crop_brick(OUTPUT[pu][o], phl->radius);
+        }
+
         write_brick(OUTPUT[pu][o]);
+
         if (OUTPUT[pu][o] != NULL && 
             get_brick_open(OUTPUT[pu][o]) != OPEN_FALSE){
             bytes += get_brick_size(OUTPUT[pu][o]);
+            pro->last_tile_written[_X_] = tile[_X_];
+            pro->last_tile_written[_Y_] = tile[_Y_];
         }
+
       }
 
       CPLPopErrorHandler();

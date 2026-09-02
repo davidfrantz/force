@@ -43,6 +43,7 @@ extern "C" {
 
 int screen_qai(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule, int input_level);
 int screen_noise(ard_t *ard, int nt, brick_t *mask, par_qai_t *qai_rule);
+int screen_adaptive_date_range(ard_t *ard, ard_t *adaptive, int nt, int n_adaptive, brick_t *mask, par_adr_t *adaptive_date_range, int input_level1);
 
 #ifdef __cplusplus
 }

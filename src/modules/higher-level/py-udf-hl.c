@@ -80,9 +80,9 @@ par_udf_t *udf;
 
   Py_Initialize();
 
-  import_array();
+  import_array1(FAILURE);
 
-  PyRun_SimpleString("from multiprocessing.pool import Pool");
+  PyRun_SimpleString("from multiprocessing import get_context as _mp_get_context");
   PyRun_SimpleString("import numpy as np");
   PyRun_SimpleString("from datetime import date as Date");
   PyRun_SimpleString("import traceback");
@@ -134,7 +134,7 @@ par_udf_t *udf;
       "            print('forcepy_pixel not found.')                                             \n"
       "            return None                                                                   \n"
       "        nDates, nBands, nY, nX = ichunk.shape                                             \n"
-      "        pool = Pool(nproc, initializer=init)                                              \n"
+      "        pool = _mp_get_context('fork').Pool(nproc, initializer=init)                      \n"
       "        date = forcepy_date2epoch(year, month, day)                                       \n"
       "        argss = list()                                                                    \n"
       "        for yi in range(nY):                                                              \n"
@@ -285,7 +285,7 @@ date_t date;
   alloc_2D((void***)&udf->bandname, udf->nb, NPOW_10, sizeof(char));
   alloc((void**)&udf->date, udf->nb, sizeof(date_t));
 
-  for (size_t b = 0; b < udf->nb; b++){
+  for (int b = 0; b < udf->nb; b++){
 
     py_bandname = PyList_GetItem(py_return, b);
     py_encoded  = PyUnicode_AsEncodedString(py_bandname, "UTF-8", "strict");
@@ -383,12 +383,14 @@ char bandname[NPOW_10];
   pylab.month    = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
   pylab.day      = (PyArrayObject *) PyArray_SimpleNew(1, pylab.dim_nt, NPY_INT);
 
-  pylab.desc_sensor = PyArray_DescrNewFromType(NPY_STRING);
-  pylab.desc_sensor->elsize = NPOW_10;
+  PyObject *py_str_descr_sensor = PyUnicode_FromFormat("S%d", NPOW_10);
+  PyArray_DescrConverter(py_str_descr_sensor, &pylab.desc_sensor);
+  Py_DECREF(py_str_descr_sensor);
   pylab.sensor = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nt, pylab.desc_sensor);
 
-  pylab.desc_bandname = PyArray_DescrNewFromType(NPY_STRING);
-  pylab.desc_bandname->elsize = NPOW_10;
+  PyObject *py_str_descr_bandname = PyUnicode_FromFormat("S%d", NPOW_10);
+  PyArray_DescrConverter(py_str_descr_bandname, &pylab.desc_bandname);
+  Py_DECREF(py_str_descr_bandname);
   pylab.bandname = (PyArrayObject *) PyArray_SimpleNewFromDescr(1, pylab.dim_nb, pylab.desc_bandname);
 
   year_     = (int*)PyArray_DATA(pylab.year);

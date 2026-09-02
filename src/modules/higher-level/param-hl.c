@@ -31,6 +31,7 @@ This file contains functions for parsing parameter files
 void register_higher(params_t *params, par_hl_t *phl);
 void register_ard1(params_t *params, par_hl_t *phl);
 void register_ard2(params_t *params, par_hl_t *phl);
+void register_adr(params_t *params, par_hl_t *phl);
 void register_bap(params_t *params, par_hl_t *phl);
 void register_tsa(params_t *params, par_hl_t *phl);
 void register_cso(params_t *params, par_hl_t *phl);
@@ -76,8 +77,11 @@ void register_higher(params_t *params, par_hl_t *phl){
   register_doublevec_par(params, "CHUNK_SIZE", 0, FLT_MAX, 2, &phl->chunk_size, &phl->n_chunk_size);
   register_char_par(params,    "FILE_OUTPUT_OPTIONS",   _CHAR_TEST_NULL_OR_EXIST_, &phl->f_gdalopt);
   register_enum_par(params,    "OUTPUT_FORMAT",  _TAGGED_ENUM_FMT_, _FMT_LENGTH_, &phl->format);
+  register_bool_par(params,    "OUTPUT_INITIALIZE", &phl->initialize);
   register_bool_par(params,    "OUTPUT_EXPLODE", &phl->explode);
   register_bool_par(params,    "OUTPUT_SUBFOLDERS", &phl->subfolders);
+  register_enum_par(params,    "READ_ERROR_MASK", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_mask);
+  register_enum_par(params,    "READ_ERROR_PRIMARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_primary);
   register_bool_par(params,    "FAIL_IF_EMPTY", &phl->fail_if_empty);
   //register_bool_par(params,    "OUTPUT_OVERWRITE", &phl->owr);
   register_int_par(params,     "NTHREAD_READ",    1, INT_MAX, &phl->ithread);
@@ -130,6 +134,23 @@ void register_ard2(params_t *params, par_hl_t *phl){
 }
 
 
+/** This function registers parameters for adaptive date range filtering
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_adr(params_t *params, par_hl_t *phl){
+
+  // adaptive date range parameters
+  register_bool_par(params,    "ADAPTIVE_RANGE", &phl->adaptive_date_range.use);
+  register_char_par(params,    "DIR_ADAPTIVE_RANGE", _CHAR_TEST_NULL_OR_EXIST_, &phl->con.dname);
+  register_charvec_par(params, "BASE_ADAPTIVE_RANGE", _CHAR_TEST_NULL_OR_BASE_, 2, &phl->con.fname, &phl->con.n);
+  register_int_par(params,     "ADAPTIVE_RANGE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
+  register_int_par(params,     "ADAPTIVE_START", 1, 2100*365, &phl->adaptive_date_range.start);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
+}
+
+
 /** This function registers BAP parameters
 --- params: registered parameters
 --- phl:    HL parameters
@@ -151,9 +172,10 @@ void register_bap(params_t *params, par_hl_t *phl){
   register_floatvec_par(params, "DOY_SCORE", 0, 1, 3, &phl->bap.Ds, &phl->bap.nDs);
   register_intvec_par(params,   "DOY_STATIC", 1, 365, 3, &phl->bap.Dt, &phl->bap.nDt);
 
-  register_bool_par(params,  "OFF_SEASON", &phl->bap.offsea);
-  register_bool_par(params,  "USE_CLOUDY", &phl->bap.use_cloudy);
-  register_bool_par(params,  "USE_HAZY", &phl->bap.use_hazy);
+  register_floatvec_par(params, "OFF_SEASON_CUTOFF", 0, 1, -1, &phl->bap.seasonal_cutoff,  &phl->bap.n_seasonal_cutoff);
+  register_float_par(params,  "CLOUDY_CUTOFF", 0, 1, &phl->bap.cloudy_cutoff);
+  register_float_par(params,  "HAZY_CUTOFF", 0, 1, &phl->bap.hazy_cutoff);
+  register_float_par(params,  "VZEN_CUTOFF", 0, 1, &phl->bap.vzen_cutoff);
   register_float_par(params, "DREQ", 1, FLT_MAX, &phl->bap.dreq);
   register_float_par(params, "HREQ", -600, 600, &phl->bap.hreq);
   register_float_par(params, "VREQ", 1, 90, &phl->bap.vreq);
@@ -315,6 +337,7 @@ void register_cfi(params_t *params, par_hl_t *phl){
   register_int_par(params,     "COARSE_NODATA", SHRT_MIN, SHRT_MAX, &phl->con.nodata);
   register_int_par(params,     "COARSE_1ST_YEAR",      1900, 2100, &phl->cfi.y0);
   register_intvec_par(params,  "COARSE_PREDICT_YEARS", 1900, 2100, -1, &phl->cfi.years, &phl->cfi.nyears);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
 
   return;
 }
@@ -330,6 +353,7 @@ void register_l2i(params_t *params, par_hl_t *phl){
   
   register_imp(params, phl);
   register_charvec_par(params, "SENSORS_LOWRES", _CHAR_TEST_NONE_, -1, &phl->sen2.sensor, &phl->sen2.n);
+  register_enum_par(params,    "READ_ERROR_SECONDARY", _TAGGED_ENUM_READ_ERR_, _READ_ERR_LENGTH_, &phl->action_if_read_error_secondary);
 
   return;
 }
@@ -859,7 +883,11 @@ double tol = 5e-3;
   if (strcmp(buffer, "++PARAM_LEVEL3_START++") == 0){
     phl->type = _HL_BAP_;
     phl->input_level1 = _INP_ARD_;
-    phl->input_level2 = _INP_NONE_;
+    if (phl->bap.pac.lsp){
+      phl->input_level2 = _INP_CON_;
+    } else {
+      phl->input_level2 = _INP_NONE_;
+    }
   } else if (strcmp(buffer, "++PARAM_TSA_START++") == 0){
     phl->type = _HL_TSA_;
     phl->input_level1 = _INP_ARD_;
@@ -934,9 +962,11 @@ double tol = 5e-3;
       break;
     case _HL_TSA_:
       register_tsa(phl->params, phl);
+      register_adr(phl->params, phl);
       break;
     case _HL_CSO_:
       register_cso(phl->params, phl);
+      register_adr(phl->params, phl);
       break;
     case _HL_CFI_:
       register_cfi(phl->params, phl);
@@ -995,6 +1025,14 @@ double tol = 5e-3;
     retrieve_sensor(&phl->sen2) != SUCCESS){
     printf("Compiling secondary sensors failed.\n"); return FAILURE;}
 
+  if (phl->type == _HL_TSA_ || phl->type == _HL_CSO_){
+    if (phl->adaptive_date_range.use){
+      phl->input_level2 = _INP_CON_;
+    } else {
+      phl->input_level2 = _INP_NONE_;
+    }
+  }
+
   if (phl->type == _HL_TSA_ && retrieve_indices(&phl->tsa.index, &phl->sen) == FAILURE){
     printf("sth wrong with bandlist."); return FAILURE;}
 
@@ -1025,6 +1063,23 @@ double tol = 5e-3;
   }
 
 
+  // check read-error flag
+  if ((phl->input_level1 == _INP_FTR_ || phl->input_level1 == _INP_CON_) && 
+      phl->action_if_read_error_primary == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with Feature or Continuous Field inputs.\n");
+    return FAILURE;
+  }
+
+  if ((phl->input_level2 == _INP_FTR_ || phl->input_level2 == _INP_CON_) && 
+      phl->action_if_read_error_secondary == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with Feature or Continuous Field inputs.\n");
+    return FAILURE;
+  }
+
+  if (phl->action_if_read_error_mask == _READ_ERR_YOLO_){
+    printf("YOLO read error flag cannot be used with mask inputs.\n");
+    return FAILURE;
+  }
 
   // check chunk size
   if (fmod(phl->chunk_size[_X_], phl->res) > tol ||
@@ -1148,10 +1203,22 @@ double tol = 5e-3;
     if (phl->bap.Ds[1] > phl->bap.Ds[0] &&
         phl->bap.Ds[1] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_GAUSS_; // gaussian
+      if (phl->bap.n_seasonal_cutoff != 2){
+        printf("For Gaussian scoring, exactly two off-season cutoffs must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[0] > phl->bap.Ds[2]){
       phl->bap.score_type = _SCR_TYPE_SIG_DES_; // descending sigmoid
+      if (phl->bap.n_seasonal_cutoff != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     } else if (phl->bap.Ds[2] > phl->bap.Ds[0]){
       phl->bap.score_type = _SCR_TYPE_SIG_ASC_; // ascending sigmoid
+      if (phl->bap.n_seasonal_cutoff != 1){
+        printf("For Sigmoid scoring, exactly one off-season cutoff must be given.\n");
+        return FAILURE;
+      }
     }
 
     // check whether products and weights are consistent
@@ -1186,9 +1253,6 @@ double tol = 5e-3;
       printf("A view zenith weight is not given, but VZN auxiliary product is specified.\n");
       return FAILURE;
     }
-
-
-    if (phl->bap.pac.lsp) phl->input_level2 = _INP_CON_;
 
   }
 

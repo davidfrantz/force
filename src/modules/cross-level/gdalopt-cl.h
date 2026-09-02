@@ -51,6 +51,7 @@ void parse_gdaloptions(char *fname, gdalopt_t *gdalopt);
 void print_gdaloptions(gdalopt_t *gdalopt);
 void copy_gdaloptions(gdalopt_t *dst, gdalopt_t *src);
 void free_gdaloptions(gdalopt_t *gdalopt);
+void check_update_driver(gdalopt_t *gdalopt, double chunk_size[], double tile_size[]);
 
 #ifdef __cplusplus
 }

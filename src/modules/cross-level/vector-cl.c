@@ -41,9 +41,7 @@ This file contains functions for handling vector files
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 GDALDatasetH warp_vector_from_disc(char *input_path, const char *destination_proj){
 GDALDatasetH input_dataset;
-GDALDatasetH memory_dataset;
 GDALDatasetH output_dataset;
-GDALDriverH vector_driver;
 char **options = NULL;
 GDALVectorTranslateOptions *translate_options = NULL;
 
@@ -54,33 +52,33 @@ GDALVectorTranslateOptions *translate_options = NULL;
     exit(FAILURE);
   }
 
-  // Get the Memory driver
-  if ((vector_driver = GDALGetDriverByName("Memory")) == NULL){
-    fprintf(stderr, "Memory driver (vector) not available.\n");
-    exit(FAILURE);
-  }
-
-  // Create an in-memory dataset
-  // note: closing this dataset yields a segmentation fault in the next function. probably not close this one
-  if ((memory_dataset = GDALCreate(vector_driver, "", 0, 0, 0, GDT_Unknown, NULL)) == NULL){
-    fprintf(stderr, "Failed to create in-memory dataset.\n");
-    exit(FAILURE);
+  // GDAL 3.10+ uses WAL (Write-Ahead Logging) for GPKG; the SQLite connection
+  // requires at least one read per layer to fully initialize the WAL state before
+  // the dataset is passed to GDALVectorTranslate — without this warm-up,
+  // GDALVectorTranslate silently fails on GPKG in GDAL 3.13+
+  for (int i=0; i<GDALDatasetGetLayerCount(input_dataset); i++){
+    OGRLayerH warm_layer = GDALDatasetGetLayer(input_dataset, i);
+    OGRFeatureH warm_feat = OGR_L_GetNextFeature(warm_layer);
+    if (warm_feat != NULL) OGR_F_Destroy(warm_feat);
+    OGR_L_ResetReading(warm_layer);
   }
 
   // prepare the translation options
-  alloc_2D((void***)&options, 2, 1024, sizeof(char));
-  copy_string(options[0], NPOW_10, "-t_srs");
-  copy_string(options[1], NPOW_10, destination_proj);
+  options = CSLAddString(options, "-f");
+  options = CSLAddString(options, "Memory");
+  options = CSLAddString(options, "-t_srs");
+  options = CSLAddString(options, destination_proj);
   translate_options = GDALVectorTranslateOptionsNew(options, NULL);
 
-  // warp the dataset
-  if ((output_dataset = GDALVectorTranslate(NULL, memory_dataset, 1, &input_dataset, translate_options, NULL)) == NULL){
-    fprintf(stderr, "Failed to reproject vector dataset%s\n", input_path);
+  // warp the dataset into a new Memory dataset (pszDest owns the name, hDstDS is NULL)
+  if ((output_dataset = GDALVectorTranslate("warped", NULL, 1, &input_dataset, translate_options, NULL)) == NULL){
+    fprintf(stderr, "Failed to reproject vector dataset %s\n", input_path);
+    fprintf(stderr, "GDAL error: %s\n", CPLGetLastErrorMsg());
     exit(FAILURE);
   }
 
   // cleanup
-  free_2D((void**)options, 2);
+  CSLDestroy(options);
   GDALVectorTranslateOptionsFree(translate_options);
   GDALClose(input_dataset);
 
@@ -114,6 +112,15 @@ small *brick_band = NULL;
     exit(FAILURE);
   }
 
+  // GDAL 3.10+ WAL warm-up: same issue as in warp_vector_from_disc — GDALRasterize
+  // also requires at least one feature read per layer before use with a GPKG dataset
+  for (int i=0; i<GDALDatasetGetLayerCount(vector_dataset); i++){
+    OGRLayerH warm_layer = GDALDatasetGetLayer(vector_dataset, i);
+    OGRFeatureH warm_feat = OGR_L_GetNextFeature(warm_layer);
+    if (warm_feat != NULL) OGR_F_Destroy(warm_feat);
+    OGR_L_ResetReading(warm_layer);
+  }
+
   // get information for destination
   get_brick_geotran(destination_brick, destination_geotran, 6);
   get_brick_proj(destination_brick, destination_proj, NPOW_10);
@@ -145,9 +152,8 @@ small *brick_band = NULL;
   GDALSetProjection(raster_dataset, destination_proj);
 
   // Prepare rasterization options
-  alloc_2D((void***)&options, 2, 1024, sizeof(char));
-  copy_string(options[0], NPOW_10, "-burn");
-  copy_string(options[1], NPOW_10, "1");
+  options = CSLAddString(options, "-burn");
+  options = CSLAddString(options, "1");
   rasterize_options = GDALRasterizeOptionsNew(options, NULL);
 
   // Perform rasterization
@@ -165,7 +171,7 @@ small *brick_band = NULL;
   }
 
   // cleanup
-  free_2D((void**)options, 2);
+  CSLDestroy(options);
   GDALRasterizeOptionsFree(rasterize_options);
   GDALClose(output_dataset);
 
@@ -190,8 +196,8 @@ small *brick_band = NULL;
 brick_t *rasterize_vector_from_disc(char *input_path, brick_t *destination_brick){
 GDALDatasetH vector_dataset;
 OGRSpatialReferenceH vector_srs;
+OGRSpatialReferenceH destination_srs;
 OGRLayerH layer;
-char *vector_proj = NULL;
 char destination_proj[NPOW_10];
 brick_t *output_brick = NULL;
 
@@ -219,20 +225,29 @@ brick_t *output_brick = NULL;
     exit(FAILURE);
   }
 
-  // Convert to WKT
-  if (OSRExportToWkt(vector_srs, &vector_proj) != OGRERR_NONE) {
-    fprintf(stderr, "Failed to retrieve WKT from %s\n", input_path);
+  // compare SRS objects directly — WKT string comparison is fragile across GDAL versions
+  // (GDAL 3.x uses WKT2 which produces different strings for the same CRS)
+  if ((destination_srs = OSRNewSpatialReference(destination_proj)) == NULL){
+    fprintf(stderr, "Failed to parse destination projection\n");
+    GDALClose(vector_dataset);
     exit(FAILURE);
   }
 
   #ifdef FORCE_DEBUG
-  printf("WKT of AOI: \n%s\n", vector_proj);
-  printf("WKT of Destination: \n%s\n", destination_proj);
+  {
+    char *vector_proj_dbg = NULL;
+    if (OSRExportToWkt(vector_srs, &vector_proj_dbg) == OGRERR_NONE){
+      printf("WKT of AOI: \n%s\n", vector_proj_dbg);
+      CPLFree(vector_proj_dbg);
+    }
+    printf("WKT of Destination: \n%s\n", destination_proj);
+  }
   #endif
 
-  // compare input and output WKT, warp if not the same
-  if (strcmp(destination_proj, vector_proj) != 0){
+  // warp if SRS differs
+  if (!OSRIsSame(destination_srs, vector_srs)){
 
+    OSRDestroySpatialReference(destination_srs);
     // close dataset again
     GDALClose(vector_dataset);
     
@@ -242,13 +257,10 @@ brick_t *output_brick = NULL;
       exit(FAILURE);
     }
 
-  } 
-  // else {
-  //  printf("AOI is in image's SRS, skipping the reprojection.\n");
-  //}
+  } else {
+    OSRDestroySpatialReference(destination_srs);
+  }
 
-  // cleanup
-  CPLFree(vector_proj);
   output_brick = rasterize_vector_from_memory(vector_dataset, destination_brick);
   GDALClose(vector_dataset);
 

@@ -59,7 +59,7 @@ int write_brick(brick_t *brick){
   GDALDriverH driver_create   = NULL;
   GDALDataType file_datatype;
   int create;
-  char **driver_metadata = NULL;
+  CSLConstList driver_metadata = NULL;
   char **options = NULL;
   float *buf = NULL;
   float now, old;
@@ -175,7 +175,11 @@ int write_brick(brick_t *brick){
       driver_create = driver_memory;
     }
   
-    //CSLDestroy(driver_metadata);
+    // driver_metadata is owned by GDAL and must not be freed by application. 
+    // It is a NULL-terminated list of strings in the form "KEY=VALUE".
+    // Setting to NULL is not necessary, but 
+    // to be sure that we do not accidentally use it for other purposes, 
+    // we set it to NULL here.
     driver_metadata   = NULL;
   
     // set GDAL output options
@@ -361,7 +365,13 @@ int write_brick(brick_t *brick){
         b_file  = bands[_FILE_][f][b];
   
         band = GDALGetRasterBand(fp, b_file);
-  
+
+        // initialize file before writing chunk to avoid uninitialized data in output image
+        if (brick->initialize){
+          if (GDALFillRaster(band, (double)brick->nodata[b_brick], 0.0) == CE_Failure){
+            printf("Unable to initialize %s. ", fname); return FAILURE;}
+        }
+
         switch (brick->datatype){
           case _DT_SHORT_:
             if (GDALRasterIO(band, GF_Write, xoff_write, yoff_write, 
@@ -630,14 +640,20 @@ const char *projection = NULL;
   GDALDataType dt = GDT_Int16;
   GDALWarpOptions *wopt = NULL;
   GDALWarpOperation woper;
-  GDALResampleAlg resample[3] = { GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic };
+  GDALResampleAlg resample[14] = { 
+    GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic,
+    GRA_CubicSpline, GRA_Lanczos, GRA_Average,
+    GRA_Mode, GRA_Max, GRA_Min,
+    GRA_Med, GRA_Q1, GRA_Q3,
+    GRA_Sum, GRA_RMS
+  };
   void *transformer = NULL;
   char src_proj[NPOW_10];
   double src_geotran[_GT_LEN_];
   double dst_geotran[_GT_LEN_];
   short *src_ = NULL;
   short **buf_ = NULL;
-  short nodata;
+  short nodata = 0;
   int src_nx, src_ny, src_nc;
   int dst_nx, dst_ny, dst_nc;
   double tmpx, tmpy;
@@ -646,6 +662,7 @@ const char *projection = NULL;
   //size_t max_mem = 1073741824; // 1GB
   size_t max_mem = 805306368; // 0.75GB
   char nthread[NPOW_10];
+  char c_nodata[NPOW_10];
   int nchar;
   char **papszWarpOptions = NULL;
   
@@ -686,7 +703,8 @@ const char *projection = NULL;
     }
   
     #ifdef FORCE_DEBUG
-    printf("WKT of brick: %s\n", src_proj);
+    printf("WKT of src (brick): %s\n", src_proj);
+    printf("WKT of dst (cube):  %s\n", cube->projection);
     #endif
   
   
@@ -696,7 +714,7 @@ const char *projection = NULL;
     // create transformer between source and destination
     if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
       NULL, cube->projection, false, 0, 2)) == NULL){
-      printf("could not create image to image transformer. "); return FAILURE;}
+      printf("could not create approximate image to image transformer. "); return FAILURE;}
   
     // estimate approximate extent
     if (GDALSuggestedWarpOutput(src_dataset, GDALGenImgProjTransform, 
@@ -772,7 +790,7 @@ const char *projection = NULL;
       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
       if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
         dst_dataset, cube->projection, false, 0, 2)) == NULL){
-        printf("could not create image to image transformer. "); return FAILURE;}
+        printf("could not create accurate image to image transformer. "); return FAILURE;}
   
   
       // buffer to hold warped image
@@ -819,8 +837,12 @@ const char *projection = NULL;
       if (nchar < 0 || nchar >= NPOW_10){ 
         printf("Buffer Overflow in assembling threads\n"); return FAILURE;}
   
+      nchar = snprintf(c_nodata, NPOW_10, "%d", nodata);
+      if (nchar < 0 || nchar >= NPOW_10){ 
+        printf("Buffer Overflow in assembling c_nodata\n"); return FAILURE;}
+
       papszWarpOptions = CSLSetNameValue(papszWarpOptions, "NUM_THREADS", nthread);
-      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", "-9999");
+      papszWarpOptions = CSLSetNameValue(papszWarpOptions, "INIT_DEST", c_nodata);
       wopt->papszWarpOptions = CSLDuplicate(papszWarpOptions);
   
   
@@ -967,10 +989,6 @@ const char *projection = NULL;
     if (src_b >= src_nb){
       printf("Requested band %d is out of bounds %d (disc)! ", src_b, src_nb); return FAILURE;}
   
-    #ifdef FORCE_DEBUG
-    printf("WKT of image on disc: %s\n", src_proj);
-    #endif
-    
   
     /** "create" the destination dataset
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
@@ -992,17 +1010,20 @@ const char *projection = NULL;
     if (GDALSetGeoTransform(dst_dataset, dst_geotran)){
       printf("could not set dst geotransformation. "); return FAILURE;}
   
+      
     #ifdef FORCE_DEBUG
-    printf("warp to UL-X: %.0f / UL-Y: %.0f @ res: %.0f\n", dst_geotran[0], dst_geotran[3], dst_geotran[1]);
+    printf("WKT of src (disc):  %s\n", src_proj);
+    printf("WKT of dst (brick): %s\n", dst_proj);
+    print_dvector(dst_geotran, "dst geotransf.", _GT_LEN_, 1, 2);
     #endif
-    
+      
   
     /** create accurate transformer between source and destination
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
   
     if ((transformer = GDALCreateGenImgProjTransformer(src_dataset, src_proj,
       dst_dataset, dst_proj, false, 0, 2)) == NULL){
-      printf("could not create image to image transformer. "); return FAILURE;}
+      printf("could not create accurate image to image transformer. "); return FAILURE;}
     
   
     /** set warping options

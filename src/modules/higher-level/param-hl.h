@@ -99,9 +99,11 @@ typedef struct {
   int *Dt;            // target DOYs
   int nDt, nDs;
   float *Ds;           // function values for target DOYs
-  int offsea; // use off-season data?
-  int use_cloudy; // use ultra-cloudy data?
-  int use_hazy; // use ultra-hazy data?
+  float *seasonal_cutoff;      // DOY score cutoff
+  int n_seasonal_cutoff;
+  float cloudy_cutoff; // use ultra-cloudy data?
+  float hazy_cutoff; // use ultra-hazy data?
+  float vzen_cutoff; // use bad view zenith data?
   int select; // select or weight?
   int combine; // how to combine scores?
 
@@ -240,6 +242,11 @@ typedef struct {
   par_sta_t sta;
 } par_stm_t;
 
+// adaptive date range
+typedef struct {
+  int use;
+  int start;
+} par_adr_t;
 
 // general TSA
 typedef struct {
@@ -437,10 +444,14 @@ typedef struct {
   int date_quarters[5];
   int nd, nw, nm, nq, ny;
 
+  // adaptive date range
+  par_adr_t adaptive_date_range;
+
   // miscellaneous
   char *f_gdalopt;   // file for GDAL options
   gdalopt_t gdalopt; // GDAL output options
   int format;        // output format
+  int initialize;    // flag: initialize output image before writing first chunk
   int explode;
   int subfolders;
   int owr;             // flag: overwrite output
@@ -449,6 +460,9 @@ typedef struct {
   int cthread;
   int stream;
   int pretty_progress;
+  int action_if_read_error_mask;      // what to do if a read error occurs
+  int action_if_read_error_primary;   // what to do if a read error occurs
+  int action_if_read_error_secondary; // what to do if a read error occurs
   int fail_if_empty;    // warn (false) or error (true) without IO
 
   // products

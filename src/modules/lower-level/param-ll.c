@@ -57,8 +57,8 @@ void register_lower(params_t *params, par_ll_t *pl2){
   register_double_par(params,  "RESOLUTION_SENTINEL2",  0, INT_MAX, &pl2->res_sentinel2);
   register_bool_par(params,    "DO_REPROJ",             &pl2->doreproj);
   register_bool_par(params,    "DO_TILE",               &pl2->dotile);
-  register_double_par(params,  "ORIGIN_LAT",            -90, 90, &pl2->orig_lat);
-  register_double_par(params,  "ORIGIN_LON",            -180, 180, &pl2->orig_lon);
+  register_doublevec_par(params, "GRID_ORIGIN",         -DBL_MAX, DBL_MAX, 2, &pl2->orig, &pl2->n_orig);
+  register_enum_par(params,     "GRID_ORIGIN_TYPE",    _TAGGED_ENUM_COORD_TYPE_, _COORD_TYPE_LENGTH_, &pl2->orig_type);
   register_charvec_par(params, "PROJECTION",            _CHAR_TEST_NONE_, -1, &pl2->proj_, &pl2->nproj_);
   register_enum_par(params,    "RESAMPLING",            _TAGGED_ENUM_RESAMPLE_, _RESAMPLE_LENGTH_, &pl2->resample);
   register_enum_par(params,    "RES_MERGE",             _TAGGED_ENUM_RES_MERGE_, _RES_MERGE_LENGTH_, &pl2->resmerge);
@@ -171,26 +171,23 @@ char  bname[NPOW_10] = "\0";
 
   pl2->params = allocate_params();
   
-  if (pl2->d_level1 != NULL){
+  // if .SAFE directory (S2) was given, use 1st granule
+  extension(pl2->d_level1, ext, NPOW_10);
+
+  if (strcmp(ext, ".SAFE") == 0){
     
-    // if .SAFE directory (S2) was given, use 1st granule
-    extension(pl2->d_level1, ext, NPOW_10);
+    strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
 
-    if (strcmp(ext, ".SAFE") == 0){
-      
-      strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
+    if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
+        printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
 
-      if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
-         printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
+    copy_string(pl2->d_level1, NPOW_10, bname);
 
-      copy_string(pl2->d_level1, NPOW_10, bname);
+  }
 
-    }
+  basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
+  //printf("%s: ", pl2->b_level1);
 
-    basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
-    //printf("%s: ", pl2->b_level1);
-  } else {
-    printf("No input image given!\n"); return FAILURE;}
 
 
   // open parameter file

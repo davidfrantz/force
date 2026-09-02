@@ -55,6 +55,9 @@ enum { SUCCESS = 0, FAILURE = 1, CANCEL = 10 };
 // dimensions
 enum { _X_, _Y_, _Z_ };
 
+// type of coordinates
+enum { _COORD_TYPE_GEO_, _COORD_TYPE_MAP_, _COORD_TYPE_LENGTH_ };
+
 // range
 enum { _MIN_, _MAX_ };
 
@@ -89,6 +92,9 @@ enum { _DT_NONE_,  _DT_SHORT_, _DT_SMALL_,
 
 // output formats
 enum { _FMT_ENVI_, _FMT_GTIFF_, _FMT_COG_, _FMT_JPEG_, _FMT_CUSTOM_, _FMT_LENGTH_ };
+
+enum { _READ_ERR_STOP_, _READ_ERR_SKIP_, 
+       _READ_ERR_YOLO_, _READ_ERR_LENGTH_ };
 
 // t-test tailtype
 enum { _TAIL_LEFT_, _TAIL_TWO_, _TAIL_RIGHT_, _TAIL_LENGTH_ };
@@ -248,7 +254,11 @@ enum { LANDSAT, SENTINEL2, _UNKNOWN_, _MISSION_LENGTH_ };
 enum { ZEN, AZI, cZEN, cAZI, sZEN, sAZI, tZEN, tAZI };
 
 // resampling method
-enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, _RESAMPLE_LENGTH_ };
+enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, 
+       _RESAMPLE_CSP_, _RESAMPLE_LZ_, _RESAMPLE_AVG_, 
+       _RESAMPLE_MODE_, _RESAMPLE_MAX_, _RESAMPLE_MIN_, 
+       _RESAMPLE_MED_, _RESAMPLE_Q1_, _RESAMPLE_Q3_, 
+       _RESAMPLE_SUM_, _RESAMPLE_RMS_, _RESAMPLE_LENGTH_ };
 
 // resolution merge method
 enum { _RES_MERGE_NONE_, _RES_MERGE_REGRESSION_, _RES_MERGE_IMPROPHE_, _RES_MERGE_STARFM_, _RES_MERGE_LENGTH_ };
@@ -283,9 +293,11 @@ enum { _CONTINENT_AF_, _CONTINENT_AN_, _CONTINENT_AS_, _CONTINENT_EU_,
 enum { _INDEX_TYPE_BAND_, _INDEX_TYPE_EQUATION_, _INDEX_TYPE_SMA_, _INDEX_TYPE_LEN_ };
 
 // tagged enums
+extern const tagged_enum_t _TAGGED_ENUM_COORD_TYPE_[_COORD_TYPE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_];
+extern const tagged_enum_t _TAGGED_ENUM_READ_ERR_[_READ_ERR_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_INT_[_INT_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_STA_[_STA_LENGTH_];

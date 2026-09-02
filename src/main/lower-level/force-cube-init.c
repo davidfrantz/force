@@ -41,17 +41,18 @@ This program initializes a datacube-definition.prj
 
 typedef struct {
   int n;
-  double geo[2]; // lon/lat
+  double orig[2]; // [ _X_, _Y_ ]
   double tile_size[2];
   char dcube[NPOW_10];
   char proj[NPOW_10];
+  int orig_type;
 } args_t;
 
 
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] [-d datacube-dir] [-o lon/lat] \n", exe);
+  printf("Usage: %s [-h] [-v] [-i] [-d datacube-dir] [-o lon/lat] [-m]\n", exe);
   printf("          [-t tile-size] projection\n");
   printf("\n");
   printf("  -h  = show this help\n");
@@ -66,6 +67,7 @@ void usage(char *exe, int exit_code){
   printf("     longitude is X!\n");
   printf("     latitude  is Y!\n");
   printf("     default: -25,60 (is ignored for pre-defined projections!)\n");
+  printf("  -m flag to use map coordinates for grid origin (instead of geographic)\n");
   printf("\n");
   printf("  -t tile-size\n");
   printf("     default: 30000,30000 (is ignored for pre-defined projections!)\n");
@@ -93,8 +95,9 @@ int i;
   // default parameters
   args->tile_size[_X_] = 30000;
   args->tile_size[_Y_] = 30000;
-  args->geo[_X_] = -25;
-  args->geo[_Y_] =  60;
+  args->orig[_X_] = -25;
+  args->orig[_Y_] =  60;
+  args->orig_type = _COORD_TYPE_GEO_;
   copy_string(args->dcube, 1024, ".");
 
   // optional parameters
@@ -116,7 +119,7 @@ int i;
         ptr = strtok_r(buffer, separator, &saveptr);
         i = 0;
         while (ptr != NULL){
-          if (i < 2) args->geo[i] = atof(ptr);
+          if (i < 2) args->orig[i] = atof(ptr);
           ptr = strtok_r(NULL, separator, &saveptr);
           i++;
         }
@@ -124,6 +127,9 @@ int i;
           fprintf(stderr, "Coordinate must have 2 numbers.\n");
           usage(argv[0], FAILURE);  
         }
+        break;
+      case 'm':
+        args->orig_type = _COORD_TYPE_MAP_;
         break;
       case 't':
         copy_string(buffer, NPOW_10, optarg);
@@ -194,15 +200,18 @@ multicube_t *multicube = NULL;
   pl2.d_level2 = args.dcube;
   copy_string(pl2.proj, NPOW_10, args.proj);
   alloc((void**)&pl2.tile_size, (pl2.n_tile_size = 2), sizeof(double));
+  alloc((void**)&pl2.orig, (pl2.n_orig = 2), sizeof(double));
   pl2.tile_size[_X_] = args.tile_size[_X_];
   pl2.tile_size[_Y_] = args.tile_size[_Y_];
-  pl2.orig_lon = args.geo[_X_];
-  pl2.orig_lat = args.geo[_Y_];
+  pl2.orig[_X_] = args.orig[_X_];
+  pl2.orig[_Y_] = args.orig[_Y_];
+  pl2.orig_type = args.orig_type;
 
   if ((multicube = start_multicube(&pl2, NULL)) == NULL){
     printf("Starting datacube(s) failed.\n"); return FAILURE;}
 
   free((void*)pl2.tile_size);
+  free((void*)pl2.orig);
   free_multicube(multicube);
 
   return SUCCESS;

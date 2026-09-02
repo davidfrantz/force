@@ -23,25 +23,30 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "index-parse-hl.h"
 
+int load_index_runtime_data(json_t **def_indices);
+int get_index_bandnames(char ***bandnames, int *n_band_names, char *index_name, json_t *def_indices);
+int get_required_bands(char ***required_band_names, int *n_required, int *index_type, char *index_name, sen_t *sen, json_t *def_indices);
+int check_available_bands(char **required_band_names, int n_required, bool *use_band, sen_t *sen);
+int remove_unused_bands(bool *use_band, sen_t *sen);
 
-/** Load index definitions from a JSON file into a Jansson json_t struct.
+
+/** Load index definitions from the JSON runtime data into a Jansson json_t struct.
 +++ The returned struct must be freed with json_decref after use.
 --- def_indices: Pointer to json_t* to receive the loaded JSON object
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_index_definitions(json_t **def_indices){
+int load_index_runtime_data(json_t **def_indices){
 
   char d_exe[NPOW_10];
   get_install_directory(d_exe, NPOW_10);
 
-  char path_sensor[NPOW_10];
-  concat_string_3(path_sensor, NPOW_10, d_exe, "force-misc/runtime-data", "indices.json", "/");
+  char path_json[NPOW_10];
+  concat_string_2(path_json, NPOW_10, d_exe, _FORCE_INDEX_FILE_, "/");
 
-  json_error_t error;
   json_t *def;
-  def = json_load_file(path_sensor, 0, &error);
-  if (!def){
-    fprintf(stderr, "Error: %s\n", error.text);
+
+  if (load_json(&def, path_json) != SUCCESS){
+    fprintf(stderr, "Error loading JSON file %s\n", path_json);
     return FAILURE;
   }
 
@@ -51,52 +56,84 @@ int load_index_definitions(json_t **def_indices){
 }
 
 
+/** Print all index definitions from the runtime data to stdout.
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_index_runtime_data(){
+
+  json_t *def_indices = NULL;
+  if (load_index_runtime_data(&def_indices) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse index definitions.\n");
+    exit(FAILURE);
+  }
+
+  int error = 0;
+
+  void *iter = json_object_iter(def_indices);
+  while (iter){
+
+    const char *index_name = json_object_iter_key(iter);
+    printf("Index: %s\n", index_name);
+
+    char **band_names = NULL;
+    int n_band_names = 0;
+    if (get_json_string_array(&band_names, &n_band_names, "band_names", json_object_iter_value(iter)) != SUCCESS) {
+      fprintf(stderr, "Error: Could not get band names for %s.\n", index_name);
+      error++;
+      iter = json_object_iter_next(def_indices, iter);
+      continue;
+    }
+    printf("  Required bands: %d\n", n_band_names);
+    for (int b=0; b<n_band_names; b++){
+      printf("  %02d: %s\n", b+1, band_names[b]);
+    }
+    printf("\n");
+
+    free_2D((void**)band_names, n_band_names); band_names = NULL;
+
+    iter = json_object_iter_next(def_indices, iter);
+
+  }
+
+  json_decref(def_indices);
+
+  if (error > 0){
+    fprintf(stderr, "Encountered %d error(s) while parsing index definitions.\n", error);
+    exit(FAILURE);
+  }
+
+  return;
+}
+
+
 /** Extract the band names from a JSON index definition.
 +++ Allocates a 2D array of strings for band names.
 --- names: Pointer to char** to receive band names (must be freed with free_2D)
---- nbands: Number of bands
+--- n_band_names: Number of bands
 --- index_name: Name of the index (e.g. "NDVI"), needs to be present in the JSON file
 --- def_index: JSON object with index definition
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_index_bandnames(char ***bandnames, int *nbands, char *index_name, json_t *def_indices){
+int get_index_bandnames(char ***bandnames, int *n_band_names, char *index_name, json_t *def_all_indices){
   
-  json_t *def_index = json_object_get(def_indices, index_name);
-  
-  if (def_index == NULL) {
-    fprintf(stderr, "Error: Item %s not found\n", index_name);
-    fprintf(stderr, "There is no definition for this index.\n");
+  json_t *def_index = NULL;
+  if (get_json_object(&def_index, index_name, def_all_indices) != SUCCESS){
+    fprintf(stderr, "Error: Could not parse index definition for %s.\n", index_name);
     return FAILURE;
   }
-
+  
   char **names = NULL;
   int n_names = 0;
-
-  if (json_is_array(def_index)) {
-
-    n_names = json_array_size(def_index);
-
-    alloc_2D((void***)&names, n_names, NPOW_10, sizeof(char));
-
-
-    for (int b=0; b<n_names; b++){
-        json_t *def_band_name = json_array_get(def_index, b);
-        if (json_is_string(def_band_name)){
-          copy_string(names[b], NPOW_10, json_string_value(def_band_name));
-          #ifdef FORCE_DEBUG
-          printf("  %02d: %s\n", b+1, names[b]);
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not a string.\n", b+1, index_name);
-          return FAILURE;
-        }
-    }
-  } else {
-    fprintf(stderr, "Error: Item %s is not an array.\n", index_name);
+  if (get_json_string_array(&names, &n_names, "band_names", def_index) != SUCCESS) {
+    fprintf(stderr, "Error: Could not get band names for %s.\n", index_name);
     return FAILURE;
   }
 
-  *nbands = n_names;
+  #ifdef FORCE_DEBUG
+  for (int b=0; b<n_names; b++) printf("  %02d: %s\n", b+1, names[b]);
+  #endif
+
+  *n_band_names = n_names;
   *bandnames = names;
 
   return SUCCESS;
@@ -271,7 +308,7 @@ int retrieve_indices(index_t *index, sen_t *sen){
 
   // load index definitions
   json_t *def_indices = NULL;
-  if (load_index_definitions(&def_indices) != SUCCESS){
+  if (load_index_runtime_data(&def_indices) != SUCCESS){
     fprintf(stderr, "Error: Could not parse index definitions.\n");
     return FAILURE;
   }

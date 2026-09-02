@@ -393,6 +393,24 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "Landsat images based on all available Landsat data: Predicting Landsat surface "
     "reflectance at any given time. Remote Sensing of Environment, 162, 67-83."
     "http://dx.doi.org/10.1016/j.rse.2015.02.009",
+    false },
+  { "Map accuracy",
+    "Olofsson, P., Foody, G. M., Stehman, S. V., & Woodcock, C. E. (2013). Making "
+    "better use of accuracy data in land change studies: Estimating accuracy and area "
+    "and quantifying uncertainty using stratified estimation. Remote Sensing of "
+    "Environment, 129, 122-131. http://dx.doi.org/10.1016/j.rse.2012.10.031",
+    false },
+  { "Map accuracy good practices",
+    "Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & "
+    "Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy "
+    "of land change. Remote sensing of Environment, 148, 42-57."
+    "http://dx.doi.org/10.1016/j.rse.2012.10.031",
+    false },
+  { "Disease Water Stress Index (DWSI)",
+    "Apan, A., Held, A., Phinn, S., & Markley, J. (2004). Detecting sugarcane "
+    "orange rust disease using EO-1 Hyperion hyperspectral imagery. International "
+    "Journal of Remote Sensing, 25(2), 489-498. "
+    "https://doi.org/10.1080/01431160310001618031",
     false }
 };
 

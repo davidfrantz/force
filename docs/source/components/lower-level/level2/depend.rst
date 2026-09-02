@@ -41,7 +41,7 @@ Water Vapor Database
 A water vapor database is necessary for the atmospheric correction of Landsat data.
 It is not needed for Sentinel-2.
 The directory containing the database needs to be given in the :ref:`l2-param` with ``DIR_WVPLUT``.
-For more information, see the :ref:`wvdb` module.
+For more information, see :ref:`wvdb`.
 
 .. seealso:: 
 

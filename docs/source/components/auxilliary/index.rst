@@ -40,6 +40,8 @@ Auxiliary
 +--------+------------------------+-------+---------------------------------------------------------+
 |        | force-magic-parameters |       | Generate parameterfiles from replacement values         |
 +--------+------------------------+-------+---------------------------------------------------------+
+|        | force-runtime-data     |       | Print runtime data information                          |
++--------+------------------------+-------+---------------------------------------------------------+
 
 
 
@@ -75,4 +77,5 @@ A glimpse of what you get:
    synthmix.rst
    stack.rst
    mdcp.rst   
-   magic-parameters.rst
+   magic-parameters.rst 
+   runtime-data.rst

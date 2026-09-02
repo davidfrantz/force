@@ -1,0 +1,328 @@
+Sensor request name: LND04
+  Sensor ID in file names: LND04
+  Description: Landsat 4 Thematic Mapper
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: LND05
+  Sensor ID in file names: LND05
+  Description: Landsat 5 Thematic Mapper
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: LND07
+  Sensor ID in file names: LND07
+  Description: Landsat 7 Enhanced Thematic Mapper
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: LND08
+  Sensor ID in file names: LND08
+  Description: Landsat 8 Operational Land Imager
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: LND09
+  Sensor ID in file names: LND09
+  Description: Landsat 9 Operational Land Imager
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: LNDLG
+  Sensor ID in file names: LNDLG
+  Description: Landsat Legacy generic sensor
+  Number of bands: 6
+  Number of band names: 6
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR1
+  06: SWIR2
+
+Sensor request name: MOD01
+  Sensor ID in file names: MOD01
+  Description: TERRA MODIS
+  Number of bands: 7
+  Number of band names: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor request name: MOD02
+  Sensor ID in file names: MOD02
+  Description: AQUA MODIS
+  Number of bands: 7
+  Number of band names: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor request name: MODIS
+  Sensor ID in file names: MODIS
+  Description: MODIS generic sensor
+  Number of bands: 7
+  Number of band names: 7
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: NIR
+  05: SWIR0
+  06: SWIR1
+  07: SWIR2
+
+Sensor request name: RGB
+  Sensor ID in file names: R-G-B
+  Description: R-G-B generic sensor
+  Number of bands: 3
+  Number of band names: 3
+  01: BLUE
+  02: GREEN
+  03: RED
+
+Sensor request name: S1AIA
+  Sensor ID in file names: S1AIA
+  Description: Sentinel-1A Ascending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: S1AID
+  Sensor ID in file names: S1AID
+  Description: Sentinel-1A Descending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: S1BIA
+  Sensor ID in file names: S1BIA
+  Description: Sentinel-1C Ascending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: S1BID
+  Sensor ID in file names: S1BID
+  Description: Sentinel-1B Descending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: S1CIA
+  Sensor ID in file names: S1CIA
+  Description: Sentinel-1B Ascending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: S1CID
+  Sensor ID in file names: S1CID
+  Description: Sentinel-1C Descending Interferometric Wide Swath
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+
+Sensor request name: sen2a
+  Sensor ID in file names: SEN2A
+  Description: Sentinel-2A MSI high-res bands
+  Number of bands: 4
+  Number of band names: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor request name: SEN2A
+  Sensor ID in file names: SEN2A
+  Description: Sentinel-2A MSI
+  Number of bands: 10
+  Number of band names: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor request name: sen2b
+  Sensor ID in file names: SEN2B
+  Description: Sentinel-2B MSI high-res bands
+  Number of bands: 4
+  Number of band names: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor request name: SEN2B
+  Sensor ID in file names: SEN2B
+  Description: Sentinel-2B MSI high-res bands
+  Number of bands: 10
+  Number of band names: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor request name: sen2c
+  Sensor ID in file names: SEN2C
+  Description: Sentinel-2C MSI high-res bands
+  Number of bands: 4
+  Number of band names: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor request name: SEN2C
+  Sensor ID in file names: SEN2C
+  Description: Sentinel-2C MSI high-res bands
+  Number of bands: 10
+  Number of band names: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor request name: sen2d
+  Sensor ID in file names: SEN2D
+  Description: Sentinel-2D MSI high-res bands
+  Number of bands: 4
+  Number of band names: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor request name: SEN2D
+  Sensor ID in file names: SEN2D
+  Description: Sentinel-2D MSI high-res bands
+  Number of bands: 10
+  Number of band names: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor request name: sen2l
+  Sensor ID in file names: SEN2L
+  Description: Sentinel-2 generic high-res sensor
+  Number of bands: 4
+  Number of band names: 4
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: BROADNIR
+
+Sensor request name: SEN2L
+  Sensor ID in file names: SEN2L
+  Description: Sentinel-2 generic sensor
+  Number of bands: 10
+  Number of band names: 10
+  01: BLUE
+  02: GREEN
+  03: RED
+  04: REDEDGE1
+  05: REDEDGE2
+  06: REDEDGE3
+  07: BROADNIR
+  08: NIR
+  09: SWIR1
+  10: SWIR2
+
+Sensor request name: VVVHP
+  Sensor ID in file names: VVVHP
+  Description: Generic VV+VH Polarimetric sensor
+  Number of bands: 2
+  Number of band names: 2
+  01: VV
+  02: VH
+
+Sensor request name: FULLP
+  Sensor ID in file names: FULLP
+  Description: Generic Full Polarimetric sensor
+  Number of bands: 4
+  Number of band names: 4
+  01: VV
+  02: VH
+  03: HH
+  04: HV
+

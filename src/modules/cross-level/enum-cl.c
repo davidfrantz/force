@@ -27,9 +27,15 @@ This file contains tagged enum definitions
 
 #include "enum-cl.h"
 
+const tagged_enum_t _TAGGED_ENUM_COORD_TYPE_[_COORD_TYPE_LENGTH_] = {
+  { _COORD_TYPE_GEO_, "GEO" }, { _COORD_TYPE_MAP_, "MAP" }};
 
 const tagged_enum_t _TAGGED_ENUM_RESAMPLE_[_RESAMPLE_LENGTH_] = {
-  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" }};
+  { _RESAMPLE_NN_, "NN" }, { _RESAMPLE_BL_, "BL" }, { _RESAMPLE_CC_, "CC" },
+  { _RESAMPLE_CSP_, "CSP" }, { _RESAMPLE_LZ_, "LZ" }, { _RESAMPLE_AVG_, "AVG" },
+  { _RESAMPLE_MODE_, "MODE" }, { _RESAMPLE_MAX_, "MAX" }, { _RESAMPLE_MIN_, "MIN" },
+  { _RESAMPLE_MED_, "MED" }, { _RESAMPLE_Q1_, "Q1" }, { _RESAMPLE_Q3_, "Q3" },
+  { _RESAMPLE_SUM_, "SUM" }, { _RESAMPLE_RMS_, "RMS" }};
 
 const tagged_enum_t _TAGGED_ENUM_RES_MERGE_[_RES_MERGE_LENGTH_] = {
   { _RES_MERGE_NONE_,     "NONE" },     { _RES_MERGE_REGRESSION_, "REGRESSION" }, 
@@ -39,6 +45,10 @@ const tagged_enum_t _TAGGED_ENUM_FMT_[_FMT_LENGTH_] = {
   { _FMT_ENVI_, "ENVI" }, { _FMT_GTIFF_, "GTiff" },
   { _FMT_COG_, "COG" },   { _FMT_JPEG_, "JPEG" },
   { _FMT_CUSTOM_, "CUSTOM"}};
+
+const tagged_enum_t _TAGGED_ENUM_READ_ERR_[_READ_ERR_LENGTH_] = {
+  { _READ_ERR_STOP_, "STOP" }, { _READ_ERR_SKIP_, "SKIP" }, 
+  { _READ_ERR_YOLO_, "YOLO" }};
 
 const tagged_enum_t _TAGGED_ENUM_QAI_[_QAI_LENGTH_] = {
   { _QAI_OFF_,      "NODATA"       }, { _QAI_CLD_OPQ_,  "CLOUD_OPAQUE" },

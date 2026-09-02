@@ -1,0 +1,24 @@
+.. _v31004:
+
+FORCE v. 3.10.04
+================
+
+Release: 24.11.2025
+
+**Read through the changelog of :ref:`v3900` closely. In this version, there are some important changes that may affect your workflows!**
+
+- **FORCE L2PS**
+
+    - Vincent Schut reported that in some cases, the ``force-l2ps`` tool would 
+      cancel processing of Landsat data as water vapour could not be retreived 
+      from the LUT. The "error" only occured when processing coastal scenes.
+      It turned out that the LUT reading function (v. >= 3.9.0) computed the
+      center y-coordinate of the image incorrectly, such that the water vapour 
+      from the row to the north was used instead. This caused an issue in coastal
+      scenes where no LUT value is available over water. Note though, that the
+      wrong LUT value was used for every scene! This has been fixed now.
+      However, also note that the neighboring LUT value is surely not that far off
+      the correct one, so the impact on the final results should be minimal 
+      (especially for the newer OLI sensors).
+      Thanks Vincent for reporting this issue. 
+      Thanks to Katja Kowalski for confirming the issue.

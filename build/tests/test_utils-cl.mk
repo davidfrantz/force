@@ -12,4 +12,5 @@ test_utils-cl: \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
-	$(OBJDIR)/utils-cl.o
+	$(OBJDIR)/utils-cl.o \
+	-lm

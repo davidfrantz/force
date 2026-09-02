@@ -22,6 +22,12 @@ DIR_MASK = NULL
 # Masks need to be binary with 0 = off / 1 = on
 # Type: Basename of file
 BASE_MASK = NULL
+# This parameter controls how FORCE deals with input errors of the mask. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default).
+# Type: Character. Valid values: {STOP, SKIP}
+READ_ERROR_MASK = SKIP
 
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
@@ -45,6 +51,13 @@ OUTPUT_FORMAT = GTiff
 # give invalid or conflicting options that result in the failure of creating files.
 # Type: full file path
 FILE_OUTPUT_OPTIONS = NULL
+# This parameter controls whether the output image is initialized before writing 
+# the first chunk. This prevents uninitialized data in the output image for sparse 
+# output scenarios, but might be slower for large images. The parameter is ignored if 
+# CHUNK_SIZE matches the tile size, because in that case the image is created in one 
+# big chunk anyways.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_INITIALIZE = TRUE
 # This parameter controls whether the output is written as multi-band image, or
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
@@ -103,8 +116,8 @@ Y_TILE_RANGE = 0 0
 # Type: full file path
 FILE_TILE = NULL
 # This parameter is used to define the size of the sub-tile processing units.
-# Most efficient is to use a chunk size that coincides with the tile size. Using 
-# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# Most efficient is to use a chunk size that coincides with the tile size. Using
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM.
 # The tilesize must be dividable by the chunk size without remainder.
 # Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
 # parameter is not permitted anymore.
@@ -133,14 +146,14 @@ USE_L2_IMPROPHE = FALSE
 # Sensors to be used in the analysis. Multi-sensor analyses are restricted
 # to the overlapping bands. Each sensor needs a sensor definition in the runtime-data
 # directory. New sensors can be added by the user. New bandnames can be added, too.
-# Type: Character list. 
+# Type: Character list.
 SENSORS = LND08 LND09 SEN2A SEN2B SEN2C
 # Target sensor that represents the combination of input sensors.
-# A sensor definition for this target sensor needs to exist to make sure that processing 
-# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2, 
-# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2 
+# A sensor definition for this target sensor needs to exist to make sure that processing
+# those outputs will be possible. For example, if you combine Landsat 8 and Sentinel-2,
+# the target sensor containing the overlapping bands could be LNDLG. If only using Sentinel-2
 # sensors, the target sensor could be SEN2L. Valid values are the same as for SENSORS.
-# Type: Character list. 
+# Type: Character list.
 TARGET_SENSOR = LNDLG
 # Main product type to be used. Usually, this is a reflectance product like BOA.
 # When using composites, you may use BAP. This can be anything, but make sure that
@@ -157,6 +170,15 @@ PRODUCT_TYPE_MAIN = BOA
 # flags as defined with SCREEN_QAI.
 # Type: Character. Valid values: {QAI,INF,NULL,...}
 PRODUCT_TYPE_QUALITY = QAI
+# This parameter controls how FORCE deals with input errors of primary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_PRIMARY = SKIP
 # Perform a spectral adjustment to Sentinel-2?
 # This method can only be used with following sensors: SEN2A, SEN2B, SEN2C, SEN2D,LND04, LND05, LND07, 
 # LND08, LND09, MOD01, MOD02.
@@ -202,23 +224,17 @@ DATE_RANGE = 2010-01-01 2019-12-31
 # will use all October-March observations from 2010-2019.
 # Type: Integer list. Valid values: [1,365]
 DOY_RANGE = 1 365
-# Landat 7 was de-orbited in 2019. Landsat 7 data might be available 
-# in your data cube even though you might not want to use it anymore. 
+# Landsat 7 was de-orbited in 2019. Landsat 7 data might be available
+# in your data cube even though you might not want to use it anymore.
 # This parameters sets the date after which Landsat 7 data should be ignored.
 # Type: Date. Format: YYYY-MM-DD
 DATE_IGNORE_LANDSAT_7 = 2099-12-31
 
 # SPECTRAL INDEX
 # ------------------------------------------------------------------------
-# Perform the time series analysis using the specified band or index.
-# Multiple indices can be processed at once to avoid multiple reads of the
-# same file. Only necessary bands will be input. You will be alerted if the
-# index cannot be computed based on the requested SENSORS. The index SMA is
-# a linear spectral mixture analysis and is dependent on the parameters
-# specified in the SPECTRAL MIXTURE ANALYSIS section below.
 # Any index defined in indices.json can be used, as well as SMA,
 # or any band name present in the SENSORS band combination
-# Type: Character list. 
+# Type: Character list.
 INDEX = NDVI EVI NBR RED NIR
 # Standardize the TSS time series with pixel mean and/or standard deviation?
 # Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}
@@ -484,5 +500,47 @@ TREND_CONF = 0.95
 # This can help to reduce the effect of outliers.
 # Type: Logical. Valid values: {TRUE,FALSE}
 CHANGE_PENALTY = FALSE
+
+# ADAPTIVE DATE RANGE
+# ------------------------------------------------------------------------
+# Perform adaptive date range filtering? If TRUE, auxilliary data wil be 
+# used to filter dates on a per-pixel basis. Adaptive date range filtering 
+# is done additionally to other filtering procedures.
+# Note that this is just a filtering step, and not some sort of grouping!
+# Type: Logical. Valid values: {TRUE,FALSE}
+ADAPTIVE_RANGE = FALSE
+# Adaptive date range datapool (parent directory of tiled continuous fields)
+# Type: full directory path
+DIR_ADAPTIVE_RANGE = NULL
+# Basenames of the adaptive date range fields (e.g. LSP-SOS.tif LSP_EOS.tif).  
+# Exactly two files need to be given, one for the start, and one for the end  
+# of the filtering period. The images can be multi-band images, where each  
+# band represents a different filtering window. The number of bands need to  
+# be the same for both files. The data type of the images needs to be signed  
+# 16bit integer. The values in the images are interpreted as continuous days  
+# since ADAPTIVE_START. Start and end dates should not be given in the wrong  
+# order. The windows should not overlap. The windows should be time-ordered. 
+# Type: List with 2 basenames of files
+BASE_ADAPTIVE_RANGE = NULL NULL
+# This parameter defines the nodata value for the continuous fields.
+# Type: Integer. Valid values: [-32768,32767]
+ADAPTIVE_RANGE_NODATA = -9999
+# This parameter specifies the starting point of the continuous days. 
+# Internally, the data are represented as 'Year x 365 + DOY'. Thus, ADAPTIVE_START
+# is an offset, which must be given as 'Year x 365 + DOY'. If the values are 
+# provided in this format, use ADAPTIVE_START = 1. If the ADAPTIVE values would be pro-
+# vided relative to January 1 2000, use ADAPTIVE_START = 730001, i.e. 2000*365+1. 
+# Leap years are not taken into account and each year consists of 365 days.
+# Type: Integer. Valid values: [1,2100*365]
+ADAPTIVE_START = 736571
+# This parameter controls how FORCE deals with input errors of secondary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_SECONDARY = SKIP
 
 ++PARAM_TSA_END++

@@ -1,0 +1,79 @@
+.. _eco_overview:
+
+Additional Tools and Resources
+==============================
+
+This page provides provides a curated list of software tools and resources 
+that are related to or can be used in conjunction with FORCE.
+
+
+Download
+--------
+
+landsatlinks
+++++++++++++
+
+`landsatlinks <https://github.com/ernstste/landsatlinks>`_ by Stefan Ernst offers a simple command line interface 
+to retrieve download links for Landsat Collection 2 Level 1 product bundles through the USGS/EROS machine-to-machine API.
+This tool has been shipped under the name ``force-level1-landsat`` in past FORCE releases, 
+but is available as a standalone tool with the same usage as before.
+It provides built-in support for checking download links against FORCE logfiles and only retrieve unprocessed images.
+It can also produce file queues for Level 2 processing with ``force-level2``.
+A docker image is available.
+
+CDSE_Sentinel2_downloader
++++++++++++++++++++++++++
+
+The `CDSE_Sentinel2_downloader <https://github.com/vudongpham/CDSE_Sentinel2_downloader>`_ by Vu-Dong Pham is a 
+Python tool to retrieve Sentinel-2 Level 1C products from the Copernicus Data Space Ecosystem through the OData API.
+It provides built-in support for checking download links against FORCE logfiles and only retrieve unprocessed images.
+
+CDSETool
+++++++++
+
+`CDSETool <https://github.com/CDSETool/CDSETool>`_ is a Python tool to find
+and retrieve products from the Copernicus Data Space Ecosystem through the OData API.
+CDSETool contains a command line interface, but can also be used as a library.
+There is support for downloading individual files from products, and multiple downloads
+can be performed concurrently.
+
+QGIS Plugins
+------------
+
+Processing
+----------
+
+
+Visualization
+-------------
+
+
+
+
+EnMAP-Box
+
+FORCE4Q https://force4q.readthedocs.io/en/develop/ by Andreas Janz
+
+Raster Timeseries Manager https://raster-timeseries-manager.readthedocs.io/en/latest/ by Andreas Janz
+
+Raster Data Plotting https://raster-data-plotting.readthedocs.io/en/latest/ by Andreas Janz
+
+EO Time Series Viewer https://eo-time-series-viewer.readthedocs.io/en/latest/ by Benjamin Jakimow
+
+Bit Flag Renderer https://bit-flag-renderer.readthedocs.io/en/latest/ by Benjamin Jakimow
+
+
+
+Other
+-----
+
+https://github.com/vudongpham/FORCE-Live by Vu-Dong Pham
+
+https://github.com/leonsnill/geeo by Leon Nill
+
+https://github.com/felixlobert/force-sar by Felix Lobert
+
+https://github.com/Florian-Katerndahl/haze by Florian Katerndahl
+
+https://github.com/maxfreu/ForceCubeAccess.jl by Max Freudenberg
+

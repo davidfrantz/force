@@ -22,6 +22,12 @@ DIR_MASK = NULL
 # Masks need to be binary with 0 = off / 1 = on
 # Type: Basename of file
 BASE_MASK = NULL
+# This parameter controls how FORCE deals with input errors of the mask. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default).
+# Type: Character. Valid values: {STOP, SKIP}
+READ_ERROR_MASK = SKIP
 
 # OUTPUT OPTIONS
 # ------------------------------------------------------------------------
@@ -45,6 +51,13 @@ OUTPUT_FORMAT = GTiff
 # give invalid or conflicting options that result in the failure of creating files.
 # Type: full file path
 FILE_OUTPUT_OPTIONS = NULL
+# This parameter controls whether the output image is initialized before writing 
+# the first chunk. This prevents uninitialized data in the output image for sparse 
+# output scenarios, but might be slower for large images. The parameter is ignored if 
+# CHUNK_SIZE matches the tile size, because in that case the image is created in one 
+# big chunk anyways.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_INITIALIZE = TRUE
 # This parameter controls whether the output is written as multi-band image, or
 # if the stack will be exploded into single-band files.
 # Type: Logical. Valid values: {TRUE,FALSE}
@@ -103,8 +116,8 @@ Y_TILE_RANGE = 0 0
 # Type: full file path
 FILE_TILE = NULL
 # This parameter is used to define the size of the sub-tile processing units.
-# Most efficient is to use a chunk size that coincides with the tile size. Using 
-# smaller chunks may be necessary if you cannot fit all necessary data into RAM. 
+# Most efficient is to use a chunk size that coincides with the tile size. Using
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM.
 # The tilesize must be dividable by the chunk size without remainder.
 # Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
 # parameter is not permitted anymore.

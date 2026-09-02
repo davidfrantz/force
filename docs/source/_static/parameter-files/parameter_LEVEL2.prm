@@ -54,18 +54,20 @@ FILE_AOI = NULL
 # a DEM.
 # Type: full file path
 FILE_DEM = NULL
-# This is the resampling option for reprojection the DEM; you can choose
-# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution
-# (CC).
-# Type: Character. Valid values: {NN,BL,CC}
-DEM_RESAMPLING = BL
 # This parameter specifies whether a DEM database should be used.
 # If TRUE, a predefined DEM database is used for processing, i.e., 
 # a precompiled database containing an individual DEM for each WRS-2 and
 # MGRS frame. If TRUE, give the directory of the database through FILE_DEM.
 # If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.
 # Type: Logical. Valid values: {TRUE,FALSE}
-USE_DEM_DATABASE = FALSE
+# USE_DEM_DATABASE = FALSE
+# This is the resampling option for reprojection the DEM; you can choose
+# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),
+# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),
+# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and
+# RMS (RMS).
+# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}
+DEM_RESAMPLING = BL
 # Nodata value of the DEM.
 # Type: Integer. Valid range: [-32768,32767]
 DEM_NODATA = -32767
@@ -105,15 +107,30 @@ RESOLUTION_LANDSAT = 30
 # pixel resolution.
 # Type: Double. Valid range: ]0,...
 RESOLUTION_SENTINEL2 = 10
-# These are the origin coordinates of the grid system in decimal degree
-# (negative values for West/South). The upper left corner of tile 
-# X0000_Y0000 represents this point. It is a good choice to use a coord-
-# inate that is North-West of your study area – to avoid negative tile
-# numbers. Not used if DO_TILE = FALSE.
-# Type: Double. Valid range: [-180,180]
-# Type: Double. Valid range: [-90,90]
-ORIGIN_LON = -25
-ORIGIN_LAT = 60
+# These are the origin coordinates of the grid system.
+# The upper left corner of tile X0000_Y0000 represents this point. It is a 
+# good choice to use a coordinate that is top-left (usually North-West) of your 
+# study area - to avoid negative tile  numbers. Not used if DO_TILE = FALSE.
+# The coordinate type is defined by GRID_ORIGIN_TYPE. If GRID_ORIGIN_TYPE = GEO,
+# the coordinates are interpreted as geographic coordinates (longitude, latitude) 
+# in decimal degree (negative values for West/South). If GRID_ORIGIN_TYPE = MAP, 
+# the coordinates are interpreted as projected map coordinates (easting, northing) 
+# in the unit of the target projection (commonly meters). 
+# The order of the coordinates is always x (longitude or easting) first, 
+# and y (latitude or northing) second, regardless of the coordinate type. Remember 
+# that longitude = x, latitude = y!!! 
+# The valid range for the geographic coordinates is: [-180,180] and [-90,90]. 
+# For map coordinates, the valid range depends on the target projection and cannot 
+# be pre-defined by FORCE. You may encounter errors if the coordinates are outside 
+# the valid range. If you use a predefined projection (e.g., EQUI7 or GLANCE7), the 
+# grid origin is internally set to specific values that are optimal for these 
+# projections, and the parameters GRID_ORIGIN and GRID_ORIGIN_TYPE are ignored.
+# Type: Double. Valid range: depends on context.
+GRID_ORIGIN = -25 60
+# The coordinate type of GRID_ORIGIN.
+# See GRID_ORIGIN for details.
+# Character. Valid values: {GEO,MAP}
+GRID_ORIGIN_TYPE = GEO
 # This defines the target coordinate system. If DO_REPROJ = FALSE, the
 # projection string can be NULL. The coordinate system must either be
 # given as WKT string - or can be a predefined coordinate/grid system.
@@ -128,9 +145,12 @@ ORIGIN_LAT = 60
 # Type: Character. Valid values: {<WKT>,EQUI7,GLANCE7}
 PROJECTION = GLANCE7
 # This is the resampling option for the reprojection; you can choose
-# between Nearest Neighbor (NN), Bilinear (BL) and Cubic Convolution
-# (CC); not used if DO_REPROJ = FALSE.
-# Type: Character. Valid values: {NN,BL,CC}
+# between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),
+# Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),
+# Max (MAX), Min (MIN), Median (MED), Q1 (Q1), Q3 (Q3), Sum (SUM), and
+# RMS (RMS).
+# Not used if DO_REPROJ = FALSE.
+# Type: Character. Valid values: {NN,BL,CC,CSP,LZ,AVG,MODE,MAX,MIN,MED,Q1,Q3,SUM,RMS}
 RESAMPLING = CC
 
 # RADIOMETRIC CORRECTION OPTIONS
@@ -227,7 +247,7 @@ SHADOW_THRESHOLD = 0.02
 # RESOLUTION MERGING
 # ------------------------------------------------------------------------
 # This parameter defines the method used for improving the spatial reso-
-# lution of Sentinel-2’s 20 m bands to 10 m. Pixels flagged as cloud or
+# lution of Sentinel-2's 20 m bands to 10 m. Pixels flagged as cloud or
 # shadow will be skipped. Following methods are available: IMPROPHE uses
 # the ImproPhe code in a spectral-only setup; REGRESSION uses a multi-
 # parameter regression (results are expected to be best, but processing
@@ -312,6 +332,7 @@ TIMEOUT_ZIP = 30
 # Metadata are written to the ENVI header or directly into the Tiff
 # to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,
 # an external .aux.xml file is additionally generated.
+# Note that COG output is only possible when the chunk size matches the tile size.
 # Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}
 OUTPUT_FORMAT = COG
 # File that contains custom GDAL output options. This is only used if 

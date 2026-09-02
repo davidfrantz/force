@@ -36,6 +36,7 @@ enum { TCB, TCG, TCW, TCD};
 
 void index_band(ard_t *ard, small *mask_, tsa_t *ts, int b, int nc, int nt, short nodata);
 void index_differenced(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
+void index_sum_ratio(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int b3, int b4, int nc, int nt, short nodata);
 void index_kernelized(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int nc, int nt, short nodata);
 void index_resistance(ard_t *ard, small *mask_, tsa_t *ts, int n, int r, int b, float f1, float f2, float f3, float f4, bool rbc, int nc, int nt, short nodata);
 void index_tasseled(ard_t *ard, small *mask_, tsa_t *ts, int type, int b1, int b2, int b3, int b4, int b5, int b6, int nc, int nt, short nodata);
@@ -125,6 +126,64 @@ float tmp, ind, scale = 10000.0;
           ind = (ard[t].dat[b1][p]-ard[t].dat[b2][p])/tmp;
           if (tmp == 0 || ind < -1 || ind > 1){
             ts->tss_[t][p] = nodata;
+          } else {
+            ts->tss_[t][p] = (short)(ind*scale);
+          }
+        }
+
+      }
+
+    }
+  }
+
+  return;
+}
+
+
+/** This function computes a spectral index time series, with Normalized
++++ sum ratio method, but in a flexible way so you can change the bands
++++ in any combination: (b1+b2)/(b3+b4)
+--- ard:    ARD
+--- mask_:  mask image
+--- ts:     pointer to instantly useable TSA image arrays
+--- b1:     band 1
+--- b2:     band 2
+--- b3:     band 3
+--- b4:     band 4
+--- nc:     number of cells
+--- nt:     number of ARD products over time
+--- nodata: nodata value
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void index_sum_ratio(ard_t *ard, small *mask_, tsa_t *ts, int b1, int b2, int b3, int b4, int nc, int nt, short nodata){
+int p, t;
+float ind, tmp, scale = 1000.0;
+
+
+  #pragma omp parallel private(t,ind,tmp) shared(ard,mask_,ts,b1,b2,b3,b4,nc,nt,nodata,scale) default(none)
+  {
+
+    #pragma omp for
+    for (p=0; p<nc; p++){
+
+      if (mask_ != NULL && !mask_[p]){
+        for (t=0; t<nt; t++) ts->tss_[t][p] = nodata;
+        continue;
+      }
+      
+      for (t=0; t<nt; t++){
+
+        if (!ard[t].msk[p]){
+          ts->tss_[t][p] = nodata;
+        } else {
+          tmp = (ard[t].dat[b3][p]+ard[t].dat[b4][p]);
+          if (tmp == 0){
+            ts->tss_[t][p] = nodata;
+            continue;
+          }
+          ind = (ard[t].dat[b1][p]+ard[t].dat[b2][p])/tmp;
+          if (ind*scale > SHRT_MAX){
+            ts->tss_[t][p] = SHRT_MAX;
           } else {
             ts->tss_[t][p] = (short)(ind*scale);
           }
@@ -1158,6 +1217,15 @@ int tsa_spectral_index(ard_t *ard, tsa_t *ts, small *mask_, int nc, int nt, int 
           band_for_index(ard[0].DAT, index->band_names[idx][1]), 
           band_for_index(ard[0].DAT, index->band_names[idx][2]), 
           1.610, 0.864, 2.186, nc, nt, nodata);
+      } else if (strcmp(index->names[idx], "DWSI") == 0){
+        cite_me(_CITE_DWSI_);
+        check_nbands_for_index(index->names[idx], 4, index->n_bands[idx]);
+        index_sum_ratio(ard, mask_, ts, 
+          band_for_index(ard[0].DAT, index->band_names[idx][0]), 
+          band_for_index(ard[0].DAT, index->band_names[idx][1]), 
+          band_for_index(ard[0].DAT, index->band_names[idx][2]), 
+          band_for_index(ard[0].DAT, index->band_names[idx][3]), 
+          nc, nt, nodata);
       } else {
         printf("There is no implementation for INDEX %s\n", index->names[idx]);      
         exit(FAILURE);

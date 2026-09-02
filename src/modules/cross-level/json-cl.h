@@ -21,26 +21,38 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Image methods header
+JSON parsing functions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef IMAGEFUNS_CL_H
-#define IMAGEFUNS_CL_H
+#ifndef JSON_CL_H
+#define JSON_CL_H
 
 #include <stdio.h>   // core input and output functions
-#include <stdlib.h>   // standard general utilities library
+#include <stdbool.h>  // boolean data type
+#include <string.h>  // string handling functions
 
 #include "../cross-level/const-cl.h"
-#include "../cross-level/dir-cl.h"
+#include "../cross-level/alloc-cl.h"
+#include "../cross-level/string-cl.h"
+
+#include <jansson.h> // JSON library
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int download_file(char *f_remote, char *f_local, char *header);
-int download_pattern(char *d_local, char *pattern, char *header);
+int load_json(json_t **json, char *path_json);
+int get_json_object(json_t **object, char *key, json_t *json);
+int get_json_string(char *string, size_t size, char *key, json_t *json);
+int get_json_integer(int *integer, char *key, json_t *json);
+int get_json_float(float *floating, char *key, json_t *json);
+int get_json_boolean(bool *boolean, char *key, json_t *json);
+int get_json_string_array(char ***strings, int *n_strings, char *key, json_t *json);
+int get_json_integer_array(int **integers, int *n_integers, char *key, json_t *json);
+int get_json_float_array(float **floats, int *n_floats, char *key, json_t *json);
+int get_json_boolean_array(bool **booleans, int *n_booleans, char *key, json_t *json);
 
 #ifdef __cplusplus
 }
