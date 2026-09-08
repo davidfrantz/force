@@ -22,6 +22,7 @@ cross: \
     quality-cl \
     queue-cl \
     read-cl \
+	runtime_data-cl \
     stats-cl \
     string-cl \
     sun-cl \
@@ -88,6 +89,9 @@ queue-cl: prepare $(CROSS_DIR)/queue-cl.c
 
 read-cl: prepare $(CROSS_DIR)/read-cl.c
 	$(GCC) -c $(CROSS_DIR)/read-cl.c -o $(OBJDIR)/read-cl.o
+
+runtime_data-cl: prepare $(CROSS_DIR)/runtime_data-cl.c
+	$(GCC) -c $(CROSS_DIR)/runtime_data-cl.c -o $(OBJDIR)/runtime_data-cl.o
 
 stats-cl: prepare $(CROSS_DIR)/stats-cl.c
 	$(GCC) -c $(CROSS_DIR)/stats-cl.c -o $(OBJDIR)/stats-cl.o
