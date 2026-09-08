@@ -704,8 +704,7 @@ int svgrid = 5000;
   directoryname(d_top_1, d_top_2, NPOW_10);
 
   // scan directory for xml file
-  if (findfile_pattern(d_top_2, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile_pattern(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(d_top_2, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding top-level S2 metadata file failed. ");
     return FAILURE;
   }
@@ -929,8 +928,7 @@ int svgrid = 5000;
   /** parse granule xml **/
 
   // scan directory for xml file
-  if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == FAILURE &&
-      findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
     printf("Finding granule metadata file failed. "); return FAILURE;
   }
 
