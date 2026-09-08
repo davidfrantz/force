@@ -1456,8 +1456,7 @@ char metaname[NPOW_10];
   if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
     mission = LANDSAT;
     pl2->res = pl2->res_landsat;
-  } else if (findfile_pattern(pl2->d_level1, "S2A", ".xml", metaname, NPOW_10) == SUCCESS ||
-             findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
+  } else if (findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
     mission = SENTINEL2;
     pl2->res = pl2->res_sentinel2;
   } else {
