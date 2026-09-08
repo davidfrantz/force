@@ -36,6 +36,7 @@ Sensor header
 #include "../cross-level/string-cl.h"
 #include "../cross-level/sys-cl.h"
 #include "../cross-level/json-cl.h"
+#include "../cross-level/runtime_data-cl.h"
 
 
 #ifdef __cplusplus

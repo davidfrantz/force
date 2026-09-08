@@ -24,37 +24,10 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 #include "sensor-hl.h"
 
 
-int load_sensor_runtime_data(json_t **def_sensors);
 int get_band_intersection(int *n_intersect, char ***intersect_bands, int n_sensors, int *nbands, char ***band_names);
 int get_band_union(int *n_union, char ***union_bands, int n_sensors, int *nbands, char ***band_names);
 int get_band_numbers_to_read(sen_t *sen, int *nbands, char ***band_names);
 int check_target_sensor(sen_t *sen, json_t *def_all_sensors);
-
-
-/** Load sensor definitions from the JSON runtime data into a Jansson json_t struct.
-+++ The returned struct must be freed with json_decref after use.
---- def_sensors: Pointer to json_t* to receive the loaded JSON object
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_sensor_runtime_data(json_t **def_sensors){
-
-  char d_exe[NPOW_10];
-  get_install_directory(d_exe, NPOW_10);
-
-  char path_json[NPOW_10];
-  concat_string_2(path_json, NPOW_10, d_exe, _FORCE_SENSOR_FILE_, "/");
-
-  json_t *def;
-
-  if (load_json(&def, path_json) != SUCCESS){
-    fprintf(stderr, "Error loading JSON file %s\n", path_json);
-    return FAILURE;
-  }
-
-  *def_sensors = def;
-
-  return SUCCESS;
-}
 
 
 /** Print all sensor definitions from the runtime data to stdout.
@@ -63,7 +36,7 @@ int load_sensor_runtime_data(json_t **def_sensors){
 void print_sensor_runtime_data(){
 
   json_t *def_all_sensors = NULL;
-  if (load_sensor_runtime_data(&def_all_sensors) != SUCCESS){
+  if (load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors) != SUCCESS){
     fprintf(stderr, "Error: Could not parse sensor definitions.\n");
     exit(FAILURE);
   }
@@ -339,7 +312,7 @@ int retrieve_sensor(sen_t *sen){
 
   // get all sensor definitions
   json_t *def_all_sensors = NULL;
-  if (load_sensor_runtime_data(&def_all_sensors) != SUCCESS){
+  if (load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors) != SUCCESS){
     fprintf(stderr, "Error: Could not parse sensor definitions.\n");
     return FAILURE;
   }
