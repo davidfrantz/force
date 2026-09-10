@@ -773,6 +773,8 @@ float *xy_ms = NULL;
 float **xyz_rho_p = NULL;
 float **xyz_tss = NULL;
 float **xyz_tsd = NULL;
+small *valid = NULL;
+int *off_flat = NULL;
 
 
   #ifdef FORCE_CLOCK
@@ -836,6 +838,8 @@ float **xyz_tsd = NULL;
   /** allocate memory **/
   alloc((void**)&cor_,  nc, sizeof(float));
   alloc((void**)&swir_, nc, sizeof(float));
+  alloc((void**)&valid, nc, sizeof(small));
+  alloc((void**)&off_flat, nk*nk, sizeof(int));
 
 
   /** compute SWIR index **/
@@ -857,14 +861,33 @@ float **xyz_tsd = NULL;
   }
 
 
-  /** estimate C for every pixel **/
-  
-  #pragma omp parallel private(j, p, ii, jj, ip, jp, np, g, z, rho_p, tss, tsd, szen, ms, f, h0, c_, num, mx, my, varx, vary, cov, gain, offset) shared(nx, ny, nk, K, b_sw2, QAI, sw2_, swir_, dem_, slp_, ill_, s_min, cor_, xyz_rho_p, xyz_tss, xyz_tsd, xy_szen, xy_ms, atc) default(none) 
+  // Precompute the validity check to not do it every time.
+  #pragma omp parallel shared(nc, QAI, ill_, slp_, s_min, valid) default(none)
   {
 
+  #pragma omp for schedule(guided)
+    for (p=0; p<nc; p++){
+      // only use illuminated and sloped pixels > 2°
+      valid[p] = (!get_off(QAI, p) && ill_[p] >= 0 && slp_[p] >= s_min) ? 1 : 0;
+    }
+
+  }
+  for (ii=0; ii<nk; ii++)
+    for (jj=0; jj<nk; jj++)
+      off_flat[ii*nk+jj] = K[ii]*nx + K[jj];
+  /** estimate C for every pixel **/
+  
+  #pragma omp parallel private(j, p, ii, jj, ip, jp, np, g, z, rho_p, tss, tsd, szen, ms, f, h0, c_, num, mx, my, varx, vary, cov, gain, offset) shared(nx, ny, nk, K, b_sw2, QAI, sw2_, swir_, dem_, slp_, ill_, s_min, cor_, valid, off_flat, xyz_rho_p, xyz_tss, xyz_tsd, xy_szen, xy_ms, atc) default(none)
+  {
+    unsigned char *row_valid = NULL, *col_valid = NULL;
+    alloc((void**)&row_valid, nk, sizeof(unsigned char));
+    alloc((void**)&col_valid, nk, sizeof(unsigned char));
     #pragma omp for schedule(guided)
     for (i=0; i<ny; i++){
-    for (j=0; j<nx; j++){
+      for (ii=0; ii<nk; ii++){
+        row_valid[ii] = (i+K[ii] >= 0 && i+K[ii] <= ny-1) ? 1 : 0;
+      }
+      for (j=0; j<nx; j++){
 
       p = i*nx+j;
 
@@ -888,18 +911,19 @@ float **xyz_tsd = NULL;
       // only do for sloped pixels > 2°
       if (slp_[p] > s_min){
 
+        for (jj=0; jj<nk; jj++)
+          col_valid[jj] = (j+K[jj] >= 0 && j+K[jj] <= nx-1) ? 1 : 0;
         num = mx = my = varx = vary = cov = 0.0;
 
         // sample neighborhood
         for (ii=0; ii<nk; ii++){
+          if (!row_valid[ii]) continue;
         for (jj=0; jj<nk; jj++){
-          
           ip = i+K[ii]; jp = j+K[jj];
-          if (ip < 0 || jp < 0 || ip > ny-1 || jp > nx-1) continue;
-          np = ip*nx+jp;
+          if (!col_valid[jj]) continue;
+          np = p + off_flat[ii*nk+jj];
 
-          // only use illuminated and sloped pixels > 2°
-          if (get_off(QAI, np) || ill_[np] < 0 || slp_[np] < s_min) continue;
+          if (!valid[np]) continue;
 
           // only do for same land cover
           if (fabs(swir_[p]-swir_[np]) > 0.025) continue;
@@ -913,10 +937,10 @@ float **xyz_tsd = NULL;
             covar_recurrence(ill_[np]/10000.0, sw2_[np]/10000.0,
             &mx, &my, &varx, &vary, &cov, num);
           }
+          /** TODO: quiet likely chance for a major speedup if we restrict the number of samples. **/
 
         }
         }
-
 
         if (num > 2){
 
@@ -950,10 +974,12 @@ float **xyz_tsd = NULL;
 
     }
     }
-
+    free((void*)row_valid);
+    free((void*)col_valid);
   }
-
+  free((void*)off_flat);
   free((void*)swir_);
+  free((void*)valid);
   free((void*)xyz_rho_p); free((void*)xyz_tss); free((void*)xyz_tsd);
   
 
