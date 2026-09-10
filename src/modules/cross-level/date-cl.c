@@ -606,6 +606,56 @@ void copy_date(date_t *from, date_t *to){
 }
 
 
+/** This function extracts a date from a UTC string
+--- date:     date struct (returned)
+--- string:   UTC string
++++ Return:   SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int date_from_utc(date_t *date, char *string){
+
+  char buffer[NPOW_10];
+  copy_string(buffer, NPOW_10, string);
+  buffer[strcspn(buffer, "\r\n#")] = 0;
+  
+  char *saveptr = NULL;
+  const char *separator = "-T:.";
+  char *tokenptr = strtok_r(buffer, separator, &saveptr);
+  
+  date_t d;
+  char_to_int(tokenptr, &d.year);
+  tokenptr = strtok_r(NULL, separator, &saveptr);
+  char_to_int(tokenptr, &d.month);
+  tokenptr = strtok_r(NULL, separator, &saveptr);
+  char_to_int(tokenptr, &d.day);
+  tokenptr = strtok_r(NULL, separator, &saveptr);
+  char_to_int(tokenptr, &d.hh);
+  tokenptr = strtok_r(NULL, separator, &saveptr);
+  char_to_int(tokenptr, &d.mm);
+  tokenptr = strtok_r(NULL, separator, &saveptr);
+  char_to_int(tokenptr, &d.ss);
+
+  d.doy = md2doy(d.month, d.day);
+  d.week = doy2week(d.doy);
+  d.ce  = doy2ce(d.doy, d.year);
+
+  d.tz = 0;
+
+  if (d.year < 1900   || d.year > 2100){ fprintf(stderr, "Invalid year in UTC string: %d\n", d.year); return FAILURE; }
+  if (d.month < 1     || d.month > 12){ fprintf(stderr, "Invalid month in UTC string: %d\n", d.month); return FAILURE; }
+  if (d.day < 1       || d.day > 31){ fprintf(stderr, "Invalid day in UTC string: %d\n", d.day); return FAILURE; }
+  if (d.doy < 1       || d.doy > 365){ fprintf(stderr, "Invalid doy in UTC string: %d\n", d.doy); return FAILURE; }
+  if (d.week < 1      || d.week > 52){ fprintf(stderr, "Invalid week in UTC string: %d\n", d.week); return FAILURE; }
+  if (d.ce < 1900*365 || d.ce > 2100*365){ fprintf(stderr, "Invalid ce in UTC string: %d\n", d.ce); return FAILURE; }
+  if (d.hh < 0        || d.hh > 23){ fprintf(stderr, "Invalid hour in UTC string: %d\n", d.hh); return FAILURE; }
+  if (d.mm < 0        || d.mm > 59){ fprintf(stderr, "Invalid minute in UTC string: %d\n", d.mm); return FAILURE; }
+  if (d.ss < 0        || d.ss > 59){ fprintf(stderr, "Invalid second in UTC string: %d\n", d.ss); return FAILURE; }
+
+  *date = d;
+
+  return SUCCESS;
+}
+
+
 /** This function extracts a date from a string
 +++ If no date was detected, a dummy date is delivered.
 +++ A date is detected when the first word of the string is an 8digit number.

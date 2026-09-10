@@ -82,6 +82,7 @@ void set_date_quarter(date_t *date, int quarter);
 void set_time(date_t *date, int hh, int mm, int ss);
 void set_secs(date_t *date, int ss);
 void copy_date(date_t *from, date_t *to);
+int date_from_utc(date_t *date, char *string);
 int date_from_string(date_t *date, char *string);
 void print_date(date_t *date);
 
