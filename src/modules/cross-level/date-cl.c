@@ -620,24 +620,32 @@ int date_from_utc(date_t *date, char *string){
   char *saveptr = NULL;
   const char *separator = "-T:.";
   char *tokenptr = strtok_r(buffer, separator, &saveptr);
-  
+
+  int parsed_tokens[6];
+
+  for (int i=0; i<6; i++){
+    if (tokenptr == NULL){ 
+      fprintf(stderr, "Failed to retrieve enough UTC string tokens: %s\n", string); 
+      return FAILURE; 
+    }
+    if (char_to_int(tokenptr, &parsed_tokens[i]) == FAILURE){ 
+      fprintf(stderr, "Failed to convert UTC string token to int: %s\n", tokenptr); 
+      return FAILURE; 
+    }
+    tokenptr = strtok_r(NULL, separator, &saveptr);
+  }
+
   date_t d;
-  char_to_int(tokenptr, &d.year);
-  tokenptr = strtok_r(NULL, separator, &saveptr);
-  char_to_int(tokenptr, &d.month);
-  tokenptr = strtok_r(NULL, separator, &saveptr);
-  char_to_int(tokenptr, &d.day);
-  tokenptr = strtok_r(NULL, separator, &saveptr);
-  char_to_int(tokenptr, &d.hh);
-  tokenptr = strtok_r(NULL, separator, &saveptr);
-  char_to_int(tokenptr, &d.mm);
-  tokenptr = strtok_r(NULL, separator, &saveptr);
-  char_to_int(tokenptr, &d.ss);
+  d.year  = parsed_tokens[0];
+  d.month = parsed_tokens[1];
+  d.day   = parsed_tokens[2];
+  d.hh    = parsed_tokens[3];
+  d.mm    = parsed_tokens[4];
+  d.ss    = parsed_tokens[5];
 
   d.doy = md2doy(d.month, d.day);
   d.week = doy2week(d.doy);
   d.ce  = doy2ce(d.doy, d.year);
-
   d.tz = 0;
 
   if (d.year < 1900   || d.year > 2100){ fprintf(stderr, "Invalid year in UTC string: %d\n", d.year); return FAILURE; }
