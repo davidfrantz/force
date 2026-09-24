@@ -32,6 +32,7 @@ Statistics header
 #include <stdlib.h>  // standard general utilities library
 #include <stdbool.h> // boolean data type
 #include <math.h>    // common mathematical functions
+#include <stdint.h>
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
@@ -68,6 +69,7 @@ float tscore_Hills_inv_t(float p, int idf);
 float tscore_T_z(float t, int df);
 float tscore_T_p(float t, int df);
 float quantile(double *x, int n, float p);
+short quantile_short(const short *toa, const small *lnd, int nc, int nland, float p, uint32_t *h);
 int mode(int *x, int n);
 int n_uniq(int *x, int n);
 int **histogram(int *x, int n, int *n_uniq);

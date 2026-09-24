@@ -761,7 +761,7 @@ small *cld_  = NULL;
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t *QAI, small *lnd_, small *cld_, short **SPR){
-int i, j, p, k = 0, nx, ny, nc, b, nb = 2;
+int i, j, p, nx, ny, nc, b, nb = 2;
 int nthr;
 int err = 0;
 double res;
@@ -772,7 +772,6 @@ short *spr_  = NULL;
 short *toa_    = NULL;
 short *mask_   = NULL;
 short *marker_ = NULL;
-double *clear_  = NULL; // need to be double for GSL quantile function
 ushort *dist_;
 char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
@@ -813,11 +812,12 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
   
   if (nthread == 1) nthr = 1; else nthr = nb;
   
-  #pragma omp parallel num_threads(nthr) private(i, j, p, k, mask_, marker_, clear_, toa_, bck) shared(nb, nx, ny, nc, nland, domains, lo, maxdist, dist_, lnd_, spr_, TOA, QAI) reduction(+: err) default(none)
+  #pragma omp parallel num_threads(nthr) private(i, j, p, mask_, marker_, toa_, bck) shared(nb, nx, ny, nc, nland, domains, lo, maxdist, dist_, lnd_, spr_, TOA, QAI) reduction(+: err) default(none)
   {
-
+    unsigned int *h = NULL;
     alloc((void**)&mask_,   nc,    sizeof(short));
     alloc((void**)&marker_, nc,    sizeof(short));
+    alloc((void**)&h,   65536, sizeof(unsigned int));
 
     #pragma omp for
     for (b=0; b<nb; b++){
@@ -826,12 +826,7 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
       memmove(mask_, toa_, nc*sizeof(short));
 
-      alloc((void**)&clear_,  nland, sizeof(double));
-      for (p=0, k=0; p<nc; p++){
-        if (lnd_[p]) clear_[k++] = mask_[p];
-      }
-      bck = (short)quantile(clear_, nland, lo);
-      free((void*)clear_);
+      bck = quantile_short(toa_, lnd_, nc, nland, lo, h);
 
       for (i=0, p=0; i<ny; i++){
       for (j=0; j<nx; j++, p++){
@@ -850,6 +845,7 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
     }
 
+    free((void*)h);
     free((void*)mask_);
     free((void*)marker_);
 

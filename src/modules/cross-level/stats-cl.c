@@ -32,6 +32,7 @@ This file contains functions for statistics
 
 
 #include "stats-cl.h"
+#include <stdint.h>
 
 #include <gsl/gsl_sort.h>         // sort data
 #include <gsl/gsl_statistics.h>   // statistical functions
@@ -676,6 +677,42 @@ double q;
   return (float)q;
 }
 
+// returns the k-th (0-based) and (k+1)-th smallest values of the histogram
+static void two_ranks(const uint32_t *h, size_t k, short *a, short *b){
+  size_t cum = 0;
+  int v = 0;
+
+  for (; v < 65536; v++){ cum += h[v]; if (cum > k) break; }
+  *a = (short)(v - 32768);
+
+  if (cum > k + 1){            // rank k+1 lives in the same bin
+    *b = *a;
+  } else {
+    for (v++; v < 65536; v++){ cum += h[v]; if (cum > k + 1) break; }
+    *b = (short)(v - 32768);
+  }
+}
+
+short quantile_short(const short *toa, const small *lnd,
+                            int nc, int nland, float p, uint32_t *h){
+  memset(h, 0, 65536 * sizeof(uint32_t));
+  for (int i = 0; i < nc; i++) if (lnd[i]) h[toa[i] + 32768]++;
+
+  if (nland <= 0) return 0;                 // GSL returns 0.0 for n == 0
+
+  double index = (double)p * (double)(nland - 1);   // same as GSL: f * (n-1)
+  size_t lhs   = (size_t)(int)index;
+  double delta = index - (double)lhs;
+
+  short a, b;
+  two_ranks(h, lhs, &a, &b);
+
+  double q = ((size_t)lhs == (size_t)nland - 1)
+           ? (double)a
+           : (1.0 - delta) * (double)a + delta * (double)b;
+
+  return (short)(float)q;                   // keep the float step!
+}
 
 /** Mode
 +++ This function computes the mode of an array. The array is completely
