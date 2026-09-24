@@ -305,9 +305,9 @@ double mx = 0, my = 0, vx = 0, vy = 0, cov = 0;
     pred = model->predict(sampleMat);
 
     if (s == 0){
-      mx = response[s]; my = pred;
+      mx = pred, my = response[s];
     } else {
-      covar_recurrence(response[s], pred, &mx, &my, &vx, &vy, &cov, s+1);
+      covar_recurrence(pred, response[s], &mx, &my, &vx, &vy, &cov, s+1);
     }
     sum += (pred-response[s])*(pred-response[s]);
     for (f=0; f<n_feature; f++){
