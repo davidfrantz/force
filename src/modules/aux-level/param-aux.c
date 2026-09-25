@@ -146,7 +146,7 @@ void write_par_ll_dem(FILE *fp, bool verbose){
     fprintf(fp, "# If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.\n");
     fprintf(fp, "# Type: Logical. Valid values: {TRUE,FALSE}\n");
   }
-  fprintf(fp, "# USE_DEM_DATABASE = FALSE\n");
+  fprintf(fp, "USE_DEM_DATABASE = FALSE\n");
   
   if (verbose){
     fprintf(fp, "# This is the resampling option for reprojection the DEM; you can choose\n");

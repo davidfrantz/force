@@ -60,7 +60,7 @@ FILE_DEM = NULL
 # MGRS frame. If TRUE, give the directory of the database through FILE_DEM.
 # If FALSE, provide a single DEM file through FILE_DEM or disable DEM usage.
 # Type: Logical. Valid values: {TRUE,FALSE}
-# USE_DEM_DATABASE = FALSE
+USE_DEM_DATABASE = FALSE
 # This is the resampling option for reprojection the DEM; you can choose
 # between Nearest Neighbor (NN), Bilinear (BL), Cubic Convolution (CC),
 # Cubic Spline (CSP), Lanczos (LZ), Average (AVG), Mode (MODE),
