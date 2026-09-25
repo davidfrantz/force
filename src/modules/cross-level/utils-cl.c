@@ -322,6 +322,11 @@ int i = 0;
 }
 
 
+/** Calculate the weighted average of a sequence
+--- values:   value sequence
+--- weights:  weight sequence
++++ average:  pointer to the calculated average
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int weighted_average_of_seq(seq_t *values, seq_t *weights, float *average){
 
   if (values == NULL || weights == NULL || average == NULL ||
@@ -382,6 +387,10 @@ int weighted_average_of_seq(seq_t *values, seq_t *weights, float *average){
 }
 
 
+/** Calculate the weighted centroid of a sequence
+--- weights:  weight sequence
++++ average:  pointer to the calculated average
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int weighted_centroid_of_seq(seq_t *weights, float *average){
 
   if (weights == NULL || average == NULL || weights->n <= 0){
