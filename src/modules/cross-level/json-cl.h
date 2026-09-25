@@ -43,12 +43,13 @@ JSON parsing functions
 extern "C" {
 #endif
 
-int load_json(json_t **json, char *path_json);
+void load_json(json_t **json, char *path_json);
+int get_json_item(json_t **item, char *key, json_t *json);
 int get_json_object(json_t **object, char *key, json_t *json);
 int get_json_string(char *string, size_t size, char *key, json_t *json);
 int get_json_integer(int *integer, char *key, json_t *json);
 int get_json_float(float *floating, char *key, json_t *json);
-int get_json_boolean(bool *boolean, char *key, json_t *json);
+int get_json_bool(bool *boolean, char *key, json_t *json);
 int get_json_string_array(char ***strings, int *n_strings, char *key, json_t *json);
 int get_json_integer_array(int **integers, int *n_integers, char *key, json_t *json);
 int get_json_float_array(float **floats, int *n_floats, char *key, json_t *json);
