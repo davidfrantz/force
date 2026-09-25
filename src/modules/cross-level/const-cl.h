@@ -28,17 +28,16 @@ Named constant definitions
 #ifndef CONSTANT_CL_H
 #define CONSTANT_CL_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "../cross-level/enum-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Directory and file names for runtime data (as macros)
-#define _FORCE_RUNTIME_DATA_DIR_   "force-misc/runtime-data"
-#define _FORCE_SENSOR_FILE_        "force-misc/runtime-data/sensors.json"
-#define _FORCE_INDEX_FILE_         "force-misc/runtime-data/indices.json"
-#define _FORCE_VERSION_FILE_       "force-misc/force-version.txt"
+#define _FORCE_VERSION_FILE_ "force-misc/force-version.txt"
 
 // abbreviated datatypes
 typedef unsigned short int ushort;
@@ -54,6 +53,13 @@ typedef struct {
   int rows, cols, cells;
 } dim_t;
 
+// sequence struct
+typedef struct {
+  float start, end, step;
+  int n;
+  float *values;
+} seq_t;
+
 // pi
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -65,10 +71,26 @@ typedef struct {
 
 #define _FORCE_NO_DATA_ -9999
 
+#define RETURN_ERROR(format, ...) \
+  do { \
+    fprintf(stderr, "Error in %s: " format "\n", \
+            __func__, ##__VA_ARGS__); \
+    return FAILURE; \
+  } while (0)
+
+#define EXIT_ERROR(format, ...) \
+  do { \
+    fprintf(stderr, "Error in %s: " format "\n", \
+            __func__, ##__VA_ARGS__); \
+    exit(FAILURE); \
+  } while (0)
+
 // compiler options
 //#define FORCE_CLOCK
 //#define FORCE_DEBUG
+//#define FORCE_LESS_VERBOSE
 //#define FORCE_DEV
+//#define FORCE_MAGIC
 
 //#define ACIX
 //#define ACIX2
