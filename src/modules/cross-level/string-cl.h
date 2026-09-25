@@ -34,6 +34,8 @@ String handling header
 #include <limits.h>   // macro constants of the integer types
 #include <errno.h>    // error numbers
 #include <stdbool.h> // boolean data type
+#include <ctype.h>   // character classification functions
+#include <strings.h> // case-insensitive string comparison
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/alloc-cl.h"
@@ -57,10 +59,14 @@ void copy_string(char *dst, size_t size, const char *src);
 void concat_string_2(char *dst, size_t size, const char *src1, const char *src2, const char *delim);
 void concat_string_3(char *dst, size_t size, const char *src1, const char *src2, const char *src3, const char *delim);
 void replace_string(char *src, const char *search, const char *replace, size_t src_len);
+void delete_until_match(char *src, const char *match, bool keep_match);
+void delete_after_match(char *src, const char *match, bool keep_match);
 int trim_leading_trailing_spaces(char *str, bool trim_leading, bool trim_trailing);
+int count_occurrences(const char *str, const char *substr);
 void overwrite_string_part(char *source, size_t offset, const char *replace, size_t replace_len);
-int char_to_int(const char *src, int *val);
-int char_to_float(const char *src, float *val);
+void char_to_int(const char *src, int *val);
+void char_to_float(const char *src, float *val);
+void char_to_double(const char *src, double *val);
 bool strings_equal(const char *str1, const char *str2);
 bool vector_contains(const char **vector, size_t size, const char *target);
 int vector_contains_pos(const char **vector, size_t size, const char *target);
