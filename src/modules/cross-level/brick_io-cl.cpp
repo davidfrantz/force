@@ -189,7 +189,7 @@ int write_brick(brick_t *brick){
     }
 
     for (int o=0; o<brick->format.options[_TV_TAG_].number; o++){
-      #ifdef FORCE_DEBUG
+      #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
       printf("setting options %s = %s\n",  
         brick->format.options[_TV_TAG_].string[o], 
         brick->format.options[_TV_VAL_].string[o]
