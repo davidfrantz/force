@@ -85,6 +85,7 @@ void copy_date(date_t *from, date_t *to);
 int date_from_utc(date_t *date, char *string);
 int date_from_string(date_t *date, char *string);
 void print_date(date_t *date);
+bool date_is_valid(date_t *date, bool check_time);
 
 #ifdef __cplusplus
 }

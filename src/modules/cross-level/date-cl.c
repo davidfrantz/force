@@ -628,10 +628,7 @@ int date_from_utc(date_t *date, char *string){
       fprintf(stderr, "Failed to retrieve enough UTC string tokens: %s\n", string); 
       return FAILURE; 
     }
-    if (char_to_int(tokenptr, &parsed_tokens[i]) == FAILURE){ 
-      fprintf(stderr, "Failed to convert UTC string token to int: %s\n", tokenptr); 
-      return FAILURE; 
-    }
+    char_to_int(tokenptr, &parsed_tokens[i]);
     tokenptr = strtok_r(NULL, separator, &saveptr);
   }
 
@@ -648,15 +645,10 @@ int date_from_utc(date_t *date, char *string){
   d.ce  = doy2ce(d.doy, d.year);
   d.tz = 0;
 
-  if (d.year < 1900   || d.year > 2100){ fprintf(stderr, "Invalid year in UTC string: %d\n", d.year); return FAILURE; }
-  if (d.month < 1     || d.month > 12){ fprintf(stderr, "Invalid month in UTC string: %d\n", d.month); return FAILURE; }
-  if (d.day < 1       || d.day > 31){ fprintf(stderr, "Invalid day in UTC string: %d\n", d.day); return FAILURE; }
-  if (d.doy < 1       || d.doy > 365){ fprintf(stderr, "Invalid doy in UTC string: %d\n", d.doy); return FAILURE; }
-  if (d.week < 1      || d.week > 52){ fprintf(stderr, "Invalid week in UTC string: %d\n", d.week); return FAILURE; }
-  if (d.ce < 1900*365 || d.ce > 2100*365){ fprintf(stderr, "Invalid ce in UTC string: %d\n", d.ce); return FAILURE; }
-  if (d.hh < 0        || d.hh > 23){ fprintf(stderr, "Invalid hour in UTC string: %d\n", d.hh); return FAILURE; }
-  if (d.mm < 0        || d.mm > 59){ fprintf(stderr, "Invalid minute in UTC string: %d\n", d.mm); return FAILURE; }
-  if (d.ss < 0        || d.ss > 59){ fprintf(stderr, "Invalid second in UTC string: %d\n", d.ss); return FAILURE; }
+  if (!date_is_valid(&d, true)){
+    fprintf(stderr, "Invalid date in UTC string: %s\n", string);
+    return FAILURE;
+  }
 
   *date = d;
 
@@ -702,12 +694,11 @@ date_t d;
     d.year, d.month, d.day, d.doy, d.week, d.ce);
   #endif
 
-  if (d.year < 1900   || d.year > 2100){   init_date(&d); return CANCEL; }
-  if (d.month < 1     || d.month > 12){    init_date(&d); return CANCEL; }
-  if (d.day < 1       || d.day > 31){      init_date(&d); return CANCEL; }
-  if (d.doy < 1       || d.doy > 365){     init_date(&d); return CANCEL; }
-  if (d.week < 1      || d.week > 52){     init_date(&d); return CANCEL; }
-  if (d.ce < 1900*365 || d.ce > 2100*365){ init_date(&d); return CANCEL; }
+  if (!date_is_valid(&d, false)){
+    init_date(&d);
+    *date = d;
+    return CANCEL;
+  }
 
   #ifdef FORCE_DEBUG
   printf("date from string 2: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
@@ -730,5 +721,30 @@ void print_date(date_t *date){
     date->hh, date->mm, date->ss, date->tz);
 
   return;
+}
+
+
+/** This function checks if a date is valid
+--- date:        date struct
+--- check_time:  whether to check time components
++++ Return:      true if valid, false otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool date_is_valid(date_t *date, bool check_time){
+
+  if (date->year < 1900 || date->year > 2100) return false;
+  if (date->month < 1 || date->month > 12) return false;
+  if (date->day < 1 || date->day > 31) return false;
+  if (date->doy < 1 || date->doy > 365) return false;
+  if (date->week < 1 || date->week > 52) return false;
+  if (date->ce < 1900*365 || date->ce > 2100*365) return false;
+
+  if (check_time){
+    if (date->hh < 0 || date->hh > 23) return false;
+    if (date->mm < 0 || date->mm > 59) return false;
+    if (date->ss < 0 || date->ss > 59) return false;
+    if (date->tz < -12 || date->tz > +14) return false; // Timezone range
+  }
+
+  return true;
 }
 
