@@ -137,7 +137,7 @@ enum { _WVL_BLUE_,     _WVL_GREEN_,    _WVL_RED_,   _WVL_REDEDGE1_,
        _WVL_VH_,       _WVL_LENGTH_ };
 
 // AOD target types
-enum { _AOD_WAT_, _AOD_SHD_, _AOD_VEG_ };
+enum { _AOD_WAT_, _AOD_VEG_ };
 
 // ARD input type
 enum { _ARD_REF_, _ARD_AUX_, _ARD_MSK_, _ARD_FTR_ };
@@ -252,6 +252,12 @@ enum { LANDSAT, SENTINEL2, _UNKNOWN_, _MISSION_LENGTH_ };
 
 // sun/view angles
 enum { ZEN, AZI, cZEN, cAZI, sZEN, sAZI, tZEN, tAZI };
+
+// calibration type
+enum { _CAL_RAD_, _CAL_REF_, _CAL_BT_, _CAL_LENGTH_ };
+
+// gaseous absorption type
+enum { _GAS_WATER_, _GAS_OZONE_, _GAS_LENGTH_ };
 
 // resampling method
 enum { _RESAMPLE_NN_, _RESAMPLE_BL_, _RESAMPLE_CC_, 
