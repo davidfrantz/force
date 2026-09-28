@@ -78,6 +78,7 @@ void alloc_string_vector(string_vector_t *str_vec, size_t number, size_t length)
 void re_alloc_string_vector(string_vector_t *str_vec, size_t new_number, size_t new_length);
 void free_string_vector(string_vector_t *str_vec);
 void fill_string_vector(string_vector_t *str_vec, size_t pos, const char *new_str);
+void print_string_vector(string_vector_t *str_vec);
 
 #ifdef __cplusplus
 }

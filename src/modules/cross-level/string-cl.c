@@ -649,3 +649,21 @@ void fill_string_vector(string_vector_t *str_vec, size_t pos, const char *new_st
 
   return;
 }
+
+
+/** Print string vector
++++ This function prints the contents of a string vector structure.
+--- str_vec:  string vector structure (read-only)
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_string_vector(string_vector_t *str_vec) {
+
+  if (str_vec == NULL) {
+    EXIT_ERROR("NULL pointer passed.");
+  }
+
+  printf("String Vector (number: %d, length: %d):\n", str_vec->number, str_vec->length);
+  for (int i=0; i<str_vec->number; i++) {
+    printf("  [%d]: %s\n", i, str_vec->string[i]);
+  }
+}
