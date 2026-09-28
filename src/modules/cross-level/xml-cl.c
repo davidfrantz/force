@@ -651,7 +651,6 @@ void split_xml_tag(const char *tag, string_t *tag_name, string_vector_t *attribu
   }
 
   fill_string(tag_name, tokenptr);
-printf("tag_name: %s\n", tag_name->string);
 
   int i = 0;
   while (tokenptr != NULL){
