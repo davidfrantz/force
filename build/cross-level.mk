@@ -7,6 +7,7 @@ cross: \
     brick_base-cl \
     brick_io-cl \
     cite-cl \
+    crs-cl \
     cube-cl \
     date-cl \
     datesys-cl \
@@ -31,7 +32,8 @@ cross: \
     tile-cl \
     utils-cl \
     vector-cl \
-    warp-cl
+    warp-cl \
+    xml-cl
 
 alloc-cl: prepare $(CROSS_DIR)/alloc-cl.c
 	$(GCC) -c $(CROSS_DIR)/alloc-cl.c -o $(OBJDIR)/alloc-cl.o
@@ -44,6 +46,9 @@ brick_io-cl: prepare $(CROSS_DIR)/brick_io-cl.cpp
 
 cite-cl: prepare $(CROSS_DIR)/cite-cl.c
 	$(GCC) -c $(CROSS_DIR)/cite-cl.c -o $(OBJDIR)/cite-cl.o
+
+crs-cl: prepare $(CROSS_DIR)/crs-cl.c
+	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/crs-cl.c -o $(OBJDIR)/crs-cl.o $(GDAL_LIBS)
 
 cube-cl: prepare $(CROSS_DIR)/cube-cl.c
 	$(GCC) -c $(CROSS_DIR)/cube-cl.c -o $(OBJDIR)/cube-cl.o
@@ -120,3 +125,5 @@ vector-cl: prepare $(CROSS_DIR)/vector-cl.c
 warp-cl: prepare $(CROSS_DIR)/warp-cl.cpp
 	$(G11) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(CROSS_DIR)/warp-cl.cpp -o $(OBJDIR)/warp-cl.o $(GDAL_LIBS)
 
+xml-cl: prepare $(CROSS_DIR)/xml-cl.c
+	$(GCC) -c $(CROSS_DIR)/xml-cl.c -o $(OBJDIR)/xml-cl.o -lm
