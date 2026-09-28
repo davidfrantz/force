@@ -34,60 +34,67 @@ Level 1 metadata header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
 #include "../cross-level/brick_base-cl.h"
-#include "../lower-level/table-ll.h"
+#include "../cross-level/runtime_data-cl.h"
+#include "../cross-level/utils-cl.h"
 #include "../lower-level/param-ll.h"
+#include "../lower-level/meta_lnd-ll.h"
+#include "../lower-level/meta_s2-ll.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 typedef struct {
-  char  orig_band[NPOW_10];   // Band ID in original file name
-  char  fname[NPOW_10]; // file name
-  int   fill;           // fill value
-  int   rsr_band;       // ID in RSR table
   float lmax, lmin;     // radiance min/max
   float qmax, qmin;     // quantized DN min/msx
-  float rmul, radd;     // reflectance scaling factor
+} radiance_cal_t;
+
+typedef struct {
+  float scale, offset;     // reflectance scaling factor
+} reflectance_cal_t;
+
+typedef struct {
   float k1, k2;         // conversion factors brightness temperature
+} temperature_cal_t;
+
+typedef struct {
+  radiance_cal_t    radiance;     // radiance calibration
+  reflectance_cal_t reflectance;  // reflectance calibration
+  temperature_cal_t temperature;  // brightness temperature calibration
+  int type;        // _CAL_RAD_, _CAL_BT_, _CAL_REF_
 } cal_t;
 
 typedef struct {
-  float nodata;
-  float **szen, **sazi; // sun  zenith / azimuth from metadata
-  float **vzen, **vazi; // view zenith / azimuth from metadata
-  int nx, ny;           // number of cells in angle grid
-  int left, right;
-  int top, bottom;
-} s2_meta;
-
-typedef struct {
-  int fill;               // fill value
-  int dtype;           // data type (bytes)
-  int sat;             // saturation value
+  int mission; // mission name
+  int band_number;     // number of bands
+  string_vector_t image_path; // path to image files
+  int saturation;      // saturation value
+  int nodata;          // nodata value
+  double res;          // spatial resolution
+  double ulx, uly;     // upper left corner coordinates
+  int nrow, ncol, ncell;      // number of rows and columns
+  int col_offset, row_offset; // offset of subset in original image
+  date_t date;        // acquisition date
+  int epsg;
+  int tier;            // processing tier
   cal_t *cal;          // calibration DN->TOA reflectance / BT
+  float *wavelength;   // band center wavelength
   char refsys_type[NPOW_10]; // reference system type
   char refsys_id[NPOW_10];  // reference system ID
-  int tier;            // tier level
-  s2_meta s2;          // Sentinel-2 calibration specific
+  simple_view_grid_t view_grid; // view grid
 } meta_t;
 
 meta_t *allocate_metadata();
 void free_metadata(meta_t *meta);
 int init_metadata(meta_t *meta);
-cal_t *allocate_calibration(int nb);
-void free_calibration(cal_t *cal);
-int init_calibration(cal_t *cal);
-int check_metadata(par_ll_t *pl2, meta_t *meta, brick_t *DN);
-int print_metadata(meta_t *meta, int nb);
-int parse_metadata_landsat(par_ll_t *pl2, meta_t *meta, brick_t **dn);
-int parse_metadata_sentinel2(par_ll_t *pl2, meta_t *meta, brick_t **dn);
-void parse_metadata_band(char *d_level1, char *tag, char *value, cal_t *cal, int lid, int type);
-void interpolate_sunview_grid(float **int_grid, int int_nx, int int_ny, float nodata);
-void collapse_view_grid(float ***grid, int nb, int nd, int nx, int ny, float nodata);
-int parse_metadata_mission(par_ll_t *pl2);
-int parse_metadata(par_ll_t *pl2, meta_t **metadata, brick_t **DN, int *mission);
+int test_metadata(meta_t *meta);
+void print_metadata(meta_t *meta);
+int parse_metadata_landsat(par_ll_t *pl2, rtd_t *rtd, meta_t *meta);
+int parse_metadata_sentinel2(par_ll_t *pl2, rtd_t *rtd, meta_t *meta);
+int parse_metadata_mission(par_ll_t *pl2, meta_t *meta);
+int parse_metadata(par_ll_t *pl2, rtd_t *rtd, meta_t **metadata);
 
 #ifdef __cplusplus
 }
