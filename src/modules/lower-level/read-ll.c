@@ -28,23 +28,83 @@ This file contains functions for reading Level 1 data
 #include "read-ll.h"
 
 
+
+int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn){
+
+  if (pl2 == NULL || rtd == NULL || meta == NULL || dn == NULL || *dn != NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+
+  /** initialize Digital Number brick
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+
+  brick_t *DN = NULL;
+
+  DN = allocate_brick(meta->band_number, 0, _DT_NONE_);
+  set_brick_dirname(DN, pl2->d_temp);
+  set_brick_provdir(DN, pl2->d_temp);
+  set_brick_filename(DN, "DIGITAL-NUMBERS");
+  set_brick_name(DN, "FORCE Digital Number brick");
+  set_brick_open(DN, false);
+  set_brick_product(DN, "DN_");
+  set_brick_par(DN, pl2->params->log);
+  set_brick_format(DN, &pl2->gdalopt);
+  set_brick_datatype(DN, _DT_USHORT_);
+
+  set_brick_nprovenance(DN, 1);
+  set_brick_provenance(DN, 0, pl2->d_level1);
+
+  set_brick_res(DN, meta->res);
+  set_brick_nrows(DN, meta->nrow);
+  set_brick_ncols(DN, meta->ncol);
+  set_brick_ulx(DN, meta->ulx);
+  set_brick_uly(DN, meta->uly);
+
+  char wkt[NPOW_10];
+  epsg_to_wkt(meta->epsg, wkt);
+  set_brick_proj(DN, wkt);
+
+  for (int b=0; b<meta->band_number; b++){
+
+    set_brick_sensor(DN, b, rtd->sensor_mapping.l2_sensor);
+
+    set_brick_save(DN, b, true);
+    set_brick_nodata(DN, b, meta->nodata);
+    set_brick_date(DN, b, meta->date);
+    set_brick_unit(DN, b, "micrometers");
+
+    set_brick_domain(DN, b, rtd->band_mapping.domains[b]);
+
+    char bandname[NPOW_10];
+    concat_string_2(bandname, NPOW_10, 
+      rtd->band_mapping.domains[b], rtd->band_mapping.l1_bands[b], " - B");
+    set_brick_bandname(DN, b, bandname);
+
+    set_brick_wavelength(DN, b, meta->wavelength[b] / 1000.0);
+
+  }
+
+  #ifdef CMIX_FAS
+  set_brick_dirname(DN, pl2->d_level1);
+  #endif
+
+  #ifdef FORCE_DEBUG
+  print_brick_info(DN);
+  #endif
+
+  *dn = DN;
+  return SUCCESS;
+}
+
+
 /** This function reads all necessary or available Level 1 data
 --- meta:    metadata
---- mission: mission ID
 --- DN:      Digital Numbers
 --- pl2:     L2 parameters
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int read_level1(meta_t *meta, int mission, brick_t *DN, par_ll_t *pl2){
-int b, nb, nx, ny, nc;
-int nx_, ny_, xoff_ = 0, yoff_ = 0;
-double res, res_;
-double geotran[_GT_LEN_];
-ushort **dn_ = NULL;
-GDALDatasetH dataset;
-GDALRasterBandH band;
-int error = 0;
-int threads;
+int read_level1(meta_t *meta, brick_t *DN, par_ll_t *pl2){
 
 
   #ifdef FORCE_CLOCK
@@ -52,18 +112,21 @@ int threads;
   #endif
 
 
-  nb  = get_brick_nbands(DN);
-  nx  = get_brick_ncols(DN);
-  ny  = get_brick_nrows(DN);
-  nc  = get_brick_ncells(DN);
-  res = get_brick_res(DN);
+  int nb  = get_brick_nbands(DN);
+  int nx  = get_brick_ncols(DN);
+  int ny  = get_brick_nrows(DN);
+  int nc  = get_brick_ncells(DN);
+  double res = get_brick_res(DN);
   allocate_brick_bands(DN, nb, nc, _DT_USHORT_);
+
+  ushort **dn_ = NULL;
   if ((dn_ = get_bands_ushort(DN)) == NULL) return FAILURE;
 
   CPLSetConfigOption("GDAL_PAM_ENABLED", "NO");
   CPLSetConfigOption("GDAL_NUM_THREADS", "ALL_CPUS");
   //CPLPushErrorHandler(CPLQuietErrorHandler);
 
+  int threads;
 
   if (pl2->ithread){
     if (pl2->nthread > nb){
@@ -75,15 +138,20 @@ int threads;
     threads = 1;
   }
 
+  int error = 0;
 
-  #pragma omp parallel  num_threads(threads) private(dataset,band,nx_,ny_,geotran,res_) firstprivate(xoff_,yoff_) shared(dn_,nb,meta,mission,nx,ny,res) reduction(+: error) default(none)
+  #pragma omp parallel num_threads(threads) shared(dn_,nb,meta,nx,ny,res) reduction(+: error) default(none)
   {
  
     #pragma omp for
-    for (b=0; b<nb; b++){
+    for (int b=0; b<nb; b++){
 
-      if ((dataset = GDALOpen(meta->cal[b].fname, GA_ReadOnly)) == NULL){
-        printf("unable to open %s. ", meta->cal[b].fname); error++;
+
+      GDALDatasetH dataset;
+      if ((dataset = GDALOpen(meta->image_path.string[b], GA_ReadOnly)) == NULL){
+        printf("unable to open %s", meta->image_path.string[b]); 
+        error++;
+        continue;
       }// else {
         //CPLPopErrorHandler();
       //}
@@ -93,27 +161,31 @@ int threads;
       printf("Driver: %s/%s\n", GDALGetDriverShortName(driver), GDALGetDriverLongName(driver));
       #endif
 
-      // get number of pixels, GDAL handles conversion to nx, ny
-      nx_ = GDALGetRasterXSize(dataset);
-      ny_ = GDALGetRasterYSize(dataset);
+      // get image resolution
+      double geotran[_GT_LEN_];
       GDALGetGeoTransform(dataset, geotran);
-      res_ = geotran[_GT_RES_];
+      double res_image = geotran[_GT_RES_];
 
-      if (mission == SENTINEL2){
-        xoff_ = floor(meta->s2.left*res/res_);
-        yoff_ = floor(meta->s2.top*res/res_);
-        nx_ = floor(nx*res/res_);
-        ny_ = floor(ny*res/res_);
-        #ifdef FORCE_DEBUG
-        printf("reading %d/%d pixels with offset %d/%d into buffer with %d/%d pixels\n", 
-          nx_, ny_, xoff_, yoff_, nx, ny);
-        #endif
-      }
+      int xoff_disc_access = floor(meta->col_offset*res/res_image);
+      int yoff_disc_access = floor(meta->row_offset*res/res_image);
+      int nx_disc_access = floor(nx*res/res_image);
+      int ny_disc_access = floor(ny*res/res_image);
 
-      band = GDALGetRasterBand(dataset, 1);
-      if (GDALRasterIO(band, GF_Read, xoff_, yoff_, nx_, ny_, dn_[b], 
+      #ifdef FORCE_DEBUG
+      printf("reading %d/%d pixels with offset %d/%d into buffer with %d/%d pixels\n", 
+        nx_disc_access, ny_disc_access, xoff_disc_access, yoff_disc_access, nx, ny);
+      #endif
+
+
+      GDALRasterBandH band = GDALGetRasterBand(dataset, 1);
+      if (GDALRasterIO(band, GF_Read, xoff_disc_access, yoff_disc_access, 
+        nx_disc_access, ny_disc_access, dn_[b], 
         nx, ny, GDT_UInt16, 0, 0) == CE_Failure){
-        printf("could not read %s. ", meta->cal[b].fname); error++;}
+        printf("could not read %s. ", meta->image_path.string[b]); 
+        error++;
+        GDALClose(dataset);
+        continue;
+      }
 
       GDALClose(dataset);
 
@@ -196,7 +268,7 @@ int tvalid = 0;
         if (b != b_cirrus && dn_[b][p] == 0){ off_[p] = true; break;}
 
         // if any (non-temp) layer saturated
-        if (b != b_temp && dn_[b][p] >= meta->sat){ set_saturation(qai, p, true); break;}
+        if (b != b_temp && dn_[b][p] >= meta->saturation){ set_saturation(qai, p, true); break;}
 
         // if temperature has any non-0 value
         if (b == b_temp) tvalid++;
@@ -256,7 +328,12 @@ ushort **dn_  = NULL;
 
 
   // impact noise was not observed yet in 16bit data
-  if (meta->dtype != 8) return SUCCESS;
+  char sensor[NPOW_10]; 
+  get_brick_sensor(DN, 0, sensor, NPOW_10);
+  if (!strings_equal(sensor, "LND04") ||
+      !strings_equal(sensor, "LND05") ||
+      !strings_equal(sensor, "LND07")) return SUCCESS;
+
   if (!pl2->impulse) return SUCCESS;
 
   nx = get_brick_ncols(DN);
@@ -332,14 +409,13 @@ ushort **dn_  = NULL;
 +++ This is done to maintain a constant calibration between sensors and
 +++ to retain the flexibility to e.g. use another E0 spectrum.
 --- meta:    metadata
---- mission: mission ID
 --- atc:     atmospheric correction factors
 --- DN:      digital numbers
 --- TOA:     Top of Atmosphere reflectance and temperature
 --- QAI:     Quality Assurance Information
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int convert_level1(meta_t *meta, int mission, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI){
+int convert_level1(meta_t *meta, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI){
 brick_t  *TOA  = NULL;
 ushort **dn_  = NULL;
 short  **toa_ = NULL;
@@ -347,7 +423,7 @@ float    *sun_ = NULL;
 int b, b_temp, b_cirrus, nb, nc, p, g;
 short nodata;
 float A, rad, dsun, pi_dsun2, tmp;
-float dn_scale, toa_scale;
+float toa_scale;
 
 
   #ifdef FORCE_CLOCK
@@ -390,14 +466,13 @@ float dn_scale, toa_scale;
 
   /** TOA reflectance to TOA reflectance (Sentinel-2) 
   in early processing versions, scale factor was 1000, now 10000 **/
-  if (mission == SENTINEL2){
+  if (meta->mission == SENTINEL2){
 
     for (b=0; b<nb; b++){
-      
-      dn_scale  = get_brick_scale(DN,  b);
+
       toa_scale = get_brick_scale(TOA, b);
       
-      #pragma omp parallel shared(b, nc, dn_scale, toa_scale, dn_, toa_, meta, QAI, nodata) default(none) 
+      #pragma omp parallel shared(b, nc, toa_scale, dn_, toa_, meta, QAI, nodata) default(none) 
       {
 
         #pragma omp for schedule(static)
@@ -405,7 +480,8 @@ float dn_scale, toa_scale;
           if (get_off(QAI, p)){ 
             toa_[b][p] = nodata; 
           } else {
-            toa_[b][p] = (dn_[b][p] + meta->cal[b].radd) / dn_scale*toa_scale;
+            toa_[b][p] = (dn_[b][p] + meta->cal[b].reflectance.offset) / 
+            meta->cal[b].reflectance.scale*toa_scale;
           }
         }
         
@@ -423,8 +499,8 @@ float dn_scale, toa_scale;
 
       toa_scale = get_brick_scale(TOA, b);
 
-      A = (meta->cal[b].lmax-meta->cal[b].lmin) / 
-          (meta->cal[b].qmax-meta->cal[b].qmin);
+      A = (meta->cal[b].radiance.lmax-meta->cal[b].radiance.lmin) / 
+          (meta->cal[b].radiance.qmax-meta->cal[b].radiance.qmin);
 
       #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
       {
@@ -435,12 +511,12 @@ float dn_scale, toa_scale;
           if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
 
           // dn to radiance
-          rad = A * (dn_[b][p]-meta->cal[b].qmin) + meta->cal[b].lmin;
+          rad = A * (dn_[b][p]-meta->cal[b].radiance.qmin) + meta->cal[b].radiance.lmin;
 
           // radiance to brightness temperature in kelvin
           if (b == b_temp){
 
-            tmp = meta->cal[b].k2/log((meta->cal[b].k1/rad)+1)*toa_scale;
+            tmp = meta->cal[b].temperature.k2/log((meta->cal[b].temperature.k1/rad)+1)*toa_scale;
             if (tmp < SHRT_MAX){
               toa_[b][p] = (short)tmp;
             } else {
@@ -452,12 +528,12 @@ float dn_scale, toa_scale;
 
             g = convert_brick_p2p(QAI, atc->xy_sun, p);
 
-            if (meta->cal[b].rmul == meta->cal[b].fill){
-              // old-style DN -> radiance -> reflectance conversion
+            if (meta->cal[b].reflectance.scale <= 0){
+              // old-style DN -> radiance -> reflectance conversion (should not happen anymore)
               tmp = rad*pi_dsun2 / (atc->E0[b]*sun_[g]);
             } else {
               // new DN -> reflectance conversion
-              tmp = (meta->cal[b].radd + meta->cal[b].rmul*dn_[b][p]) / sun_[g];
+              tmp = (meta->cal[b].reflectance.offset + meta->cal[b].reflectance.scale*dn_[b][p]) / sun_[g];
             }
 
             if (tmp < FLT_MIN){

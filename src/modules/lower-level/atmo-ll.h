@@ -50,7 +50,7 @@ Atmospheric correction header
 extern "C" {
 #endif
 
-brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *AOI, top_t *TOP, int *nprod);
+brick_t **radiometric_correction(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *AOI, top_t *TOP, int *nprod);
 
 #ifdef __cplusplus
 }

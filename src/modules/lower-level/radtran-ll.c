@@ -291,23 +291,38 @@ float Pa;
 +++ the bands' relative spectral response and absorption coefficients
 --- w:      total path water vapor in cm
 --- m:      air mass one path
---- b_rsr:  ID in relative spectral response array
+--- rtd:    runtime data
+--- b:      band ID
 +++ Return: water vapor transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float wvp_transmitt(float w, float m, int b_rsr){
-int wvl;
-float tmp, tmp2, Tw;
-double a, s;
+float wvp_transmitt(float w, float m, rtd_t *rtd, int b){
 
-  tmp = w/m;
 
-  for (wvl=0, a=0, s=0; wvl<_WVL_DIM_; wvl++){
-    tmp2 = _AW_[wvl]*tmp;
-    a += _RSR_[b_rsr][wvl]*
-            exp((-1.2110662*tmp2)/pow(1+24.1229127*tmp2, 0.3669996));
-    s += _RSR_[b_rsr][wvl];
+  if (rtd == NULL || b < 0 || b >= rtd->rsr_mapping.nbands){
+    fprintf(stderr, "Error: Invalid runtime data or band ID in wvp_transmitt().\n");
+    exit(FAILURE); // Return an error value
   }
-  Tw = a/s;
+
+  seq_t transmittance = rtd->absorption.spectrum[_GAS_WATER_];
+  alloc((void**)&transmittance.values, transmittance.n, sizeof(float));
+
+  for (int i=0; i<transmittance.n; i++){
+    float tmp = rtd->absorption.spectrum[_GAS_WATER_].values[i] * w / m;
+    transmittance.values[i] = exp((-1.2110662*tmp)/pow(1+24.1229127*tmp, 0.3669996));
+  }
+
+  float Tw;
+
+  if (weighted_average_of_seq(&transmittance, &rtd->rsr_mapping.rsr[b], &Tw) != SUCCESS){
+    fprintf(stderr, "Error: Could not calculate water vapor transmittance for band %d.\n", b);
+    exit(FAILURE); // Return an error value
+  }
+
+  #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+  printf("wvp_transmitt: band %d, Tw = %.4f\n", b, Tw);
+  #endif
+
+  free((void*)transmittance.values);
 
   return Tw;
 }
@@ -319,20 +334,38 @@ double a, s;
 --- o:      total ozone
 --- m:      air mass one path
 --- b_rsr:  ID in relative spectral response array
-+++ Return: water vapor transmittance
+--- rtd:    runtime data
+--- b:      band ID
++++ Return: ozone transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-float ozone_transmitt(float o, float m, int b_rsr){
-int wvl;
-float tmp, To;
-double a, s;
+float ozone_transmitt(float o, float m, rtd_t *rtd, int b){
 
-  tmp = -o/m;
 
-  for (wvl=0, a=0, s=0; wvl<_WVL_DIM_; wvl++){
-    a += _RSR_[b_rsr][wvl]*exp(_AO_[wvl]*tmp);
-    s += _RSR_[b_rsr][wvl];
+ if (rtd == NULL || b < 0 || b >= rtd->rsr_mapping.nbands){
+    fprintf(stderr, "Error: Invalid runtime data or band ID in wvp_transmitt().\n");
+    exit(FAILURE); // Return an error value
   }
-  To = a/s;
+
+  seq_t transmittance = rtd->absorption.spectrum[_GAS_OZONE_];
+  alloc((void**)&transmittance.values, transmittance.n, sizeof(float));
+
+  for (int i=0; i<transmittance.n; i++){
+    float tmp = rtd->absorption.spectrum[_GAS_OZONE_].values[i] * -o / m;
+    transmittance.values[i] = exp(tmp);
+  }
+
+  float To;
+
+  if (weighted_average_of_seq(&transmittance, &rtd->rsr_mapping.rsr[b], &To) != SUCCESS){
+    fprintf(stderr, "Error: Could not calculate ozone transmittance for band %d.\n", b);
+    exit(FAILURE); // Return an error value
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("ozone_transmitt: band %d, To = %.4f\n", b, To);
+  #endif
+
+  free((void*)transmittance.values);
 
   return To;
 }

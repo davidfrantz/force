@@ -31,8 +31,9 @@ Radiative transfer computations header
 #include <stdbool.h> // boolean data type
 #include <math.h>    // common mathematical functions
 
-#include "../lower-level/table-ll.h"
-
+#include "../cross-level/const-cl.h"
+#include "../cross-level/runtime_data-cl.h"
+#include "../cross-level/utils-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,8 +54,8 @@ float env_weight(float aod, float mod, float Fa, float Fr);
 float backscatter(float ms, float mv, float sazi, float vazi);
 float phase_molecular(float cospsi);
 float phase_aerosol(float cospsi, float *hg);
-float wvp_transmitt(float w, float m, int b_rsr);
-float ozone_transmitt(float o, float m, int b_rsr);
+float wvp_transmitt(float w, float m, rtd_t *rsr, int b);
+float ozone_transmitt(float o, float m, rtd_t *rtd, int b);
 float gas_transmitt(float Tsw, float Tvw, float Tso, float Tvo);
 float fresnel_reflection(float i);
 float illumin(float csz, float ssz, float ctz, float stz, float sa, float ta);

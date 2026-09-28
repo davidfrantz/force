@@ -47,7 +47,7 @@ Cloud and cloud shadow header
 extern "C" {
 #endif
 
-int detect_clouds(par_ll_t *pl2, int mission, atc_t *atc, brick_t *TOA, brick_t *DEM, brick_t *EXP, brick_t *QAI);
+int detect_clouds(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *DEM, brick_t *EXP, brick_t *QAI);
 int cloud_distance(brick_t *QAI, int nodata, short *DIST);
 
 #ifdef __cplusplus

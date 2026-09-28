@@ -43,18 +43,18 @@ iweights_t interpolation_weights(int j, int i, int nf, int ne, double res, doubl
 float interpolate_coarse(iweights_t weight, float *COARSE);
 int surface_reflectance(par_ll_t *pl2, atc_t *atc, int b, short *bck_, short *toa_, short *Tg_, short *boa_, small *dem_, short *ill_, ushort *sky_, ushort *cf_, brick_t *QAI);
 short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small *dem_, brick_t *QAI);
-int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI);
+int atmo_angledep(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI);
 int atmo_elevdep(par_ll_t *pl2, atc_t *atc, brick_t *QAI, top_t *TOP);
 int apply_aoi(brick_t *QAI, brick_t *AOI);
 brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
-brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
+brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
 brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
 brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI);
 brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI);
 brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI);
 brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP);
 brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP);
-brick_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct);
+brick_t **compile_level2(par_ll_t *pl2, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct);
 
 
 /** This function computes the weights to interpolate the coarse atmos-
@@ -671,14 +671,15 @@ float **xyz_F = NULL;
 /** This function computes all atmospheric parameters that are a function 
 +++ of view or sun angles.
 --- pl2:    L2 parameters
+--- rtd:    runtime data
 --- meta:   metadata
 --- atc:    atmospheric correction factors
 --- TOP:    Topographic Derivatives
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int atmo_angledep(par_ll_t *pl2, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI){
-int e, f, g, ne, nf, b, nb;
+int atmo_angledep(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI){
+int e, f, g, ne, nf, b, nb, b_temp = -1;
 int dem, doy;
 float ms, mv, psi, Hr;
 float ozone;
@@ -693,8 +694,9 @@ double lon, lat;
   ne = get_brick_ncols(atc->xy_mod);
   nf = get_brick_nrows(atc->xy_mod);
   nb = get_brick_nbands(atc->xy_mod);
+  b_temp = find_domain(atc->xy_mod, "TEMP");
 
-  #pragma omp parallel private(g, b, ms, mv, psi, Hr, doy, lon, lat, ozone, dem) shared(nb, ne, nf, meta, atc, pl2, QAI, TOP) default(none) 
+  #pragma omp parallel private(g, b, ms, mv, psi, Hr, doy, lon, lat, ozone, dem) shared(nb, ne, nf, b_temp, meta, atc, pl2, rtd, QAI, TOP) default(none) 
   {
 
     #pragma omp for collapse(2) schedule(static)
@@ -729,11 +731,13 @@ double lon, lat;
 
       for (b=0; b<nb; b++){
 
+        if (b == b_temp) continue;
+
         // gaseous transmittance
-        set_brick(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, meta->cal[b].rsr_band));
-        set_brick(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, meta->cal[b].rsr_band));
+        set_brick(atc->xy_Tsw, b, g, wvp_transmitt(atc->wvp, ms, rtd, b));
+        set_brick(atc->xy_Tvw, b, g, wvp_transmitt(atc->wvp, mv, rtd, b));
+        set_brick(atc->xy_Tso, b, g, ozone_transmitt(ozone, ms, rtd, b));
+        set_brick(atc->xy_Tvo, b, g, ozone_transmitt(ozone, mv, rtd, b));
         
         set_brick(atc->xy_Tg, b, g, gas_transmitt(
           get_brick(atc->xy_Tsw, b, g), get_brick(atc->xy_Tvw, b, g),
@@ -973,6 +977,7 @@ small *aoi_ = NULL;
 --- pl2:    L2 parameters
 --- mission: mission ID
 --- atc:    atmospheric correction factors
+--- wvlut:  Water vapor lookup table
 --- cube:   data cube parameters
 --- TOA:    TOA reflectance
 --- QAI:    Quality Assurance Information
@@ -980,7 +985,7 @@ small *aoi_ = NULL;
 --- TOP:    Topographic Derivatives
 +++ Return: BOA brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP){
+brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP){
 int p, nc;
 int b, b_red, b_nir, b_sw1;
 #ifndef ACIX
@@ -1052,7 +1057,7 @@ brick_t *BOA = TOA;
     if ((boa_ = get_band_short(BOA, b_)) == NULL) return NULL;
 
     if (pl2->doatmo && mission == SENTINEL2){
-      if ((Tg_ = gas_transmittance(atc, b, WVP, QAI)) == NULL){
+      if ((Tg_ = gas_transmittance(atc, wvlut, b, WVP, QAI)) == NULL){
       printf("error in gas transmittance.\n"); return NULL;}
     } else Tg_ = NULL;
   
@@ -1914,8 +1919,9 @@ short *wvp_ = NULL;
     
 /** This function compiles the Level 2 products ready to be output
 --- pl2:      L2 parameters
---- mission:  mission ID
+--- meta:     metadata
 --- atc:      atmospheric correction factors
+--- wvlut:    water vapor lookup table
 --- cube:     data cube parameters
 --- TOA:      TOA reflectance
 --- QAI:      Quality Assurance Information
@@ -1924,7 +1930,7 @@ short *wvp_ = NULL;
 --- nproduct: number of products
 +++ Return: array of product bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **compile_level2(par_ll_t *pl2, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct){
+brick_t **compile_level2(par_ll_t *pl2, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct){
 int nprod, p_boa, p_qai, p_dst, p_vzn, p_hot, p_aod, p_wvp, p_ovv;
 brick_t **LEVEL2 = NULL;
 
@@ -1965,7 +1971,7 @@ brick_t **LEVEL2 = NULL;
       printf("error in compiling L2 AOD. "); return NULL;}}
 
   // do BOA near the end (TOA is altered within)
-  if ((LEVEL2[p_boa] = compile_l2_boa(pl2, mission, atc, cube, TOA, QAI, WVP, TOP)) == NULL){
+  if ((LEVEL2[p_boa] = compile_l2_boa(pl2, meta->mission, atc, wvlut, cube, TOA, QAI, WVP, TOP)) == NULL){
     printf("error in compiling L2 BOA. "); return NULL;}
 
   // do WVP after BOA (WVP is altered within)
@@ -2011,8 +2017,8 @@ brick_t **LEVEL2 = NULL;
 +++ radiometric correction. This includes estimating AOD, water vapor, 
 +++ environment effect, topographic correction and atmospheric correction.
 --- pl2:    L2 parameters
+--- rtd:     runtime data
 --- meta:    metadata
---- mission: mission ID
 --- atc:     atmospheric correction factors
 --- cube:    data cube parameters
 --- TOA:     TOA reflectance
@@ -2021,8 +2027,9 @@ brick_t **LEVEL2 = NULL;
 --- nprod:   number of products
 +++ Return:  array of product bricks
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t **radiometric_correction(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *AOI, top_t *TOP, int *nprod){
+brick_t **radiometric_correction(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *AOI, top_t *TOP, int *nprod){
 int b, nb;
+wvp_lut_t wvlut = {0};
 brick_t  *WVP    = NULL;
 brick_t **L2 = NULL;
 
@@ -2041,6 +2048,17 @@ brick_t **L2 = NULL;
     cite_me(_CITE_RADTRAN_);
     cite_me(_CITE_ATMVAL_);
 
+    if (load_runtime_data_absorption(rtd) == FAILURE){
+      fprintf(stderr, "Error: Failed to load gaseous absorption runtime data.\n");
+      return NULL;
+    }
+
+    if (load_runtime_data_water_library(rtd) == FAILURE){
+      fprintf(stderr, "Error: Failed to load water library runtime data.\n");
+      return NULL;
+    }
+
+
 
     /** elevation stats (mean, max/min, # of 100m classes)
     +++ rayleigh scattering @ sea level
@@ -2050,25 +2068,26 @@ brick_t **L2 = NULL;
     atc->Hr = mod_elev_factor(atc->dem.avg);
 
     #ifdef FORCE_DEBUG
+    print_fvector(atc->wvl, "wavelengths:        ", nb, 1, 4);
     print_fvector(atc->mod, "rayleigh @ sea level", nb, 1, 4);
     printf("Hr: %.4f\n", atc->Hr);
     #endif
 
     /** precipitable water vapor
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (mission == LANDSAT){
+    if (meta->mission == LANDSAT){
       if ((atc->wvp = water_vapor_from_lut(pl2, atc)) < 0){
         printf("Cannot read wvp from LUT. "); return NULL;}
     } else atc->wvp = 0.0;
 
     /** angle-dependent coarse-grid atmospheric modelling
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    atmo_angledep(pl2, meta, atc, TOP, QAI);
+    atmo_angledep(pl2, rtd, meta, atc, TOP, QAI);
 
     /** compile AOD, use image-based water/shadow targets, refine by DODB, 
     +++ use external values (one or several options are possible)
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (compile_aod(pl2, meta, atc, TOA, QAI, TOP) == FAILURE){
+    if (compile_aod(pl2, rtd, meta, atc, TOA, QAI, TOP) == FAILURE){
       printf("error in AOD module.\n"); return NULL;}
 
     /** elevation-dependent coarse-grid atmospheric modelling
@@ -2077,8 +2096,8 @@ brick_t **L2 = NULL;
     
     /** water vapor and gaseous transmittance estimation
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (mission == SENTINEL2){
-      if ((WVP = water_vapor(meta, atc, TOA, QAI, TOP->dem)) == NULL){
+    if (meta->mission == SENTINEL2){
+      if ((WVP = water_vapor(rtd, meta, atc, &wvlut, TOA, QAI, TOP->dem)) == NULL){
         printf("error in water vapor estimation. "); return NULL;}
     } else WVP = NULL;
 
@@ -2102,18 +2121,20 @@ brick_t **L2 = NULL;
 
   /** Level 2 datasets
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  if ((L2 = compile_level2(pl2, mission, atc, cube, TOA, QAI, WVP, TOP, nprod)) == NULL){
+  if ((L2 = compile_level2(pl2, meta, atc, &wvlut, cube, TOA, QAI, WVP, TOP, nprod)) == NULL){
     printf("error in compiling Level 2 products. "); return NULL;}
 
 
   /** clean
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-  free_wvlut();
+  free_wvlut(&wvlut);
 
 
   #ifdef FORCE_DEBUG
   int prod;
-  for (prod=0; prod<(*nprod); prod++){ print_brick_info(L2[prod]); write_brick(L2[prod]);}
+  for (prod=0; prod<(*nprod); prod++){
+    print_brick_info(L2[prod]); write_brick(L2[prod]);
+  }
   #endif
 
 

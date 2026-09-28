@@ -37,6 +37,7 @@ Read Level 1 header
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick_base-cl.h"
 #include "../cross-level/brick_io-cl.h"
+#include "../cross-level/crs-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/sun-cl.h"
 #include "../cross-level/imagefuns-cl.h"
@@ -50,10 +51,11 @@ Read Level 1 header
 extern "C" {
 #endif
 
-int read_level1(meta_t *meta, int mission, brick_t *DN, par_ll_t *pl2);
+int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn);
+int read_level1(meta_t *meta, brick_t *DN, par_ll_t *pl2);
 int bounds_level1(meta_t *meta, brick_t *DN, brick_t **QAI, par_ll_t *pl2);
 int impulse_noise_level1(meta_t *meta, brick_t *DN, brick_t *QAI, par_ll_t *pl2);
-int convert_level1(meta_t *meta, int mission, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI);
+int convert_level1(meta_t *meta, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI);
 
 #ifdef __cplusplus
 }

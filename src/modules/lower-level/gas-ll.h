@@ -47,7 +47,7 @@ Atmospheric Gas header
 extern "C" {
 #endif
 
-// water vapor LUT
+
 typedef struct {
   float ***val;
   int nb;
@@ -55,13 +55,10 @@ typedef struct {
   int nm;
 } wvp_lut_t;
 
-// global instance
-extern wvp_lut_t _WVLUT_;
-
-int wvp_transmitt_lut(meta_t *meta, atc_t *atc);
-brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM);
-short *gas_transmittance(atc_t *atc, int b, brick_t *WVP, brick_t *QAI);
-void free_wvlut();
+int wvp_transmitt_lut(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut);
+brick_t *water_vapor(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, brick_t *TOA, brick_t *QAI, brick_t *DEM);
+short *gas_transmittance(atc_t *atc, wvp_lut_t *wvlut, int b, brick_t *WVP, brick_t *QAI);
+void free_wvlut(wvp_lut_t *wvlut);
 float ozone_amount(float lon, float lat, int doy);
 float water_vapor_from_lut(par_ll_t *pl2, atc_t *atc);
 
