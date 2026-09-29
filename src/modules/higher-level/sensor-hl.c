@@ -36,10 +36,7 @@ int check_target_sensor(sen_t *sen, json_t *def_all_sensors);
 void print_sensor_runtime_data(){
 
   json_t *def_all_sensors = NULL;
-  if (load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse sensor definitions.\n");
-    exit(FAILURE);
-  }
+  load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors);
 
   int error = 0;
 
@@ -312,10 +309,7 @@ int retrieve_sensor(sen_t *sen){
 
   // get all sensor definitions
   json_t *def_all_sensors = NULL;
-  if (load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse sensor definitions.\n");
-    return FAILURE;
-  }
+  load_runtime_data(_FORCE_SENSOR_FILE_, &def_all_sensors);
 
   for (int s=0; s<sen->n; s++){
 

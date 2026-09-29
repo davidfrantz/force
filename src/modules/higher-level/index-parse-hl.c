@@ -35,10 +35,7 @@ int remove_unused_bands(bool *use_band, sen_t *sen);
 void print_index_runtime_data(){
 
   json_t *def_indices = NULL;
-  if (load_runtime_data(_FORCE_INDEX_FILE_, &def_indices) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse index definitions.\n");
-    exit(FAILURE);
-  }
+  load_runtime_data(_FORCE_INDEX_FILE_, &def_indices);
 
   int error = 0;
 
@@ -281,10 +278,7 @@ int retrieve_indices(index_t *index, sen_t *sen){
 
   // load index definitions
   json_t *def_indices = NULL;
-  if (load_runtime_data(_FORCE_INDEX_FILE_, &def_indices) != SUCCESS){
-    fprintf(stderr, "Error: Could not parse index definitions.\n");
-    return FAILURE;
-  }
+  load_runtime_data(_FORCE_INDEX_FILE_, &def_indices);
 
   int error = 0;
   bool *use_bands = NULL;

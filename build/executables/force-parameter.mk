@@ -12,6 +12,7 @@ force-parameter: \
   param-hl \
   param-ll \
   read-cl \
+  runtime_data-cl \
   sensor-hl \
   string-cl \
   sys-cl \
@@ -31,6 +32,7 @@ force-parameter: \
 	$(OBJDIR)/param-hl.o \
 	$(OBJDIR)/param-ll.o \
 	$(OBJDIR)/read-cl.o \
+	$(OBJDIR)/runtime_data-cl.o \
 	$(OBJDIR)/sensor-hl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/sys-cl.o \
