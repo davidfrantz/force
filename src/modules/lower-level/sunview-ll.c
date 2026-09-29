@@ -134,12 +134,11 @@ float szen, sazi;
 +++ This function computes sun positions (+cos/sin/tan), and view angles
 --- pl2:    L2 parameters
 --- meta:   metadata
---- mission: mission ID
 --- atc:    atmospheric correction factors
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int sun_target_view(par_ll_t *pl2, meta_t *meta, int mission, atc_t *atc, brick_t *QAI){
+int sun_target_view(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *QAI){
 double lat, lon;
 float zen, azi;
 int e, f, g, p;
@@ -157,15 +156,18 @@ float *xy_szen = NULL;
   nc  = get_brick_ncells(QAI);
 
   // average satellite height (m)
-  if (mission == LANDSAT){
+  #ifdef FORCE_MAGIC
+  fprintf(stderr, "Warning: Using magic numbers for satellite altitude.\n");
+  #endif
+  if (meta->mission == LANDSAT){
     atc->view.H = 705000.0;
-  } else if (mission == SENTINEL2){
+  } else if (meta->mission == SENTINEL2){
     atc->view.H = 786000.0;
   } else { printf("unknown mission.\n"); return FAILURE;}
   atc->view.H2 = atc->view.H*atc->view.H;
 
   // compute approx. view geometry for Landsat
-  if (mission == LANDSAT){
+  if (meta->mission == LANDSAT){
     if (viewgeo(pl2, QAI, atc) == FAILURE){
       printf("error in view geometry. "); return FAILURE;}
   }
@@ -194,7 +196,7 @@ float *xy_szen = NULL;
     set_brick(atc->xy_sun, tAZI, g, tan(azi));
 
     // satellite view geometry
-    if (view_angle(meta, mission, atc, QAI, f, e, g) == FAILURE){
+    if (view_angle(meta, atc, QAI, f, e, g) == FAILURE){
       printf("error in view geometry. "); return FAILURE;}
 
   }
@@ -331,7 +333,6 @@ double dx, dy;
 /** Compute view angle
 +++ This function computes the view angles
 --- meta:   metadata
---- mission: mission ID
 --- atc:    atmospheric correction factors
 --- QAI:    Quality Assurance Information
 --- f:      column in coarse grid
@@ -339,7 +340,7 @@ double dx, dy;
 --- g:      cell in coarse grid
 +++ Return: SUCCESS/FAILURE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int view_angle(meta_t *meta, int mission, atc_t *atc, brick_t *QAI, int f, int e, int g){
+int view_angle(meta_t *meta, atc_t *atc, brick_t *QAI, int f, int e, int g){
 int i, j, p, nx, ny;
 float dist, res, cres, rres, zen = 0, azi = 0;
 
@@ -352,7 +353,7 @@ float dist, res, cres, rres, zen = 0, azi = 0;
   rres = res/cres;
 
 
-  if (mission == LANDSAT){
+  if (meta->mission == LANDSAT){
 
     // distance from nadir line in pixels
     dist = (atc->view.a*f/rres + atc->view.b*e/rres + atc->view.c) / 
@@ -370,9 +371,10 @@ float dist, res, cres, rres, zen = 0, azi = 0;
       while (azi < 0) azi += 2*M_PI;
     }
 
-  } else if (mission == SENTINEL2){
+  } else if (meta->mission == SENTINEL2){
 
-    if (meta->s2.vzen[e][f] == meta->s2.nodata || meta->s2.vazi[e][f] == meta->s2.nodata){
+    if (fequal(meta->view_grid.zen[g], meta->view_grid.nodata) || 
+        fequal(meta->view_grid.azi[g], meta->view_grid.nodata)){
 
       zen = atc->nodata;
       azi = atc->nodata;
@@ -389,8 +391,8 @@ float dist, res, cres, rres, zen = 0, azi = 0;
       }
 
     } else {
-      zen = meta->s2.vzen[e][f]*_D2R_CONV_;
-      azi = meta->s2.vazi[e][f]*_D2R_CONV_;
+      zen = meta->view_grid.zen[g]*_D2R_CONV_;
+      azi = meta->view_grid.azi[g]*_D2R_CONV_;
     }
 
   }

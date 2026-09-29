@@ -14,13 +14,14 @@ lower: \
     equi7-ll \
     gas-ll \
     glance7-ll \
+    meta-lnd-ll \
+    meta-s2-ll \
     meta-ll \
     param-ll \
     radtran-ll \
     read-ll \
     resmerge-ll \
     sunview-ll \
-    table-ll \
     topo-ll
 
 aod-ll: prepare $(LOWER_DIR)/aod-ll.c
@@ -56,8 +57,14 @@ gas-ll: prepare $(LOWER_DIR)/gas-ll.c
 glance7-ll: prepare $(LOWER_DIR)/glance7-ll.c
 	$(GCC) -c $(LOWER_DIR)/glance7-ll.c -o $(OBJDIR)/glance7-ll.o
 
+meta_lnd-ll: prepare $(LOWER_DIR)/meta_lnd-ll.c
+	$(GCC) -c $(LOWER_DIR)/meta_lnd-ll.c -o $(OBJDIR)/meta_lnd-ll.o
+
+meta_s2-ll: prepare $(LOWER_DIR)/meta_s2-ll.c
+	$(GCC) -c $(LOWER_DIR)/meta_s2-ll.c -o $(OBJDIR)/meta_s2-ll.o
+
 meta-ll: prepare $(LOWER_DIR)/meta-ll.c
-	$(GCC) $(GDAL_INCLUDES) $(GDAL_FLAGS) -c $(LOWER_DIR)/meta-ll.c -o $(OBJDIR)/meta-ll.o $(GDAL_LIBS)
+	$(GCC) -c $(LOWER_DIR)/meta-ll.c -o $(OBJDIR)/meta-ll.o
 
 param-ll: prepare $(LOWER_DIR)/param-ll.c
 	$(GCC) -c $(LOWER_DIR)/param-ll.c -o $(OBJDIR)/param-ll.o
@@ -73,9 +80,6 @@ resmerge-ll: prepare $(LOWER_DIR)/resmerge-ll.c
 
 sunview-ll: prepare $(LOWER_DIR)/sunview-ll.c
 	$(GCC) -c $(LOWER_DIR)/sunview-ll.c -o $(OBJDIR)/sunview-ll.o
-
-table-ll: prepare $(LOWER_DIR)/table-ll.c
-	$(GCC) -c $(LOWER_DIR)/table-ll.c -o $(OBJDIR)/table-ll.o
 
 topo-ll: prepare $(LOWER_DIR)/topo-ll.c
 	$(GCC) -c $(LOWER_DIR)/topo-ll.c -o $(OBJDIR)/topo-ll.o

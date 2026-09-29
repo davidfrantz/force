@@ -43,8 +43,7 @@ void copy_string(char *dst, size_t size, const char *src){
 
   strncpy(dst, src, size);
   if (dst[size-1] != '\0'){
-    printf("cannot copy, string too long (%ld -> %ld):\n%s\n", strlen(src), size, src);
-    exit(1);
+    EXIT_ERROR("cannot copy, string too long (%ld -> %ld):\n  %s", strlen(src), size, src);
   }
 
   return;
@@ -66,8 +65,7 @@ int nchar;
 
   nchar = snprintf(dst, size, "%s%s%s", src1, delim, src2);
   if (nchar < 0 || nchar >= size){ 
-    printf("Buffer Overflow in assembling string\n"); 
-    exit(1);
+    EXIT_ERROR("Buffer Overflow in assembling strings\n  %s\n  %s", src1, src2); 
   }
 
   return;
@@ -90,8 +88,7 @@ int nchar;
 
   nchar = snprintf(dst, size, "%s%s%s%s%s", src1, delim, src2, delim, src3);
   if (nchar < 0 || nchar >= size){ 
-    printf("Buffer Overflow in assembling string\n"); 
-    exit(1);
+    EXIT_ERROR("Buffer Overflow in assembling strings\n  %s\n  %s\n  %s", src1, src2, src3); 
   }
 
   return;
@@ -131,8 +128,7 @@ size_t suffix_len;
   //printf("length replace: %lu\n", replace_len);
 
   if (source_len - search_len + replace_len >= buffer_len){
-    printf("Error: Insufficient buffer size for replacing.\n");
-    exit(1);
+    EXIT_ERROR("Insufficient buffer size for replacing.");
   }
 
   alloc((void**)&buffer, buffer_len, sizeof(char**));
@@ -177,6 +173,49 @@ size_t suffix_len;
 }
 
 
+/** Delete characters from a string until a match is found
++++ This function deletes characters from a string until a match is found.
+--- src:        source string (modified)
+--- match:      search pattern
+--- keep_match: if true, the match is kept; otherwise, it's deleted
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void delete_until_match(char *src, const char *match, bool keep_match){
+
+  char *found = strstr(src, match);
+  if (found != NULL) {
+    size_t src_len = strlen(src);
+    size_t match_len = strlen(match);
+    size_t delete_len = found - src + (keep_match ? 0 : match_len);
+    size_t remaining_len = src_len - delete_len;
+    memmove(src, src + delete_len, remaining_len);
+    src[remaining_len] = '\0'; // Null-terminate the string
+  }
+
+  return;
+}
+
+
+/** Delete characters from a string after a match is found
++++ This function deletes characters from a string after a match is found.
+--- src:        source string (modified)
+--- match:      search pattern
+--- keep_match: if true, the match is kept; otherwise, it's deleted
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void delete_after_match(char *src, const char *match, bool keep_match){
+
+  char *found = strstr(src, match);
+  if (found != NULL) {
+    size_t match_len = strlen(match);
+    size_t new_len = found - src + (keep_match ? match_len : 0);
+    src[new_len] = '\0'; // Null-terminate the string after or before the match
+  }
+
+  return;
+}
+
+
 /** Trim leading and trailing spaces from a string
 +++ This function trims leading and trailing spaces from a string.
 --- str:              string to trim (modified)
@@ -214,6 +253,28 @@ int trim_leading_trailing_spaces(char *str, bool trim_leading, bool trim_trailin
 }
 
 
+/** Count the number of occurrences of a substring in a string
++++ This function counts the number of occurrences of a substring in a string.
+--- str:    source string
+--- substr: substring to count
++++ Return: number of occurrences
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int count_occurrences(const char *str, const char *substr) {
+int count = 0;
+const char *tmp = str;
+size_t substr_len = strlen(substr);
+
+  if (!str || !substr || *substr == '\0') return 0; // Safety check
+
+  while ((tmp = strstr(tmp, substr)) != NULL) {
+    count++;
+    tmp += substr_len; // Move past the last found substring
+  }
+
+  return count;
+}
+
+
 /** Overwrites part of a string with substring
 +++ This function overwrites part of a string with a given replacement string.
 +++ It is checked that the buffer doesn't overflow; error if so.
@@ -227,13 +288,11 @@ void overwrite_string_part(char *source, size_t offset, const char *replace, siz
 
 
   if (replace_len > strlen(replace)){
-    printf("Error: Replacement string length (%lu) exceeds length of replacement string (%lu).\n", replace_len, strlen(replace));
-    exit(1);
+    EXIT_ERROR("Replacement string length (%lu) exceeds length of replacement string (%lu).", replace_len, strlen(replace));
   }
 
   if (offset + replace_len > strlen(source)){
-    printf("Error: Offset (%lu) plus replacement length (%lu) exceeds source length (%lu).\n", offset, replace_len, strlen(source));
-    exit(1);
+    EXIT_ERROR("Offset (%lu) plus replacement length (%lu) exceeds source length (%lu).", offset, replace_len, strlen(source));
   }
   
   memcpy(source + offset, replace, replace_len);
@@ -242,39 +301,102 @@ void overwrite_string_part(char *source, size_t offset, const char *replace, siz
 }
 
 
-int char_to_int(const char *src, int *val){
+/** Convert a string to an integer
++++ This function converts a string to an integer.
+--- src: source string
+--- val: pointer to the integer value (output)
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void char_to_int(const char *src, int *val){
 long int temp_val;
 char *temp;
 errno = 0;
 
 
-  temp_val = strtol(src, &temp, 0);
+  temp_val = strtol(src, &temp, 10);
 
   if (temp == src || *temp != '\0' || errno == ERANGE){
-    return FAILURE;}
+    EXIT_ERROR("Failed to convert string to int: %s", src);
+  }
 
   if (temp_val < INT_MIN ||
       temp_val > INT_MAX){
-    return FAILURE;}
+    EXIT_ERROR("Integer value out of range: %s", src);
+  }
 
   *val = (int)temp_val;
-  return SUCCESS;
+  return;
 }
 
 
-int char_to_float(const char *src, float *val){
+/** Reject hex-float and inf/nan literals, which strtof/strtod otherwise accept silently.
+--- src:    source string
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+static void reject_nonfinite_literal(const char *src){
+const char *p = src;
+
+  while (isspace((unsigned char)*p)) p++;
+  if (*p == '+' || *p == '-') p++;
+
+  if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X')){
+    EXIT_ERROR("Hexadecimal float notation is not supported: %s", src);
+  }
+
+  if (strncasecmp(p, "inf", 3) == 0 || strncasecmp(p, "nan", 3) == 0){
+    EXIT_ERROR("inf/nan literals are not supported: %s", src);
+  }
+
+  return;
+}
+
+
+
+/** Convert a string to a float
++++ This function converts a string to a float.
+--- src: source string
+--- val: pointer to the float value (output)
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void char_to_float(const char *src, float *val){
 float temp_val;
 char *temp;
 errno = 0;
 
+  reject_nonfinite_literal(src);
 
   temp_val = strtof(src, &temp);
 
   if (temp == src || *temp != '\0' || errno == ERANGE){
-    return FAILURE;}
+    EXIT_ERROR("Failed to convert string to float: %s", src);
+  }
 
   *val = (float)temp_val;
-  return SUCCESS;
+  return;
+}
+
+
+/** Convert a string to a double
++++ This function converts a string to a double.
+--- src: source string
+--- val: pointer to the double value (output)
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void char_to_double(const char *src, double *val){
+double temp_val;
+char *temp;
+errno = 0;
+
+  reject_nonfinite_literal(src);
+
+  temp_val = strtod(src, &temp);
+
+  if (temp == src || *temp != '\0' || errno == ERANGE){
+    EXIT_ERROR("Failed to convert string to double: %s", src);
+  }
+
+  *val = temp_val;
+  return;
 }
 
 
@@ -287,7 +409,7 @@ errno = 0;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 bool strings_equal(const char *str1, const char *str2) {
 
-  if (strcmp(str1, str2) == 0) {
+  if (strcmp(str1, str2) == 0){
     return true;
   }
 
@@ -305,8 +427,8 @@ bool strings_equal(const char *str1, const char *str2) {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 bool vector_contains(const char **vector, size_t size, const char *target) {
   
-  for (size_t i = 0; i < size; i++) {
-    if (strings_equal(vector[i], target)) {
+  for (size_t i=0; i<size; i++) {
+    if (strings_equal(vector[i], target)){
       return true;
     }
   }
@@ -325,8 +447,8 @@ bool vector_contains(const char **vector, size_t size, const char *target) {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int vector_contains_pos(const char **vector, size_t size, const char *target) {
   
-  for (size_t i = 0; i < size; i++) {
-    if (strings_equal(vector[i], target)) {
+  for (size_t i=0; i<size; i++){
+    if (strings_equal(vector[i], target)){
       return i;
     }
   }
@@ -350,15 +472,13 @@ void alloc_string(string_t *str, size_t length){
 
 
   if (str == NULL) {
-    printf("Error: Non-NULL pointer passed to alloc_string.\n");
-    exit(1);
+    EXIT_ERROR("Non-NULL pointer passed.");
   }
 
   free_string(str); // prevent memory leak
 
   if (length <= 0){
-    printf("Error: Cannot allocate string of length <= 0.\n");
-    exit(1);
+    EXIT_ERROR("Cannot allocate string of length <= 0.");
   }
 
   str->length = length + 1; // +1 for null terminator
@@ -398,8 +518,7 @@ void free_string(string_t *str){
 void fill_string(string_t *str, const char *src){
 
   if (str == NULL || src == NULL) {
-    printf("Error: NULL pointer passed to fill_string.\n");
-    exit(1);
+    EXIT_ERROR("NULL pointer passed.");
   }
 
   //printf("Filling string with source: %s (length: %zu)\n", src, strlen(src));
@@ -422,18 +541,15 @@ void fill_string(string_t *str, const char *src){
 void alloc_string_vector(string_vector_t *str_vec, size_t number, size_t length){
 
   if (str_vec == NULL) {
-    printf("Error: NULL pointer passed to alloc_string_vector.\n");
-    exit(1);
+    EXIT_ERROR("NULL pointer passed.");
   }
 
   if (number <= 0){
-    printf("Error: Cannot allocate string vector of number <= 0.\n");
-    exit(1);
+    EXIT_ERROR("Cannot allocate string vector of number <= 0.");
   }
 
   if (length <= 0){
-    printf("Error: Cannot allocate string vector of length <= 0.\n");
-    exit(1);
+    EXIT_ERROR("Cannot allocate string vector of length <= 0.");
   }
 
   str_vec->number = number;
@@ -455,18 +571,15 @@ void alloc_string_vector(string_vector_t *str_vec, size_t number, size_t length)
 void re_alloc_string_vector(string_vector_t *str_vec, size_t new_number, size_t new_length){
 
   if (str_vec == NULL) {
-    printf("Error: NULL pointer passed to realloc_string_vector.\n");
-    exit(1);
+    EXIT_ERROR("NULL pointer passed.");
   }
 
   if (new_number <= 0){
-    printf("Error: Cannot reallocate string vector of number <= 0.\n");
-    exit(1);
+    EXIT_ERROR("Cannot reallocate string vector of number <= 0.");
   }
 
   if (new_length <= 0){
-    printf("Error: Cannot reallocate string vector of length <= 0.\n");
-    exit(1);
+    EXIT_ERROR("Cannot reallocate string vector of length <= 0.");
   }
 
   re_alloc_2D((void***)&str_vec->string, str_vec->number, str_vec->length, new_number, new_length + 1, sizeof(char));
@@ -485,18 +598,15 @@ void re_alloc_string_vector(string_vector_t *str_vec, size_t new_number, size_t 
 void free_string_vector(string_vector_t *str_vec){
 
     if (str_vec == NULL) {
-    printf("Error: NULL pointer passed to free_string_vector.\n");
-    exit(1);
+    EXIT_ERROR("NULL pointer passed.");
   }
 
   if (str_vec->number <= 0){
-    printf("Error: No string items to free.\n");
-    exit(1);
+    EXIT_ERROR("No string items to free.");
   }
 
   if (str_vec->length <= 0){
-    printf("Error: No strings to free.\n");
-    exit(1);
+    EXIT_ERROR("No strings to free.");
   }
 
   free_2D((void**)str_vec->string, str_vec->number);
@@ -522,13 +632,11 @@ void free_string_vector(string_vector_t *str_vec){
 void fill_string_vector(string_vector_t *str_vec, size_t pos, const char *new_str){
 
   if (str_vec == NULL || new_str == NULL) {
-    printf("Error: NULL pointer passed to add_string_to_vector.\n");
-    exit(1);
+    EXIT_ERROR("NULL pointer passed.");
   }
 
   if (pos < 0){
-    printf("Error: Position (%ld) out of bounds in add_string_to_vector.\n", pos);
-    exit(1);
+    EXIT_ERROR("Position (%ld) out of bounds.\n", pos);
   }
 
   if (pos >= str_vec->number || strlen(new_str) >= str_vec->length){
@@ -540,4 +648,22 @@ void fill_string_vector(string_vector_t *str_vec, size_t pos, const char *new_st
   copy_string(str_vec->string[pos], str_vec->length, new_str);
 
   return;
+}
+
+
+/** Print string vector
++++ This function prints the contents of a string vector structure.
+--- str_vec:  string vector structure (read-only)
++++ Return:   void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void print_string_vector(string_vector_t *str_vec) {
+
+  if (str_vec == NULL) {
+    EXIT_ERROR("NULL pointer passed.");
+  }
+
+  printf("String Vector (number: %d, length: %d):\n", str_vec->number, str_vec->length);
+  for (int i=0; i<str_vec->number; i++) {
+    printf("  [%d]: %s\n", i, str_vec->string[i]);
+  }
 }

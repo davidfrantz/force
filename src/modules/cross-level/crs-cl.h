@@ -21,40 +21,25 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Global definition of tables
+CRS support header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef TABLE_H
-#define TABLE_H
+#ifndef CRS_CL_H
+#define CRS_CL_H
+
+#include <stdio.h>    // core input and output functions
+#include <stdlib.h>   // standard general utilities library
+
+#include "../cross-level/const-cl.h"
+#include "../cross-level/string-cl.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const float _E0_[1991];
-extern const float _AW_[1991];
-extern const float _AO_[1991];
-extern const float _WVL_[1991];
-extern const int   _WVL_DIM_;
-extern const int _RSR_START_LND04_;
-extern const int _RSR_START_LND05_;
-extern const int _RSR_START_LND07_;
-extern const int _RSR_START_LND08_;
-extern const int _RSR_START_LND09_;
-extern const int _RSR_START_SEN2A_;
-extern const int _RSR_START_SEN2B_;
-extern const int _RSR_START_SEN2C_;
-extern const int _RSR_START_SEN2D_;
-extern const float _RSR_[56][1991];
-extern const int   _RSR_DIM_;
-extern const int   _AERO_WATERLIB_DIM_[2];
-extern const float _AERO_WATERLIB_[26][491];
-extern const int   _AERO_LANDLIB_DIM_[2];
-extern const float _AERO_LANDLIB_[34][1991];
-
-float wavelength(int b_rsr);
-float E0(int b_rsr);
+int epsg_to_wkt(int epsg_code, char *wkt_output);
 
 #ifdef __cplusplus
 }

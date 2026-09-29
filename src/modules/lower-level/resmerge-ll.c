@@ -953,13 +953,13 @@ float slice_value[2], std, nclass = 40;
 +++ This function controlls the Sentinel-2 resolution merging of the 20m 
 +++ Sentinel-2 bands. Based on parameterization, different methods are 
 +++ used. The function will exit gracefully if not Sentinel-2.
---- mission: mission ID
---- resmerge: resolution merge option
+--- pl2:      L2 parameters
+--- meta:     metadata
 --- TOA:      TOA reflectance (will be altered)
 --- QAI:      Quality Assurance Information
 +++ Return:   SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int resolution_merge(int mission, int resmerge, brick_t *TOA, brick_t *QAI){
+int resolution_merge(par_ll_t *pl2, meta_t *meta, brick_t *TOA, brick_t *QAI){
 
 
   #ifdef FORCE_CLOCK
@@ -967,12 +967,12 @@ int resolution_merge(int mission, int resmerge, brick_t *TOA, brick_t *QAI){
   #endif
 
 
-  if (mission != SENTINEL2) return SUCCESS;
+  if (meta->mission != SENTINEL2) return SUCCESS;
   
   //cite_me(_CITE_RESMERGE_);
 
   
-  switch (resmerge){
+  switch (pl2->resmerge){
     case _RES_MERGE_NONE_:
       return SUCCESS;
     case _RES_MERGE_REGRESSION_:

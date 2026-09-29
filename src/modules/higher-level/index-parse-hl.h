@@ -37,6 +37,7 @@ Index parsing header
 #include "../cross-level/sys-cl.h"
 #include "../higher-level/sensor-hl.h"
 #include "../cross-level/json-cl.h"
+#include "../cross-level/runtime_data-cl.h"
 
 
 #ifdef __cplusplus

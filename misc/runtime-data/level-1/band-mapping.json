@@ -1,0 +1,111 @@
+{
+  "LANDSAT_4": [
+    {"domain": "BLUE",  "band": "1", "output": true},
+    {"domain": "GREEN", "band": "2", "output": true},
+    {"domain": "RED",   "band": "3", "output": true},
+    {"domain": "NIR",   "band": "4", "output": true},
+    {"domain": "SWIR1", "band": "5", "output": true},
+    {"domain": "SWIR2", "band": "7", "output": true},
+    {"domain": "TEMP",  "band": "6", "output": false}
+  ],
+  "LANDSAT_5": [
+    {"domain": "BLUE",  "band": "1", "output": true},
+    {"domain": "GREEN", "band": "2", "output": true},
+    {"domain": "RED",   "band": "3", "output": true},
+    {"domain": "NIR",   "band": "4", "output": true},
+    {"domain": "SWIR1", "band": "5", "output": true},
+    {"domain": "SWIR2", "band": "7", "output": true},
+    {"domain": "TEMP",  "band": "6", "output": false}
+  ],
+  "LANDSAT_7": [
+    {"domain": "BLUE",  "band": "1", "output": true},
+    {"domain": "GREEN", "band": "2", "output": true},
+    {"domain": "RED",   "band": "3", "output": true},
+    {"domain": "NIR",   "band": "4", "output": true},
+    {"domain": "SWIR1", "band": "5", "output": true},
+    {"domain": "SWIR2", "band": "7", "output": true},
+    {"domain": "TEMP",  "band": "6_VCID_1", "output": false}
+  ],
+  "LANDSAT_8": [
+    {"domain": "ULTRABLUE", "band": "1", "output": false},
+    {"domain": "BLUE",      "band": "2", "output": true},
+    {"domain": "GREEN",     "band": "3", "output": true},
+    {"domain": "RED",       "band": "4", "output": true},
+    {"domain": "NIR",       "band": "5", "output": true},
+    {"domain": "CIRRUS",    "band": "9", "output": false},
+    {"domain": "SWIR1",     "band": "6", "output": true},
+    {"domain": "SWIR2",     "band": "7", "output": true},
+    {"domain": "TEMP",      "band": "10", "output": false}
+  ],
+  "LANDSAT_9": [
+    {"domain": "ULTRABLUE", "band": "1", "output": false},
+    {"domain": "BLUE",      "band": "2", "output": true},
+    {"domain": "GREEN",     "band": "3", "output": true},
+    {"domain": "RED",       "band": "4", "output": true},
+    {"domain": "NIR",       "band": "5", "output": true},
+    {"domain": "CIRRUS",    "band": "9", "output": false},
+    {"domain": "SWIR1",     "band": "6", "output": true},
+    {"domain": "SWIR2",     "band": "7", "output": true},
+    {"domain": "TEMP",      "band": "10", "output": false}
+  ],
+  "Sentinel-2A": [
+    {"domain": "ULTRABLUE", "band": "01", "output": false},
+    {"domain": "BLUE",      "band": "02", "output": true},
+    {"domain": "GREEN",     "band": "03", "output": true},
+    {"domain": "RED",       "band": "04", "output": true},
+    {"domain": "REDEDGE1",  "band": "05", "output": true},
+    {"domain": "REDEDGE2",  "band": "06", "output": true},
+    {"domain": "REDEDGE3",  "band": "07", "output": true},
+    {"domain": "BROADNIR",  "band": "08", "output": true},
+    {"domain": "NIR",       "band": "8A", "output": true},
+    {"domain": "VAPOR",     "band": "09", "output": false},
+    {"domain": "CIRRUS",    "band": "10", "output": false},
+    {"domain": "SWIR1",     "band": "11", "output": true},
+    {"domain": "SWIR2",     "band": "12", "output": true}
+  ],
+  "Sentinel-2B": [
+    {"domain": "ULTRABLUE", "band": "01", "output": false},
+    {"domain": "BLUE",      "band": "02", "output": true},
+    {"domain": "GREEN",     "band": "03", "output": true},
+    {"domain": "RED",       "band": "04", "output": true},
+    {"domain": "REDEDGE1",  "band": "05", "output": true},
+    {"domain": "REDEDGE2",  "band": "06", "output": true},
+    {"domain": "REDEDGE3",  "band": "07", "output": true},
+    {"domain": "BROADNIR",  "band": "08", "output": true},
+    {"domain": "NIR",       "band": "8A", "output": true},
+    {"domain": "VAPOR",     "band": "09", "output": false},
+    {"domain": "CIRRUS",    "band": "10", "output": false},
+    {"domain": "SWIR1",     "band": "11", "output": true},
+    {"domain": "SWIR2",     "band": "12", "output": true}
+  ],
+  "Sentinel-2C": [
+    {"domain": "ULTRABLUE", "band": "01", "output": false},
+    {"domain": "BLUE",      "band": "02", "output": true},
+    {"domain": "GREEN",     "band": "03", "output": true},
+    {"domain": "RED",       "band": "04", "output": true},
+    {"domain": "REDEDGE1",  "band": "05", "output": true},
+    {"domain": "REDEDGE2",  "band": "06", "output": true},
+    {"domain": "REDEDGE3",  "band": "07", "output": true},
+    {"domain": "BROADNIR",  "band": "08", "output": true},
+    {"domain": "NIR",       "band": "8A", "output": true},
+    {"domain": "VAPOR",     "band": "09", "output": false},
+    {"domain": "CIRRUS",    "band": "10", "output": false},
+    {"domain": "SWIR1",     "band": "11", "output": true},
+    {"domain": "SWIR2",     "band": "12", "output": true}
+  ],
+  "Sentinel-2D": [
+    {"domain": "ULTRABLUE", "band": "01", "output": false},
+    {"domain": "BLUE",      "band": "02", "output": true},
+    {"domain": "GREEN",     "band": "03", "output": true},
+    {"domain": "RED",       "band": "04", "output": true},
+    {"domain": "REDEDGE1",  "band": "05", "output": true},
+    {"domain": "REDEDGE2",  "band": "06", "output": true},
+    {"domain": "REDEDGE3",  "band": "07", "output": true},
+    {"domain": "BROADNIR",  "band": "08", "output": true},
+    {"domain": "NIR",       "band": "8A", "output": true},
+    {"domain": "VAPOR",     "band": "09", "output": false},
+    {"domain": "CIRRUS",    "band": "10", "output": false},
+    {"domain": "SWIR1",     "band": "11", "output": true},
+    {"domain": "SWIR2",     "band": "12", "output": true}
+  ]
+}

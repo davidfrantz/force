@@ -1730,7 +1730,7 @@ short  *temp_      = NULL;
 +++ etection in Landsat imagery. Remote Sensing of Environment, 118, 83-94
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --- pl2:     L2 parameters
---- mission: mission ID
+--- meta:    metadata
 --- atc:     atmospheric correction factors
 --- TOA:     TOA reflectance
 --- DEM:     DEM
@@ -1738,7 +1738,7 @@ short  *temp_      = NULL;
 --- QAI:     Quality Assurance Information (modified)
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int detect_clouds(par_ll_t *pl2, int mission, atc_t *atc, brick_t *TOA, brick_t *DEM, brick_t *EXP, brick_t *QAI){
+int detect_clouds(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *DEM, brick_t *EXP, brick_t *QAI){
 int npix, nclear, nland, ncloud, nc, p;
 float lowtemp = -1.0, hightemp = -1.0;
 float cc;
@@ -1774,11 +1774,11 @@ small *shd_   = NULL;
 
     /** Cloud Probability **/
 
-    if (mission == LANDSAT){
+    if (meta->mission == LANDSAT){
       if (cloud_probability(pl2->nthread, npix, nclear, nland, &ncloud, pl2->cldprob, &cc, &lowtemp, &hightemp,
           TOA, QAI, pcp_, clr_, lnd_, brt_, var_, &cld_) == FAILURE){
         printf("error in cloud probability module.\n"); return FAILURE;}
-    } else if (mission == SENTINEL2){
+    } else if (meta->mission == SENTINEL2){
       if (cloud_parallax(nclear, nland, npix, &ncloud, &cc, TOA, QAI, pcp_, clr_, lnd_, brt_, var_, &cld_) == FAILURE){
         printf("error in cloud parallax module.\n"); return FAILURE;}
     }

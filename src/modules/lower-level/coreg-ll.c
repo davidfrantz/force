@@ -1620,14 +1620,14 @@ match_t dm;
 /** This function is the public interface to the LSReg coregistration.
 +++ Only Sentinel-2 images will be co-registered. The tie point detection
 +++ is performed on the NIR band.
---- mission: mission ID
+--- meta:    metadata
 --- pl2:     L2 parameters
 --- meta:    metadata
 --- TOA:     Top of Atmosphere reflectance
 --- QAI:     Quality Assurance Information
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI){
+int coregister(par_ll_t *pl2, meta_t *meta, brick_t *TOA, brick_t *QAI){
 int p, nx, ny, nc, nb, band, err, year, month, dy;
 double res;
 char fname[NPOW_10], cyear[NPOW_10];
@@ -1661,9 +1661,9 @@ int success = FAILURE;
 
   // import target
   if ((target = get_bands_short(TOA)) == NULL) return FAILURE;
-  if (mission == SENTINEL2){
+  if (meta->mission == SENTINEL2){
     if ((band = find_domain(TOA, "BROADNIR")) < 0) return FAILURE;
-  } else if (mission == LANDSAT){
+  } else if (meta->mission == LANDSAT){
     if ((band = find_domain(TOA, "NIR")) < 0) return FAILURE;
   } else {
     printf("unknown mission in coreg.\n"); return FAILURE;

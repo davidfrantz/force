@@ -38,13 +38,15 @@ Enhance spatial resolution header
 #include "../cross-level/brick_io-cl.h"
 #include "../cross-level/imagefuns-cl.h"
 #include "../cross-level/cite-cl.h"
+#include "../lower-level/param-ll.h"
+#include "../lower-level/meta-ll.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int resolution_merge(int mission, int resmerge, brick_t *TOA, brick_t *QAI);
+int resolution_merge(par_ll_t *pl2, meta_t *meta, brick_t *TOA, brick_t *QAI);
 
 #ifdef __cplusplus
 }
