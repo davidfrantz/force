@@ -1,0 +1,11 @@
+{
+  "LANDSAT_4": "LND04",
+  "LANDSAT_5": "LND05",
+  "LANDSAT_7": "LND07",
+  "LANDSAT_8": "LND08",
+  "LANDSAT_9": "LND09",
+  "Sentinel-2A": "SEN2A",
+  "Sentinel-2B": "SEN2B",
+  "Sentinel-2C": "SEN2C",
+  "Sentinel-2D": "SEN2D"
+}

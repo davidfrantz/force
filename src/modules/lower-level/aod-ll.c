@@ -182,13 +182,6 @@ short **toa_   = NULL;
   #endif
 
 
-  // shadow type is disabled until further notice
-  if (type == _AOD_SHD_){
-    *DOBJ = dobj;
-    return 0;
-  }
-
-
   nb = get_brick_nbands(TOA);
   nx = get_brick_ncols(TOA);
   ny = get_brick_nrows(TOA);
@@ -244,17 +237,6 @@ short **toa_   = NULL;
               toa_[blue][p] > toa_[nir][p] && // blue > nir
               ((z < 1 && slp_[p] < 870) ||    // slope < 1° if z > 1km
                (z > 1 && slp_[p] < 175))){    // slope < 5° if z < 1km
-            TARGET[p] = true;
-          } else {
-            INVERT[p] = true;
-          }
-          break;
-        case _AOD_SHD_:                         // shadow target:
-          if (toa_[sw2][p] < 500 &&           // swir2 < 5%
-              toa_[red][p] < 2000 &&          // red < 20%
-              toa_[blue][p] > toa_[nir][p] && // blue > nir
-              ill_[p] < 5000 &&               // illumination angle > 60°
-              slp_[p] > 870){                 // slope > 5°
             TARGET[p] = true;
           } else {
             INVERT[p] = true;
@@ -337,7 +319,7 @@ short **toa_   = NULL;
 
       if (get_off(QAI, p)) continue;
       if (SEGMENT[p] < 1) continue;
-      if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0) && type != _AOD_SHD_) continue;
+      if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0)) continue;
       if (type == _AOD_VEG_ && DISTANCE[p] < 2) continue;
       
       for (b=1, valid=true; b<nb; b++){
@@ -436,7 +418,7 @@ short **toa_   = NULL;
 
     if (get_off(QAI, p)) continue;
     if ((o = SEGMENT[p]-1) < 0) continue;
-    if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0) && type != _AOD_SHD_) continue;
+    if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0)) continue;
     if (!LAPSE[p]) continue;
 
     csum[o] += ill_[p]/10000.0; // rescale to prevent overflow
@@ -496,7 +478,7 @@ short **toa_   = NULL;
         p = i*nx+j;
 
         if (get_off(QAI, p)) continue;
-        if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0) && type != _AOD_SHD_) continue;
+        if ((get_shadow(QAI, p) || get_cloud(QAI, p) > 0)) continue;
 
         // no target --> environment reflectance
         if (SEGMENT[p] == 0){
@@ -661,7 +643,7 @@ FILE *fp = NULL;
 --- type:   Target type (water/shadow/vegetation)
 +++ Return: Number of successful targets
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int aod_from_target(par_ll_t *pl2, meta_t *meta, atc_t *atc, double res, darkobj_t *dobj, int num, int type){
+int aod_from_target(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, double res, darkobj_t *dobj, int num, int type){
 speclib_t *lib = NULL;
 int b, bb, nb, naod, c, o, w, wbest, k = 0;
 int ultrablue, blue, green, red, sw2;
@@ -683,28 +665,19 @@ float coef[3], coefbest[3];
   nb = get_brick_nbands(atc->xy_aod);
 
   ultrablue  = find_domain(atc->xy_aod, "ULTRABLUE");
-  if ((blue  = find_domain(atc->xy_aod, "BLUE"))  < 0) return FAILURE; 
-  if ((green = find_domain(atc->xy_aod, "GREEN")) < 0) return FAILURE; 
-  if ((red   = find_domain(atc->xy_aod, "RED"))   < 0) return FAILURE; 
-  if ((sw2   = find_domain(atc->xy_aod, "SWIR2")) < 0) return FAILURE; 
-
-
-  // shadow type is disabled until further notice
-  if (type == _AOD_SHD_){
-    //*map_aod = map_avg;
-    return 0;}
+  if ((blue  = find_domain(atc->xy_aod, "BLUE"))  < 0) return -1; 
+  if ((green = find_domain(atc->xy_aod, "GREEN")) < 0) return -1; 
+  if ((red   = find_domain(atc->xy_aod, "RED"))   < 0) return -1; 
+  if ((sw2   = find_domain(atc->xy_aod, "SWIR2")) < 0) return -1; 
 
 
   /** initialize spectral library **/
   switch (type){
     case _AOD_WAT_:
-      lib = water_lib(nb, meta);
-      break;
-    case _AOD_SHD_:
-      lib = land_lib(nb, meta);
+      if ((lib = water_lib(nb, rtd)) == NULL) return -1;
       break;
     case _AOD_VEG_:
-      lib = veg_lib(nb, blue, green, red);
+      if ((lib = veg_lib(nb, blue, green, red)) == NULL) return -1;
       for (b=0; b<nb; b++) atc->aod_bands[b] = false;
       atc->aod_bands[blue]  = true;
       atc->aod_bands[green] = true;
@@ -974,7 +947,7 @@ double lower = 0.1;
 double upper = 1000;
 
 
-  param.n = dark->nwat+dark->nshd+dark->nveg;
+  param.n = dark->nwat+dark->nveg;
   
   // almost flat AOD
   atc->Hp = 1000;
@@ -990,15 +963,6 @@ double upper = 1000;
       if (param.z[k] < zmin) zmin = param.z[k];
       if (param.z[k] > zmax) zmax = param.z[k];
       param.aod[k] = dark->wat[o].aod[green];
-      k++;
-    }
-
-    for (o=0; o<dark->kshd; o++){
-      if (!dark->shd[o].valid) continue;
-      param.z[k]   = dark->shd[o].z;
-      if (param.z[k] < zmin) zmin = param.z[k];
-      if (param.z[k] > zmax) zmax = param.z[k];
-      param.aod[k] = dark->shd[o].aod[green];
       k++;
     }
 
@@ -1097,11 +1061,6 @@ double upper = 1000;
     dark->wat[o].Ha = aod_elev_factor(dark->wat[o].z, atc->Hp);
   }
 
-  for (o=0; o<dark->kshd; o++){
-    if (!dark->shd[o].valid) continue;
-    dark->shd[o].Ha = aod_elev_factor(dark->shd[o].z, atc->Hp);
-  }
-
   for (o=0; o<dark->kveg; o++){
     if (!dark->veg[o].valid) continue;
     dark->veg[o].Ha = aod_elev_factor(dark->veg[o].z, atc->Hp);
@@ -1117,26 +1076,47 @@ double upper = 1000;
 --- meta:   metadata
 +++ Return: Spectral library
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-speclib_t *water_lib(int nb, meta_t *meta){
+speclib_t *water_lib(int nb, rtd_t *rtd){
 speclib_t *lib;
-int i, b, b_rsr, w;
-double v, s;
+
 
   alloc((void**)&lib, 1, sizeof(speclib_t));
 
-  lib->n = _AERO_WATERLIB_DIM_[0];
+  if (!rtd->water_library.loaded || rtd->water_library.number <= 0){
+    printf("no water library found in metadata\n");
+    return NULL;
+  }
+
+  lib->n = rtd->water_library.number;
   alloc_2D((void***)&lib->s, lib->n, nb, sizeof(float));
 
-  for (i=0; i<lib->n; i++){
-    for (b=0; b<nb; b++){
-      b_rsr = meta->cal[b].rsr_band;
-      for (w=0, v=0, s=0; w<_AERO_WATERLIB_DIM_[1]; w++){
-        v += _RSR_[b_rsr][w]*_AERO_WATERLIB_[i][w];
-        s += _RSR_[b_rsr][w];
+  for (int i=0; i<lib->n; i++){
+    
+    for (int b=0; b<nb; b++){
+      
+      if (strings_equal(rtd->band_mapping.domains[b], "TEMP")){
+        continue;
       }
-      if (s > 0) lib->s[i][b] = v/s;
+      
+      if (weighted_average_of_seq(&rtd->water_library.spectrum[i], 
+        &rtd->rsr_mapping.rsr[b], &lib->s[i][b]) != SUCCESS){
+        fprintf(stderr, "Error: Could not calculate water library reflectance for band %d and spectrum %d.\n", b, i);
+        return NULL;
+      }
+
     }
+
   }
+
+  #ifdef FORCE_DEBUG
+  for (int i=0; i<lib->n; i++){
+    printf("water library %03d:\n", i);
+    for (int b=0; b<nb; b++){
+      printf(" %.5f", lib->s[i][b]);
+    }
+    printf("\n");
+  }
+  #endif
 
   return lib;
 }
@@ -1328,7 +1308,6 @@ float E0_, Eg, Egc, k;
         }
 
         // reference reflectance including topography and BRDF
-        if (type == _AOD_SHD_) rhow = rhow*Egc/Eg;
         if (type == _AOD_VEG_) rhow = rhow*Egc/(brdf*Eg);
 
         // background reflectance
@@ -1542,19 +1521,7 @@ float *weight = NULL;
     }
     weight[g] += w;
   }
-  
-  // add shade measurements to map
-  for (o=0; o<dark->kshd; o++){
-    if (!dark->shd[o].valid) continue;
-    g = dark->shd[o].g;
-    w = dark->shd[o].rsq*dark->shd[o].rsq;
-    for (b=0; b<nb; b++){
-      aod = aod_elev_scale(dark->shd[o].aod[b], dark->shd[o].Ha, atc->Ha);
-      map[b][g] += aod*w;
-    }
-    weight[g] += w;
-  }
-  
+
   // add veg measurements to map
   for (o=0; o<dark->kveg; o++){
     if (!dark->veg[o].valid) continue;
@@ -1711,6 +1678,7 @@ double *interpol = NULL;
 +++ image, and AOD is inferred on a per-object basis. The objects are av-
 +++ eraged, and interpolated to produce an AOD map. Finally AOD is logged.
 --- pl2:    L2 parameters
+--- rtd:    runtime data
 --- meta:   metadata
 --- atc:    atmospheric correction factors
 --- TOA:    TOA reflectance
@@ -1718,7 +1686,7 @@ double *interpol = NULL;
 --- TOP:    Topographic Derivatives
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int compile_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP){
+int compile_aod(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, top_t *TOP){
 int b, nb, o;
 int green, sw2;
 double res;
@@ -1764,16 +1732,14 @@ printf("aod_bands as local variable?\n");
 #endif
   // extract dark targets from image and tabulate necessary information
   dark.kwat = extract_dark_target(atc, TOA, QAI, TOP, _AOD_WAT_, &dark.wat);
-  dark.kshd = extract_dark_target(atc, TOA, QAI, TOP, _AOD_SHD_, &dark.shd);
   dark.kveg = extract_dark_target(atc, TOA, QAI, TOP, _AOD_VEG_, &dark.veg);
 
   #ifdef FORCE_CLOCK
   proctime_print("DT extracted", TIME);
   #endif
   // object-based estimation of AOD
-  if ((dark.nwat = aod_from_target(pl2, meta, atc, res, dark.wat, dark.kwat, _AOD_WAT_)) < 0) return FAILURE;
-  if ((dark.nshd = aod_from_target(pl2, meta, atc, res, dark.shd, dark.kshd, _AOD_SHD_)) < 0) return FAILURE;
-  if ((dark.nveg = aod_from_target(pl2, meta, atc, res, dark.veg, dark.kveg, _AOD_VEG_)) < 0) return FAILURE;
+  if ((dark.nwat = aod_from_target(pl2, rtd, meta, atc, res, dark.wat, dark.kwat, _AOD_WAT_)) < 0) return FAILURE;
+  if ((dark.nveg = aod_from_target(pl2, rtd, meta, atc, res, dark.veg, dark.kveg, _AOD_VEG_)) < 0) return FAILURE;
   
   // estimate elevation-dependency
   aod_elev_dependency(atc, &dark, green);
@@ -1783,7 +1749,7 @@ printf("aod_bands as local variable?\n");
   proctime_print("AOD estimated", TIME);
   #endif
   // compile AOD map or use fallback
-  if ((dark.nwat+dark.nshd+dark.nveg) > 0){
+  if ((dark.nwat+dark.nveg) > 0){
     if (aod_map(atc, &dark) == FAILURE){
       printf("error in computing AOD map\n"); return FAILURE;}
     atc->aodmap = true;
@@ -1803,14 +1769,7 @@ printf("aod_bands as local variable?\n");
     free((void*)dark.wat[o].est);    
   }
   free((void*)dark.wat);
-  
-  for (o=0; o<dark.kshd; o++){
-    free((void*)dark.shd[o].ttoa); free((void*)dark.shd[o].etoa);
-    free((void*)dark.shd[o].aod);    
-    free((void*)dark.shd[o].est);    
-  }
-  free((void*)dark.shd);
-  
+
   for (o=0; o<dark.kveg; o++){
     free((void*)dark.veg[o].ttoa); free((void*)dark.veg[o].etoa);
     free((void*)dark.veg[o].aod);    

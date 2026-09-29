@@ -129,7 +129,7 @@ typedef struct {
 } atc_t;
 
 
-atc_t *allocate_atc(par_ll_t *pl2, meta_t *meta, brick_t *DN);
+atc_t *allocate_atc(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t *DN);
 void free_atc(atc_t *atc);
 float **atc_get_band_reshaped(brick_t **xyz, int b);
 

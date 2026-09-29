@@ -46,10 +46,12 @@ FILE *fp = NULL;
   concat_string_2(fname_version,  NPOW_10, dname_exe, _FORCE_VERSION_FILE_, "/");
 
   if (!(fp = fopen(fname_version, "r"))){
-    printf("unable to open version file %s\n", fname_version); exit(FAILURE);}
+    EXIT_ERROR("unable to open version file %s", fname_version);
+  }
 
   if (fgets(buffer, NPOW_16, fp) == NULL){
-    printf("unable to read from version file %s\n", fname_version); exit(FAILURE);}
+    EXIT_ERROR("unable to read from version file %s", fname_version);
+  }
 
   buffer[strcspn(buffer, "\r\n")] = 0;
 
@@ -233,6 +235,73 @@ double diff, max, A, B;
 }
 
 
+/** Equality test for floats against 0
++++ This function tests for quasi equality of a float against 0. fequal is
++++ unsuitable for this as its relative tolerance collapses to 0 when one
++++ of the numbers is 0. Pass tol = NULL to use the default tolerance
++++ (FLT_EPSILON)
+--- a:      number
+--- tol:    tolerance (NULL for default)
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool fequal0(float a, float *tol){
+float t = (tol != NULL) ? *tol : FLT_EPSILON;
+
+  return (fabsf(a) <= t);
+}
+
+
+/** Equality test for doubles against 0
++++ This function tests for quasi equality of a double against 0. dequal is
++++ unsuitable for this as its relative tolerance collapses to 0 when one
++++ of the numbers is 0. Pass tol = NULL to use the default tolerance
++++ (DBL_EPSILON)
+--- a:      number
+--- tol:    tolerance (NULL for default)
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool dequal0(double a, double *tol){
+double t = (tol != NULL) ? *tol : DBL_EPSILON;
+
+  return (fabs(a) <= t);
+}
+
+
+/** Divisibility test for floats
++++ This function tests whether a is (quasi) evenly divisible by b
+--- a:      dividend
+--- b:      divisor
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool fdivisible(float a, float b){
+float remainder, tol;
+
+  if (fequal0(b, NULL)) return false;
+
+  tol = fabsf(b) * FLT_EPSILON;
+  remainder = fmodf(fabsf(a), fabsf(b));
+
+  return (remainder <= tol || fabsf(b) - remainder <= tol);
+}
+
+
+/** Divisibility test for doubles
++++ This function tests whether a is (quasi) evenly divisible by b
+--- a:      dividend
+--- b:      divisor
++++ Return: true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool ddivisible(double a, double b){
+double remainder, tol;
+
+  if (dequal0(b, NULL)) return false;
+
+  tol = fabs(b) * DBL_EPSILON;
+  remainder = fmod(fabs(a), fabs(b));
+
+  return (remainder <= tol || fabs(b) - remainder <= tol);
+}
+
 /** Print bytes as human-readable string
 --- bytes:  bytes
 +++ Return: void
@@ -250,4 +319,109 @@ int i = 0;
   printf("%.2f %s\n", dbytes, unit[i]);
 
   return;
+}
+
+
+/** Calculate the weighted average of a sequence
+--- values:   value sequence
+--- weights:  weight sequence
++++ average:  pointer to the calculated average
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int weighted_average_of_seq(seq_t *values, seq_t *weights, float *average){
+
+  if (values == NULL || weights == NULL || average == NULL ||
+      values->n <= 0 || weights->n <= 0){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  // use tolerant comparisons, exact bounds may be off by float rounding
+  if ((weights->start < values->start && !fequal(weights->start, values->start)) ||
+      (weights->end   > values->end   && !fequal(weights->end,   values->end))){
+    RETURN_ERROR("Weight sequence (%.2f-%.2f) is not within value sequence range (%.2f-%.2f).\n", 
+      weights->start, weights->end, values->start, values->end);
+  }
+
+  // if we need support for different step sizes, interpolation will be needed
+  if (!fequal(weights->step, values->step)){
+    RETURN_ERROR("Weight sequence step (%.2f) is not equal to value sequence step (%.2f).\n", 
+      weights->step, values->step);
+  }
+
+  if (weights->values == NULL || values->values == NULL){
+    RETURN_ERROR("Weight or value sequence is not initialized.");
+  }
+
+  // if we need support for sequences that start off the step-grid, interpolation will be needed
+  if (!fdivisible(weights->start - values->start, values->step)){
+    RETURN_ERROR("Weight sequence does not start on the step-grid of the value sequence.");
+  }
+
+  int offset = (int)lround((weights->start - values->start) / values->step);
+
+  if (offset < 0 || offset + weights->n > values->n){
+    RETURN_ERROR("Weight sequence is out of bounds of the value sequence.");
+  }
+
+  float sum_weighted_values = 0.0;
+  float sum_weights = 0.0;
+
+
+  for (int i=0; i<weights->n; i++){
+
+    if (weights->values[i] < 0.0){
+      RETURN_ERROR("Weight sequence contains negative values.");
+    }
+
+    sum_weighted_values += weights->values[i] * values->values[i+offset];
+    sum_weights += weights->values[i];
+
+  }
+
+  if (fequal0(sum_weights, NULL)){
+    RETURN_ERROR("Weight sequence sums to zero.");
+  }
+
+  *average = sum_weighted_values / sum_weights;
+
+  return SUCCESS;
+}
+
+
+/** Calculate the weighted centroid of a sequence
+--- weights:  weight sequence
++++ average:  pointer to the calculated average
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int weighted_centroid_of_seq(seq_t *weights, float *average){
+
+  if (weights == NULL || average == NULL || weights->n <= 0){
+    RETURN_ERROR("Invalid input.");
+  }
+
+
+  if (weights->values == NULL){
+    RETURN_ERROR("Weight or value sequence is not initialized.");
+  }
+
+  float sum_weighted_values = 0.0;
+  float sum_weights = 0.0;
+
+
+  for (int i=0; i<weights->n; i++){
+
+    if (weights->values[i] < 0.0){
+      RETURN_ERROR("Weight sequence contains negative values.");
+    }
+
+    sum_weighted_values += weights->values[i] * (weights->start + i * weights->step);
+    sum_weights += weights->values[i];
+
+  }
+
+  if (fequal0(sum_weights, NULL)){
+    RETURN_ERROR("Weight sequence sums to zero.");
+  }
+
+  *average = sum_weighted_values / sum_weights;
+
+  return SUCCESS;
 }

@@ -31,25 +31,19 @@ This file contains functions for parsing JSON files
 /** Load JSON file into a Jansson json_t struct.
 +++ The returned struct must be freed with json_decref after use.
 --- json:   Pointer to json_t* to receive the loaded JSON item
-+++ Return: SUCCESS/FAILURE
++++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_json(json_t **json, char *path_json){
-
+void load_json(json_t **json, char *path_json){
 
   json_error_t error;
   json_t *js;
   js = json_load_file(path_json, 0, &error);
-  if (!js){
-    fprintf(stderr, "Error: %s\n", error.text);
-    return FAILURE;
-  }
+  if (!js) EXIT_ERROR("%s", error.text);
 
   *json = js;
 
-  return SUCCESS;
+  return;
 }
-
-
 
 
 /** Extract a JSON item from a parent JSON object, independent of its type.
@@ -63,8 +57,7 @@ int get_json_item(json_t **item, char *key, json_t *json){
   json_t *it = json_object_get(json, key);
 
   if (it == NULL){
-      fprintf(stderr, "Error: Item with key %s not found in JSON.\n", key);
-      return FAILURE;
+    RETURN_ERROR("Item with key %s not found in JSON.", key);
   }
 
   *item = it;
@@ -84,14 +77,13 @@ int get_json_object(json_t **object, char *key, json_t *json){
   json_t *obj = json_object_get(json, key);
 
   if (obj == NULL){
-      fprintf(stderr, "Error: Item with key %s not found in JSON.\n", key);
-      return FAILURE;
+    RETURN_ERROR("Item with key %s not found in JSON.", key);
   }
+
   if (json_is_object(obj)){
-      *object = obj;
+    *object = obj;
   } else {
-      fprintf(stderr, "Error: Item with key %s is not an object, type is: %d.\n", key, json_typeof(obj));
-      return FAILURE;
+    RETURN_ERROR("Item with key %s is not an object, type is: %d.", key, json_typeof(obj));
   }
 
   return SUCCESS;
@@ -109,17 +101,16 @@ int get_json_string(char *string, size_t size, char *key, json_t *json){
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_string(item)){
-      copy_string(string, size, json_string_value(item));
-      #ifdef FORCE_DEBUG
-      printf("%s: %s\n", key, string);
-      #endif
+    copy_string(string, size, json_string_value(item));
+    #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+    printf("%s: %s\n", key, string);
+    #endif
   } else {
-      fprintf(stderr, "Error: Item with key %s is not a string, type is: %d.\n", key, json_typeof(item));
-      return FAILURE;
+    RETURN_ERROR("Item with key %s is not a string, type is: %d.", key, json_typeof(item));
   }
 
   return SUCCESS;
@@ -136,17 +127,16 @@ int get_json_integer(int *integer, char *key, json_t *json){
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_integer(item)){
-      *integer = (int)json_integer_value(item);
-      #ifdef FORCE_DEBUG
-      printf("%s: %d\n", key, *integer);
-      #endif
+    *integer = (int)json_integer_value(item);
+    #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+    printf("%s: %d\n", key, *integer);
+    #endif
   } else {
-      fprintf(stderr, "Error: Item with key %s is not an integer, type is: %d.\n", key, json_typeof(item));
-      return FAILURE;
+    RETURN_ERROR("Item with key %s is not an integer, type is: %d.", key, json_typeof(item));
   }
 
   return SUCCESS;
@@ -164,17 +154,16 @@ int get_json_float(float *floating, char *key, json_t *json){
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_real(item)){
-      *floating = (float)json_real_value(item);
-      #ifdef FORCE_DEBUG
-      printf("%s: %f\n", key, *floating);
-      #endif
+    *floating = (float)json_real_value(item);
+    #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+    printf("%s: %f\n", key, *floating);
+    #endif
   } else {
-      fprintf(stderr, "Error: Item with key %s is not a float, type is: %d.\n", key, json_typeof(item));
-      return FAILURE;
+    RETURN_ERROR("Item with key %s is not a float, type is: %d.", key, json_typeof(item));
   }
 
   return SUCCESS;
@@ -187,21 +176,20 @@ int get_json_float(float *floating, char *key, json_t *json){
 --- json: JSON item
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_json_boolean(bool *boolean, char *key, json_t *json){
+int get_json_bool(bool *boolean, char *key, json_t *json){
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_boolean(item)){
-      *boolean = json_is_true(item);
-      #ifdef FORCE_DEBUG
-      printf("%s: %s\n", key, (*boolean) ? "true" : "false");
-      #endif
+    *boolean = json_is_true(item);
+    #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+    printf("%s: %s\n", key, (*boolean) ? "true" : "false");
+    #endif
   } else {
-      fprintf(stderr, "Error: Item with key %s is not a boolean, type is: %d.\n", key, json_typeof(item));
-      return FAILURE;
+    RETURN_ERROR("Item with key %s is not a boolean, type is: %d.", key, json_typeof(item));
   }
 
   return SUCCESS;
@@ -222,7 +210,7 @@ int n_buffer = 0;
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_array(item)){
@@ -232,20 +220,19 @@ int n_buffer = 0;
     alloc_2D((void***)&buffer, n_buffer, NPOW_10, sizeof(char));
 
     for (int i=0; i<n_buffer; i++){
-        json_t *value = json_array_get(item, i);
-        if (json_is_string(value)){
-          copy_string(buffer[i], NPOW_10, json_string_value(value));
-          #ifdef FORCE_DEBUG
-          printf("%s[%d]: %s\n", key, i, buffer[i]);
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not a string, type is: %d.\n", i, key, json_typeof(item));
-          return FAILURE;
-        }
+      json_t *value = json_array_get(item, i);
+      if (json_is_string(value)){
+        copy_string(buffer[i], NPOW_10, json_string_value(value));
+        #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+        printf("%s[%d]: %s\n", key, i, buffer[i]);
+        #endif
+      } else {
+        free_2D((void**)buffer, n_buffer); buffer = NULL;
+        RETURN_ERROR("Element %d in %s array is not a string, type is: %d.", i, key, json_typeof(item));
+      }
     }
   } else {
-    fprintf(stderr, "Error: Item %s is not an array, type is: %d.\n", key, json_typeof(item));
-    return FAILURE;
+    RETURN_ERROR("Item %s is not an array, type is: %d.", key, json_typeof(item));
   }
 
   *strings = buffer;
@@ -269,7 +256,7 @@ int n_buffer = 0;
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+    RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_array(item)){
@@ -279,20 +266,19 @@ int n_buffer = 0;
     alloc((void**)&buffer, n_buffer, sizeof(int));
 
     for (int i=0; i<n_buffer; i++){
-        json_t *value = json_array_get(item, i);
-        if (json_is_integer(value)){
-          buffer[i] = (int)json_integer_value(value);
-          #ifdef FORCE_DEBUG
-          printf("%s[%d]: %d\n", key, i, buffer[i]);
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not an integer, type is: %d.\n", i, key, json_typeof(item));
-          return FAILURE;
-        }
+      json_t *value = json_array_get(item, i);
+      if (json_is_integer(value)){
+        buffer[i] = (int)json_integer_value(value);
+        #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+        printf("%s[%d]: %d\n", key, i, buffer[i]);
+        #endif
+      } else {
+        free((void*)buffer); buffer = NULL;
+        RETURN_ERROR("Element %d in %s array is not an integer, type is: %d.", i, key, json_typeof(item));
+      }
     }
   } else {
-    fprintf(stderr, "Error: Item %s is not an array, type is: %d.\n", key, json_typeof(item));
-    return FAILURE;
+    RETURN_ERROR("Item %s is not an array, type is: %d.", key, json_typeof(item));
   }
 
   *integers = buffer;
@@ -316,7 +302,7 @@ int n_buffer = 0;
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+      RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_array(item)){
@@ -326,20 +312,19 @@ int n_buffer = 0;
     alloc((void**)&buffer, n_buffer, sizeof(float));
 
     for (int i=0; i<n_buffer; i++){
-        json_t *value = json_array_get(item, i);
-        if (json_is_real(value)){
-          buffer[i] = (float)json_real_value(value);
-          #ifdef FORCE_DEBUG
-          printf("%s[%d]: %f\n", key, i, buffer[i]);
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not a float, type is: %d.\n", i, key, json_typeof(item));
-          return FAILURE;
-        }
+      json_t *value = json_array_get(item, i);
+      if (json_is_real(value)){
+        buffer[i] = (float)json_real_value(value);
+        #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+        printf("%s[%d]: %f\n", key, i, buffer[i]);
+        #endif
+      } else {
+        free((void*)buffer); buffer = NULL;
+        RETURN_ERROR("Element %d in %s array is not a float, type is: %d.", i, key, json_typeof(item));
+      }
     }
   } else {
-    fprintf(stderr, "Error: Item %s is not an array, type is: %d.\n", key, json_typeof(item));
-    return FAILURE;
+    RETURN_ERROR("Item %s is not an array, type is: %d.", key, json_typeof(item));
   }
 
   *floats = buffer;
@@ -363,7 +348,7 @@ int n_buffer = 0;
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
-      return FAILURE;
+      RETURN_ERROR("Could not find key %s in JSON.", key);
   }
 
   if (json_is_array(item)){
@@ -373,20 +358,19 @@ int n_buffer = 0;
     alloc((void**)&buffer, n_buffer, sizeof(bool));
 
     for (int i=0; i<n_buffer; i++){
-        json_t *value = json_array_get(item, i);
-        if (json_is_boolean(value)){
-          buffer[i] = json_is_true(value);
-          #ifdef FORCE_DEBUG
-          printf("%s[%d]: %s\n", key, i, (buffer[i]) ? "true" : "false");
-          #endif
-        } else {
-          fprintf(stderr, "Error: Element %d in %s array is not a boolean, type is: %d.\n", i, key, json_typeof(item));
-          return FAILURE;
-        }
+      json_t *value = json_array_get(item, i);
+      if (json_is_boolean(value)){
+        buffer[i] = json_is_true(value);
+        #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+        printf("%s[%d]: %s\n", key, i, (buffer[i]) ? "true" : "false");
+        #endif
+      } else {
+        free((void*)buffer); buffer = NULL;
+        RETURN_ERROR("Element %d in %s array is not a boolean, type is: %d.", i, key, json_typeof(item));
+      }
     }
   } else {
-    fprintf(stderr, "Error: Item %s is not an array, type is: %d.\n", key, json_typeof(item));
-    return FAILURE;
+    RETURN_ERROR("Item %s is not an array, type is: %d.", key, json_typeof(item));
   }
 
   *booleans = buffer;

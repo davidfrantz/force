@@ -606,6 +606,56 @@ void copy_date(date_t *from, date_t *to){
 }
 
 
+/** This function extracts a date from a UTC string
+--- date:     date struct (returned)
+--- string:   UTC string
++++ Return:   SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int date_from_utc(date_t *date, char *string){
+
+  char buffer[NPOW_10];
+  copy_string(buffer, NPOW_10, string);
+  buffer[strcspn(buffer, "\r\n#")] = 0;
+  
+  char *saveptr = NULL;
+  const char *separator = "-T:.";
+  char *tokenptr = strtok_r(buffer, separator, &saveptr);
+
+  int parsed_tokens[6];
+
+  for (int i=0; i<6; i++){
+    if (tokenptr == NULL){ 
+      fprintf(stderr, "Failed to retrieve enough UTC string tokens: %s\n", string); 
+      return FAILURE; 
+    }
+    char_to_int(tokenptr, &parsed_tokens[i]);
+    tokenptr = strtok_r(NULL, separator, &saveptr);
+  }
+
+  date_t d;
+  d.year  = parsed_tokens[0];
+  d.month = parsed_tokens[1];
+  d.day   = parsed_tokens[2];
+  d.hh    = parsed_tokens[3];
+  d.mm    = parsed_tokens[4];
+  d.ss    = parsed_tokens[5];
+
+  d.doy = md2doy(d.month, d.day);
+  d.week = doy2week(d.doy);
+  d.ce  = doy2ce(d.doy, d.year);
+  d.tz = 0;
+
+  if (!date_is_valid(&d, true)){
+    fprintf(stderr, "Invalid date in UTC string: %s\n", string);
+    return FAILURE;
+  }
+
+  *date = d;
+
+  return SUCCESS;
+}
+
+
 /** This function extracts a date from a string
 +++ If no date was detected, a dummy date is delivered.
 +++ A date is detected when the first word of the string is an 8digit number.
@@ -644,12 +694,11 @@ date_t d;
     d.year, d.month, d.day, d.doy, d.week, d.ce);
   #endif
 
-  if (d.year < 1900   || d.year > 2100){   init_date(&d); return CANCEL; }
-  if (d.month < 1     || d.month > 12){    init_date(&d); return CANCEL; }
-  if (d.day < 1       || d.day > 31){      init_date(&d); return CANCEL; }
-  if (d.doy < 1       || d.doy > 365){     init_date(&d); return CANCEL; }
-  if (d.week < 1      || d.week > 52){     init_date(&d); return CANCEL; }
-  if (d.ce < 1900*365 || d.ce > 2100*365){ init_date(&d); return CANCEL; }
+  if (!date_is_valid(&d, false)){
+    init_date(&d);
+    *date = d;
+    return CANCEL;
+  }
 
   #ifdef FORCE_DEBUG
   printf("date from string 2: %04d (Y), %02d (M), %02d (D), %03d (DOY), %02d (W), %d (CE)\n",
@@ -672,5 +721,30 @@ void print_date(date_t *date){
     date->hh, date->mm, date->ss, date->tz);
 
   return;
+}
+
+
+/** This function checks if a date is valid
+--- date:        date struct
+--- check_time:  whether to check time components
++++ Return:      true if valid, false otherwise
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+bool date_is_valid(date_t *date, bool check_time){
+
+  if (date->year < 1900 || date->year > 2100) return false;
+  if (date->month < 1 || date->month > 12) return false;
+  if (date->day < 1 || date->day > 31) return false;
+  if (date->doy < 1 || date->doy > 365) return false;
+  if (date->week < 1 || date->week > 52) return false;
+  if (date->ce < 1900*365 || date->ce > 2100*365) return false;
+
+  if (check_time){
+    if (date->hh < 0 || date->hh > 23) return false;
+    if (date->mm < 0 || date->mm > 59) return false;
+    if (date->ss < 0 || date->ss > 59) return false;
+    if (date->tz < -12 || date->tz > +14) return false; // Timezone range
+  }
+
+  return true;
 }
 

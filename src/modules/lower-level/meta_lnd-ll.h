@@ -21,46 +21,67 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Atmospheric Gas header
+Landsat Level 1 metadata header
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef WVP_LL_H
-#define WVP_LL_H
+
+#ifndef META_LND_LL_H
+#define META_LND_LL_H
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
-#include <stdbool.h>  // boolean data type
+#include <math.h>    // common mathematical functions
+#include <float.h>   // macro constants of the floating-point library
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/string-cl.h"
-#include "../cross-level/brick_base-cl.h"
-#include "../cross-level/brick_io-cl.h"
-#include "../cross-level/quality-cl.h"
-#include "../lower-level/meta-ll.h"
-#include "../lower-level/atc-ll.h"
-#include "../lower-level/radtran-ll.h"
-#include "../cross-level/cite-cl.h"
+#include "../cross-level/utils-cl.h"
+#include "../cross-level/date-cl.h"
+#include "../cross-level/runtime_data-cl.h"
+
+#include "../lower-level/param-ll.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 typedef struct {
-  float ***val;
-  int nb;
-  int nw;
-  int nm;
-} wvp_lut_t;
+  char spacecraft_name[NPOW_10];
+  char processing_level[NPOW_10];
+  int collection_number;
+  char collection_category[NPOW_10];
+  char landsat_product_id[NPOW_10];
+  int wrs_type;
+  int wrs_path;
+  int wrs_row;
+  char wrs_path_row[NPOW_10];
+  char date_char[NPOW_10];
+  char time_char[NPOW_10];
+  date_t date; 
+  char **image_files;
+  int nodata;
+  int saturation;
+  int nband;
+  double ulx, uly;
+  int nrow, ncol, ncell;
+  double res;
+  int epsg;
+  int tier;
+  float *reflectance_scale;
+  float *reflectance_offset;
+  float *radiance_min;
+  float *radiance_max;
+  float *quantize_min;
+  float *quantize_max;
+  float *k1;
+  float *k2;
+} lnd_mtd_t;
 
-int wvp_transmitt_lut(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut);
-brick_t *water_vapor(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, brick_t *TOA, brick_t *QAI, brick_t *DEM);
-short *gas_transmittance(atc_t *atc, wvp_lut_t *wvlut, int b, brick_t *WVP, brick_t *QAI);
-void free_wvlut(wvp_lut_t *wvlut);
-float ozone_amount(float lon, float lat, int doy);
-float water_vapor_from_lut(par_ll_t *pl2, atc_t *atc);
+void free_metadata_landsat(lnd_mtd_t *mtd);
+int parse_metadata_landsat_platform(char *d_level1, lnd_mtd_t *mtd);
+int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd);
 
 #ifdef __cplusplus
 }

@@ -23,37 +23,10 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "index-parse-hl.h"
 
-int load_index_runtime_data(json_t **def_indices);
 int get_index_bandnames(char ***bandnames, int *n_band_names, char *index_name, json_t *def_indices);
 int get_required_bands(char ***required_band_names, int *n_required, int *index_type, char *index_name, sen_t *sen, json_t *def_indices);
 int check_available_bands(char **required_band_names, int n_required, bool *use_band, sen_t *sen);
 int remove_unused_bands(bool *use_band, sen_t *sen);
-
-
-/** Load index definitions from the JSON runtime data into a Jansson json_t struct.
-+++ The returned struct must be freed with json_decref after use.
---- def_indices: Pointer to json_t* to receive the loaded JSON object
-+++ Return: SUCCESS/FAILURE
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int load_index_runtime_data(json_t **def_indices){
-
-  char d_exe[NPOW_10];
-  get_install_directory(d_exe, NPOW_10);
-
-  char path_json[NPOW_10];
-  concat_string_2(path_json, NPOW_10, d_exe, _FORCE_INDEX_FILE_, "/");
-
-  json_t *def;
-
-  if (load_json(&def, path_json) != SUCCESS){
-    fprintf(stderr, "Error loading JSON file %s\n", path_json);
-    return FAILURE;
-  }
-
-  *def_indices = def;
-
-  return SUCCESS;
-}
 
 
 /** Print all index definitions from the runtime data to stdout.
@@ -62,7 +35,7 @@ int load_index_runtime_data(json_t **def_indices){
 void print_index_runtime_data(){
 
   json_t *def_indices = NULL;
-  if (load_index_runtime_data(&def_indices) != SUCCESS){
+  if (load_runtime_data(_FORCE_INDEX_FILE_, &def_indices) != SUCCESS){
     fprintf(stderr, "Error: Could not parse index definitions.\n");
     exit(FAILURE);
   }
@@ -308,7 +281,7 @@ int retrieve_indices(index_t *index, sen_t *sen){
 
   // load index definitions
   json_t *def_indices = NULL;
-  if (load_index_runtime_data(&def_indices) != SUCCESS){
+  if (load_runtime_data(_FORCE_INDEX_FILE_, &def_indices) != SUCCESS){
     fprintf(stderr, "Error: Could not parse index definitions.\n");
     return FAILURE;
   }

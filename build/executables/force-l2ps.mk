@@ -10,6 +10,7 @@ force-l2ps: \
   cloud-ll \
   coreg-ll \
   coregfuns-ll \
+  crs-cl \
   cube-cl \
   cube-ll \
   date-cl \
@@ -21,8 +22,11 @@ force-l2ps: \
   gdalopt-cl \
   glance7-ll \
   imagefuns-cl \
+  json-cl \
   konami-cl \
   lock-cl \
+  meta_lnd-ll \
+  meta_s2-ll \
   meta-ll \
   param-cl \
   param-ll \
@@ -32,17 +36,18 @@ force-l2ps: \
   read-cl \
   read-ll \
   resmerge-ll \
+  runtime_data-cl \
   string-cl \
   stats-cl \
   sun-cl \
   sunview-ll \
   sys-cl \
-  table-ll \
   tile-cl \
   topo-ll \
   utils-cl \
   vector-cl \
   warp-cl \
+  xml-cl \
   $(EXE_LOWER_DIR)/force-l2ps.c
 	$(G11) -o $(BINDIR)/force-l2ps $(EXE_LOWER_DIR)/force-l2ps.c \
 	$(OBJDIR)/alloc-cl.o \
@@ -56,6 +61,7 @@ force-l2ps: \
 	$(OBJDIR)/cloud-ll.o \
 	$(OBJDIR)/coreg-ll.o \
 	$(OBJDIR)/coregfuns-ll.o \
+	$(OBJDIR)/crs-cl.o \
 	$(OBJDIR)/cube-cl.o \
 	$(OBJDIR)/cube-ll.o \
 	$(OBJDIR)/date-cl.o \
@@ -67,8 +73,11 @@ force-l2ps: \
 	$(OBJDIR)/gdalopt-cl.o \
 	$(OBJDIR)/glance7-ll.o \
 	$(OBJDIR)/imagefuns-cl.o \
+	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
 	$(OBJDIR)/lock-cl.o \
+	$(OBJDIR)/meta_lnd-ll.o \
+	$(OBJDIR)/meta_s2-ll.o \
 	$(OBJDIR)/meta-ll.o \
 	$(OBJDIR)/param-cl.o \
 	$(OBJDIR)/param-ll.o \
@@ -78,17 +87,19 @@ force-l2ps: \
 	$(OBJDIR)/read-cl.o \
 	$(OBJDIR)/read-ll.o \
 	$(OBJDIR)/resmerge-ll.o \
+	$(OBJDIR)/runtime_data-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/stats-cl.o \
 	$(OBJDIR)/sun-cl.o \
 	$(OBJDIR)/sunview-ll.o \
 	$(OBJDIR)/sys-cl.o \
-	$(OBJDIR)/table-ll.o \
 	$(OBJDIR)/tile-cl.o \
 	$(OBJDIR)/topo-ll.o \
 	$(OBJDIR)/utils-cl.o \
 	$(OBJDIR)/vector-cl.o \
 	$(OBJDIR)/warp-cl.o \
+	$(OBJDIR)/xml-cl.o \
 	$(GDAL_INCLUDES) $(GDAL_FLAGS) $(GDAL_LIBS) \
 	$(GSL_INCLUDES) $(GSL_FLAGS) $(GSL_LIBS) \
-	-lm
+	-lm \
+	-ljansson

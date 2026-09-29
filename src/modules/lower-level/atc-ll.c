@@ -28,7 +28,8 @@ This file contains functions for handling atmosph. correction parameters
 #include "atc-ll.h"
 
 
-void init_atc(meta_t *meta, brick_t *DN, atc_t *atc);
+
+void init_atc(rtd_t *rtd, meta_t *meta, brick_t *DN, atc_t *atc);
 void init_atc_xy(par_ll_t *pl2, brick_t *DN, atc_t *atc);
 void init_atc_xyz(atc_t *atc);
 void free_atc_xy(atc_t *atc);
@@ -38,13 +39,19 @@ void free_atc_xyz(atc_t *atc);
 /** This function initializes parameters used for atmospheric correction.
 +++ This includes precomputing TTHG parameters, environmental weighting,
 +++ absorption coefficients, wavelengths and allocating memory.
+--- rtd:    runtime data
 --- meta:   metadata
 --- DN:     Digital Numbers
 --- atc:    atmospheric correction factors
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_atc(meta_t *meta, brick_t *DN, atc_t *atc){;
+void init_atc(rtd_t *rtd, meta_t *meta, brick_t *DN, atc_t *atc){
 int r = 1, b, nb = get_brick_nbands(DN);
+
+
+  if (load_runtime_data_E0(rtd) != SUCCESS){
+    EXIT_ERROR("Failed to load runtime data for E0.");
+  }
 
 
   /** nodata value **/
@@ -147,8 +154,24 @@ int r = 1, b, nb = get_brick_nbands(DN);
     atc->wvl[b]   = get_brick_wavelength(DN, b);
     atc->lwvl[b]  = log(atc->wvl[b]);
     atc->lwvl2[b] = atc->lwvl[b]*atc->lwvl[b];
-    
-    atc->E0[b] = E0(meta->cal[b].rsr_band);
+
+    if (!strings_equal(rtd->band_mapping.domains[b], "TEMP")){
+
+      if (weighted_average_of_seq(&rtd->E0.spectrum, 
+        &rtd->rsr_mapping.rsr[b], &atc->E0[b]) != SUCCESS){
+        fprintf(stderr, "Error: Could not calculate E0 for band %d.\n", b);
+        exit(FAILURE);
+      }
+
+      #ifdef FORCE_DEBUG
+      printf("band %d: wvl = %.2f, E0 = %.2f\n", b, atc->wvl[b], atc->E0[b]);
+      #endif
+
+    } else {
+      #ifdef FORCE_DEBUG
+      printf("band %d: wvl = %.2f, E0 = %.2f (TEMP band, skipping)\n", b, atc->wvl[b], atc->E0[b]);
+      #endif
+    }
 
   }
 
@@ -505,10 +528,11 @@ int z, nz = _BYTE_LEN_;
 /** This function allocates the atmospheric parameters
 +++ Return: atmospheric parameters (must be freed with free_atc)
 --- pl2:    L2 parameters
+--- rtd:    runtime data
 --- meta:   metadata
 --- DN:     Digital Numbers
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-atc_t *allocate_atc(par_ll_t *pl2, meta_t *meta, brick_t *DN){
+atc_t *allocate_atc(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t *DN){
 atc_t *atc = NULL;
 
 
@@ -517,7 +541,7 @@ atc_t *atc = NULL;
   #endif
 
   alloc((void**)&atc, 1, sizeof(atc_t));
-  init_atc(meta, DN, atc);
+  init_atc(rtd, meta, DN, atc);
   init_atc_xy(pl2, DN, atc);
   init_atc_xyz(atc);
 

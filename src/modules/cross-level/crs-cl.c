@@ -3,7 +3,7 @@
 This file is part of FORCE - Framework for Operational Radiometric 
 Correction for Environmental monitoring.
 
-Copyright (C) 2013-2025 David Frantz
+Copyright (C) 2013-2022 David Frantz
 
 FORCE is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,49 +21,44 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Sensor header
+This file contains functions for handling CRS
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-#ifndef SENSOR_HL_H
-#define SENSOR_HL_H
+#include "crs-cl.h"
 
-#include <stdio.h>   // core input and output functions
-#include <stdlib.h>  // standard general utilities library
-#include <stdbool.h>  // boolean data type
-
-#include "../cross-level/const-cl.h"
-#include "../cross-level/string-cl.h"
-#include "../cross-level/sys-cl.h"
-#include "../cross-level/json-cl.h"
-#include "../cross-level/runtime_data-cl.h"
+#include "gdal.h"           // public (C callable) GDAL entry points
+#include "cpl_conv.h"
+#include "ogr_srs_api.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int epsg_to_wkt(int epsg_code, char *wkt_output){
 
-// Level 2 band dictionary
-typedef struct {
-  int    n;
-  int    n_bands;
-  int  **band_number;
-  char **band_names; 
-  char **sensor;
-  char  *target;
-  char  *main_product;
-  char  *quality_product;
-  char **aux_products;
-  int    n_aux_products;
-  int spec_adjust; // spectral band adjustment to S2A?
-} sen_t;
 
-void print_sensor_runtime_data();
-int retrieve_sensor(sen_t *sen);
+  OGRSpatialReferenceH srs = OSRNewSpatialReference(NULL);
 
-#ifdef __cplusplus
+  if (OSRImportFromEPSG(srs, epsg_code) == OGRERR_NONE){
+    
+    char *wkt = NULL;
+
+    // 3. Export to WKT string
+    OSRExportToWkt(srs, &wkt);
+
+    #ifdef FORCE_DEBUG
+    printf("EPSG conversion from EPSG:%d to WKT:\n", epsg_code);
+    printf("%s\n", wkt);
+    #endif
+    
+    copy_string(wkt_output, NPOW_10, wkt);
+
+    CPLFree(wkt);
+
+  } else {
+    OSRDestroySpatialReference(srs);
+    RETURN_ERROR("Could not convert EPSG:%d to WKT.", epsg_code);
+  }
+
+  OSRDestroySpatialReference(srs);
+
+  return SUCCESS;
 }
-#endif
-
-#endif
-

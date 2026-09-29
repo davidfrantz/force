@@ -36,6 +36,7 @@ Coregistration header
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/cite-cl.h"
 #include "../lower-level/param-ll.h"
+#include "../lower-level/meta-ll.h"
 #include "../lower-level/coregfuns-ll.h"
 
 
@@ -43,7 +44,7 @@ Coregistration header
 extern "C" {
 #endif
 
-int coregister(int mission, par_ll_t *pl2, brick_t *TOA, brick_t *QAI);
+int coregister(par_ll_t *pl2, meta_t *meta, brick_t *TOA, brick_t *QAI);
 
 #ifdef __cplusplus
 }

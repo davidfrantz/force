@@ -31,18 +31,24 @@ This file contains functions for handling Atmospheric Gas
 #include <gsl/gsl_multimin.h>          // minimization functions 
 
 
-wvp_lut_t _WVLUT_;
+typedef struct {
+  float values[16];
+  rtd_t *rtd;
+  const wvp_lut_t *lut;
+} wvp_minimizer_params_t;
 
 
 /** This function computes a water vapor transmittace look-up-table, which
 +++ is used for fast estimation of Sentinel-2 water vapor. The function 
 +++ will exit successfully if atmospheric correction is disabled or if not
 +++ Sentinel-2
+--- rtd:    runtime data
 --- meta:   metadata
 --- atc:    atmospheric correction factors
+--- wvlut:  water vapor lookup table
 +++ Return: SUCCESS / FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int wvp_transmitt_lut(meta_t *meta, atc_t *atc){
+int wvp_transmitt_lut(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut){
 int b, nb, km, kw;
 float w, m, m_min, m_max;
 int km_min, km_max;
@@ -55,10 +61,10 @@ int nw = 701;
   #endif
 
 
-  _WVLUT_.nb = nb = get_brick_nbands(atc->xy_Tg);
-  _WVLUT_.nw = nw;
-  _WVLUT_.nm = nm;
-  alloc_3D((void****)&_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw, _WVLUT_.nm, sizeof(float));
+  wvlut->nb = nb = get_brick_nbands(atc->xy_Tg);
+  wvlut->nw = nw;
+  wvlut->nm = nm;
+  alloc_3D((void****)&wvlut->val, wvlut->nb, wvlut->nw, wvlut->nm, sizeof(float));
 
 
   if (atc->cosszen[0] < atc->cosvzen[0]){
@@ -81,7 +87,7 @@ int nw = 701;
   printf("m min/max: %.2f %.2f\n", m_min, m_max);
   #endif
 
-  #pragma omp parallel private(b, m, w) shared(nm, nw, nb, km_min, km_max, meta, _WVLUT_) default(none)
+  #pragma omp parallel private(b, m, w) shared(nm, nw, nb, km_min, km_max, meta, rtd, wvlut) default(none)
   {
 
     #pragma omp for collapse(2) schedule(guided)
@@ -93,7 +99,7 @@ int nw = 701;
         w = kw*0.01;
     
         for (b=0; b<nb; b++){
-          _WVLUT_.val[b][kw][km] = wvp_transmitt(w, m, meta->cal[b].rsr_band);
+          wvlut->val[b][kw][km] = wvp_transmitt(w, m, rtd, b);
         }
 
       }
@@ -117,10 +123,11 @@ int nw = 701;
 +++ Return: Absolute residual of BOA reflectance (reference - measurement)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 double fun_wvp(const gsl_vector *v, void *params){
-float *p = (float *)params;
+wvp_minimizer_params_t *context = (wvp_minimizer_params_t *)params;
+float *p = context->values;
 float w;
 float nir, wvp;
-int b_nir, b_wvp, b_nir_rsr, b_wvp_rsr;
+int b_nir, b_wvp;
 float ms, mv, To_nir, To_wvp, rho_p_nir, rho_p_wvp;
 float T_nir, T_wvp, s_nir, s_wvp;
 float Tsw_nir, Tvw_nir, Tsw_wvp, Tvw_wvp, Tg_nir, Tg_wvp;
@@ -134,8 +141,6 @@ int kms, kmv, kw;
   wvp       = p[1];
   b_nir     = (int)p[2];
   b_wvp     = (int)p[3];
-  b_nir_rsr = (int)p[4];
-  b_wvp_rsr = (int)p[5];
   ms        = p[6];
   mv        = p[7];
   To_nir    = p[8];
@@ -154,10 +159,10 @@ int kms, kmv, kw;
   // if water vapor > tabulated values, compute
   if (w > 7.0){
 
-    Tsw_nir = wvp_transmitt(w, ms, b_nir_rsr);
-    Tvw_nir = wvp_transmitt(w, mv, b_nir_rsr);
-    Tsw_wvp = wvp_transmitt(w, ms, b_wvp_rsr);
-    Tvw_wvp = wvp_transmitt(w, mv, b_wvp_rsr);
+    Tsw_nir = wvp_transmitt(w, ms, context->rtd, b_nir);
+    Tvw_nir = wvp_transmitt(w, mv, context->rtd, b_nir);
+    Tsw_wvp = wvp_transmitt(w, ms, context->rtd, b_wvp);
+    Tvw_wvp = wvp_transmitt(w, mv, context->rtd, b_wvp);
 
   // use tabulated values
   } else {
@@ -166,10 +171,10 @@ int kms, kmv, kw;
     kms = (int)floor(ms/0.01);
     kmv = (int)floor(mv/0.01);
 
-    Tsw_nir = _WVLUT_.val[b_nir][kw][kms];
-    Tvw_nir = _WVLUT_.val[b_nir][kw][kmv];
-    Tsw_wvp = _WVLUT_.val[b_wvp][kw][kms];
-    Tvw_wvp = _WVLUT_.val[b_wvp][kw][kmv];
+    Tsw_nir = context->lut->val[b_nir][kw][kms];
+    Tvw_nir = context->lut->val[b_nir][kw][kmv];
+    Tsw_wvp = context->lut->val[b_wvp][kw][kms];
+    Tvw_wvp = context->lut->val[b_wvp][kw][kmv];
 
   }
 
@@ -195,20 +200,22 @@ int kms, kmv, kw;
 +++ @ 0.945 should be equal. Nelder-Mead Simplex optimization is used.
 +++ Water and shadow pixels will be set to the scene average, and a QAI
 +++ flag is set in this case.
+--- rtd:    runtime data
 --- meta:   metadata
 --- atc:    atmospheric correction factors
+--- wvlut:  water vapor lookup table
 --- TOA:    TOA brick
 --- QAI:    QAI brick
 --- DEM:    DEM brick
 +++ Return: Water vapor brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *water_vapor(meta_t *meta, atc_t *atc, brick_t *TOA, brick_t *QAI, brick_t *DEM){
+brick_t *water_vapor(rtd_t *rtd, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, brick_t *TOA, brick_t *QAI, brick_t *DEM){
 int i, j, ii, jj, p, nx, ny, g, z, k;
 int b_reference, b_measure;
 float reference, measure, dem;
 float w, w_avg;
 double w_sum = 0, num = 0;
-float param[16];
+wvp_minimizer_params_t param;
 const gsl_multimin_fminimizer_type *T = NULL;
 gsl_multimin_fminimizer *s = NULL;
 gsl_vector *ss = NULL, *x = NULL;
@@ -239,7 +246,8 @@ float **xyz_s_m = NULL;
   #endif
 
 
-  if (wvp_transmitt_lut(meta, atc) != SUCCESS){
+
+  if (wvp_transmitt_lut(rtd, meta, atc, wvlut) != SUCCESS){
     printf("error in water vapor transmittance LUT. "); return NULL;}
 
 
@@ -274,7 +282,7 @@ float **xyz_s_m = NULL;
   if ((xyz_s_m     = atc_get_band_reshaped(atc->xyz_s, b_measure))   == NULL) return NULL;
 
 
-  #pragma omp parallel private(j, ii, jj, p, g, reference, measure, dem, z, k, w, x, T, ss, s, minex_func, param, iter, status, size) shared(nx, ny, b_reference, b_measure, toa_, wvp_, dem_, QAI, xy_ms, xy_mv, xy_Tvo_r, xy_Tvo_m, xy_Tso_r, xy_Tso_m, xyz_rho_p_r, xyz_rho_p_m, xyz_T_r, xyz_T_m, xyz_s_r, xyz_s_m, atc, meta, gsl_multimin_fminimizer_nmsimplex2) reduction(+: w_sum, num) default(none)
+  #pragma omp parallel private(j, ii, jj, p, g, reference, measure, dem, z, k, w, x, T, ss, s, minex_func, param, iter, status, size) shared(nx, ny, b_reference, b_measure, toa_, wvp_, dem_, QAI, xy_ms, xy_mv, xy_Tvo_r, xy_Tvo_m, xy_Tso_r, xy_Tso_m, xyz_rho_p_r, xyz_rho_p_m, xyz_T_r, xyz_T_m, xyz_s_r, xyz_s_m, atc, meta, rtd, wvlut, gsl_multimin_fminimizer_nmsimplex2) reduction(+: w_sum, num) default(none)
   {
 
   
@@ -293,7 +301,7 @@ float **xyz_s_m = NULL;
     // initialize method and iterate
     minex_func.n = 1;
     minex_func.f = fun_wvp;
-    minex_func.params = param;
+    minex_func.params = &param;
     T = gsl_multimin_fminimizer_nmsimplex2;
     s = gsl_multimin_fminimizer_alloc(T, 1);
 
@@ -343,22 +351,22 @@ float **xyz_s_m = NULL;
       /** copy variables to param, and initialize minimizer
       +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-      param[0]  = reference;
-      param[1]  = measure;
-      param[2]  = b_reference;
-      param[3]  = b_measure;
-      param[4]  = meta->cal[b_reference].rsr_band;
-      param[5]  = meta->cal[b_measure].rsr_band;
-      param[6]  = xy_ms[g];
-      param[7]  = xy_mv[g];
-      param[8]  = xy_Tso_r[g]*xy_Tvo_r[g];
-      param[9]  = xy_Tso_m[g]*xy_Tvo_m[g];
-      param[10] = xyz_rho_p_r[z][g];
-      param[11] = xyz_rho_p_m[z][g];
-      param[12] = xyz_T_r[z][g];
-      param[13] = xyz_T_m[z][g];
-      param[14] = xyz_s_r[z][g];
-      param[15] = xyz_s_m[z][g];
+      param.values[0]  = reference;
+      param.values[1]  = measure;
+      param.values[2]  = b_reference;
+      param.values[3]  = b_measure;
+      param.values[6]  = xy_ms[g];
+      param.values[7]  = xy_mv[g];
+      param.values[8]  = xy_Tso_r[g]*xy_Tvo_r[g];
+      param.values[9]  = xy_Tso_m[g]*xy_Tvo_m[g];
+      param.values[10] = xyz_rho_p_r[z][g];
+      param.values[11] = xyz_rho_p_m[z][g];
+      param.values[12] = xyz_T_r[z][g];
+      param.values[13] = xyz_T_m[z][g];
+      param.values[14] = xyz_s_r[z][g];
+      param.values[15] = xyz_s_m[z][g];
+      param.rtd = rtd;
+      param.lut = wvlut;
 
       gsl_vector_set(x, 0, w);
       gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
@@ -459,12 +467,13 @@ float **xyz_s_m = NULL;
 +++ This function computes the gaseous transmittance based on the esti-
 +++ mated water vapor content. Gaseous Transmittance is scaled by 10000.
 --- atc:    atmospheric correction factors
+--- wvlut:  Water vapor lookup table
 --- b:      band for which the transmittance is computed
 --- WVP:    Water vapor brick
 --- QAI:    QAI brick
 +++ Return: Gaseous transmittance
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-short *gas_transmittance(atc_t *atc, int b, brick_t *WVP, brick_t *QAI){
+short *gas_transmittance(atc_t *atc, wvp_lut_t *wvlut, int b, brick_t *WVP, brick_t *QAI){
 int i, j, ii, jj, p, nx, ny, g;
 int kw, kms, kmv;
 float w, ms, mv, Tsw, Tvw, Tso, Tvo, tg;
@@ -484,10 +493,10 @@ float *xy_Tvo = NULL;
   ny = get_brick_nrows(WVP);
   if ((wvp_ = get_band_short(WVP, 0))       == NULL) return NULL;
   
-  if ((xy_ms       = get_band_float(atc->xy_sun, cZEN))   == NULL) return NULL;
-  if ((xy_mv       = get_band_float(atc->xy_view, cZEN))   == NULL) return NULL;
-  if ((xy_Tso       = get_band_float(atc->xy_Tso, b))   == NULL) return NULL;
-  if ((xy_Tvo       = get_band_float(atc->xy_Tvo, b))   == NULL) return NULL;
+  if ((xy_ms  = get_band_float(atc->xy_sun, cZEN)) == NULL) return NULL;
+  if ((xy_mv  = get_band_float(atc->xy_view, cZEN)) == NULL) return NULL;
+  if ((xy_Tso = get_band_float(atc->xy_Tso, b)) == NULL) return NULL;
+  if ((xy_Tvo = get_band_float(atc->xy_Tvo, b)) == NULL) return NULL;
 
   alloc((void**)&Tg_, nx*ny, sizeof(short));
 
@@ -495,7 +504,7 @@ float *xy_Tvo = NULL;
   /**estimate water vapor for each 60m pixel
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
-  #pragma omp parallel private(j, p, ii, jj, g, w, kw, ms, mv, kms, kmv, Tsw, Tvw, Tso, Tvo, tg) shared(b, nx, ny, QAI, wvp_, WVP, _WVLUT_, Tg_, xy_ms, xy_mv, xy_Tso, xy_Tvo, atc) default(none) 
+  #pragma omp parallel private(j, p, ii, jj, g, w, kw, ms, mv, kms, kmv, Tsw, Tvw, Tso, Tvo, tg) shared(b, nx, ny, QAI, wvp_, WVP, wvlut, Tg_, xy_ms, xy_mv, xy_Tso, xy_Tvo, atc) default(none) 
   {
 
     #pragma omp for schedule(guided)
@@ -521,8 +530,8 @@ float *xy_Tvo = NULL;
       kms = (int)floor(ms/0.01);
       kmv = (int)floor(mv/0.01);
 
-      Tsw = _WVLUT_.val[b][kw][kms];
-      Tvw = _WVLUT_.val[b][kw][kmv];
+      Tsw = wvlut->val[b][kw][kms];
+      Tvw = wvlut->val[b][kw][kmv];
       Tso = xy_Tso[g];
       Tvo = xy_Tvo[g];
       tg  = gas_transmitt(Tsw, Tvw, Tso, Tvo);
@@ -558,10 +567,16 @@ float *xy_Tvo = NULL;
 /** This function frees the WV LUT global variable
 +++ Return: void
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void free_wvlut(){
+void free_wvlut(wvp_lut_t *wvlut){
 
-  free_3D((void***)_WVLUT_.val, _WVLUT_.nb, _WVLUT_.nw);
-  
+  if (wvlut == NULL) return;
+
+  free_3D((void***)wvlut->val, wvlut->nb, wvlut->nw);
+  wvlut->val = NULL;
+  wvlut->nb = 0;
+  wvlut->nw = 0;
+  wvlut->nm = 0;
+
   return;
 }
 

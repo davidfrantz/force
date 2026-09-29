@@ -49,7 +49,7 @@ brick_t *allocate_brick(int nb, int nc, int datatype){
 brick_t *brick = NULL;
 
 
-  #ifdef FORCE_DEBUG
+  #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
   printf("allocating brick with %d bands and %d cells of datatype %d\n", nb, nc, datatype);
   #endif
   
@@ -617,6 +617,9 @@ int b;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void print_brick_info(brick_t *brick){
 
+  #ifdef FORCE_LESS_VERBOSE
+  return;
+  #endif
 
   printf("\nbrick info for %s - %s - SID %d\n", brick->name.string, brick->product.string, brick->sid);
   printf("open: %d, explode %d, initialize %d\n", 

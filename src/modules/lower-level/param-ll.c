@@ -165,29 +165,12 @@ void free_param_lower(par_ll_t *pl2){
 int parse_param_lower(par_ll_t *pl2){
 FILE *fpar = NULL;
 char  buffer[NPOW_16] = "\0";
-char  ext[NPOW_10] = "\0";
-char  bname[NPOW_10] = "\0";
 
 
   pl2->params = allocate_params();
   
-  // if .SAFE directory (S2) was given, use 1st granule
-  extension(pl2->d_level1, ext, NPOW_10);
-
-  if (strcmp(ext, ".SAFE") == 0){
-    
-    strncat(pl2->d_level1, "/GRANULE", NPOW_10-strlen(pl2->d_level1)-1);
-
-    if (findfile_pattern(pl2->d_level1, "L1C", NULL, bname, NPOW_10) != SUCCESS){
-        printf("Unable to dive down .SAFE file!\n"); return FAILURE;}
-
-    copy_string(pl2->d_level1, NPOW_10, bname);
-
-  }
-
   basename_without_ext(pl2->d_level1, pl2->b_level1, NPOW_10);
   //printf("%s: ", pl2->b_level1);
-
 
 
   // open parameter file

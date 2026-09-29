@@ -41,6 +41,7 @@ This program is the FORCE Level-2 Processing System (single image)
 #include "../../modules/cross-level/cube-cl.h"
 #include "../../modules/cross-level/quality-cl.h"
 #include "../../modules/cross-level/vector-cl.h"
+#include "../../modules/cross-level/runtime_data-cl.h"
 #include "../../modules/lower-level/param-ll.h"
 #include "../../modules/lower-level/meta-ll.h"
 #include "../../modules/lower-level/cube-ll.h"
@@ -149,8 +150,9 @@ int opt;
 
 int main( int argc, char *argv[] ){
 args_t args;
-int mission, c;
+int c;
 par_ll_t *pl2  = NULL; // can be renamed to par, once par is not global anymore...
+rtd_t rtd  = {0};
 meta_t   *meta = NULL;
 multicube_t   *multicube = NULL;
 atc_t    *atc  = NULL;
@@ -196,8 +198,12 @@ GDALDriverH driver;
   cite_me(_CITE_L2PS_);
 
   // parse metadata
-  if (parse_metadata(pl2, &meta, &DN, &mission) == FAILURE){
+  if (parse_metadata(pl2, &rtd, &meta) == FAILURE){
     printf("Parsing metadata failed.\n"); return FAILURE;}
+
+  // initialize image struct
+  if (init_level1(pl2, &rtd, meta, &DN) != SUCCESS){
+    printf("Initializing Level-1 image failed.\n"); return FAILURE;}
 
   // write and init a new datacube
   if ((multicube = start_multicube(pl2, DN)) == NULL){
@@ -219,10 +225,10 @@ GDALDriverH driver;
 
     /** read Digital Numbers + projection
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (read_level1(meta, mission, DN, pl2) != SUCCESS){
+    if (read_level1(meta, DN, pl2) != SUCCESS){
       printf("reading DNs failed.\n"); return FAILURE;}
 
-    if ((atc = allocate_atc(pl2, meta, DN)) == NULL){
+    if ((atc = allocate_atc(pl2, &rtd, meta, DN)) == NULL){
       printf("Allocating atc failed.\n"); return FAILURE;}
 
 
@@ -241,13 +247,13 @@ GDALDriverH driver;
 
     /** sun-target-view geometry
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (sun_target_view(pl2, meta, mission, atc, QAI) == FAILURE){
+    if (sun_target_view(pl2, meta, atc, QAI) == FAILURE){
       printf("computing sun/view geometry failed.\n"); return FAILURE;}
 
 
     /** TOA reflectance + brightness temperature
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (convert_level1(meta, mission, atc, DN, &TOA, QAI) != SUCCESS){
+    if (convert_level1(meta, atc, DN, &TOA, QAI) != SUCCESS){
       printf("DN to TOA conversion failed.\n"); return FAILURE;}
     free_brick_bands(DN);
 
@@ -260,7 +266,7 @@ GDALDriverH driver;
 
    /** cloud and cloud shadow detection
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    err = detect_clouds(pl2, mission, atc, TOA, TOP->dem, TOP->exp, QAI);
+    err = detect_clouds(pl2, meta, atc, TOA, TOP->dem, TOP->exp, QAI);
     if (err == FAILURE){
       printf("error in cloud module.\n"); return FAILURE;
     } else if (err == CANCEL){
@@ -271,19 +277,19 @@ GDALDriverH driver;
 
    /** coregistration
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (coregister(mission, pl2, TOA, QAI) != SUCCESS){
+    if (coregister(pl2, meta, TOA, QAI) != SUCCESS){
       printf("coregistration failed.\n"); return FAILURE;}
 
 
   /** resolution merge
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (resolution_merge(mission, pl2->resmerge, TOA, QAI) != SUCCESS){
+    if (resolution_merge(pl2, meta, TOA, QAI) != SUCCESS){
       printf("unable to merge resolutions.\n"); return FAILURE;}
 
 
     /** radiometric correction
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if ((LEVEL2 = radiometric_correction(pl2, meta, mission, atc, multicube->cube[c], TOA, QAI, AOI, TOP, &nprod)) == NULL){
+    if ((LEVEL2 = radiometric_correction(pl2, &rtd, meta, atc, multicube->cube[c], TOA, QAI, AOI, TOP, &nprod)) == NULL){
       printf("Error in radiometric module.\n"); return FAILURE;}
     free_atc(atc);
 
@@ -297,10 +303,12 @@ GDALDriverH driver;
 
   cite_push(pl2->d_level2);
   
-  free_param_lower(pl2); free_metadata(meta); free_multicube(multicube);
+  free_param_lower(pl2);
+  free_runtime_data(&rtd);
+  free_metadata(meta);
+  free_multicube(multicube);
   free_brick(DN);
 
-  
   CPLPopErrorHandler();
 
   GDALDestroy();
