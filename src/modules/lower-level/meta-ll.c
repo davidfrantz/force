@@ -136,7 +136,7 @@ void print_metadata(meta_t *meta){
   printf("  Nodata: %d\n", meta->nodata);
   printf("  Resolution: %f\n", meta->res);
   printf("  Upper-left coordinates: (%f, %f)\n", meta->ulx, meta->uly);
-  printf("  Image dimensions: (%d, %d, %d)\n", meta->nrow, meta->ncol, meta->ncell);
+  printf("  Image dimensions: (%d, %d, %d)\n", meta->ncol, meta->nrow, meta->ncell);
   printf("  Image offsets: (%d, %d)\n", meta->col_offset, meta->row_offset);
   printf("  Acquisition date:\n");
   print_date(&meta->date);
