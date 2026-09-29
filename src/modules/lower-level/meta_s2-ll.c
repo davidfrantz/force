@@ -269,17 +269,17 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       int band_id;
       get_xml_attribute_int_value(xml_open.string, "band_id", &band_id);
       if (band_id < 0 || band_id >= mtd->nband){
-        free_metadata_sentinel2(mtd);
         free_2D((void**)band_order, mtd->nband);
+        free_metadata_sentinel2(mtd);
         fclose(fp);
         RETURN_ERROR("Band ID (%s) is out of bounds.", xml_open.string);
       }
       int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, band_order[band_id]);
       if (b < 0 || b>= mtd->nband){
-        free_metadata_sentinel2(mtd);
         free_2D((void**)band_order, mtd->nband);
+        free_metadata_sentinel2(mtd);
         fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of bounds.", band_order[band_id]);
+        RETURN_ERROR("Band ID (%s) is out of bounds.", xml_open.string);
       }
       char_to_float(xml_value.string, &mtd->offset[b]);
     } else if (strstr(buffer, "<Spectral_Information") != NULL &&
@@ -295,8 +295,8 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       }
       int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, band_id);
       if (b < 0 || b >= mtd->nband){
-        free_metadata_sentinel2(mtd);
         free_2D((void**)band_order, mtd->nband);
+        free_metadata_sentinel2(mtd);
         fclose(fp);
         RETURN_ERROR("Band ID (%s) is out of bounds.", band_id);
       }
