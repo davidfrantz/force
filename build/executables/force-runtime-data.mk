@@ -4,6 +4,7 @@ force-runtime-data: \
   index-parse-hl \
   json-cl \
   konami-cl \
+  runtime_data-cl \
   string-cl \
   utils-cl \
   sensor-hl \
@@ -15,6 +16,7 @@ force-runtime-data: \
 	$(OBJDIR)/index-parse-hl.o \
 	$(OBJDIR)/json-cl.o \
 	$(OBJDIR)/konami-cl.o \
+	$(OBJDIR)/runtime_data-cl.o \
 	$(OBJDIR)/string-cl.o \
 	$(OBJDIR)/utils-cl.o \
 	$(OBJDIR)/sensor-hl.o \

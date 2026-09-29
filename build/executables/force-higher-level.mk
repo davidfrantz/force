@@ -39,6 +39,7 @@ force-higher-level: \
   read-cl \
   read-ard-hl \
   read-aux-hl \
+  runtime_data-cl \
   sample-hl \
   sensor-hl \
   spec-adjust-hl \
@@ -98,6 +99,7 @@ force-higher-level: \
 	$(OBJDIR)/read-cl.o \
 	$(OBJDIR)/read-ard-hl.o \
 	$(OBJDIR)/read-aux-hl.o \
+	$(OBJDIR)/runtime_data-cl.o \
 	$(OBJDIR)/sample-hl.o \
 	$(OBJDIR)/sensor-hl.o \
 	$(OBJDIR)/spec-adjust-hl.o \
