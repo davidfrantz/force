@@ -205,11 +205,11 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   for (int b=0; b<mtd->nband; b++) mtd->offset[b] = FLT_MIN;
   
   // keep track of how many IMAGE_FILE tags we have seen to build a dictionary
-  // because some metadata are not tagged with a band_id attribute, so we need to keep track of the order they appear in the XML
-  // looks superfluous, but is important if runtime data definition order ever becomes different from metadata order
+  // because many metadata are not tagged with a band_id attribute, but just a running number,
+  // so we need to trust that the order of all metadata tags matches the order of bands in the runtime data
+  // if it fails for IMAGE_FILE tags, this is hopefully a good enough indication 
+  // that the metadata is corrupted or inconsistent
   int b_occurence = 0; 
-  char **band_order = NULL;
-  alloc_2D((void***)&band_order, mtd->nband, NPOW_10, sizeof(char));
 
   // process line by line
   char buffer[NPOW_13];
@@ -241,14 +241,22 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       delete_after_match(granule_name, "/IMG_DATA", false);
       concat_string_2(mtd->granule_path, NPOW_10, d_level1, granule_name, "/");
       delete_until_match(image_file, "_B", false);
-      int b;
-      if ((b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, image_file)) >= 0){
-        char image_path_ext[NPOW_10];
-        concat_string_2(image_path_ext, NPOW_10, image_path, ".jp2", "");
-        concat_string_2(mtd->image_files[b], NPOW_10, d_level1, image_path_ext, "/");
-        copy_string(band_order[b_occurence], NPOW_10, image_file);
-        b_occurence++;
+      if (strlen(image_file) != 2) continue; // not a reflectance band, e.g., TCI
+      int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, image_file);
+      if (b < 0 || b >= mtd->nband){
+        free_metadata_sentinel2(mtd);
+        fclose(fp);
+        RETURN_ERROR("Band ID (%s) is out of bounds.", image_file);
       }
+      if (b != b_occurence){
+        free_metadata_sentinel2(mtd);
+        fclose(fp);
+        RETURN_ERROR("Band ID (%s) is out of order, i.e. %d vs %d.", image_file, b_occurence, b);
+      }
+      char image_path_ext[NPOW_10];
+      concat_string_2(image_path_ext, NPOW_10, image_path, ".jp2", "");
+      concat_string_2(mtd->image_files[b], NPOW_10, d_level1, image_path_ext, "/");
+      b_occurence++;
     } else if (strstr(buffer, "<SPECIAL_VALUE_TEXT") != NULL){
       char special_value_type[NPOW_10];
       get_xml_string_value(buffer, special_value_type, NPOW_10);
@@ -269,36 +277,19 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       int band_id;
       get_xml_attribute_int_value(xml_open.string, "band_id", &band_id);
       if (band_id < 0 || band_id >= mtd->nband){
-        free_2D((void**)band_order, mtd->nband);
         free_metadata_sentinel2(mtd);
         fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of bounds.", xml_open.string);
+        RETURN_ERROR("Band ID (%s) is out of bounds: %d.", xml_open.string, band_id);
       }
-      int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, band_order[band_id]);
-      if (b < 0 || b>= mtd->nband){
-        free_2D((void**)band_order, mtd->nband);
-        free_metadata_sentinel2(mtd);
-        fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of bounds.", xml_open.string);
-      }
-      char_to_float(xml_value.string, &mtd->offset[b]);
+      char_to_float(xml_value.string, &mtd->offset[band_id]);
     } else if (strstr(buffer, "<Spectral_Information") != NULL &&
                strstr(buffer, "<Spectral_Information_List>") == NULL){
-      char band_id[NPOW_10];
-      get_xml_attribute_string_value(buffer, "physicalBand", band_id, NPOW_10);
-      replace_string(band_id, "B", "", NPOW_10);
-      // weird hack to handle inconsistency in band_id being a single digit, e.g. "1" instead of "01"
-      if (strlen(band_id) == 1){
-        band_id[1] = band_id[0];
-        band_id[0] = '0';
-        band_id[2] = '\0';
-      }
-      int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, band_id);
-      if (b < 0 || b >= mtd->nband){
-        free_2D((void**)band_order, mtd->nband);
+      int band_id;
+      get_xml_attribute_int_value(buffer, "bandId", &band_id);
+      if (band_id < 0 || band_id >= mtd->nband){
         free_metadata_sentinel2(mtd);
         fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of bounds.", band_id);
+        RETURN_ERROR("Band ID (%s) is out of bounds: %d.", buffer, band_id);
       }
       while (fgets(buffer, NPOW_13, fp) != NULL &&
              strstr(buffer, "</Spectral_Information") == NULL){
@@ -306,13 +297,13 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
         printf("XML: %s", buffer);
         #endif
         if (strstr(buffer, "<MIN") != NULL){
-          get_xml_float_value(buffer, &mtd->rsr[b].start);
+          get_xml_float_value(buffer, &mtd->rsr[band_id].start);
         } else if (strstr(buffer, "<MAX") != NULL){
-          get_xml_float_value(buffer, &mtd->rsr[b].end);
+          get_xml_float_value(buffer, &mtd->rsr[band_id].end);
         } else if (strstr(buffer, "<STEP") != NULL){
-          get_xml_float_value(buffer, &mtd->rsr[b].step);
+          get_xml_float_value(buffer, &mtd->rsr[band_id].step);
         } else if (strstr(buffer, "<VALUES") != NULL){
-          get_xml_float_values(buffer, &mtd->rsr[b].values, &mtd->rsr[b].n);
+          get_xml_float_values(buffer, &mtd->rsr[band_id].values, &mtd->rsr[band_id].n);
         }
       }
 
@@ -325,7 +316,6 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   free_string(&xml_open);
   free_string(&xml_value);
   free_string(&xml_close);
-  free_2D((void**)band_order, mtd->nband);
 
   // Test if we got everything
 
@@ -335,8 +325,9 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   }
 
   if (mtd->processing_baseline < 4.0){
+    fprintf(stderr, "Processing baseline: %.2f\n", mtd->processing_baseline);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Outdated Sentine-2 processing baseline detected: %.2f", mtd->processing_baseline);
+    RETURN_ERROR("Outdated Sentine-2 processing baseline detected.");
   }
 
   if (strlen(mtd->processing_level) == 0){
@@ -345,14 +336,15 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   }
 
   if (strcmp(mtd->processing_level, "Level-1C") != 0){
+    fprintf(stderr, "Processing level: %s\n", mtd->processing_level);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Unsupported processing level detected: %s.", mtd->processing_level);
+    RETURN_ERROR("Unsupported processing level detected.");
   }
 
   if (b_occurence != mtd->nband){
+    fprintf(stderr, "Number of IMAGE_FILE tags: %d, expected number of bands: %d\n", b_occurence, mtd->nband);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Number of IMAGE_FILE tags (%d) does not match expected number of bands (%d).", 
-            b_occurence, mtd->nband);
+    RETURN_ERROR("Number of IMAGE_FILE tags does not match expected number of bands.");
   }
 
   if (mtd->nodata == INT_MIN){
@@ -391,9 +383,10 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       RETURN_ERROR("Could not retrieve RSR information for band %d.", b);
     }
     if (mtd->rsr[b].n != (mtd->rsr[b].end - mtd->rsr[b].start) / mtd->rsr[b].step + 1){
+      fprintf(stderr, "Band %d: RSR start = %f, end = %f, step = %f, n = %d\n", 
+              b, mtd->rsr[b].start, mtd->rsr[b].end, mtd->rsr[b].step, mtd->rsr[b].n);
       free_metadata_sentinel2(mtd);
-      RETURN_ERROR("Number of RSR values (%d) does not match expected number (%d) for band %d.", 
-              mtd->rsr[b].n, (int)((mtd->rsr[b].end - mtd->rsr[b].start) / mtd->rsr[b].step + 1), b);
+      RETURN_ERROR("Number of RSR values does not match range definition.");
     }
     if (mtd->rsr[b].values == NULL){
       free_metadata_sentinel2(mtd);
@@ -401,8 +394,9 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
     }
     for (int i=0; i<mtd->rsr[b].n; i++){
       if (mtd->rsr[b].values[i] < 0){
+        fprintf(stderr, "Band %d: RSR value at index %d is negative: %f\n", b, i, mtd->rsr[b].values[i]);
         free_metadata_sentinel2(mtd);
-        RETURN_ERROR("RSR value at index %d is negative for band %d.", i, b);
+        RETURN_ERROR("RSR values corrupted for band %d.", b);
       }
     }
   }
@@ -527,14 +521,16 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
             fclose(fp);
             RETURN_ERROR("Inconsistent view grid size in metadata.");
           } else if (mtd->view_grid.res <= 0){
+            fprintf(stderr, "View grid resolution: %.2f\n", mtd->view_grid.res);
             free_metadata_sentinel2(mtd);
             fclose(fp);
-            RETURN_ERROR("Invalid view grid resolution (%.2f) in metadata.", mtd->view_grid.res);
+            RETURN_ERROR("Invalid view grid resolution in metadata.");
           }
           if (mtd->ncol < 0 || mtd->nrow < 0){
+            fprintf(stderr, "Image dimensions: %d x %d\n", mtd->ncol, mtd->nrow);
             free_metadata_sentinel2(mtd);
             fclose(fp);
-            RETURN_ERROR("Invalid image dimensions (%d x %d) in metadata.", mtd->ncol, mtd->nrow);
+            RETURN_ERROR("Invalid image dimensions in metadata.");
           }
           mtd->view_grid.ncol = ceil(mtd->ncol*mtd->res/mtd->view_grid.res) + 1;
           mtd->view_grid.nrow = ceil(mtd->nrow*mtd->res/mtd->view_grid.res) + 1;
@@ -584,9 +580,11 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
             RETURN_ERROR("Negative row index (%d) while parsing sun/view angles in metadata.", i);
           }
           if (i >= mtd->view_grid.nrow){
+            fprintf(stderr, "Row index counter (%d), expected number of rows (%d) in metadata.\n", 
+              i, mtd->view_grid.nrow);
             free_metadata_sentinel2(mtd);
             fclose(fp);
-            RETURN_ERROR("More rows of sun/view angles than expected (%d) in metadata.", mtd->view_grid.nrow);
+            RETURN_ERROR("More rows of sun/view angles than expected in metadata.");
           }
           if (b < 0 || b >= mtd->nband){
             free_metadata_sentinel2(mtd);
@@ -604,10 +602,12 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
           get_xml_string_values(buffer, &value_list, &value_count);
 
           if (value_count != mtd->view_grid.ncol){
+            fprintf(stderr, "Row %d: number of values (%d), expected number of columns (%d) in metadata.\n", 
+              i, value_count, mtd->view_grid.ncol);
             free_metadata_sentinel2(mtd);
             free_2D((void**)value_list, value_count);
             fclose(fp);
-            RETURN_ERROR("Number of values (%d) does not match expected number (%d) in metadata.", value_count, mtd->view_grid.ncol);
+            RETURN_ERROR("Number of values does not match expected number in metadata.");
           }          
 
           for (int j=0; j<value_count; j++){
@@ -648,27 +648,31 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
   }
 
   if (mtd->nrow <= 0 || mtd->ncol <= 0){
+    fprintf(stderr, "nrow = %d, ncol = %d\n", mtd->nrow, mtd->ncol);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Invalid image dimensions (%d x %d) in metadata.", mtd->ncol, mtd->nrow);
+    RETURN_ERROR("Invalid image dimensions in metadata.");
   } else {
     mtd->ncell = mtd->nrow*mtd->ncol;
   }
   
   if (dequal(mtd->ulx, DBL_MIN) || dequal(mtd->uly, DBL_MIN)){
+    fprintf(stderr, "ulx = %f, uly = %f\n", mtd->ulx, mtd->uly);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Invalid upper-left coordinates (%f, %f) in metadata.", mtd->ulx, mtd->uly);
+    RETURN_ERROR("Invalid upper-left coordinates in metadata.");
   }
     
   if (mtd->res <= 0 || dequal(mtd->res, DBL_MAX)){
+    fprintf(stderr, "resolution = %.2f\n", mtd->res);
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Invalid resolution (%.2f) in metadata.", mtd->res);
+    RETURN_ERROR("Invalid resolution in metadata.");
   }
   
   if (mtd->view_grid.res <= 0 || dequal(mtd->view_grid.res, DBL_MAX) || 
       mtd->view_grid.ncol <= 0 || mtd->view_grid.nrow <= 0){
-    free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Invalid view grid resolution (%.2f) or dimensions (%d x %d) in metadata.", 
+    fprintf(stderr, "view grid: res = %.2f, ncol = %d, nrow = %d\n", 
       mtd->view_grid.res, mtd->view_grid.ncol, mtd->view_grid.nrow);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid view grid resolution or dimensions in metadata.");
   }
 
   if (mtd->view_grid.zen == NULL || mtd->view_grid.azi == NULL){
