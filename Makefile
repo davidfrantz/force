@@ -27,10 +27,15 @@
 # Installation directory
 INSTALLDIR=/usr/local/bin
 
+# Link time optimization flags.
+ifeq ($(LTO),yes)
+  FLAGS_LTO = -flto
+endif
+
 # Libraries
 GDAL_INCLUDES = $(shell gdal-config --cflags)
 GDAL_LIBS = $(shell gdal-config --libs)
-GDAL_FLAGS = -Wl,-rpath=/usr/lib
+GDAL_FLAGS = $(FLAGS_LTO) -Wl,-rpath=/usr/lib
 
 GSL_INCLUDES = $(shell gsl-config --cflags)
 GSL_LIBS = $(shell gsl-config --libs)
@@ -57,7 +62,7 @@ RSTATS_LIBS = $(shell R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L') -lR
 ### Compiler
 
 # Compilation Flags
-CFLAGS=-O3 -Wall -fopenmp
+CFLAGS=-O3 -Wall $(FLAGS_LTO) -fopenmp
 #CFLAGS=-g -Wall -fopenmp
 
 GCC=gcc $(CFLAGS)
