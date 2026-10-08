@@ -110,6 +110,8 @@ void register_ard1(params_t *params, par_hl_t *phl){
   register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, -1, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", 2, &phl->date_range, &phl->ndate);
   register_intvec_par(params,  "DOY_RANGE", 1, 365, 2, &phl->doy_range, &phl->ndoy);
+  register_intvec_par(params,  "DOYS_TSI", 1, 365, 24, &phl->doys_tsi, &phl->ndoys_tsi);
+  register_intvec_par(params,  "YEAR_RANGE", 2010, 2100, 10, &phl->year_range, &phl->nyear_range);
   register_date_par(params,    "DATE_IGNORE_LANDSAT_7", "1900-01-01", "2099-12-31", &phl->date_ignore_lnd07);
 
   return;

@@ -438,6 +438,10 @@ typedef struct {
   date_t date_ignore_lnd07; // date after which LND07 should be ignored (deorbiting)
   int ndate, ndoy;
   int *doy_range;
+  int *year_range;
+  int nyear_range;
+  int *doys_tsi;// the DOY for which tsi interpolation is wanted, will be used for every years in year_range
+  int ndoys_tsi;
   int date_doys[366];        // doys   that should be used (modulates date_from, date_to)
   int date_weeks[53];
   int date_months[13];
