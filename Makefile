@@ -60,8 +60,8 @@ RSTATS_LIBS = $(shell R CMD config --ldflags | sed 's/ /\n/g' | grep '\-L') -lR
 CFLAGS=-O3 -Wall -fopenmp
 #CFLAGS=-g -Wall -fopenmp
 
-GCC=gcc $(CFLAGS)
-G11=g++ -std=c++11 $(CFLAGS)
+GCC=$(CCACHE) gcc $(CFLAGS)
+G11=$(CCACHE) g++ -std=c++11 $(CFLAGS)
 
 
 ##########################################################################
