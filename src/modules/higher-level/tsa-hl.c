@@ -943,11 +943,25 @@ short nodata;
 
     ni = ceil((phl->date_range[_MAX_].ce-phl->date_range[_MIN_].ce+1)/phl->tsa.tsi.step);
   } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+
+  date_t date;
+  init_date(&date);
     printf("INT_DATE_CONSTANT_DOY zone\n");
-    printf("year range is %i\n", phl->tsa.tsi.year_range[0]);
-    printf("DOY vector is %i\n", phl->tsa.tsi.doys_tsi[0]);
-
-
+    ni=0;
+    int nyears=phl->tsa.tsi.year_range[1]-phl->tsa.tsi.year_range[0];
+    int niMax=nyears*phl->tsa.tsi.ndoys_tsi;
+    //printf("nyear is %02d and nDOY is %02d, so max ni is %02d", phl->tsa.tsi.nyear_range,phl->tsa.tsi.ndoys_tsi, niMax);
+    alloc((void**)&ts.d_tsi, niMax, sizeof(date_t));
+    for (int y=phl->tsa.tsi.year_range[0];y <phl->tsa.tsi.year_range[1]+1;y++){
+          for (t=0;t<phl->tsa.tsi.ndoys_tsi;t++){
+            int doy=phl->tsa.tsi.doys_tsi[t];
+            set_date(&date, y, 1, 1);
+            set_date_doy(&date, doy);
+            printf(" date %04d-%02d-%02d\n", date.year,date.month,  date.day);
+            copy_date(&date, &ts.d_tsi[ni]);
+            ni++;
+          }
+    }
   }
 
   // number of steps for NRT monitoring
