@@ -939,8 +939,15 @@ short nodata;
   // number of steps for interpolation
   if (phl->tsa.tsi.method == _INT_NONE_){
     ni = nt;
-  } else {
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_DEFAULT_){
+
     ni = ceil((phl->date_range[_MAX_].ce-phl->date_range[_MIN_].ce+1)/phl->tsa.tsi.step);
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+    printf("INT_DATE_CONSTANT_DOY zone\n");
+    printf("year range is %i\n", phl->tsa.tsi.year_range[0]);
+    printf("DOY vector is %i\n", phl->tsa.tsi.doys_tsi[0]);
+
+
   }
 
   // number of steps for NRT monitoring

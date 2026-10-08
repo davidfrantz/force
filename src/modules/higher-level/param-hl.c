@@ -110,8 +110,6 @@ void register_ard1(params_t *params, par_hl_t *phl){
   register_enumvec_par(params, "SCREEN_QAI", _TAGGED_ENUM_QAI_, _QAI_LENGTH_, -1, &phl->qai.flags, &phl->qai.nflags);
   register_datevec_par(params, "DATE_RANGE", "1900-01-01", "2099-12-31", 2, &phl->date_range, &phl->ndate);
   register_intvec_par(params,  "DOY_RANGE", 1, 365, 2, &phl->doy_range, &phl->ndoy);
-  register_intvec_par(params,  "DOYS_TSI", 1, 365, 24, &phl->doys_tsi, &phl->ndoys_tsi);
-  register_intvec_par(params,  "YEAR_RANGE", 2010, 2100, 10, &phl->year_range, &phl->nyear_range);
   register_date_par(params,    "DATE_IGNORE_LANDSAT_7", "1900-01-01", "2099-12-31", &phl->date_ignore_lnd07);
 
   return;
@@ -236,6 +234,9 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "HARMONIC_TREND",  &phl->tsa.tsi.harm_trend);
   register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", 2, &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
+  register_enum_par(params,    "TSI_STEP_METHOD", _TAGGED_ENUM_TSI_STEP_METHOD_,_INT_DATE_LENGTH_, &phl->tsa.tsi.step_method);
+  register_intvec_par(params,  "DOYS_TSI", 1, 365, 24, &phl->tsa.tsi.doys_tsi, &phl->tsa.tsi.ndoys_tsi);
+  register_intvec_par(params,  "YEAR_RANGE", 2010, 2100, 2, &phl->tsa.tsi.year_range, &phl->tsa.tsi.nyear_range);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
   register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);

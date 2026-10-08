@@ -158,6 +158,9 @@ enum { _SCR_COMB_ADD_, _SCR_COMB_MUL_, _SCR_COMB_LENGTH_ };
 // interpolation method
 enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
 
+// choice of date for TSI
+enum { _INT_DATE_DEFAULT_, _INT_DATE_CONSTANT_DOY_, _INT_DATE_LENGTH_ };
+
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };
 
@@ -324,7 +327,7 @@ extern const tagged_enum_t _TAGGED_ENUM_INF_[_INF_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_SCR_COMB_[_SCR_COMB_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_];
 extern const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_];
-
+extern const tagged_enum_t _TAGGED_ENUM_TSI_STEP_METHOD_[_INT_DATE_LENGTH_];
 #ifdef __cplusplus
 }
 #endif

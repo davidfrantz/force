@@ -28,8 +28,8 @@
 INSTALLDIR=/usr/local/bin
 
 # Libraries
-GDAL_INCLUDES = $(shell gdal-config --cflags)
-GDAL_LIBS = $(shell gdal-config --libs)
+GDAL_INCLUDES = $(shell /usr/bin/gdal-config --cflags)
+GDAL_LIBS = $(shell /usr/bin/gdal-config --libs)
 GDAL_FLAGS = -Wl,-rpath=/usr/lib
 
 GSL_INCLUDES = $(shell gsl-config --cflags)
