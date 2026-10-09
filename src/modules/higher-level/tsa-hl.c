@@ -481,6 +481,8 @@ char sensor[NPOW_10];
   }
 
   if (ni > 0){
+  
+  if (phl->tsa.tsi.step_method==_INT_DATE_DEFAULT_){
     for (t=0; t<ni; t++){
       if (phl->tsa.tsi.method == _INT_NONE_){
         date = get_brick_date(ard[t].DAT, 0);
@@ -491,8 +493,28 @@ char sensor[NPOW_10];
       }
       copy_date(&date, &ts->d_tsi[t]);
       copy_string(ts->bandnames_tsi[t], NPOW_10, sensor);
+    } 
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+    int nyears=phl->tsa.tsi.year_range[1]-phl->tsa.tsi.year_range[0];
+    int niMax=nyears*phl->tsa.tsi.ndoys_tsi;
+    t=0;
+    for (int y=phl->tsa.tsi.year_range[0];y <phl->tsa.tsi.year_range[1]+1;y++){
+          for (int cdoy=0;cdoy<phl->tsa.tsi.ndoys_tsi;cdoy++){
+            int doy=phl->tsa.tsi.doys_tsi[cdoy];
+            set_date(&date, y, 1, 1);
+            set_date_doy(&date, doy);
+            // check interpolation date is in the range of L2 dates
+             if (phl->date_range[_MAX_].ce > date.ce && phl->date_range[_MIN_].ce < date.ce){
+              copy_date(&date, &ts->d_tsi[t]); 
+              copy_string(sensor, NPOW_10, "BLEND");
+              copy_string(ts->bandnames_tsi[t], NPOW_10, sensor);
+              t++;
+            }
+          }
     }
   }
+  }
+  
 
   if (phl->ny > 0){
     for (t=0; t<phl->ny; t++){
@@ -666,8 +688,10 @@ brick_compile_info_t *info = NULL;
             case _inter_:
               if (phl->tsa.tsi.method == _INT_NONE_){
                 date = get_brick_date(ard[t].DAT, 0);
-              } else {
-                set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
+              } else if (phl->tsa.tsi.step_method== _INT_DATE_DEFAULT_){
+                 set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
+              } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+                  set_date_ce(&date, ts->d_tsi[t].ce);
               }
               set_brick_sensor(TSA[o], t, "BLEND");
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
@@ -946,20 +970,19 @@ short nodata;
 
   date_t date;
   init_date(&date);
-    printf("INT_DATE_CONSTANT_DOY zone\n");
+    // loop is ONLY to determine ni value
     ni=0;
     int nyears=phl->tsa.tsi.year_range[1]-phl->tsa.tsi.year_range[0];
     int niMax=nyears*phl->tsa.tsi.ndoys_tsi;
-    //printf("nyear is %02d and nDOY is %02d, so max ni is %02d", phl->tsa.tsi.nyear_range,phl->tsa.tsi.ndoys_tsi, niMax);
-    alloc((void**)&ts.d_tsi, niMax, sizeof(date_t));
     for (int y=phl->tsa.tsi.year_range[0];y <phl->tsa.tsi.year_range[1]+1;y++){
           for (t=0;t<phl->tsa.tsi.ndoys_tsi;t++){
             int doy=phl->tsa.tsi.doys_tsi[t];
             set_date(&date, y, 1, 1);
             set_date_doy(&date, doy);
-            printf(" date %04d-%02d-%02d\n", date.year,date.month,  date.day);
-            copy_date(&date, &ts.d_tsi[ni]);
+            // check interpolation date is in the range of L2 dates
+             if (phl->date_range[_MAX_].ce > date.ce && phl->date_range[_MIN_].ce < date.ce){
             ni++;
+            }
           }
     }
   }
