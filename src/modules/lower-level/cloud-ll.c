@@ -841,15 +841,13 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
       }
 
       greyscale_reconstruction_(mask_, marker_, nx, ny);
-      for (p=0; p<nc; p++) marker_[p]  -= mask_[p];
-
-    }
-
-    #pragma omp critical
-    {
-      for (p=0; p<nc; p++){
-        if (marker_[p] < spr_[p]) spr_[p] = marker_[p];
+      #pragma omp critical
+      {
+        for (p=0; p<nc; p++){
+          if ((marker_[p] - mask_[p]) < spr_[p]) spr_[p] = marker_[p] - mask_[p];
+        }
       }
+
     }
 
     free((void*)mask_);
