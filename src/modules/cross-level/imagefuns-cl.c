@@ -27,6 +27,7 @@ This file contains functions for image methods
 
 #include "imagefuns-cl.h"
 
+static void build_disk_halfwidth(int r, int *halfwidth);
 
 /** This function estimates the width of a Gaussian used to perform Gaus-
 +++ sian lowpass filtering.
@@ -142,7 +143,7 @@ int nx, ny;
 }
 
 
-/** This function buffers all TRUE pixels by r pixels using the midpoint 
+/** This function buffers all TRUE pixels by r pixels building a stencil.
 +++ circle algorithm.
 --- image:  Binary image (only use with 0/1)
 --- nx:     number of columns
@@ -151,19 +152,22 @@ int nx, ny;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int buffer_(small *image, int nx, int ny, int r){
-int i, j, k, p, d, x, y;
+int i, j, p, dy, hw, row_base;
 int nc = nx*ny;
-small *tmp = NULL;
+int tdim = 2*r + 1;
+int *halfwidth = NULL;
+small * restrict tmp = NULL;
 
 
   if (r <= 0) return SUCCESS;
 
   alloc((void**)&tmp, nc, sizeof(small));
+  alloc((void**)&halfwidth, tdim, sizeof(int));
 
-  // do for every pixel, except boundary
-  // boundary width is determined by buffer radius
+  // Build the stencil for the pixel buffer.
+  build_disk_halfwidth(r, halfwidth);
 
-  #pragma omp parallel private(j, p, k, x, y, d) shared(nx, ny, r, image, tmp) default(none) 
+  #pragma omp parallel private(j, p, dy, hw, row_base) shared(nx, ny, r, image, tmp, halfwidth) default(none)
   {
 
     #pragma omp for schedule(guided)
@@ -174,31 +178,19 @@ small *tmp = NULL;
 
       if (!image[p]) continue;
 
-      // midpoint circle algorithm
-      d = 3 - r;
-      x = 0;
-      y = r;
+      // one contiguous fill per row.
+      for (dy=-r; dy<=r; dy++)
+      {
 
-      while (x <= y){
-
-        // draw buffer with radius around point
-        for (k=i-y; k<=i+y; k++){ tmp[nx*k+j+x] = true; tmp[nx*k+j-x] = true; }
-        for (k=i-x; k<=i+x; k++){ tmp[nx*k+j+y] = true; tmp[nx*k+j-y] = true; }
-
-        if (d < 0){
-          d = d + (4 * x) + 6;
-        } else {
-          d = d + 4 * (x - y) + 10;
-          y -= 1;
-        }
-        x += 1;
+        hw = halfwidth[dy+r];
+        row_base = nx*(i+dy);
+        memset(&tmp[row_base + j - hw], true, (size_t)(2*hw+1)*sizeof(small));
 
       }
     }
     }
     
   }
-
 
   // copy buffer to input
   memmove(image, tmp, nc*sizeof(small));
@@ -208,7 +200,55 @@ small *tmp = NULL;
   return SUCCESS;
 }
 
+/** Build a lookup table of per-row half-widths for a circle of radius r,
++++ by running the midpoint-circle algorithm on a template. The resulting shape is
++++ bit-identical to what the original algorithm draws around any
++++ interior on-pixel.
+--- r:          radius
+--- halfwidth:  array of half-widths (returned)
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+static void build_disk_halfwidth(int r, int *halfwidth){
+  int tdim = 2*r + 1;
+  small *tmpl = NULL;
+  int i, j, x, y, d, k, row, col, dist, hw;
 
+  alloc((void**)&tmpl, tdim*tdim, sizeof(small));
+
+  i = r; j = r;  // center of the template
+  d = 3 - r;
+  x = 0;
+  y = r;
+
+  while (x <= y){
+
+    for (k=i-y; k<=i+y; k++){ tmpl[tdim*k+j+x] = true; tmpl[tdim*k+j-x] = true; }
+    for (k=i-x; k<=i+x; k++){ tmpl[tdim*k+j+y] = true; tmpl[tdim*k+j-y] = true; }
+
+    if (d < 0){
+      d = d + (4 * x) + 6;
+    } else {
+      d = d + 4 * (x - y) + 10;
+      y -= 1;
+    }
+    x += 1;
+
+  }
+
+  // collapse each template row into its half-width (max |col - center| set)
+  for (row=0; row<tdim; row++){
+    hw = 0;
+    for (col=0; col<tdim; col++){
+      if (tmpl[tdim*row+col]){
+        dist = abs(col - r);
+        if (dist > hw) hw = dist;
+      }
+    }
+    halfwidth[row] = hw;  // indexed as halfwidth[dy + r]
+  }
+
+  free((void*)tmpl);
+}
 /** This function performs a majority filling, i.e. FALSE cells that are 
 +++ surrounded by 5 or more TRUE cells will be set to TRUE. This fills
 +++ small holes in a binary image. Brick entry point
