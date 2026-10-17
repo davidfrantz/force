@@ -39,7 +39,10 @@ void alloc(void **ptr, size_t n, size_t size){
 void *arr = NULL;
 
   arr = (void*) calloc(n, size);
-  if (arr == NULL){ printf("unable to allocate memory!\n"); exit(1);}
+  if (arr == NULL) EXIT_ERROR(
+    "unable to allocate memory! Requested a block of %zu elements of size %zu\n", 
+    n, size); 
+
 
   *ptr = arr;
   return;
@@ -129,7 +132,7 @@ void *arr = NULL;
   if (n_now == n) return;
 
   arr = (void*) realloc(*ptr, n*size);
-  if (arr == NULL){ printf("unable to reallocate memory!\n"); exit(1);}
+  if (arr == NULL) EXIT_ERROR("unable to reallocate memory! Requested a block of size %zu\n", n*size);
   
   if (n > n_now) memset((char*)arr + n_now*size, 0, (n-n_now)*size);
   

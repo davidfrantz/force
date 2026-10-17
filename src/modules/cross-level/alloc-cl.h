@@ -32,6 +32,7 @@ Allocation header
 #include <stdlib.h>  // standard general utilities library
 #include <string.h>  // string handling functions
 
+#include "../cross-level/const-cl.h"
 
 #ifdef __cplusplus
 extern "C" {
