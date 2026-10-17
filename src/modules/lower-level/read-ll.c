@@ -1239,10 +1239,7 @@ ushort **dn_  = NULL;
 
 
 /** This function converts all the DN bands to TOA reflectance or bright-
-+++ ness Temperature. In case of Sentinel-2, TOA reflectance is first re-
-+++ transformed to DNs before it is converted to TOA reflectance again.
-+++ This is done to maintain a constant calibration between sensors and
-+++ to retain the flexibility to e.g. use another E0 spectrum.
++++ ness Temperature.
 --- meta:    metadata
 --- atc:     atmospheric correction factors
 --- DN:      digital numbers
@@ -1251,14 +1248,6 @@ ushort **dn_  = NULL;
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int convert_level1(meta_t *meta, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI){
-brick_t  *TOA  = NULL;
-ushort **dn_  = NULL;
-short  **toa_ = NULL;
-float    *sun_ = NULL;
-int b, b_temp, b_cirrus, nb, nc, p, g;
-short nodata;
-float A, rad, dsun, pi_dsun2, tmp;
-float toa_scale;
 
 
   #ifdef FORCE_CLOCK
@@ -1266,22 +1255,22 @@ float toa_scale;
   #endif
 
 
-  nb = get_brick_nbands(DN);
-  nc = get_brick_ncells(DN);
-  nodata = _FORCE_NO_DATA_;
+  int nb = get_brick_nbands(DN);
+  int nc = get_brick_ncells(DN);
+  short nodata = _FORCE_NO_DATA_;
 
-  TOA = copy_brick(DN, nb, _DT_SHORT_);
+  brick_t  *TOA = copy_brick(DN, nb, _DT_SHORT_);
   
   // temperature band?
-  b_temp   = find_domain(TOA, "TEMP");
-  b_cirrus = find_domain(DN,  "CIRRUS");
+  int b_temp   = find_domain(TOA, "TEMP");
+  int b_cirrus = find_domain(DN,  "CIRRUS");
 
   // update metadata
   set_brick_name(TOA, "FORCE TOA brick");
   set_brick_product(TOA, "TOA");
   set_brick_filename(TOA, "TOA");
 
-  for (b=0; b<nb; b++){
+  for (int b=0; b<nb; b++){
 
     set_brick_nodata(TOA, b, nodata);
     if (b != b_temp){
@@ -1294,104 +1283,190 @@ float toa_scale;
 
 
   // get brick arrays for faster computation
+  ushort **dn_  = NULL;
+  short  **toa_ = NULL;
+  float    *sun_ = NULL;
   if ((dn_  = get_bands_ushort(DN)) == NULL) return FAILURE;
   if ((toa_ = get_bands_short(TOA)) == NULL) return FAILURE;
   if ((sun_ = get_band_float(atc->xy_sun, cZEN)) == NULL) return FAILURE;
 
 
-  /** TOA reflectance to TOA reflectance (Sentinel-2) 
-  in early processing versions, scale factor was 1000, now 10000 **/
-  if (meta->mission == SENTINEL2){
+  for (int b=0; b<nb; b++){
 
-    for (b=0; b<nb; b++){
+    float toa_scale = get_brick_scale(TOA, b);
 
-      toa_scale = get_brick_scale(TOA, b);
-      
+    float dsun = doy2dsun(get_brick_doy(TOA, 0));
+    float pi_dsun2  = M_PI*dsun*dsun;
+
+    /** Conversion applies multiplicative and additive scaling factors to
+    +++ the DN values to convert them to TOA reflectance. 
+    +++ This approach is being used for Sentinel-2 L1C data
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+    if (meta->mission == SENTINEL2 && 
+        meta->processing_level == _LEVEL_1C_){
+
       #pragma omp parallel shared(b, nc, toa_scale, dn_, toa_, meta, QAI, nodata) default(none) 
       {
 
         #pragma omp for schedule(static)
-        for (p=0; p<nc; p++){
+        for (int p=0; p<nc; p++){
           if (get_off(QAI, p)){ 
             toa_[b][p] = nodata; 
           } else {
-            toa_[b][p] = (dn_[b][p] + meta->cal[b].reflectance.offset) / 
-            meta->cal[b].reflectance.scale*toa_scale;
+            toa_[b][p] = (dn_[b][p] + meta->cal[b].offset) / 
+              meta->cal[b].scale * toa_scale;
           }
         }
         
       }
 
-    }
+    
 
-  /** digital numbers to TOA reflectance and brightness temperature (Landsat) **/
-  } else {
+    /** Conversion applies traditional radiance to reflectance conversion,
+    +++ while scaling the DN values to radiance first using additive 
+    +++ scaling factors and physical gains.
+    +++ This approach is being used for Sentinel-2 L1B data
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+    } else if (meta->mission == SENTINEL2 && 
+               meta->processing_level == _LEVEL_1B_){
 
-    dsun = doy2dsun(get_brick_doy(TOA, 0));
-    pi_dsun2  = M_PI*dsun*dsun;
-
-    for (b=0; b<nb; b++){
-
-      toa_scale = get_brick_scale(TOA, b);
-
-      A = (meta->cal[b].radiance.lmax-meta->cal[b].radiance.lmin) / 
-          (meta->cal[b].radiance.qmax-meta->cal[b].radiance.qmin);
-
-      #pragma omp parallel private(rad, tmp, g) shared(b, b_temp, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
+      #pragma omp parallel shared(b, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, pi_dsun2, meta, atc) default(none) 
       {
 
         #pragma omp for schedule(guided)
-        for (p=0; p<nc; p++){
+        for (int p=0; p<nc; p++){
+
+          //if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
+          if (dn_[b][p] <= 0){ toa_[b][p] = nodata; continue;}
+
+          // dn to radiance
+          int g = convert_brick_p2p(QAI, atc->xy_sun, p);
+          float rad = (dn_[b][p] + meta->cal[b].offset) / meta->cal[b].gain;
+          float tmp = rad*pi_dsun2 / (atc->E0[b]*sun_[g]);
+
+          toa_[b][p] = (short)(tmp*toa_scale);
+
+        }
+        
+      }
+    
+      
+    /** Conversion applies multiplicative and additive scaling factors to
+    +++ the DN values, but also corrects for the sun angle. 
+    +++ This approach is being used for the reflective Landsat L1 bands
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+    } else if (meta->mission == LANDSAT && 
+      b != b_temp){
+
+      #pragma omp parallel shared(b, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, meta, atc) default(none) 
+      {
+
+        #pragma omp for schedule(guided)
+        for (int p=0; p<nc; p++){
+
+          if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
+
+          int g = convert_brick_p2p(QAI, atc->xy_sun, p);
+          float tmp = (meta->cal[b].offset + meta->cal[b].scale*dn_[b][p]) / sun_[g];
+
+          if (tmp < FLT_MIN){
+            if (b == b_cirrus){
+              toa_[b][p] = (short)0;
+            } else {
+              toa_[b][p] = (short)nodata;
+              set_off(QAI, p, true);
+            }
+          } else {
+            toa_[b][p] = (short)(tmp*toa_scale);
+          }
+
+        }
+        
+      }
+
+    /** Conversion applies traditional radiance to reflectance conversion,
+    +++ while scaling the DN values to radiance first using min/max
+    +++ radiance values and quantized min/max DN values.
+    +++ This approach was being used for the reflective Landsat L1 bands.
+    +++ It is not recommended to use this approach anymore, but we keep
+    +++ it here, just in case.
+    +++ A warning is issued to the user if this approach is used.
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+    } else if (meta->mission == LANDSAT && 
+      b != b_temp && 
+      meta->cal[b].scale <= 0){
+
+      fprintf(stderr, "WARNING: Using old-style DN -> radiance -> reflectance conversion for band %d. This is not recommended and may produce more uncertain results.\n", b);
+
+      float A = (meta->cal[b].lmax - meta->cal[b].lmin) / 
+          (meta->cal[b].qmax - meta->cal[b].qmin);
+
+      #pragma omp parallel shared(b, b_cirrus, nc, nodata, toa_scale, dn_, toa_, sun_, QAI, A, pi_dsun2, meta, atc) default(none) 
+      {
+
+        #pragma omp for schedule(guided)
+        for (int p=0; p<nc; p++){
 
           if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
 
           // dn to radiance
-          rad = A * (dn_[b][p]-meta->cal[b].radiance.qmin) + meta->cal[b].radiance.lmin;
+          int g = convert_brick_p2p(QAI, atc->xy_sun, p);
+          float rad = A * (dn_[b][p] - meta->cal[b].qmin) + meta->cal[b].lmin;
+          float tmp = rad*pi_dsun2 / (atc->E0[b]*sun_[g]);
 
-          // radiance to brightness temperature in kelvin
-          if (b == b_temp){
-
-            tmp = meta->cal[b].temperature.k2/log((meta->cal[b].temperature.k1/rad)+1)*toa_scale;
-            if (tmp < SHRT_MAX){
-              toa_[b][p] = (short)tmp;
+          if (tmp < FLT_MIN){
+            if (b == b_cirrus){
+              toa_[b][p] = (short)0;
             } else {
-              toa_[b][p] = SHRT_MAX;
+              toa_[b][p] = (short)nodata;
+              set_off(QAI, p, true);
             }
-
-          // radiance to reflectance
           } else {
-
-            g = convert_brick_p2p(QAI, atc->xy_sun, p);
-
-            if (meta->cal[b].reflectance.scale <= 0){
-              // old-style DN -> radiance -> reflectance conversion (should not happen anymore)
-              tmp = rad*pi_dsun2 / (atc->E0[b]*sun_[g]);
-            } else {
-              // new DN -> reflectance conversion
-              tmp = (meta->cal[b].reflectance.offset + meta->cal[b].reflectance.scale*dn_[b][p]) / sun_[g];
-            }
-
-            if (tmp < FLT_MIN){
-              if (b == b_cirrus){
-                toa_[b][p] = (short)0;
-              } else {
-                toa_[b][p] = (short)nodata;
-                set_off(QAI, p, true);
-              }
-            } else {
-              toa_[b][p] = (short)(tmp*toa_scale);
-            }
-
+            toa_[b][p] = (short)(tmp*toa_scale);
           }
 
         }
         
       }
 
+    /** Conversion for brightness temperature (in Kelvin),
+    +++ while scaling the DN values to radiance first using min/max
+    +++ radiance values and quantized min/max DN values.
+    +++ This approach is being used for the thermal Landsat L1 bands
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
+    } else if (meta->mission == LANDSAT && 
+      b == b_temp){
+
+      float A = (meta->cal[b].lmax - meta->cal[b].lmin) / 
+          (meta->cal[b].qmax - meta->cal[b].qmin);
+
+      #pragma omp parallel shared(b, nc, nodata, toa_scale, dn_, toa_, QAI, A, meta) default(none) 
+      {
+
+        #pragma omp for schedule(guided)
+        for (int p=0; p<nc; p++){
+
+          if (get_off(QAI, p)){ toa_[b][p] = nodata; continue;}
+
+          // dn to radiance
+          float rad = A * (dn_[b][p] - meta->cal[b].qmin) + meta->cal[b].lmin;
+
+          float tmp = meta->cal[b].k2/log((meta->cal[b].k1/rad)+1)*toa_scale;
+          if (tmp < SHRT_MAX){
+            toa_[b][p] = (short)tmp;
+          } else {
+            toa_[b][p] = SHRT_MAX;
+          }
+
+        }
+        
+      }
+
+    } else {
+      RETURN_ERROR("Unsupported pathway for TOA conversion.");
     }
 
   }
-
 
   #ifdef FORCE_DEBUG
   print_brick_info(TOA); set_brick_open(TOA, OPEN_CREATE); write_brick(TOA);
