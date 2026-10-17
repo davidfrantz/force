@@ -1680,7 +1680,7 @@ int success = FAILURE;
     if (nchar < 0 || nchar >= NPOW_10){
       printf("Buffer Overflow in assembling pattern\n"); return FAILURE;}
 
-    success = findfile_starts(pl2->d_coreg, cyear, NULL, fname, NPOW_10);
+    success = findfile_starts(pl2->d_coreg, cyear, NULL, 0, fname, NPOW_10);
     dy++;
   }
   
