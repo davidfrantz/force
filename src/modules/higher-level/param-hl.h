@@ -348,6 +348,8 @@ typedef struct {
   int ogeo;
   int omax;
   int oare;
+  int ocon; // GLCM contrast
+  int odis; // GLCM dissimilarity
   char *base;
   int kernel;
 } par_lsm_t;

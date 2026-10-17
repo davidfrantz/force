@@ -147,6 +147,15 @@ FEATURE_NODATA = -9999
 # proceed (FALSE)?
 # Type: Logical. Valid values: {TRUE,FALSE}
 FEATURE_EXCLUDE = FALSE
+# This parameter controls how FORCE deals with input errors of primary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_PRIMARY = SKIP
 
 # Landscape Metrics
 # ------------------------------------------------------------------------
@@ -189,8 +198,10 @@ LSM_ALL_PIXELS = FALSE
 # effective mesh size.
 # Additionally, arithmetic mean, geometric mean, standard deviation, maximum value
 # and the area of the foreground class within the kernel are available.
-# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE}
-LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE
+# Furthermore, Image texture measures of dissimilarity are available. These measures
+# are calculated for the complete wall-to-wall scene regardless of thresholds.
+# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE,CON,DIS}
+LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE CON DIS
 # This parameter defines the basename for the output files. The basename will
 # be appended by Module ID, product ID, and the file extension.
 # Type: Character.
