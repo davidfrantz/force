@@ -247,8 +247,8 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# The valid range for the geographic coordinates is: [-180,180] and [-90,90]. \n");
     fprintf(fp, "# For map coordinates, the valid range depends on the target projection and cannot \n");
     fprintf(fp, "# be pre-defined by FORCE. You may encounter errors if the coordinates are outside \n");
-    fprintf(fp, "# the valid range. If you use a predefined projection (e.g., EQUI7 or GLANCE7), the \n");
-    fprintf(fp, "# grid origin is internally set to specific values that are optimal for these \n");
+    fprintf(fp, "# the valid range. If you use a predefined projection (e.g., EQUI7-XX or GLANCE7-XX), \n");
+    fprintf(fp, "# the grid origin is internally set to specific values that are optimal for these \n");
     fprintf(fp, "# projections, and the parameters GRID_ORIGIN and GRID_ORIGIN_TYPE are ignored.\n");
     fprintf(fp, "# Type: Double. Valid range: depends on context.\n");
   }
@@ -271,11 +271,11 @@ void write_par_ll_cube(FILE *fp, bool verbose){
     fprintf(fp, "# are globally defined sets of projections with a corresponding grid \n");
     fprintf(fp, "# system. EQUI7 consists of 7 Equi-Distant, continental projections,\n");
     fprintf(fp, "# with a tile size of 100km. GLANCE7 consists of 7 Equal-Area, conti-\n");
-    fprintf(fp, "# nental projections, with a tile size of 150km. One datacube will be\n");
-    fprintf(fp, "# generated for each continent.\n");
-    fprintf(fp, "# Type: Character. Valid values: {<WKT>,EQUI7,GLANCE7}\n");
+    fprintf(fp, "# nental projections, with a tile size of 150km. The XX in the projection\n");
+    fprintf(fp, "# name refers to the continent (AF, AN, AS, EU, NA, OC, SA).\n");
+    fprintf(fp, "# Type: Character. Valid values: {<WKT>,EQUI7-XX,GLANCE7-XX}\n");
   }
-  fprintf(fp, "PROJECTION = GLANCE7\n");
+  fprintf(fp, "PROJECTION = PROJCS[\"ETRS89 / LAEA Europe\",GEOGCS[\"ETRS89\",DATUM[\"European_Terrestrial_Reference_System_1989\",SPHEROID[\"GRS 1980\",6378137,298.257222101,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6258\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4258\"]],PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],PARAMETER[\"latitude_of_center\",52],PARAMETER[\"longitude_of_center\",10],PARAMETER[\"false_easting\",4321000],PARAMETER[\"false_northing\",3210000],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"3035\"]]\n");
 
   if (verbose){
     fprintf(fp, "# This is the resampling option for the reprojection; you can choose\n");

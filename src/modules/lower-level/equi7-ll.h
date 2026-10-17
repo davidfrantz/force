@@ -44,7 +44,7 @@ Equi7 header
 extern "C" {
 #endif
 
-multicube_t *start_equi7cube(par_ll_t *pl2, brick_t *brick);
+cube_t *construct_equi7_datacube(par_ll_t *pl2);
 
 #ifdef __cplusplus
 }

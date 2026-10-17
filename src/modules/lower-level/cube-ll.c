@@ -30,7 +30,7 @@ This file contains functions that define the datacubes
 
 int tile_level2(par_ll_t *pl2, cube_t *cube, brick_t **LEVEL2, int nprod);
 int flush_level2(par_ll_t *pl2, meta_t *meta, brick_t **LEVEL2, int nprod);
-multicube_t *start_datacube(par_ll_t *pl2, brick_t *brick);
+cube_t *construct_custom_datacube(par_ll_t *pl2, meta_t *meta);
 
 
 /** This function tiles the image, computes tile cloud coverage and writes
@@ -51,9 +51,6 @@ double tulx, tuly; // ul of tile
 double ulx, uly; // ul of image
 int istart, jstart; // image-to-chip offset
 int ntile = 0; // number of written tiles
-int *tiles_x = NULL;
-int *tiles_y = NULL;
-int  tiles_k;
 int err = 0;
 bool empty;
 short nodata;
@@ -68,10 +65,6 @@ int cube_nx, cube_ny, cube_nc;
   time_t TIME; time(&TIME);
   #endif
 
-  
-  // get tile file and read it
-  if (tile_readlist(pl2->f_tile, &tiles_x, &tiles_y, &tiles_k) != SUCCESS){
-    printf("Reading tile file failed! "); return FAILURE;}
 
   // get dataset information
   get_brick_geotran(LEVEL2[0], geotran, 6);
@@ -101,7 +94,11 @@ int cube_nx, cube_ny, cube_nc;
   for (tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
 
     // if tile is not allowlisted (if specified), skip
-    if (tile_allowlisted(tiles_x, tiles_y, tiles_k, tx, ty) == FAILURE) continue;
+    if (!tile_allowlisted(cube->allowed_tiles, cube->n_allowed_tiles, tx, ty)) continue;
+
+    #ifdef FORCE_DEBUG
+    printf("Start to output tile X%04d_Y%04d\n", tx, ty);
+    #endif
 
     // upper left coordinate of current tile
     tulx = cube->origin_map.x + tx*cube->tile_size[_X_];
@@ -156,7 +153,7 @@ int cube_nx, cube_ny, cube_nc;
         // count valid and cloudy pixels
         if (prod == 0){
 
-          if (get_off(CUBED[prod], p)) continue;
+          //if (get_off(CUBED[prod], p)) continue;
           
           if (get_cloud(CUBED[prod], p) > 0 || get_shadow(CUBED[prod], p)) ncld++;
           ndata++;
@@ -203,6 +200,10 @@ int cube_nx, cube_ny, cube_nc;
 
     }
 
+    #ifdef FORCE_DEBUG
+    printf("tile X%04d_Y%04d: written: %d\n", tx, ty, !empty);
+    #endif  
+
   }
   }
   
@@ -214,7 +215,6 @@ int cube_nx, cube_ny, cube_nc;
   printf("%2d product(s) written. ", ntile);
 
   // clean
-  free((void*)tiles_x); free((void*)tiles_y);
   for (prod=0; prod<nprod; prod++) free_brick(CUBED[prod]);
   free((void*)CUBED);
 
@@ -267,21 +267,188 @@ int nchar;
 }
 
 
+
+
+bool datacube_extent(par_ll_t *pl2, cube_t *cube, brick_t *brick){
+double map_ulx, map_uly, map_lrx, map_lry;
+double ulx, uly, urx, ury, lrx, lry, llx, lly;
+char map_proj[NPOW_10];
+int t_ulx, t_uly, t_urx, t_ury, t_lrx, t_lry, t_llx, t_lly;
+double tilex, tiley;
+
+
+  if (!pl2->dotile) return true;
+
+  map_ulx = get_brick_ulx(brick);
+  map_uly = get_brick_uly(brick);
+  map_lrx = map_ulx + get_brick_width(brick);
+  map_lry = map_uly - get_brick_height(brick);
+  get_brick_proj(brick, map_proj, NPOW_10);
+
+  // UL
+  if ((warp_any_to_any(map_ulx, map_uly, &ulx, &uly,
+                      map_proj, cube->projection)) == FAILURE){
+    printf("computing upper left in dst_srs failed. ");
+    free_datacube(cube);
+    return NULL;
+  }
+
+  // UR
+  if ((warp_any_to_any(map_lrx, map_uly, &urx, &ury,
+                      map_proj, cube->projection)) == FAILURE){
+    printf("computing upper right in dst_srs failed. ");
+    free_datacube(cube);
+    return NULL;
+  }
+  
+  // LR
+  if ((warp_any_to_any(map_lrx, map_lry, &lrx, &lry,
+                      map_proj, cube->projection)) == FAILURE){
+    printf("computing lower right in dst_srs failed. ");
+    free_datacube(cube);
+    return NULL;
+  }
+
+  // LL
+  if ((warp_any_to_any(map_ulx, map_lry, &llx, &lly,
+                      map_proj, cube->projection)) == FAILURE){
+    printf("computing lower left in dst_srs failed. ");
+    free_datacube(cube);
+    return NULL;
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("image extent in map_srs: \n");
+  printf("UL: %f/%f, UR: %f/%f\n", map_ulx, map_uly, map_lrx, map_uly);
+  printf("LR: %f/%f, LL: %f/%f\n", map_lrx, map_lry, map_ulx, map_lry);
+  printf("image extent in dst_srs: \n");
+  printf("UL: %f/%f, UR: %f/%f\n", ulx, uly, urx, ury);
+  printf("LR: %f/%f, LL: %f/%f\n", lrx, lry, llx, lly);
+  printf("map srs: %s\n", map_proj);
+  printf("dst srs: %s\n", cube->projection);
+  #endif
+
+  tile_find(ulx, uly, &tilex, &tiley, &t_ulx, &t_uly, cube);
+  tile_find(urx, ury, &tilex, &tiley, &t_urx, &t_ury, cube);
+  tile_find(lrx, lry, &tilex, &tiley, &t_lrx, &t_lry, cube);
+  tile_find(llx, lly, &tilex, &tiley, &t_llx, &t_lly, cube);
+  
+  #ifdef FORCE_DEBUG
+  printf("tile UL: %d %d\n", t_ulx, t_uly);
+  printf("tile UR: %d %d\n", t_urx, t_ury);
+  printf("tile LR: %d %d\n", t_lrx, t_lry);
+  printf("tile LL: %d %d\n", t_llx, t_lly);
+  #endif
+
+  cube->tile_extent[_X_][_MIN_] = INT_MAX;
+  if (t_ulx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_ulx;
+  if (t_urx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_urx;
+  if (t_lrx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_lrx;
+  if (t_llx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_llx;
+
+  cube->tile_extent[_Y_][_MIN_] = INT_MAX;
+  if (t_uly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_uly;
+  if (t_ury < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_ury;
+  if (t_lry < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lry;
+  if (t_lly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lly;
+
+  cube->tile_extent[_X_][_MAX_] = INT_MIN;
+  if (t_ulx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_ulx;
+  if (t_urx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_urx;
+  if (t_lrx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_lrx;
+  if (t_llx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_llx;
+
+  cube->tile_extent[_Y_][_MAX_] = INT_MIN;
+  if (t_uly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_uly;
+  if (t_ury > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_ury;
+  if (t_lry > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lry;
+  if (t_lly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lly;
+
+  cube->dim_tiles.cols = cube->tile_extent[_X_][_MAX_] - cube->tile_extent[_X_][_MIN_] + 1;
+  cube->dim_tiles.rows = cube->tile_extent[_Y_][_MAX_] - cube->tile_extent[_Y_][_MIN_] + 1;
+  cube->dim_tiles.cells = cube->dim_tiles.cols * cube->dim_tiles.rows;
+
+  #ifdef FORCE_DEBUG
+  printf("tile extent: X[%d,%d], Y[%d,%d]\n", 
+    cube->tile_extent[_X_][_MIN_], cube->tile_extent[_X_][_MAX_], 
+    cube->tile_extent[_Y_][_MIN_], cube->tile_extent[_Y_][_MAX_]);
+  printf("number of tiles: %d x %d = %d\n", 
+    cube->dim_tiles.cols, cube->dim_tiles.rows, cube->dim_tiles.cells);
+  #endif
+
+  int **allowed_tiles = NULL;
+  int  n_allowed_tiles;
+
+  int **allowed_and_covered_tiles = NULL;
+  int  n_allowed_and_covered_tiles = 0;
+
+  alloc_2D((void***)&allowed_and_covered_tiles, 2, cube->dim_tiles.cells, sizeof(int));
+
+  if (tile_readlist(pl2->f_tile, &allowed_tiles, &n_allowed_tiles) != SUCCESS){
+    printf("Reading tile file failed! "); return FAILURE;}
+
+  for (int tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
+  for (int ty=cube->tile_extent[_Y_][_MIN_]; ty<=cube->tile_extent[_Y_][_MAX_]; ty++){
+
+    // cube may already contain an allowlist of files
+    // this is the case when preset tile systems are used (e.g. EQUI7, GLANCE7)
+    // so we first check against them
+    if (!tile_allowlisted(cube->allowed_tiles, cube->n_allowed_tiles, tx, ty)){
+      #ifdef FORCE_DEBUG
+      printf("Tile X%04d_Y%04d suppressed due to preset tile system.\n", tx, ty);
+      #endif
+      continue;
+    }
+
+    // next we check against the user-specified allowlist (if any)
+    if (!tile_allowlisted(allowed_tiles, n_allowed_tiles, tx, ty)){ 
+      #ifdef FORCE_DEBUG
+      printf("Tile X%04d_Y%04d suppressed due to user-specified allowlist.\n", tx, ty);
+      #endif
+      continue;
+    }
+
+    allowed_and_covered_tiles[_X_][n_allowed_and_covered_tiles] = tx;
+    allowed_and_covered_tiles[_Y_][n_allowed_and_covered_tiles] = ty;
+    n_allowed_and_covered_tiles++;
+
+    #ifdef FORCE_DEBUG
+    printf("Tile X%04d_Y%04d allowed and covered.\n", tx, ty);
+    #endif
+
+  }
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("Number of allowed and covered tiles: %d\n", n_allowed_and_covered_tiles);
+  #endif
+
+  // free memory
+  if (allowed_tiles != NULL) free_2D((void**)allowed_tiles, 2);
+  if (cube->allowed_tiles != NULL) free_2D((void**)cube->allowed_tiles, 2);
+
+  if (n_allowed_and_covered_tiles == 0){
+    printf("No intersection of allowed and covered tiles.\n");
+    if (allowed_and_covered_tiles != NULL) free_2D((void**)allowed_and_covered_tiles, 2);
+    return false;
+  }
+
+  // transfer ownership of the allowlisted tiles to the cube
+  cube->allowed_tiles = allowed_and_covered_tiles;
+  cube->n_allowed_tiles = n_allowed_and_covered_tiles;
+
+  return true;
+}
+
+
 /** This function compiles the data cube parameters from the information
 +++ given in the parameter file.
 --- pl2:    L2 parameters
---- brick:  input image brick
-+++ Return: data cube parameters for one cube
+--- meta:   metadata
++++ Return: data cube parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_datacube(par_ll_t *pl2, brick_t *brick){
-multicube_t *multicube = NULL;
+cube_t *construct_custom_datacube(par_ll_t *pl2, meta_t *meta){
 cube_t *cube = NULL;
-double tilex, tiley;
-double utm_ulx, utm_uly, utm_lrx, utm_lry;
-double ulx, uly, urx, ury, lrx, lry, llx, lly;
-int t_ulx, t_uly, t_urx, t_ury, t_lrx, t_lry, t_llx, t_lly;
-char utm_proj[NPOW_10];
-double tol = 5e-3;
 
 
   #ifdef FORCE_CLOCK
@@ -290,42 +457,43 @@ double tol = 5e-3;
   
   
   //cube = allocate_datacube();
-  multicube = allocate_multicube(1);
-  multicube->cover[0] = true;
-  cube = multicube->cube[0];
-
+  cube = allocate_datacube();
   copy_string(cube->dir_path, NPOW_10, pl2->d_level2);
 
 
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
 
     cube->resolution = pl2->res;
+    copy_string(cube->projection, NPOW_10, pl2->proj);
+    
+  } else if (pl2->doreproj && meta->processing_level == _LEVEL_1B_){
+
+    cube->resolution = meta->res;
     copy_string(cube->projection, NPOW_10, pl2->proj);
 
   } else {
 
-    cube->resolution = get_brick_res(brick);
-    get_brick_proj(brick, utm_proj, NPOW_10);
-    copy_string(cube->projection, NPOW_10, utm_proj);
-    
+    cube->resolution = meta->res;
+    copy_string(cube->projection, NPOW_10, meta->projection);
+
   }
 
   if (pl2->dotile){
 
     if (pl2->n_tile_size != 2){
       printf("TILE_SIZE must have two values (X and Y). ");
-      free_multicube(multicube);
+      free_datacube(cube);
       return NULL;
     }
 
     cube->tile_size[_X_] = pl2->tile_size[_X_];
     cube->tile_size[_Y_] = pl2->tile_size[_Y_];
 
-    if (fmod(cube->tile_size[_X_], cube->resolution) > tol || 
-        fmod(cube->tile_size[_Y_], cube->resolution) > tol){
+    if (!ddivisible(cube->tile_size[_X_], cube->resolution) || 
+        !ddivisible(cube->tile_size[_Y_], cube->resolution)){
       printf("TILE_SIZE must be a multiple of RESOLUTION. ");
       printf("If DO_REPROJ = FALSE, the image resolution overrides the RESOLUTION parameter. ");
-      free_multicube(multicube);
+      free_datacube(cube);
       return NULL;
     }
 
@@ -340,7 +508,7 @@ double tol = 5e-3;
         printf("  Longitude between -180 and 180.\n");
         printf("  Latitude must be between -90 and 90.\n");
         printf("  The correct format of GRID_ORIGIN is: GRID_ORIGIN = lon lat\n");
-        free_multicube(multicube);
+        free_datacube(cube);
         return NULL;
       }
     }
@@ -354,7 +522,7 @@ double tol = 5e-3;
                           &cube->origin_map.x, &cube->origin_map.y,
                           cube->projection)) == FAILURE){
         printf("Computing tile origin in map coordinates failed. ");
-        free_multicube(multicube);
+        free_datacube(cube);
         return NULL;
       }
 
@@ -367,104 +535,19 @@ double tol = 5e-3;
                           &cube->origin_geo.x, &cube->origin_geo.y,
                           cube->projection)) == FAILURE){
         printf("Computing tile origin in geographic coordinates failed. ");
-        free_multicube(multicube);
+        free_datacube(cube);
         return NULL;
       }
 
     } else {
       printf("Invalid GRID_ORIGIN_TYPE. ");
-      free_multicube(multicube);
+      free_datacube(cube);
       return NULL;
     }
 
-
-
-    if (brick != NULL){
-
-      utm_ulx = get_brick_ulx(brick);
-      utm_uly = get_brick_uly(brick);
-      utm_lrx = utm_ulx + get_brick_width(brick);
-      utm_lry = utm_uly - get_brick_height(brick);
-      get_brick_proj(brick, utm_proj, NPOW_10);
-
-      // UL
-      if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing upper left in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      // UR
-      if ((warp_any_to_any(utm_lrx, utm_uly, &urx, &ury,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing upper left in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-      
-      // LR
-      if ((warp_any_to_any(utm_lrx, utm_lry, &lrx, &lry,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing lower right in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      // LL
-      if ((warp_any_to_any(utm_ulx, utm_lry, &llx, &lly,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing lower right in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      tile_find(ulx, uly, &tilex, &tiley, &t_ulx, &t_uly, cube);
-      tile_find(urx, ury, &tilex, &tiley, &t_urx, &t_ury, cube);
-      tile_find(lrx, lry, &tilex, &tiley, &t_lrx, &t_lry, cube);
-      tile_find(llx, lly, &tilex, &tiley, &t_llx, &t_lly, cube);
-      
-      #ifdef FORCE_DEBUG
-      printf("tile UL: %d %d\n", t_ulx, t_uly);
-      printf("tile UR: %d %d\n", t_urx, t_ury);
-      printf("tile LR: %d %d\n", t_lrx, t_lry);
-      printf("tile LL: %d %d\n", t_llx, t_lly);
-      #endif
-
-      cube->tile_extent[_X_][_MIN_] = INT_MAX;
-      if (t_ulx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_ulx;
-      if (t_urx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_urx;
-      if (t_lrx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_lrx;
-      if (t_llx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_llx;
-
-      cube->tile_extent[_Y_][_MIN_] = INT_MAX;
-      if (t_uly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_uly;
-      if (t_ury < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_ury;
-      if (t_lry < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lry;
-      if (t_lly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lly;
-
-      cube->tile_extent[_X_][_MAX_] = INT_MIN;
-      if (t_ulx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_ulx;
-      if (t_urx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_urx;
-      if (t_lrx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_lrx;
-      if (t_llx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_llx;
-
-      cube->tile_extent[_Y_][_MAX_] = INT_MIN;
-      if (t_uly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_uly;
-      if (t_ury > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_ury;
-      if (t_lry > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lry;
-      if (t_lly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lly;
-
-      cube->dim_tiles.cols = cube->tile_extent[_X_][_MAX_] - cube->tile_extent[_X_][_MIN_] + 1;
-      cube->dim_tiles.rows = cube->tile_extent[_Y_][_MAX_] - cube->tile_extent[_Y_][_MIN_] + 1;
-      cube->dim_tiles.cells = cube->dim_tiles.cols * cube->dim_tiles.rows;
-
-    }
-
-
     if (write_datacube_def(cube) == FAILURE){
       printf("Writing datacube definition failed. "); 
-      free_multicube(multicube);
+      free_datacube(cube);
       return NULL;
     }
 
@@ -486,10 +569,10 @@ double tol = 5e-3;
 
 
   #ifdef FORCE_CLOCK
-  proctime_print("starting data cube", TIME);
+  proctime_print("initializing data cube", TIME);
   #endif
 
-  return multicube;
+  return cube;
 }
 
 
@@ -549,52 +632,49 @@ int prod;
 
 /** This function compiles the data cube parameters. It either compiles
 +++ an individual datacube from the information given in the parameter 
-+++ file - or predefined (EQUI7/GLANCE7) datacubes (can be multiple
-+++ continental cubes) are compiled.
++++ file - or predefined (EQUI7/GLANCE7) datacubes are compiled.
 --- pl2:    L2 parameters
---- brick:  input image brick
-+++ Return: data cube parameters for one cube
+--- meta:   metadata
++++ Return: data cube parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_multicube(par_ll_t *pl2, brick_t *brick){
-multicube_t *multicube = NULL;
+cube_t *construct_datacube(par_ll_t *pl2, meta_t *meta){
+cube_t *cube = NULL;
 
 
   if (pl2->doreproj && 
-     (strcmp(pl2->proj, "EQUI7")    == 0 ||
-      strcmp(pl2->proj, "EQUI7-AF") == 0 ||
-      strcmp(pl2->proj, "EQUI7-AN") == 0 ||
-      strcmp(pl2->proj, "EQUI7-AS") == 0 ||
-      strcmp(pl2->proj, "EQUI7-EU") == 0 ||
-      strcmp(pl2->proj, "EQUI7-NA") == 0 ||
-      strcmp(pl2->proj, "EQUI7-OC") == 0 ||
-      strcmp(pl2->proj, "EQUI7-SA") == 0)){
+     (strings_equal(pl2->proj, "EQUI7-AF") ||
+      strings_equal(pl2->proj, "EQUI7-AN") ||
+      strings_equal(pl2->proj, "EQUI7-AS") ||
+      strings_equal(pl2->proj, "EQUI7-EU") ||
+      strings_equal(pl2->proj, "EQUI7-NA") ||
+      strings_equal(pl2->proj, "EQUI7-OC") ||
+      strings_equal(pl2->proj, "EQUI7-SA"))){
 
     // initialize datacubes in EQUI7 specification
-    if ((multicube = start_equi7cube(pl2, brick)) == NULL){
+    if ((cube = construct_equi7_datacube(pl2)) == NULL){
       printf("Starting EQUI7 datacubes failed.\n"); return NULL;}
 
   } else if (pl2->doreproj && 
-     (strcmp(pl2->proj, "GLANCE7") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-AF") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-AN") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-AS") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-EU") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-NA") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-OC") == 0 ||
-      strcmp(pl2->proj, "GLANCE7-SA") == 0)){
+     (strings_equal(pl2->proj, "GLANCE7-AF") ||
+      strings_equal(pl2->proj, "GLANCE7-AN") ||
+      strings_equal(pl2->proj, "GLANCE7-AS") ||
+      strings_equal(pl2->proj, "GLANCE7-EU") ||
+      strings_equal(pl2->proj, "GLANCE7-NA") ||
+      strings_equal(pl2->proj, "GLANCE7-OC") ||
+      strings_equal(pl2->proj, "GLANCE7-SA"))){
     
     // initialize datacubes in GLANCE7 specification
-    if ((multicube = start_glance7cube(pl2, brick)) == NULL){
+    if ((cube = construct_glance7_datacube(pl2)) == NULL){
       printf("Starting GLANCE7 datacubes failed.\n"); return NULL;}
 
   } else {
 
     // initialize a single datacube (default)
-    if ((multicube = start_datacube(pl2, brick)) == NULL){
+    if ((cube = construct_custom_datacube(pl2, meta)) == NULL){
       printf("Starting datacube failed.\n"); return NULL;}
 
   }
   
-  return multicube;
+  return cube;
 }
 

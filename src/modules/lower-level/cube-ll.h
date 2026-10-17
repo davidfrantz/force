@@ -48,7 +48,8 @@ extern "C" {
 #endif
 
 int cube_level2(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t **LEVEL2, int nprod);
-multicube_t *start_multicube(par_ll_t *pl2, brick_t *brick);
+cube_t *construct_datacube(par_ll_t *pl2, meta_t *meta);
+bool datacube_extent(par_ll_t *pl2, cube_t *cube, brick_t *brick);
 
 #ifdef __cplusplus
 }

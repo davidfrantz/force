@@ -36,22 +36,22 @@ This file contains functions for GLANCE7 datacubes
 
 
 // name of continental cube
-static char name7[7][NPOW_10] = {
+static const char *name7[7] = {
   "africa", "antarctica", "asia", "europe", "n-america", "oceania", "s-america" };
 
 
 // projection name of continental cube
-static char projname7[7][NPOW_10] = {
+static const char *projname7[7] = {
   "GLANCE-AF", "GLANCE-AN", "GLANCE-AS", "GLANCE-EU", "GLANCE-NA", "GLANCE-OC", "GLANCE-SA" };
 
 
 // abbreviation of continental cube
-//static char abbr7[7][NPOW_10] = {
+//static const char *abbr7[7] = {
 //  "AF", "AN", "AS", "EU", "NA", "OC", "SA" };
 
   
 // WKT projection of continental cube
-static char proj7[7][NPOW_10] = {
+static const char *proj7[7] = {
   "PROJCS[\"BU MEaSUREs Lambert Azimuthal Equal Area - AF - V01\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"degree\",0.0174532925199433]],PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],PARAMETER[\"longitude_of_center\",20],PARAMETER[\"latitude_of_center\",5],UNIT[\"meter\",1.0]]",
   "PROJCS[\"BU MEaSUREs Lambert Azimuthal Equal Area - AN - V01\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"degree\",0.0174532925199433]],PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],PARAMETER[\"longitude_of_center\",0],PARAMETER[\"latitude_of_center\",-90],UNIT[\"meter\",1.0]]",
   "PROJCS[\"BU MEaSUREs Lambert Azimuthal Equal Area - AS - V01\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"degree\",0.0174532925199433]],PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],PARAMETER[\"longitude_of_center\",100],PARAMETER[\"latitude_of_center\",45],UNIT[\"meter\",1.0]]",
@@ -99,24 +99,16 @@ static int tiles7_sa[2][3648] = {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
 
-/** This function compiles the data cube parameters. The continental cubes
-+++ that match the input image are selected, and all projection/cubing
-+++ parameters are set.
+/** This function compiles the data cube parameters, and matches them to 
++++ the input image.
 --- pl2:    L2 parameters
---- brick:  input image brick
-+++ Return: data cube parameters for multiple cubes
++++ Return: data cube parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *start_glance7cube(par_ll_t *pl2, brick_t *brick){
-multicube_t *multicube = NULL;
+cube_t *construct_glance7_datacube(par_ll_t *pl2){
 cube_t *cube = NULL;
 int *xtiles7[7] = { tiles7_af[0], tiles7_an[0], tiles7_as[0], tiles7_eu[0], tiles7_na[0], tiles7_oc[0], tiles7_sa[0] };
 int *ytiles7[7] = { tiles7_af[1], tiles7_an[1], tiles7_as[1], tiles7_eu[1], tiles7_na[1], tiles7_oc[1], tiles7_sa[1] };
 int c, t;
-double tilex, tiley;
-double utm_ulx, utm_uly, utm_lrx, utm_lry;
-double ulx, uly, urx, ury, lrx, lry, llx, lly;
-int t_ulx, t_uly, t_urx, t_ury, t_lrx, t_lry, t_llx, t_lly;
-char utm_proj[NPOW_10];
 double tol = 5e-3;
 int nchar;
 
@@ -126,195 +118,76 @@ int nchar;
   #endif
 
 
-  multicube = allocate_multicube(7);
-
-
-  for (c=0; c<7; c++){
-
-    // if a subprojection, and not this continent, skip for good
-    if (!strings_equal(pl2->proj, "GLANCE7") &&
-        !strings_equal(pl2->proj, projname7[c])) continue;
-
-    cube = multicube->cube[c];
-
-    nchar = snprintf(cube->dir_path, NPOW_10, "%s/%s", pl2->d_level2, name7[c]);
-    if (nchar < 0 || nchar >= NPOW_10){ 
-      printf("Buffer Overflow in assembling dirname\n"); return NULL;}
-
-    cube->resolution = pl2->res;
-
-    copy_string(cube->projection, NPOW_10, proj7[c]);
-
-    cube->tile_size[_X_] = cube->tile_size[_Y_] = 150000;
-
-    if (fmod(cube->tile_size[_X_], cube->resolution) > tol ||
-        fmod(cube->tile_size[_Y_], cube->resolution) > tol){
-      printf("TILE_SIZE must be a multiple of RESOLUTION. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-
-    cube->dim_tile_pixels.cols = floor(cube->tile_size[_X_]/cube->resolution);
-    cube->dim_tile_pixels.rows = floor(cube->tile_size[_Y_]/cube->resolution);
-    cube->dim_tile_pixels.cells = cube->dim_tile_pixels.cols*cube->dim_tile_pixels.rows;
-
-    cube->n_allowed_tiles = ntiles7[c];
-    alloc_2D((void***)&cube->allowed_tiles, 2, cube->n_allowed_tiles, sizeof(int));
-
-    for (t=0; t<cube->n_allowed_tiles; t++){
-      cube->allowed_tiles[_X_][t] = xtiles7[c][t];
-      cube->allowed_tiles[_Y_][t] = ytiles7[c][t];
-    }
-
-    cube->origin_map.x = ulx7[c];
-    cube->origin_map.y = uly7[c];
-
-    if ((warp_any_to_geo(cube->origin_map.x,  cube->origin_map.y,
-                        &cube->origin_geo.x, &cube->origin_geo.y,
-                         cube->projection)) == FAILURE){
-        printf("Computing tile origin in geo_srs failed. ");
-      free_multicube(multicube);
-      return NULL;
-    }
-
-
-    if (brick != NULL){
-
-      utm_ulx = get_brick_ulx(brick);
-      utm_uly = get_brick_uly(brick);
-      utm_lrx = utm_ulx + get_brick_width(brick);
-      utm_lry = utm_uly - get_brick_height(brick);
-      get_brick_proj(brick, utm_proj, NPOW_10);
-
-
-      // UL
-      if ((warp_any_to_any(utm_ulx, utm_uly, &ulx, &uly,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing upper left in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      // UR
-      if ((warp_any_to_any(utm_lrx, utm_uly, &urx, &ury,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing upper left in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-      
-      // LR
-      if ((warp_any_to_any(utm_lrx, utm_lry, &lrx, &lry,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing lower right in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      // LL
-      if ((warp_any_to_any(utm_ulx, utm_lry, &llx, &lly,
-                          utm_proj, cube->projection)) == FAILURE){
-        printf("computing lower right in dst_srs failed. ");
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      tile_find(ulx, uly, &tilex, &tiley, &t_ulx, &t_uly, cube);
-      tile_find(urx, ury, &tilex, &tiley, &t_urx, &t_ury, cube);
-      tile_find(lrx, lry, &tilex, &tiley, &t_lrx, &t_lry, cube);
-      tile_find(llx, lly, &tilex, &tiley, &t_llx, &t_lly, cube);
-      
-      #ifdef FORCE_DEBUG
-      printf("tile UL: %d %d\n", t_ulx, t_uly);
-      printf("tile UR: %d %d\n", t_urx, t_ury);
-      printf("tile LR: %d %d\n", t_lrx, t_lry);
-      printf("tile LL: %d %d\n", t_llx, t_lly);
-      #endif
-
-      cube->tile_extent[_X_][_MIN_] = INT_MAX;
-      if (t_ulx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_ulx;
-      if (t_urx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_urx;
-      if (t_lrx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_lrx;
-      if (t_llx < cube->tile_extent[_X_][_MIN_]) cube->tile_extent[_X_][_MIN_] = t_llx;
-
-      cube->tile_extent[_Y_][_MIN_] = INT_MAX;
-      if (t_uly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_uly;
-      if (t_ury < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_ury;
-      if (t_lry < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lry;
-      if (t_lly < cube->tile_extent[_Y_][_MIN_]) cube->tile_extent[_Y_][_MIN_] = t_lly;
-
-      cube->tile_extent[_X_][_MAX_] = INT_MIN;
-      if (t_ulx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_ulx;
-      if (t_urx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_urx;
-      if (t_lrx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_lrx;
-      if (t_llx > cube->tile_extent[_X_][_MAX_]) cube->tile_extent[_X_][_MAX_] = t_llx;
-
-      cube->tile_extent[_Y_][_MAX_] = INT_MIN;
-      if (t_uly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_uly;
-      if (t_ury > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_ury;
-      if (t_lry > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lry;
-      if (t_lly > cube->tile_extent[_Y_][_MAX_]) cube->tile_extent[_Y_][_MAX_] = t_lly;
-
-      cube->dim_tiles.cols = cube->tile_extent[_X_][_MAX_] - cube->tile_extent[_X_][_MIN_] + 1;
-      cube->dim_tiles.rows = cube->tile_extent[_Y_][_MAX_] - cube->tile_extent[_Y_][_MIN_] + 1;
-      cube->dim_tiles.cells = cube->dim_tiles.cols * cube->dim_tiles.rows;
-
-      for (t=0; t<cube->n_allowed_tiles; t++){
-
-        for (tilex=cube->tile_extent[_X_][_MIN_]; tilex<=cube->tile_extent[_X_][_MAX_]; tilex++){
-        for (tiley=cube->tile_extent[_Y_][_MIN_]; tiley<=cube->tile_extent[_Y_][_MAX_]; tiley++){
-
-          if (cube->allowed_tiles[_X_][t] == tilex && cube->allowed_tiles[_Y_][t] == tiley){
-            multicube->cover[c] = true;
-            tilex = cube->tile_extent[_X_][_MAX_] + 1;
-            tiley = cube->tile_extent[_Y_][_MAX_] + 1;
-            t = cube->n_allowed_tiles + 1;
-            break;
-          }
-        
-        }
-        }
-
-      }
-
-      #ifdef FORCE_DEBUG
-      printf("datacube %s is covered by input image: %d\n", name7[c], multicube->cover[c]);
-      #endif
-
-    } else {
-
-      multicube->cover[c] = true;
-
-    }
-
-
-    if (multicube->cover[c]){
-      
-      if (createdir(cube->dir_path) == FAILURE){
-        printf("creating continental GLANCE7 datacube failed.\n"); 
-        free_multicube(multicube);
-        return NULL;
-      }
-
-      if (write_datacube_def(cube) == FAILURE){
-        printf("Writing datacube definition failed. "); 
-        free_multicube(multicube);
-        return NULL;
-      }
-
-    }
-
+  if ((c = vector_contains_pos(projname7, 7, pl2->proj)) < 0){
+    printf("EQUI7: projection %s not supported\n", pl2->proj);
+    return NULL;
   }
 
+  cube = allocate_datacube();
+
+  nchar = snprintf(cube->dir_path, NPOW_10, "%s/%s", pl2->d_level2, name7[c]);
+  if (nchar < 0 || nchar >= NPOW_10){ 
+    printf("Buffer Overflow in assembling dirname\n"); return NULL;}
+
+  cube->resolution = pl2->res;
+
+  copy_string(cube->projection, NPOW_10, proj7[c]);
+
+  cube->tile_size[_X_] = cube->tile_size[_Y_] = 150000;
+
+  if (fmod(cube->tile_size[_X_], cube->resolution) > tol ||
+      fmod(cube->tile_size[_Y_], cube->resolution) > tol){
+    printf("TILE_SIZE must be a multiple of RESOLUTION. ");
+    free_datacube(cube);
+    return NULL;
+  }
+
+  cube->dim_tile_pixels.cols = floor(cube->tile_size[_X_]/cube->resolution);
+  cube->dim_tile_pixels.rows = floor(cube->tile_size[_Y_]/cube->resolution);
+  cube->dim_tile_pixels.cells = cube->dim_tile_pixels.cols*cube->dim_tile_pixels.rows;
+
+  cube->n_allowed_tiles = ntiles7[c];
+  alloc_2D((void***)&cube->allowed_tiles, 2, cube->n_allowed_tiles, sizeof(int));
+
+  for (t=0; t<cube->n_allowed_tiles; t++){
+    cube->allowed_tiles[_X_][t] = xtiles7[c][t];
+    cube->allowed_tiles[_Y_][t] = ytiles7[c][t];
+  }
+
+  cube->origin_map.x = ulx7[c];
+  cube->origin_map.y = uly7[c];
+
+  if ((warp_any_to_geo(cube->origin_map.x,  cube->origin_map.y,
+                      &cube->origin_geo.x, &cube->origin_geo.y,
+                        cube->projection)) == FAILURE){
+      printf("Computing tile origin in geo_srs failed. ");
+    free_datacube(cube);
+    return NULL;
+  }
+
+
+  if (createdir(cube->dir_path) == FAILURE){
+    printf("creating continental GLANCE7 datacube failed.\n"); 
+    free_datacube(cube);
+    return NULL;
+  }
+
+  if (write_datacube_def(cube) == FAILURE){
+    printf("Writing datacube definition failed.\n"); 
+    free_datacube(cube);
+    return NULL;
+  }
+
+
   #ifdef FORCE_DEBUG
-  print_multicube(multicube);
+  print_datacube(cube);
   #endif
 
 
   #ifdef FORCE_CLOCK
-  proctime_print("compiling glance7 data cubes", TIME);
+  proctime_print("compiling glance7 data cube", TIME);
   #endif
 
-  return multicube;
+  return cube;
 }
 
