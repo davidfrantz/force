@@ -1,0 +1,11 @@
+{
+  "LANDSAT_4": 705000.0,
+  "LANDSAT_5": 705000.0,
+  "LANDSAT_7": 705000.0,
+  "LANDSAT_8": 705000.0,
+  "LANDSAT_9": 705000.0,
+  "Sentinel-2A": 786000.0,
+  "Sentinel-2B": 786000.0,
+  "Sentinel-2C": 786000.0,
+  "Sentinel-2D": 786000.0 
+}

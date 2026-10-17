@@ -59,6 +59,7 @@ void free_runtime_data(rtd_t *rtd){
   if (rtd->band_mapping.domains != NULL) free_2D((void**)rtd->band_mapping.domains, rtd->band_mapping.nbands);
   if (rtd->band_mapping.l1_bands != NULL) free_2D((void**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands);
   if (rtd->band_mapping.l2_output != NULL) free((void*)rtd->band_mapping.l2_output);
+  if (rtd->band_mapping.resolution != NULL) free((void*)rtd->band_mapping.resolution);
   memset(&rtd->band_mapping, 0, sizeof(rtd_band_mapping_t));
 
 
@@ -72,6 +73,17 @@ void free_runtime_data(rtd_t *rtd){
     free((void*)rtd->rsr_mapping.rsr);
   }
   memset(&rtd->rsr_mapping, 0, sizeof(rtd_rsr_mapping_t));
+  
+  if (rtd->view_angles.ncol != NULL) free((void*)rtd->view_angles.ncol);
+  if (rtd->view_angles.tan_psi != NULL){
+    for (int b=0; b<rtd->view_angles.nbands; b++){
+      if (rtd->view_angles.tan_psi[_X_][b] != NULL) free((void*)rtd->view_angles.tan_psi[_X_][b]);
+      if (rtd->view_angles.tan_psi[_Y_][b] != NULL) free((void*)rtd->view_angles.tan_psi[_Y_][b]);
+    }
+    free_2D((void**)rtd->view_angles.tan_psi, 2);
+  }
+  memset(&rtd->view_angles, 0, sizeof(rtd_view_angles_t));
+
 
   memset(rtd, 0, sizeof(rtd_t));
 
@@ -128,7 +140,7 @@ int load_runtime_data_band_mapping(char *spacecraft_name, rtd_t *rtd){
   alloc_2D((void***)&rtd->band_mapping.domains, rtd->band_mapping.nbands, NPOW_10, sizeof(char));
   alloc_2D((void***)&rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, NPOW_10, sizeof(char));
   alloc((void**)&rtd->band_mapping.l2_output, rtd->band_mapping.nbands, sizeof(bool));
-
+  alloc((void**)&rtd->band_mapping.resolution, rtd->band_mapping.nbands, sizeof(double));
   for (int b=0; b<rtd->band_mapping.nbands; b++){
 
     json_t *band_bandmap = json_array_get(spacecraft_bandmap, b);
@@ -148,6 +160,12 @@ int load_runtime_data_band_mapping(char *spacecraft_name, rtd_t *rtd){
       free_runtime_data(rtd);
       json_decref(band_mapping);
       RETURN_ERROR("Could not find `domain` for item %d in spacecraft mapping runtime data.", b);
+    }
+
+    if (get_json_double(&rtd->band_mapping.resolution[b], "size", band_bandmap) != SUCCESS){
+      free_runtime_data(rtd);
+      json_decref(band_mapping);
+      RETURN_ERROR("Error: Could not find `size` for item %d in spacecraft mapping runtime data.", b);
     }
 
     if (get_json_bool(&rtd->band_mapping.l2_output[b], "output", band_bandmap) != SUCCESS){
@@ -297,6 +315,156 @@ int load_runtime_data_rsr_mapping(char *spacecraft_name, rtd_t *rtd){
 }
 
 
+int load_runtime_data_view_angles(char *spacecraft_name, int detector, rtd_t *rtd){
+
+
+  if (rtd == NULL){
+    RETURN_ERROR("Runtime data structure is NULL.");
+  }
+
+  if (rtd->view_angles.loaded){
+    free_runtime_data(rtd);
+    RETURN_ERROR("View angles runtime data is already loaded.");
+  }
+
+  if (!rtd->band_mapping.loaded){
+    free_runtime_data(rtd);
+    RETURN_ERROR("Band mapping runtime data must be loaded before loading view angles data.");
+  }
+
+  int nbands = rtd->band_mapping.nbands;
+  rtd->view_angles.nbands = nbands;
+
+  json_t *view_angles = NULL;
+  load_runtime_data(_FORCE_L1_VIEW_ANGLES_FILE_, &view_angles);
+
+  json_t *spacecraft_view_angles;
+  if (get_json_item(&spacecraft_view_angles, spacecraft_name, view_angles) != SUCCESS){
+    free_runtime_data(rtd);
+    json_decref(view_angles);
+    RETURN_ERROR("Could not find key %s in view angles runtime data.", spacecraft_name);
+  }
+
+  copy_string(rtd->view_angles.spacecraft_name, NPOW_10, spacecraft_name);
+  
+
+  char detector_key[NPOW_10];
+  int nchar = snprintf(detector_key, NPOW_10, "D%02d", detector);
+  if (nchar < 0 || nchar >= NPOW_10){
+    free_runtime_data(rtd);
+    json_decref(view_angles);
+    RETURN_ERROR("Failed to format detector key.");
+  }
+
+  json_t *detector_view_angles;
+  if (get_json_item(&detector_view_angles, detector_key, spacecraft_view_angles) != SUCCESS){
+    free_runtime_data(rtd);
+    json_decref(view_angles);
+    RETURN_ERROR("Could not find key %s in view angles runtime data.", detector_key);
+  }
+
+  rtd->view_angles.detector = detector;
+
+  alloc_2D((void***)&rtd->view_angles.tan_psi, 2, nbands, sizeof(float*));
+  alloc((void**)&rtd->view_angles.ncol, nbands, sizeof(int));
+
+  int ncol_min = INT_MAX;
+  int error = 0;
+  
+  for (int b=0; b<nbands; b++){
+    
+    char band_key[NPOW_10];
+    int nchar = snprintf(band_key, NPOW_10, "B%s", rtd->band_mapping.l1_bands[b]);
+    if (nchar < 0 || nchar >= NPOW_10){
+      free_runtime_data(rtd);
+      json_decref(view_angles);
+      RETURN_ERROR("Failed to format band key.");
+    }
+
+    json_t *band_view_angles;
+    if (get_json_item(&band_view_angles, band_key, detector_view_angles) != SUCCESS){
+      CONTINUE_ERROR("Could not find key %s in view angles runtime data.", &error, rtd->band_mapping.l1_bands[b]);
+    }
+
+    int ncol_x = 0;
+    if (get_json_float_array(&rtd->view_angles.tan_psi[_X_][b], &ncol_x, "TAN_PSI_X", band_view_angles) != SUCCESS){
+      CONTINUE_ERROR("Could not find `TAN_PSI_X` for band %s in view angles runtime data.", &error, rtd->band_mapping.l1_bands[b]);
+    }
+    
+    int ncol_y = 0;
+    if (get_json_float_array(&rtd->view_angles.tan_psi[_Y_][b], &ncol_y, "TAN_PSI_Y", band_view_angles) != SUCCESS){
+      CONTINUE_ERROR("Could not find `TAN_PSI_X` for band %s in view angles runtime data.", &error, rtd->band_mapping.l1_bands[b]);
+    }
+
+    if (ncol_x != ncol_y){
+      CONTINUE_ERROR("Number of columns for TAN_PSI_X (%d) does not match TAN_PSI_Y (%d) for band %s in view angles runtime data.", &error, ncol_x, ncol_y, rtd->band_mapping.l1_bands[b]);
+    }
+
+    rtd->view_angles.ncol[b] = ncol_x;
+
+    if (ncol_x < ncol_min) ncol_min = ncol_x;
+
+  }
+
+  json_decref(view_angles);
+
+  if (error > 0){
+    free_runtime_data(rtd);
+    RETURN_ERROR("Parsing view angles failed.");
+  }
+
+  /**for (int b=0; b<nbands; b++){
+    if (!fdivisible(rtd->view_angles.ncol[b], ncol_min)){
+      CONTINUE_ERROR("Cannot divide %d by %d for band %s.", &error, rtd->view_angles.ncol[b], ncol_min, rtd->band_mapping.l1_bands[b]);
+    }
+  }**/
+
+  if (error > 0){
+    free_runtime_data(rtd);
+    RETURN_ERROR("Parsing view angles failed.");
+  }
+
+  rtd->view_angles.loaded = true;
+
+  return SUCCESS;
+}
+
+
+
+/** Load the satellite altitude runtime data for a specific spacecraft.
+--- spacecraft_name: Name of the spacecraft
+--- rtd: Pointer to the runtime data structure
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int load_runtime_data_satellite_altitude(char *spacecraft_name, rtd_t *rtd){
+
+  if (rtd == NULL){
+    RETURN_ERROR("Runtime data structure is NULL in load_runtime_data_satellite_altitude.");
+  }
+
+  if (rtd->satellite_altitude.loaded){
+    free_runtime_data(rtd);
+    RETURN_ERROR("Satellite altitude runtime data is already loaded.");
+  }
+
+  json_t *altitude_data = NULL;
+  load_runtime_data(_FORCE_L1_ALTITUDE_FILE_, &altitude_data);
+
+  if (get_json_float(&rtd->satellite_altitude.value, spacecraft_name, altitude_data) != SUCCESS){
+    free_runtime_data(rtd);
+    json_decref(altitude_data);
+    RETURN_ERROR("Error: Could not find altitude for spacecraft %s in satellite altitude runtime data.", spacecraft_name);
+  }
+
+  json_decref(altitude_data);
+  
+  copy_string(rtd->satellite_altitude.spacecraft_name, NPOW_10, spacecraft_name);
+  rtd->satellite_altitude.loaded = true;
+
+  return SUCCESS;
+}
+
+
 int load_runtime_data_E0(rtd_t *rtd){
 
   if (rtd == NULL) RETURN_ERROR("Runtime data structure is NULL.");
@@ -409,3 +577,4 @@ int load_runtime_data_water_library(rtd_t *rtd){
 
   return SUCCESS;
 }
+

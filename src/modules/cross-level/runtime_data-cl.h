@@ -47,6 +47,8 @@ extern "C" {
 #define _FORCE_L1_BAND_MAP_FILE_      "force-misc/runtime-data/level-1/band-mapping.json"
 #define _FORCE_L1_SENSOR_MAP_FILE_    "force-misc/runtime-data/level-1/sensor-mapping.json"
 #define _FORCE_L1_RSR_FILE_           "force-misc/runtime-data/level-1/relative-spectral-response.json"
+#define _FORCE_L1_VIEW_ANGLES_FILE_   "force-misc/runtime-data/level-1/l1b-view-angles.json"
+#define _FORCE_L1_ALTITUDE_FILE_      "force-misc/runtime-data/level-1/satellite-altitude.json"
 #define _FORCE_L1_E0_FILE_            "force-misc/runtime-data/level-1/exoatmospheric-irradiance.json"
 #define _FORCE_L1_ABSORPTION_FILE_    "force-misc/runtime-data/level-1/gaseous-absorption.json"
 #define _FORCE_L1_WATER_LIBRARY_FILE_ "force-misc/runtime-data/level-1/water-library.json"
@@ -55,6 +57,7 @@ typedef struct {
   bool loaded;
   char spacecraft_name[NPOW_10];
   int nbands;
+  double *resolution;
   char **domains;
   char **l1_bands;
   bool *l2_output;
@@ -72,6 +75,21 @@ typedef struct {
   int nbands;
   seq_t *rsr;
 } rtd_rsr_mapping_t;
+
+typedef struct {
+  bool loaded;
+  char spacecraft_name[NPOW_10];
+  int detector;
+  int nbands;
+  int *ncol;
+  float ***tan_psi;
+} rtd_view_angles_t;
+
+typedef struct {
+  bool loaded;
+  char spacecraft_name[NPOW_10];
+  float value;
+} rtd_altitude_t;
 
 typedef struct {
   bool loaded;
@@ -95,6 +113,8 @@ typedef struct {
   rtd_band_mapping_t band_mapping;
   rtd_sensor_mapping_t sensor_mapping;
   rtd_rsr_mapping_t rsr_mapping;
+  rtd_view_angles_t view_angles;
+  rtd_altitude_t satellite_altitude;
   rtd_E0_t E0;
   rtd_absorption_t absorption;
   rtd_water_library_t water_library;
@@ -105,6 +125,8 @@ void free_runtime_data(rtd_t *rtd);
 int load_runtime_data_band_mapping(char *spacecraft_name, rtd_t *rtd);
 int load_runtime_data_sensor_mapping(char *spacecraft_name, rtd_t *rtd);
 int load_runtime_data_rsr_mapping(char *spacecraft_name, rtd_t *rtd);
+int load_runtime_data_view_angles(char *spacecraft_name, int detector, rtd_t *rtd);
+int load_runtime_data_satellite_altitude(char *spacecraft_name, rtd_t *rtd);
 int load_runtime_data_E0(rtd_t *rtd);
 int load_runtime_data_absorption(rtd_t *rtd);
 int load_runtime_data_water_library(rtd_t *rtd);
