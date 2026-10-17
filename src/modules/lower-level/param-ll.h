@@ -48,6 +48,7 @@ typedef struct {
   char f_par[NPOW_10];    // parameter file
   char d_level1[NPOW_10]; // input Level-1 directory
   char b_level1[NPOW_10]; // basename of input Level-1 directory
+  int granule_id;         // granule ID (0-based indexing)
   char *d_level2;         // output Level-2 directory
   char *d_log;            // logfile directory
   char *d_temp;           // temporary directory

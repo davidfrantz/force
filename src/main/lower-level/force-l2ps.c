@@ -65,17 +65,21 @@ typedef struct {
   int n;
   char fimg[NPOW_10];
   char fprm[NPOW_10];
+  int granule_id;
 } args_t;
 
 
 void usage(char *exe, int exit_code){
 
 
-  printf("Usage: %s [-h] [-v] [-i] image-dir parameter-file\n", exe);
+
+  printf("Usage: %s [-h] [-v] [-i] [-g granule_id] image-dir parameter-file\n", exe);
   printf("\n");
   printf("  -h  = show this help\n");
   printf("  -v  = show version\n");
   printf("  -i  = show program's purpose\n");
+  printf("\n");
+  printf("  -g  = set granule ID (optional, default is 1)\n");
   printf("\n");
   printf("  Positional arguments:\n");
   printf("  - 'image-dir':      extracted Level 1 image\n");
@@ -93,9 +97,10 @@ int opt;
 
 
   opterr = 0;
+  args->granule_id = 0;
 
   // optional parameters
-  while ((opt = getopt(argc, argv, "hvid")) != -1){
+  while ((opt = getopt(argc, argv, "hvidg:")) != -1){
     switch(opt){
       case 'h':
         usage(argv[0], SUCCESS);
@@ -105,6 +110,14 @@ int opt;
       case 'i':
         printf("Level 2 processing of single image\n");
         exit(SUCCESS);
+      case 'g':
+        args->granule_id = atoi(optarg);
+        if (args->granule_id < 1){
+          fprintf(stderr, "Invalid granule ID (%d). Must be >= 1.\n", args->granule_id);
+          usage(argv[0], FAILURE);
+        }
+        args->granule_id--; // internally we use 0-based indexing
+        break;
       case 'd':
         #ifdef FORCE_DEBUG
         exit(FAILURE);
@@ -181,6 +194,7 @@ GDALDriverH driver;
   pl2 = allocate_param_lower();
   copy_string(pl2->d_level1, NPOW_10, args.fimg);
   copy_string(pl2->f_par,    NPOW_10, args.fprm);
+  pl2->granule_id = args.granule_id;
 
 
   // make GDAL less verbose
