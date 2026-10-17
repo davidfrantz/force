@@ -150,7 +150,7 @@ int get_json_integer(int *integer, char *key, json_t *json){
 --- json: JSON item
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int get_json_float(float *floating, char *key, json_t *json){
+int get_json_float(float *float_value, char *key, json_t *json){
 
   json_t *item = NULL;
   if (get_json_item(&item, key, json) != SUCCESS){
@@ -158,12 +158,39 @@ int get_json_float(float *floating, char *key, json_t *json){
   }
 
   if (json_is_real(item)){
-    *floating = (float)json_real_value(item);
+    *float_value = (float)json_real_value(item);
     #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
-    printf("%s: %f\n", key, *floating);
+    printf("%s: %f\n", key, *float_value);
     #endif
   } else {
     RETURN_ERROR("Item with key %s is not a float, type is: %d.", key, json_typeof(item));
+  }
+
+  return SUCCESS;
+}
+
+
+
+/** Extract a double from a JSON item.
+--- double_value: Pointer to double to store the extracted double
+--- key: Key of the JSON item to extract
+--- json: JSON item
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_json_double(double *double_value, char *key, json_t *json){
+
+  json_t *item = NULL;
+  if (get_json_item(&item, key, json) != SUCCESS){
+    RETURN_ERROR("Could not find key %s in JSON.", key);
+  }
+
+  if (json_is_real(item)){
+    *double_value = json_real_value(item);
+    #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+    printf("%s: %f\n", key, *double_value);
+    #endif
+  } else {
+    RETURN_ERROR("Item with key %s is not a double, type is: %d.", key, json_typeof(item));
   }
 
   return SUCCESS;
@@ -329,6 +356,52 @@ int n_buffer = 0;
 
   *floats = buffer;
   *n_floats = n_buffer;
+ 
+  return SUCCESS;
+}
+
+
+/** Extract an array of doubles from a JSON item.
++++ Allocates an array of doubles.
+--- doubles: Pointer to double* to receive the array of doubles (must be freed)
+--- n_doubles: Pointer to int to receive the number of doubles
+--- key: Key of the JSON item to extract
+--- json: JSON item
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_json_double_array(double **doubles, int *n_doubles, char *key, json_t *json){
+double *buffer = NULL;
+int n_buffer = 0;
+
+  json_t *item = NULL;
+  if (get_json_item(&item, key, json) != SUCCESS){
+      RETURN_ERROR("Could not find key %s in JSON.", key);
+  }
+
+  if (json_is_array(item)){
+
+    n_buffer = json_array_size(item);
+
+    alloc((void**)&buffer, n_buffer, sizeof(double));
+
+    for (int i=0; i<n_buffer; i++){
+      json_t *value = json_array_get(item, i);
+      if (json_is_real(value)){
+        buffer[i] = json_real_value(value);
+        #if defined(FORCE_DEBUG) && !defined(FORCE_LESS_VERBOSE)
+        printf("%s[%d]: %f\n", key, i, buffer[i]);
+        #endif
+      } else {
+        free((void*)buffer); buffer = NULL;
+        RETURN_ERROR("Element %d in %s array is not a double, type is: %d.", i, key, json_typeof(item));
+      }
+    }
+  } else {
+    RETURN_ERROR("Item %s is not an array, type is: %d.", key, json_typeof(item));
+  }
+
+  *doubles = buffer;
+  *n_doubles = n_buffer;
  
   return SUCCESS;
 }

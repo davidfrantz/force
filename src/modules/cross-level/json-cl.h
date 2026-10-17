@@ -48,11 +48,13 @@ int get_json_item(json_t **item, char *key, json_t *json);
 int get_json_object(json_t **object, char *key, json_t *json);
 int get_json_string(char *string, size_t size, char *key, json_t *json);
 int get_json_integer(int *integer, char *key, json_t *json);
-int get_json_float(float *floating, char *key, json_t *json);
+int get_json_float(float *float_value, char *key, json_t *json);
+int get_json_double(double *double_value, char *key, json_t *json);
 int get_json_bool(bool *boolean, char *key, json_t *json);
 int get_json_string_array(char ***strings, int *n_strings, char *key, json_t *json);
 int get_json_integer_array(int **integers, int *n_integers, char *key, json_t *json);
 int get_json_float_array(float **floats, int *n_floats, char *key, json_t *json);
+int get_json_double_array(double **doubles, int *n_doubles, char *key, json_t *json);
 int get_json_boolean_array(bool **booleans, int *n_booleans, char *key, json_t *json);
 
 #ifdef __cplusplus
