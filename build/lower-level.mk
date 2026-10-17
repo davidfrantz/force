@@ -14,8 +14,8 @@ lower: \
     equi7-ll \
     gas-ll \
     glance7-ll \
-    meta-lnd-ll \
-    meta-s2-ll \
+    meta_lnd-ll \
+    meta_s2-ll \
     meta-ll \
     param-ll \
     radtran-ll \
