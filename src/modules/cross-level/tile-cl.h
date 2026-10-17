@@ -30,6 +30,7 @@ Tiling header
 
 #include <stdio.h>   // core input and output functions
 #include <stdlib.h>  // standard general utilities library
+#include <stdbool.h> // boolean type
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/cube-cl.h"
@@ -39,8 +40,8 @@ Tiling header
 extern "C" {
 #endif
 
-int tile_readlist(char *f_tile, int **X, int **Y, int *k);
-int tile_allowlisted(int *allow_x, int *allow_y, int allow_k, int x, int y);
+int tile_readlist(char *f_tile, int ***allowed_tiles, int *number);
+bool tile_allowlisted(int **allowed_tiles, int allowed_number, int x, int y);
 int tile_active(char *f_tile, cube_t *cube);
 
 #ifdef __cplusplus

@@ -32,61 +32,81 @@ This file contains functions that handle tiling operations
 +++ This function reads the tile allow-list. If none is given, it is gra-
 +++ cefully ignored. The X/Y IDs and the number of entries is returned.
 --- f_tile: path of tile allow-list
---- X:      X tile coordinate IDs (returned)
---- Y:      Y tile coordinate IDs (returned)
---- k:      number of tiles       (returned)
+--- allowed_tiles: allow-listed tiles: [_X_][_Y_] x n
+--- number: number of allow-listed tiles
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tile_readlist(char *f_tile, int **X, int **Y, int *k){
-FILE *fp = NULL;
-char  buffer[NPOW_10] = "\0";
-int i, *x = NULL, *y = NULL;
-char cx[5], cy[5];
+int tile_readlist(char *f_tile, int ***allowed_tiles, int *number){
 
+  if (f_tile == NULL || allowed_tiles == NULL || number == NULL){
+    printf("Invalid input.\n"); 
+    return FAILURE;
+  }
 
   // if no file is specified, make sure that processing can continue
-  if ((strcmp(f_tile, "NULL") == 0)){
-    *k = 0;
-    alloc((void**)&x, 1, sizeof(int)); *X = x;
-    alloc((void**)&y, 1, sizeof(int)); *Y = y;
+  if (strings_equal(f_tile, "NULL")){
+    *number = 0;
+    *allowed_tiles = NULL;
     return SUCCESS;
   }
 
 
+  FILE *fp = NULL;
   if ((fp = fopen(f_tile, "r")) == NULL){
-    printf("Unable to open tile file!\n"); return FAILURE;}
+    printf("Unable to open tile file!\n"); 
+    *number = 0;
+    *allowed_tiles = NULL;
+    return FAILURE;
+  }
 
+  char  buffer[NPOW_10] = "\0";
   if (fgets(buffer, NPOW_10, fp) == NULL){
-    printf("Error while reading from tile file!\n"); return FAILURE;}
+    printf("Error while reading from tile file!\n"); 
+    *number = 0;
+    *allowed_tiles = NULL;
+    return FAILURE;
+  }
+
+  buffer[strcspn(buffer, "\r\n#")] = 0;
 
   // number of positive tiles should be in 1st line
-  if ((*k = atoi(buffer)) <= 0){
-    printf("Error retrieving number of lines in tile file!\n"); return FAILURE;}
-
-  alloc((void**)&x, *k, sizeof(int)); 
-  alloc((void**)&y, *k, sizeof(int));
-
+  int n;
+  char_to_int(buffer, &n);
+  if (n <= 0){
+    printf("Number of lines in tile file must be positive!\n"); 
+    *number = 0;
+    *allowed_tiles = NULL;
+    return FAILURE;
+  }
+  
+  
+  int **tiles = NULL;
+  alloc_2D((void***)&tiles, 2, n, sizeof(int)); 
+  
   // read line by line, one Tile ID should be in each line
-  for (i=0; i<*k; i++){
-
+  for (int i=0; i<n; i++){
+    
     if (fgets(buffer, NPOW_10, fp) == NULL){
       printf("Error reading line %d in tile file\n", i+2); return FAILURE;}
 
+    buffer[strcspn(buffer, "\r\n#")] = 0;
+
+    char cx[5], cy[5];
     strncpy(cx, buffer+1, 4); cx[4] = '\0'; 
     strncpy(cy, buffer+7, 4); cy[4] = '\0'; 
-    x[i] = atoi(cx);
-    y[i] = atoi(cy);
+    tiles[_X_][i] = atoi(cx);
+    tiles[_Y_][i] = atoi(cy);
 
   }
 
   fclose(fp);
   
   #ifdef FORCE_DEBUG
-  printf("positive tile list contains %d tiles\n", *k);
+  printf("Allowed tile list contains %d tiles\n", n);
   #endif
 
-  *X = x;
-  *Y = y;
+  *number = n;
+  *allowed_tiles = tiles;
   return SUCCESS;
 }
 
@@ -94,26 +114,25 @@ char cx[5], cy[5];
 /** Test if tile is allow-listed
 +++ This function tests whether a given tile is allow-listed or not.
 +++ If no allow-list is given, all tiles are considered allow-listed.
---- allow_x: allow-listed X tile coordinate IDs
---- allow_y: allow-listed Y tile coordinate IDs
---- allow_k: number of allow-listed tiles
+--- allowed_tiles: allow-listed tiles: [_X_][_Y_] x n 
+--- allowed_number: number of allow-listed tiles
 --- x:       x tile coordinate ID
 --- y:       y tile coordinate ID
-+++ Return:  SUCCESS/FAILURE
++++ Return:  true/false
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int tile_allowlisted(int *allow_x, int *allow_y, int allow_k, int x, int y){
-int k;
-bool allow = false;
+bool tile_allowlisted(int **allowed_tiles, int allowed_number, int x, int y){
 
-  if (allow_k > 0){
-    for (k=0; k<allow_k; k++){
-      if (x == allow_x[k] && y == allow_y[k]) allow = true;
+  bool allow = false;
+
+  if (allowed_number > 0 && allowed_tiles != NULL){
+    for (int i=0; i<allowed_number; i++){
+      if (x == allowed_tiles[_X_][i] && y == allowed_tiles[_Y_][i]) allow = true;
     }
   } else {
     allow = true;
   }
   
-  if (allow) return SUCCESS; else return FAILURE;
+  return allow;
 }
 
 
@@ -127,12 +146,17 @@ bool allow = false;
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int tile_active(char *f_tile, cube_t *cube){
-int tx, ty;
-int *allow_x = NULL, *allow_y = NULL, allow_k;
 
+
+  if (f_tile == NULL || cube == NULL){
+    printf("Invalid input.\n"); 
+    return FAILURE;
+  }
 
   // read tile allow-list
-  if (tile_readlist(f_tile, &allow_x, &allow_y, &allow_k) != SUCCESS){
+  int **allowed_tiles = NULL;
+  int allowed_number = 0;
+  if (tile_readlist(f_tile, &allowed_tiles, &allowed_number) != SUCCESS){
     printf("Reading tile file failed! "); return FAILURE;}
 
   // allocate active tile list
@@ -140,11 +164,11 @@ int *allow_x = NULL, *allow_y = NULL, allow_k;
   cube->n_allowed_tiles = 0;
 
   // how many tiles really to do?
-  for (ty=cube->tile_extent[_Y_][_MIN_]; ty<=cube->tile_extent[_Y_][_MAX_]; ty++){
-  for (tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
+  for (int ty=cube->tile_extent[_Y_][_MIN_]; ty<=cube->tile_extent[_Y_][_MAX_]; ty++){
+  for (int tx=cube->tile_extent[_X_][_MIN_]; tx<=cube->tile_extent[_X_][_MAX_]; tx++){
 
     // if tile is not allowlisted (if specified), skip
-    if (tile_allowlisted(allow_x, allow_y, allow_k, tx, ty) == FAILURE) continue;
+    if (!tile_allowlisted(allowed_tiles, allowed_number, tx, ty)) continue;
 
     cube->allowed_tiles[_X_][cube->n_allowed_tiles] = tx;
     cube->allowed_tiles[_Y_][cube->n_allowed_tiles] = ty;
@@ -153,8 +177,7 @@ int *allow_x = NULL, *allow_y = NULL, allow_k;
   }
   }
 
-  free((void*)allow_x);
-  free((void*)allow_y);
+  if (allowed_tiles != NULL) free_2D((void**)allowed_tiles, 2);
 
   // is there any tile to do?
   if (cube->n_allowed_tiles == 0){
