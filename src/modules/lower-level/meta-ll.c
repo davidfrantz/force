@@ -56,6 +56,7 @@ void free_metadata(meta_t *meta){
   meta->wavelength = NULL;
 
   free_string_vector(&meta->image_path);
+  free_string_vector(&meta->geolocation_path);
 
   if (meta->view_grid.zen != NULL) free((void*)meta->view_grid.zen);
   if (meta->view_grid.azi != NULL) free((void*)meta->view_grid.azi);
@@ -79,8 +80,8 @@ int init_metadata(meta_t *meta){
   meta->saturation = INT_MIN;
   meta->nodata = INT_MIN;
 
-  meta->ulx = DBL_MIN;
-  meta->uly = DBL_MIN;
+  meta->ul.x = DBL_MIN;
+  meta->ul.y = DBL_MIN;
 
   meta->col_offset = INT_MIN;
   meta->row_offset = INT_MIN;
@@ -100,17 +101,17 @@ int test_metadata(meta_t *meta){
   if (meta->saturation == INT_MIN) RETURN_ERROR("Saturation is not set.");
   if (meta->nodata == INT_MIN) RETURN_ERROR("Nodata is not set.");
   if (meta->res <= 0.0) RETURN_ERROR("Resolution is not set.");
-  if (dequal(meta->ulx, DBL_MIN) || dequal(meta->uly, DBL_MIN)) RETURN_ERROR("Upper-left coordinates are not set.");
-  if (meta->nrow < 1 || meta->ncol < 1 || meta->ncell < 1) RETURN_ERROR("Image dimensions are not set.");
+  if (dequal(meta->ul.x, DBL_MIN) || dequal(meta->ul.y, DBL_MIN)) RETURN_ERROR("Upper-left coordinates are not set.");
+  if (meta->dim.rows < 1 || meta->dim.cols < 1 || meta->dim.cells < 1) RETURN_ERROR("Image dimensions are not set.");
   if (meta->col_offset == INT_MIN || meta->row_offset == INT_MIN) RETURN_ERROR("Image offsets are not set.");
   if (meta->date.year < 1900 || meta->date.year > 2100) RETURN_ERROR("Acquisition date is not set.");
   if (meta->epsg == 0) RETURN_ERROR("EPSG code is not set.");
   if (meta->cal == NULL) RETURN_ERROR("Calibration is NULL.");
   if (meta->wavelength == NULL) RETURN_ERROR("Wavelength is NULL.");
   if (meta->refsys_type[0] == '\0' || meta->refsys_id[0] == '\0') RETURN_ERROR("Reference system is not set.");
-  if (meta->mission == SENTINEL2){
+  if (meta->mission == SENTINEL2 && meta->processing_level == _LEVEL_1C_){
     if (meta->view_grid.zen == NULL || meta->view_grid.azi == NULL) RETURN_ERROR("View grid is not set.");
-    if (meta->view_grid.nrow < 1 || meta->view_grid.ncol < 1 || meta->view_grid.ncell < 1) RETURN_ERROR("View grid dimensions are not set.");
+    if (meta->view_grid.dim.rows < 1 || meta->view_grid.dim.cols < 1 || meta->view_grid.dim.cells < 1) RETURN_ERROR("View grid dimensions are not set.");
     if (meta->view_grid.res < 1) RETURN_ERROR("View grid resolution is not set.");
   }
 
@@ -135,8 +136,8 @@ void print_metadata(meta_t *meta){
   printf("  Saturation: %d\n", meta->saturation);
   printf("  Nodata: %d\n", meta->nodata);
   printf("  Resolution: %f\n", meta->res);
-  printf("  Upper-left coordinates: (%f, %f)\n", meta->ulx, meta->uly);
-  printf("  Image dimensions: (%d, %d, %d)\n", meta->ncol, meta->nrow, meta->ncell);
+  printf("  Upper-left coordinates: (%f, %f)\n", meta->ul.x, meta->ul.y);
+  printf("  Image dimensions: (%d, %d, %d)\n", meta->dim.cols, meta->dim.rows, meta->dim.cells);
   printf("  Image offsets: (%d, %d)\n", meta->col_offset, meta->row_offset);
   printf("  Acquisition date:\n");
   print_date(&meta->date);
@@ -146,35 +147,34 @@ void print_metadata(meta_t *meta){
   printf("  Calibration:\n");
   for (int b=0; b<meta->band_number; b++){
     printf("    Band %d:\n", b+1);
-    printf("      Type: %d\n", meta->cal[b].type);
-    printf("      Reflectance scale: %f\n", meta->cal[b].reflectance.scale);
-    printf("      Reflectance offset: %f\n", meta->cal[b].reflectance.offset);
-    printf("      Radiance min: %f\n", meta->cal[b].radiance.lmin);
-    printf("      Radiance max: %f\n", meta->cal[b].radiance.lmax);
-    printf("      Radiance quantize min: %f\n", meta->cal[b].radiance.qmin);
-    printf("      Radiance quantize max: %f\n", meta->cal[b].radiance.qmax);
-    printf("      Temperature K1: %f\n", meta->cal[b].temperature.k1);
-    printf("      Temperature K2: %f\n", meta->cal[b].temperature.k2);
+    printf("      Reflectance scale: %f\n", meta->cal[b].scale);
+    printf("      Reflectance offset: %f\n", meta->cal[b].offset);
+    printf("      Radiance min: %f\n", meta->cal[b].lmin);
+    printf("      Radiance max: %f\n", meta->cal[b].lmax);
+    printf("      Radiance quantize min: %f\n", meta->cal[b].qmin);
+    printf("      Radiance quantize max: %f\n", meta->cal[b].qmax);
+    printf("      Temperature K1: %f\n", meta->cal[b].k1);
+    printf("      Temperature K2: %f\n", meta->cal[b].k2);
   }
   for (int b=0; b<meta->band_number; b++){
     printf("  Band %d wavelength: %f\n", b+1, meta->wavelength[b]);
   }
   if (meta->mission == SENTINEL2){
     printf("  View grid:\n");
-    printf("    Dimensions: (%d, %d, %d)\n", meta->view_grid.nrow, meta->view_grid.ncol, meta->view_grid.ncell);
+    printf("    Dimensions: (%d, %d, %d)\n", meta->view_grid.dim.rows, meta->view_grid.dim.cols, meta->view_grid.dim.cells);
     printf("    Resolution: %f\n", meta->view_grid.res);
     printf("    Zenith angles:\n");
-    for (int i=0, p=0; i<meta->view_grid.nrow; i++){
+    for (int i=0, p=0; i<meta->view_grid.dim.rows; i++){
       printf("    ");
-    for (int j=0; j<meta->view_grid.ncol; j++, p++){
+    for (int j=0; j<meta->view_grid.dim.cols; j++, p++){
       printf(" %5.2f", meta->view_grid.zen[p]);
     }
     printf("\n");
     }
     printf("    Azimuth angles:\n");
-    for (int i=0, p=0; i<meta->view_grid.nrow; i++){
+    for (int i=0, p=0; i<meta->view_grid.dim.rows; i++){
       printf("    ");
-    for (int j=0; j<meta->view_grid.ncol; j++, p++){
+    for (int j=0; j<meta->view_grid.dim.cols; j++, p++){
       printf(" %5.2f", meta->view_grid.azi[p]);
     }
     printf("\n");
@@ -243,6 +243,10 @@ int parse_metadata_landsat(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
     fill_string_vector(&meta->image_path, b, full_path);
   }
 
+  // L1TP, L1GT, or L1GS are all considered L1C for FORCE purposes
+  // if not any of those, then parse_metadata_landsat_mtl would have failed
+  meta->processing_level = _LEVEL_1C_;
+
   int nchar = 0;
   nchar = snprintf(meta->refsys_type, NPOW_10, "WRS-%d", lnd_mtd.wrs_type);
   if (nchar < 0 || nchar >= NPOW_10) RETURN_ERROR("Failed to format reference system type.");
@@ -254,33 +258,26 @@ int parse_metadata_landsat(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
   meta->tier = lnd_mtd.tier;
 
   meta->res = lnd_mtd.res;
-  meta->ulx = lnd_mtd.ulx;
-  meta->uly = lnd_mtd.uly;
-  meta->ncol = lnd_mtd.ncol;
-  meta->nrow = lnd_mtd.nrow;
-  meta->ncell = lnd_mtd.ncell;
+  meta->ul = lnd_mtd.ul;
+  meta->dim = lnd_mtd.dim;
   meta->col_offset = 0.0;
   meta->row_offset = 0.0;
   meta->epsg = lnd_mtd.epsg;
+  epsg_to_wkt(meta->epsg, meta->projection);
 
   copy_date(&lnd_mtd.date, &meta->date);
 
   alloc((void**)&meta->cal, lnd_mtd.nband, sizeof(cal_t));
 
   for (int b=0; b<lnd_mtd.nband; b++){
-    if (!strings_equal(rtd->band_mapping.domains[b], "TEMP")){
-      meta->cal[b].type = _CAL_REF_;
-    } else {
-      meta->cal[b].type = _CAL_BT_;
-    }
-    meta->cal[b].reflectance.scale = lnd_mtd.reflectance_scale[b];
-    meta->cal[b].reflectance.offset = lnd_mtd.reflectance_offset[b];
-    meta->cal[b].radiance.lmin = lnd_mtd.radiance_min[b];
-    meta->cal[b].radiance.lmax = lnd_mtd.radiance_max[b];
-    meta->cal[b].radiance.qmin = lnd_mtd.quantize_min[b];
-    meta->cal[b].radiance.qmax = lnd_mtd.quantize_max[b];
-    meta->cal[b].temperature.k1 = lnd_mtd.k1[b];
-    meta->cal[b].temperature.k2 = lnd_mtd.k2[b];
+    meta->cal[b].scale = lnd_mtd.reflectance_scale[b];
+    meta->cal[b].offset = lnd_mtd.reflectance_offset[b];
+    meta->cal[b].lmin = lnd_mtd.radiance_min[b];
+    meta->cal[b].lmax = lnd_mtd.radiance_max[b];
+    meta->cal[b].qmin = lnd_mtd.quantize_min[b];
+    meta->cal[b].qmax = lnd_mtd.quantize_max[b];
+    meta->cal[b].k1 = lnd_mtd.k1[b];
+    meta->cal[b].k2 = lnd_mtd.k2[b];
   }
 
   alloc((void**)&meta->wavelength, lnd_mtd.nband, sizeof(float));
@@ -330,31 +327,62 @@ int parse_metadata_sentinel2(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
     return FAILURE;
   }
 
+  // derive product level (L1B or L1C)
+  if (parse_metadata_sentinel2_product_level(pl2->d_level1, &s2_mtd) != SUCCESS){
+    fprintf(stderr, "Error: Failed to parse Sentinel-2 product level.\n");
+    return FAILURE;
+  }
+
   // parse top-level (.SAFE) xml
-  if (parse_metadata_sentinel2_safe(pl2->d_level1, rtd, &s2_mtd) != SUCCESS){
+  if (parse_metadata_sentinel2_safe(pl2, rtd, &s2_mtd) != SUCCESS){
     fprintf(stderr, "Error: Failed to parse Sentinel-2 top-level metadata.\n");
     return FAILURE;
   }
 
-  // parse granule xml
-  if (parse_metadata_sentinel2_granule(s2_mtd.granule_path, nd, rtd, &s2_mtd) != SUCCESS){
-    fprintf(stderr, "Error: Failed to parse Sentinel-2 granule metadata.\n");
+  if (strings_equal(s2_mtd.processing_level, "L1C")){
+
+    // parse granule xml
+    if (parse_metadata_sentinel2_l1c_granule(s2_mtd.granule_path, nd, rtd, &s2_mtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to parse Sentinel-2 granule metadata.\n");
+      return FAILURE;
+    }
+
+    // parse MGRS tile ID
+    if (parse_mgrs_tile(pl2->b_level1, &s2_mtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to parse Sentinel-2 MGRS tile ID.\n");
+      return FAILURE;
+    }
+
+    // construct view grid and identify required image subset
+    if (construct_sentinel2_view_grid(pl2, &s2_mtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to construct Sentinel-2 view grid.\n");
+      return FAILURE;
+    }
+
+  } else if (strings_equal(s2_mtd.processing_level, "L1B")){
+
+    // parse granule xml
+    if (parse_metadata_sentinel2_l1b_granule(s2_mtd.granule_path, nd, rtd, &s2_mtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to parse Sentinel-2 L1B granule metadata.\n");
+      return FAILURE;
+    }
+
+    // load runtime data for view angles
+    if (load_runtime_data_view_angles(s2_mtd.spacecraft_name, s2_mtd.detector, rtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to load view angles for %s.\n", s2_mtd.spacecraft_name);
+      return FAILURE;
+    }
+
+    // load runtime data for satellite altitude
+    if (load_runtime_data_satellite_altitude(s2_mtd.spacecraft_name, rtd) != SUCCESS){
+      fprintf(stderr, "Error: Failed to load satellite altitude for %s.\n", s2_mtd.spacecraft_name);
+      return FAILURE;
+    }
+
+  } else {
+    RETURN_ERROR("Unknown Sentinel-2 processing level: %s.\n", s2_mtd.processing_level);
     return FAILURE;
   }
-
-  // parse MGRS tile ID
-  char mgrs_tile[NPOW_10];
-  if (parse_mgrs_tile(pl2->b_level1, mgrs_tile, NPOW_10) != SUCCESS){
-    fprintf(stderr, "Error: Failed to parse Sentinel-2 MGRS tile ID.\n");
-    return FAILURE;
-  }
-
-  // construct view grid and identify required image subset
-  if (construct_sentinel2_view_grid(pl2, &s2_mtd) != SUCCESS){
-    fprintf(stderr, "Error: Failed to construct Sentinel-2 view grid.\n");
-    return FAILURE;
-  }
-
 
 
 
@@ -367,8 +395,23 @@ int parse_metadata_sentinel2(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
     fill_string_vector(&meta->image_path, b, s2_mtd.image_files[b]);
   }
 
+  alloc_string_vector(&meta->geolocation_path, s2_mtd.nband,
+    strlen(s2_mtd.geolocation_files[0]) + 1);
+  for (int b=0; b<s2_mtd.nband; b++){
+    fill_string_vector(&meta->geolocation_path, b, s2_mtd.geolocation_files[b]);
+  }
+
+if (strings_equal(s2_mtd.processing_level, "L1C")){
+    meta->processing_level = _LEVEL_1C_;
+  } else if (strings_equal(s2_mtd.processing_level, "L1B")){
+    meta->processing_level = _LEVEL_1B_;
+  } else {
+    RETURN_ERROR("Unknown Sentinel-2 processing level: %s.\n", s2_mtd.processing_level);
+    return FAILURE;
+  }
+
   copy_string(meta->refsys_type, NPOW_10, "MGRS");
-  copy_string(meta->refsys_id, NPOW_10, mgrs_tile);
+  copy_string(meta->refsys_id, NPOW_10, s2_mtd.mgrs);
   
   meta->saturation = s2_mtd.saturation;
   meta->nodata = s2_mtd.nodata;
@@ -377,24 +420,34 @@ int parse_metadata_sentinel2(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
   meta->tier = 1;
 
   meta->res = s2_mtd.res;
-  meta->ulx = s2_mtd.ulx;
-  meta->uly = s2_mtd.uly;
-  meta->ncol = s2_mtd.ncol;
-  meta->nrow = s2_mtd.nrow;
-  meta->ncell = s2_mtd.ncell;
+  meta->lowest_res = s2_mtd.lowest_res;
+  meta->ul = s2_mtd.ul;
+  meta->dim = s2_mtd.dim;
   meta->col_offset = s2_mtd.col_offset;
   meta->row_offset = s2_mtd.row_offset;
   meta->epsg = s2_mtd.epsg;
+  epsg_to_wkt(meta->epsg, meta->projection);
 
   copy_date(&s2_mtd.date, &meta->date);
 
   alloc((void**)&meta->cal, s2_mtd.nband, sizeof(cal_t));
-  for (int b=0; b<s2_mtd.nband; b++){
-    meta->cal[b].type = _CAL_REF_;
-    meta->cal[b].reflectance.scale = s2_mtd.scale;
-    meta->cal[b].reflectance.offset = s2_mtd.offset[b];
+
+  if (strings_equal(s2_mtd.processing_level, "L1C")){
+    for (int b=0; b<s2_mtd.nband; b++){
+      meta->cal[b].scale = s2_mtd.scale;
+      meta->cal[b].offset = s2_mtd.offset[b];
+    }
+  } else if (strings_equal(s2_mtd.processing_level, "L1B")){
+    for (int b=0; b<s2_mtd.nband; b++){
+      meta->cal[b].gain = s2_mtd.gain[b];
+      meta->cal[b].offset = s2_mtd.offset[b];
+    }
+  } else {
+    RETURN_ERROR("Unknown Sentinel-2 processing level: %s.\n", s2_mtd.processing_level);
+    return FAILURE;
   }
-  
+
+
   // transfer ownership of viewing angles from s2_mtd to meta
   meta->view_grid = s2_mtd.subset_view_grid;
   s2_mtd.subset_view_grid.zen = NULL;
@@ -427,10 +480,10 @@ int parse_metadata_sentinel2(par_ll_t *pl2, rtd_t *rtd, meta_t *meta){
 int parse_metadata_mission(par_ll_t *pl2, meta_t *meta){
 char metaname[NPOW_10];
 
-  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", metaname, NPOW_10) == SUCCESS){
+  if (findfile_pattern(pl2->d_level1, "MTL", ".txt", 0, metaname, NPOW_10) == SUCCESS){
     pl2->res = pl2->res_landsat;
     meta->mission = LANDSAT;
-  } else if (findfile_pattern(pl2->d_level1, "MTD", ".xml", metaname, NPOW_10) == SUCCESS){
+  } else if (findfile_pattern(pl2->d_level1, "MTD", ".xml", 0, metaname, NPOW_10) == SUCCESS){
     pl2->res = pl2->res_sentinel2;
     meta->mission = SENTINEL2;
   } else {

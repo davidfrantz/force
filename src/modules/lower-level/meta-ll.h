@@ -36,6 +36,7 @@ Level 1 metadata header
 #include "../cross-level/brick_base-cl.h"
 #include "../cross-level/runtime_data-cl.h"
 #include "../cross-level/utils-cl.h"
+#include "../cross-level/crs-cl.h"
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta_lnd-ll.h"
 #include "../lower-level/meta_s2-ll.h"
@@ -48,36 +49,28 @@ extern "C" {
 
 typedef struct {
   float lmax, lmin;     // radiance min/max
-  float qmax, qmin;     // quantized DN min/msx
-} radiance_cal_t;
-
-typedef struct {
-  float scale, offset;     // reflectance scaling factor
-} reflectance_cal_t;
-
-typedef struct {
+  float qmax, qmin;     // quantized DN min/max
+  float scale, offset;  // multiplicative and additive scaling factors
+  float gain;           // physical gain factor for converting DN to radiance
   float k1, k2;         // conversion factors brightness temperature
-} temperature_cal_t;
-
-typedef struct {
-  radiance_cal_t    radiance;     // radiance calibration
-  reflectance_cal_t reflectance;  // reflectance calibration
-  temperature_cal_t temperature;  // brightness temperature calibration
-  int type;        // _CAL_RAD_, _CAL_BT_, _CAL_REF_
 } cal_t;
 
 typedef struct {
   int mission; // mission name
+  int processing_level; // processing level (L1B, L1C, etc.)
   int band_number;     // number of bands
   string_vector_t image_path; // path to image files
+  string_vector_t geolocation_path; // path to geolocation files
   int saturation;      // saturation value
   int nodata;          // nodata value
   double res;          // spatial resolution
-  double ulx, uly;     // upper left corner coordinates
-  int nrow, ncol, ncell;      // number of rows and columns
+  double lowest_res;   // lowest spatial resolution
+  coord_t ul;     // upper left corner coordinates
+  dim_t dim;      // number of rows and columns
   int col_offset, row_offset; // offset of subset in original image
   date_t date;        // acquisition date
-  int epsg;
+  int epsg;           // EPSG code of projection
+  char projection[NPOW_10]; // projection in WKT format
   int tier;            // processing tier
   cal_t *cal;          // calibration DN->TOA reflectance / BT
   float *wavelength;   // band center wavelength
