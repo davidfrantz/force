@@ -39,17 +39,18 @@ bool fileexist(char *fname){
 
 
 /** This function searches the given directory for a file, which contains
-+++ the given pattern. The first match will be returned. NULL will be re-
++++ the given pattern. The nth match will be returned. NULL will be re-
 +++ turned if no file was found.
 --- dir_path: directory
 --- pattern:  pattern
 --- filter:   an additional filter, e.g. for file extensions, 
               NULL to disable filtering
+--- nth:      nth match to return (0-based indexing)
 --- fname:    buffer that will hold the filename
 --- size:     length of the buffer
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int findfile_pattern(const char *dir_path, const char *pattern, const char *filter, char fname[], int size){
+int findfile_pattern(const char *dir_path, const char *pattern, const char *filter, int nth, char fname[], int size){
 DIR *dp;
 int nchar;
 struct dirent *ep;
@@ -72,12 +73,17 @@ struct dirent *ep;
           return FAILURE;
         } else {
 
-          nchar = snprintf(fname, size, "%s/%s", dir_path, ep->d_name);
-          if (nchar < 0 || nchar >= size){ 
-            printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
-            
-          (void) closedir(dp);
-          return SUCCESS;
+          if (count == nth){
+            nchar = snprintf(fname, size, "%s/%s", dir_path, ep->d_name);
+            if (nchar < 0 || nchar >= size){ 
+              printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
+              
+            (void) closedir(dp);
+            return SUCCESS;
+          } else {
+            count++;
+          }
+
         }
 
       }
@@ -95,17 +101,18 @@ struct dirent *ep;
 
 
 /** This function searches the given directory for a file, which starts
-+++ with the given pattern. The first match will be returned. NULL will be re-
++++ with the given pattern. The nth match will be returned. NULL will be re-
 +++ turned if no file was found.
 --- dir_path: directory
 --- pattern:  pattern (must be at the start of the filename)
 --- filter:   an additional filter, e.g. for file extensions, 
               NULL to disable filtering
+--- nth:      nth match to return (0-based indexing)
 --- fname:    buffer that will hold the filename
 --- size:     length of the buffer
 +++ Return:   SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int findfile_starts(const char *dir_path, const char *pattern, const char *filter, char fname[], int size){
+int findfile_starts(const char *dir_path, const char *pattern, const char *filter, int nth, char fname[], int size){
 DIR *dp;
 int nchar;
 struct dirent *ep;
@@ -127,11 +134,15 @@ struct dirent *ep;
             return FAILURE;
         } else {
 
+          if (count == nth){
             nchar = snprintf(fname, size, "%s/%s", dir_path, ep->d_name);
             if (nchar < 0 || nchar >= size){ 
                 printf("Buffer Overflow in assembling filename\n"); return FAILURE;}
             (void) closedir(dp);
             return SUCCESS;
+          } else {
+            count++;
+          }
         }
       }
     }
