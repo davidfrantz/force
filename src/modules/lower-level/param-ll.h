@@ -111,6 +111,8 @@ typedef struct {
   int dem_resample;  // resampling option for DEM
   int use_dem_database; // flag: use DEM database
   int coreg_nodata;  // Master nodata
+
+  float illumination_cutoff; // illumination cutoff for topographic correction
   
   float maxcc, maxtc;     // max. allowable cloud cover per scene/tile
   float wvp;              // water vapor dummy value
