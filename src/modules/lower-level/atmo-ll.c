@@ -46,14 +46,14 @@ short *background_reflectance(atc_t *atc, int b, short *toa_, short *Tg_, small 
 int atmo_angledep(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, atc_t *atc, top_t *TOP, brick_t *QAI);
 int atmo_elevdep(par_ll_t *pl2, atc_t *atc, brick_t *QAI, top_t *TOP);
 int apply_aoi(brick_t *QAI, brick_t *AOI);
-brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
-brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
+brick_t *compile_l2_qai(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t *QAI);
+brick_t *compile_l2_boa(par_ll_t *pl2, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP);
 brick_t *compile_l2_dst(par_ll_t *pl2, cube_t *cube, brick_t *QAI);
 brick_t *compile_l2_ovv(par_ll_t *pl2, brick_t *BOA, brick_t *QAI);
-brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI);
-brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI);
-brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP);
-brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP);
+brick_t *compile_l2_vzn(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI);
+brick_t *compile_l2_hot(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t *TOA, brick_t *QAI);
+brick_t *compile_l2_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP);
+brick_t *compile_l2_wvp(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP);
 brick_t **compile_level2(par_ll_t *pl2, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP, int *nproduct);
 
 
@@ -336,7 +336,7 @@ float **xyz_tsd_sw2 = NULL;
           tmp = (toa-rho_p)/tg;
           ref = A * brdf * tmp / (T + s*tmp);
 
-          //printf("toa: %.2f, rho_p: %.4f, tg: %.4f, A: %.2f, brdf: %.2f, T: %.4f, s: %.4f\n", toa, rho_p, tg, A, brdf, T, s);
+          //printf("toa: %.4f, boa: %.4f, rho_p: %.4f, tg: %.4f, A: %.4f, brdf: %.4f, T: %.4f, s: %.4f\n", toa, ref, rho_p, tg, A, brdf, T, s);
 
         }
 
@@ -975,7 +975,7 @@ small *aoi_ = NULL;
 
 /** This function compiles the BOA product ready to be output
 --- pl2:    L2 parameters
---- mission: mission ID
+--- meta:   metadata
 --- atc:    atmospheric correction factors
 --- wvlut:  Water vapor lookup table
 --- cube:   data cube parameters
@@ -985,7 +985,7 @@ small *aoi_ = NULL;
 --- TOP:    Topographic Derivatives
 +++ Return: BOA brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_boa(par_ll_t *pl2, int mission, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP){
+brick_t *compile_l2_boa(par_ll_t *pl2, meta_t *meta, atc_t *atc, wvp_lut_t *wvlut, cube_t *cube, brick_t *TOA, brick_t *QAI, brick_t *WVP, top_t *TOP){
 int p, nc;
 int b, b_red, b_nir, b_sw1;
 #ifndef ACIX
@@ -1056,7 +1056,7 @@ brick_t *BOA = TOA;
     if ((toa_ = get_band_short(BOA, b))  == NULL) return NULL;
     if ((boa_ = get_band_short(BOA, b_)) == NULL) return NULL;
 
-    if (pl2->doatmo && mission == SENTINEL2){
+    if (pl2->doatmo && meta->mission == SENTINEL2){
       if ((Tg_ = gas_transmittance(atc, wvlut, b, WVP, QAI)) == NULL){
       printf("error in gas transmittance.\n"); return NULL;}
     } else Tg_ = NULL;
@@ -1101,7 +1101,7 @@ brick_t *BOA = TOA;
 
 
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, BOA, cube) == FAILURE){
       printf("warping BOA failed.\n"); return NULL;}
   }
@@ -1147,11 +1147,12 @@ brick_t *BOA = TOA;
 
 /** This function compiles the QAI product ready to be output
 --- pl2:    L2 parameters
+--- meta:   metadata
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 +++ Return: QAI brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_qai(par_ll_t *pl2, cube_t *cube, brick_t *QAI){
+brick_t *compile_l2_qai(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t *QAI){
 char fname[NPOW_10];
 char product[NPOW_10];
 char sensor[NPOW_10];
@@ -1168,7 +1169,7 @@ short *qa_ = NULL;
   
   
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, 0, pl2->nthread, QA, cube) == FAILURE){
       printf("warping QAI failed.\n"); return NULL;}
   }
@@ -1451,12 +1452,13 @@ enum { R, G, B };
 
 /** This function compiles the VZN product ready to be output
 --- pl2:    L2 parameters
+--- meta:   metadata
 --- atc:    atmospheric correction factors
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 +++ Return: VZN brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_vzn(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI){
+brick_t *compile_l2_vzn(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI){
 int e, f, g, i, j, p, ne, nf, ng, nx, ny, k = 0;
 char fname[NPOW_10];
 char product[NPOW_10];
@@ -1503,7 +1505,7 @@ GDALDataType eOutputType = GDT_Float64;
   cube->resolution = get_brick_res(COARSE);
 
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, COARSE, cube) == FAILURE){
       printf("warping VZN failed.\n"); return NULL;}
   }
@@ -1625,12 +1627,13 @@ GDALDataType eOutputType = GDT_Float64;
 
 /** This function compiles the HOT product ready to be output
 --- pl2:    L2 parameters
+--- meta:   metadata
 --- cube:   data cube parameters
 --- TOA:    TOA reflectance
 --- QAI:    Quality Assurance Information
 +++ Return: HOT brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_hot(par_ll_t *pl2, cube_t *cube, brick_t *TOA, brick_t *QAI){
+brick_t *compile_l2_hot(par_ll_t *pl2, meta_t *meta, cube_t *cube, brick_t *TOA, brick_t *QAI){
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_10];
@@ -1673,7 +1676,7 @@ short *hot_ = NULL;
 
 
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, HOT, cube) == FAILURE){
       printf("warping HOT failed.\n"); return NULL;}
   }
@@ -1716,13 +1719,14 @@ short *hot_ = NULL;
 
 /** This function compiles the AOD product ready to be output
 --- pl2:    L2 parameters
+--- meta:   metadata
 --- atc:    atmospheric correction factors
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 --- TOP:    Topographic Derivatives
 +++ Return: AOD brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_aod(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP){
+brick_t *compile_l2_aod(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI, top_t *TOP){
 int i, j, p, nx, ny, ne, nf, z;
 int b_green;
 double fres, gres;
@@ -1787,7 +1791,7 @@ float **xy_aod_ = NULL;
 
 
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, AOD, cube) == FAILURE){
       printf("warping AOD failed.\n"); return NULL;}
   }
@@ -1830,13 +1834,14 @@ float **xy_aod_ = NULL;
 
 /** This function compiles the WVP product ready to be output
 --- pl2:    L2 parameters
+--- meta:   metadata
 --- atc:    atmospheric correction factors
 --- cube:   data cube parameters
 --- QAI:    Quality Assurance Information
 --- WVP:    Water vapor
 +++ Return: WVP brick
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-brick_t *compile_l2_wvp(par_ll_t *pl2, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP){
+brick_t *compile_l2_wvp(par_ll_t *pl2, meta_t *meta, atc_t *atc, cube_t *cube, brick_t *QAI, brick_t *WVP){
 int p, nc;
 char fname[NPOW_10];
 char product[NPOW_10];
@@ -1877,7 +1882,7 @@ short *wvp_ = NULL;
   }
 
   // reproj the data
-  if (pl2->doreproj){
+  if (pl2->doreproj && meta->processing_level == _LEVEL_1C_){
     if (warp_from_brick_to_unknown_brick(pl2->dotile, pl2->resample, pl2->nthread, WV, cube) == FAILURE){
       printf("warping WVP failed.\n"); return NULL;}
   }
@@ -1963,24 +1968,24 @@ brick_t **LEVEL2 = NULL;
 
 
   if (p_hot >= 0){
-    if ((LEVEL2[p_hot] = compile_l2_hot(pl2, cube, TOA, QAI)) == NULL){
+    if ((LEVEL2[p_hot] = compile_l2_hot(pl2, meta, cube, TOA, QAI)) == NULL){
       printf("error in compiling L2 HOT. "); return NULL;}}
       
   if (p_aod >= 0){
-    if ((LEVEL2[p_aod] = compile_l2_aod(pl2, atc, cube, QAI, TOP)) == NULL){
+    if ((LEVEL2[p_aod] = compile_l2_aod(pl2, meta, atc, cube, QAI, TOP)) == NULL){
       printf("error in compiling L2 AOD. "); return NULL;}}
 
   // do BOA near the end (TOA is altered within)
-  if ((LEVEL2[p_boa] = compile_l2_boa(pl2, meta->mission, atc, wvlut, cube, TOA, QAI, WVP, TOP)) == NULL){
+  if ((LEVEL2[p_boa] = compile_l2_boa(pl2, meta, atc, wvlut, cube, TOA, QAI, WVP, TOP)) == NULL){
     printf("error in compiling L2 BOA. "); return NULL;}
 
   // do WVP after BOA (WVP is altered within)
   if (p_wvp >= 0){
-    if ((LEVEL2[p_wvp] = compile_l2_wvp(pl2, atc, cube, QAI, WVP)) == NULL){
+    if ((LEVEL2[p_wvp] = compile_l2_wvp(pl2, meta, atc, cube, QAI, WVP)) == NULL){
       printf("error in compiling L2 WVP. "); return NULL;}} else free_brick(WVP);
 
   // do QAI at the very end (QAI is altered within)
-  if ((LEVEL2[p_qai] = compile_l2_qai(pl2, cube, QAI)) == NULL){
+  if ((LEVEL2[p_qai] = compile_l2_qai(pl2, meta, cube, QAI)) == NULL){
     printf("error in compiling L2 QAI. "); return NULL;}
 
   if (p_dst >= 0){
@@ -1988,7 +1993,7 @@ brick_t **LEVEL2 = NULL;
       printf("error in compiling L2 DST. "); return NULL;}}
 
   if (p_vzn >= 0){
-    if ((LEVEL2[p_vzn] = compile_l2_vzn(pl2, atc, cube, LEVEL2[p_qai])) == NULL){
+    if ((LEVEL2[p_vzn] = compile_l2_vzn(pl2, meta, atc, cube, LEVEL2[p_qai])) == NULL){
     printf("error in compiling L2 VZN. "); return NULL;}}
 
   if (p_ovv >= 0){
