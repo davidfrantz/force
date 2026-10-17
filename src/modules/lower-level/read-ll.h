@@ -32,11 +32,15 @@ Read Level 1 header
 #include <stdlib.h>  // standard general utilities library
 
 #include "cpl_conv.h"       // various convenience functions for CPL
+#include "cpl_string.h"     // string list utilities
 #include "gdal.h"           // public (C callable) GDAL entry points
+#include "gdal_alg.h"       // transformation and warp extent functions
+#include "gdal_utils.h"     // GDAL warp application API
 
 #include "../cross-level/const-cl.h"
 #include "../cross-level/brick_base-cl.h"
 #include "../cross-level/brick_io-cl.h"
+#include "../cross-level/cube-cl.h"
 #include "../cross-level/crs-cl.h"
 #include "../cross-level/quality-cl.h"
 #include "../cross-level/sun-cl.h"
@@ -45,14 +49,24 @@ Read Level 1 header
 #include "../lower-level/param-ll.h"
 #include "../lower-level/meta-ll.h"
 #include "../lower-level/atc-ll.h"
+#include "../lower-level/sunview-ll.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn);
-int read_level1(meta_t *meta, brick_t *DN, par_ll_t *pl2);
+int init_level1_brick(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn);
+int read_level1(rtd_t *rtd, meta_t *meta, cube_t *cube, brick_t *DN, par_ll_t *pl2);
+int read_level1c(meta_t *meta, brick_t *DN, par_ll_t *pl2);
+int read_level1b(rtd_t *rtd, meta_t *meta, cube_t *cube, brick_t *DN, par_ll_t *pl2);
+int get_center_coordinates_l1b(meta_t *meta, coord_t *top, coord_t *bottom);
+int get_aligned_warped_extent(meta_t *meta, cube_t *cube, par_ll_t *pl2, GDALDatasetH orthoready_dataset, coord_t *ul, coord_t *lr);
+int compile_orthoready_datasets(meta_t *meta, GDALDatasetH **orthoready_datasets, dim_t *lowres_dim, int *lowres_band);
+int compile_orthoready_angle_datasets(GDALDatasetH orthoready_carrier, GDALDatasetH **orthoready_angle_datasets, float **view_angle_row, dim_t *dim);
+int warp_orthoready_dataset(meta_t *meta, par_ll_t *pl2, GDALDatasetH orthoready_dataset, 
+  double original_resolution, coord_t *ul, coord_t *lr, dim_t *expected_dim, double expected_resolution,
+  GDALDataType gdal_type, void *output_buffer);
 int bounds_level1(meta_t *meta, brick_t *DN, brick_t **QAI, par_ll_t *pl2);
 int impulse_noise_level1(meta_t *meta, brick_t *DN, brick_t *QAI, par_ll_t *pl2);
 int convert_level1(meta_t *meta, atc_t *atc, brick_t *DN, brick_t **toa, brick_t *QAI);

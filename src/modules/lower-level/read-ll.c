@@ -29,7 +29,7 @@ This file contains functions for reading Level 1 data
 
 
 
-int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn){
+int init_level1_brick(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn){
 
   if (pl2 == NULL || rtd == NULL || meta == NULL || dn == NULL || *dn != NULL){
     RETURN_ERROR("Invalid input.");
@@ -56,13 +56,24 @@ int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn){
   set_brick_provenance(DN, 0, pl2->d_level1);
 
   set_brick_res(DN, meta->res);
-  set_brick_nrows(DN, meta->nrow);
-  set_brick_ncols(DN, meta->ncol);
-  set_brick_ulx(DN, meta->ulx);
-  set_brick_uly(DN, meta->uly);
+  set_brick_nrows(DN, meta->dim.rows);
+  set_brick_ncols(DN, meta->dim.cols);
+  set_brick_ulx(DN, meta->ul.x);
+  set_brick_uly(DN, meta->ul.y);
 
   char wkt[NPOW_10];
-  epsg_to_wkt(meta->epsg, wkt);
+
+  if (meta->processing_level == _LEVEL_1C_){
+    copy_string(wkt, NPOW_10, meta->projection);
+  } else if (meta->processing_level == _LEVEL_1B_){
+    if (!pl2->doreproj || !pl2->dotile){
+      RETURN_ERROR("L1B cannot be used without reprojection and tiling.");
+    }
+    copy_string(wkt, NPOW_10, pl2->proj);
+  } else {
+    RETURN_ERROR("Invalid processing level.");
+  }
+
   set_brick_proj(DN, wkt);
 
   for (int b=0; b<meta->band_number; b++){
@@ -98,13 +109,40 @@ int init_level1(par_ll_t *pl2, rtd_t *rtd, meta_t *meta, brick_t **dn){
 }
 
 
-/** This function reads all necessary or available Level 1 data
+int read_level1(rtd_t *rtd, meta_t *meta, cube_t *cube, brick_t *DN, par_ll_t *pl2){
+
+  if (meta == NULL || cube == NULL || DN == NULL || pl2 == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  // orthorectified Level 1 data (L1C) - read directly into DN brick
+  if (meta->processing_level == _LEVEL_1C_){
+
+    if (read_level1c(meta, DN, pl2) != SUCCESS){
+      RETURN_ERROR("reading Level 1C data failed.");
+    }
+    
+  // non-orthorectified Level 1 data (L1B) - warp into DN brick
+  } else if (meta->processing_level == _LEVEL_1B_){
+    
+    if (read_level1b(rtd, meta, cube, DN, pl2) != SUCCESS){
+      RETURN_ERROR("reading Level 1B data failed.");
+    }
+
+  } else {
+    RETURN_ERROR("Invalid processing level.");
+  }
+
+  return SUCCESS;
+}
+
+/** This function reads all necessary or available Level 1C data
 --- meta:    metadata
 --- DN:      Digital Numbers
 --- pl2:     L2 parameters
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int read_level1(meta_t *meta, brick_t *DN, par_ll_t *pl2){
+int read_level1c(meta_t *meta, brick_t *DN, par_ll_t *pl2){
 
 
   #ifdef FORCE_CLOCK
@@ -205,6 +243,803 @@ int read_level1(meta_t *meta, brick_t *DN, par_ll_t *pl2){
   proctime_print("read Level 1", TIME);
   #endif
 
+  return SUCCESS;
+}
+
+
+/** This function reads all necessary or available Level 1B data
++++ This function projects the Level 1B data to the output grid and writes
++++ it to the Digital Number brick.
+--- rtd:     runtime data
+--- meta:    metadata
+--- cube:    datacube parameters
+--- DN:      Digital Numbers
+--- pl2:     L2 parameters
++++ Return:  SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int read_level1b(rtd_t *rtd, meta_t *meta, cube_t *cube, brick_t *DN, par_ll_t *pl2){
+
+  if (meta == NULL || cube == NULL || DN == NULL || pl2 == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  #ifdef FORCE_CLOCK
+  time_t TIME; time(&TIME);
+  #endif
+
+  if (!pl2->doreproj){
+    RETURN_ERROR("L1B cannot be used without reprojection.");
+  }
+
+  if (!pl2->dotile){
+    RETURN_ERROR("L1B cannot be used without tiling.");
+  }
+
+
+  // compute the view geometry, result is one row of view angles for each 
+  // pixel of the detector. Number of columns is the same as a matching 
+  // band of the input L1B data. The lowest resolution band is used to
+  // save memory and processing speed. 
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  coord_t top, bottom;
+
+  if (get_center_coordinates_l1b(meta, &top, &bottom) != SUCCESS){
+    RETURN_ERROR("Getting center coordinates for Level 1B data failed.");
+  }
+
+  float **view_angles = NULL;
+  dim_t view_angle_dim;
+  if (view_angles_sentinel2_l1b(rtd, &top, &bottom, &view_angles, &view_angle_dim) != SUCCESS){
+    free_2D((void**)view_angles, 2);
+    RETURN_ERROR("Calculating view angles for Level 1B data failed.");
+  }
+
+
+  // create "orthorectification-ready" datasets for each band 
+  // orthoready_datasets has meta->band_number elements
+  // lowres_dim is the dimension of the lowest resolution band,
+  // which we use as carrier for warping the view angles.
+  //  lowres_band is the index of that band.
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  GDALDatasetH *orthoready_datasets = NULL;
+  dim_t lowres_dim;
+  int lowres_band;
+
+  if (compile_orthoready_datasets(meta, &orthoready_datasets, &lowres_dim, &lowres_band) != SUCCESS){
+    RETURN_ERROR("Compiling orthoready datasets failed.");
+  }
+
+  if (lowres_dim.cols != view_angle_dim.cols){
+    for (int b=0; b<meta->band_number; b++){
+      if (orthoready_datasets[b] != NULL) GDALClose(orthoready_datasets[b]);
+    }
+    free((void*)orthoready_datasets);
+    free_2D((void**)view_angles, 2);
+    RETURN_ERROR("No band has the same number of columns as the view angle array");
+  }
+
+
+  // create "orthorectification-ready" datasets for the view angles
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  
+  GDALDatasetH *orthoready_angle_datasets = NULL;
+
+  if (compile_orthoready_angle_datasets(orthoready_datasets[lowres_band], &orthoready_angle_datasets, view_angles, &lowres_dim) != SUCCESS){
+    for (int b=0; b<meta->band_number; b++){
+      if (orthoready_datasets[b] != NULL) GDALClose(orthoready_datasets[b]);
+    }
+    free((void*)orthoready_datasets);
+    free_2D((void**)view_angles, 2);
+    RETURN_ERROR("Compiling orthoready datasets for view angles failed.");
+  }
+
+  free_2D((void**)view_angles, 2);
+
+
+  // estimate the warped extent and align it to output grid
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  coord_t ul, lr;
+
+  if (get_aligned_warped_extent(meta, cube, pl2, orthoready_datasets[0], &ul, &lr) != SUCCESS){
+    for (int b=0; b<meta->band_number; b++){
+      if (orthoready_datasets[b] != NULL) GDALClose(orthoready_datasets[b]);
+    }
+    free((void*)orthoready_datasets);
+    RETURN_ERROR("Estimating warped extent failed.");
+  }
+
+
+  // update our metadata and initialized DN brick
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  meta->ul = ul;
+  meta->dim.cols = (int)round((lr.x - ul.x) / meta->res);
+  meta->dim.rows = (int)round((ul.y - lr.y) / meta->res);
+  meta->dim.cells = meta->dim.cols * meta->dim.rows;
+
+  set_brick_nrows(DN, meta->dim.rows);
+  set_brick_ncols(DN, meta->dim.cols);
+  set_brick_ulx(DN, meta->ul.x);
+  set_brick_uly(DN, meta->ul.y);
+
+  printf("maximum integer: %d\n", INT_MAX);
+  printf("about to allocate DN brick with %d bands, %d rows, %d cols, %d cells\n", meta->band_number, meta->dim.rows, meta->dim.cols, meta->dim.cells);
+
+  allocate_brick_bands(DN, meta->band_number, meta->dim.cells, _DT_USHORT_);
+
+  printf("allocated DN brick with %d bands, %d rows, %d cols, %d cells\n", meta->band_number, meta->dim.rows, meta->dim.cols, meta->dim.cells);
+  // allocate view angle brick
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  brick_t *view_angle_brick = copy_brick(DN, 2, _DT_FLOAT_);
+  set_brick_domain(view_angle_brick, ZEN, "ZENITH");
+  set_brick_domain(view_angle_brick, AZI, "AZIMUTH");
+  set_brick_filename(view_angle_brick, "VIEW-ANGLES");
+  set_brick_name(view_angle_brick, "FORCE View Angle brick");
+
+  printf("allocated view angle brick with %d bands, %d rows, %d cols, %d cells\n", get_brick_nbands(view_angle_brick), get_brick_nrows(view_angle_brick), get_brick_ncols(view_angle_brick), get_brick_ncells(view_angle_brick));
+
+  // Warp the images to the output grid and read them into the DN brick
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  int error = 0;
+
+  #pragma omp parallel shared(meta, pl2, rtd, orthoready_datasets, ul, lr, DN, stderr) reduction(+:error) default(none) 
+  {
+
+    #pragma omp for schedule(static)
+
+    for (int b=0; b<meta->band_number; b++){
+
+      #ifdef FORCE_DEBUG
+      printf("Start to warp band %d to output grid.\n", b);
+      #endif
+
+      if (warp_orthoready_dataset(meta, pl2, orthoready_datasets[b], 
+        rtd->band_mapping.resolution[b], &ul, &lr, &meta->dim, meta->res, 
+        GDT_UInt16, get_band_ushort(DN, b)) != SUCCESS){
+        CONTINUE_ERROR("Warping orthoready dataset %d failed.", &error, b);
+      }
+
+      #ifdef FORCE_DEBUG
+      printf("Warped band %d to output grid.\n", b);
+      #endif
+
+    }
+
+  }
+
+  for (int b=0; b<meta->band_number; b++){
+    if (orthoready_datasets[b] != NULL) GDALClose(orthoready_datasets[b]);
+  }
+  free((void*)orthoready_datasets);
+
+  // potentially adapt to directly warp to coarse grid resolution, would require
+  // average resampling, and maybe adaption of LR coordinate
+  // but leave for now
+  // handled below by averaging of the view angles to the coarse grid
+  for (int b=0; b<2; b++){
+
+    if (warp_orthoready_dataset(meta, pl2, orthoready_angle_datasets[b], 
+      rtd->band_mapping.resolution[lowres_band], &ul, &lr, &meta->dim, meta->res, 
+      GDT_Float32, get_band_float(view_angle_brick, b)) != SUCCESS){
+      CONTINUE_ERROR("Warping orthoready view angle dataset %d failed.", &error, b);
+    }
+
+    #ifdef FORCE_DEBUG
+    printf("Warped angle band %d to output grid.\n", b);
+    #endif
+
+  }
+
+  for (int b=0; b<2; b++){
+    if (orthoready_angle_datasets[b] != NULL) GDALClose(orthoready_angle_datasets[b]);
+  }
+  free((void*)orthoready_angle_datasets);
+
+  if (error > 0){
+    free_brick(view_angle_brick);
+    RETURN_ERROR("Warping error in %d datasets.", error);
+  }
+
+  #ifdef FORCE_DEBUG
+  print_brick_info(DN); set_brick_open(DN, OPEN_CREATE); write_brick(DN);
+  print_brick_info(view_angle_brick); set_brick_open(view_angle_brick, OPEN_CREATE); write_brick(view_angle_brick);
+  #endif
+
+
+  // construct a simple view grid for the coarse grid computations.
+  // Mimick the layout of L1C data
+  // Angles should be in degrees, so convert after averaging
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  meta->view_grid.res = 5000.0;
+  #ifdef FORCE_MAGIC
+  fprintf(stderr, "Warn Magic Number: coarse grid in L1B construction initialized with resolution of %d m.\n", meta->view_grid.res);
+  fprintf(stderr, "Warn Magic Number: This is redundant and should be refactored.\n");
+  #endif
+
+  meta->view_grid.dim.cols = ceil(meta->dim.cols * meta->res / meta->view_grid.res);
+  meta->view_grid.dim.rows = ceil(meta->dim.rows * meta->res / meta->view_grid.res);
+  meta->view_grid.dim.cells = meta->view_grid.dim.cols * meta->view_grid.dim.rows;
+  meta->view_grid.nodata = FLT_MIN;
+
+  alloc((void**)&meta->view_grid.zen, meta->view_grid.dim.cells, sizeof(float));
+  alloc((void**)&meta->view_grid.azi, meta->view_grid.dim.cells, sizeof(float));
+
+  int cell_size = floor(meta->view_grid.res/meta->res);
+
+  float **view_angle_data = get_bands_float(view_angle_brick);
+
+  for (int g_row=0, g_cell=0; g_row<meta->view_grid.dim.rows; g_row++){
+  for (int g_col=0; g_col<meta->view_grid.dim.cols; g_col++, g_cell++){
+
+    double sum[2] = {0.0, 0.0};
+    double num[2] = {0.0, 0.0};
+
+    for (int i_row=g_row*cell_size; i_row<(g_row*cell_size+cell_size); i_row++){
+    for (int i_col=g_col*cell_size; i_col<(g_col*cell_size+cell_size); i_col++){
+
+      if (i_row >= meta->dim.rows || i_col >= meta->dim.cols) continue;
+
+      int i_cell = i_row*meta->dim.cols+i_col;
+
+      for (int b=0; b<2; b++){
+        if (!dequal(view_angle_data[b][i_cell], meta->nodata)){
+          sum[b] += view_angle_data[b][i_cell];
+          num[b]++;
+        }
+      }
+
+    }
+    }
+
+    if (num[ZEN] > 0){
+      meta->view_grid.zen[g_cell] = sum[ZEN] / num[ZEN] * _R2D_CONV_;
+      //printf("g_cell %d: zenith = %.2f, num = %.2f\n", g_cell, meta->view_grid.zen[g_cell], num[ZEN]);
+    } else {
+      meta->view_grid.zen[g_cell] = meta->view_grid.nodata;
+    }
+
+    if (num[AZI] > 0){
+      meta->view_grid.azi[g_cell] = sum[AZI] / num[AZI] * _R2D_CONV_;
+      //printf("g_cell %d: azimuth = %.2f, num = %.2f\n", g_cell, meta->view_grid.azi[g_cell], num[AZI]);
+    } else {
+      meta->view_grid.azi[g_cell] = meta->view_grid.nodata;
+    }
+
+  }
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("View grid: %d rows, %d cols, %d cells, %.2f m resolution\n", 
+    meta->view_grid.dim.rows, meta->view_grid.dim.cols, meta->view_grid.dim.cells, meta->view_grid.res);
+  printf("View zenith:\n");
+  for (int g_row=0, g_cell=0; g_row<meta->view_grid.dim.rows; g_row++){
+  for (int g_col=0; g_col<meta->view_grid.dim.cols; g_col++, g_cell++){
+    printf("%06.2f ", meta->view_grid.zen[g_cell]);
+  }
+  printf("\n");
+  }
+  printf("View azimuth:\n");
+  for (int g_row=0, g_cell=0; g_row<meta->view_grid.dim.rows; g_row++){
+  for (int g_col=0; g_col<meta->view_grid.dim.cols; g_col++, g_cell++){
+    printf("%06.2f ", meta->view_grid.azi[g_cell]);
+  }
+  printf("\n");
+  }
+  #endif
+
+  free_brick(view_angle_brick);
+
+  #ifdef FORCE_CLOCK
+  proctime_print("read Level 1", TIME);
+  #endif
+
+  return SUCCESS;
+}
+
+
+/** This function gets the center coordinates for a Level 1B dataset.
++++ The center coordinates are the coordinates of the center pixel of the geolocation dataset.
+--- meta:    metadata
+--- top:     coordinates of the top pixel
+--- bottom:  coordinates of the bottom pixel
++++ Return:  SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+ int get_center_coordinates_l1b(meta_t *meta, coord_t *top, coord_t *bottom){
+
+  if (meta == NULL || top == NULL || bottom == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+
+  GDALDatasetH geolocation_dataset;
+  if ((geolocation_dataset = GDALOpen(meta->geolocation_path.string[0], GA_ReadOnly)) == NULL){
+    RETURN_ERROR("Unable to open %s", meta->geolocation_path.string[0]);
+  }
+
+  int ncol = GDALGetRasterXSize(geolocation_dataset);
+  int nrow = GDALGetRasterYSize(geolocation_dataset);
+
+  for (int i=0; i<2; i++){
+
+    GDALRasterBandH band = GDALGetRasterBand(geolocation_dataset, i+1);
+    if (band == NULL){
+      GDALClose(geolocation_dataset);
+      RETURN_ERROR("Unable to get band %d from geolocation dataset.", i+1);
+    }
+
+    double top_value, bottom_value;
+
+    if (GDALRasterIO(band, GF_Read, ncol / 2, 0, 1, 1, 
+        &top_value, 1, 1, GDT_Float64, 0, 0) == CE_Failure){
+      GDALClose(geolocation_dataset);
+      RETURN_ERROR("Could not read top coordinate from geolocation dataset.");
+    }
+
+    if (GDALRasterIO(band, GF_Read, ncol / 2, nrow - 1, 1, 1, 
+        &bottom_value, 1, 1, GDT_Float64, 0, 0) == CE_Failure){
+      GDALClose(geolocation_dataset);
+      RETURN_ERROR("Could not read bottom coordinate from geolocation dataset.");
+    }
+
+    if (i == 0){
+      top->x = top_value * _D2R_CONV_;
+      bottom->x = bottom_value * _D2R_CONV_;
+    } else if (i == 1){
+      top->y = top_value * _D2R_CONV_;
+      bottom->y = bottom_value * _D2R_CONV_;
+    }
+
+  }
+
+  GDALClose(geolocation_dataset);
+
+  #ifdef FORCE_DEBUG
+  printf("Top-center coordinate (geo): %.4f (X), %.4f (Y)\n", 
+    top->x * _R2D_CONV_, top->y * _R2D_CONV_);
+  printf("Bottom-center coordinate (geo): %.4f (X), %.4f (Y)\n", 
+    bottom->x * _R2D_CONV_, bottom->y * _R2D_CONV_);
+  printf("Top-center coordinate (rad): %.4f (X), %.4f (Y)\n", 
+    top->x, top->y);
+  printf("Bottom-center coordinate (rad): %.4f (X), %.4f (Y)\n", 
+    bottom->x, bottom->y);
+  #endif
+
+  return SUCCESS;
+}
+
+
+/** This function estimates the warped extent of a geolocation-array transformer
++++ This is a preflight warp to determine the output extent/resolution, not the
++++ actual warp that will be performed later. The output extent is aligned to the output grid.
++++ Either to the data cube tile grid if tiling is enabled, or to the output resolution of the 
++++ lowest-resolution band if tiling is disabled.
+--- meta:    metadata
+--- cube:    datacube parameters
+--- pl2:     L2 parameters
+--- orthoready_dataset:  a GDAL dataset that is ready for orthorectification
+--- ul:      upper-left coordinates of the warped extent (output)
+--- lr:      lower-right coordinates of the warped extent (output)
++++ Return:  SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int get_aligned_warped_extent(meta_t *meta, cube_t *cube, par_ll_t *pl2, 
+  GDALDatasetH orthoready_dataset, coord_t *ul, coord_t *lr){
+
+  if (meta == NULL || cube == NULL || pl2 == NULL || 
+      orthoready_dataset == NULL || ul == NULL || lr == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  // dev comments
+  // Calling GDALSuggestedWarpOutput2() on a geolocation-array
+  // transformer crashes inside libgdal's backmap generation. gdalwarp -geoloc
+  // (without -te) performs an unconstrained warp and lets GDAL determine the
+  // output extent/resolution internally without that crash, so replicate
+  // that here and read back the resulting geotransform/size.
+  // This is a preflight warp to determine the output extent/resolution, not the
+  // actual warp that will be performed later.
+  // Downside is, we perform  a full warp of the first band just to get the 
+  // output extent/resolution, which takes time
+  char *warp_options[] = {
+      "-t_srs", pl2->proj,
+      "-r", "near",
+      "-geoloc",
+      "-of", "MEM",
+      NULL
+  };
+
+  GDALWarpAppOptions *warp_app_options = GDALWarpAppOptionsNew(warp_options, NULL);
+
+  int error = 0;
+  GDALDatasetH warped_dataset = GDALWarp(
+    "", NULL, 1, &orthoready_dataset, warp_app_options, &error);
+  GDALWarpAppOptionsFree(warp_app_options);
+
+  if (error != CE_None || warped_dataset == NULL){
+    if (warped_dataset != NULL) GDALClose(warped_dataset);
+    RETURN_ERROR("Suggesting warp output extent failed: %s", CPLGetLastErrorMsg());
+  }
+
+  double suggested_geotransform[_GT_LEN_];
+  if (GDALGetGeoTransform(warped_dataset, suggested_geotransform) != CE_None){
+    GDALClose(warped_dataset);
+    RETURN_ERROR("Could not read suggested geotransform");
+  }
+
+  coord_t suggested_dim;
+  suggested_dim.x = GDALGetRasterXSize(warped_dataset);
+  suggested_dim.y = GDALGetRasterYSize(warped_dataset);
+  GDALClose(warped_dataset);
+
+  coord_t suggested_ul, suggested_lr;
+  suggested_ul.x = suggested_geotransform[_GT_ULX_];
+  suggested_ul.y = suggested_geotransform[_GT_ULY_];
+  suggested_lr.x = suggested_ul.x + suggested_dim.x * suggested_geotransform[_GT_XRES_];
+  suggested_lr.y = suggested_ul.y + suggested_dim.y * suggested_geotransform[_GT_YRES_];
+
+  #ifdef FORCE_DEBUG
+  printf("Suggested extent: \n");
+  printf("  UL-X: %.9f\n", suggested_ul.x);
+  printf("  UL-Y: %.9f\n", suggested_ul.y);
+  printf("  LR-X: %.9f\n", suggested_lr.x);
+  printf("  LR-Y: %.9f\n", suggested_lr.y);
+  #endif
+
+
+  coord_t aligned_ul, aligned_lr;
+
+  if (tile_align_resolution(cube, meta->lowest_res, suggested_ul.x, suggested_ul.y, &aligned_ul.x, &aligned_ul.y) == FAILURE){
+    RETURN_ERROR("Aligning pixel coordinates failed");
+  }
+
+  if (tile_align_resolution(cube, meta->lowest_res, suggested_lr.x, suggested_lr.y, &aligned_lr.x, &aligned_lr.y) == FAILURE){
+    RETURN_ERROR("Aligning pixel coordinates failed");
+  }
+
+  aligned_lr.x += meta->lowest_res;
+  aligned_lr.y -= meta->lowest_res;
+
+  #ifdef FORCE_MAGIC
+  fprintf(stderr, "WARNING: Using hard-coded extent adjustment for Sentinel-2 data. This is a temporary solution and should be replaced with a more robust approach.\n");
+  #endif
+
+  #ifdef FORCE_DEBUG
+  printf("Adjusted extent: \n");
+  printf("  UL-X: %.9f\n", aligned_ul.x);
+  printf("  UL-Y: %.9f\n", aligned_ul.y);
+  printf("  LR-X: %.9f\n", aligned_lr.x);
+  printf("  LR-Y: %.9f\n", aligned_lr.y);
+  printf("  Number of columns: %d\n", (int)round((aligned_lr.x - aligned_ul.x) / meta->res));
+  printf("  Number of rows: %d\n",    (int)round((aligned_ul.y - aligned_lr.y) / meta->res));
+  #endif
+
+  *ul = aligned_ul;
+  *lr = aligned_lr;
+
+  return SUCCESS;
+}
+
+
+int compile_orthoready_datasets(meta_t *meta, GDALDatasetH **orthoready_datasets, 
+  dim_t *lowres_dim, int *lowres_band){
+
+  if (meta == NULL || orthoready_datasets == NULL ||
+      lowres_dim == NULL || lowres_band == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  GDALDriverH memory_driver = GDALGetDriverByName("MEM");
+  if (memory_driver == NULL){
+    RETURN_ERROR("Unable to load MEM driver"); 
+  }
+
+  GDALDatasetH *orthoready;
+  alloc((void**)&orthoready, meta->band_number, sizeof(GDALDatasetH));
+
+  dim_t *dim;
+  alloc((void**)&dim, meta->band_number, sizeof(dim_t));
+
+  // keywords for geolocation metadata
+  const char *geolocation_keys[] = {
+    "SRS", "X_BAND", "Y_BAND", "PIXEL_OFFSET", "LINE_OFFSET", 
+    "PIXEL_STEP", "LINE_STEP", "GEOREFERENCING_CONVENTION"
+  };
+  int num_geolocation_keys = sizeof(geolocation_keys) / sizeof(geolocation_keys[0]);
+
+  int error = 0;
+  
+  // this will be within a parallel region, so errors will be counted and handled after the parallel region
+  for (int b=0; b<meta->band_number; b++){
+
+    GDALDatasetH physical_image_dataset;
+
+    if ((physical_image_dataset = GDALOpen(meta->image_path.string[b], GA_ReadOnly)) == NULL){
+      CONTINUE_ERROR("Unable to open %s", &error, meta->image_path.string[b]); 
+    }
+
+    GDALRasterBandH band = GDALGetRasterBand(physical_image_dataset, 1);
+    if (band == NULL){
+      GDALClose(physical_image_dataset);
+      CONTINUE_ERROR("Unable to get band for %s", &error, meta->image_path.string[b]); 
+    }
+    dim[b].cols = GDALGetRasterBandXSize(band);
+    dim[b].rows = GDALGetRasterBandYSize(band);
+
+    orthoready[b] = GDALCreateCopy(
+      memory_driver, "", physical_image_dataset, FALSE, NULL, NULL, NULL);
+    GDALClose(physical_image_dataset);
+
+    if (orthoready[b] == NULL){
+      CONTINUE_ERROR("Unable to create orthoready dataset for band %d", &error, b);
+    }
+
+    // retrieve GEOLOCATION metadata from the physical geolocation dataset 
+    // and set it on the orthoready dataset
+
+    GDALDatasetH physical_geolocation_dataset;
+    if ((physical_geolocation_dataset = GDALOpen(meta->geolocation_path.string[b], GA_ReadOnly)) == NULL){
+      CONTINUE_ERROR("Unable to open %s", &error, meta->geolocation_path.string[b]);
+    }
+
+    for (int i=0; i<num_geolocation_keys; i++){
+      const char *key = geolocation_keys[i];
+      const char *value = GDALGetMetadataItem(physical_geolocation_dataset, key, NULL);
+      if (value == NULL){
+        GDALClose(physical_geolocation_dataset);
+        CONTINUE_ERROR("Missing geolocation metadata key %s in %s", &error, key, meta->geolocation_path.string[b]);
+      }
+      // gdalwarp -geoloc fails to transform most points with a negative step
+      if (strstr(key, "STEP") != NULL){
+        double step_value = atof(value);
+        if (step_value < 0) {
+          step_value = -step_value;
+          char step_str[32];
+          snprintf(step_str, sizeof(step_str), "%.1f", step_value);
+          value = step_str;
+        }
+      }
+      // if the SRS is specified as an EPSG code, convert it to WKT for GDAL
+      if (strings_equal(key, "SRS") && strncmp(value, "EPSG:", 5) == 0){
+        char srs_wkt[NPOW_10];
+        if (epsg_to_wkt(atoi(value + 5), srs_wkt) != SUCCESS){
+          GDALClose(physical_geolocation_dataset);
+          CONTINUE_ERROR("Unable to convert geolocation SRS %s to WKT", &error, value);
+        }
+        value = srs_wkt;
+      }
+      // set the metadata item on the orthoready dataset into GEOLOCATION domain
+      GDALSetMetadataItem(orthoready[b], key, value, "GEOLOCATION");
+    }
+
+    // set the X_DATASET and Y_DATASET metadata items to point to the geolocation dataset
+    GDALSetMetadataItem(orthoready[b], "X_DATASET", meta->geolocation_path.string[b], "GEOLOCATION");
+    GDALSetMetadataItem(orthoready[b], "Y_DATASET", meta->geolocation_path.string[b], "GEOLOCATION");
+
+    GDALClose(physical_geolocation_dataset);
+
+  }
+
+  if (error > 0){
+    for (int b=0; b<meta->band_number; b++){
+      if (orthoready[b] != NULL) GDALClose(orthoready[b]);
+    }
+    free((void*)orthoready);
+    free((void*)dim);
+    RETURN_ERROR("Creation of orthoready dataset failed for %d bands", error);
+  }
+
+
+  *lowres_dim = dim[0];
+  *lowres_band = 0;
+
+  for (int b=1; b<meta->band_number; b++){
+    if (dim[b].cols < (*lowres_dim).cols){
+      *lowres_dim = dim[b];
+      *lowres_band = b;
+    }
+  }
+
+  free((void*)dim);
+
+
+  #ifdef FORCE_DEBUG
+  for (int b=0; b<meta->band_number; b++){
+    GDALInfoOptions *info_options = GDALInfoOptionsNew(NULL, NULL);
+    char *info = GDALInfo(orthoready[b], info_options);
+
+    if (info != NULL){
+      printf("Orthoready dataset info for band %d:\n", b);
+      printf("%s", info);
+      CPLFree(info);
+    }
+    GDALInfoOptionsFree(info_options);
+  }
+  #endif
+
+  *orthoready_datasets = orthoready;
+  return SUCCESS;
+}
+
+
+int compile_orthoready_angle_datasets(GDALDatasetH orthoready_carrier, 
+  GDALDatasetH **orthoready_angle_datasets, float **view_angle_row, dim_t *dim){
+
+  if (orthoready_carrier == NULL || orthoready_angle_datasets == NULL ||
+      view_angle_row == NULL || dim == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+  GDALDriverH memory_driver = GDALGetDriverByName("MEM");
+  if (memory_driver == NULL){
+    RETURN_ERROR("Unable to load MEM driver"); 
+  }
+
+  int nb = 2;
+  GDALDatasetH *orthoready;
+  alloc((void**)&orthoready, nb, sizeof(GDALDatasetH));
+
+  int error = 0;
+
+  for (int b=0; b<nb; b++){
+
+    orthoready[b] = GDALCreate(memory_driver, "", dim->cols, dim->rows, 1, GDT_Float32, NULL);
+    if (orthoready[b] == NULL){
+      CONTINUE_ERROR("Unable to create angle dataset for band %d", &error, b);
+    }
+
+    // same sensor grid as the matching band, so its GEOLOCATION domain applies as-is
+    char **geolocation_metadata = GDALGetMetadata(orthoready_carrier, "GEOLOCATION");
+    GDALSetMetadata(orthoready[b], geolocation_metadata, "GEOLOCATION");
+
+    GDALRasterBandH band = GDALGetRasterBand(orthoready[b], 1);
+
+    int write_error = 0;
+    for (int i=0; i<dim->rows; i++){
+      if (GDALRasterIO(band, GF_Write, 0, i, dim->cols, 1,
+          view_angle_row[b], dim->cols, 1, GDT_Float32, 0, 0) == CE_Failure){
+        write_error++;
+        break;
+      }
+    }
+
+    if (write_error > 0){
+      CONTINUE_ERROR("Unable to write angle values to band %d", &error, b);
+    }
+
+  }
+
+  if (error > 0){
+    for (int b=0; b<nb; b++){
+      if (orthoready[b] != NULL) GDALClose(orthoready[b]);
+    }
+    free((void*)orthoready);
+    RETURN_ERROR("Creation of orthoready datasets failed for %d bands", error);
+  }
+
+
+  #ifdef FORCE_DEBUG
+  for (int b=0; b<nb; b++){
+    GDALInfoOptions *info_options = GDALInfoOptionsNew(NULL, NULL);
+    char *info = GDALInfo(orthoready[b], info_options);
+
+    if (info != NULL){
+      printf("Orthoready dataset info for band %d:\n", b);
+      printf("%s", info);
+      CPLFree(info);
+    }
+    GDALInfoOptionsFree(info_options);
+  }
+  #endif
+
+  *orthoready_angle_datasets = orthoready;
+  return SUCCESS;
+}
+
+
+int warp_orthoready_dataset(meta_t *meta, par_ll_t *pl2, GDALDatasetH orthoready_dataset, 
+  double original_resolution, coord_t *ul, coord_t *lr, dim_t *expected_dim, double expected_resolution,
+  GDALDataType gdal_type, void *output_buffer){
+
+  if (meta == NULL || pl2 == NULL || orthoready_dataset == NULL ||
+      ul == NULL || lr == NULL || expected_dim == NULL || output_buffer == NULL){
+    RETURN_ERROR("Invalid input.");
+  }
+
+
+  // prepare warp options
+  char c_res[32] = {0};
+  int nchar = snprintf(c_res, sizeof(c_res), "%.9f", original_resolution);
+  if (nchar < 0 || nchar >= sizeof(c_res)){
+    RETURN_ERROR("Could not format resolution (%.9f).", original_resolution);
+  }
+
+  char c_min_x[32];
+  nchar = snprintf(c_min_x, sizeof(c_min_x), "%.9f", (ul->x < lr->x) ? ul->x : lr->x);
+  if (nchar < 0 || nchar >= sizeof(c_min_x)){
+    RETURN_ERROR("Could not format min x coordinate (%.9f).", (ul->x < lr->x) ? ul->x : lr->x);
+  }
+
+  char c_min_y[32];
+  nchar = snprintf(c_min_y, sizeof(c_min_y), "%.9f", (ul->y < lr->y) ? ul->y : lr->y);
+  if (nchar < 0 || nchar >= sizeof(c_min_y)){
+    RETURN_ERROR("Could not format min y coordinate (%.9f).", (ul->y < lr->y) ? ul->y : lr->y);
+  }
+
+  char c_max_x[32];
+  nchar = snprintf(c_max_x, sizeof(c_max_x), "%.9f", (lr->x > ul->x) ? lr->x : ul->x);
+  if (nchar < 0 || nchar >= sizeof(c_max_x)){
+    RETURN_ERROR("Could not format max x coordinate (%.9f).", (lr->x > ul->x) ? lr->x : ul->x);
+  }
+
+  char c_max_y[32];
+  nchar = snprintf(c_max_y, sizeof(c_max_y), "%.9f", (lr->y > ul->y) ? lr->y : ul->y);
+  if (nchar < 0 || nchar >= sizeof(c_max_y)){
+    RETURN_ERROR("Could not format max y coordinate (%.9f).", (lr->y > ul->y) ? lr->y : ul->y);
+  }
+
+  char c_nodata[32] = {0};
+  nchar = snprintf(c_nodata, sizeof(c_nodata), "%d", meta->nodata);
+  if (nchar < 0 || nchar >= sizeof(c_nodata)){
+    RETURN_ERROR("Could not format nodata value (%d).", meta->nodata);
+  }
+
+  char *warpoptions[] = {
+      "-t_srs", pl2->proj,
+      "-r", "cubic",
+      "-geoloc",
+      "-srcnodata", c_nodata,
+      "-dstnodata", c_nodata,
+      "-of", "MEM",
+      "-te", c_min_x, c_min_y, c_max_x, c_max_y,
+      "-tr", c_res, c_res,
+      NULL
+  };
+
+  GDALWarpAppOptions *warp_app_options = GDALWarpAppOptionsNew(warpoptions, NULL);
+
+  int gdal_error = 0;
+  // GDAL warps in chunks; chunks outside the swath fail to transform and stay nodata
+  CPLPushErrorHandler(CPLQuietErrorHandler);
+  GDALDatasetH warped_dataset = GDALWarp("", NULL, 1, &orthoready_dataset, warp_app_options, &gdal_error);
+  CPLPopErrorHandler();
+
+  GDALWarpAppOptionsFree(warp_app_options);
+
+  if (gdal_error != CE_None || warped_dataset == NULL){
+    if (warped_dataset != NULL) GDALClose(warped_dataset);
+    RETURN_ERROR("Warping failed.");
+  }
+
+  GDALRasterBandH warped_band = GDALGetRasterBand(warped_dataset, 1);
+  if (warped_band == NULL){
+    GDALClose(warped_dataset);
+    RETURN_ERROR("Cannot open warped band.");
+  }
+
+  // just to be sure, check that the warped dataset has the expected size
+  int warped_ncol = GDALGetRasterBandXSize(warped_band); 
+  int warped_nrow = GDALGetRasterBandYSize(warped_band);
+  if (expected_dim->cols != (warped_ncol * original_resolution / expected_resolution) || 
+      expected_dim->rows != (warped_nrow * original_resolution / expected_resolution)){
+    GDALClose(warped_dataset);
+    RETURN_ERROR("Warped dataset size (%d x %d) does not match expected size (%d x %d) x resolution ratio %.2f", 
+      warped_ncol, warped_nrow, expected_dim->cols, expected_dim->rows, original_resolution / expected_resolution);
+  }
+
+  // read into brick buffer
+  if (GDALRasterIO(warped_band, GF_Read, 0, 0, warped_ncol, warped_nrow, 
+    output_buffer, expected_dim->cols, expected_dim->rows, gdal_type, 0, 0) == CE_Failure){
+    GDALClose(warped_dataset);
+    RETURN_ERROR("Cannot read warped band.");
+  }
+
+  GDALClose(warped_dataset);
+  
   return SUCCESS;
 }
 
