@@ -74,6 +74,9 @@ enum { _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, _HL_CFI_,
 // level of module
 enum { _LOWER_LEVEL_, _HIGHER_LEVEL_, _AUX_LEVEL_ };
 
+// processing level
+enum { _LEVEL_1B_, _LEVEL_1C_, _LEVEL_2_, _LEVEL_3_, _LEVEL_4_ };
+
 // input type
 enum { _INP_RAW_, _INP_ARD_, _INP_QAI_, _INP_FTR_, 
        _INP_AUX_, _INP_CON_, _INP_NONE_, _INP_LENGTH_ };
