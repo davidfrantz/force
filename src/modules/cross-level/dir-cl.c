@@ -28,6 +28,32 @@ This file contains functions for reading directories and handling names
 #include "dir-cl.h"
 
 
+/** This function checks if a filename matches a filter. The filter can be
++++ NULL, in which case the function will always return true. If the filter
++++ ends with a '$', the function will check if the filename ends with the
++++ filter (without the '$'). Otherwise, the function will check if the
++++ filter is contained in the filename.
+--- name:    filename
+--- filter:  filter
++++ Return:  true/false
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+static bool filter_matches(const char *name, const char *filter){
+
+  if (filter == NULL) return true;
+
+  size_t filter_length = strlen(filter);
+  size_t name_length = strlen(name);
+
+  if (filter_length > 0 && filter[filter_length-1] == '$'){
+    filter_length--;
+    return name_length >= filter_length &&
+      strncmp(name + name_length - filter_length, filter, filter_length) == 0;
+  }
+
+  return strstr(name, filter) != NULL;
+}
+
+
 /** Test for existing file/directory
 --- fname:  filename
 +++ Return: true/false
@@ -45,6 +71,7 @@ bool fileexist(char *fname){
 --- pattern:  pattern
 --- filter:   an additional filter, e.g. for file extensions, 
               NULL to disable filtering
+              "filter$" can be used to match the end of the filename
 --- nth:      nth match to return (0-based indexing)
 --- fname:    buffer that will hold the filename
 --- size:     length of the buffer
@@ -66,7 +93,7 @@ struct dirent *ep;
 
       if (strstr(ep->d_name, pattern)){
 
-        if (filter != NULL && !strstr(ep->d_name, filter)) continue;
+        if (!filter_matches(ep->d_name, filter)) continue;
 
         if (strlen(dir_path)+strlen(ep->d_name)+1 > size){
           printf("array is too short for holding filename.\n");
@@ -109,6 +136,7 @@ struct dirent *ep;
 --- pattern:  pattern (must be at the start of the filename)
 --- filter:   an additional filter, e.g. for file extensions, 
               NULL to disable filtering
+              "filter$" can be used to match the end of the filename
 --- nth:      nth match to return (0-based indexing)
 --- fname:    buffer that will hold the filename
 --- size:     length of the buffer
@@ -129,7 +157,7 @@ struct dirent *ep;
 
       if (strncmp(ep->d_name, pattern, strlen(pattern)) == 0){
 
-        if (filter != NULL && !strstr(ep->d_name, filter)) continue;
+        if (!filter_matches(ep->d_name, filter)) continue;
 
         if (strlen(dir_path)+strlen(ep->d_name)+1 > size){
             printf("array is too short for holding filename.\n");
