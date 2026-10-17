@@ -426,6 +426,32 @@ void write_par_ll_aod(FILE *fp, bool verbose){
 
 
 /** This function writes parameters into a parameter skeleton file: lower
++++ level topographic correction pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_ll_toc(FILE *fp, bool verbose){
+
+
+
+  fprintf(fp, "\n# TOPOGRAPHIC CORRECTION OPTIONS\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter sets the minimum illumination angle for the topographic \n");
+    fprintf(fp, "# correction. Above this angle, the illumination angle is fixed to the \n");
+    fprintf(fp, "# specified value and the topographic correction is applied. This can reduce \n");
+    fprintf(fp, "# overcorrection effects.\n");
+    fprintf(fp, "# Type: Float. Valid range: [0,90]\n");
+  }
+  fprintf(fp, "ILLUMINATION_CUTOFF = 80.0\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: lower
 +++ level cloud detection pars
 --- fp:      parameter skeleton file
 --- verbose: add description, or use more compact format for experts?

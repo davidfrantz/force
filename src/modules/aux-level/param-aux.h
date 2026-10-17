@@ -45,6 +45,7 @@ void write_par_ll_cube(FILE *fp, bool verbose);
 void write_par_ll_atcor(FILE *fp, bool verbose);
 void write_par_ll_wvp(FILE *fp, bool verbose);
 void write_par_ll_aod(FILE *fp, bool verbose);
+void write_par_ll_toc(FILE *fp, bool verbose);
 void write_par_ll_cloud(FILE *fp, bool verbose);
 void write_par_ll_resmerge(FILE *fp, bool verbose);
 void write_par_ll_coreg(FILE *fp, bool verbose);
