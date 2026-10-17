@@ -88,6 +88,25 @@ typedef struct {
     exit(FAILURE); \
   } while (0)
 
+#define BREAK_ERROR(format, error, ...) \
+  { \
+    fprintf(stderr, "Error in %s: " format "\n", \
+            __func__, ##__VA_ARGS__); \
+    (*error)++; \
+    break; \
+  }
+
+#define CONTINUE_ERROR(format, error, ...) \
+  { \
+    fprintf(stderr, "Error in %s: " format "\n", \
+            __func__, ##__VA_ARGS__); \
+    (*error)++; \
+    continue; \
+  }
+
+
+
+
 // compiler options
 //#define FORCE_CLOCK
 //#define FORCE_DEBUG
