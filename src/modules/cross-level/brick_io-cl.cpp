@@ -256,7 +256,7 @@ int write_brick(brick_t *brick){
       timeout = lock_timeout(get_brick_size(brick));
   
       if ((lock = (char*)CPLLockFile(fname, timeout)) == NULL){
-        printf("Unable to lock file %s (timeout: %fs, nx/ny: %d/%d). ", fname, timeout, brick->nx, brick->ny);
+        printf("Unable to lock file %s (timeout: %fs, nx/ny: %ld/%ld). ", fname, timeout, brick->dim_image.cols, brick->dim_image.rows);
         return FAILURE;}
   
   
@@ -278,16 +278,16 @@ int write_brick(brick_t *brick){
           printf("Number of bands %d do not match for UPDATE/MERGE mode (file: %d). ", 
             nbands, GDALGetRasterCount(fo)); 
           return FAILURE;}
-        if (GDALGetRasterXSize(fo) != brick->nx){
-          printf("Number of cols %d do not match for UPDATE/MERGE mode (file: %d). ", 
-            brick->nx, GDALGetRasterXSize(fo)); 
+        if ((size_t)GDALGetRasterXSize(fo) != brick->dim_image.cols){
+          printf("Number of cols %ld do not match for UPDATE/MERGE mode (file: %d). ", 
+            brick->dim_image.cols, GDALGetRasterXSize(fo)); 
           return FAILURE;}
-        if (GDALGetRasterYSize(fo) != brick->ny){
-          printf("Number of rows %d do not match for UPDATE/MERGE mode (file: %d). ", 
-            brick->ny, GDALGetRasterYSize(fo)); 
+        if ((size_t)GDALGetRasterYSize(fo) != brick->dim_image.rows){
+          printf("Number of rows %ld do not match for UPDATE/MERGE mode (file: %d). ", 
+            brick->dim_image.rows, GDALGetRasterYSize(fo)); 
           return FAILURE;}
   
-        alloc((void**)&buf, brick->nc, sizeof(float));
+        alloc((void**)&buf, brick->dim_image.cells, sizeof(float));
   
         for (b=0; b<nbands; b++){
   
@@ -296,12 +296,12 @@ int write_brick(brick_t *brick){
           
           band = GDALGetRasterBand(fo, b_file);
   
-          if (GDALRasterIO(band, GF_Read, 0, 0, brick->nx, brick->ny, buf, 
-            brick->nx, brick->ny, GDT_Float32, 0, 0) == CE_Failure){
+          if (GDALRasterIO(band, GF_Read, 0, 0, brick->dim_image.cols, brick->dim_image.rows, buf, 
+            brick->dim_image.cols, brick->dim_image.rows, GDT_Float32, 0, 0) == CE_Failure){
             printf("Unable to read %s. ", fname); return FAILURE;} 
   
   
-          for (int p=0; p<brick->nc; p++){
+          for (size_t p=0; p<brick->dim_image.cells; p++){
   
             now = get_brick(brick, b_brick, p);
             old = buf[p];
@@ -335,25 +335,25 @@ int write_brick(brick_t *brick){
         if ((fp = GDALOpen(fname, GA_Update)) == NULL){
           printf("Unable to open %s. ", fname); return FAILURE;}
       } else {
-        if ((fp = GDALCreate(driver_create, fname, brick->nx, brick->ny, nbands, file_datatype, options)) == NULL){
+        if ((fp = GDALCreate(driver_create, fname, brick->dim_image.cols, brick->dim_image.rows, nbands, file_datatype, options)) == NULL){
           printf("Error creating file %s. ", fname); return FAILURE;}
       }
         
       if (brick->open == OPEN_CHUNK){
         if (brick->chunk[_X_] < 0 || 
             brick->chunk[_Y_] < 0 || 
-            brick->chunk[_X_] >= brick->dim_chunk.cols || 
-            brick->chunk[_Y_] >= brick->dim_chunk.rows){
+            (size_t)brick->chunk[_X_] >= brick->dim_chunk.cols || 
+            (size_t)brick->chunk[_Y_] >= brick->dim_chunk.rows){
           printf("attempting to write invalid chunk\n");
           return FAILURE;
         }
-        nx_write     = brick->cx;
-        ny_write     = brick->cy;
-        xoff_write   = brick->chunk[_X_] * brick->cx;
-        yoff_write   = brick->chunk[_Y_] * brick->cy;
+        nx_write     = brick->dim_punit.cols;
+        ny_write     = brick->dim_punit.rows;
+        xoff_write   = brick->chunk[_X_] * brick->dim_punit.cols;
+        yoff_write   = brick->chunk[_Y_] * brick->dim_punit.rows;
       } else {
-        nx_write     = brick->nx;
-        ny_write     = brick->ny;
+        nx_write     = brick->dim_image.cols;
+        ny_write     = brick->dim_image.rows;
         xoff_write   = 0;
         yoff_write   = 0;
       }
@@ -560,8 +560,8 @@ const char *projection = NULL;
     exit(FAILURE);
   } 
 
-  dim.cols = (int)GDALGetRasterXSize(dataset);
-  dim.rows = (int)GDALGetRasterYSize(dataset);
+  dim.cols = GDALGetRasterXSize(dataset);
+  dim.rows = GDALGetRasterYSize(dataset);
   dim.cells = dim.cols*dim.rows;
   GDALGetGeoTransform(dataset, geotran); 
   projection = GDALGetProjectionRef(dataset);
@@ -596,8 +596,7 @@ const char *projection = NULL;
   set_brick_geotran(brick,    geotran);
   set_brick_res(brick,        geotran[_GT_RES_]);
   set_brick_proj(brick,       projection);
-  set_brick_ncols(brick,      dim.cols);
-  set_brick_nrows(brick,      dim.rows);
+  set_brick_image_dim(brick,  &dim);
   
   set_brick_filename(brick, "DONOTOUTPUT");
   set_brick_dirname(brick, "DONOTOUTPUT");
@@ -632,7 +631,8 @@ const char *projection = NULL;
   +++ Return:  SUCCESS/FAILURE
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
   int warp_from_brick_to_unknown_brick(bool tile, int rsm, int threads, brick_t *src, cube_t *cube){
-  int i, j, p, k, b, b_, chunk_nb, nb;
+  size_t i, j, p;
+  int k, b, b_, chunk_nb, nb;
   GDALDriverH driver;
   GDALDatasetH src_dataset;
   GDALDatasetH dst_dataset;
@@ -654,10 +654,11 @@ const char *projection = NULL;
   short *src_ = NULL;
   short **buf_ = NULL;
   short nodata = 0;
-  int src_nx, src_ny, src_nc;
-  int dst_nx, dst_ny, dst_nc;
+  dim_t src_dim, dst_dim;
+  int tmp_nx, tmp_ny; // GDAL requires int*
   double tmpx, tmpy;
-  size_t src_dim, chunk_nx, chunk_ny;
+  dim_t chunk_dim;
+  size_t chunk_size;
   //size_t max_mem = 1342177280; // 1.25GB
   //size_t max_mem = 1073741824; // 1GB
   size_t max_mem = 805306368; // 0.75GB
@@ -679,14 +680,12 @@ const char *projection = NULL;
   
   
     nb = get_brick_nbands(src);
-    src_nx = get_brick_ncols(src);
-    src_ny = get_brick_nrows(src);
-    src_nc = get_brick_ncells(src);
+    src_dim = get_brick_image_dim(src);
     get_brick_geotran(src, src_geotran, _GT_LEN_);
     get_brick_proj(src, src_proj, NPOW_10);
   
     // create source image
-    if ((src_dataset = GDALCreate(driver, "mem", src_nx, src_ny, nb, dt, NULL)) == NULL){
+    if ((src_dataset = GDALCreate(driver, "mem", src_dim.cols, src_dim.rows, nb, dt, NULL)) == NULL){
       printf("could not create src image. "); return FAILURE;}
     if (GDALSetProjection(src_dataset, src_proj) == CE_Failure){
       printf("could not set src projection. "); return FAILURE;}
@@ -697,8 +696,8 @@ const char *projection = NULL;
     for (b=0; b<nb; b++){
       src_band = GDALGetRasterBand(src_dataset, b+1);
       if ((src_ = get_band_short(src, b)) == NULL) return FAILURE;
-      if (GDALRasterIO(src_band, GF_Write, 0, 0, src_nx, src_ny, 
-        src_, src_nx, src_ny, dt, 0, 0 ) == CE_Failure){
+      if (GDALRasterIO(src_band, GF_Write, 0, 0, src_dim.cols, src_dim.rows, 
+        src_, src_dim.cols, src_dim.rows, dt, 0, 0 ) == CE_Failure){
         printf("could not 'copy' src data. "); return FAILURE;}
     }
   
@@ -718,8 +717,11 @@ const char *projection = NULL;
   
     // estimate approximate extent
     if (GDALSuggestedWarpOutput(src_dataset, GDALGenImgProjTransform, 
-      transformer, dst_geotran, &dst_nx, &dst_ny) == CE_Failure){
+      transformer, dst_geotran, &tmp_nx, &tmp_ny) == CE_Failure){
       printf("could not suggest dst extent. "); return FAILURE;}
+    dst_dim.cols = (size_t)tmp_nx;
+    dst_dim.rows = (size_t)tmp_ny;
+    dst_dim.cells = dst_dim.cols*dst_dim.rows;
   
     // align with output grid of data cube
     if (tile){
@@ -735,9 +737,9 @@ const char *projection = NULL;
     
     // convert computed resolution to actual dst resolution
     // add some rows and columns, just to be sure
-    dst_nx = dst_nx * dst_geotran[_GT_XRES_] / cube->resolution + 10;
-    dst_ny = dst_ny * dst_geotran[_GT_YRES_] / cube->resolution * -1 + 10;
-    dst_nc = dst_nx*dst_ny;
+    dst_dim.cols = dst_dim.cols * dst_geotran[_GT_XRES_] / cube->resolution + 10;
+    dst_dim.rows = dst_dim.rows * dst_geotran[_GT_YRES_] / cube->resolution * -1 + 10;
+    dst_dim.cells = dst_dim.cols*dst_dim.rows;
     dst_geotran[_GT_XRES_] = cube->resolution; 
     dst_geotran[_GT_YRES_] = cube->resolution * -1;
 
@@ -745,9 +747,9 @@ const char *projection = NULL;
     GDALDestroyGenImgProjTransformer(transformer);
   
     #ifdef FORCE_DEBUG
-    printf("src nx/ny: %d/%d\n",  src_nx, src_ny);
+    printf("src nx/ny: %ld/%ld\n",  src_dim.cols, src_dim.rows);
     print_dvector(src_geotran, "src geotransf.", _GT_LEN_, 1, 2);
-    printf("dst nx/ny: %d/%d\n", dst_nx, dst_ny);
+    printf("dst nx/ny: %ld/%ld\n", dst_dim.cols, dst_dim.rows);
     print_dvector(dst_geotran, "dst geotransf.", _GT_LEN_, 1, 2);
     #endif
   
@@ -759,7 +761,7 @@ const char *projection = NULL;
       chunk_nb = 1;
     } else {
       chunk_nb = nb;
-      while ((size_t)src_nc*(size_t)chunk_nb*sizeof(short) > max_mem) chunk_nb--;
+      while (src_dim.cells*(size_t)chunk_nb*sizeof(short) > max_mem) chunk_nb--;
       if (chunk_nb < 1) chunk_nb = 1;
     }
   
@@ -778,7 +780,7 @@ const char *projection = NULL;
       /** "create" the destination dataset
       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
   
-      if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, chunk_nb, dt, NULL)) == NULL){
+      if ((dst_dataset = GDALCreate(driver, "mem", dst_dim.cols, dst_dim.rows, chunk_nb, dt, NULL)) == NULL){
         printf("could not create dst image. "); return FAILURE;}
       if (GDALSetProjection(dst_dataset, cube->projection) == CE_Failure){
         printf("could not set dst projection. "); return FAILURE;}
@@ -794,13 +796,13 @@ const char *projection = NULL;
   
   
       // buffer to hold warped image
-      alloc_2DC((void***)&buf_, chunk_nb, dst_nc, sizeof(short));
+      alloc_2DC((void***)&buf_, chunk_nb, dst_dim.cells, sizeof(short));
       for (b_=0; b_<chunk_nb; b_++){
         if ((nodata = get_brick_nodata(src, b+b_)) != 0){
-          #pragma omp parallel shared(b_, dst_nc, buf_, nodata) default(none) 
+          #pragma omp parallel shared(b_, dst_dim, buf_, nodata) default(none) 
           {
             #pragma omp for schedule(static)
-            for (p=0; p<dst_nc; p++) buf_[b_][p] = nodata;
+            for (p=0; p<dst_dim.cells; p++) buf_[b_][p] = nodata;
           }
         }
       }
@@ -848,11 +850,16 @@ const char *projection = NULL;
   
       /** check if we can warp the image in one operation or need chunks
       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ **/
-      chunk_nx = src_nx; chunk_ny = src_ny; k = 0;
-      //while ((src_dim = chunk_nx*chunk_ny*(size_t)nb*sizeof(short)) > INT_MAX){
-      while ((src_dim = (size_t)chunk_nx*(size_t)chunk_ny*(size_t)chunk_nb*sizeof(short)) > max_mem){
-        if (k % 2 == 0) chunk_nx/=2; else chunk_ny/=2;
-        k++;}
+      chunk_dim = src_dim; k = 0;
+      while ((chunk_size = chunk_dim.cells*(size_t)chunk_nb*sizeof(short)) > max_mem){
+        if (k % 2 == 0){
+          chunk_dim.cols/=2; 
+        } else {
+          chunk_dim.rows/=2;
+        }
+        chunk_dim.cells = chunk_dim.cols*chunk_dim.rows;
+        k++;
+      }
       
       #ifdef FORCE_DEBUG
       printf("\nImage brick is warped in %d chunks.\n", k+1);
@@ -863,10 +870,10 @@ const char *projection = NULL;
       if (woper.Initialize(wopt) == CE_Failure){
           printf("could not initialize warper. "); return FAILURE;}
   
-      for (i=0; i<src_ny; i+=chunk_ny){
-      for (j=0; j<src_nx; j+=chunk_nx){
-        if (woper.WarpRegionToBuffer(0, 0, dst_nx, dst_ny, buf_[0],
-          dt, j, i, chunk_nx, chunk_ny) == CE_Failure){
+      for (i=0; i<src_dim.rows; i+=chunk_dim.rows){
+      for (j=0; j<src_dim.cols; j+=chunk_dim.cols){
+        if (woper.WarpRegionToBuffer(0, 0, dst_dim.cols, dst_dim.rows, buf_[0],
+          dt, j, i, chunk_dim.cols, chunk_dim.rows) == CE_Failure){
           printf("could not warp. "); return FAILURE;}
       }
       }
@@ -879,8 +886,8 @@ const char *projection = NULL;
       papszWarpOptions = NULL;
     
       for (b_=0; b_<chunk_nb; b_++){
-        re_alloc((void**)&src->vshort[b_+b], src_nc, dst_nc, sizeof(short));
-        memmove(src->vshort[b_+b], buf_[b_], dst_nc*sizeof(short));
+        re_alloc((void**)&src->vshort[b_+b], src_dim.cells, dst_dim.cells, sizeof(short));
+        memmove(src->vshort[b_+b], buf_[b_], dst_dim.cells*sizeof(short));
       }
   
       free((void*)buf_[0]); free((void*)buf_); buf_ = NULL;
@@ -898,8 +905,7 @@ const char *projection = NULL;
   
     // update geo metadata
     set_brick_geotran(src, dst_geotran);
-    set_brick_ncols(src, dst_nx);
-    set_brick_nrows(src, dst_ny);
+    set_brick_image_dim(src, &dst_dim);
     set_brick_proj(src, cube->projection);
   
   
@@ -944,13 +950,14 @@ const char *projection = NULL;
   const char *src_proj = NULL;
   char dst_proj[NPOW_10];
   double dst_geotran[_GT_LEN_];
-  int i, j, p, np, k, k_do;
+  size_t i, j, p, np;
+  int k, k_do;
   int dst_nodata;
-  int nc_done_, nc_done = 0;
+  size_t nc_done_, nc_done = 0;
   int src_nb, dst_nb;
-  int dst_nx, dst_ny;
-  int chunk_nx, chunk_ny;
-  int chunk_xoff, chunk_yoff;
+  dim_t dst_dim;
+  dim_t chunk_dim;
+  size_t chunk_xoff, chunk_yoff;
   float tmp;
   char nthread[NPOW_10];
   char initdata[NPOW_10];
@@ -997,13 +1004,12 @@ const char *projection = NULL;
     get_brick_proj(dst, dst_proj, NPOW_10);
     dst_nodata = get_brick_nodata(dst, 0);
     dst_nb = get_brick_nbands(dst);
-    dst_nx = get_brick_ncols(dst);
-    dst_ny = get_brick_nrows(dst);
+    dst_dim = get_brick_image_dim(dst);
   
     if (dst_b >= dst_nb){
       printf("Requested band %d is out of bounds %d (brick)! ", dst_b, dst_nb); return FAILURE;}
   
-    if ((dst_dataset = GDALCreate(driver, "mem", dst_nx, dst_ny, 1, dt, NULL)) == NULL){
+    if ((dst_dataset = GDALCreate(driver, "mem", dst_dim.cols, dst_dim.rows, 1, dt, NULL)) == NULL){
       printf("could not create dst image. "); return FAILURE;}
     if (GDALSetProjection(dst_dataset, dst_proj)){
       printf("could not set dst projection. "); return FAILURE;}
@@ -1072,10 +1078,10 @@ const char *projection = NULL;
   
     // set nodata in destination image
     if (dst_nodata != 0){
-      #pragma omp parallel shared(dst_nx, dst_ny, dst, dst_b, dst_nodata) default(none) 
+      #pragma omp parallel shared(dst_dim, dst, dst_b, dst_nodata) default(none) 
       {
         #pragma omp for schedule(static)
-        for (p=0; p<dst_nx*dst_ny; p++) set_brick(dst, dst_b, p, dst_nodata);
+        for (p=0; p<dst_dim.cells; p++) set_brick(dst, dst_b, p, dst_nodata);
       }
     }
   
@@ -1083,28 +1089,28 @@ const char *projection = NULL;
     woper.Initialize(wopt);
   
     chunk_xoff = 0; chunk_yoff = 0;
-    chunk_nx = dst_nx; chunk_ny = dst_ny;
+    chunk_dim = dst_dim;
     k = 0, k_do = 0;
   
     // start with whole image, if unsuccessful, warp in chunks
-    while (eErr != CE_None && chunk_ny > 1){
+    while (eErr != CE_None && chunk_dim.rows > 1){
   
       #ifdef FORCE_DEBUG
-      printf("try to warp %d x %d pix, x / y offset %d / %d. ", 
-        chunk_nx, chunk_ny, chunk_xoff, chunk_yoff);
+      printf("try to warp %ld x %ld pix, x / y offset %ld / %ld. ", 
+        chunk_dim.cols, chunk_dim.rows, chunk_xoff, chunk_yoff);
       #endif
   
-      alloc((void**)&buf, chunk_nx*chunk_ny, sizeof(float));
+      alloc((void**)&buf, chunk_dim.cells, sizeof(float));
       if (dst_nodata != 0){
-        #pragma omp parallel shared(chunk_nx, chunk_ny, buf, dst_nodata) default(none) 
+        #pragma omp parallel shared(chunk_dim, buf, dst_nodata) default(none) 
         {
           #pragma omp for schedule(static)
-          for (np=0; np<chunk_nx*chunk_ny; np++) buf[np] = dst_nodata;
+          for (np=0; np<chunk_dim.cells; np++) buf[np] = dst_nodata;
         }
       }
   
       // warp
-      eErr = woper.WarpRegionToBuffer(chunk_xoff, chunk_yoff, chunk_nx, chunk_ny, buf, dt, 0, 0, 0, 0);
+      eErr = woper.WarpRegionToBuffer(chunk_xoff, chunk_yoff, chunk_dim.cols, chunk_dim.rows, buf, dt, 0, 0, 0, 0);
    
       if (eErr == CE_Failure){
   
@@ -1114,10 +1120,11 @@ const char *projection = NULL;
   
         // decrease size
         if (k++ % 2 == 0){
-          tmp = ceil(chunk_ny/2.0); chunk_ny = tmp;
+          tmp = ceil(chunk_dim.rows/2.0); chunk_dim.rows = tmp;
         } else {
-          tmp = ceil(chunk_nx/2.0); chunk_nx = tmp;
+          tmp = ceil(chunk_dim.cols/2.0); chunk_dim.cols = tmp;
         }
+        chunk_dim.cells = chunk_dim.rows * chunk_dim.cols;
   
       } else {
   
@@ -1128,15 +1135,15 @@ const char *projection = NULL;
         // copy buffer to image
         nc_done_ = 0;
         
-        #pragma omp parallel private(j, p, np) shared(dst_nx, dst_ny, chunk_nx, chunk_ny, chunk_xoff, chunk_yoff, buf, dst, dst_b, dst_nodata) reduction(+: nc_done_) default(none) 
+        #pragma omp parallel private(j, p, np) shared(dst_dim, chunk_dim, chunk_xoff, chunk_yoff, buf, dst, dst_b, dst_nodata) reduction(+: nc_done_) default(none) 
         {
   
           #pragma omp for schedule(static)
-          for (i=chunk_yoff; i<chunk_yoff+chunk_ny; i++){
-          for (j=chunk_xoff; j<chunk_xoff+chunk_nx; j++){
-            if (i >= dst_ny || j >= dst_nx) continue;
-            p  = i*dst_nx+j;
-            np = (i-chunk_yoff)*chunk_nx + (j-chunk_xoff);
+          for (i=chunk_yoff; i<chunk_yoff+chunk_dim.rows; i++){
+          for (j=chunk_xoff; j<chunk_xoff+chunk_dim.cols; j++){
+            if (i >= dst_dim.rows || j >= dst_dim.cols) continue;
+            p  = i*dst_dim.cols+j;
+            np = (i-chunk_yoff)*chunk_dim.cols + (j-chunk_xoff);
             set_brick(dst, dst_b, p, buf[np]);
             buf[np] = dst_nodata;
             nc_done_++;
@@ -1148,11 +1155,11 @@ const char *projection = NULL;
         nc_done += nc_done_;
   
         // if part of image is still missing, increase offsets
-        if (nc_done < dst_nx*dst_ny){
-          if (chunk_yoff < dst_ny && chunk_ny < dst_ny){
-            chunk_yoff+=chunk_ny;
-          } else if (chunk_xoff < dst_nx && chunk_nx < dst_nx){
-            chunk_xoff+=chunk_nx;
+        if (nc_done < dst_dim.cells){
+          if (chunk_yoff < dst_dim.rows && chunk_dim.rows < dst_dim.rows){
+            chunk_yoff+=chunk_dim.rows;
+          } else if (chunk_xoff < dst_dim.cols && chunk_dim.cols < dst_dim.cols){
+            chunk_xoff+=chunk_dim.cols;
           }
           eErr = CE_Failure;
         } else {

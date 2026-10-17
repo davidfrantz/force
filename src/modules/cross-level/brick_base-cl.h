@@ -58,20 +58,18 @@ typedef struct {
   bool initialize;       // initialize file before writing to it?
 
   int nb;                // number of images
-  int nx;                // number of columns
-  int ny;                // number of rows
-  int nc;                // number of cells
-  int cx;                // number of chunking columns
-  int cy;                // number of chunking rows
-  int cc;                // number of chunking cells
+  dim_t dim_image;       // # image dimensions
+  dim_t dim_chunk;       // # chunk dimensions (number of chunks in image)
+  dim_t dim_punit;       // # processing unit dimensions (number of pixels in chunk)
   double geotran[6];     // geotransformation
-  double width;           // width of image (nx*res)
-  double height;          // height of image (ny*res)
-  double cwidth;          // chunking width of image (nx*res)
-  double cheight;         // chunking height of image (ny*res)
-  int chunk[2];           // ID of chunk
-  dim_t dim_chunk;        // # chunks dimensions
-  int tile[2];            // ID of tile
+  double width;          // width of image (nx*res)
+  double height;         // height of image (ny*res)
+  double width_punit;    // width of processing unit / chunk (nx*res)
+  double height_punit;   // height of processing unit / chunk (ny*res)
+  int chunk[2];          // ID of chunk  --- NOTE: this should become size_t in the future, but right now it
+  // is used in a way that it may be negative, so we cannot change it to size_t yet
+
+  int tile[2];           // ID of tile --- tiles can be negative, so we cannot change it to size_t
   string_t proj;      // projection
 
   string_t par;       // parameterization
@@ -95,9 +93,9 @@ typedef struct {
     
 } brick_t;
 
-int      allocate_brick_bands(brick_t *brick, int nb, int nc, int datatype);
+int      allocate_brick_bands(brick_t *brick, int nb, size_t nc, int datatype);
 int      reallocate_brick_bands(brick_t *brick, int nb);
-brick_t *allocate_brick(int nb, int nc, int datatype);
+brick_t *allocate_brick(int nb, size_t nc, int datatype);
 int      reallocate_brick(brick_t *brick, int nb);
 void     free_brick_bands(brick_t *brick);
 void     free_brick(brick_t *brick);
@@ -147,29 +145,33 @@ void     set_brick_byte(brick_t *brick, size_t byte);
 int      get_brick_byte(brick_t *brick);
 void     set_brick_nbands(brick_t *brick, int nb);
 int      get_brick_nbands(brick_t *brick);
-void     set_brick_ncols(brick_t *brick, int nx);
-int      get_brick_ncols(brick_t *brick);
-void     set_brick_nrows(brick_t *brick, int ny);
-int      get_brick_nrows(brick_t *brick);
-void     set_brick_ncells(brick_t *brick, int nc);
-int      get_brick_ncells(brick_t *brick);
+void     set_brick_image_dim(brick_t *brick, dim_t *dim);
+dim_t    get_brick_image_dim(brick_t *brick);
+//void     set_brick_ncols(brick_t *brick, size_t nx);
+//size_t   get_brick_ncols(brick_t *brick);
+//void     set_brick_nrows(brick_t *brick, size_t ny);
+//size_t   get_brick_nrows(brick_t *brick);
+//void     set_brick_ncells(brick_t *brick, size_t nc);
+//size_t   get_brick_ncells(brick_t *brick);
 size_t   get_brick_size(brick_t *brick);
-void     set_brick_chunkncols(brick_t *brick, int cx);
-int      get_brick_chunkncols(brick_t *brick);
-void     set_brick_chunknrows(brick_t *brick, int cy);
-int      get_brick_chunknrows(brick_t *brick);
-void     set_brick_chunkncells(brick_t *brick, int cc);
-int      get_brick_chunkncells(brick_t *brick);
-void     set_brick_chunkx(brick_t *brick, int chunkx);
-int      get_brick_chunkx(brick_t *brick);
-void     set_brick_chunky(brick_t *brick, int chunky);
-int      get_brick_chunky(brick_t *brick);
-void     set_brick_chunk_dim_x(brick_t *brick, int ncol);
-void     set_brick_chunk_dim_y(brick_t *brick, int nrow);
+void     set_brick_punit_dim(brick_t *brick, dim_t *dim);
+dim_t    get_brick_punit_dim(brick_t *brick);
+//void     set_brick_chunkncols(brick_t *brick, size_t nx);
+//size_t   get_brick_chunkncols(brick_t *brick);
+//void     set_brick_chunknrows(brick_t *brick, size_t ny);
+//size_t   get_brick_chunknrows(brick_t *brick);
+//void     set_brick_chunkncells(brick_t *brick, size_t nc);
+//size_t   get_brick_chunkncells(brick_t *brick);
+void     set_brick_chunkx(brick_t *brick, size_t chunkx);
+size_t   get_brick_chunkx(brick_t *brick);
+void     set_brick_chunky(brick_t *brick, size_t chunky);
+size_t   get_brick_chunky(brick_t *brick);
+//void     set_brick_chunk_dim_x(brick_t *brick, size_t ncol);
+//void     set_brick_chunk_dim_y(brick_t *brick, size_t nrow);
+//size_t   get_brick_chunk_dim_y(brick_t *brick);
+//size_t   get_brick_chunk_dim_n(brick_t *brick);
+//size_t   get_brick_chunk_dim_x(brick_t *brick);
 void     set_brick_chunk_dim(brick_t *brick, dim_t *dim);
-int get_brick_chunk_dim_x(brick_t *brick);
-int get_brick_chunk_dim_y(brick_t *brick);
-int get_brick_chunk_dim_n(brick_t *brick);
 dim_t    get_brick_chunk_dim(brick_t *brick);
 void     set_brick_tilex(brick_t *brick, int tx);
 int      get_brick_tilex(brick_t *brick);
@@ -190,10 +192,10 @@ void     set_brick_width(brick_t *brick, double width);
 double   get_brick_width(brick_t *brick);
 void     set_brick_height(brick_t *brick, double height);
 double   get_brick_height(brick_t *brick);
-void     set_brick_chunkwidth(brick_t *brick, double cwidth);
-double   get_brick_chunkwidth(brick_t *brick);
-void     set_brick_chunkheight(brick_t *brick, double cheight);
-double   get_brick_chunkheight(brick_t *brick);
+void     set_brick_punit_width(brick_t *brick, double width);
+double   get_brick_punit_width(brick_t *brick);
+void     set_brick_punit_height(brick_t *brick, double height);
+double   get_brick_punit_height(brick_t *brick);
 void     set_brick_proj(brick_t *brick, const char *proj);
 void     get_brick_proj(brick_t *brick, char proj[], size_t size);
 void     set_brick_par(brick_t *brick, const char *par);
@@ -202,7 +204,7 @@ void     set_brick_save(brick_t *brick, int b, bool save);
 bool     get_brick_save(brick_t *brick, int b);
 void     set_brick_nodata(brick_t *brick, int b, int nodata);
 int      get_brick_nodata(brick_t *brick, int b);
-bool     is_brick_nodata(brick_t *brick, int b, int p);
+bool     is_brick_nodata(brick_t *brick, int b, size_t p);
 void     set_brick_scale(brick_t *brick, int b, float scale);
 float    get_brick_scale(brick_t *brick, int b);
 void     set_brick_wavelength(brick_t *brick, int b, float wavelength);
@@ -240,8 +242,8 @@ int      get_brick_timezone(brick_t *brick, int b);
 int      get_brick_timezone(brick_t *brick, int b);
 void     get_brick_compactdate(brick_t *brick, int b, char formatted[], size_t size);
 void     get_brick_longdate(brick_t *brick, int b, char formatted[], size_t size);
-void     set_brick(brick_t *brick, int b, int p, float val);
-float    get_brick(brick_t *brick, int b, int p);
+void     set_brick(brick_t *brick, int b, size_t p, float val);
+float    get_brick(brick_t *brick, int b, size_t p);
 short  **get_bands_short(brick_t *brick);
 small  **get_bands_small(brick_t *brick);
 float  **get_bands_float(brick_t *brick);

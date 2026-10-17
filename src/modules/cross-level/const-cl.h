@@ -50,13 +50,13 @@ typedef struct {
 
 // array indexing struct
 typedef struct {
-  int rows, cols, cells;
+  size_t rows, cols, cells;
 } dim_t;
 
 // sequence struct
 typedef struct {
   float start, end, step;
-  int n;
+  size_t n;
   float *values;
 } seq_t;
 
