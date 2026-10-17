@@ -60,6 +60,8 @@ struct dirent *ep;
 
   if (dp != NULL){
 
+    int count = 0;
+
     while ((ep = readdir(dp))){
 
       if (strstr(ep->d_name, pattern)){
@@ -122,6 +124,8 @@ struct dirent *ep;
   if (dp != NULL){
 
     while ((ep = readdir(dp))){
+
+      int count = 0;
 
       if (strncmp(ep->d_name, pattern, strlen(pattern)) == 0){
 
