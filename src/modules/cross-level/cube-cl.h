@@ -71,6 +71,8 @@ cube_t *read_datacube_def(char *d_read);
 cube_t *copy_datacube_def(char *d_read, char *d_write);
 int tile_find(double ulx, double uly, double *tilex, double *tiley, int *idx, int *idy, cube_t *cube);
 int tile_align(cube_t *cube, double ulx, double uly, double *new_ulx, double *new_uly);
+int tile_align_resolution(cube_t *cube, double resolution, double ulx, double uly, double *new_ulx, double *new_uly);
+
 
 #ifdef __cplusplus
 }

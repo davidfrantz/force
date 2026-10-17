@@ -465,3 +465,39 @@ int idx, idy;   // id of first tile
   return SUCCESS;
 }
 
+
+/** Align coordinates with tiling scheme, but with a specified pixel size
++++ This function takes a coordinate, and returns the nearest coordinate
++++ (to the topleft) that aligns with the tiling scheme. This way, e.g.
++++ a warping operation can exactly match the tiles
+--- cube:    datacube
+--- ulx:     upper left x coordinate of image
+--- uly:     upper left y coordinate of image
+--- new_ulx: aligned upper left x coordinate of image (returned)
+--- new_uly: aligned upper left y coordinate of image (returned)
++++ Return:  SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int tile_align_resolution(cube_t *cube, double resolution, double ulx, double uly, double *new_ulx, double *new_uly){
+double t0x, t0y; // ul x/y of first tile
+int idx, idy;   // id of first tile
+
+
+  // ul coordinate of 1st tile: t0x, t0y
+  tile_find(ulx, uly, &t0x, &t0y, &idx, &idy, cube);
+  
+  // shift t0x to the right until it is right of image-ul, 
+  // then step back one pixel and assign as new image-ul
+  while (t0x < ulx) t0x += resolution;
+  t0x -= resolution;
+  *new_ulx = t0x;
+
+  // shift t0y to the bottom until it is below image-ul, 
+  // then step back one pixel and assign as new image-ul
+  while (t0y > uly) t0y -= resolution;
+  t0y += resolution;
+  *new_uly = t0y;
+
+  return SUCCESS;
+}
+
+
