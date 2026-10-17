@@ -64,8 +64,8 @@ typedef struct {
   int nodata;
   int saturation;
   int nband;
-  double ulx, uly;
-  int nrow, ncol, ncell;
+  coord_t ul;
+  dim_t dim;
   double res;
   int epsg;
   int tier;

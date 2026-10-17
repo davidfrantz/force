@@ -70,7 +70,7 @@ int parse_metadata_landsat_platform(char *d_level1, lnd_mtd_t *mtd){
   char metaname[NPOW_10];
 
   // scan directory for MTL.txt file
-  if (findfile_pattern(d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
+  if (findfile_pattern(d_level1, "MTL", ".txt", 0, metaname, NPOW_10) != SUCCESS){
     free_metadata_landsat(mtd);
     RETURN_ERROR("Unable to find Landsat metadata (MTL file) in %s", d_level1); 
   }
@@ -89,7 +89,7 @@ int parse_metadata_landsat_platform(char *d_level1, lnd_mtd_t *mtd){
   // process line by line
   while (fgets(buffer, NPOW_10, fp) != NULL){
 
-    #ifdef FORCE_DEBUG
+     #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
     printf("MTL: %s", buffer);
     #endif
 
@@ -165,8 +165,8 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
     mtd->k2[b] = FLT_MIN;
   }
   
-  mtd->ulx   = DBL_MIN; 
-  mtd->uly   = DBL_MIN;
+  mtd->ul.x   = DBL_MIN; 
+  mtd->ul.y   = DBL_MIN;
 
   int temp_nrow = 0, temp_ncol = 0;
   double temp_res = 0.0;
@@ -176,7 +176,7 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
   char metaname[NPOW_10];
 
   // scan directory for MTL.txt file
-  if (findfile_pattern(d_level1, "MTL", ".txt", metaname, NPOW_10) != SUCCESS){
+  if (findfile_pattern(d_level1, "MTL", ".txt", 0, metaname, NPOW_10) != SUCCESS){
     free_metadata_landsat(mtd);
     RETURN_ERROR("Unable to find Landsat metadata (MTL file) in %s", d_level1); 
   }
@@ -195,7 +195,7 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
   // process line by line
   while (fgets(buffer, NPOW_10, fp) != NULL){
 
-    #ifdef FORCE_DEBUG
+    #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
     printf("MTL: %s", buffer);
     #endif
 
@@ -229,9 +229,9 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
     } else if (strings_equal(tag, "SCENE_CENTER_TIME")){
       copy_string(mtd->time_char, NPOW_10, tokenptr);
     } else if (strings_equal(tag, "REFLECTIVE_SAMPLES")){
-      char_to_int(tokenptr, &mtd->ncol);
+      char_to_int(tokenptr, &mtd->dim.cols);
     } else if (strings_equal(tag, "REFLECTIVE_LINES")){
-      char_to_int(tokenptr, &mtd->nrow);
+      char_to_int(tokenptr, &mtd->dim.rows);
     } else if (strings_equal(tag, "GRID_CELL_SIZE_REFLECTIVE")){
       char_to_double(tokenptr, &mtd->res);
     } else if (strings_equal(tag, "THERMAL_SAMPLES")){
@@ -241,11 +241,11 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
     } else if (strings_equal(tag, "GRID_CELL_SIZE_THERMAL")){
       char_to_double(tokenptr, &temp_res);
     } else if (strings_equal(tag, "CORNER_UL_PROJECTION_X_PRODUCT")){
-      char_to_double(tokenptr, &mtd->ulx);
-      mtd->ulx -= 15.0; // adjust for pixel center
+      char_to_double(tokenptr, &mtd->ul.x);
+      mtd->ul.x -= 15.0; // adjust for pixel center
     } else if (strings_equal(tag, "CORNER_UL_PROJECTION_Y_PRODUCT")){
-      char_to_double(tokenptr, &mtd->uly);
-      mtd->uly += 15.0; // adjust for pixel center
+      char_to_double(tokenptr, &mtd->ul.y);
+      mtd->ul.y += 15.0; // adjust for pixel center
     } else if (strings_equal(tag, "UTM_ZONE")){
       #ifdef FORCE_MAGIC
       fprintf(stderr, "Warning: Using magic number offset for UTM EPSG codes\n");
@@ -392,13 +392,13 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
     RETURN_ERROR("Could not parse Landsat acquisition date/time.");
   }
 
-  if (mtd->nrow < 1 || mtd->ncol < 1){
+  if (mtd->dim.rows < 1 || mtd->dim.cols < 1){
     free_metadata_landsat(mtd);
     RETURN_ERROR("Could not retrieve Landsat image dimensions.");
   }
-  mtd->ncell = mtd->nrow * mtd->ncol;
+  mtd->dim.cells = mtd->dim.rows * mtd->dim.cols;
 
-  if (mtd->nrow != temp_nrow || mtd->ncol != temp_ncol){
+  if (mtd->dim.rows != temp_nrow || mtd->dim.cols != temp_ncol){
     free_metadata_landsat(mtd);
     RETURN_ERROR("Reflective and thermal image dimensions do not match.");
   }
@@ -413,7 +413,7 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
     RETURN_ERROR("Reflective and thermal image resolutions do not match.");
   }
 
-  if (dequal(mtd->ulx, DBL_MIN) || dequal(mtd->uly, DBL_MIN)){
+  if (dequal(mtd->ul.x, DBL_MIN) || dequal(mtd->ul.y, DBL_MIN)){
     free_metadata_landsat(mtd);
     RETURN_ERROR("Could not retrieve Landsat image upper-left coordinates.");
   }
@@ -477,8 +477,8 @@ int parse_metadata_landsat_mtl(char *d_level1, rtd_t *rtd, lnd_mtd_t *mtd){
   printf("  WRS type = %d, path = %d, row = %d, path/row = %s\n", mtd->wrs_type, mtd->wrs_path, mtd->wrs_row, mtd->wrs_path_row);
   printf("  acquisition date = %s, time = %s\n",  mtd->date_char, mtd->time_char);
   print_date(&mtd->date);
-  printf("  image dimensions = %d x %d, resolution = %.2f\n", mtd->ncol, mtd->nrow, mtd->res);
-  printf("  upper-left coordinates = (%.2f, %.2f), EPSG = %d\n", mtd->ulx, mtd->uly, mtd->epsg);
+  printf("  image dimensions = %d x %d, resolution = %.2f\n", mtd->dim.cols, mtd->dim.rows, mtd->res);
+  printf("  upper-left coordinates = (%.2f, %.2f), EPSG = %d\n", mtd->ul.x, mtd->ul.y, mtd->epsg);
   printf("  nodata = %d, saturation = %d\n", mtd->nodata, mtd->saturation);
   for (int b=0; b<mtd->nband; b++){
     printf("  band %d:\n", b+1);
