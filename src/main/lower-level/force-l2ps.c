@@ -163,11 +163,10 @@ int opt;
 
 int main( int argc, char *argv[] ){
 args_t args;
-int c;
 par_ll_t *pl2  = NULL; // can be renamed to par, once par is not global anymore...
 rtd_t rtd  = {0};
 meta_t   *meta = NULL;
-multicube_t   *multicube = NULL;
+cube_t   *cube = NULL;
 atc_t    *atc  = NULL;
 
 top_t   *TOP = NULL;
@@ -208,21 +207,7 @@ GDALDriverH driver;
   if (parse_param_lower(pl2) != SUCCESS){
     printf("Parsing parameter file failed.\n"); return FAILURE;}
 
-  cite_me(_CITE_FORCE_);
-  cite_me(_CITE_L2PS_);
-
-  // parse metadata
-  if (parse_metadata(pl2, &rtd, &meta) == FAILURE){
-    printf("Parsing metadata failed.\n"); return FAILURE;}
-
-  // initialize image struct
-  if (init_level1(pl2, &rtd, meta, &DN) != SUCCESS){
-    printf("Initializing Level-1 image failed.\n"); return FAILURE;}
-
-  // write and init a new datacube
-  if ((multicube = start_multicube(pl2, DN)) == NULL){
-    printf("Starting datacube(s) failed.\n"); return FAILURE;}
-
+    
   // open threads
   if (omp_get_thread_limit() < (pl2->nthread)){
     printf("not enough threads allowed. Reduce NTHREAD.\n"); return FAILURE;}
@@ -231,96 +216,119 @@ GDALDriverH driver;
   omp_set_max_active_levels(2);
 
 
-  // do processing for every datacube [not the best solution, but more easy to implenet atm]
-  for (c=0; c<multicube->n; c++){
-
-    // skip inactive cubes
-    if (!multicube->cover[c]) continue;
-
-    /** read Digital Numbers + projection
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (read_level1(meta, DN, pl2) != SUCCESS){
-      printf("reading DNs failed.\n"); return FAILURE;}
-
-    if ((atc = allocate_atc(pl2, &rtd, meta, DN)) == NULL){
-      printf("Allocating atc failed.\n"); return FAILURE;}
+  // push general citation
+  cite_me(_CITE_FORCE_);
+  cite_me(_CITE_L2PS_);
 
 
-    /** initialize Quality Assurance Information
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (bounds_level1(meta, DN, &QAI, pl2) == FAILURE){
-      printf("Compiling nodata / saturation masks failed.\n"); return FAILURE;}
+  // parse metadata
+  if (parse_metadata(pl2, &rtd, &meta) == FAILURE){
+    printf("Parsing metadata failed.\n"); return FAILURE;}
 
 
-    /** warp and rasterize AOI
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (strcmp(pl2->f_aoi, "NULL") != 0){
-      AOI = rasterize_vector_from_disc(pl2->f_aoi, DN);
-    }
+  // initialize image struct
+  if (init_level1_brick(pl2, &rtd, meta, &DN) != SUCCESS){
+    printf("Initializing Level-1 image failed.\n"); return FAILURE;}
+
+  // write and init a new datacube
+  if ((cube = construct_datacube(pl2, meta)) == NULL){
+    printf("Starting datacube(s) failed.\n"); return FAILURE;}
 
 
-    /** sun-target-view geometry
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (sun_target_view(pl2, meta, atc, QAI) == FAILURE){
-      printf("computing sun/view geometry failed.\n"); return FAILURE;}
-
-
-    /** TOA reflectance + brightness temperature
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (convert_level1(meta, atc, DN, &TOA, QAI) != SUCCESS){
-      printf("DN to TOA conversion failed.\n"); return FAILURE;}
-    free_brick_bands(DN);
-
-
-    /** read/reproject/ckeck DEM and compute slope/aspect
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (compile_topography(pl2, atc, &TOP, QAI) != SUCCESS){
-      printf("unable to compile topography.\n"); return FAILURE;}
-
-
-   /** cloud and cloud shadow detection
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    err = detect_clouds(pl2, meta, atc, TOA, TOP->dem, TOP->exp, QAI);
-    if (err == FAILURE){
-      printf("error in cloud module.\n"); return FAILURE;
-    } else if (err == CANCEL){
-      proctime_print("Processing time", TIME);
-      return SUCCESS;
-    }
-
-
-   /** coregistration
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (coregister(pl2, meta, TOA, QAI) != SUCCESS){
-      printf("coregistration failed.\n"); return FAILURE;}
-
-
-  /** resolution merge
+  /** read Digital Numbers + projection
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (resolution_merge(pl2, meta, TOA, QAI) != SUCCESS){
-      printf("unable to merge resolutions.\n"); return FAILURE;}
+  if (read_level1(&rtd, meta, cube, DN, pl2) != SUCCESS){
+    printf("reading DNs failed.\n"); return FAILURE;}
 
 
-    /** radiometric correction
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if ((LEVEL2 = radiometric_correction(pl2, &rtd, meta, atc, multicube->cube[c], TOA, QAI, AOI, TOP, &nprod)) == NULL){
-      printf("Error in radiometric module.\n"); return FAILURE;}
-    free_atc(atc);
-
-
-    /** reprojection, tiling and output
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-    if (cube_level2(pl2, meta, multicube->cube[c], LEVEL2, nprod) != SUCCESS){
-      printf("Error in geometric module.\n"); return FAILURE;}
-
+  /** compute the extent of the datacube and check if we have coverage
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (!datacube_extent(pl2, cube, DN)){
+    printf("No coverage of datacube / allowd-tiles by input image.\n");
+    return FAILURE;
   }
+
+
+  /** allocate and initialize atmospheric correction parameters
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if ((atc = allocate_atc(pl2, &rtd, meta, DN)) == NULL){
+    printf("Allocating atc failed.\n"); return FAILURE;}
+
+
+  /** initialize Quality Assurance Information
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (bounds_level1(meta, DN, &QAI, pl2) == FAILURE){
+    printf("Compiling nodata / saturation masks failed.\n"); return FAILURE;}
+
+
+  /** warp and rasterize AOI
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (strcmp(pl2->f_aoi, "NULL") != 0){
+    AOI = rasterize_vector_from_disc(pl2->f_aoi, DN);
+  }
+
+
+  /** sun-target-view geometry
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (sun_target_view(pl2, meta, atc, QAI) == FAILURE){
+    printf("computing sun/view geometry failed.\n"); return FAILURE;}
+
+
+  /** TOA reflectance + brightness temperature
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (convert_level1(meta, atc, DN, &TOA, QAI) != SUCCESS){
+    printf("DN to TOA conversion failed.\n"); return FAILURE;}
+  free_brick_bands(DN);
+
+
+  /** read/reproject/ckeck DEM and compute slope/aspect
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (compile_topography(pl2, atc, &TOP, QAI) != SUCCESS){
+    printf("unable to compile topography.\n"); return FAILURE;}
+
+
+  /** cloud and cloud shadow detection
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  err = detect_clouds(pl2, meta, atc, TOA, TOP->dem, TOP->exp, QAI);
+  if (err == FAILURE){
+    printf("error in cloud module.\n"); return FAILURE;
+  } else if (err == CANCEL){
+    proctime_print("Processing time", TIME);
+    return SUCCESS;
+  }
+
+
+  /** coregistration
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (coregister(pl2, meta, TOA, QAI) != SUCCESS){
+    printf("coregistration failed.\n"); return FAILURE;}
+
+
+/** resolution merge
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (resolution_merge(pl2, meta, TOA, QAI) != SUCCESS){
+    printf("unable to merge resolutions.\n"); return FAILURE;}
+
+
+  /** radiometric correction
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if ((LEVEL2 = radiometric_correction(pl2, &rtd, meta, atc, cube, TOA, QAI, AOI, TOP, &nprod)) == NULL){
+    printf("Error in radiometric module.\n"); return FAILURE;}
+  free_atc(atc);
+
+
+  /** reprojection, tiling and output
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+  if (cube_level2(pl2, meta, cube, LEVEL2, nprod) != SUCCESS){
+    printf("Error in geometric module.\n"); return FAILURE;}
+
 
   cite_push(pl2->d_level2);
   
   free_param_lower(pl2);
   free_runtime_data(&rtd);
   free_metadata(meta);
-  free_multicube(multicube);
+  free_datacube(cube);
   free_brick(DN);
 
   CPLPopErrorHandler();
