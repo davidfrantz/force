@@ -1100,7 +1100,7 @@ int tvalid = 0;
       for (b=0; b<nb; b++){
 
         // if any layer void --> boundary
-        if (b != b_cirrus && dn_[b][p] == 0){ off_[p] = true; break;}
+        if (b != b_cirrus && dn_[b][p] == meta->nodata){ off_[p] = true; break;}
 
         // if any (non-temp) layer saturated
         if (b != b_temp && dn_[b][p] >= meta->saturation){ set_saturation(qai, p, true); break;}
