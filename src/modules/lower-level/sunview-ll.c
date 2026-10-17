@@ -330,6 +330,150 @@ double dx, dy;
 }
 
 
+/** This function computes the view angles for Sentinel-2 L1B data. It averages the view angles across all bands, applies Earth curvature correction to the view zenith angles, and applies heading correction to the view azimuth angles.
+--- rtd: runtime data containing view angles and other parameters
+--- top: coordinates of the top-left corner of the image
+--- bottom: coordinates of the bottom-right corner of the image
+--- view_angle_row: 2D array to store the computed view angles (zenith and azimuth)
+--- dim: dimensions of the image
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int view_angles_sentinel2_l1b(rtd_t *rtd, coord_t *top, coord_t *bottom, float ***view_angle_row, dim_t *dim){
+
+  if (rtd == NULL || top == NULL || bottom == NULL || view_angle_row == NULL || dim == NULL){
+    fprintf(stderr, "Error: Invalid input.\n");
+    return FAILURE;
+  }
+
+  if (!rtd->view_angles.loaded || rtd->view_angles.tan_psi == NULL || rtd->view_angles.ncol == NULL){
+    fprintf(stderr, "Error: View angles runtime data is not loaded.\n");
+    return FAILURE;
+  }
+
+
+  // average the bands (at lowest resolution)
+  // no need to do it at the highest resolution, this would be overkill
+  // this is not optimal, but is what FORCE has been doing for a long time, 
+  // so keep the same behavior for now
+
+  int ncol_min = rtd->view_angles.ncol[0];
+  for (int b=1; b<rtd->view_angles.nbands; b++){
+    if (rtd->view_angles.ncol[b] < ncol_min) ncol_min = rtd->view_angles.ncol[b];
+  }
+
+  float **tan_psi_average = NULL;
+  alloc_2D((void***)&tan_psi_average, 2, ncol_min, sizeof(float));
+
+  for (int b=0; b<rtd->view_angles.nbands; b++){
+
+    int step = rtd->view_angles.ncol[b] / ncol_min;
+
+    for (int c=0; c<ncol_min; c++){
+      if ((c*step) < rtd->view_angles.ncol[b]){
+        tan_psi_average[_X_][c] += rtd->view_angles.tan_psi[_X_][b][c*step];
+        tan_psi_average[_Y_][c] += rtd->view_angles.tan_psi[_Y_][b][c*step];
+      }
+    }
+  }
+
+  for (int c=0; c<ncol_min; c++){
+    tan_psi_average[_X_][c] /= rtd->view_angles.nbands;
+    tan_psi_average[_Y_][c] /= rtd->view_angles.nbands;
+  }
+
+
+  // convert the average tan_psi to view zenith and view azimuth angles
+  float **view_angle = NULL;
+  alloc_2D((void***)&view_angle, 2, ncol_min, sizeof(float));
+
+  for (int c=0; c<ncol_min; c++){
+    view_angle[ZEN][c] = atan(
+      sqrt(
+        tan_psi_average[_X_][c]*tan_psi_average[_X_][c] + 
+        tan_psi_average[_Y_][c]*tan_psi_average[_Y_][c]
+      ));
+    view_angle[AZI][c] = atan2(
+      tan_psi_average[_X_][c], tan_psi_average[_Y_][c]);
+  }
+
+  if (tan_psi_average != NULL) free_2D((void**)tan_psi_average, 2);
+  tan_psi_average = NULL;
+
+
+
+  // apply Earth curvature correction to the view zenith angles
+
+  double center_latitude = (top->y + bottom->y) / 2.0;
+
+  double earth_radius = sqrt(
+    (
+      pow(WGS84_A, 4) * pow(cos(center_latitude), 2) + 
+      pow(WGS84_B, 4) * pow(sin(center_latitude), 2)
+    ) /  
+    (
+      pow(WGS84_A, 2) * pow(cos(center_latitude), 2) + 
+      pow(WGS84_B, 2) * pow(sin(center_latitude), 2)
+    )
+  );
+
+
+  double orbital_radius = WGS84_A + rtd->satellite_altitude.value;
+  double satellite_altitude = orbital_radius - earth_radius;
+  
+  for (int c=0; c<ncol_min; c++){
+    float z = view_angle[ZEN][c];
+    view_angle[ZEN][c] = asin(
+      orbital_radius / earth_radius * sin(z));
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("Earth radius at center latitude: %.2f meters\n", earth_radius);
+  printf("Satellite altitude above ellipsoid: %.2f meters\n", satellite_altitude);
+  printf("View zenith angles (sampled left to right): %.2f, %.2f, %.2f, %.2f, %.2f\n", 
+    view_angle[ZEN][0] * _R2D_CONV_, view_angle[ZEN][ncol_min/4] * _R2D_CONV_, 
+    view_angle[ZEN][ncol_min/2] * _R2D_CONV_, view_angle[ZEN][3*ncol_min/4] * _R2D_CONV_, 
+    view_angle[ZEN][ncol_min-1] * _R2D_CONV_);
+  #endif
+
+  // apply heading correction to the view azimuth angles
+
+  double dlon = bottom->x - top->x;
+  if (dlon >  M_PI) dlon -= 2*M_PI;
+  if (dlon < -M_PI) dlon += 2*M_PI;
+
+  double heading = atan2(
+    cos(bottom->y) * sin(dlon),
+    cos(top->y) * sin(bottom->y) - sin(top->y) * cos(bottom->y) * cos(dlon)
+  );
+
+  if (heading < 0) heading += 2*M_PI;
+  
+  // apply heading correction to the view azimuth angles
+  // the view azimuth angles are measured clockwise from north,
+  // while the heading is measured clockwise from south, so we need to add pi
+  for (int c=0; c<ncol_min; c++){
+    float a = heading - view_angle[AZI][c] + M_PI;
+    view_angle[AZI][c] = fmod(fmod(a, 2*M_PI) + 2*M_PI, 2*M_PI);
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("Heading: %.2f degrees\n", heading * _R2D_CONV_);
+  printf("Heading: %.2f radians\n", heading);
+  printf("View azimuth angles (sampled left to right): %.2f, %.2f, %.2f, %.2f, %.2f\n", 
+    view_angle[AZI][0] * _R2D_CONV_, view_angle[AZI][ncol_min/4] * _R2D_CONV_, 
+    view_angle[AZI][ncol_min/2] * _R2D_CONV_, view_angle[AZI][3*ncol_min/4] * _R2D_CONV_, 
+    view_angle[AZI][ncol_min-1] * _R2D_CONV_);
+  #endif
+  
+  *view_angle_row = view_angle;
+  (*dim).cols = ncol_min;
+  (*dim).rows = 1;
+  (*dim).cells = ncol_min;
+  return SUCCESS;
+}
+
+
+
 /** Compute view angle
 +++ This function computes the view angles
 --- meta:   metadata

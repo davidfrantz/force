@@ -48,6 +48,7 @@ extern "C" {
 double standard_sunzenith(date_t *dmeta, double lat, double lon);
 int sun_target_view(par_ll_t *pl2, meta_t *meta, atc_t *atc, brick_t *QAI);
 int viewgeo(par_ll_t *pl2, brick_t *QAI, atc_t *atc);
+int view_angles_sentinel2_l1b(rtd_t *rtd, coord_t *top, coord_t *bottom, float ***view_angle_row, dim_t *dim);
 int view_angle(meta_t *meta, atc_t *atc, brick_t *QAI, int f, int e, int g);
 
 #ifdef __cplusplus
