@@ -50,7 +50,7 @@ extern "C" {
 
 typedef struct {
   double res;
-  int nrow, ncol, ncell;
+  dim_t dim;
   //float *sun_z, *sun_a;
   float ***zen, ***azi;
   float nodata;
@@ -58,7 +58,7 @@ typedef struct {
 
 typedef struct {
   double res;
-  int nrow, ncol, ncell;
+  dim_t dim;
   float *zen, *azi;
   float nodata;
 } simple_view_grid_t;
@@ -67,18 +67,23 @@ typedef struct {
   char spacecraft_name[NPOW_10];
   char processing_level[NPOW_10];
   char **image_files;
+  char **geolocation_files;
   char granule_path[NPOW_10];
   float processing_baseline;
   date_t date; 
   int nband;
   int ndetector;
-  double ulx, uly;
-  int nrow, ncol, ncell;
+  int detector;
+  coord_t ul;
+  dim_t dim;
   int col_offset, row_offset;
   double res;
+  double lowest_res;
   int epsg;
+  char mgrs[NPOW_10];
   float scale;
   float *offset;
+  float *gain;
   int nodata;
   int saturation;
   seq_t *rsr;
@@ -88,10 +93,12 @@ typedef struct {
 
 void free_metadata_sentinel2(s2_mtd_t *mtd);
 
-int parse_mgrs_tile(char *b_level1, char *mgrs, size_t size);
+int parse_mgrs_tile(char *b_level1, s2_mtd_t *mtd);
 int parse_metadata_sentinel2_platform(char *d_level1, s2_mtd_t *mtd);
-int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd);
-int parse_metadata_sentinel2_granule(char *d_level1, int detector_number, rtd_t *rtd, s2_mtd_t *mtd);
+int parse_metadata_sentinel2_product_level(char *d_level1, s2_mtd_t *mtd);
+int parse_metadata_sentinel2_safe(par_ll_t *pl2, rtd_t *rtd, s2_mtd_t *mtd);
+int parse_metadata_sentinel2_l1c_granule(char *d_level1, int detector_number, rtd_t *rtd, s2_mtd_t *mtd);
+int parse_metadata_sentinel2_l1b_granule(char *d_level1, int detector_number, rtd_t *rtd, s2_mtd_t *mtd);
 
 int construct_sentinel2_view_grid(par_ll_t *pl2, s2_mtd_t *mtd);
 void interpolate_sentinel2_view_grid(s2_mtd_t *mtd);

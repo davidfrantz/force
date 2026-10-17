@@ -33,9 +33,13 @@ void free_metadata_sentinel2(s2_mtd_t *mtd){
   if (mtd == NULL) return;
 
   if (mtd->image_files != NULL) free_2D((void**)mtd->image_files, mtd->nband);
+  if (mtd->geolocation_files != NULL) free_2D((void**)mtd->geolocation_files, mtd->nband);
   if (mtd->offset != NULL) free((void*)mtd->offset);
+  if (mtd->gain != NULL) free((void*)mtd->gain);
   mtd->image_files = NULL;
+  mtd->geolocation_files = NULL;
   mtd->offset = NULL;
+  mtd->gain = NULL;
 
   if (mtd->rsr != NULL){
     for (int b=0; b< mtd->nband; b++){
@@ -63,14 +67,10 @@ void free_metadata_sentinel2(s2_mtd_t *mtd){
 }
 
 
-int parse_mgrs_tile(char *b_level1, char *mgrs, size_t size){
+int parse_mgrs_tile(char *b_level1, s2_mtd_t *mtd){
 
-  if (b_level1 == NULL || mgrs == NULL){
+  if (b_level1 == NULL || mtd == NULL){
     RETURN_ERROR("Invalid input.");
-  }
-
-  if (size < 7){
-    RETURN_ERROR("Buffer for MGRS tile ID is too small.");
   }
 
   char buffer[NPOW_10];
@@ -90,14 +90,14 @@ int parse_mgrs_tile(char *b_level1, char *mgrs, size_t size){
   if (strlen(tokenptr) != 6){
     RETURN_ERROR("Sentinel-2 MGRS tile ID has wrong length. Got %s, expected 6 characters.", tokenptr);
   }
-  copy_string(mgrs, size, tokenptr);
+  copy_string(mtd->mgrs, NPOW_10, tokenptr);
 
-  if (mgrs[0] != 'T'){
-    RETURN_ERROR("Could not retrieve Sentinel-2 MGRS tile ID. Got %s, expected Txxxxxx.", mgrs);
+  if (mtd->mgrs[0] != 'T'){
+    RETURN_ERROR("Could not retrieve Sentinel-2 MGRS tile ID. Got %s, expected Txxxxxx.", mtd->mgrs);
   }
 
   char utm_zone_str[3] = {0};
-  strncpy(utm_zone_str, mgrs+1, 2);
+  strncpy(utm_zone_str, mtd->mgrs+1, 2);
   int utm_zone;
   char_to_int(utm_zone_str, &utm_zone);
   if (utm_zone < 1 || utm_zone > 60){
@@ -116,7 +116,7 @@ int parse_metadata_sentinel2_platform(char *d_level1, s2_mtd_t *mtd){
   
   // scan directory for xml file
   char metaname[NPOW_10];
-  if (findfile_pattern(d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(d_level1, "MTD", ".xml", 0, metaname, NPOW_10) == FAILURE){
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Finding top-level S2 metadata file failed in %s.", d_level1);
   }
@@ -136,7 +136,7 @@ int parse_metadata_sentinel2_platform(char *d_level1, s2_mtd_t *mtd){
   char buffer[NPOW_13];
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
-    #ifdef FORCE_DEBUG
+    #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
     printf("XML: %s", buffer);
     #endif
 
@@ -164,9 +164,54 @@ int parse_metadata_sentinel2_platform(char *d_level1, s2_mtd_t *mtd){
   return SUCCESS;
 }
 
-int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
+// cannot read from metadata as such, as the key is not present in L1B data
+int parse_metadata_sentinel2_product_level(char *d_level1, s2_mtd_t *mtd){
 
-  if (d_level1 == NULL || rtd == NULL || mtd == NULL ||
+  if (d_level1 == NULL || mtd == NULL){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid input.");
+  }
+  
+  // scan directory for xml file
+  char metaname[NPOW_10];
+  if (findfile_pattern(d_level1, "MTD", ".xml", 0, metaname, NPOW_10) == FAILURE){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Finding top-level S2 metadata file failed in %s.", d_level1);
+  }
+
+  char basename[NPOW_10];
+  basename_without_ext(metaname, basename, NPOW_10);
+
+  // remove everything up to and including "MSI"
+  // expected names: 
+  //  - MTD_MSIL1B.xml (.xml already removed)
+  //  - MTD_MSIL1C.xml (.xml already removed)
+  delete_until_match(basename, "MSI", false);
+
+  if (strlen(basename) == 0){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Could not retrieve Sentinel-2 product level from %s.", metaname);
+  }
+
+  if (!strings_equal(basename, "L1B") && 
+      !strings_equal(basename, "L1C")){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Unsuppoorted Sentinel-2 product level (%s) in %s.", basename, metaname);
+  }
+
+  copy_string(mtd->processing_level, NPOW_10, basename);
+
+  #ifdef FORCE_DEBUG
+  printf("metadata parsed from %s:\n", metaname);
+  printf("  product level = %s\n", mtd->processing_level);
+  #endif
+
+  return SUCCESS;
+}
+
+int parse_metadata_sentinel2_safe(par_ll_t *pl2, rtd_t *rtd, s2_mtd_t *mtd){
+
+  if (pl2 == NULL || rtd == NULL || mtd == NULL ||
       rtd->band_mapping.l1_bands == NULL || rtd->band_mapping.domains == NULL || 
       rtd->band_mapping.nbands <= 0){
     free_metadata_sentinel2(mtd);
@@ -180,9 +225,9 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
 
   // scan directory for xml file
   char metaname[NPOW_10];
-  if (findfile_pattern(d_level1, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(pl2->d_level1, "MTD", ".xml", 0, metaname, NPOW_10) == FAILURE){
     free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Finding top-level S2 metadata file failed in %s.", d_level1);
+    RETURN_ERROR("Finding top-level S2 metadata file failed in %s.", pl2->d_level1);
   }
 
   #ifdef FORCE_DEBUG
@@ -198,12 +243,15 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
 
   // allocate memory for image files, offsets, and response functions
   alloc_2D((void***)&mtd->image_files, mtd->nband, NPOW_10, sizeof(char));
+  alloc_2D((void***)&mtd->geolocation_files, mtd->nband, NPOW_10, sizeof(char));
   alloc((void**)&mtd->offset, mtd->nband, sizeof(float));
+  alloc((void**)&mtd->gain,   mtd->nband, sizeof(float));
   alloc((void**)&mtd->rsr, mtd->nband, sizeof(seq_t));
 
   // initialize offsets to FLT_MIN to detect missing values (0 could be a valid offset)
   for (int b=0; b<mtd->nband; b++) mtd->offset[b] = FLT_MIN;
-  
+
+
   // keep track of how many IMAGE_FILE tags we have seen to build a dictionary
   // because many metadata are not tagged with a band_id attribute, but just a running number,
   // so we need to trust that the order of all metadata tags matches the order of bands in the runtime data
@@ -219,59 +267,95 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
 
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
-    #ifdef FORCE_DEBUG
+     #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
     printf("XML: %s", buffer);
     #endif
+
+    // L1B-specific metadata
+    if (strings_equal(mtd->processing_level, "L1B")){
+
+      if (strstr(buffer, "<Spectral_Band_Information") != NULL){
+        int band_id;
+        get_xml_attribute_int_value(buffer, "bandId", &band_id);
+        if (band_id < 0 || band_id >= mtd->nband){
+          free_metadata_sentinel2(mtd);
+          fclose(fp);
+          RETURN_ERROR("Band ID (%s) is out of bounds: %d.", buffer, band_id);
+        }
+        while (fgets(buffer, NPOW_13, fp) != NULL &&
+              strstr(buffer, "</Spectral_Band_Information") == NULL){
+           #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
+          printf("XML: %s", buffer);
+          #endif
+          if (strstr(buffer, "<PHYSICAL_GAINS") != NULL){
+            get_xml_float_value(buffer, &mtd->gain[band_id]);
+          } 
+        }
+
+      }
+
+    }
+
+    // L1C-specific metadata
+    if (strings_equal(mtd->processing_level, "L1C")){
+
+      if (strstr(buffer, "<IMAGE_FILE") != NULL &&
+         !strings_equal(mtd->processing_level, "L1B")){
+        char image_path[NPOW_10];
+        char image_file[NPOW_10];
+        char granule_name[NPOW_10];
+        get_xml_string_value(buffer, image_path, NPOW_10);
+        basename_without_ext(image_path, image_file, NPOW_10);
+        copy_string(granule_name, NPOW_10, image_path);
+        delete_after_match(granule_name, "/IMG_DATA", false);
+        concat_string_2(mtd->granule_path, NPOW_10, pl2->d_level1, granule_name, "/");
+        delete_until_match(image_file, "_B", false);
+        if (strlen(image_file) != 2) continue; // not a reflectance band, e.g., TCI
+        int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, image_file);
+        if (b < 0 || b >= mtd->nband){
+          free_metadata_sentinel2(mtd);
+          fclose(fp);
+          RETURN_ERROR("Band ID (%s) is out of bounds.", image_file);
+        }
+        if (b != b_occurence){
+          free_metadata_sentinel2(mtd);
+          fclose(fp);
+          RETURN_ERROR("Band ID (%s) is out of order, i.e. %d vs %d.", image_file, b_occurence, b);
+        }
+        char image_path_ext[NPOW_10];
+        concat_string_2(image_path_ext, NPOW_10, image_path, ".jp2", "");
+        concat_string_2(mtd->image_files[b], NPOW_10, pl2->d_level1, image_path_ext, "/");
+        b_occurence++;
+      } else if (strstr(buffer, "<PRODUCT_START_TIME") != NULL){
+        split_xml_line(buffer, &xml_open, &xml_value, &xml_close);
+        date_from_utc(&mtd->date, xml_value.string);
+      } else if (strstr(buffer, "<SPECIAL_VALUE_TEXT") != NULL){
+        char special_value_type[NPOW_10];
+        get_xml_string_value(buffer, special_value_type, NPOW_10);
+        if (fgets(buffer, NPOW_13, fp) != NULL){
+          #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
+          printf("XML: %s", buffer);
+          #endif
+          if (strcmp(special_value_type, "SATURATED") == 0){
+            get_xml_int_value(buffer, &mtd->saturation);
+          } else if (strcmp(special_value_type, "NODATA") == 0){
+            get_xml_int_value(buffer, &mtd->nodata);
+          }
+        }
+      } else if (strstr(buffer, "<QUANTIFICATION_VALUE") != NULL){
+        get_xml_float_value(buffer, &mtd->scale);
+      }
+
+    }
+
+    // common metadata for L1B and L1C
 
     // processing baseline
     if (strstr(buffer, "<PROCESSING_BASELINE") != NULL){
       get_xml_float_value(buffer, &mtd->processing_baseline);
-    } else if (strstr(buffer, "<PROCESSING_LEVEL") != NULL){
-      get_xml_string_value(buffer, mtd->processing_level, NPOW_10);
-    } else if (strstr(buffer, "<PRODUCT_START_TIME") != NULL){
-      split_xml_line(buffer, &xml_open, &xml_value, &xml_close);
-      date_from_utc(&mtd->date, xml_value.string);
-    } else if (strstr(buffer, "<IMAGE_FILE") != NULL){
-      char image_path[NPOW_10];
-      char image_file[NPOW_10];
-      char granule_name[NPOW_10];
-      get_xml_string_value(buffer, image_path, NPOW_10);
-      basename_without_ext(image_path, image_file, NPOW_10);
-      copy_string(granule_name, NPOW_10, image_path);
-      delete_after_match(granule_name, "/IMG_DATA", false);
-      concat_string_2(mtd->granule_path, NPOW_10, d_level1, granule_name, "/");
-      delete_until_match(image_file, "_B", false);
-      if (strlen(image_file) != 2) continue; // not a reflectance band, e.g., TCI
-      int b = vector_contains_pos((const char**)rtd->band_mapping.l1_bands, rtd->band_mapping.nbands, image_file);
-      if (b < 0 || b >= mtd->nband){
-        free_metadata_sentinel2(mtd);
-        fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of bounds.", image_file);
-      }
-      if (b != b_occurence){
-        free_metadata_sentinel2(mtd);
-        fclose(fp);
-        RETURN_ERROR("Band ID (%s) is out of order, i.e. %d vs %d.", image_file, b_occurence, b);
-      }
-      char image_path_ext[NPOW_10];
-      concat_string_2(image_path_ext, NPOW_10, image_path, ".jp2", "");
-      concat_string_2(mtd->image_files[b], NPOW_10, d_level1, image_path_ext, "/");
-      b_occurence++;
-    } else if (strstr(buffer, "<SPECIAL_VALUE_TEXT") != NULL){
-      char special_value_type[NPOW_10];
-      get_xml_string_value(buffer, special_value_type, NPOW_10);
-      if (fgets(buffer, NPOW_13, fp) != NULL){
-        #ifdef FORCE_DEBUG
-        printf("XML: %s", buffer);
-        #endif
-        if (strcmp(special_value_type, "SATURATED") == 0){
-          get_xml_int_value(buffer, &mtd->saturation);
-        } else if (strcmp(special_value_type, "NODATA") == 0){
-          get_xml_int_value(buffer, &mtd->nodata);
-        }
-      }
-    } else if (strstr(buffer, "<QUANTIFICATION_VALUE") != NULL){
-      get_xml_float_value(buffer, &mtd->scale);
+    // PROCESSING_LEVEL not present in L1B, so derived from filename before calling this function
+    //} else if (strstr(buffer, "<PROCESSING_LEVEL") != NULL){
+    //  get_xml_string_value(buffer, mtd->processing_level, NPOW_10);
     } else if (strstr(buffer, "<RADIO_ADD_OFFSET") != NULL){
       split_xml_line(buffer, &xml_open, &xml_value, &xml_close);
       int band_id;
@@ -293,7 +377,7 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
       }
       while (fgets(buffer, NPOW_13, fp) != NULL &&
              strstr(buffer, "</Spectral_Information") == NULL){
-        #ifdef FORCE_DEBUG
+         #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
         printf("XML: %s", buffer);
         #endif
         if (strstr(buffer, "<MIN") != NULL){
@@ -317,7 +401,100 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   free_string(&xml_value);
   free_string(&xml_close);
 
+
+  // L1B-specifics
+  // scaling factor is not present in L1B metadata, so we set it to 1.0
+  // IMAGE_FILE tags are not present in L1B metadata, so we scan the directory for the granule and image files
+  // GEO_DATA files are user-, and pre-computed, so we scan the directory for the geolocation files
+  if (strings_equal(mtd->processing_level, "L1B")){
+
+    #ifdef FORCE_MAGIC
+    fprintf(stderr, "Magic number for L1B scaling factor set to 1.0.\n");
+    #endif
+    mtd->scale = 1.0;
+
+    #ifdef FORCE_MAGIC
+    fprintf(stderr, "Magic number for NODATA set to 0.\n");
+    #endif
+    mtd->nodata = 0;
+
+    #ifdef FORCE_MAGIC
+    fprintf(stderr, "Magic number for SATURATION set to %d.\n", USHRT_MAX);
+    #endif
+    mtd->saturation = USHRT_MAX;
+
+
+    // scan directory for granule
+    char granule_parent_path[NPOW_10];
+    concat_string_2(granule_parent_path, NPOW_10, pl2->d_level1, "GRANULE", "/");
+    if (findfile_pattern(granule_parent_path, "L1B_GR", "", pl2->granule_id, mtd->granule_path, NPOW_10) == FAILURE){
+      free_metadata_sentinel2(mtd);
+      RETURN_ERROR("Finding Sentinel-2 granule directory failed in %s.", granule_parent_path);
+    }
+
+    // scan directory for image files
+    char image_parent_path[NPOW_10];
+    concat_string_2(image_parent_path, NPOW_10, mtd->granule_path, "IMG_DATA", "/");
+
+    for (int b=0; b<mtd->nband; b++){
+      char pattern[NPOW_10];
+      concat_string_2(pattern, NPOW_10, "_B", rtd->band_mapping.l1_bands[b], "");
+      //if (findfile_pattern(image_parent_path, pattern, ".jp2$", 0, mtd->image_files[b], NPOW_10) == FAILURE){
+      if (findfile_pattern(image_parent_path, pattern, ".tif$", 0, mtd->image_files[b], NPOW_10) == FAILURE){
+        free_metadata_sentinel2(mtd);
+        RETURN_ERROR("Finding Sentinel-2 image file (%s) failed in %s.", rtd->band_mapping.l1_bands[b], image_parent_path);
+      }
+    }
+
+    // scan directory for geolocation files
+    char geolocation_parent_path[NPOW_10];
+    concat_string_2(geolocation_parent_path, NPOW_10, mtd->granule_path, "GEO_DATA", "/");
+
+    for (int b=0; b<mtd->nband; b++){
+      char pattern[NPOW_10];
+      concat_string_2(pattern, NPOW_10, "_B", rtd->band_mapping.l1_bands[b], "");
+      if (findfile_pattern(geolocation_parent_path, pattern, ".tif$", 0, mtd->geolocation_files[b], NPOW_10) == FAILURE){
+        free_metadata_sentinel2(mtd);
+        RETURN_ERROR("Finding Sentinel-2 geolocation file (%s) failed in %s.", rtd->band_mapping.l1_bands[b], geolocation_parent_path);
+      }
+    }
+
+  }
+
+
+
   // Test if we got everything
+
+  // L1B-specific metadata
+  // note: some that are in this file for L1C, are present in the L1B granule metadata
+  if (strings_equal(mtd->processing_level, "L1B")){
+
+    for (int b=0; b<mtd->nband; b++){
+      if (fequal(mtd->gain[b], 0.0)){
+        free_metadata_sentinel2(mtd);
+        RETURN_ERROR("Could not retrieve physical gains for band %d.", b);
+      }
+    }
+
+  }
+
+  // L1C-specific metadata
+  if (strings_equal(mtd->processing_level, "L1C")){
+
+    if (b_occurence != mtd->nband){
+      fprintf(stderr, "Number of IMAGE_FILE tags: %d, expected number of bands: %d\n", b_occurence, mtd->nband);
+      free_metadata_sentinel2(mtd);
+      RETURN_ERROR("Number of IMAGE_FILE tags does not match expected number of bands.");
+    }
+
+    if (!date_is_valid(&mtd->date, true)){
+      free_metadata_sentinel2(mtd);
+      RETURN_ERROR("Could not retrieve Sentinel-2 acquisition date.");
+    }
+
+  }
+
+  // common metadata for L1B and L1C
 
   if (fequal(mtd->processing_baseline, 0.0)){
     free_metadata_sentinel2(mtd);
@@ -330,23 +507,6 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
     RETURN_ERROR("Outdated Sentine-2 processing baseline detected.");
   }
 
-  if (strlen(mtd->processing_level) == 0){
-    free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Could not retrieve Sentinel-2 processing level.");
-  }
-
-  if (strcmp(mtd->processing_level, "Level-1C") != 0){
-    fprintf(stderr, "Processing level: %s\n", mtd->processing_level);
-    free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Unsupported processing level detected.");
-  }
-
-  if (b_occurence != mtd->nband){
-    fprintf(stderr, "Number of IMAGE_FILE tags: %d, expected number of bands: %d\n", b_occurence, mtd->nband);
-    free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Number of IMAGE_FILE tags does not match expected number of bands.");
-  }
-
   if (mtd->nodata == INT_MIN){
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Could not retrieve Sentinel-2 NODATA value.");
@@ -357,16 +517,10 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
     RETURN_ERROR("Could not retrieve Sentinel-2 SATURATION value.");
   }
 
-  if (!date_is_valid(&mtd->date, true)){
-    free_metadata_sentinel2(mtd);
-    RETURN_ERROR("Could not retrieve Sentinel-2 acquisition date.");
-  }
-
   if (fequal0(mtd->scale, NULL)){
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Could not retrieve Sentinel-2 quantification value.");
   }
-
 
   for (int b=0; b<mtd->nband; b++){
     if (fequal(mtd->offset[b], FLT_MIN)){
@@ -423,30 +577,35 @@ int parse_metadata_sentinel2_safe(char *d_level1, rtd_t *rtd, s2_mtd_t *mtd){
   for (int b=0; b<mtd->nband; b++){
     printf("    band %d: %s\n", b, mtd->image_files[b]);
   }
+  printf("  geolocation files:\n");
+  for (int b=0; b<mtd->nband; b++){
+    printf("    band %d: %s\n", b, mtd->geolocation_files[b]);
+  }
   #endif
 
 
   return SUCCESS;
 }
 
-int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t *rtd, s2_mtd_t *mtd){
+int parse_metadata_sentinel2_l1c_granule(char *d_granule, int detector_number, rtd_t *rtd, s2_mtd_t *mtd){
 
-  if (d_granule == NULL || detector_number < 0 || mtd == NULL){
+  if (d_granule == NULL || detector_number < 0 || rtd == NULL || mtd == NULL){
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Invalid input.");
   }
 
-  mtd->nrow  = INT_MIN; 
-  mtd->ncol  = INT_MIN;
-  mtd->ncell = INT_MIN;
-  mtd->ulx   = DBL_MIN; 
-  mtd->uly   = DBL_MIN;
-  mtd->res   = DBL_MAX;
+  mtd->dim.rows   = INT_MIN; 
+  mtd->dim.cols   = INT_MIN;
+  mtd->dim.cells  = INT_MIN;
+  mtd->ul.x       = DBL_MIN; 
+  mtd->ul.y       = DBL_MIN;
+  mtd->res        = DBL_MAX;
+  mtd->lowest_res = DBL_MIN;
 
   mtd->view_grid.res    = DBL_MAX;
-  mtd->view_grid.nrow   = INT_MIN;
-  mtd->view_grid.ncol   = INT_MIN;
-  mtd->view_grid.ncell  = INT_MIN;
+  mtd->view_grid.dim.rows   = INT_MIN;
+  mtd->view_grid.dim.cols   = INT_MIN;
+  mtd->view_grid.dim.cells  = INT_MIN;
   mtd->view_grid.zen = NULL;
   mtd->view_grid.azi = NULL;
   mtd->view_grid.nodata = FLT_MAX;
@@ -455,7 +614,7 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
 
   // scan directory for xml file
   char metaname[NPOW_10];
-  if (findfile_pattern(d_granule, "MTD", ".xml", metaname, NPOW_10) == FAILURE){
+  if (findfile_pattern(d_granule, "MTD", ".xml", 0, metaname, NPOW_10) == FAILURE){
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Finding granule metadata file (`*MTD*.xml`) failed in %s", d_granule); 
   }
@@ -475,7 +634,7 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
   char buffer[NPOW_13];
   while (fgets(buffer, NPOW_13, fp) != NULL){
 
-    #ifdef FORCE_DEBUG
+     #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
     printf("XML: %s", buffer);
     #endif
 
@@ -486,19 +645,20 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
     } else if (strstr(buffer, "<NROWS") != NULL){
       int temp;
       get_xml_int_value(buffer, &temp);
-      if (temp > mtd->nrow) mtd->nrow = temp;
+      if (temp > mtd->dim.rows) mtd->dim.rows = temp;
     } else if (strstr(buffer, "<NCOLS") != NULL){
       int temp;
       get_xml_int_value(buffer, &temp);
-      if (temp > mtd->ncol) mtd->ncol = temp;
+      if (temp > mtd->dim.cols) mtd->dim.cols = temp;
     } else if (strstr(buffer, "<ULX") != NULL){
-      get_xml_double_value(buffer, &mtd->ulx); // all res are TL-aligned, so we can just take any
+      get_xml_double_value(buffer, &mtd->ul.x); // all res are TL-aligned, so we can just take any
     } else if (strstr(buffer, "<ULY") != NULL){
-      get_xml_double_value(buffer, &mtd->uly); // all res are TL-aligned, so we can just take any
+      get_xml_double_value(buffer, &mtd->ul.y); // all res are TL-aligned, so we can just take any
     } else if (strstr(buffer, "<XDIM") != NULL){
       double temp;
       get_xml_double_value(buffer, &temp);
-      if (temp < mtd->res) mtd->res = fabs(temp); // pixels are square, so we can just take x or y. fabs just in case
+      if (fabs(temp) < mtd->res) mtd->res = fabs(temp); // pixels are square, so we can just take x or y. fabs just in case
+      if (fabs(temp) > mtd->lowest_res) mtd->lowest_res = fabs(temp); // pixels are square, so we can just take x or y. fabs just in case
     } else if (strstr(buffer, "<Tile_Angles") != NULL){
 
       int b = -1, d = -1;
@@ -507,7 +667,7 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
 
       while (fgets(buffer, NPOW_13, fp) != NULL &&
              strstr(buffer, "</Tile_Angles") == NULL){
-        #ifdef FORCE_DEBUG
+         #if defined FORCE_DEBUG && !defined FORCE_LESS_VERBOSE
         printf("XML: %s", buffer);
         #endif
         if (strstr(buffer, "<COL_STEP") != NULL ||
@@ -526,29 +686,29 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
             fclose(fp);
             RETURN_ERROR("Invalid view grid resolution in metadata.");
           }
-          if (mtd->ncol < 0 || mtd->nrow < 0){
-            fprintf(stderr, "Image dimensions: %d x %d\n", mtd->ncol, mtd->nrow);
+          if (mtd->dim.cols < 0 || mtd->dim.rows < 0){
+            fprintf(stderr, "Image dimensions: %d x %d\n", mtd->dim.cols, mtd->dim.rows);
             free_metadata_sentinel2(mtd);
             fclose(fp);
             RETURN_ERROR("Invalid image dimensions in metadata.");
           }
-          mtd->view_grid.ncol = ceil(mtd->ncol*mtd->res/mtd->view_grid.res) + 1;
-          mtd->view_grid.nrow = ceil(mtd->nrow*mtd->res/mtd->view_grid.res) + 1;
-          mtd->view_grid.ncell = mtd->view_grid.nrow*mtd->view_grid.ncol;
+          mtd->view_grid.dim.cols = ceil(mtd->dim.cols*mtd->res/mtd->view_grid.res) + 1;
+          mtd->view_grid.dim.rows = ceil(mtd->dim.rows*mtd->res/mtd->view_grid.res) + 1;
+          mtd->view_grid.dim.cells = mtd->view_grid.dim.rows*mtd->view_grid.dim.cols;
           if (mtd->view_grid.zen == NULL){
-            alloc_3D((void****)&mtd->view_grid.zen, mtd->nband, mtd->ndetector, mtd->view_grid.ncell, sizeof(float));
+            alloc_3D((void****)&mtd->view_grid.zen, mtd->nband, mtd->ndetector, mtd->view_grid.dim.cells, sizeof(float));
             for (int b=0; b<mtd->nband; b++){
               for (int d=0; d<mtd->ndetector; d++){
-                for (int i=0; i<mtd->view_grid.ncell; i++){
+                for (int i=0; i<mtd->view_grid.dim.cells; i++){
                   mtd->view_grid.zen[b][d][i] = mtd->view_grid.nodata;
                 }
               }
             } 
             if (mtd->view_grid.azi == NULL){
-              alloc_3D((void****)&mtd->view_grid.azi, mtd->nband, mtd->ndetector, mtd->view_grid.ncell, sizeof(float));
+              alloc_3D((void****)&mtd->view_grid.azi, mtd->nband, mtd->ndetector, mtd->view_grid.dim.cells, sizeof(float));
               for (int b=0; b<mtd->nband; b++){
                 for (int d=0; d<mtd->ndetector; d++){
-                  for (int i=0; i<mtd->view_grid.ncell; i++){
+                  for (int i=0; i<mtd->view_grid.dim.cells; i++){
                     mtd->view_grid.azi[b][d][i] = mtd->view_grid.nodata;
                   }
                 }
@@ -579,9 +739,9 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
             fclose(fp);
             RETURN_ERROR("Negative row index (%d) while parsing sun/view angles in metadata.", i);
           }
-          if (i >= mtd->view_grid.nrow){
+          if (i >= mtd->view_grid.dim.rows){
             fprintf(stderr, "Row index counter (%d), expected number of rows (%d) in metadata.\n", 
-              i, mtd->view_grid.nrow);
+              i, mtd->view_grid.dim.rows);
             free_metadata_sentinel2(mtd);
             fclose(fp);
             RETURN_ERROR("More rows of sun/view angles than expected in metadata.");
@@ -601,9 +761,9 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
           int value_count = 0;
           get_xml_string_values(buffer, &value_list, &value_count);
 
-          if (value_count != mtd->view_grid.ncol){
+          if (value_count != mtd->view_grid.dim.cols){
             fprintf(stderr, "Row %d: number of values (%d), expected number of columns (%d) in metadata.\n", 
-              i, value_count, mtd->view_grid.ncol);
+              i, value_count, mtd->view_grid.dim.cols);
             free_metadata_sentinel2(mtd);
             free_2D((void**)value_list, value_count);
             fclose(fp);
@@ -613,15 +773,15 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
           for (int j=0; j<value_count; j++){
             if (z){
               if (strcmp(value_list[j], "NaN") != 0){
-                mtd->view_grid.zen[b][d][i*mtd->view_grid.ncol+j] = atof(value_list[j]);
+                mtd->view_grid.zen[b][d][i*mtd->view_grid.dim.cols+j] = atof(value_list[j]);
               } else {
-                mtd->view_grid.zen[b][d][i*mtd->view_grid.ncol+j] = mtd->view_grid.nodata;
+                mtd->view_grid.zen[b][d][i*mtd->view_grid.dim.cols+j] = mtd->view_grid.nodata;
               }
             } else if (a){
               if (strcmp(value_list[j], "NaN") != 0){
-                mtd->view_grid.azi[b][d][i*mtd->view_grid.ncol+j] = atof(value_list[j]);
+                mtd->view_grid.azi[b][d][i*mtd->view_grid.dim.cols+j] = atof(value_list[j]);
               } else {
-                mtd->view_grid.azi[b][d][i*mtd->view_grid.ncol+j] = mtd->view_grid.nodata;
+                mtd->view_grid.azi[b][d][i*mtd->view_grid.dim.cols+j] = mtd->view_grid.nodata;
               }
             } else {
               free_metadata_sentinel2(mtd);
@@ -647,16 +807,16 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
     RETURN_ERROR("Could not retrieve Sentinel-2 EPSG code.");
   }
 
-  if (mtd->nrow <= 0 || mtd->ncol <= 0){
-    fprintf(stderr, "nrow = %d, ncol = %d\n", mtd->nrow, mtd->ncol);
+  if (mtd->dim.rows <= 0 || mtd->dim.cols <= 0){
+    fprintf(stderr, "nrow = %d, ncol = %d\n", mtd->dim.rows, mtd->dim.cols);
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Invalid image dimensions in metadata.");
   } else {
-    mtd->ncell = mtd->nrow*mtd->ncol;
+    mtd->dim.cells = mtd->dim.rows*mtd->dim.cols;
   }
   
-  if (dequal(mtd->ulx, DBL_MIN) || dequal(mtd->uly, DBL_MIN)){
-    fprintf(stderr, "ulx = %f, uly = %f\n", mtd->ulx, mtd->uly);
+  if (dequal(mtd->ul.x, DBL_MIN) || dequal(mtd->ul.y, DBL_MIN)){
+    fprintf(stderr, "ulx = %f, uly = %f\n", mtd->ul.x, mtd->ul.y);
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Invalid upper-left coordinates in metadata.");
   }
@@ -666,11 +826,17 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Invalid resolution in metadata.");
   }
+
+  if (mtd->lowest_res <= 0 || dequal(mtd->lowest_res, DBL_MIN)){
+    fprintf(stderr, "lowest resolution = %.2f\n", mtd->lowest_res);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid lowest resolution in metadata.");
+  }
   
   if (mtd->view_grid.res <= 0 || dequal(mtd->view_grid.res, DBL_MAX) || 
-      mtd->view_grid.ncol <= 0 || mtd->view_grid.nrow <= 0){
+      mtd->view_grid.dim.cols <= 0 || mtd->view_grid.dim.rows <= 0){
     fprintf(stderr, "view grid: res = %.2f, ncol = %d, nrow = %d\n", 
-      mtd->view_grid.res, mtd->view_grid.ncol, mtd->view_grid.nrow);
+      mtd->view_grid.res, mtd->view_grid.dim.cols, mtd->view_grid.dim.rows);
     free_metadata_sentinel2(mtd);
     RETURN_ERROR("Invalid view grid resolution or dimensions in metadata.");
   }
@@ -683,11 +849,134 @@ int parse_metadata_sentinel2_granule(char *d_granule, int detector_number, rtd_t
   #ifdef FORCE_DEBUG
   printf("metadata parsed from %s:\n", metaname);
   printf("  rows = %d, cols = %d, cells = %d, resolution = %.2f\n", 
-    mtd->nrow, mtd->ncol, mtd->ncell, mtd->res);
-  printf("  ulx = %.2f, uly = %.2f\n", mtd->ulx, mtd->uly);
+    mtd->dim.rows, mtd->dim.cols, mtd->dim.cells, mtd->res);
+  printf("  ulx = %.2f, uly = %.2f\n", mtd->ul.x, mtd->ul.y);
   printf("  view grid: rows = %d, cols = %d, cells = %d, resolution = %.2f\n", 
-    mtd->view_grid.nrow, mtd->view_grid.ncol, 
-    mtd->view_grid.ncell, mtd->view_grid.res);
+    mtd->view_grid.dim.rows, mtd->view_grid.dim.cols, 
+    mtd->view_grid.dim.cells, mtd->view_grid.res);
+  #endif
+  
+  return SUCCESS;
+}
+
+
+
+int parse_metadata_sentinel2_l1b_granule(char *d_granule, int detector_number, rtd_t *rtd, s2_mtd_t *mtd){
+
+  if (d_granule == NULL || detector_number < 0 || rtd == NULL || mtd == NULL){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid input.");
+  }
+
+  mtd->dim.rows  = INT_MIN; 
+  mtd->dim.cols  = INT_MIN;
+  mtd->dim.cells = INT_MIN;
+  mtd->res = DBL_MAX;
+  mtd->lowest_res = DBL_MIN;
+  
+  mtd->epsg = 32766; // placeholder EPSG
+    copy_string(mtd->mgrs, NPOW_10, "NONDEF"); // no MGRS for L1B
+
+  mtd->ndetector = detector_number;
+
+
+  // scan directory for xml file
+  char metaname[NPOW_10];
+  if (findfile_pattern(d_granule, "MTD", ".xml", 0, metaname, NPOW_10) == FAILURE){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Finding granule metadata file (`*MTD*.xml`) failed in %s", d_granule); 
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("granule-level metadata: %s\n", metaname);
+  #endif
+
+  // open xml
+  FILE *fp = NULL;
+  if ((fp = fopen(metaname, "r")) == NULL){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Unable to open S2 metadata file %s", metaname); 
+  }
+
+  // process line by line
+  char buffer[NPOW_13];
+  string_t xml_open = {0};
+  string_t xml_value = {0};
+  string_t xml_close = {0};
+
+  while (fgets(buffer, NPOW_13, fp) != NULL){
+
+    #ifdef FORCE_DEBUG
+    printf("XML: %s", buffer);
+    #endif
+
+    if (strstr(buffer, "<NROWS") != NULL){
+      int temp;
+      get_xml_int_value(buffer, &temp);
+      if (temp > mtd->dim.rows) mtd->dim.rows = temp;
+    } else if (strstr(buffer, "<NCOLS") != NULL){
+      int temp;
+      get_xml_int_value(buffer, &temp);
+      if (temp > mtd->dim.cols) mtd->dim.cols = temp;
+    } else if (strstr(buffer, "<Size") != NULL){
+      double temp;
+      get_xml_attribute_double_value(buffer, "resolution", &temp);
+      if (fabs(temp) < mtd->res) mtd->res = fabs(temp); // pixels are square, so we can just take x or y. fabs just in case
+      if (fabs(temp) > mtd->lowest_res) mtd->lowest_res = fabs(temp);
+    } else if (strstr(buffer, "<DETECTOR_ID") != NULL){
+      get_xml_int_value(buffer, &mtd->detector);
+    } else if (strstr(buffer, "<SENSING_TIME") != NULL){
+      split_xml_line(buffer, &xml_open, &xml_value, &xml_close);
+      date_from_utc(&mtd->date, xml_value.string);
+    }
+  }
+
+  fclose(fp);
+
+  free_string(&xml_open);
+  free_string(&xml_value);
+  free_string(&xml_close);
+
+  // check if we got everything
+
+  if (mtd->dim.rows <= 0 || mtd->dim.cols <= 0){
+    fprintf(stderr, "nrow = %d, ncol = %d\n", mtd->dim.rows, mtd->dim.cols);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid image dimensions in metadata.");
+  } else {
+    mtd->dim.cells = mtd->dim.rows*mtd->dim.cols;
+  }
+  
+  if (mtd->res <= 0 || dequal(mtd->res, DBL_MAX)){
+    fprintf(stderr, "resolution = %.2f\n", mtd->res);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid resolution in metadata.");
+  }
+
+  if (mtd->lowest_res <= 0 || dequal(mtd->lowest_res, DBL_MIN)){
+    fprintf(stderr, "lowest resolution = %.2f\n", mtd->lowest_res);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid lowest resolution in metadata.");
+  }
+
+  if (mtd->detector < 1 || mtd->detector > mtd->ndetector){
+    fprintf(stderr, "detector = %d, expected range: [1, %d]\n", mtd->detector, mtd->ndetector);
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Invalid detector number in metadata.");
+  }
+
+  if (!date_is_valid(&mtd->date, true)){
+    free_metadata_sentinel2(mtd);
+    RETURN_ERROR("Could not retrieve Sentinel-2 acquisition date.");
+  }
+
+  #ifdef FORCE_DEBUG
+  printf("metadata parsed from %s:\n", metaname);
+  printf("  rows = %d, cols = %d, cells = %d\n", mtd->dim.rows, mtd->dim.cols, mtd->dim.cells);
+  printf("  resolution = %.2f, lowest resolution = %.2f\n", mtd->res, mtd->lowest_res);
+  printf("  detector = %d, number of detectors = %d\n", mtd->detector, mtd->ndetector);
+  printf("  acquisition date = \n");
+  print_date(&mtd->date);
   #endif
   
   return SUCCESS;
@@ -735,8 +1024,8 @@ void interpolate_sentinel2_view_grid(s2_mtd_t *mtd){
   for (int b=0; b<mtd->nband; b++){
   for (int d=0; d<mtd->ndetector; d++){
     
-    int cell_nx = mtd->view_grid.ncol - 1;
-    int cell_ny = mtd->view_grid.nrow - 1;
+    int cell_nx = mtd->view_grid.dim.cols - 1;
+    int cell_ny = mtd->view_grid.dim.rows - 1;
     int cell_nc = cell_nx * cell_ny;
     
     float *cell_grid_zen = NULL;
@@ -757,7 +1046,7 @@ void interpolate_sentinel2_view_grid(s2_mtd_t *mtd){
       for (int ii=0; ii<=1; ii++){
       for (int jj=0; jj<=1; jj++){
 
-        int int_p = (i+ii) * mtd->view_grid.ncol + (j+jj);
+        int int_p = (i+ii) * mtd->view_grid.dim.cols + (j+jj);
 
         if (!fequal(mtd->view_grid.zen[b][d][int_p], mtd->view_grid.nodata)){
           sum_zen += mtd->view_grid.zen[b][d][int_p];
@@ -787,18 +1076,18 @@ void interpolate_sentinel2_view_grid(s2_mtd_t *mtd){
     }
 
     memmove(mtd->view_grid.zen[b][d], cell_grid_zen, cell_nc*sizeof(float));
-    re_alloc((void**)&mtd->view_grid.zen[b][d], mtd->view_grid.ncell, cell_nc, sizeof(float));
+    re_alloc((void**)&mtd->view_grid.zen[b][d], mtd->view_grid.dim.cells, cell_nc, sizeof(float));
     free((void*)cell_grid_zen);
 
     memmove(mtd->view_grid.azi[b][d], cell_grid_azi, cell_nc*sizeof(float));
-    re_alloc((void**)&mtd->view_grid.azi[b][d], mtd->view_grid.ncell, cell_nc, sizeof(float));
+    re_alloc((void**)&mtd->view_grid.azi[b][d], mtd->view_grid.dim.cells, cell_nc, sizeof(float));
     free((void*)cell_grid_azi);
 
   }
   }
 
-  mtd->view_grid.ncol--;
-  mtd->view_grid.nrow--;
+  mtd->view_grid.dim.cols--;
+  mtd->view_grid.dim.rows--;
 
   return;
 }
@@ -823,8 +1112,8 @@ float sum_zen, num_zen, sum_azi, num_azi;
     EXIT_ERROR("Invalid input.");
   }
 
-  for (int i=0, p=0; i<mtd->view_grid.nrow; i++){
-  for (int j=0; j<mtd->view_grid.ncol; j++, p++){
+  for (int i=0, p=0; i<mtd->view_grid.dim.rows; i++){
+  for (int j=0; j<mtd->view_grid.dim.cols; j++, p++){
 
     sum_zen = num_zen = 0;
     sum_azi = num_azi = 0;
@@ -876,14 +1165,14 @@ void subset_sentinel2_view_grid(par_ll_t *pl2, s2_mtd_t *mtd){
   if (pl2->doreproj || pl2->dotile){
 
     // get image subset
-    left = mtd->view_grid.ncol-1; right  = 0;
-    top  = mtd->view_grid.nrow-1; bottom = 0;
+    left = mtd->view_grid.dim.cols-1; right  = 0;
+    top  = mtd->view_grid.dim.rows-1; bottom = 0;
 
-    for (int i=0; i<mtd->view_grid.nrow; i++){
-    for (int j=0; j<mtd->view_grid.ncol; j++){
+    for (int i=0; i<mtd->view_grid.dim.rows; i++){
+    for (int j=0; j<mtd->view_grid.dim.cols; j++){
 
-      if (!fequal(mtd->view_grid.zen[0][0][i*mtd->view_grid.nrow+j], mtd->view_grid.nodata) && 
-          !fequal(mtd->view_grid.azi[0][0][i*mtd->view_grid.nrow+j], mtd->view_grid.nodata)){
+      if (!fequal(mtd->view_grid.zen[0][0][i*mtd->view_grid.dim.rows+j], mtd->view_grid.nodata) && 
+          !fequal(mtd->view_grid.azi[0][0][i*mtd->view_grid.dim.rows+j], mtd->view_grid.nodata)){
         if (j < left)   left   = j;
         if (j > right)  right  = j;
         if (i < top)    top    = i;
@@ -900,41 +1189,41 @@ void subset_sentinel2_view_grid(par_ll_t *pl2, s2_mtd_t *mtd){
 
     while (fmod(left*mtd->view_grid.res, 60) != 0 && left > 0) left--;
     while (fmod(top*mtd->view_grid.res,  60) != 0 && top  > 0) top--;
-    while (fmod(right*mtd->view_grid.res,  60) != 0 && right  < (mtd->view_grid.ncol-1)) right++;
-    while (fmod(bottom*mtd->view_grid.res, 60) != 0 && bottom < (mtd->view_grid.nrow-1)) bottom++;
+    while (fmod(right*mtd->view_grid.res,  60) != 0 && right  < (mtd->view_grid.dim.cols-1)) right++;
+    while (fmod(bottom*mtd->view_grid.res, 60) != 0 && bottom < (mtd->view_grid.dim.rows-1)) bottom++;
 
   } else {
   
-    left = 0; right  = mtd->view_grid.ncol;
-    top  = 0; bottom = mtd->view_grid.nrow;
+    left = 0; right  = mtd->view_grid.dim.cols;
+    top  = 0; bottom = mtd->view_grid.dim.rows;
 
   }
 
-  mtd->subset_view_grid.ncol  = right-left;
-  mtd->subset_view_grid.nrow  = bottom-top;
-  mtd->subset_view_grid.ncell = mtd->subset_view_grid.ncol * mtd->subset_view_grid.nrow;
+  mtd->subset_view_grid.dim.cols  = right-left;
+  mtd->subset_view_grid.dim.rows  = bottom-top;
+  mtd->subset_view_grid.dim.cells = mtd->subset_view_grid.dim.cols * mtd->subset_view_grid.dim.rows;
   mtd->subset_view_grid.res  = mtd->view_grid.res;
   mtd->subset_view_grid.nodata = mtd->view_grid.nodata;
 
-  if (mtd->subset_view_grid.ncol <= 0 || mtd->subset_view_grid.nrow <= 0){
+  if (mtd->subset_view_grid.dim.cols <= 0 || mtd->subset_view_grid.dim.rows <= 0){
     EXIT_ERROR("no valid cell after subsetting. Abort.");
   }
 
 
 
 
-  alloc((void**)&mtd->subset_view_grid.zen, mtd->subset_view_grid.ncell, sizeof(float));
-  alloc((void**)&mtd->subset_view_grid.azi, mtd->subset_view_grid.ncell, sizeof(float));
+  alloc((void**)&mtd->subset_view_grid.zen, mtd->subset_view_grid.dim.cells, sizeof(float));
+  alloc((void**)&mtd->subset_view_grid.azi, mtd->subset_view_grid.dim.cells, sizeof(float));
 
   // copy values to final view grids
-  for (int i=0, p=0; i<mtd->subset_view_grid.nrow; i++){
-  for (int j=0; j<mtd->subset_view_grid.ncol; j++, p++){
+  for (int i=0, p=0; i<mtd->subset_view_grid.dim.rows; i++){
+  for (int j=0; j<mtd->subset_view_grid.dim.cols; j++, p++){
 
     int ii = i+top;
     int jj = j+left;
 
-    mtd->subset_view_grid.zen[p] = mtd->view_grid.zen[0][0][ii*mtd->view_grid.ncol+jj];
-    mtd->subset_view_grid.azi[p] = mtd->view_grid.azi[0][0][ii*mtd->view_grid.ncol+jj];
+    mtd->subset_view_grid.zen[p] = mtd->view_grid.zen[0][0][ii*mtd->view_grid.dim.cols+jj];
+    mtd->subset_view_grid.azi[p] = mtd->view_grid.azi[0][0][ii*mtd->view_grid.dim.cols+jj];
 
   }
   }
@@ -942,20 +1231,20 @@ void subset_sentinel2_view_grid(par_ll_t *pl2, s2_mtd_t *mtd){
   float res_ratio = mtd->view_grid.res / mtd->res;
   mtd->col_offset = left * res_ratio;
   mtd->row_offset = top  * res_ratio;
-  mtd->ulx += mtd->col_offset * mtd->res;
-  mtd->uly -= mtd->row_offset * mtd->res;
+  mtd->ul.x += mtd->col_offset * mtd->res;
+  mtd->ul.y -= mtd->row_offset * mtd->res;
 
-  if ((mtd->col_offset + mtd->subset_view_grid.ncol * res_ratio) > mtd->ncol){
-    mtd->ncol -= mtd->col_offset;
+  if ((mtd->col_offset + mtd->subset_view_grid.dim.cols * res_ratio) > mtd->dim.cols){
+    mtd->dim.cols -= mtd->col_offset;
   } else {
-    mtd->ncol = mtd->subset_view_grid.ncol * res_ratio;
+    mtd->dim.cols = mtd->subset_view_grid.dim.cols * res_ratio;
   }
-  if ((mtd->row_offset + mtd->subset_view_grid.nrow * res_ratio) > mtd->nrow){
-    mtd->nrow -= mtd->row_offset;
+  if ((mtd->row_offset + mtd->subset_view_grid.dim.rows * res_ratio) > mtd->dim.rows){
+    mtd->dim.rows -= mtd->row_offset;
   } else {
-    mtd->nrow = mtd->subset_view_grid.nrow * res_ratio;
+    mtd->dim.rows = mtd->subset_view_grid.dim.rows * res_ratio;
   }
-  mtd->ncell = mtd->nrow * mtd->ncol;
+  mtd->dim.cells = mtd->dim.rows * mtd->dim.cols;
 
   free_3D((void***)mtd->view_grid.zen, mtd->nband, mtd->ndetector);
   mtd->view_grid.zen = NULL;
@@ -964,8 +1253,8 @@ void subset_sentinel2_view_grid(par_ll_t *pl2, s2_mtd_t *mtd){
 
   #ifdef FORCE_DEBUG
   printf("active image subset: UL-X %d (%.2f) / UL-Y %d (%.2f) with width %d and height %d\n", 
-    mtd->col_offset, mtd->ulx, mtd->row_offset, mtd->uly, mtd->ncol, mtd->nrow);
-    printf("coarse cells: width/height %d/%d\n", mtd->subset_view_grid.ncol, mtd->subset_view_grid.nrow);
+    mtd->col_offset, mtd->ul.x, mtd->row_offset, mtd->ul.y, mtd->dim.cols, mtd->dim.rows);
+    printf("coarse cells: width/height %d/%d\n", mtd->subset_view_grid.dim.cols, mtd->subset_view_grid.dim.rows);
   #endif
 
   return;
