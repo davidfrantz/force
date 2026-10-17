@@ -109,7 +109,8 @@ enum { _RGB_R_, _RGB_G_, _RGB_B_, _RGB_LENGTH_ };
 enum { _QAI_BIT_OFF_ =  0, _QAI_BIT_CLD_ =  1, _QAI_BIT_SHD_ =  3, 
        _QAI_BIT_SNW_ =  4, _QAI_BIT_WTR_ =  5, _QAI_BIT_AOD_ =  6, 
        _QAI_BIT_SUB_ =  8, _QAI_BIT_SAT_ =  9, _QAI_BIT_SUN_ = 10, 
-       _QAI_BIT_ILL_ = 11, _QAI_BIT_SLP_ = 13, _QAI_BIT_WVP_ = 14};
+       _QAI_BIT_ILL_ = 11, _QAI_BIT_SLP_ = 13, _QAI_BIT_WVP_ = 14,
+       _QAI_BIT_TBD_ = 15 };
 
 // QAI flag ordering
 enum { _QAI_FLAG_OFF_, _QAI_FLAG_CLD_, _QAI_FLAG_SHD_, 

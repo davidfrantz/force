@@ -240,6 +240,18 @@ bool get_vaporfill_from_value(short value){
   return get_qai_from_value(value, _QAI_BIT_WVP_, 1);
 }
 
+/** read TBD flag **/
+bool get_tbd_qai(brick_t *qai, int p){
+
+  return get_qai(qai, _QAI_BIT_TBD_, p, 1);
+}
+
+/** read TBD flag, directly from value **/
+bool get_tbd_qai_from_value(short value){
+
+  return get_qai_from_value(value, _QAI_BIT_TBD_, 1);
+}
+
 /** set off/on flag **/
 void set_off(brick_t *qai, int p, short val){
 
@@ -359,6 +371,16 @@ void set_vaporfill(brick_t *qai, int p, short val){
 /** set water vapor fill flag, directly to value **/
 void set_vaporfill_to_value(short *value, short val){
   set_qai_to_value(value, _QAI_BIT_WVP_, val, 1);
+}
+
+/** set TBD flag **/
+void set_tbd_qai(brick_t *qai, int p, short val){
+  set_qai(qai, _QAI_BIT_TBD_, p, val, 1);
+}
+
+/** set TBD flag, directly to value **/
+void set_tbd_qai_to_value(short *value, short val){
+  set_qai_to_value(value, _QAI_BIT_TBD_, val, 1);
 }
 
 

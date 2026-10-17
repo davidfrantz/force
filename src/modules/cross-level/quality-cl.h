@@ -51,6 +51,7 @@ bool get_lowsun(brick_t *qai, int p);
 char get_illumination(brick_t *qai, int p);
 bool get_slope(brick_t *qai, int p);
 bool get_vaporfill(brick_t *qai, int p);
+bool get_tbd_qai(brick_t *qai, int p);
 
 bool get_off_from_value(short qai_value);
 char get_cloud_from_value(short qai_value);
@@ -64,6 +65,7 @@ bool get_lowsun_from_value(short qai_value);
 char get_illumination_from_value(short qai_value);
 bool get_slope_from_value(short qai_value);
 bool get_vaporfill_from_value(short qai_value);
+bool get_tbd_qai_from_value(short qai_value);
 
 void set_off(brick_t *qai, int p, short val);
 void set_cloud(brick_t *qai, int p, short val);
@@ -77,6 +79,7 @@ void set_lowsun(brick_t *qai, int p, short val);
 void set_illumination(brick_t *qai, int p, short val);
 void set_slope(brick_t *qai, int p, short val);
 void set_vaporfill(brick_t *qai, int p, short val);
+void set_tbd_qai(brick_t *qai, int p, short val);
 
 void set_off_to_value(short *value, short val);
 void set_cloud_to_value(short *value, short val);
@@ -90,6 +93,7 @@ void set_lowsun_to_value(short *value, short val);
 void set_illumination_to_value(short *value, short val);
 void set_slope_to_value(short *value, short val);
 void set_vaporfill_to_value(short *value, short val);
+void set_tbd_qai_to_value(short *value, short val);
 
 void merge_qai_from_values(brick_t *qai, int p, short qai_1, short qai_2);
 
