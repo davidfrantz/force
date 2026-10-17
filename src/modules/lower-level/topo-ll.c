@@ -34,7 +34,7 @@ int ocean_topography(brick_t *DEM);
 int smooth_topography(brick_t *DEM);
 int exposition_topography(brick_t *DEM, brick_t *EXP, brick_t *QAI);
 int stats_topography(atc_t *atc, brick_t *DEM, brick_t *CDEM, brick_t *QAI);
-int illumination_topography(atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI);
+int illumination_topography(par_ll_t *pl2, atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI);
 
 
 /** This function allocates the topographic variables
@@ -512,7 +512,7 @@ small  *cdem_ = NULL;
 --- QAI:    Quality Assurance Information
 +++ Return: SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-int illumination_topography(atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI){
+int illumination_topography(par_ll_t *pl2, atc_t *atc, brick_t *EXP, brick_t *ILL, brick_t *SKY, brick_t *QAI){
 int p, g, nc;
 float slp, asp;
 ushort *slp_ = NULL;
@@ -535,8 +535,16 @@ float **sun_ = NULL;
   if ((sun_ = get_bands_float(atc->xy_sun)) == NULL) return FAILURE;
 
 
-  #pragma omp parallel private(g, slp, asp) shared(nc, QAI, slp_, asp_, ill_, sky_, sun_, atc) default(none) 
+  #pragma omp parallel private(g, slp, asp) shared(nc, QAI, slp_, asp_, ill_, sky_, sun_, atc, pl2) default(none) 
   {
+
+    #ifdef FORCE_MAGIC
+    fprintf(stderr, "FORCE MAGIC: illumination_topography uses magic numbers for illumination thresholds!\n");
+    #endif
+
+    float poor_illumination   = cos(80.0 * _D2R_CONV_) * 10000.0;
+    float medium_illumination = cos(55.0 * _D2R_CONV_) * 10000.0;
+    float cutoff_illumination = cos(pl2->illumination_cutoff * _D2R_CONV_) * 10000.0;
 
     #pragma omp for schedule(guided)
     for (p=0; p<nc; p++){
@@ -559,10 +567,15 @@ float **sun_ = NULL;
       // set illumination QAI
       if (ill_[p] < 0){
         set_illumination(QAI, p, 3); // deep shadow
-      } else if (ill_[p] < 1736.482){
+      } else if (ill_[p] < poor_illumination){
         set_illumination(QAI, p, 2); // poor
-      } else if (ill_[p] < 5735.764){
+      } else if (ill_[p] < medium_illumination){
         set_illumination(QAI, p, 1); // moderate
+      }
+
+      // set minimum illumination angle to constrain topographic correction
+      if (ill_[p] < cutoff_illumination){
+        ill_[p] = cutoff_illumination;
       }
 
       // sky view factor (portion of the sky dome diffusing on to a tilted surface)
@@ -701,7 +714,7 @@ brick_t *DEM = NULL;
   set_brick_filename(top->sky, "DEM-SKY-VIEW");
   set_brick_bandname(top->sky, 0, "Sky View Factor");
 
-  if (illumination_topography(atc, top->exp, top->ill, top->sky, QAI) != SUCCESS){
+  if (illumination_topography(pl2, atc, top->exp, top->ill, top->sky, QAI) != SUCCESS){
     printf("error in topographic correction. "); return FAILURE;}
 
   free_brick(DEM);
