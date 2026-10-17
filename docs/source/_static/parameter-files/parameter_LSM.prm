@@ -200,8 +200,8 @@ LSM_ALL_PIXELS = FALSE
 # and the area of the foreground class within the kernel are available.
 # Furthermore, Image texture measures of dissimilarity are available. These measures
 # are calculated for the complete wall-to-wall scene regardless of thresholds.
-# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE,DIS}
-LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE DIS
+# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE,CON,DIS}
+LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE CON DIS
 # This parameter defines the basename for the output files. The basename will
 # be appended by Module ID, product ID, and the file extension.
 # Type: Character.

@@ -61,6 +61,7 @@ typedef struct {
   short **geo_;
   short **max_;
   short **are_;
+  short **con_; // GLCM contrast
   short **dis_; // GLCM dissimilarity
 } lsm_t;
 

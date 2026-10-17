@@ -737,8 +737,8 @@ int i;
       lsm->omax = true;
     } else if (lsm->metrics[i] == _LSM_ARE_){
       lsm->oare = true;
-    } else if (lsm->metrics[i] == _LSM_ARE_) {
-      lsm->oare = true;
+    } else if (lsm->metrics[i] == _LSM_CON_) {
+      lsm->ocon = true;
     } else if (lsm->metrics[i] == _LSM_DIS_) {
       lsm->odis = true;
     } else {
