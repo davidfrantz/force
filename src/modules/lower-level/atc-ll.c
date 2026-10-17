@@ -189,7 +189,14 @@ int r = 1, b, nb = get_brick_nbands(DN);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 void init_atc_xy(par_ll_t *pl2, brick_t *DN, atc_t *atc){
 int b, nb = get_brick_nbands(DN);
-int svgrid = 5000;
+
+
+  int svgrid = 5000;
+  #ifdef FORCE_MAGIC
+  fprintf(stderr, "Warn Magic Number: coarse grid initialized with resolution of %d m.\n", svgrid);
+  fprintf(stderr, "Warn Magic Number: This is redundant and should be refactored.\n");
+  #endif
+
 
 
   // resolution and number of cells in x- and y-direction
