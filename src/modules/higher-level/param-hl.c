@@ -456,7 +456,7 @@ void register_lsm(params_t *params, par_hl_t *phl){
   register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, -1, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
   register_enum_par(params,    "LSM_KERNEL_SHAPE", _TAGGED_ENUM_KERNEL_, _KERNEL_LENGTH_, &phl->lsm.kernel);
-
+    
   return;
 }
 
@@ -737,6 +737,10 @@ int i;
       lsm->omax = true;
     } else if (lsm->metrics[i] == _LSM_ARE_){
       lsm->oare = true;
+    } else if (lsm->metrics[i] == _LSM_ARE_) {
+      lsm->oare = true;
+    } else if (lsm->metrics[i] == _LSM_DIS_) {
+      lsm->odis = true;
     } else {
       printf("warning: unknown lsm.\n");
     }

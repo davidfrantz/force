@@ -23,7 +23,7 @@ along with FORCE.  If not, see <http://www.gnu.org/licenses/>.
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 This file contains functions for computing landscape metrics
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Copyright (C) 2013-2022 Franz Schug, David Frantz
+Copyright (C) 2013-2022 Franz Schug, David Frantz, Katarzyna Ewa Lewinska
 Contact: fschug@wisc.edu
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 
@@ -49,24 +49,26 @@ int test_objects(small *cld_, int nx, int ny, int **OBJ, int **SIZE, int *nobj);
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 brick_t **compile_lsm(ard_t *features, lsm_t *lsm, par_hl_t *phl, cube_t *cube, int *nproduct){
 brick_t **LSM = NULL;
-int b, o, nprod = 11;
+int b, o, nprod = 12;
 int error = 0;
 int nchar;
 char bname[NPOW_10];
 char domain[NPOW_10];
-enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
-int prodlen[11] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
-char prodname[11][NPOW_10] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE" };
+enum{ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_, _dis_ };
+int prodlen[12] ={ phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature, phl->ftr.nfeature };
+char prodname[12][NPOW_10] ={ "MPA", "UCI", "FDI", "EDD", "NBR", "EMS", "AVG", "STD", "GEO", "MAX", "ARE", "DIS"};
 
-int prodtype[11] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_ };
+int prodtype[12] ={ _mpa_, _uci_, _fdi_, _edd_, _nbr_, _ems_, _avg_, _std_, _geo_, _max_, _are_, _dis_ };
 
-bool enable[11] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
+bool enable[12] ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare,
+                    phl->lsm.odis };
 
-bool write[11]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
-                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare };
+bool write[12]  ={ phl->lsm.ompa, phl->lsm.ouci, phl->lsm.ofdi, phl->lsm.oedd, phl->lsm.onbr,
+                    phl->lsm.oems, phl->lsm.oavg, phl->lsm.ostd, phl->lsm.ogeo, phl->lsm.omax, phl->lsm.oare,
+                    phl->lsm.odis };
 
-short ***ptr[11] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_, &lsm->are_};
+short ***ptr[12] ={ &lsm->mpa_, &lsm->uci_, &lsm->fdi_, &lsm->edd_, &lsm->nbr_, &lsm->ems_, &lsm->avg_, &lsm->std_, &lsm->geo_, &lsm->max_, &lsm->are_, &lsm->dis_};
 
 
   alloc((void**)&LSM, nprod, sizeof(brick_t*));
@@ -277,6 +279,7 @@ float unit_perim = 0;
         if (phl->lsm.ogeo) lsm.geo_[f][p] = nodata;
         if (phl->lsm.omax) lsm.max_[f][p] = nodata;
         if (phl->lsm.oare) lsm.are_[f][p] = nodata;
+        if (phl->lsm.odis) lsm.dis_[f][p] = nodata;
         
         if (mask_ != NULL && !mask_[p]) continue;
         if (!features[f].msk[p] && phl->ftr.exclude) continue;
@@ -302,6 +305,121 @@ float unit_perim = 0;
         }
       }
 
+    }
+
+    /*
+     * Calculate continuous dissimilarity from original feature values.
+     * Independent of binary classification and patch metrics.
+     *
+     * D = sum(|x_i - x_j|) / number_of_unique_pairs
+     *
+     * Uses all valid pixel pairs within the selected moving window.
+     */
+
+    if (phl->lsm.odis) {
+
+      #pragma omp parallel default(none) \
+        shared(lsm, features, phl, mask_, KDIST, nx, ny, nc, \
+               f, nodata, width, kernelSize)
+
+      {
+        double *window_values =
+          (double*)malloc((size_t)kernelSize * sizeof(double));
+
+        #pragma omp for schedule(guided)
+        for (p = 0; p < nc; p++) {
+
+          int row = p / nx;
+          int col = p % nx;
+          int nvalues = 0;
+          int wi, wj;
+          int ri, rj, rp;
+          int ki_local, kj_local;
+          int a, b;
+          long long npairs = 0;
+          double sumdiff = 0.0;
+          double dissimilarity;
+
+          /* Output was initialized to nodata above. */
+          if (mask_ != NULL && !mask_[p]) continue;
+
+          if (features[f].dat[0][p] == nodata) continue;
+
+          if (phl->ftr.exclude && !features[f].msk[p]) continue;
+
+          if (window_values == NULL) continue;
+
+          /*
+           * Collect valid original feature values in the
+           * configured square or circular moving window.
+           */
+          for (wi = -phl->lsm.radius;
+               wi <= phl->lsm.radius; wi++) {
+
+            for (wj = -phl->lsm.radius;
+                 wj <= phl->lsm.radius; wj++) {
+
+              ri = row + wi;
+              rj = col + wj;
+
+              /* Check image boundaries before indexing. */
+              if (ri < 0 || ri >= ny ||
+                  rj < 0 || rj >= nx) continue;
+
+              ki_local = wi + phl->lsm.radius;
+              kj_local = wj + phl->lsm.radius;
+
+              /* Respect the configured kernel shape. */
+              if (phl->lsm.kernel == _KERNEL_CIRCLE_ &&
+                  KDIST[ki_local][kj_local] >
+                    phl->lsm.radius) continue;
+
+              rp = ri * nx + rj;
+
+              /* Respect the processing mask. */
+              if (mask_ != NULL && !mask_[rp]) continue;
+
+              /* Respect the feature mask when exclusion is on. */
+              if (phl->ftr.exclude && !features[f].msk[rp])
+                continue;
+
+              /* Exclude nodata values. */
+              if (features[f].dat[0][rp] == nodata) continue;
+
+              window_values[nvalues++] =
+                (double)features[f].dat[0][rp];
+            }
+          }
+
+          /*
+           * Calculate absolute differences between all unique
+           * pairs of valid pixels. Each pair is counted once.
+           */
+          for (a = 0; a < nvalues; a++) {
+            for (b = a + 1; b < nvalues; b++) {
+
+              sumdiff += fabs(window_values[a] -
+                              window_values[b]);
+
+              npairs++;
+            }
+          }
+
+          if (npairs > 0) {
+
+            dissimilarity = sumdiff / (double)npairs;
+
+            /* Output brick uses signed short values. */
+            if (dissimilarity >= (double)SHRT_MAX) {
+              lsm.dis_[f][p] = SHRT_MAX;
+            } else {
+              lsm.dis_[f][p] = (short)lround(dissimilarity);
+            }
+          }
+        }
+
+        free(window_values);
+      }
     }
 
     // make objects and delete small ones
