@@ -69,6 +69,9 @@ typedef struct {
 #define _R2D_CONV_  57.29577951308232286465
 #define _D2R_CONV_   0.01745329251994329547
 
+#define  WGS84_A 6378137.0 // semi-major axis in meters
+#define  WGS84_B 6356752.314245 // semi-minor axis in meters
+
 #define _FORCE_NO_DATA_ -9999
 
 #define RETURN_ERROR(format, ...) \
