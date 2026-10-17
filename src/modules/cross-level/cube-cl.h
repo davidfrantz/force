@@ -60,20 +60,10 @@ typedef struct {
   int n_allowed_tiles; // number of allow-listed tiles
 } cube_t;
 
-typedef struct{
-  int n;
-  cube_t **cube;
-  bool *cover;
-} multicube_t;
-
 cube_t *allocate_datacube();
-multicube_t *allocate_multicube(int n);
 void free_datacube(cube_t *cube);
-void free_multicube(multicube_t *multicube);
 void init_datacube(cube_t *cube);
-void init_multicube(multicube_t *multicube, int n);
 void print_datacube(cube_t *cube);
-void print_multicube(multicube_t *multicube);
 void update_datacube_extent(cube_t *cube, int tminx, int tmaxx, int tminy, int tmaxy);
 void update_datacube_res(cube_t *cube, double res);
 int write_datacube_def(cube_t *cube);

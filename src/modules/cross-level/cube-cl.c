@@ -42,21 +42,6 @@ cube_t *cube = NULL;
 }
 
 
-/** This function allocates multiple datacubes
---- n:      number of datacubes
-+++ Return: multiple datacubes (must be freed with free_multicube)
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-multicube_t *allocate_multicube(int n){
-multicube_t *multicube = NULL;
-
-
-  alloc((void**)&multicube, 1, sizeof(multicube_t));
-  init_multicube(multicube, n);    
-
-  return multicube;
-}
-
-
 /** This function frees a datacube
 --- cube:   datacube
 +++ Return: void
@@ -70,28 +55,6 @@ void free_datacube(cube_t *cube){
   cube->n_allowed_tiles = 0;
 
   free((void*)cube); cube = NULL;
-
-  return;
-}
-
-
-/** This function frees multiple datacubes
---- cube:   multiple datacubes
-+++ Return: void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void free_multicube(multicube_t *multicube){
-int c;
-
-  if (multicube == NULL) return;
-
-  for (c=0; c<multicube->n; c++) free_datacube(multicube->cube[c]);
-  if (multicube->cube  != NULL) free((void*)multicube->cube);
-  if (multicube->cover != NULL) free((void*)multicube->cover);
-  multicube->cube  = NULL;
-  multicube->cover = NULL;
-  multicube->n = 0;
-
-  free((void*)multicube); multicube = NULL;
 
   return;
 }
@@ -120,23 +83,6 @@ void init_datacube(cube_t *cube){
 }
 
 
-/** This function initializes multiple datacubes
---- multicube: multiple datacubes
---- n:         number of datacubes
-+++ Return:    void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void init_multicube(multicube_t *multicube, int n){
-int c;
-
-  multicube->n = n;
-  alloc((void**)&multicube->cube, n, sizeof(cube_t*));
-  for (c=0; c<n; c++) multicube->cube[c] = allocate_datacube();
-  alloc((void**)&multicube->cover, n, sizeof(bool));
-
-  return;
-}
-
-
 /** This function prints a datacube
 --- cube:   datacube
 +++ Return: void
@@ -155,23 +101,6 @@ void print_datacube(cube_t *cube){
   printf("Number of allow-listed tiles: %d\n", cube->n_allowed_tiles);
   printf("Tile size: %.2f (X) %.2f (Y)\n", cube->tile_size[_X_], cube->tile_size[_Y_]);
   printf("Number of pixels per tile: %d (X) x %d (Y) = %d\n", cube->dim_tile_pixels.cols, cube->dim_tile_pixels.rows, cube->dim_tile_pixels.cells);
-
-  return;
-}
-
-
-/** This function prints multiple datacubes
---- multicube: multiple datacubes
-+++ Return:    void
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
-void print_multicube(multicube_t *multicube){
-int c;
-
-  printf("Multicube contains %d datacubes\n", multicube->n);
-  for (c=0; c<multicube->n; c++){
-    printf("\nCube %d is covered with data: %d\n", c, multicube->cover[c]);
-    print_datacube(multicube->cube[c]);
-  }
 
   return;
 }
