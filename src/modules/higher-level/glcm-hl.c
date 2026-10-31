@@ -132,6 +132,8 @@ char dname[NPOW_10];
 char subname[NPOW_10];
 int nchar;
 
+  if ((brick = copy_brick(from, nb, _DT_SHORT_)) == NULL) return NULL;
+
   set_brick_name(brick, "FORCE GLCM statistics");
   set_brick_product(brick, prodname);
 
