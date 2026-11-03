@@ -159,7 +159,7 @@ enum { _SCR_COMB_ADD_, _SCR_COMB_MUL_, _SCR_COMB_LENGTH_ };
 enum { _INT_NONE_, _INT_LINEAR_, _INT_MOVING_, _INT_RBF_, _INT_HARMONIC_, _INT_LENGTH_ };
 
 // choice of date for TSI
-enum { _INT_DATE_DEFAULT_, _INT_DATE_CONSTANT_DOY_, _INT_DATE_LENGTH_ };
+enum { _INT_DATE_STEP_, _INT_DATE_DOY_, _INT_DATE_LENGTH_ };
 
 // standardization
 enum { _STD_NONE_, _STD_NORMAL_, _STD_CENTER_, _STD_LENGTH_ };

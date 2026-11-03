@@ -482,7 +482,7 @@ char sensor[NPOW_10];
 
   if (ni > 0){
   
-  if (phl->tsa.tsi.step_method==_INT_DATE_DEFAULT_){
+  if (phl->tsa.tsi.step_method==_INT_DATE_STEP_){
     for (t=0; t<ni; t++){
       if (phl->tsa.tsi.method == _INT_NONE_){
         date = get_brick_date(ard[t].DAT, 0);
@@ -494,7 +494,7 @@ char sensor[NPOW_10];
       copy_date(&date, &ts->d_tsi[t]);
       copy_string(ts->bandnames_tsi[t], NPOW_10, sensor);
     } 
-  } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_DOY_){
     int nyears=phl->tsa.tsi.year_range[1]-phl->tsa.tsi.year_range[0];
     int niMax=nyears*phl->tsa.tsi.ndoys_tsi;
     t=0;
@@ -503,7 +503,6 @@ char sensor[NPOW_10];
             int doy=phl->tsa.tsi.doys_tsi[cdoy];
             set_date(&date, y, 1, 1);
             set_date_doy(&date, doy);
-            // check interpolation date is in the range of L2 dates
              if (phl->date_range[_MAX_].ce > date.ce && phl->date_range[_MIN_].ce < date.ce){
               copy_date(&date, &ts->d_tsi[t]); 
               copy_string(sensor, NPOW_10, "BLEND");
@@ -688,10 +687,10 @@ brick_compile_info_t *info = NULL;
             case _inter_:
               if (phl->tsa.tsi.method == _INT_NONE_){
                 date = get_brick_date(ard[t].DAT, 0);
-              } else if (phl->tsa.tsi.step_method== _INT_DATE_DEFAULT_){
+              } else if (phl->tsa.tsi.step_method== _INT_DATE_STEP_){
                  set_date_ce(&date, phl->date_range[_MIN_].ce + t*phl->tsa.tsi.step);
-              } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
-                  set_date_ce(&date, ts->d_tsi[t].ce);
+              } else if (phl->tsa.tsi.step_method== _INT_DATE_DOY_){
+                 set_date_ce(&date, ts->d_tsi[t].ce);
               }
               set_brick_sensor(TSA[o], t, "BLEND");
               compact_date(date.year, date.month, date.day, fdate, NPOW_10);
@@ -963,10 +962,10 @@ short nodata;
   // number of steps for interpolation
   if (phl->tsa.tsi.method == _INT_NONE_){
     ni = nt;
-  } else if (phl->tsa.tsi.step_method== _INT_DATE_DEFAULT_){
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_STEP_){
 
     ni = ceil((phl->date_range[_MAX_].ce-phl->date_range[_MIN_].ce+1)/phl->tsa.tsi.step);
-  } else if (phl->tsa.tsi.step_method== _INT_DATE_CONSTANT_DOY_){
+  } else if (phl->tsa.tsi.step_method== _INT_DATE_DOY_){
 
   date_t date;
   init_date(&date);
