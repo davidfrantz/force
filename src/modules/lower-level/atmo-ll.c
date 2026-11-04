@@ -1700,6 +1700,7 @@ short *hot_ = NULL;
   set_brick_open(HOT, OPEN_MERGE);
   set_brick_explode(HOT, false);
   set_brick_format(HOT, &pl2->gdalopt);
+  set_brick_scale(HOT, 0, 10000);
   set_brick_wavelength(HOT, 0, 1);
   set_brick_unit(HOT, 0, "unknown");
   set_brick_domain(HOT, 0, product);
