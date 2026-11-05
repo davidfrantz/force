@@ -43,9 +43,9 @@ cd $BIN
 ./splits.sh enable
 
 make -j
-sudo make install
+#sudo make install
 
-make clean
+#make clean
 
 ./splits.sh disable
 

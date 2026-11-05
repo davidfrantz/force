@@ -1777,9 +1777,28 @@ void write_par_hl_tsi(FILE *fp, bool verbose){
   fprintf(fp, "INT_DAY = 16\n");
 
   if (verbose){
+    fprintf(fp, "# Mode for determining TSI dates ; either a step in day or a vector of DOY.\n");
+    fprintf(fp, "# Type: Character. Valid values: {INT_STEP,DOY_VECTOR}\n");
+  }
+  fprintf(fp, "TSI_STEP_METHOD=INT_STEP\n");
+
+  if (verbose){
+    fprintf(fp, "# For mode DOY_VECTOR only, to restrict the output TSI dates to certain years.\n");
+    fprintf(fp, "# Type: Integer list of two elements. Valid values: [0,3000]\n");
+  }
+  fprintf(fp, "YEAR_RANGE=2016 2026\n");
+
+  if (verbose){
+    fprintf(fp, "# For mode DOY_VECTOR only, the DOY vector of dates for which TSI is running.\n");
+    fprintf(fp, "# Type: Integer list. Valid values: [1,365]\n");
+  }
+  fprintf(fp, "DOYS_TSI=8 23 38 53 69 84 99 114 130 145 160 175 191 206 221 236 252 267 282 297 313 328 343 358\n");
+
+  if (verbose){
     fprintf(fp, "# Standardize the TSI time series with pixel mean and/or standard deviation?\n");
     fprintf(fp, "# Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}\n");
   }
+
   fprintf(fp, "STANDARDIZE_TSI = NONE\n");
 
   if (verbose){

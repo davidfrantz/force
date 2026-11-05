@@ -194,3 +194,6 @@ const tagged_enum_t _TAGGED_ENUM_RGB_[_RGB_LENGTH_] = {
 const tagged_enum_t _TAGGED_ENUM_UDF_[_UDF_LENGTH_] = {
   { _UDF_PIXEL_,  "PIXEL" }, { _UDF_CHUNK_,  "CHUNK" }};
 
+const tagged_enum_t _TAGGED_ENUM_TSI_STEP_METHOD_[_INT_DATE_LENGTH_] = {
+{ _INT_DATE_STEP_,"STEP"}, {_INT_DATE_DOY_,"DOY_VECTOR" }};
+

@@ -320,6 +320,15 @@ OUTPUT_NRT = FALSE
 # This parameter gives the interpolation step in days.
 # Type: Integer. Valid range: [1,...
 INT_DAY = 16
+# Mode for determining TSI dates ; either a step in day or a vector of DOY
+# Type: Character. Valid values: {INT_STEP,DOY_VECTOR}
+TSI_STEP_METHOD=INT_STEP
+# For mode DOY_VECTOR only, to restrict the output TSI dates to certain years.
+# Type: Integer list of two elements. Valid values: [0,3000]
+YEAR_RANGE=2016 2026
+# For mode DOY_VECTOR only, the DOY vector of dates for which TSI is running 
+DOYS_TSI=8 23 38 53 69 84 99 114 130 145 160 175 191 206 221 236 252 267 282 297 313 328 343 358
+# Type: Integer list. Valid values: [1,365]
 # Standardize the TSI time series with pixel mean and/or standard deviation?
 # Type: Logical. Valid values: {NONE,NORMALIZE,CENTER}
 STANDARDIZE_TSI = NONE

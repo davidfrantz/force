@@ -149,6 +149,11 @@ typedef struct {
 typedef struct {
   int method;            // interpolation method
   int step;              // interpolate each n days
+  int step_method;            // choice of date for interpolation
+  int *year_range;
+  int nyear_range;
+  int *doys_tsi;              // the DOY for which tsi interpolation is wanted, will be used for every years in year_range
+  int ndoys_tsi;
   int mov_max;                // max temp. dist for moving stats filter
   int rbf_nk;                 // number of kernels for RBF fit
   int *rbf_sigma; // sigmas for RBF fit

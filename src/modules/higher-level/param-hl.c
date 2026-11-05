@@ -234,6 +234,9 @@ void register_tsa(params_t *params, par_hl_t *phl){
   register_bool_par(params,    "HARMONIC_TREND",  &phl->tsa.tsi.harm_trend);
   register_datevec_par(params, "HARMONIC_FIT_RANGE", "1900-01-01", "2099-12-31", 2, &phl->tsa.tsi.harm_fit_range, &phl->tsa.tsi.harm_fit_nrange);
   register_int_par(params,     "INT_DAY",     1, INT_MAX, &phl->tsa.tsi.step);
+  register_enum_par(params,    "TSI_STEP_METHOD", _TAGGED_ENUM_TSI_STEP_METHOD_,_INT_DATE_LENGTH_, &phl->tsa.tsi.step_method);
+  register_intvec_par(params,  "DOYS_TSI", 1, 365, -1, &phl->tsa.tsi.doys_tsi, &phl->tsa.tsi.ndoys_tsi);
+  register_intvec_par(params,  "YEAR_RANGE", 0, 3000,2, &phl->tsa.tsi.year_range, &phl->tsa.tsi.nyear_range);
   register_enum_par(params,    "STANDARDIZE_TSI", _TAGGED_ENUM_STD_, _STD_LENGTH_, &phl->tsa.tsi.standard);
   register_bool_par(params,    "OUTPUT_TSI",  &phl->tsa.tsi.otsi);
   register_bool_par(params,    "OUTPUT_NRT",  &phl->tsa.tsi.onrt);
