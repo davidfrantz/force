@@ -433,8 +433,6 @@ float A, B;
 float tempprob;
 float *LANDPROB = NULL;
 double *CLEARLPROB = NULL; // need to be double for GSL quantile function
-double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
-
 
   #ifdef FORCE_CLOCK
   time_t TIME; time(&TIME);
@@ -443,36 +441,23 @@ double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
   /** clear all or clear land temp + temperature quantiles **/
 
+  uint32_t *h = NULL;
+  int n;
+  alloc((void**)&h, 65536, sizeof(uint32_t));
+
   if ((100.0*nland/(float)npix) >= 0.1){
-
-    alloc((void**)&CLEARTEMP, nland, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (lnd_[p]) CLEARTEMP[k++] = temp_[p];
-    }
-
-    lowtemp  = quantile(CLEARTEMP, nland, lo);
-    hightemp = quantile(CLEARTEMP, nland, hi);
-
+    hist_short(temp_, lnd_, nc, h);  n = nland;
   } else {
-
-    alloc((void**)&CLEARTEMP, nclear, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (clr_[p]) CLEARTEMP[k++] = temp_[p];
-    }
-
-    lowtemp  = quantile(CLEARTEMP, nclear, lo);
-    hightemp = quantile(CLEARTEMP, nclear, hi);
-
+    hist_short(temp_, clr_, nc, h);  n = nclear;
   }
 
+  lowtemp  = quantile_hist(h, n, lo);   // one histogram, two quantiles
+  hightemp = quantile_hist(h, n, hi);
+  free((void*)h);
   #ifdef FORCE_DEBUG
   printf("low/high temperature quantiles: %f / %f\n", lowtemp, hightemp);
   #endif
 
-  free((void*)CLEARTEMP);
-  
 
   /** cloud probability over land **/
 
@@ -531,10 +516,10 @@ float hi = 0.825;
 float brightprob, tempprob;
 float wtrtemp = 0.0;
 int nCLEARWTR = 0;
-bool  *CLEARWTR = NULL;
+small  *CLEARWTR = NULL;
+uint32_t *h = NULL;
 float *WATERPROB = NULL;
 double *CLEARWPROB = NULL; // need to be double for GSL quantile function
-double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
 
   #ifdef FORCE_CLOCK
@@ -544,24 +529,19 @@ double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
   /** cloud probability over water **/
 
-  alloc((void**)&CLEARWTR, nc, sizeof(bool));
+  alloc((void**)&CLEARWTR, nc, sizeof(small));
 
   for (p=0; p<nc; p++){
-    if (get_water(QAI, p) && sw2_[p] <= 300){ CLEARWTR[p] = true; nCLEARWTR++;}
+    if (get_water(QAI, p) && sw2_[p] <= 300){ CLEARWTR[p] = 1; nCLEARWTR++;}
   }
 
   // test if there is clear water, if not skip and give water prob = -1
   if (nCLEARWTR > 0){
 
-    alloc((void**)&CLEARTEMP, nCLEARWTR, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (CLEARWTR[p])CLEARTEMP[k++] = temp_[p];
-    }
-
-    wtrtemp = quantile(CLEARTEMP, nCLEARWTR, hi);
-    free((void*)CLEARTEMP);
-
+    alloc((void**)&h, 65536, sizeof(uint32_t));
+    hist_short(temp_, CLEARWTR, nc, h);
+    wtrtemp = quantile_hist(h, nCLEARWTR, hi);
+    free((void*)h);
 
     alloc((void**)&WATERPROB, nc, sizeof(float));
 
