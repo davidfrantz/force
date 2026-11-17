@@ -677,7 +677,13 @@ double q;
   return (float)q;
 }
 
-// returns the k-th (0-based) and (k+1)-th smallest values of the histogram
+/** two ranks
++++ The function returns the quantile values at rank k and k+1 from a histogram
+--- h:      histogram
+--- k:      rank
+--- a:      quantile value at rank k (returned)
+--- b:      quantile value at rank k+1 (returned)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 static void two_ranks(const uint32_t *h, size_t k, short *a, short *b){
   size_t cum = 0;
   int v = 0;
@@ -692,26 +698,50 @@ static void two_ranks(const uint32_t *h, size_t k, short *a, short *b){
     *b = (short)(v - 32768);
   }
 }
-
-short quantile_short(const short *toa, const small *lnd,
-                            int nc, int nland, float p, uint32_t *h){
+/** hist_short
++++ builds the histogram of all possible short values in the range [-32768, 32767].
+--- x:      array of short integers
+--- m:      mask array
+--- nc:     number of cells
+--- h:      histogram (output)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void hist_short(const short *x, const small *m, int nc, uint32_t *h){
   memset(h, 0, 65536 * sizeof(uint32_t));
-  for (int i = 0; i < nc; i++) if (lnd[i]) h[toa[i] + 32768]++;
+  for (int i = 0; i < nc; i++) if (m[i]) h[x[i] + 32768]++;
+}
 
-  if (nland <= 0) return 0;                 // GSL returns 0.0 for n == 0
-
-  double index = (double)p * (double)(nland - 1);   // same as GSL: f * (n-1)
+/** quantile_hist
++++ takes a histogram and returns the float value of a quantile.
+--- h:      histogram
+--- n:      number of counted values
+--- p:      probability [0,1]
++++ Return: quantile
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+float quantile_hist(const uint32_t *h, int n, float p){
+  if (n <= 0) return 0;
+  double index = (double)p * (double)(n - 1);
   size_t lhs   = (size_t)(int)index;
   double delta = index - (double)lhs;
-
   short a, b;
   two_ranks(h, lhs, &a, &b);
-
-  double q = ((size_t)lhs == (size_t)nland - 1)
-           ? (double)a
+  double q = (lhs == (size_t)n - 1) ? (double)a
            : (1.0 - delta) * (double)a + delta * (double)b;
+  return (float)q;
+}
 
-  return (short)(float)q;                   // keep the float step!
+/** quantile_short
++++ wrapper to return the short value of the quantile.
+--- toa:    array of short integers
+--- lnd:    mask array (e.g. pixels marked as land), checks for != 0
+--- nc:     length of toa and lnd
+--- nland:  number of masked values
+--- p:      probability [0,1]
+--- h:      histogram for short values so fixed length 65536
+--- Return: quantile
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+short quantile_short(const short *toa, const small *lnd, int nc, int nland, float p, uint32_t *h){
+  hist_short(toa, lnd, nc, h);
+  return (short)quantile_hist(h, nland, p);
 }
 
 /** Mode

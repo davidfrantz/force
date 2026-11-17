@@ -69,6 +69,8 @@ float tscore_Hills_inv_t(float p, int idf);
 float tscore_T_z(float t, int df);
 float tscore_T_p(float t, int df);
 float quantile(double *x, int n, float p);
+float quantile_hist(const uint32_t *h, int n, float p);
+void hist_short(const short *x, const small *m, int nc, uint32_t *h);
 short quantile_short(const short *toa, const small *lnd, int nc, int nland, float p, uint32_t *h);
 int mode(int *x, int n);
 int n_uniq(int *x, int n);
