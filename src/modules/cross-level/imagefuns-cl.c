@@ -727,8 +727,10 @@ int nx, ny;
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int greyscale_reconstruction_(short *MASK, short *MARKER, int nx, int ny){
 int i, j, p, ii, jj, np, np1[4], np2[4], k;
+int n = nx*ny;
 short min, max;
 queue_t fifo;
+short mp;
 
   np1[0] = -nx-1; np1[1] = -nx; np1[2] = -nx+1; np1[3] = -1;
   np2[0] = nx+1; np2[1] = nx; np2[2] = nx-1; np2[3] = 1;
@@ -741,22 +743,20 @@ queue_t fifo;
 
   /* set border of marker image to mask value
      set rest of image to maximum of mask */
-  max = SHRT_MIN;  
-  for (p=0; p<nx*ny; p++){
+  max = SHRT_MIN;
+  for (p=0; p<n; p++){
     if (MASK[p] > max) max = MASK[p];
   }
-  
-  
-  for (i=0, p=0; i<ny; i++){
-  for (j=0; j<nx; j++, p++){
-    
-    if (i == 0 || j == 0 || i == ny-1 || j == nx-1){
-      MARKER[p] = MASK[p];
-    } else {
-      MARKER[p] = max;
-    }
 
+  for (p=0; p<n; p++) MARKER[p] = max;
+
+  for (j=0; j<nx; j++){
+    MARKER[j]              = MASK[j];
+    MARKER[(ny-1)*nx+j]    = MASK[(ny-1)*nx+j];
   }
+  for (i=0; i<ny; i++){
+    MARKER[i*nx]           = MASK[i*nx];
+    MARKER[i*nx+nx-1]      = MASK[i*nx+nx-1];
   }
 
 
@@ -800,7 +800,7 @@ queue_t fifo;
           printf("Failed to enqueue another coord. pair!\n"); 
           return FAILURE;
         }
-        continue;
+        break;
 
       }
     }
@@ -808,13 +808,13 @@ queue_t fifo;
   }
   }
 
-  //fprintf("step 2: done. queue length: %d\n", fifo->length);
+  // fprintf("step 2: done queue length: %d\n", fifo->length);
 
   // queue propagation
   while (dequeue(&fifo, &j, &i) == SUCCESS){
 
     p = nx*i+j;
-
+    mp = MARKER[p];
     for (ii=-1; ii<=1; ii++){
     for (jj=-1; jj<=1; jj++){
 
@@ -822,21 +822,21 @@ queue_t fifo;
 
       np = (i+ii)*nx+j+jj;
 
-      if (MARKER[np] > MARKER[p] && MASK[np] != MARKER[np]){
+      if (MARKER[np] > mp && MASK[np] != MARKER[np]){
 
-        if (MARKER[p] > MASK[np]) MARKER[np] = MARKER[p]; else MARKER[np] = MASK[np];
-        
-        if (enqueue(&fifo, j+jj, i+ii) == FAILURE){
-          printf("Failed to enqueue another coord. pair!\n");
-          return FAILURE;
+        if (MARKER[np] > mp && MASK[np] != MARKER[np]){
+          MARKER[np] = (mp > MASK[np]) ? mp : MASK[np];
+          if (enqueue(&fifo, j+jj, i+ii) == FAILURE){
+            printf("Failed to enqueue another coord. pair!\n");
+            return FAILURE;
+          }
         }
-
       }
 
     }
     }
 
-  }  
+  }
 
   //fprintf("step 3: done. queue length: %d\n", fifo->length);
 

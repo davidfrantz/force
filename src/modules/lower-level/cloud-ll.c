@@ -822,7 +822,6 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
           if ((marker_[p] - mask_[p]) < spr_[p]) spr_[p] = marker_[p] - mask_[p];
         }
       }
-
     }
 
     free((void*)h);
