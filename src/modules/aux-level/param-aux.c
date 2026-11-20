@@ -2371,6 +2371,18 @@ void write_par_hl_feature(FILE *fp, bool verbose){
   }
   fprintf(fp, "FEATURE_EXCLUDE = FALSE\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of primary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_PRIMARY = SKIP\n");
+
   return;
 }
 
@@ -2494,9 +2506,11 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# effective mesh size.\n");
     fprintf(fp, "# Additionally, arithmetic mean, geometric mean, standard deviation, maximum value\n");
     fprintf(fp, "# and the area of the foreground class within the kernel are available.\n");
-    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE}\n");
+    fprintf(fp, "# Furthermore, Image texture measures of contrastm and dissimilarity are available. These measures\n");
+    fprintf(fp, "# are calculated for the complete wall-to-wall scene regardless of thresholds.\n");
+    fprintf(fp, "# Type: Character list. Valid values: {UCI,MPA,FDI,EDD,NBR,EMS,AVG,GEO,STD,MAX,ARE,CON, DIS}\n");
   }
-  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE\n");
+  fprintf(fp, "LSM = UCI MPA FDI EDD NBR EMS AVG GEO STD MAX ARE CON DIS\n");
 
   if (verbose){
     fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");

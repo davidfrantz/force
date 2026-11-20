@@ -299,6 +299,9 @@ double covariance(double cov, double n){
 }
 
 
+
+
+
 /** Compute slope of linear regression
 +++ This function computes the slope of a linear regression.
 --- cov:    covariance between x and y
