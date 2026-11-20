@@ -75,7 +75,7 @@ COPY --link --chown=1000:1000 . .
 # Build, install, check FORCE
 RUN echo "building FORCE" && \
   ./debug.sh $debug && \
-  make -j$(nproc) $build
+  make LTO=yes -j$(nproc) $build
 
 FROM internal_base AS force
 
