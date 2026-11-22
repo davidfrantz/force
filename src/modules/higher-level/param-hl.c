@@ -471,7 +471,9 @@ void register_lsm(params_t *params, par_hl_t *phl){
 void register_glcm(params_t *params, par_hl_t *phl){
 
 
-  register_int_par(params,     "GLCM_WINDOW",    0, 1e6,  &phl->glcm.winsize);
+  register_int_par(params,     "GLCM_WINDOW", 0, 1e6,  &phl->glcm.winsize);
+  register_int_par(params,     "GLCM_MIN", -10000, 10000, &phl->glcm.min);
+  register_int_par(params,     "GLCM_MAX", -10000, 10000, &phl->glcm.max);
   register_enumvec_par(params, "GLCM", _TAGGED_ENUM_GLCM_, _GLCM_LENGTH_, -1, &phl->glcm.metrics, &phl->glcm.nmetrics);
   register_char_par(params,    "GLCM_BASE",  _CHAR_TEST_NONE_, &phl->glcm.base);
     
@@ -1210,9 +1212,6 @@ double tol = 5e-3;
   } else if (phl->type == _HL_LSM_){
     phl->radius = phl->lsm.radius;
     phl->lsm.radius = (int)(phl->lsm.radius/phl->res);
-  // } else if (phl->type == _HL_GLCM_){
-  //   phl->radius = phl->glcm.winsize;
-  //   phl->glcm.winsize = (int)(phl-glcm.winsize/phl->res);
   } else if (phl->type == _HL_L2I_ || phl->type == _HL_CFI_){
     if (phl->imp.pred_radius > phl->imp.text_radius){
       phl->radius = phl->imp.pred_radius;

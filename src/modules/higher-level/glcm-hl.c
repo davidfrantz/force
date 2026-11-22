@@ -35,11 +35,11 @@ Contact: lewinska@hu-berlin.de
 
 // GLCM quantisation (same idea as n_grey / min_x / max_x in azvoleff/glcm)
 #define GLCM_NLEVELS 32
-#define GLCM_MIN    -10000
-#define GLCM_MAX     10000
+// #define GLCM_MIN    -10000
+// #define GLCM_MAX     10000
 
-static inline int glcm_quantize(short value){
-  int level = (int)(((double)value - GLCM_MIN) / (GLCM_MAX - GLCM_MIN) * GLCM_NLEVELS);
+static inline int glcm_quantize(short value, int vmin, int vmax){
+  int level = (int)(((double)value - vmin) / (double)(vmax - vmin) * GLCM_NLEVELS);
   if (level < 0) level = 0;
   if (level > GLCM_NLEVELS-1) level = GLCM_NLEVELS-1;
   return level;
@@ -192,8 +192,8 @@ small *mask_ = NULL;
 int nprod = 0;
 int f, nx, ny;
 short nodata;
-
-  printf("GLCM: entered, nf=%d, winsize=%d\n", nf, phl->glcm.winsize); fflush(stdout);
+ 
+    // printf("GLCM: entered, nf=%d, winsize=%d\n", nf, phl->glcm.winsize); fflush(stdout);
 
   cite_me(_CITE_GLCM_);
 
@@ -208,7 +208,11 @@ short nodata;
     *nproduct = 0;
     return NULL;
   }
-
+  if (phl->glcm.max <= phl->glcm.min){
+    printf("GLCM_MAX must be greater than GLCM_MIN (got %d and %d).\n", phl->glcm.min, phl->glcm.max);
+    *nproduct = 0;
+    return NULL;
+  }
   // import bricks
   nx = get_brick_chunkncols(features[0].DAT);
   ny = get_brick_chunknrows(features[0].DAT);
@@ -305,8 +309,8 @@ short nodata;
             if (features[f].dat[0][np2] == nodata) continue;
 
             // grey levels, not raw values
-            gi = glcm_quantize(features[f].dat[0][np]);
-            gj = glcm_quantize(features[f].dat[0][np2]);
+            gi = glcm_quantize(features[f].dat[0][np],  phl->glcm.min, phl->glcm.max);
+            gj = glcm_quantize(features[f].dat[0][np2], phl->glcm.min, phl->glcm.max);
             diff = (double)(gi - gj);
 
             glcm_dis_sum += fabs(diff);

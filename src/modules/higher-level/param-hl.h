@@ -354,6 +354,8 @@ typedef struct {
 
 // GLCM metrics
 typedef struct {
+  int min; 
+  int max; 
   int winsize;
   int *metrics, nmetrics;
   int ocon; // GLCM contrast

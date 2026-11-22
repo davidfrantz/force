@@ -2508,6 +2508,19 @@ void write_par_hl_glcm(FILE *fp, bool verbose){
   fprintf(fp, "# ------------------------------------------------------------------------\n");
 
   if (verbose){
+    fprintf(fp, "# This parameter defines the lower bound of the gray-level range for GLCM.\n");
+    fprintf(fp, "# Units are the same as for the input layers. Values below are assigned to\n");
+    fprintf(fp, "# the GLCM_MIN. Valid range [-10000,10000]. GLCM_MIN must be < GLCM_MAX/\n");
+  }
+  fprintf(fp, "GLCM_MIN = 0\n");
+  if (verbose){
+    fprintf(fp, "# This parameter defines the upper bound of the gray-level range for GLCM.\n");
+    fprintf(fp, "# Units are the same as for the input layers. Values above are assigned to\n");
+    fprintf(fp, "# the GLCM_MAX. Valid range [-10000,10000]. GLCM_MAX must be > GLCM_MIN.\n");
+  }
+  fprintf(fp, "GLCM_MAX = 10000\n");
+
+  if (verbose){
     fprintf(fp, "# This parameter defines window size of the kernel used for computing\n");
     fprintf(fp, "# GLCM statistics (in pixels). The value must be an odd integer.\n");
     fprintf(fp, "# Type: Integer. Valid values: ]3,CHUNK_SIZE]\n");
