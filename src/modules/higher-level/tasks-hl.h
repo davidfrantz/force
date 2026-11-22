@@ -48,6 +48,7 @@ Higher level tasks header
 #include "../higher-level/ml-hl.h"
 #include "../higher-level/texture-hl.h"
 #include "../higher-level/lsm-hl.h"
+#include "../higher-level/glcm-hl.h"
 #include "../higher-level/lib-hl.h"
 #include "../higher-level/sample-hl.h"
 #include "../higher-level/cf-improphe-hl.h"

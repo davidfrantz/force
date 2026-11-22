@@ -352,6 +352,20 @@ typedef struct {
   int kernel;
 } par_lsm_t;
 
+// GLCM metrics
+typedef struct {
+  int min; 
+  int max; 
+  int winsize;
+  int *metrics, nmetrics;
+  int ocon; // GLCM contrast
+  int odis; // GLCM dissimilarity
+  int ohom; // GLCM homogenity
+  int oent; // GLCM entropy
+  int ouni; // GLCM uniformity
+  char *base;
+} par_glcm_t;
+
 // library completeness testing
 typedef struct {
   char  *d_lib;
@@ -478,6 +492,7 @@ typedef struct {
   par_smp_t smp;
   par_txt_t txt;
   par_lsm_t lsm;
+  par_glcm_t glcm;
   par_lib_t lib;
   par_udp_t udf;
 

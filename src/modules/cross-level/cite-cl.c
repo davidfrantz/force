@@ -411,6 +411,11 @@ cite_t _cite_me_[_CITE_LENGTH_] = {
     "orange rust disease using EO-1 Hyperion hyperspectral imagery. International "
     "Journal of Remote Sensing, 25(2), 489-498. "
     "https://doi.org/10.1080/01431160310001618031",
+    false },
+  { "Gray Level Co-occurrence Matrix (GLCM)",
+    "Haralick, R., Shanmugan, K., and Dinstein, I. (1973). Textural Features for Image "
+    "Classification. IEEE Transactions on Systems, Man, and Cybernetics, SMC-3(6), 610-621. "
+    "https://doi.org/10.1109/TSMC.1973.4309314",
     false }
 };
 

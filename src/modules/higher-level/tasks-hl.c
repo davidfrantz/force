@@ -209,6 +209,10 @@ bool error = false;
         OUTPUT[pu] = landscape_metrics(ARD1[pu], MASK[pu], 
           nt1[pu], phl, cube, &nprod[pu]);
         break;
+      case _HL_GLCM_:
+        OUTPUT[pu] = glcm_statistics(ARD1[pu], MASK[pu], 
+          nt1[pu], phl, cube, &nprod[pu]);
+        break;
       case _HL_L2I_:
         OUTPUT[pu] = level2_improphe(ARD1[pu], ARD2[pu], MASK[pu], 
           nt1[pu], nt2[pu], phl, cube, &nprod[pu]);

@@ -43,6 +43,7 @@ void register_ftr(params_t *params, par_hl_t *phl);
 void register_smp(params_t *params, par_hl_t *phl);
 void register_txt(params_t *params, par_hl_t *phl);
 void register_lsm(params_t *params, par_hl_t *phl);
+void register_glcm(params_t *params, par_hl_t *phl);
 void register_lib(params_t *params, par_hl_t *phl);
 void alloc_ftr(par_ftr_t *ftr);
 void free_ftr(par_ftr_t *ftr);
@@ -53,6 +54,7 @@ int parse_sta(par_sta_t *sta);
 int parse_pol(par_pol_t *pol);
 int parse_txt(par_txt_t *txt);
 int parse_lsm(par_lsm_t *lsm);
+int parse_glcm(par_glcm_t *glcm);
 int parse_quality(par_qai_t *qai);
 
 
@@ -456,7 +458,25 @@ void register_lsm(params_t *params, par_hl_t *phl){
   register_enumvec_par(params, "LSM", _TAGGED_ENUM_LSM_, _LSM_LENGTH_, -1, &phl->lsm.metrics, &phl->lsm.nmetrics);
   register_char_par(params,    "LSM_BASE",  _CHAR_TEST_NONE_, &phl->lsm.base);
   register_enum_par(params,    "LSM_KERNEL_SHAPE", _TAGGED_ENUM_KERNEL_, _KERNEL_LENGTH_, &phl->lsm.kernel);
+    
+  return;
+}
 
+
+/** This function registers GLCM statistics
+--- params: registered parameters
+--- phl:    HL parameters
++++ Return: void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void register_glcm(params_t *params, par_hl_t *phl){
+
+
+  register_int_par(params,     "GLCM_WINDOW", 0, 1e6,  &phl->glcm.winsize);
+  register_int_par(params,     "GLCM_MIN", -10000, 10000, &phl->glcm.min);
+  register_int_par(params,     "GLCM_MAX", -10000, 10000, &phl->glcm.max);
+  register_enumvec_par(params, "GLCM", _TAGGED_ENUM_GLCM_, _GLCM_LENGTH_, -1, &phl->glcm.metrics, &phl->glcm.nmetrics);
+  register_char_par(params,    "GLCM_BASE",  _CHAR_TEST_NONE_, &phl->glcm.base);
+    
   return;
 }
 
@@ -746,6 +766,35 @@ int i;
 }
 
 
+/** This function reparses GLCM statistics (special para-
++++ meter that cannot be parsed with the general parser).
+--- glcm:    glcm parameters
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+int parse_glcm(par_glcm_t *glcm){
+int i;
+
+
+  for (i=0; i<glcm->nmetrics; i++){
+    if (glcm->metrics[i] == _GLCM_CON_) {
+      glcm->ocon = true;
+    } else if (glcm->metrics[i] == _GLCM_DIS_) {
+      glcm->odis = true;
+    } else if (glcm->metrics[i] == _GLCM_HOM_) {
+      glcm->ohom = true;
+    } else if (glcm->metrics[i] == _GLCM_ENT_) {
+      glcm->oent = true;
+    } else if (glcm->metrics[i] == _GLCM_UNI_) {
+      glcm->ouni = true;
+    } else {
+      printf("warning: unknown glcm.\n");
+    }
+  }
+
+  return SUCCESS;
+}
+
+
 /** This function reparses Quality Assurance Information rules (special para-
 +++ meter that cannot be parsed with the general parser).
 --- qai:    QAI parameters
@@ -920,6 +969,10 @@ double tol = 5e-3;
     phl->type = _HL_LSM_;
     phl->input_level1 = _INP_FTR_;
     phl->input_level2 = _INP_NONE_;
+  } else if (strcmp(buffer, "++PARAM_GLCM_START++") == 0){
+    phl->type = _HL_GLCM_;
+    phl->input_level1 = _INP_FTR_;
+    phl->input_level2 = _INP_NONE_;
   } else if (strcmp(buffer, "++PARAM_LIB_START++") == 0){
     phl->type = _HL_LIB_;
     phl->input_level1 = _INP_FTR_;
@@ -988,6 +1041,9 @@ double tol = 5e-3;
     case _HL_LSM_:
       register_lsm(phl->params, phl);
       break;
+    case _HL_GLCM_:
+      register_glcm(phl->params, phl);
+      break;
     case _HL_LIB_:
       register_lib(phl->params, phl);
       break;
@@ -1044,6 +1100,8 @@ double tol = 5e-3;
   if (phl->type == _HL_TXT_) parse_txt(&phl->txt);
   
   if (phl->type == _HL_LSM_) parse_lsm(&phl->lsm);
+
+  if (phl->type == _HL_GLCM_) parse_glcm(&phl->glcm);
 
   if (phl->input_level1 == _INP_FTR_) parse_ftr(&phl->ftr);
 

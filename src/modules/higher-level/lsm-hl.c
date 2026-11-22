@@ -515,4 +515,3 @@ float unit_perim = 0;
   *nproduct = nprod;
   return LSM;
 }
-

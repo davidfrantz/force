@@ -7,6 +7,7 @@ higher: \
     cf-improphe-hl \
     cso-hl \
     fold-hl \
+	glcm-hl \
     improphe-hl \
     index-compute-hl \
     index-parse-hl \
@@ -46,6 +47,9 @@ cso-hl: prepare $(HIGHER_DIR)/cso-hl.c
 
 fold-hl: prepare $(HIGHER_DIR)/fold-hl.c
 	$(GCC) -c $(HIGHER_DIR)/fold-hl.c -o $(OBJDIR)/fold-hl.o
+
+glcm-hl: prepare $(HIGHER_DIR)/glcm-hl.c
+	$(GCC) -c $(HIGHER_DIR)/glcm-hl.c -o $(OBJDIR)/glcm-hl.o
 
 improphe-hl: prepare $(HIGHER_DIR)/improphe-hl.c
 	$(GCC) -c $(HIGHER_DIR)/improphe-hl.c -o $(OBJDIR)/improphe-hl.o

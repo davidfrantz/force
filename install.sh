@@ -39,7 +39,7 @@ BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd $BIN
 
-./debug.sh disable
+./debug.sh enable
 ./splits.sh enable
 
 make -j

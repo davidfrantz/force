@@ -1,0 +1,177 @@
+++PARAM_GLCM_START++
+
+# INPUT/OUTPUT DIRECTORIES
+# ------------------------------------------------------------------------
+# Lower Level datapool (parent directory of tiled input data)
+# Type: full directory path
+DIR_LOWER = NULL
+# Higher Level datapool (parent directory of tiled output data)
+# Type: full directory path
+DIR_HIGHER = NULL
+# This is the directory where provenance files should be saved.
+# Type: full directory path
+DIR_PROVENANCE = NULL
+
+# MASKING
+# ------------------------------------------------------------------------
+# Analysis Mask datapool (parent directory of tiled analysis masks)
+# If no analysis mask should be applied, give NULL.
+# Type: full directory path
+DIR_MASK = NULL
+# Basename of analysis masks (e.g. WATER-MASK.tif).
+# Masks need to be binary with 0 = off / 1 = on
+# Type: Basename of file
+BASE_MASK = NULL
+# This parameter controls how FORCE deals with input errors of the mask. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default).
+# Type: Character. Valid values: {STOP, SKIP}
+READ_ERROR_MASK = SKIP
+READ_ERROR_PRIMARY = SKIP
+
+# OUTPUT OPTIONS
+# ------------------------------------------------------------------------
+# Output format, which is either uncompressed flat binary image format aka
+# ENVI Standard, GeoTiff, or COG. GeoTiff images are compressed with ZSTD and hori-
+# zontal differencing; BigTiff support is enabled; the Tiff is internally tiled 
+# with 256x256 px blocks.
+# Metadata are written to the ENVI header or directly into the Tiff
+# to the FORCE domain. If the size of the metadata exceeds the Tiff's limit,
+# an external .aux.xml file is additionally generated.
+# Note that COG output is only possible when the chunk size matches the tile size.
+# Type: Character. Valid values: {ENVI,GTiff,COG,CUSTOM}
+OUTPUT_FORMAT = GTiff
+# File that contains custom GDAL output options. This is only used if 
+# OUTPUT_FORMAT = CUSTOM. If OUTPUT_FORMAT = CUSTOM, this file is mandatory.
+# The file should be written in tag and value notation. The first two lines 
+# are mandatory and specify GDAL driver and file extension, e.g. DRIVER = GTiff
+# and EXTENSION = tif. The driver name refers to the GDAL short driver names. 
+# Lines 3ff can hold a variable number of GDAL options (up to 32 are allowed).
+# Please note: with opening output options up to the user, it is now possible to
+# give invalid or conflicting options that result in the failure of creating files.
+# Type: full file path
+FILE_OUTPUT_OPTIONS = NULL
+# This parameter controls whether the output image is initialized before writing 
+# the first chunk. This prevents uninitialized data in the output image for sparse 
+# output scenarios, but might be slower for large images. The parameter is ignored if 
+# CHUNK_SIZE matches the tile size, because in that case the image is created in one 
+# big chunk anyways.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_INITIALIZE = TRUE
+# This parameter controls whether the output is written as multi-band image, or
+# if the stack will be exploded into single-band files.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_EXPLODE = FALSE
+# This parameter controls whether the output is written in one folder,
+# or whether several subfolders per product type will be generated to better
+# structure the output.
+# Type: Logical. Valid values: {TRUE,FALSE}
+OUTPUT_SUBFOLDERS = FALSE
+# This parameter controls whether FORCE raises a warning or an error 
+# if no read or written bytes are detected. The default (FALSE) will 
+# result in a warning.
+# Type: Logical. Valid values: {TRUE,FALSE}
+FAIL_IF_EMPTY = FALSE
+
+# PARALLEL PROCESSING
+# ------------------------------------------------------------------------
+# This module is using a streaming mechanism to speed up processing. There
+# are three processing teams (3 Threads) that simultaneously handle Input,
+# Processing, and Output. Example: when chunk 2 is being processed, data
+# from chunk 3 are already being input and results from chunk 1 are being
+# output. Each team can have multiple sub-threads to speed up the work. The
+# number of threads to use for each team is given by following parameters.
+# Type: Integer. Valid range: [1,...
+NTHREAD_READ = 8
+NTHREAD_COMPUTE = 22
+NTHREAD_WRITE = 4
+# Use STREAMING = FALSE to disable streaming. This will perform reading, 
+# computing and writing after one another in sequential mode.
+# Each operation will still be parallelized with above settings.
+# Disabling streaming might be necessary for some UDFs that otherwise
+# produce threading conflicts with the internally used OpenMP functionality.
+# Type: Logical. Valid values: {TRUE,FALSE}
+STREAMING = TRUE
+# This module will display progress information on screen. By default, the
+# progress information overwrites itself to produce a pretty displayal. 
+# However, this can cause error messages (or printing in UDFs) to be overwritten.
+# If disabled (FALSE), the progress information will be simply be appended
+# on screen (stdout).
+# Type: Logical. Valid values: {TRUE,FALSE}
+PRETTY_PROGRESS = TRUE
+
+# PROCESSING EXTENT AND RESOLUTION
+# ------------------------------------------------------------------------
+# Analysis extent, given in tile numbers (see tile naming)
+# Each existing tile falling into this square extent will be processed
+# A shapefile of the tiles can be generated with force-tabulate-grid
+# Type: Integer list. Valid range: [-999,9999]
+X_TILE_RANGE = 0 0
+Y_TILE_RANGE = 0 0
+# Allow-list of tiles. Can be used to further limit the analysis extent to
+# non-square extents. The allow-list is intersected with the analysis extent,
+# i.e. only tiles included in both the analysis extent AND the allow-list will
+# be processed.
+# Optional. If NULL, the complete analysis extent is processed
+# Type: full file path
+FILE_TILE = NULL
+# This parameter is used to define the size of the sub-tile processing units.
+# Most efficient is to use a chunk size that coincides with the tile size. Using
+# smaller chunks may be necessary if you cannot fit all necessary data into RAM.
+# The tilesize must be dividable by the chunk size without remainder.
+# Note that setting the chunk size to 0 as was done with the deprecated BLOCK_SIZE
+# parameter is not permitted anymore.
+# Type: Integer list. Valid range: ]0,TILE_SIZE]
+CHUNK_SIZE = 0 0
+# Analysis resolution. The tile (and chunk) size must be dividable by this
+# resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
+# Type: Double. Valid range: ]0,CHUNK_SIZE]
+RESOLUTION = 10
+
+# FEATURES
+# ------------------------------------------------------------------------
+# This parameter specifies the feature(s) used for the analysis. The base-
+# name of a tiled dataset needs to be given, followed by an integer list that
+# specifies the bands that are to be used. This parameter can be given
+# multiple times if multiple features are to be used. The features are used
+# in the same order as given here, thus keep this in mind when training
+# machine learning models with force-train.
+# Type: Basename of file, followed by Integer list
+INPUT_FEATURE = 2018-2018_001-365_LEVEL4_TSA_SEN2L_NDV_STM.tif 1 2 3 4 5 6
+# Nodata value of the features.
+# Type: Integer. Valid values: [-32768,32767]
+FEATURE_NODATA = -9999
+# Should nodata values be excluded if any feature is nodata (TRUE). Or just
+# proceed (FALSE)?
+# Type: Logical. Valid values: {TRUE,FALSE}
+FEATURE_EXCLUDE = FALSE
+# This parameter controls how FORCE deals with input errors of primary input. 
+# If set to STOP, FORCE will raise an error and full-stop processing.
+# If set to SKIP, FORCE will raise a warning and skip the processing 
+# of the affected block of data (default). If set to YOLO, FORCE 
+# will raise a warning but continue processing the affected block of data; 
+# this is the most risky option and should be used with caution; 
+# do not blame us if something goes wrong.
+# Type: Character. Valid values: {STOP, SKIP, YOLO}
+READ_ERROR_PRIMARY = SKIP
+
+# Gray-Level Co-occurrence Matrix (GLCM) Statistics
+# ------------------------------------------------------------------------
+# This parameter defines window size of the kernel used for computing the
+# GLCM statistics (in pixels). The value must be an odd integer. 
+# Type: Integer. Valid values: ]3,CHUNK_SIZE]
+GLCM_WINDOW = 3
+# Which Gray-Level Co-occurrence Matrix (GLCM) Statistics should be computed?
+# There will be one GLCM output file for each metric with as many bands as there
+# are features (in the same order). Available metrics are contrast, dissimilarity, homogenity
+# entropy, and uniformity.
+# These statistics are calculated for the complete wall-to-wall scene regardless of thresholds.
+# Type: Character list. Valid values: {CON,DIS,HOM,ENT,UNI}
+GLCM = CON DIS HOM ENT UNI
+# This parameter defines the basename for the output files. The basename will
+# be appended by Module ID, product ID, and the file extension.
+# Type: Character.
+GLCM_BASE = GLCM
+
+++PARAM_GLCM_END++

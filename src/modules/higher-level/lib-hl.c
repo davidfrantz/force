@@ -144,6 +144,10 @@ int nchar;
     printf("Buffer Overflow in assembling filename\n"); return NULL;}
   set_brick_filename(brick, fname);
 
+  nchar = snprintf(fname, NPOW_10, "%s_HL_GLCM_%s", phl->lib.base, prodname);
+  if (nchar < 0 || nchar >= NPOW_10){
+    printf("Buffer Overflow in assembling filename\n"); return NULL;}
+  set_brick_filename(brick, fname);
 
   if (write){
     set_brick_open(brick, OPEN_CHUNK);

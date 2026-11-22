@@ -2371,6 +2371,18 @@ void write_par_hl_feature(FILE *fp, bool verbose){
   }
   fprintf(fp, "FEATURE_EXCLUDE = FALSE\n");
 
+  if (verbose){
+    fprintf(fp, "# This parameter controls how FORCE deals with input errors of primary input. \n");
+    fprintf(fp, "# If set to STOP, FORCE will raise an error and full-stop processing.\n");
+    fprintf(fp, "# If set to SKIP, FORCE will raise a warning and skip the processing \n");
+    fprintf(fp, "# of the affected block of data (default). If set to YOLO, FORCE \n");
+    fprintf(fp, "# will raise a warning but continue processing the affected block of data; \n");
+    fprintf(fp, "# this is the most risky option and should be used with caution; \n");
+    fprintf(fp, "# do not blame us if something goes wrong.\n");
+    fprintf(fp, "# Type: Character. Valid values: {STOP, SKIP, YOLO}\n");
+  }
+  fprintf(fp, "READ_ERROR_PRIMARY = SKIP\n");
+
   return;
 }
 
@@ -2504,6 +2516,61 @@ void write_par_hl_lsm(FILE *fp, bool verbose){
     fprintf(fp, "# Type: Character.\n");
   }
   fprintf(fp, "LSM_BASE = LSM\n");
+
+  return;
+}
+
+
+/** This function writes parameters into a parameter skeleton file: higher
++++ level Gray-Level Co-occurrence Matrix (GLCM) pars
+--- fp:      parameter skeleton file
+--- verbose: add description, or use more compact format for experts?
++++ Return:  void
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+void write_par_hl_glcm(FILE *fp, bool verbose){
+
+
+  fprintf(fp, "\n# Gray-Level Co-occurrence Matrix (GLCM) Statistics\n");
+  fprintf(fp, "# ------------------------------------------------------------------------\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the lower bound of the gray-level range for GLCM.\n");
+    fprintf(fp, "# Units are the same as for the input layers. Values below are assigned to\n");
+    fprintf(fp, "# the GLCM_MIN. Valid range [-10000,10000]. GLCM_MIN must be < GLCM_MAX/\n");
+  }
+  fprintf(fp, "GLCM_MIN = 0\n");
+  if (verbose){
+    fprintf(fp, "# This parameter defines the upper bound of the gray-level range for GLCM.\n");
+    fprintf(fp, "# Units are the same as for the input layers. Values above are assigned to\n");
+    fprintf(fp, "# the GLCM_MAX. Valid range [-10000,10000]. GLCM_MAX must be > GLCM_MIN.\n");
+  }
+  fprintf(fp, "GLCM_MAX = 10000\n");
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines window size of the kernel used for computing\n");
+    fprintf(fp, "# GLCM statistics (in pixels). The value must be an odd integer.\n");
+    fprintf(fp, "# Type: Integer. Valid values: ]3,CHUNK_SIZE]\n");
+  }
+  fprintf(fp, "GLCM_WINDOW = 3\n");
+ 
+  if (verbose){
+    fprintf(fp, "# Which Gray-Level Co-occurrence Matrix (GLCM) Statistics should be computed?\n");
+    fprintf(fp, "# There will be one GLCM output file for each metric with as many bands as there\n");
+    fprintf(fp, "# are features (in the same order). Available metrics are contrast, dissimilarity, homogenity,\n");
+    fprintf(fp, "# entropy, and uniformity.\n");
+    fprintf(fp, "# These statistics are calculated for the complete wall-to-wall scene regardless of thresholds.\n");
+    fprintf(fp, "# Type: Character list. Valid values: {CON,DIS,HOM,ENT,UNI}\n");
+  }
+  fprintf(fp, "GLCM = CON DIS HOM ENT UNI\n");
+
+
+
+  if (verbose){
+    fprintf(fp, "# This parameter defines the basename for the output files. The basename will\n");
+    fprintf(fp, "# be appended by Module ID, product ID, and the file extension.\n");
+    fprintf(fp, "# Type: Character.\n");
+  }
+  fprintf(fp, "GLCM_BASE = GLCM\n");
 
   return;
 }

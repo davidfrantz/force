@@ -89,6 +89,7 @@ void show_modules(int exit_code){
   printf("    ML:       Machine Learning\n");
   printf("    TXT:      Texture\n");
   printf("    LSM:      Landscape Metrics\n");
+  printf("    GLCM:     Gray Level Co-occurrence Matrix\n");
   printf("    LIB:      Library Completeness\n");
   printf("\n");
 
@@ -98,27 +99,27 @@ void show_modules(int exit_code){
 
 
 void parse_module(char *argv, args_t *args){
-int m, n_modules = 14;
-char module_tags[14][NPOW_10] = {
+int m, n_modules = 15;
+char module_tags[15][NPOW_10] = {
   "LEVEL2", "LEVEL3", "TSA",   "CSO", 
   "UDF",    "CFIMP",  "L2IMP", "ML",      
-  "SMP",    "TXT",    "LSM",   "LIB",
-  "TRAIN",  "SYNTHMIX" };
-int modules[14] = {
+  "SMP",    "TXT",    "LSM",   "GLCM",
+  "LIB",    "TRAIN",  "SYNTHMIX" };
+int modules[15] = {
   _LL_LEVEL2_, _HL_BAP_, _HL_TSA_, _HL_CSO_, 
   _HL_UDF_,    _HL_CFI_, _HL_L2I_, _HL_ML_, 
-  _HL_SMP_,    _HL_TXT_, _HL_LSM_, _HL_LIB_, 
-  _AUX_TRAIN_, _AUX_SYNTHMIX_ };
-int levels[14] = {
+  _HL_SMP_,    _HL_TXT_, _HL_LSM_, _HL_GLCM_,
+  _HL_LIB_,   _AUX_TRAIN_, _AUX_SYNTHMIX_ };
+int levels[15] = {
   _LOWER_LEVEL_,  _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
   _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
   _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, _HIGHER_LEVEL_, 
-  _AUX_LEVEL_,    _AUX_LEVEL_ };
-int input_levels[14] = {
+  _HIGHER_LEVEL_, _AUX_LEVEL_,    _AUX_LEVEL_ };
+int input_levels[15] = {
   _INP_RAW_, _INP_ARD_, _INP_ARD_, _INP_QAI_,
   _INP_ARD_, _INP_ARD_, _INP_ARD_, _INP_FTR_,
   _INP_FTR_, _INP_FTR_, _INP_FTR_, _INP_FTR_,
-  _INP_AUX_, _INP_AUX_ };
+  _INP_FTR_, _INP_AUX_, _INP_AUX_ };
 
 
   copy_string(args->module_tag, NPOW_10, argv);
@@ -290,6 +291,10 @@ FILE *fp;
 
   if (args.module == _HL_LSM_){
     write_par_hl_lsm(fp, args.comments);
+  }
+
+  if (args.module == _HL_GLCM_){
+    write_par_hl_glcm(fp, args.comments);
   }
 
   if (args.module == _HL_LIB_){

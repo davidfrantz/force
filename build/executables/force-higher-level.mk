@@ -16,6 +16,7 @@ force-higher-level: \
   dir-cl \
   enum-cl \
   gdalopt-cl \
+  glcm-hl \
   imagefuns-cl \
   improphe-hl \
   json-cl \
@@ -76,6 +77,7 @@ force-higher-level: \
 	$(OBJDIR)/dir-cl.o \
 	$(OBJDIR)/enum-cl.o \
 	$(OBJDIR)/gdalopt-cl.o \
+	$(OBJDIR)/glcm-hl.o \
 	$(OBJDIR)/imagefuns-cl.o \
 	$(OBJDIR)/improphe-hl.o \
 	$(OBJDIR)/json-cl.o \

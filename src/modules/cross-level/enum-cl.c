@@ -173,6 +173,10 @@ const tagged_enum_t _TAGGED_ENUM_LSM_[_LSM_LENGTH_] = {
   { _LSM_AVG_, "AVG" }, { _LSM_STD_, "STD" }, { _LSM_GEO_, "GEO" }, 
   { _LSM_MAX_, "MAX" }, { _LSM_ARE_, "ARE" }};
 
+const tagged_enum_t _TAGGED_ENUM_GLCM_[_GLCM_LENGTH_] = {
+  { _GLCM_CON_, "CON" }, { _GLCM_DIS_, "DIS" }, { _GLCM_HOM_, "HOM" },
+  { _GLCM_ENT_, "ENT" }, { _GLCM_UNI_, "UNI" }};
+
 const tagged_enum_t _TAGGED_ENUM_KERNEL_[_KERNEL_LENGTH_] = {
   { _KERNEL_SQUARE_, "SQUARE" }, { _KERNEL_CIRCLE_, "CIRCLE" }};
 
