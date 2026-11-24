@@ -286,8 +286,8 @@ float **xyz_tsd_sw2 = NULL;
         tvd     = interpolate_coarse(weights, xyz_tvd[z]);
         s       = interpolate_coarse(weights, xyz_s[z]); 
         rho_p   = interpolate_coarse(weights, xyz_rho_p[z]); 
-        tss_sw2 = interpolate_coarse(weights, xyz_tss[z]);
-        tsd_sw2 = interpolate_coarse(weights, xyz_tsd[z]);
+        tss_sw2 = interpolate_coarse(weights, xyz_tss_sw2[z]);
+        tsd_sw2 = interpolate_coarse(weights, xyz_tsd_sw2[z]);
         if (pl2->dobrdf) brdf = interpolate_coarse(weights, xy_brdf); 
 
         if (Tg_ == NULL){
