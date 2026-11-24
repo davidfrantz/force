@@ -49,8 +49,47 @@ typedef struct {
 
 int create_queue(queue_t *q, int size);
 void destroy_queue(queue_t* q);
-int enqueue(queue_t *q, int x, int y);
-int dequeue(queue_t *q, int *x, int *y);
+/** This function puts an image coordinate to the FIFO queue
+--- q:      queue
+--- x:      column
+--- y:      row
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+static inline int enqueue(queue_t *q, int x, int y){
+
+  if ((q->head+1 == q->tail) ||
+      (q->head+1 == q->size && q->tail == 0)){
+    return FAILURE; // head runs into tail (buffer is full)...
+      } else {
+        q->buf_x[q->head] = (short)x;
+        q->buf_y[q->head] = (short)y;
+        q->head++; // step forward head
+        if(q->head == q->size) q->head = 0; // circular buffer
+      }
+
+  return SUCCESS;
+}
+
+/** This function pulls an image coordinate from the FIFO queue
+--- q:      queue
+--- x:      column
+--- y:      row
++++ Return: SUCCESS/FAILURE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+static inline int dequeue(queue_t *q, int *x, int *y){
+
+
+  if (q->tail != q->head){ //see if any data is available
+    *x = (int)q->buf_x[q->tail];
+    *y = (int)q->buf_y[q->tail];
+    q->tail++;  // step forward  tail
+    if (q->tail == q->size) q->tail = 0; // circular buffer
+  } else {
+    return FAILURE; // nothing in buffer
+  }
+
+  return SUCCESS;
+}
 
 #ifdef __cplusplus
 }

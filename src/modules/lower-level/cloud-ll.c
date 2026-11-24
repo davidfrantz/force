@@ -433,8 +433,6 @@ float A, B;
 float tempprob;
 float *LANDPROB = NULL;
 double *CLEARLPROB = NULL; // need to be double for GSL quantile function
-double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
-
 
   #ifdef FORCE_CLOCK
   time_t TIME; time(&TIME);
@@ -443,36 +441,23 @@ double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
   /** clear all or clear land temp + temperature quantiles **/
 
+  uint32_t *h = NULL;
+  int n;
+  alloc((void**)&h, 65536, sizeof(uint32_t));
+
   if ((100.0*nland/(float)npix) >= 0.1){
-
-    alloc((void**)&CLEARTEMP, nland, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (lnd_[p]) CLEARTEMP[k++] = temp_[p];
-    }
-
-    lowtemp  = quantile(CLEARTEMP, nland, lo);
-    hightemp = quantile(CLEARTEMP, nland, hi);
-
+    hist_short(temp_, lnd_, nc, h);  n = nland;
   } else {
-
-    alloc((void**)&CLEARTEMP, nclear, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (clr_[p]) CLEARTEMP[k++] = temp_[p];
-    }
-
-    lowtemp  = quantile(CLEARTEMP, nclear, lo);
-    hightemp = quantile(CLEARTEMP, nclear, hi);
-
+    hist_short(temp_, clr_, nc, h);  n = nclear;
   }
 
+  lowtemp  = quantile_hist(h, n, lo);   // one histogram, two quantiles
+  hightemp = quantile_hist(h, n, hi);
+  free((void*)h);
   #ifdef FORCE_DEBUG
   printf("low/high temperature quantiles: %f / %f\n", lowtemp, hightemp);
   #endif
 
-  free((void*)CLEARTEMP);
-  
 
   /** cloud probability over land **/
 
@@ -531,10 +516,10 @@ float hi = 0.825;
 float brightprob, tempprob;
 float wtrtemp = 0.0;
 int nCLEARWTR = 0;
-bool  *CLEARWTR = NULL;
+small  *CLEARWTR = NULL;
+uint32_t *h = NULL;
 float *WATERPROB = NULL;
 double *CLEARWPROB = NULL; // need to be double for GSL quantile function
-double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
 
   #ifdef FORCE_CLOCK
@@ -544,24 +529,19 @@ double *CLEARTEMP = NULL;  // need to be double for GSL quantile function
 
   /** cloud probability over water **/
 
-  alloc((void**)&CLEARWTR, nc, sizeof(bool));
+  alloc((void**)&CLEARWTR, nc, sizeof(small));
 
   for (p=0; p<nc; p++){
-    if (get_water(QAI, p) && sw2_[p] <= 300){ CLEARWTR[p] = true; nCLEARWTR++;}
+    if (get_water(QAI, p) && sw2_[p] <= 300){ CLEARWTR[p] = 1; nCLEARWTR++;}
   }
 
   // test if there is clear water, if not skip and give water prob = -1
   if (nCLEARWTR > 0){
 
-    alloc((void**)&CLEARTEMP, nCLEARWTR, sizeof(double));
-
-    for (p=0, k=0; p<nc; p++){
-      if (CLEARWTR[p])CLEARTEMP[k++] = temp_[p];
-    }
-
-    wtrtemp = quantile(CLEARTEMP, nCLEARWTR, hi);
-    free((void*)CLEARTEMP);
-
+    alloc((void**)&h, 65536, sizeof(uint32_t));
+    hist_short(temp_, CLEARWTR, nc, h);
+    wtrtemp = quantile_hist(h, nCLEARWTR, hi);
+    free((void*)h);
 
     alloc((void**)&WATERPROB, nc, sizeof(float));
 
@@ -761,7 +741,7 @@ small *cld_  = NULL;
 +++ Return:  SUCCESS/FAILURE
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
 int shadow_probability(int nthread, int nland, atc_t *atc, brick_t *TOA, brick_t *QAI, small *lnd_, small *cld_, short **SPR){
-int i, j, p, k = 0, nx, ny, nc, b, nb = 2;
+int i, j, p, nx, ny, nc, b, nb = 2;
 int nthr;
 int err = 0;
 double res;
@@ -772,7 +752,6 @@ short *spr_  = NULL;
 short *toa_    = NULL;
 short *mask_   = NULL;
 short *marker_ = NULL;
-double *clear_  = NULL; // need to be double for GSL quantile function
 ushort *dist_;
 char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
@@ -813,11 +792,12 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
   
   if (nthread == 1) nthr = 1; else nthr = nb;
   
-  #pragma omp parallel num_threads(nthr) private(i, j, p, k, mask_, marker_, clear_, toa_, bck) shared(nb, nx, ny, nc, nland, domains, lo, maxdist, dist_, lnd_, spr_, TOA, QAI) reduction(+: err) default(none)
+  #pragma omp parallel num_threads(nthr) private(i, j, p, mask_, marker_, toa_, bck) shared(nb, nx, ny, nc, nland, domains, lo, maxdist, dist_, lnd_, spr_, TOA, QAI) reduction(+: err) default(none)
   {
-
+    unsigned int *h = NULL;
     alloc((void**)&mask_,   nc,    sizeof(short));
     alloc((void**)&marker_, nc,    sizeof(short));
+    alloc((void**)&h,   65536, sizeof(unsigned int));
 
     #pragma omp for
     for (b=0; b<nb; b++){
@@ -826,12 +806,7 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
 
       memmove(mask_, toa_, nc*sizeof(short));
 
-      alloc((void**)&clear_,  nland, sizeof(double));
-      for (p=0, k=0; p<nc; p++){
-        if (lnd_[p]) clear_[k++] = mask_[p];
-      }
-      bck = (short)quantile(clear_, nland, lo);
-      free((void*)clear_);
+      bck = quantile_short(toa_, lnd_, nc, nland, lo, h);
 
       for (i=0, p=0; i<ny; i++){
       for (j=0; j<nx; j++, p++){
@@ -847,9 +822,9 @@ char domains[2][NPOW_10] = { "NIR", "SWIR1" };
           if ((marker_[p] - mask_[p]) < spr_[p]) spr_[p] = marker_[p] - mask_[p];
         }
       }
-
     }
 
+    free((void*)h);
     free((void*)mask_);
     free((void*)marker_);
 
